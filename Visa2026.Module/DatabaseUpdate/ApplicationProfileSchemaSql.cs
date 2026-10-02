@@ -61,6 +61,7 @@ public static class ApplicationProfileSchemaSql
             "RequireRegionCity" boolean NOT NULL DEFAULT false,
             "RequireBusinessTripAddress" boolean NOT NULL DEFAULT false,
             "RequireInvitationAddress" boolean NOT NULL DEFAULT false,
+            "RequireInvitationPlace" boolean NOT NULL DEFAULT false,
             "DefaultBusinessTripAddressId" uuid NULL,
             "RequirePurpose" boolean NOT NULL DEFAULT false,
             "DefaultPurpose" character varying(700) NULL,
@@ -234,6 +235,7 @@ public static class ApplicationProfileSchemaSql
                 RequireRegionCity bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireRegionCity DEFAULT (0),
                 RequireBusinessTripAddress bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireBusinessTripAddress DEFAULT (0),
                 RequireInvitationAddress bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireInvitationAddress DEFAULT (0),
+                RequireInvitationPlace bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireInvitationPlace DEFAULT (0),
                 DefaultBusinessTripAddressId uniqueidentifier NULL,
                 RequirePurpose bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequirePurpose DEFAULT (0),
                 DefaultPurpose nvarchar(700) NULL,
@@ -521,6 +523,9 @@ public static class ApplicationProfileSchemaSql
 
     internal const string EnsureRequireInvitationAddressPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireInvitationAddress" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureRequireInvitationPlacePostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireInvitationPlace" boolean NOT NULL DEFAULT false;""";
 
     internal const string EnsureRequirePurposePostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequirePurpose" boolean NOT NULL DEFAULT false;""";
@@ -874,6 +879,7 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceBusinessTripOtherSiteIdPostgres,
         EnsureInstanceBusinessTripPrivateHouseAddressPostgres,
         EnsureRequireInvitationAddressPostgres,
+        EnsureRequireInvitationPlacePostgres,
         EnsureRequirePurposePostgres,
         EnsureDefaultPurposePostgres,
         EnsureInstancePurposePostgres,
@@ -1087,6 +1093,11 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireInvitationAddress') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD RequireInvitationAddress bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_RequireInvitationAddress DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireInvitationPlace') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequireInvitationPlace bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequireInvitationPlace DEFAULT (0);
 
         IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'FromRegionId') IS NULL

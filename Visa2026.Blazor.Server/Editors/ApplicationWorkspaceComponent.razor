@@ -50,6 +50,7 @@
                                         HeaderFieldStatusIsError="@HeaderFieldStatusIsError"
                                         HeaderFieldChanged="@HeaderFieldChanged"
                                         AlternativeAddressCreateRequested="@AlternativeAddressCreateRequested"
+                                        InvitationSiteCreateRequested="@InvitationSiteCreateRequested"
                                         OrganizationStatusMessage="@OrganizationStatusMessage"
                                         OrganizationStatusIsError="@OrganizationStatusIsError"
                                         OrganizationLetterheadChanged="@OrganizationLetterheadChanged"
@@ -105,6 +106,7 @@
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
+    [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
     [Parameter] public string? OrganizationStatusMessage { get; set; }
     [Parameter] public bool OrganizationStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }

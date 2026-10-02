@@ -804,6 +804,31 @@ namespace Visa2026.Module.BusinessObjects
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_InvitationAddress_Alternative");
+                b.Property(a => a.PrivateHouseAddress).HasMaxLength(255);
+                b.HasOne(a => a.Lodging)
+                    .WithMany()
+                    .HasForeignKey(a => a.LodgingId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_InvitationAddress_Lodging");
+                b.HasOne(a => a.Hotel)
+                    .WithMany()
+                    .HasForeignKey(a => a.HotelId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_InvitationAddress_Hotel");
+                b.HasOne(a => a.Hospital)
+                    .WithMany()
+                    .HasForeignKey(a => a.HospitalId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_InvitationAddress_Hospital");
+                b.HasOne(a => a.OtherSite)
+                    .WithMany()
+                    .HasForeignKey(a => a.OtherSiteId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_InvitationAddress_OtherSite");
             });
 
             modelBuilder.Entity<BusinessTripAddress>(b =>

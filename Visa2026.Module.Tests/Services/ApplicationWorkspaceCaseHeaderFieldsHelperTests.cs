@@ -612,4 +612,56 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var option = Assert.Single(filtered);
         Assert.Contains("Döwletabatgazçykaryş", option.DisplayName);
     }
+
+    [Fact]
+    public void CanCreateInvitationSite_requires_a_chosen_invitation_city()
+    {
+        var lodging = new ApplicationWorkspaceCaseHeaderField
+        {
+            Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationLodging,
+        };
+        var noCity = new[]
+        {
+            new ApplicationWorkspaceCaseHeaderField
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationCity,
+            },
+        };
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(lodging, noCity));
+
+        var withCity = new[]
+        {
+            new ApplicationWorkspaceCaseHeaderField
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationCity,
+                SelectedId = Guid.NewGuid(),
+            },
+        };
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(lodging, withCity));
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(
+            new ApplicationWorkspaceCaseHeaderField
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationHotel,
+            },
+            withCity));
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(
+            new ApplicationWorkspaceCaseHeaderField
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+            },
+            withCity));
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(
+            new ApplicationWorkspaceCaseHeaderField
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationPrivateHouse,
+            },
+            withCity));
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(
+            new ApplicationWorkspaceCaseHeaderField
+            {
+                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationLodging,
+                ReadOnly = true,
+            },
+            withCity));
+    }
 }

@@ -119,6 +119,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
+        InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
         OrganizationLetterheadChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SaveOrganizationLetterheadAsync),
         OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
     };
@@ -558,6 +559,31 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
             {
                 Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+                Value = savedId.ToString("D"),
+            });
+        });
+    }
+
+    private void OpenNewInvitationSite(string fieldKey)
+    {
+        if (_application == null || string.IsNullOrWhiteSpace(fieldKey))
+            return;
+
+        var fields = ComponentModel?.WorkspaceSnapshot?.CaseView?.HeaderFields;
+        var cityId = fields?
+            .FirstOrDefault(field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationCity)
+            ?.SelectedId;
+        if (cityId is not Guid id || id == Guid.Empty)
+            return;
+
+        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, savedId =>
+        {
+            if (savedId == Guid.Empty)
+                return;
+
+            _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
+            {
+                Key = fieldKey,
                 Value = savedId.ToString("D"),
             });
         });

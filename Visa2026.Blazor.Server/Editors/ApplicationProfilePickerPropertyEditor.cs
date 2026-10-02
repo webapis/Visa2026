@@ -74,6 +74,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
         CaseSummaryFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, OnCaseSummaryFieldChanged),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
+        InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -672,6 +673,31 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             OnCaseSummaryFieldChanged(new ApplicationWorkspaceCaseHeaderFieldUpdate
             {
                 Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+                Value = savedId.ToString("D"),
+            });
+        });
+    }
+
+    private void OpenNewInvitationSite(string fieldKey)
+    {
+        if (_application == null || string.IsNullOrWhiteSpace(fieldKey))
+            return;
+
+        var fields = ComponentModel?.CaseSummaryFields;
+        var cityId = fields?
+            .FirstOrDefault(field => field.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationCity)
+            ?.SelectedId;
+        if (cityId is not Guid id || id == Guid.Empty)
+            return;
+
+        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, savedId =>
+        {
+            if (savedId == Guid.Empty)
+                return;
+
+            OnCaseSummaryFieldChanged(new ApplicationWorkspaceCaseHeaderFieldUpdate
+            {
+                Key = fieldKey,
                 Value = savedId.ToString("D"),
             });
         });

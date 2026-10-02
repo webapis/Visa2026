@@ -673,6 +673,11 @@
           <LayoutGroup Id="SizeableEditors" RelativeSize="47.0945945945946" Caption="Notes" Removed="True">
             <LayoutItem Id="Notes" RelativeSize="100" Removed="True" />
           </LayoutGroup>
+          <TabbedGroup Id="Tabs" Removed="True">
+            <LayoutGroup Id="Documents" Removed="True">
+              <LayoutItem Id="Documents" Removed="True" />
+            </LayoutGroup>
+          </TabbedGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>

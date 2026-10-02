@@ -1363,6 +1363,55 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Beýleki çakylyk ýerleri",
             ["ru-RU"] = "Другие места приглашения",
         },
+        ["ApplicationProfile.Field.InvitationPlace"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation place",
+            ["tr-TR"] = "Davet yeri",
+            ["tk-TM"] = "Çakylyk ýeri",
+            ["ru-RU"] = "Место приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationAddressType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address type",
+            ["tr-TR"] = "Adres türü",
+            ["tk-TM"] = "Salgy görnüşi",
+            ["ru-RU"] = "Тип адреса",
+        },
+        ["ApplicationProfile.Field.InvitationLodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lodging",
+            ["tr-TR"] = "Konaklama",
+            ["tk-TM"] = "Ýaşaýyş jaýy",
+            ["ru-RU"] = "Проживание",
+        },
+        ["ApplicationProfile.Field.InvitationHotel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hotel",
+            ["tr-TR"] = "Otel",
+            ["tk-TM"] = "Myhmanhana",
+            ["ru-RU"] = "Гостиница",
+        },
+        ["ApplicationProfile.Field.InvitationHospital"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hospital",
+            ["tr-TR"] = "Hastane",
+            ["tk-TM"] = "Hassahana",
+            ["ru-RU"] = "Больница",
+        },
+        ["ApplicationProfile.Field.InvitationOtherSite"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other site",
+            ["tr-TR"] = "Diğer yer",
+            ["tk-TM"] = "Başga ýer",
+            ["ru-RU"] = "Другой объект",
+        },
+        ["ApplicationProfile.Field.InvitationPrivateHouse"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Private house",
+            ["tr-TR"] = "Müstakil ev",
+            ["tk-TM"] = "Hususy jaý",
+            ["ru-RU"] = "Частный дом",
+        },
         ["ApplicationProfile.Field.BusinessTripAddressLegacy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Business trip address (legacy)",

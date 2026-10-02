@@ -1,7 +1,7 @@
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Letter text for <see cref="InvitationAddress"/>: first region and city, then the catalog line.
+/// Letter text for <see cref="InvitationAddress"/>: region, city, and the chosen place, then other places.
 /// </summary>
 public static class InvitationAddressText
 {
@@ -13,7 +13,7 @@ public static class InvitationAddressText
         var first = AddressOfResidenceReportText.CityAndStreet(
             address.Region?.NameTm,
             address.City?.NameTm,
-            null);
+            MainPlace(address));
         var rest = address.AlternativeAddress?.AddressLine?.Trim();
         if (string.IsNullOrEmpty(first))
             return rest ?? string.Empty;
@@ -21,4 +21,15 @@ public static class InvitationAddressText
             return first;
         return first + ", " + rest;
     }
+
+    public static string MainPlace(InvitationAddress address) =>
+        address.Type switch
+        {
+            ResidenceType.Lodging => address.Lodging?.FullAddress?.Trim() ?? string.Empty,
+            ResidenceType.Hotel => address.Hotel?.Name?.Trim() ?? string.Empty,
+            ResidenceType.Hospital => address.Hospital?.Name?.Trim() ?? string.Empty,
+            ResidenceType.Other => address.OtherSite?.FullAddress?.Trim() ?? string.Empty,
+            ResidenceType.PrivateHouse => address.PrivateHouseAddress?.Trim() ?? string.Empty,
+            _ => string.Empty,
+        };
 }

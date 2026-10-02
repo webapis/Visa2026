@@ -20,11 +20,13 @@ public class ApplicationProfileTenantCatalogAddressPositionTests
             {
                 Assert.False(row.RequirePersonAddressOfResidence, row.Code);
                 Assert.True(row.RequireInvitationAddress, row.Code);
+                Assert.True(row.RequireInvitationPlace, row.Code);
             }
             else
             {
                 Assert.True(row.RequirePersonAddressOfResidence, row.Code);
                 Assert.False(row.RequireInvitationAddress, row.Code);
+                Assert.False(row.RequireInvitationPlace, row.Code);
             }
         }
     }
@@ -46,5 +48,6 @@ public class ApplicationProfileTenantCatalogAddressPositionTests
         ApplicationProfileFromApplicationTypeMapper.Apply(invitation, new ApplicationType { Name = "App_Inv" });
         Assert.False(invitation.RequirePersonAddressOfResidence);
         Assert.True(invitation.RequireInvitationAddress);
+        Assert.True(invitation.RequireInvitationPlace);
     }
 }

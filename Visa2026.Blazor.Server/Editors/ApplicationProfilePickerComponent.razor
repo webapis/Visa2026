@@ -312,6 +312,8 @@
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> CaseSummaryFieldChanged { get; set; }
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
 
+    [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
+
     private bool _initialLoadStarted;
     private bool _orgCatalogManageOpen;
 
@@ -566,6 +568,14 @@
                             @Msg("ApplicationProfileInstance.Picker.New")
                         </button>
                     }
+                    @if (CanAddInvitationSite(field))
+                    {
+                        <button type="button"
+                                class="ap-picker__org-new"
+                                @onclick="() => OnNewInvitationSite(field.Key)">
+                            @Msg("ApplicationProfileInstance.Picker.New")
+                        </button>
+                    }
                 </div>
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
@@ -608,6 +618,14 @@
     private Task OnNewAlternativeAddress() =>
         AlternativeAddressCreateRequested.HasDelegate
             ? AlternativeAddressCreateRequested.InvokeAsync()
+            : Task.CompletedTask;
+
+    private bool CanAddInvitationSite(ApplicationWorkspaceCaseHeaderField field) =>
+        ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(field, CaseSummaryFields);
+
+    private Task OnNewInvitationSite(string fieldKey) =>
+        InvitationSiteCreateRequested.HasDelegate
+            ? InvitationSiteCreateRequested.InvokeAsync(fieldKey)
             : Task.CompletedTask;
 
     private Task OnCaseSummaryFieldChanged(string key, string? value)

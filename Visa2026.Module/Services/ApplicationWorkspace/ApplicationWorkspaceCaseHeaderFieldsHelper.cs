@@ -39,6 +39,12 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const int BusinessTripPrivateHouseAddressMaxLength = 255;
     public const string InvitationRegion = "InvitationRegion";
     public const string InvitationCity = "InvitationCity";
+    public const string InvitationAddressType = "InvitationAddressType";
+    public const string InvitationLodging = "InvitationLodging";
+    public const string InvitationHotel = "InvitationHotel";
+    public const string InvitationHospital = "InvitationHospital";
+    public const string InvitationOtherSite = "InvitationOtherSite";
+    public const string InvitationPrivateHouse = "InvitationPrivateHouse";
     public const string InvitationAlternativeAddress = "InvitationAlternativeAddress";
     public const string Purpose = "Purpose";
     public const int PurposeMaxLength = 700;
@@ -296,6 +302,26 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 CitiesForSelectedRegion(catalogs.Cities, catalogs.RegionCatalog, stay?.Region?.ID),
                 readOnly: false,
                 LookupFill(stay?.City?.ID, null));
+        }
+
+        if (ShowInvitationPlace(profile, application))
+        {
+            var stay = application.InvitationAddress;
+            AddLookup(fields, InvitationAddressType, ApplicationProfileLocalization.Field("InvitationAddressType"), "purple", "📍",
+                visible: true,
+                stay?.Type is ResidenceType invitationType ? ResidenceTypeOptionId(invitationType) : null,
+                stay?.Type?.ToString() ?? string.Empty,
+                catalogs.ResidenceTypes,
+                readOnly: false,
+                LookupFill(
+                    stay?.Type is ResidenceType selectedType ? ResidenceTypeOptionId(selectedType) : null,
+                    null));
+            AddInvitationSite(fields, stay, catalogs);
+        }
+
+        if (ShowInvitationAddress(profile, application))
+        {
+            var stay = application.InvitationAddress;
             AddLookup(fields, InvitationAlternativeAddress, ApplicationProfileLocalization.Field("InvitationAlternativeAddress"), "purple", "📍",
                 visible: true,
                 stay?.AlternativeAddress?.ID,
@@ -507,7 +533,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Region = item;
                     if (item == null || (stay.City?.Region != null && stay.City.Region.ID != item.ID))
+                    {
                         stay.City = null;
+                        ClearInvitationSitesIfCityMismatch(stay, null);
+                    }
                 }, out error);
             case InvitationCity:
                 if (!ShowInvitationAddress(profile, application))
@@ -518,6 +547,61 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     stay.City = item;
                     if (item?.Region != null)
                         stay.Region = item.Region;
+                    ClearInvitationSitesIfCityMismatch(stay, item);
+                }, out error);
+            case InvitationAddressType:
+                if (!ShowInvitationPlace(profile, application))
+                    return Hidden(out error);
+                return SetInvitationAddressType(objectSpace, application, value, out error);
+            case InvitationLodging:
+                if (!ShowInvitationPlace(profile, application))
+                    return Hidden(out error);
+                return SetLookup<Lodging>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.Type = ResidenceType.Lodging;
+                    stay.ClearSitesExcept(ResidenceType.Lodging);
+                    stay.Lodging = item;
+                }, out error);
+            case InvitationHotel:
+                if (!ShowInvitationPlace(profile, application))
+                    return Hidden(out error);
+                return SetLookup<Hotel>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.Type = ResidenceType.Hotel;
+                    stay.ClearSitesExcept(ResidenceType.Hotel);
+                    stay.Hotel = item;
+                }, out error);
+            case InvitationHospital:
+                if (!ShowInvitationPlace(profile, application))
+                    return Hidden(out error);
+                return SetLookup<Hospital>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.Type = ResidenceType.Hospital;
+                    stay.ClearSitesExcept(ResidenceType.Hospital);
+                    stay.Hospital = item;
+                }, out error);
+            case InvitationOtherSite:
+                if (!ShowInvitationPlace(profile, application))
+                    return Hidden(out error);
+                return SetLookup<OtherSite>(objectSpace, value, item =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.Type = ResidenceType.Other;
+                    stay.ClearSitesExcept(ResidenceType.Other);
+                    stay.OtherSite = item;
+                }, out error);
+            case InvitationPrivateHouse:
+                if (!ShowInvitationPlace(profile, application))
+                    return Hidden(out error);
+                return SetText(value, BusinessTripPrivateHouseAddressMaxLength, text =>
+                {
+                    var stay = EnsureInvitationAddress(objectSpace, application);
+                    stay.Type = ResidenceType.PrivateHouse;
+                    stay.ClearSitesExcept(ResidenceType.PrivateHouse);
+                    stay.PrivateHouseAddress = text;
                 }, out error);
             case InvitationAlternativeAddress:
                 if (!ShowInvitationAddress(profile, application))
@@ -553,6 +637,129 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
     private static bool ShowInvitationAddress(ApplicationProfile? profile, ApplicationProfileInstance application) =>
         Visible(profile, p => p.RequireInvitationAddress, static _ => false, application);
+
+    private static bool ShowInvitationPlace(ApplicationProfile? profile, ApplicationProfileInstance application) =>
+        Visible(profile, p => p.RequireInvitationPlace, static _ => false, application);
+
+    public static bool IsInvitationSiteCatalogField(string? fieldKey) =>
+        fieldKey is InvitationLodging or InvitationHotel or InvitationHospital or InvitationOtherSite;
+
+    public static bool CanCreateInvitationSite(
+        ApplicationWorkspaceCaseHeaderField field,
+        IEnumerable<ApplicationWorkspaceCaseHeaderField>? fields)
+    {
+        if (field.ReadOnly || !IsInvitationSiteCatalogField(field.Key))
+            return false;
+
+        var cityId = fields?.FirstOrDefault(item => item.Key == InvitationCity)?.SelectedId;
+        return cityId is Guid id && id != Guid.Empty;
+    }
+
+    private static void AddInvitationSite(
+        List<ApplicationWorkspaceCaseHeaderField> fields,
+        InvitationAddress? stay,
+        Catalogs catalogs)
+    {
+        if (stay == null)
+            return;
+
+        switch (stay.Type)
+        {
+            case ResidenceType.Lodging:
+                AddLookup(fields, InvitationLodging, ApplicationProfileLocalization.Field("InvitationLodging"), "purple", "📍",
+                    visible: true,
+                    stay.Lodging?.ID,
+                    stay.Lodging?.FullAddress ?? string.Empty,
+                    SitesForInvitationCity(catalogs.Lodgings, stay.City),
+                    readOnly: false,
+                    LookupFill(stay.Lodging?.ID, null));
+                break;
+            case ResidenceType.Hotel:
+                AddLookup(fields, InvitationHotel, ApplicationProfileLocalization.Field("InvitationHotel"), "purple", "📍",
+                    visible: true,
+                    stay.Hotel?.ID,
+                    stay.Hotel?.Name ?? string.Empty,
+                    SitesForInvitationCity(catalogs.Hotels, stay.City),
+                    readOnly: false,
+                    LookupFill(stay.Hotel?.ID, null));
+                break;
+            case ResidenceType.Hospital:
+                AddLookup(fields, InvitationHospital, ApplicationProfileLocalization.Field("InvitationHospital"), "purple", "📍",
+                    visible: true,
+                    stay.Hospital?.ID,
+                    stay.Hospital?.Name ?? string.Empty,
+                    SitesForInvitationCity(catalogs.Hospitals, stay.City),
+                    readOnly: false,
+                    LookupFill(stay.Hospital?.ID, null));
+                break;
+            case ResidenceType.Other:
+                AddLookup(fields, InvitationOtherSite, ApplicationProfileLocalization.Field("InvitationOtherSite"), "purple", "📍",
+                    visible: true,
+                    stay.OtherSite?.ID,
+                    stay.OtherSite?.FullAddress ?? string.Empty,
+                    SitesForInvitationCity(catalogs.OtherSites, stay.City),
+                    readOnly: false,
+                    LookupFill(stay.OtherSite?.ID, null));
+                break;
+            case ResidenceType.PrivateHouse:
+                AddShortText(fields, InvitationPrivateHouse, ApplicationProfileLocalization.Field("InvitationPrivateHouse"), "purple", "📍",
+                    visible: true,
+                    stay.PrivateHouseAddress,
+                    BusinessTripPrivateHouseAddressMaxLength,
+                    TextFill(stay.PrivateHouseAddress, null));
+                break;
+        }
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceLookupOption> SitesForInvitationCity(
+        IReadOnlyList<SiteCatalogOption> sites,
+        City? city)
+    {
+        if (city == null || city.ID == Guid.Empty)
+            return Array.Empty<ApplicationWorkspaceLookupOption>();
+
+        return FilterSitesByCity(sites, city.ID, city.NameTm);
+    }
+
+    private static bool SetInvitationAddressType(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        string? value,
+        out string? error)
+    {
+        var stay = EnsureInvitationAddress(objectSpace, application);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            stay.Type = null;
+            stay.ClearSitesExcept(null);
+            error = null;
+            return true;
+        }
+
+        if (!TryParseResidenceTypeOptionId(value, out var type))
+        {
+            error = "Choose a valid invitation address type.";
+            return false;
+        }
+
+        stay.Type = type;
+        stay.ClearSitesExcept(type);
+        error = null;
+        return true;
+    }
+
+    private static void ClearInvitationSitesIfCityMismatch(InvitationAddress stay, City? city)
+    {
+        var cityId = city?.ID ?? Guid.Empty;
+        if (stay.Lodging?.City != null && stay.Lodging.City.ID != cityId)
+            stay.Lodging = null;
+        if (stay.Hotel?.City != null && stay.Hotel.City.ID != cityId)
+            stay.Hotel = null;
+        if (stay.Hospital?.City != null && stay.Hospital.City.ID != cityId)
+            stay.Hospital = null;
+        if (stay.OtherSite?.City != null && stay.OtherSite.City.ID != cityId)
+            stay.OtherSite = null;
+    }
 
     private static InvitationAddress EnsureInvitationAddress(
         IObjectSpace objectSpace,

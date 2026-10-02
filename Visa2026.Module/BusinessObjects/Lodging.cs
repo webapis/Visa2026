@@ -34,6 +34,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(LodgingDocument.Lodging))]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         public virtual IList<LodgingDocument> Documents { get; set; }
 
         [Aggregated]

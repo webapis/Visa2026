@@ -159,7 +159,10 @@ public static class ApplicationProfileFromApplicationTypeMapper
         var caklykAlmak = ApplicationProfileInvitationAddressPolicy.IsCaklykAlmakType(type);
         profile.RequirePersonAddressOfResidence = !caklykAlmak;
         if (caklykAlmak)
+        {
             profile.RequireInvitationAddress = true;
+            profile.RequireInvitationPlace = true;
+        }
         profile.RequirePersonVisa = type.ShowCurrentVisa || type.ShowNextVisa;
         profile.RequirePersonInvitationItem = type.ShowCurrentInvitationItem || type.ShowPreviousInvitationItem;
         profile.RequirePersonWorkPermitItem = type.ShowCurrentWorkPermitItem || type.ShowPreviousWorkPermitItem;

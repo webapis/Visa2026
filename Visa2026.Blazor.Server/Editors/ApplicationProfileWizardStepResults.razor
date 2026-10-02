@@ -192,6 +192,11 @@
                     <td>—</td><td>—</td>
                 </tr>
                 <tr>
+                    <td><input type="checkbox" @bind="Profile.RequireInvitationPlace" disabled="@Disabled" /></td>
+                    <td>@Field("InvitationPlace")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindTypeSite")</span></td>
+                    <td>—</td><td>—</td>
+                </tr>
+                <tr>
                     <td><input type="checkbox" @bind="Profile.RequirePurpose" disabled="@Disabled" @bind:after="OnPurposeUseChanged" /></td>
                     <td>@Field("Purpose")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindText")</span></td>
                     <td><input type="checkbox" checked="@HasPurposeDefault" disabled="@(Disabled || !Profile.RequirePurpose)" @onchange="TogglePurposeDefault" /></td>

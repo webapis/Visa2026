@@ -474,6 +474,8 @@
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
+
+    [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
     [Parameter] public string? OrganizationStatusMessage { get; set; }
     [Parameter] public bool OrganizationStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceOrganizationLetterheadUpdate> OrganizationLetterheadChanged { get; set; }
@@ -987,6 +989,16 @@
             ? AlternativeAddressCreateRequested.InvokeAsync()
             : Task.CompletedTask;
 
+    private bool CanAddInvitationSite(ApplicationWorkspaceCaseHeaderField field) =>
+        ApplicationWorkspaceCaseHeaderFieldsHelper.CanCreateInvitationSite(
+            field,
+            Snapshot?.CaseView?.HeaderFields);
+
+    private Task OnNewInvitationSite(string fieldKey) =>
+        InvitationSiteCreateRequested.HasDelegate
+            ? InvitationSiteCreateRequested.InvokeAsync(fieldKey)
+            : Task.CompletedTask;
+
     private Task OnHeaderFieldChanged(string key, string? value)
     {
         if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
@@ -1480,6 +1492,14 @@
                         <button type="button"
                                 class="cw-org-new"
                                 @onclick="OnNewAlternativeAddress">
+                            @Msg("ApplicationProfileInstance.Picker.New")
+                        </button>
+                    }
+                    @if (CanAddInvitationSite(field))
+                    {
+                        <button type="button"
+                                class="cw-org-new"
+                                @onclick="() => OnNewInvitationSite(field.Key)">
                             @Msg("ApplicationProfileInstance.Picker.New")
                         </button>
                     }

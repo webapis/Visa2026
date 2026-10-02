@@ -36,6 +36,12 @@ public static class InvitationAddressSchemaSql
                 "ApplicationProfileInstanceId" uuid NULL,
                 "RegionId" uuid NULL,
                 "CityId" uuid NULL,
+                "Type" integer NULL,
+                "LodgingId" uuid NULL,
+                "HotelId" uuid NULL,
+                "HospitalId" uuid NULL,
+                "OtherSiteId" uuid NULL,
+                "PrivateHouseAddress" character varying(255) NULL,
                 "AlternativeAddressId" uuid NULL,
                 CONSTRAINT "FK_InvitationAddress_Instance"
                     FOREIGN KEY ("ApplicationProfileInstanceId") REFERENCES "ApplicationProfileInstances" ("ID") ON DELETE CASCADE,
@@ -44,7 +50,15 @@ public static class InvitationAddressSchemaSql
                 CONSTRAINT "FK_InvitationAddress_City"
                     FOREIGN KEY ("CityId") REFERENCES "Cities" ("ID"),
                 CONSTRAINT "FK_InvitationAddress_Alternative"
-                    FOREIGN KEY ("AlternativeAddressId") REFERENCES "AlternativeAddressesForInvitation" ("ID") ON DELETE SET NULL
+                    FOREIGN KEY ("AlternativeAddressId") REFERENCES "AlternativeAddressesForInvitation" ("ID") ON DELETE SET NULL,
+                CONSTRAINT "FK_InvitationAddress_Lodging"
+                    FOREIGN KEY ("LodgingId") REFERENCES "Lodgings" ("ID"),
+                CONSTRAINT "FK_InvitationAddress_Hotel"
+                    FOREIGN KEY ("HotelId") REFERENCES "Hotels" ("ID"),
+                CONSTRAINT "FK_InvitationAddress_Hospital"
+                    FOREIGN KEY ("HospitalId") REFERENCES "Hospitals" ("ID"),
+                CONSTRAINT "FK_InvitationAddress_OtherSite"
+                    FOREIGN KEY ("OtherSiteId") REFERENCES "OtherSites" ("ID")
             );
             CREATE UNIQUE INDEX "IX_InvitationAddress_ApplicationProfileInstanceId"
                 ON "InvitationAddress" ("ApplicationProfileInstanceId")
@@ -52,6 +66,10 @@ public static class InvitationAddressSchemaSql
             CREATE INDEX "IX_InvitationAddress_RegionId" ON "InvitationAddress" ("RegionId");
             CREATE INDEX "IX_InvitationAddress_CityId" ON "InvitationAddress" ("CityId");
             CREATE INDEX "IX_InvitationAddress_AlternativeAddressId" ON "InvitationAddress" ("AlternativeAddressId");
+            CREATE INDEX "IX_InvitationAddress_LodgingId" ON "InvitationAddress" ("LodgingId");
+            CREATE INDEX "IX_InvitationAddress_HotelId" ON "InvitationAddress" ("HotelId");
+            CREATE INDEX "IX_InvitationAddress_HospitalId" ON "InvitationAddress" ("HospitalId");
+            CREATE INDEX "IX_InvitationAddress_OtherSiteId" ON "InvitationAddress" ("OtherSiteId");
           END IF;
         END $$;
 
@@ -63,9 +81,44 @@ public static class InvitationAddressSchemaSql
             ALTER TABLE "AlternativeAddressesForInvitation" ALTER COLUMN "GCRecord" SET NOT NULL;
           END IF;
           IF to_regclass('public."InvitationAddress"') IS NOT NULL THEN
+            ALTER TABLE "InvitationAddress" ADD COLUMN IF NOT EXISTS "Type" integer NULL;
+            ALTER TABLE "InvitationAddress" ADD COLUMN IF NOT EXISTS "LodgingId" uuid NULL;
+            ALTER TABLE "InvitationAddress" ADD COLUMN IF NOT EXISTS "HotelId" uuid NULL;
+            ALTER TABLE "InvitationAddress" ADD COLUMN IF NOT EXISTS "HospitalId" uuid NULL;
+            ALTER TABLE "InvitationAddress" ADD COLUMN IF NOT EXISTS "OtherSiteId" uuid NULL;
+            ALTER TABLE "InvitationAddress" ADD COLUMN IF NOT EXISTS "PrivateHouseAddress" character varying(255) NULL;
             UPDATE "InvitationAddress" SET "GCRecord" = 0 WHERE "GCRecord" IS NULL;
             ALTER TABLE "InvitationAddress" ALTER COLUMN "GCRecord" SET DEFAULT 0;
             ALTER TABLE "InvitationAddress" ALTER COLUMN "GCRecord" SET NOT NULL;
+
+            IF to_regclass('public."Lodgings"') IS NOT NULL
+               AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_InvitationAddress_Lodging') THEN
+              ALTER TABLE "InvitationAddress"
+                ADD CONSTRAINT "FK_InvitationAddress_Lodging"
+                FOREIGN KEY ("LodgingId") REFERENCES "Lodgings" ("ID");
+              CREATE INDEX IF NOT EXISTS "IX_InvitationAddress_LodgingId" ON "InvitationAddress" ("LodgingId");
+            END IF;
+            IF to_regclass('public."Hotels"') IS NOT NULL
+               AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_InvitationAddress_Hotel') THEN
+              ALTER TABLE "InvitationAddress"
+                ADD CONSTRAINT "FK_InvitationAddress_Hotel"
+                FOREIGN KEY ("HotelId") REFERENCES "Hotels" ("ID");
+              CREATE INDEX IF NOT EXISTS "IX_InvitationAddress_HotelId" ON "InvitationAddress" ("HotelId");
+            END IF;
+            IF to_regclass('public."Hospitals"') IS NOT NULL
+               AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_InvitationAddress_Hospital') THEN
+              ALTER TABLE "InvitationAddress"
+                ADD CONSTRAINT "FK_InvitationAddress_Hospital"
+                FOREIGN KEY ("HospitalId") REFERENCES "Hospitals" ("ID");
+              CREATE INDEX IF NOT EXISTS "IX_InvitationAddress_HospitalId" ON "InvitationAddress" ("HospitalId");
+            END IF;
+            IF to_regclass('public."OtherSites"') IS NOT NULL
+               AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_InvitationAddress_OtherSite') THEN
+              ALTER TABLE "InvitationAddress"
+                ADD CONSTRAINT "FK_InvitationAddress_OtherSite"
+                FOREIGN KEY ("OtherSiteId") REFERENCES "OtherSites" ("ID");
+              CREATE INDEX IF NOT EXISTS "IX_InvitationAddress_OtherSiteId" ON "InvitationAddress" ("OtherSiteId");
+            END IF;
           END IF;
         END $$;
         """;
@@ -94,6 +147,12 @@ public static class InvitationAddressSchemaSql
                 ApplicationProfileInstanceId uniqueidentifier NULL,
                 RegionId uniqueidentifier NULL,
                 CityId uniqueidentifier NULL,
+                Type int NULL,
+                LodgingId uniqueidentifier NULL,
+                HotelId uniqueidentifier NULL,
+                HospitalId uniqueidentifier NULL,
+                OtherSiteId uniqueidentifier NULL,
+                PrivateHouseAddress nvarchar(255) NULL,
                 AlternativeAddressId uniqueidentifier NULL,
                 CONSTRAINT FK_InvitationAddress_Instance
                     FOREIGN KEY (ApplicationProfileInstanceId) REFERENCES dbo.ApplicationProfileInstances (ID) ON DELETE CASCADE,

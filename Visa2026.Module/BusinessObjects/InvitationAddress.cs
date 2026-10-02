@@ -31,6 +31,38 @@ public class InvitationAddress : BaseObject
 
     public virtual Guid? CityId { get; set; }
 
+    [ImmediatePostData]
+    [XafDisplayName("Address type")]
+    public virtual ResidenceType? Type { get; set; }
+
+    [DataSourceCriteria("City = '@This.City'")]
+    [XafDisplayName("Lodging")]
+    public virtual Lodging Lodging { get; set; }
+
+    public virtual Guid? LodgingId { get; set; }
+
+    [DataSourceCriteria("City = '@This.City'")]
+    [XafDisplayName("Hotel")]
+    public virtual Hotel Hotel { get; set; }
+
+    public virtual Guid? HotelId { get; set; }
+
+    [DataSourceCriteria("City = '@This.City'")]
+    [XafDisplayName("Hospital")]
+    public virtual Hospital Hospital { get; set; }
+
+    public virtual Guid? HospitalId { get; set; }
+
+    [DataSourceCriteria("City = '@This.City'")]
+    [XafDisplayName("Other site")]
+    public virtual OtherSite OtherSite { get; set; }
+
+    public virtual Guid? OtherSiteId { get; set; }
+
+    [MaxLength(255)]
+    [XafDisplayName("Private house")]
+    public virtual string PrivateHouseAddress { get; set; }
+
     [XafDisplayName("Alternative addresses")]
     public virtual AlternativeAddressesForInvitation AlternativeAddress { get; set; }
 
@@ -41,6 +73,20 @@ public class InvitationAddress : BaseObject
     public virtual ApplicationProfileInstance ApplicationProfileInstance { get; set; }
 
     public virtual Guid? ApplicationProfileInstanceId { get; set; }
+
+    public void ClearSitesExcept(ResidenceType? keep)
+    {
+        if (keep != ResidenceType.Lodging)
+            Lodging = null;
+        if (keep != ResidenceType.Hotel)
+            Hotel = null;
+        if (keep != ResidenceType.Hospital)
+            Hospital = null;
+        if (keep != ResidenceType.Other)
+            OtherSite = null;
+        if (keep != ResidenceType.PrivateHouse)
+            PrivateHouseAddress = null;
+    }
 
     [NotMapped]
     [VisibleInDetailView(false)]

@@ -128,6 +128,8 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireInvitationAddress { get; set; }
 
+    public bool RequireInvitationPlace { get; set; }
+
     public bool RequirePurpose { get; set; }
 
     public string? DefaultPurpose { get; set; }
@@ -272,6 +274,7 @@ public sealed class ApplicationProfileTenantCatalogRow
             DefaultToCityLocalizationKey = NullIfEmpty(profile.DefaultToCity?.LocalizationKey),
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
             RequireInvitationAddress = profile.RequireInvitationAddress,
+            RequireInvitationPlace = profile.RequireInvitationPlace,
             RequirePurpose = profile.RequirePurpose,
             DefaultPurpose = NullIfEmpty(profile.DefaultPurpose),
             RequireProject = profile.RequireProject,
@@ -576,6 +579,9 @@ internal static class ApplicationProfileTenantCatalogSync
         if (ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code)
             || row.RequireInvitationAddress)
             profile.RequireInvitationAddress = true;
+        if (ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code)
+            || row.RequireInvitationPlace)
+            profile.RequireInvitationPlace = true;
         profile.RequirePurpose = row.RequirePurpose;
         profile.DefaultPurpose = string.IsNullOrWhiteSpace(row.DefaultPurpose) ? null : row.DefaultPurpose.Trim();
         profile.RequireProject = row.RequireProject;

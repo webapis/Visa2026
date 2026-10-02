@@ -295,6 +295,12 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<string> InvitationSiteCreateRequested
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
     public string? OrganizationStatusMessage
     {
         get => GetPropertyValue<string?>();

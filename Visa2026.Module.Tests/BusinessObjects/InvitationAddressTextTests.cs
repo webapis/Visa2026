@@ -12,6 +12,8 @@ public class InvitationAddressTextTests
         {
             Region = new Region { NameTm = "Ahal welaýaty" },
             City = new City { NameTm = "Ak bugdaý" },
+            Type = ResidenceType.Hotel,
+            Hotel = new Hotel { Name = "Ýyldyz myhmanhanasy" },
             AlternativeAddress = new AlternativeAddressesForInvitation
             {
                 AddressLine = "ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri, Şagadam köçesi 12",
@@ -19,7 +21,27 @@ public class InvitationAddressTextTests
         };
 
         Assert.Equal(
-            "Ahal welaýatynyň, Ak bugdaý, ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri, Şagadam köçesi 12",
+            "Ahal welaýatynyň, Ak bugdaý, Ýyldyz myhmanhanasy, ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri, Şagadam köçesi 12",
+            InvitationAddressText.Format(address));
+    }
+
+    [Fact]
+    public void Format_puts_other_places_after_a_private_house()
+    {
+        var address = new InvitationAddress
+        {
+            Region = new Region { NameTm = "Ahal welaýaty" },
+            City = new City { NameTm = "Ak bugdaý" },
+            Type = ResidenceType.PrivateHouse,
+            PrivateHouseAddress = "Şagadam köçesi 4",
+            AlternativeAddress = new AlternativeAddressesForInvitation
+            {
+                AddressLine = "ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri",
+            },
+        };
+
+        Assert.Equal(
+            "Ahal welaýatynyň, Ak bugdaý, Şagadam köçesi 4, ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri",
             InvitationAddressText.Format(address));
     }
 

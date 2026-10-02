@@ -155,6 +155,7 @@
       "RequireRegionCity": false,
       "RequireBusinessTripAddress": false,
       "RequireInvitationAddress": true,
+      "RequireInvitationPlace": true,
       "RequireProject": true,
       "RequireUrgency": true,
       "DefaultUrgencyLocalizationKey": "NORM",

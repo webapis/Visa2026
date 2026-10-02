@@ -223,6 +223,13 @@ public class ApplicationProfile : BaseObject
     [XafDisplayName("Invitation address")]
     public virtual bool RequireInvitationAddress { get; set; }
 
+    /// <summary>
+    /// Case summary collects the invitation stay type and the matching lodging, hotel, hospital, other site, or private house.
+    /// Seeded on for Çakylyk Almak. Other templates stay off until the wizard turns it on.
+    /// </summary>
+    [XafDisplayName("Invitation place")]
+    public virtual bool RequireInvitationPlace { get; set; }
+
     public virtual ResidenceType? DefaultBusinessTripAddressType { get; set; }
     public virtual Lodging? DefaultBusinessTripLodging { get; set; }
     public virtual Guid? DefaultBusinessTripLodgingId { get; set; }
@@ -1042,6 +1049,7 @@ public static class ApplicationProfileLockHelper
 #pragma warning restore CS0618
         || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
         || original.RequireInvitationAddress != current.RequireInvitationAddress
+        || original.RequireInvitationPlace != current.RequireInvitationPlace
         || original.DefaultBusinessTripAddressType != current.DefaultBusinessTripAddressType
         || original.DefaultBusinessTripLodgingId != current.DefaultBusinessTripLodgingId
         || original.DefaultBusinessTripHotelId != current.DefaultBusinessTripHotelId
