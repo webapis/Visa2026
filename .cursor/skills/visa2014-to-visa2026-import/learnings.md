@@ -1,3 +1,15 @@
+### 2026-10-02 — Staging SSH reset during morning App_Visa_Ext_FM
+
+- **Phase**: scalar import stopped and resumed
+- **Why**: Tunnel `15433` exited 255 (`Connection reset`) about 48 minutes after the Friday resume. Roster was at 6400/22926, posted 0, failed 15.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt App_Visa_Ext_FM/roster -SkipLookupPreflight`. Log `20261002-110627` first progress `failed=0`.
+### 2026-10-02 — Staging App_Visa_Ext_FM roster resumed
+
+- **Phase**: scalar import resumed
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Yesterday's roster scan ended `posted=257 failed=4427` after `Failed to connect to 127.0.0.1:15433`. Header 335 stayed.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt App_Visa_Ext_FM/roster -SkipLookupPreflight`. Log `20261002-101707` first progress `failed=0`.
+- **Prevent**: Do not restart from Person. Already-posted roster rows stay in the id-map.
 ### 2026-10-01 — Staging SSH reset during App_Visa_Ext_FM roster
 
 - **Phase**: scalar import stopped and resumed

@@ -106,12 +106,82 @@ public static class ApplicationProfileInstancePersonService
         return true;
     }
 
-    public static void UnlinkPerson(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
+    public static void UnlinkPerson(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person) =>
+        UnlinkPerson(objectSpace, application, person, ignoreRosterLock: false);
+
+    /// <summary>
+    /// Removes case roster rows before a <see cref="Person"/> master delete.
+    /// Officers delete from Employees; the case links are not aggregated on <see cref="Person"/>,
+    /// so XAF would clear <c>Person</c> on those rows and required-field rules would block the delete.
+    /// Completed cases are included: the person record is going away.
+    /// </summary>
+    public static void DetachForPersonDelete(IObjectSpace objectSpace, Person person)
+    {
+        if (objectSpace == null || person == null || person.ID == Guid.Empty)
+            return;
+
+        DetachForPersonDelete(objectSpace, person, new System.Collections.Generic.HashSet<Guid>());
+    }
+
+    private static void DetachForPersonDelete(IObjectSpace objectSpace, Person person, System.Collections.Generic.HashSet<Guid> visited)
+    {
+        if (!visited.Add(person.ID))
+            return;
+
+        var personId = person.ID;
+        var memberIds = objectSpace.GetObjectsQuery<Person>()
+            .Where(p => p.SponsoringEmployee != null && p.SponsoringEmployee.ID == personId)
+            .Select(p => p.ID)
+            .ToList();
+        foreach (var memberId in memberIds)
+        {
+            var member = objectSpace.GetObjectByKey<Person>(memberId);
+            if (member != null)
+                DetachForPersonDelete(objectSpace, member, visited);
+        }
+
+        var applicationIds = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => a.People.Any(p => p.ID == personId))
+            .Select(a => a.ID)
+            .ToList();
+        var linkApplicationIds = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(l => l.PersonId == personId)
+            .Select(l => l.ApplicationProfileInstanceId)
+            .Distinct()
+            .ToList();
+
+        foreach (var applicationId in applicationIds.Union(linkApplicationIds))
+        {
+            if (applicationId == Guid.Empty)
+                continue;
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            if (application != null)
+                UnlinkPerson(objectSpace, application, person, ignoreRosterLock: true);
+        }
+
+        var leftoverLinks = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(l => l.PersonId == personId)
+            .ToList();
+        foreach (var link in leftoverLinks)
+            objectSpace.Delete(link);
+
+        var borderZoneItems = objectSpace.GetObjectsQuery<BorderZoneItem>()
+            .Where(i => i.Person != null && i.Person.ID == personId)
+            .ToList();
+        foreach (var item in borderZoneItems)
+            objectSpace.Delete(item);
+    }
+
+    public static void UnlinkPerson(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person,
+        bool ignoreRosterLock)
     {
         if (objectSpace == null || application == null || person == null)
             return;
 
-        if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+        if (!ignoreRosterLock && ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
             return;
 
         var personId = person.ID;

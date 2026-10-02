@@ -230,3 +230,12 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Recreate **prod app only**.
 - **Prevent**: When the request names prod, do not recreate the staging app or write to `visa2026_staging`.
 - **Skill**: setup-docker-engine
+
+### 2026-10-02 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.819`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** touch `/opt/visa2026-staging`. Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:caca2808e51a` Created `2026-10-01T11:27:01Z` (replaces `6baa25f07310` `2026-09-30T08:57Z`). Module assembly `1.0.0.819`. Prod postgres stayed **healthy** (Up 8 weeks). Seed gates quick (profile updated=36; approval-leg scanned=4832 assigned=0; org FKs filled=0). Host poll 2 and LAN `http://10.100.128.26/LoginPage` → **200**. Scan override still on (`AzureOpenAI` / `true`).
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain.
+- **Skill**: setup-docker-engine
