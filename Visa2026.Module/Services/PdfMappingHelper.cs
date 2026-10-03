@@ -347,7 +347,39 @@ namespace Visa2026.Module.Services
                 }
             }
 
+            ApplyInvitationStayFields(data, application);
+
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);
+        }
+
+        internal const string InvitationStayRegionKey = "topmostSubform[0].Page2[0]._33[0]";
+        internal const string InvitationStayCityKey = "topmostSubform[0].Page2[0]._34[0]";
+        internal const string InvitationStayAddressKey = "topmostSubform[0].Page2[0]._35[0]";
+
+        /// <summary>
+        /// When the profile shows Invitation address, fields 33–35 come from the case stay.
+        /// Otherwise the seeded address-of-residence mappings are left as they were.
+        /// </summary>
+        private static void ApplyInvitationStayFields(Dictionary<string, object> data, ApplicationProfileInstance application)
+        {
+            if (application?.ApplicationProfile?.RequireInvitationAddress != true)
+                return;
+
+            var stay = application.InvitationAddress;
+            SetInvitationStayField(data, InvitationStayRegionKey, stay?.Region?.PdfForm_Code);
+            SetInvitationStayField(data, InvitationStayCityKey, stay?.City?.PdfForm_Code);
+            SetInvitationStayField(data, InvitationStayAddressKey, InvitationAddressText.StayAddress(stay));
+        }
+
+        private static void SetInvitationStayField(Dictionary<string, object> data, string key, string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                data.Remove(key);
+                return;
+            }
+
+            data[key] = NormalizePdfValue(value);
         }
 
         private static object GetValueByPath(object obj, string path)

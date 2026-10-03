@@ -56,4 +56,24 @@ public class InvitationAddressTextTests
 
         Assert.Equal("Ahal welaýatynyň, Ak bugdaý", InvitationAddressText.Format(address));
     }
+
+    [Fact]
+    public void StayAddress_is_the_place_then_other_places_without_region_or_city()
+    {
+        var address = new InvitationAddress
+        {
+            Region = new Region { NameTm = "Ahal welaýaty" },
+            City = new City { NameTm = "Ak bugdaý" },
+            Type = ResidenceType.Hotel,
+            Hotel = new Hotel { Name = "Ýyldyz myhmanhanasy" },
+            AlternativeAddress = new AlternativeAddressesForInvitation
+            {
+                AddressLine = "ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri",
+            },
+        };
+
+        Assert.Equal(
+            "Ýyldyz myhmanhanasy, ýa-da Balkan welaýatynyň, Türkmenbaşy şäheri",
+            InvitationAddressText.StayAddress(address));
+    }
 }

@@ -192,9 +192,9 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | ApplicationProfileInstance level serves as default. |
 | `topmostSubform[0].Page2[0]._27[0]` | Duration of stay | textEdit | `Application.VisaPeriod.PdfForm_Count` | |
 | `topmostSubform[0].Page2[0]._271[0]`| Duration unit | choiceList | `Application.VisaPeriod.PdfForm__Code` | Raw: 'GUN', 'AY', 'YYL' |
-| `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | |
-| `topmostSubform[0].Page2[0]._34[0]` | District of stay | choiceList | `CurrentAddressOfResidence.City.PdfForm_Code` | |
-| `topmostSubform[0].Page2[0]._35[0]` | Stay address | textEdit | `CurrentAddressOfResidence.FullAddress` | |
+| `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | When the profile Invitation address switch is on: `InvitationAddress.Region.PdfForm_Code` |
+| `topmostSubform[0].Page2[0]._34[0]` | District of stay | choiceList | `CurrentAddressOfResidence.City.PdfForm_Code` | When the profile Invitation address switch is on: `InvitationAddress.City.PdfForm_Code` |
+| `topmostSubform[0].Page2[0]._35[0]` | Stay address | textEdit | `CurrentAddressOfResidence.FullAddress` | When the profile Invitation address switch is on: chosen place + other invitation places (no region or city) |
 
 ---
 

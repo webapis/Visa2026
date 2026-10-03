@@ -22,6 +22,24 @@ public static class InvitationAddressText
         return first + ", " + rest;
     }
 
+    /// <summary>
+    /// Application-form field 35: the chosen place, then other invitation places.
+    /// Region and city are separate dropdowns.
+    /// </summary>
+    public static string StayAddress(InvitationAddress? address)
+    {
+        if (address == null)
+            return string.Empty;
+
+        var place = MainPlace(address);
+        var rest = address.AlternativeAddress?.AddressLine?.Trim();
+        if (string.IsNullOrEmpty(place))
+            return rest ?? string.Empty;
+        if (string.IsNullOrEmpty(rest))
+            return place;
+        return place + ", " + rest;
+    }
+
     public static string MainPlace(InvitationAddress address) =>
         address.Type switch
         {

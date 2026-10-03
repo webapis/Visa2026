@@ -167,4 +167,101 @@ public class PdfMappingHelperTests
         Assert.Equal("GABRIEL", value);
         Assert.Equal("_03", PdfXfaFieldValueLookup.LocalName("topmostSubform[0].Page1[0]._03[0]"));
     }
+
+    [Fact]
+    public void MapApplicationData_UsesInvitationStayWhenTheProfileShowsInvitationAddress()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationType = new ApplicationType { ShowCurrentAddressOfResidence = true },
+            ApplicationProfile = new ApplicationProfile { RequireInvitationAddress = true },
+            InvitationAddress = new InvitationAddress
+            {
+                Region = new Region { PdfForm_Code = "AH" },
+                City = new City { PdfForm_Code = "AKB" },
+                Type = ResidenceType.Hotel,
+                Hotel = new Hotel { Name = "Ýyldyz myhmanhanasy" },
+                AlternativeAddress = new AlternativeAddressesForInvitation
+                {
+                    AddressLine = "ýa-da Balkan welaýatynyň",
+                },
+            },
+        };
+        var item = new ApplicationRosterMergeLine
+        {
+            SuppressPersonCurrentFieldSync = true,
+            ApplicationProfileInstance = application,
+            CurrentAddressOfResidence = new AddressOfResidence
+            {
+                Region = new Region { PdfForm_Code = "LB" },
+                City = new City { PdfForm_Code = "LB" },
+                FullAddress = "Residence street",
+            },
+        };
+        var data = new Dictionary<string, object>();
+        var mappings = new List<PdfFormMappingDefinition>
+        {
+            new()
+            {
+                PdfFieldKey = PdfMappingHelper.InvitationStayRegionKey,
+                MappingMode = PdfMappingMode.Property,
+                PropertyPath = "CurrentAddressOfResidence.Region.PdfForm_Code",
+            },
+            new()
+            {
+                PdfFieldKey = PdfMappingHelper.InvitationStayCityKey,
+                MappingMode = PdfMappingMode.Property,
+                PropertyPath = "CurrentAddressOfResidence.City.PdfForm_Code",
+            },
+            new()
+            {
+                PdfFieldKey = PdfMappingHelper.InvitationStayAddressKey,
+                MappingMode = PdfMappingMode.Property,
+                PropertyPath = "CurrentAddressOfResidence.FullAddress",
+            },
+        };
+
+        PdfMappingHelper.MapApplicationData(data, application, item, objectSpace: null, logger: null, mappings);
+
+        Assert.Equal("AH", data[PdfMappingHelper.InvitationStayRegionKey]);
+        Assert.Equal("AKB", data[PdfMappingHelper.InvitationStayCityKey]);
+        Assert.Equal("YYLDYZ MYHMANHANASY, YA-DA BALKAN WELAYATYNYNG", data[PdfMappingHelper.InvitationStayAddressKey]);
+    }
+
+    [Fact]
+    public void MapApplicationData_KeepsAddressOfResidenceWhenInvitationAddressIsOff()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationType = new ApplicationType { ShowCurrentAddressOfResidence = true },
+            ApplicationProfile = new ApplicationProfile { RequireInvitationAddress = false },
+            InvitationAddress = new InvitationAddress
+            {
+                Region = new Region { PdfForm_Code = "AH" },
+            },
+        };
+        var item = new ApplicationRosterMergeLine
+        {
+            SuppressPersonCurrentFieldSync = true,
+            ApplicationProfileInstance = application,
+            CurrentAddressOfResidence = new AddressOfResidence
+            {
+                Region = new Region { PdfForm_Code = "LB" },
+            },
+        };
+        var data = new Dictionary<string, object>();
+        var mappings = new List<PdfFormMappingDefinition>
+        {
+            new()
+            {
+                PdfFieldKey = PdfMappingHelper.InvitationStayRegionKey,
+                MappingMode = PdfMappingMode.Property,
+                PropertyPath = "CurrentAddressOfResidence.Region.PdfForm_Code",
+            },
+        };
+
+        PdfMappingHelper.MapApplicationData(data, application, item, objectSpace: null, logger: null, mappings);
+
+        Assert.Equal("LB", data[PdfMappingHelper.InvitationStayRegionKey]);
+    }
 }
