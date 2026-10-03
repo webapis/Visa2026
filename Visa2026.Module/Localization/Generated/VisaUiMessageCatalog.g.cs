@@ -2018,7 +2018,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Lodging",
             ["tr-TR"] = "Konaklama",
-            ["tk-TM"] = "Ýaşaýyş",
+            ["tk-TM"] = "Umumy ýaşaýyş jaýy",
             ["ru-RU"] = "Проживание",
         },
         ["ApplicationProfile.Site.LodgingPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

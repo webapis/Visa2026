@@ -208,7 +208,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 application.BusinessTripAddressType is ResidenceType type
                     ? ResidenceTypeOptionId(type)
                     : null,
-                application.BusinessTripAddressType?.ToString() ?? string.Empty,
+                application.BusinessTripAddressType is ResidenceType tripType
+                    ? ResidenceTypeLabel(tripType)
+                    : string.Empty,
                 catalogs.ResidenceTypes,
                 readOnly: false,
                 LookupFill(
@@ -310,7 +312,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             AddLookup(fields, InvitationAddressType, ApplicationProfileLocalization.Field("InvitationAddressType"), "purple", "📍",
                 visible: true,
                 stay?.Type is ResidenceType invitationType ? ResidenceTypeOptionId(invitationType) : null,
-                stay?.Type?.ToString() ?? string.Empty,
+                stay?.Type is ResidenceType invitationLabel ? ResidenceTypeLabel(invitationLabel) : string.Empty,
                 catalogs.ResidenceTypes,
                 readOnly: false,
                 LookupFill(
@@ -640,6 +642,17 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
     private static bool ShowInvitationPlace(ApplicationProfile? profile, ApplicationProfileInstance application) =>
         Visible(profile, p => p.RequireInvitationPlace, static _ => false, application);
+
+    private static string ResidenceTypeLabel(ResidenceType type) =>
+        type switch
+        {
+            ResidenceType.Lodging => ApplicationProfileLocalization.Msg("ApplicationProfile.Site.Lodging"),
+            ResidenceType.Hotel => ApplicationProfileLocalization.Msg("ApplicationProfile.Site.Hotel"),
+            ResidenceType.Hospital => ApplicationProfileLocalization.Msg("ApplicationProfile.Site.Hospital"),
+            ResidenceType.Other => ApplicationProfileLocalization.Msg("ApplicationProfile.Site.Other"),
+            ResidenceType.PrivateHouse => ApplicationProfileLocalization.Msg("ApplicationProfile.Site.PrivateHouse"),
+            _ => type.ToString(),
+        };
 
     public static bool IsInvitationSiteCatalogField(string? fieldKey) =>
         fieldKey is InvitationLodging or InvitationHotel or InvitationHospital or InvitationOtherSite;
@@ -1467,15 +1480,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .Select(t => new ApplicationWorkspaceLookupOption
                 {
                     Id = ResidenceTypeOptionId(t),
-                    DisplayName = t switch
-                    {
-                        ResidenceType.Lodging => "Lodging",
-                        ResidenceType.Hotel => "Hotel",
-                        ResidenceType.Hospital => "Hospital",
-                        ResidenceType.Other => "Other site",
-                        ResidenceType.PrivateHouse => "Private house",
-                        _ => t.ToString(),
-                    },
+                    DisplayName = ResidenceTypeLabel(t),
                 })
                 .ToList();
 
