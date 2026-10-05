@@ -2405,9 +2405,17 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
     gap: 0.75rem;
-    white-space: nowrap;
+    white-space: normal;
+}
+
+.app-item-doc-copies-preview__image-error {
+    flex: 0 0 auto;
+    margin: 0;
+    color: var(--dxbl-danger-color, #dc3545);
+    font-size: 0.8125rem;
 }
 
 .app-item-doc-copies-preview__header-toolbar {

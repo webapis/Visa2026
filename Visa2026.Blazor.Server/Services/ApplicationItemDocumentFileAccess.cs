@@ -225,6 +225,99 @@ public sealed class ApplicationItemDocumentFileAccess
         return true;
     }
 
+    public bool TryGetImageDownload(
+        IReadOnlyList<Guid> applicationPersonIds,
+        string slotKey,
+        string familyKey,
+        out ApplicationItemDocumentFileResult? result,
+        Guid applicationId = default)
+    {
+        result = null;
+        if (ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(slotKey, familyKey))
+            return false;
+
+        if (applicationPersonIds == null || applicationPersonIds.Count == 0)
+            return false;
+
+        var rowIds = applicationPersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+        if (rowIds.Count == 0)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(familyKey))
+            ApplicationItemDocumentCopiesTypeCatalog.TryParseFamilyPreviewKey(slotKey, out familyKey);
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                rowIds,
+                applicationId,
+                out var application,
+                out var people)
+            || application == null
+            || people.Count != rowIds.Count)
+        {
+            return false;
+        }
+
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
+        IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> files;
+        string archiveBaseName;
+        if (!string.IsNullOrWhiteSpace(familyKey))
+        {
+            files = ApplicationItemDocumentCopiesTypeCatalog.CollectFamilyFiles(lines, familyKey);
+            archiveBaseName = ApplicationItemDocumentCopiesTypeCatalog.FamilyTitle(familyKey);
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(slotKey))
+                return false;
+
+            var mergedGroup = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines)
+                .FirstOrDefault(g => string.Equals(g.SlotKey, slotKey, StringComparison.Ordinal));
+            if (mergedGroup == null)
+                return false;
+
+            files = mergedGroup.Files;
+            archiveBaseName = string.IsNullOrWhiteSpace(mergedGroup.SlotLabel)
+                ? slotKey
+                : mergedGroup.SlotLabel;
+        }
+
+        if (files == null || files.Count == 0)
+            return false;
+
+        if (!pdfMerger.TryLoadValidatedSourceFiles(rowIds, files, application.ID, out var sources)
+            || sources == null
+            || sources.Count == 0)
+        {
+            return false;
+        }
+
+        if (!ApplicationItemDocumentCopyImageDownloadBuilder.TryBuild(
+                sources,
+                archiveBaseName,
+                out var content,
+                out var fileName,
+                out var contentType)
+            || content == null
+            || content.Length == 0
+            || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        result = new ApplicationItemDocumentFileResult
+        {
+            Content = content,
+            FileName = fileName,
+            ContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType
+        };
+        return true;
+    }
+
     public bool TryGetBatchSummaryPdf(
         IReadOnlyList<Guid> applicationPersonIds,
         ApplicationItemDocumentBatchSummaryKind kind,

@@ -49,6 +49,14 @@
                                   SizeMode="SizeMode.Small"
                                   Click="@DownloadPreviewPdfAsync" />
                     }
+                    @if (ShowImageDownload)
+                    {
+                        <DxButton Text="@ActionDownloadImage"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  Enabled="@(!_imageDownloadBusy)"
+                                  Click="@DownloadPreviewImageAsync" />
+                    }
                     @if (!_loading && ShowBatchSummaryAction)
                     {
                         <DxButton Text="@ActionBatchSummary"
@@ -77,6 +85,10 @@
     </HeaderContentTemplate>
     <BodyContentTemplate>
         <div class="app-item-doc-copies-preview">
+            @if (!string.IsNullOrWhiteSpace(_imageDownloadError) && !_loading)
+            {
+                <div class="app-item-doc-copies-preview__image-error" role="alert">@_imageDownloadError</div>
+            }
             @if (_loading)
             {
                 <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--loading" role="status" aria-live="polite">
@@ -124,6 +136,9 @@
     private byte[]? _pdfDownloadContent;
     private string _pdfDownloadFileName = string.Empty;
     private string _activeSlotKey = string.Empty;
+    private bool _offerImageDownload;
+    private bool _imageDownloadBusy;
+    private string _imageDownloadError = string.Empty;
     private readonly DocumentPreviewPopupWindowState _windowState = new();
     private int _layoutSyncGeneration;
     private string _previewLoadingLabel = string.Empty;
@@ -156,11 +171,19 @@
 
     private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
     private string ActionDownload => Msg("ApplicationItemDocumentCopies.Action.Download");
+    private string ActionDownloadImage => Msg("ApplicationItemDocumentCopies.Action.DownloadImage");
+    private string ImageDownloadError => Msg("ApplicationItemDocumentCopies.DownloadImage.Error");
     private string ActionBatchSummary => Msg("ApplicationItemDocumentCopies.Action.BatchSummary");
     private string WindowControlsLabel => Msg("ApplicationDocumentPreview.Window.Controls");
     private string WindowMinimizeLabel => Msg("ApplicationDocumentPreview.Window.Minimize");
     private string WindowMaximizeLabel => Msg("ApplicationDocumentPreview.Window.Maximize");
     private string WindowRestoreLabel => Msg("ApplicationDocumentPreview.Window.Restore");
+
+    private bool ShowImageDownload =>
+        !_loading
+        && _offerImageDownload
+        && _pdfDownloadContent != null
+        && !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(_activeSlotKey);
 
     private bool ShowBatchSummaryAction =>
         !string.IsNullOrWhiteSpace(_activeSlotKey)
@@ -176,6 +199,9 @@
     public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
     {
         _activeSlotKey = slotKey;
+        _imageDownloadError = string.Empty;
+        _imageDownloadBusy = false;
+        _offerImageDownload = !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(slotKey);
         _previewLoadingLabel = FormatPreviewLoadingLabel(slotLabel);
         await OpenPdfAsync(
             slotLabel,
@@ -251,6 +277,48 @@
             stream);
     }
 
+    private async Task DownloadPreviewImageAsync()
+    {
+        if (_imageDownloadBusy || !_offerImageDownload)
+            return;
+
+        _imageDownloadBusy = true;
+        _imageDownloadError = string.Empty;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            if (!FileAccess.TryGetImageDownload(
+                    ApplicationItemIds,
+                    _activeSlotKey,
+                    familyKey: null,
+                    out var result,
+                    ApplicationProfileInstanceId)
+                || result == null
+                || result.Content == null
+                || result.Content.Length == 0)
+            {
+                _imageDownloadError = ImageDownloadError;
+                return;
+            }
+
+            using var stream = new MemoryStream(result.Content, writable: false);
+            await FileDownloader.DownloadAsync(result.FileName, stream, result.ContentType);
+        }
+        catch (Exception ex)
+        {
+            _imageDownloadError = ImageDownloadError;
+            ErrorReporter.ReportDocumentCopiesError(
+                ImageDownloadError,
+                ApplicationRuntimeLogCategories.DocumentCopiesPreviewDialog,
+                ex);
+        }
+        finally
+        {
+            _imageDownloadBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private async Task DownloadBatchSummaryAsync()
     {
         if (!ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, PackageOptions, out var kind)
@@ -309,6 +377,9 @@
         _error = string.Empty;
         _loading = false;
         _activeSlotKey = string.Empty;
+        _offerImageDownload = false;
+        _imageDownloadBusy = false;
+        _imageDownloadError = string.Empty;
         _previewLoadingLabel = string.Empty;
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;

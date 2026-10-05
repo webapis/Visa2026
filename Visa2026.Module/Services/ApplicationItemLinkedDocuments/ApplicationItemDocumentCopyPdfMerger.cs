@@ -116,6 +116,81 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         }
     }
 
+    /// <summary>
+    /// Loads the same roster files the PDF merge would use, without converting them to PDF.
+    /// </summary>
+    public bool TryLoadValidatedSourceFiles(
+        IReadOnlyList<Guid> applicationPersonIds,
+        IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> entries,
+        Guid applicationId,
+        out IReadOnlyList<ApplicationItemDocumentImageSource> sources)
+    {
+        sources = Array.Empty<ApplicationItemDocumentImageSource>();
+
+        if (applicationPersonIds == null || applicationPersonIds.Count == 0)
+            return false;
+
+        if (entries == null || entries.Count == 0)
+            return false;
+
+        var allowedRowIds = applicationPersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToHashSet();
+
+        if (allowedRowIds.Count == 0)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                applicationPersonIds,
+                applicationId,
+                out var application,
+                out var people)
+            || application == null)
+        {
+            return false;
+        }
+
+        var snapshots = new Dictionary<Guid, ApplicationItemLinkedDocumentsSnapshot>();
+        foreach (var person in people)
+        {
+            snapshots[person.ID] = ApplicationPersonLinkedDocumentsResolver.Resolve(objectSpace, application, person);
+        }
+
+        foreach (var entry in entries)
+        {
+            if (!allowedRowIds.Contains(entry.ApplicationItemId))
+                return false;
+
+            if (!snapshots.TryGetValue(entry.ApplicationItemId, out var snapshot))
+                return false;
+
+            if (!snapshot.ContainsFile(entry.File.FileDataId))
+                return false;
+        }
+
+        var loaded = new List<ApplicationItemDocumentImageSource>();
+        foreach (var entry in entries)
+        {
+            if (!TryLoadFileContent(objectSpace, entry.File.FileDataId, out var fileContent, out var fileNameForExt))
+                continue;
+
+            loaded.Add(new ApplicationItemDocumentImageSource
+            {
+                Content = fileContent,
+                FileName = string.IsNullOrWhiteSpace(fileNameForExt) ? "document" : fileNameForExt
+            });
+        }
+
+        if (loaded.Count == 0)
+            return false;
+
+        sources = loaded;
+        return true;
+    }
+
     private bool TryLoadFileContent(
         IObjectSpace objectSpace,
         Guid fileDataId,

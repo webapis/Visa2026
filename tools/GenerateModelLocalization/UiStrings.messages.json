@@ -4805,6 +4805,18 @@
     "tk-TM": "Göçür",
     "ru-RU": "Скачать"
   },
+  "ApplicationItemDocumentCopies.Action.DownloadImage": {
+    "en": "Download image",
+    "tr-TR": "Görüntüyü indir",
+    "tk-TM": "Surat göçür",
+    "ru-RU": "Скачать изображение"
+  },
+  "ApplicationItemDocumentCopies.DownloadImage.Error": {
+    "en": "Could not download this file as an image.",
+    "tr-TR": "Bu dosya görüntü olarak indirilemedi.",
+    "tk-TM": "Bu faýly surat hökmünde göçürmek mümkin bolmady.",
+    "ru-RU": "Не удалось скачать этот файл как изображение."
+  },
   "ApplicationItemDocumentCopies.Action.BatchSummary": {
     "en": "Batch summary",
     "tr-TR": "Toplu özet",

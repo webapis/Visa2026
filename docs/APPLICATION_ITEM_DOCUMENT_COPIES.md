@@ -184,8 +184,8 @@ The action is enabled only when at least one line is selected. Content opens in 
 
 ### Inline preview
 
-- **Scan slots:** merged PDF in the preview slot iframe; header offers **Download** and **Batch summary** (when 2+ lines and merge options allow). Exclusive mode hides the slot list while previewing (same pattern as Resminamalar).
-- **Application form:** **Preview** on a person row or the **Application form** type section opens `#visa-preview-slot` (same OpenPreviewOnly viewer as scans). Chrome/Edge cannot iframe XFA, so the slot renders the filled form with **pdf.js** (`enableXfa`, local `wwwroot/lib/pdfjs/`). Page paper is an SVG rect; dark fills are remapped to white for display. **Download** in the preview header still returns the filled XFA (or a ZIP of filled forms for several people). Legacy hosts without inline preview still download immediately.
+- **Scan slots:** merged PDF in the preview slot iframe; header offers **Download** (the PDF), **Download image**, and **Batch summary** (when 2+ lines and merge options allow). **Download image** returns the uploaded picture when the preview is a single image file. A one-page PDF becomes one JPEG. Several pages or several files become a ZIP of images named `{label}-images.zip` (original pictures kept as stored; PDF pages as `name-page-01.jpg`). Exclusive mode hides the slot list while previewing (same pattern as Resminamalar).
+- **Application form:** **Preview** on a person row or the **Application form** type section opens `#visa-preview-slot` (same OpenPreviewOnly viewer as scans). Chrome/Edge cannot iframe XFA, so the slot renders the filled form with **pdf.js** (`enableXfa`, local `wwwroot/lib/pdfjs/`). Page paper is an SVG rect; dark fills are remapped to white for display. **Download** in the preview header still returns the filled XFA (or a ZIP of filled forms for several people). The application form does not offer **Download image**. **Download package** stays a PDF ZIP. Legacy hosts without inline preview still download immediately.
 
 ### Download package (replaces Generate PDF accept)
 

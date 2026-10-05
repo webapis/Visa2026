@@ -187,6 +187,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Göçür",
             ["ru-RU"] = "Скачать",
         },
+        ["ApplicationItemDocumentCopies.Action.DownloadImage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download image",
+            ["tr-TR"] = "Görüntüyü indir",
+            ["tk-TM"] = "Surat göçür",
+            ["ru-RU"] = "Скачать изображение",
+        },
         ["ApplicationItemDocumentCopies.Action.DownloadAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Download all",
@@ -284,6 +291,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu dosya indirilemedi.",
             ["tk-TM"] = "Bu faýly göçürmek mümkin bolmady.",
             ["ru-RU"] = "Не удалось скачать этот файл.",
+        },
+        ["ApplicationItemDocumentCopies.DownloadImage.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not download this file as an image.",
+            ["tr-TR"] = "Bu dosya görüntü olarak indirilemedi.",
+            ["tk-TM"] = "Bu faýly surat hökmünde göçürmek mümkin bolmady.",
+            ["ru-RU"] = "Не удалось скачать этот файл как изображение.",
         },
         ["ApplicationItemDocumentCopies.Empty.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
