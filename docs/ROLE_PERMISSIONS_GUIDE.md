@@ -164,7 +164,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type |
 |---|
 | `ApplicationTypeFilter`, `ApplicationType`, `ApplicationState`, `ApplicationLocation` |
-| `ApplicationProfile` | Read only except `Instances` (new applications) and `NestedTemplates` (Create template). Create and Delete stay denied |
+| `ApplicationProfile` | Read only except `Instances` (new applications) and `NestedTemplates` (Create template). Create and Delete stay denied. Member Write uses an empty criteria, and `ApplicationProfileInstance.ApplicationProfile` is writable, so linking a profile on create is allowed |
 | `ApplicationProfileTemplate` | Read, Write, Create (Create template from yellow marks). No Delete |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
 | `MigrationService`, `PassportType`, `Position`, `PurposeOfTravel` |

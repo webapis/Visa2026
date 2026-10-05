@@ -880,6 +880,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         /// Officers set <see cref="ApplicationProfileInstance.ApplicationProfile"/> on create.
         /// That updates <see cref="ApplicationProfile.Instances"/>. A type-level Write Deny on the profile
         /// blocks the save. Keep the catalog read-only except that collection.
+        /// Member Write must use an empty criteria: <c>AssociationPermissionsMode.Auto</c> does not
+        /// apply a criteria-based grant to the other side of the association, so the instance property stays denied.
         /// </summary>
         static void EnsureOfficerCanAssignApplicationProfile(PermissionPolicyRole role)
         {
@@ -899,27 +901,39 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             typePerm.CreateState = SecurityPermissionState.Deny;
             typePerm.DeleteState = SecurityPermissionState.Deny;
 
-            EnsureApplicationProfileMemberWrite(role, nameof(ApplicationProfile.Instances));
+            EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.Instances));
             // Create from yellow marks appends the new row to this collection.
-            EnsureApplicationProfileMemberWrite(role, nameof(ApplicationProfile.NestedTemplates));
+            EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.NestedTemplates));
+            // The property named in the security error. Both sides are required when a criteria was involved.
+            EnsureAssociationMemberWrite<ApplicationProfileInstance>(role, nameof(ApplicationProfileInstance.ApplicationProfile));
         }
 
-        static void EnsureApplicationProfileMemberWrite(PermissionPolicyRole role, string memberName)
+        static void EnsureAssociationMemberWrite<T>(PermissionPolicyRole role, string memberName) where T : class
         {
-            var typePerm = role.TypePermissions.First(p => p.TargetType == typeof(ApplicationProfile));
-            var memberPerm = typePerm.MemberPermissions
-                .FirstOrDefault(mp => string.Equals(mp.Members, memberName, StringComparison.Ordinal));
-            if (memberPerm != null)
+            var typePerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == typeof(T));
+            if (typePerm == null)
+                return;
+
+            var matches = typePerm.MemberPermissions
+                .Where(mp => string.Equals(mp.Members, memberName, StringComparison.Ordinal))
+                .ToList();
+            if (matches.Count == 0)
             {
-                memberPerm.WriteState = SecurityPermissionState.Allow;
+                role.AddMemberPermission<T>(
+                    SecurityOperations.Write,
+                    memberName,
+                    string.Empty,
+                    SecurityPermissionState.Allow);
                 return;
             }
 
-            role.AddMemberPermissionFromLambda<ApplicationProfile>(
-                SecurityOperations.Write,
-                memberName,
-                _ => true,
-                SecurityPermissionState.Allow);
+            foreach (var memberPerm in matches)
+            {
+                memberPerm.WriteState = SecurityPermissionState.Allow;
+                // A lambda criteria ("True") blocks automatic permission on the other association end.
+                if (!string.IsNullOrEmpty(memberPerm.Criteria))
+                    memberPerm.Criteria = string.Empty;
+            }
         }
 
         static void EnsureDenyTypeAccess<T>(PermissionPolicyRole role) where T : class
