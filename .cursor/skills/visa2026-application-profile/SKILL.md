@@ -148,6 +148,7 @@ flowchart LR
 | People & links **Link existing** search row and person rules stay light | Picker shell is `#f8fafc`, row rules `#f1f5f9`, and host `.os-btn` is `#fff` | `case-tabs.css` `.os-person-link-picker`; keep Search / Cancel on `--os-panel` |
 | Section switch shows a light “Opening …” pane | `.cw-tab-loading` veil is `rgba(248, 250, 252, 0.78)` | `case-workspace.css`; veil is the theme panel, track is `--os-line` |
 | First open of a case shows white skeleton bars | `.cw-loading` bars use `#e2e8f0` / `#f8fafc` | `case-workspace.css`; bars shimmer between `--os-line` and the panel |
+| Organization letterhead fields stay white | Disabled `.cw-summary-field__input` is `#f8fafc` | `case-workspace.css`; Organization inputs use `--os-panel` |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |

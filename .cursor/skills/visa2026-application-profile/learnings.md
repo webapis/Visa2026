@@ -1,3 +1,12 @@
+### 2026-10-05 — Organization letterhead fields follow Fluent Dark
+
+- **Need**: Organization on a case showed white Name, Address, and the other letterhead boxes on Fluent Dark.
+- **Cause**: Those boxes are disabled inputs, and `.cw-summary-field__input:disabled` was `#f8fafc`. The Default chip was `#dcfce7`.
+- **Fix**: Disabled letterhead fields use `--os-panel`. Default uses `--os-ok-soft`.
+- **Officer**: Hard-refresh. Open a case → Organization → Edit. The letterhead boxes should match the dark page. Check light once.
+- **Prevent**: Do not put `#f8fafc` back on `.cw-summary-field__input:disabled`.
+- **Cross-skill**: —
+
 ### 2026-10-05 — Çakylyk Almak links last visa, not salary or medical
 
 - **Need**: Application for Invitation (Çakylyk Almak) should not require EmployeeSalary or MedicalRecord. It should pin the person's latest visa even when that visa has expired, so form field 30 can show it.

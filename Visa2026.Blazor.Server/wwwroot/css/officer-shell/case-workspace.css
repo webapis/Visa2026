@@ -273,7 +273,7 @@ button.cw-person:focus-visible {
   border: 1px solid var(--os-line); background: var(--os-panel); color: var(--os-ink);
   border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 650; cursor: pointer;
 }
-.cw-summary-mode-btn:hover { border-color: #64748b; background: #f8fafc; }
+.cw-summary-mode-btn:hover { border-color: var(--os-line); background: var(--os-surface); color: var(--os-ink); }
 .cw-summary-empty, .cw-summary-foot, .cw-summary-status { margin: 0 0 8px; font-size: 0.8rem; color: var(--os-muted); }
 .cw-summary-status.is-error { color: #b91c1c; }
 .cw-summary-gate { margin: 0 0 12px; }
@@ -333,7 +333,7 @@ button.cw-person:focus-visible {
   font: inherit; background: var(--os-panel); color: var(--os-ink);
   -webkit-text-fill-color: var(--os-ink);
 }
-.cw-summary-field__input:disabled { background: #f8fafc; color: var(--os-muted); -webkit-text-fill-color: var(--os-muted); }
+.cw-summary-field__input:disabled { background: var(--os-surface); color: var(--os-ink); -webkit-text-fill-color: var(--os-ink); }
 select.cw-summary-field__input {
   background: var(--os-panel);
   color: var(--os-ink);
@@ -1325,8 +1325,8 @@ select.cw-summary-field__input option {
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #dcfce7;
-  color: #166534;
+  background: var(--os-ok-soft);
+  color: var(--os-ink);
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -1496,8 +1496,11 @@ select.cw-summary-field__input option {
   border-color: var(--os-line);
 }
 .dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-summary-field__input,
-.dxbl-theme-fluent-mode-dark .officer-case-workspace select.cw-summary-field__input {
-  background: var(--os-panel);
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-summary-field__input:disabled,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace select.cw-summary-field__input,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace select.cw-summary-field__input option,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-org-preview textarea.cw-summary-field__input {
+  background-color: var(--os-panel);
   color: var(--os-ink);
   -webkit-text-fill-color: var(--os-ink);
   border-color: var(--os-line);
