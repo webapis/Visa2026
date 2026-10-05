@@ -41,7 +41,7 @@ public static class ApplicationProfileInstancePersonValidItems
         return passport != null;
     }
 
-    public static bool CanLinkVisa(Visa? visa, DateTime? asOf = null)
+    public static bool CanLinkVisa(Visa? visa, DateTime? asOf = null, bool includeExpired = false)
     {
         if (visa == null || visa.IsCancelled || visa.IsChanged)
             return false;
@@ -50,7 +50,32 @@ public static class ApplicationProfileInstancePersonValidItems
         if (visa.StartDate == default || visa.StartDate.Date > asOfDate)
             return false;
 
-        return !IsExpiredAsOf(visa.ExpirationDate, asOfDate);
+        return includeExpired || !IsExpiredAsOf(visa.ExpirationDate, asOfDate);
+    }
+
+    /// <summary>
+    /// Çakylyk Almak pins the person's latest issued visa for application-form section 30,
+    /// including a visa whose validity has already ended.
+    /// </summary>
+    public static bool LinksLastIssuedVisaIncludingExpired(ApplicationProfileInstance? application) =>
+        ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(
+            profileCatalogKey: null,
+            application?.ApplicationProfile?.Code)
+        || ApplicationProfileInvitationAddressPolicy.IsCaklykAlmakType(application?.ApplicationType);
+
+    public static bool CanAutoLink(
+        ApplicationProfileInstance? application,
+        ApplicationProfileInstancePersonLinkKind kind,
+        object? entity)
+    {
+        if (kind == ApplicationProfileInstancePersonLinkKind.Visa
+            && entity is Visa visa
+            && LinksLastIssuedVisaIncludingExpired(application))
+        {
+            return CanLinkVisa(visa, includeExpired: true);
+        }
+
+        return CanLinkEntity(entity);
     }
 
     public static bool CanLinkMedicalRecord(MedicalRecord? record, DateTime? asOf = null) =>
@@ -117,20 +142,21 @@ public static class ApplicationProfileInstancePersonValidItems
     public static Visa? ResolveVisa(Person? person, DateTime? asOf = null) =>
         ResolveVisas(person, 1, asOf).FirstOrDefault();
 
-    public static IReadOnlyList<Visa> ResolveVisas(Person? person, int lastCount, DateTime? asOf = null) =>
-        ResolveVisas(objectSpace: null, person, lastCount, asOf);
+    public static IReadOnlyList<Visa> ResolveVisas(Person? person, int lastCount, DateTime? asOf = null, bool includeExpired = false) =>
+        ResolveVisas(objectSpace: null, person, lastCount, asOf, includeExpired);
 
     public static IReadOnlyList<Visa> ResolveVisas(
         IObjectSpace? objectSpace,
         Person? person,
         int lastCount,
-        DateTime? asOf = null)
+        DateTime? asOf = null,
+        bool includeExpired = false)
     {
         lastCount = ApplicationProfilePersonLastCount.Clamp(lastCount);
         if (person == null)
             return [];
 
-        if (!EnforceOfficerLinkValidity && lastCount == 1)
+        if (!EnforceOfficerLinkValidity && lastCount == 1 && !includeExpired)
         {
             var current = PersonCurrentItems.GetCurrentVisa(person, asOf ?? DateTime.Today);
             return current == null ? [] : [current];
@@ -139,8 +165,8 @@ public static class ApplicationProfileInstancePersonValidItems
         IEnumerable<Visa> query = UnionDistinctById(
             QueryVisasForPerson(objectSpace, person.ID),
             person.Passports?.Where(p => p != null).SelectMany(p => p.Visas ?? Array.Empty<Visa>()));
-        if (EnforceOfficerLinkValidity)
-            query = query.Where(v => CanLinkVisa(v, asOf));
+        if (EnforceOfficerLinkValidity || includeExpired)
+            query = query.Where(v => CanLinkVisa(v, asOf, includeExpired));
 
         return query
             .OrderByDescending(v => v.StartDate)

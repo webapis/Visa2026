@@ -348,6 +348,7 @@ namespace Visa2026.Module.Services
             }
 
             ApplyInvitationStayFields(data, application);
+            RememberVisaDegreeLocalizationKey(data, application);
 
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);
         }
@@ -369,6 +370,18 @@ namespace Visa2026.Module.Services
             SetInvitationStayField(data, InvitationStayRegionKey, stay?.Region?.PdfForm_Code);
             SetInvitationStayField(data, InvitationStayCityKey, stay?.City?.PdfForm_Code);
             SetInvitationStayField(data, InvitationStayAddressKey, InvitationAddressText.StayAddress(stay));
+        }
+
+        private static void RememberVisaDegreeLocalizationKey(Dictionary<string, object> data, ApplicationProfileInstance application)
+        {
+            var key = application?.VisaType?.LocalizationKey;
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                data.Remove(PdfVisaDegreeChoiceList.LocalizationKeyDataKey);
+                return;
+            }
+
+            data[PdfVisaDegreeChoiceList.LocalizationKeyDataKey] = key.Trim();
         }
 
         private static void SetInvitationStayField(Dictionary<string, object> data, string key, string? value)

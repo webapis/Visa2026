@@ -138,6 +138,46 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
+    public void ResolveVisas_IncludeExpired_KeepsLatestExpiredVisa()
+    {
+        var person = new Person();
+        var passport = new Passport
+        {
+            Person = person,
+            Visas = new ObservableCollection<Visa>(),
+        };
+        person.Passports.Add(passport);
+        var expired = CreateVisa(Today.AddDays(-20), Today.AddDays(-1));
+        expired.ID = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        expired.Passport = passport;
+        passport.Visas.Add(expired);
+
+        Assert.Empty(ApplicationProfileInstancePersonValidItems.ResolveVisas(person, 1));
+
+        var resolved = ApplicationProfileInstancePersonValidItems.ResolveVisas(person, 1, includeExpired: true);
+        Assert.Same(expired, Assert.Single(resolved));
+    }
+
+    [Fact]
+    public void CanAutoLink_CaklykAlmakAllowsExpiredVisa()
+    {
+        var expired = CreateVisa(Today.AddDays(-20), Today.AddDays(-1));
+        var invitation = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { Code = "get_invitation" },
+        };
+
+        Assert.True(ApplicationProfileInstancePersonValidItems.CanAutoLink(
+            invitation,
+            ApplicationProfileInstancePersonLinkKind.Visa,
+            expired));
+        Assert.False(ApplicationProfileInstancePersonValidItems.CanAutoLink(
+            new ApplicationProfileInstance(),
+            ApplicationProfileInstancePersonLinkKind.Visa,
+            expired));
+    }
+
+    [Fact]
     public void CanLinkMedicalRecord_FalseWhenExpired()
     {
         var record = new MedicalRecord { IssueDate = Today.AddYears(-1) };

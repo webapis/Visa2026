@@ -151,16 +151,16 @@ Type:  picture  ← date field (XFA picture = formatted input)
 Note:  Currently mapped ✅ (person.DateOfBirth)
        ⚠️  Send as DateTime; Spire formats via dateTimeField.Value = dt.ToString("dd.MM.yyyy")
 
-Key:   topmostSubform[0].Page1[0]._07[0]
-Label: 15. RAÝATLYGY (Citizenship / nationality)
+Key:   topmostSubform[0].Page1[0]._06[0]
+Label: 6. Raýatlygy (citizenship / nationality)
 Type:  choiceList
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  Mapped to Person.Nationality.Code
 Valid: ISO 3166-1 alpha-3 country codes (e.g. 'TKM', 'RUS', 'USA' …)
 
-Key:   topmostSubform[0].Page1[0]._06[0]
-Label: 14. DOGLAN YURDY (Country of birth)
+Key:   topmostSubform[0].Page1[0]._07[0]
+Label: 7. Doglan ýurdy (country of birth)
 Type:  choiceList
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  Mapped to Person.CountryOfBirth.Code
 Valid: ISO 3166-1 alpha-3 country codes
 
 Key:   topmostSubform[0].Page1[0]._03[0]
@@ -446,8 +446,8 @@ CRITICAL FINDINGS FOR YOUR C# CODE
 
 5. UNMAPPED FIELDS YOU MAY WANT TO ADD:
    - _02[0]   Patronymic
-   - _07[0]   Citizenship (country code)
-   - _06[0]   Country of birth (country code)
+   - _06[0]   6. Raýatlygy — Person.Nationality
+   - _07[0]   7. Doglan ýurdy — Person.CountryOfBirth
    - _14[0]   Country of residence (country code)
    - _17[0]   Profession
    - _19[0]   Education level

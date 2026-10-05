@@ -168,8 +168,8 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._02[0]` | 10. Patronymic | textEdit | `application.Urgency.PdfForm_Code` | Field repurposed for Urgency Code. |
 | `topmostSubform[0].Page1[0]._04[0]` | 12. Date of birth | picture | `person.DateOfBirth` | Passed as `DateTime` |
 | `topmostSubform[0].Page1[0]._05[0]` | 13. Gender | choiceList | `person.Gender.Name` | Raw = display: `'M'`/`'F'`/`'X'` |
-| `topmostSubform[0].Page1[0]._06[0]` | 14. Country of birth | choiceList | `person.CountryOfBirth.Code` | ISO 3166-1 alpha-3 |
-| `topmostSubform[0].Page1[0]._07[0]` | 15. Citizenship | choiceList | `person.Nationality.Code` | ISO 3166-1 alpha-3 |
+| `topmostSubform[0].Page1[0]._06[0]` | 6. Raýatlygy | choiceList | `Person.Nationality.Code` | ISO 3166-1 alpha-3. Printed label is citizenship, not country of birth. |
+| `topmostSubform[0].Page1[0]._07[0]` | 7. Doglan ýurdy | choiceList | `Person.CountryOfBirth.Code` | ISO 3166-1 alpha-3. Printed label is country of birth. |
 | `topmostSubform[0].Page1[0]._08[0]` | 16. Birth place | textEdit | `person.BirthPlace` | |
 | `topmostSubform[0].Page1[0]._09[0]` | 17. Personal/ID number | textEdit | `passport.PersonalNumber` | |
 | `topmostSubform[0].Page1[0]._10[0]` | 18. Document type | choiceList | `passport.PassportType.Name` | Resolves to `'P'`, `'PD'`, etc. |
@@ -189,7 +189,8 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 | XFA Key | Form Label | Type | C# Source | Notes |
 |---------|-----------|------|-----------|-------|
-| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | ApplicationProfileInstance level serves as default. |
+| `topmostSubform[0].Page2[0]._25[0]` | 25. Wizanyň derejesi | choiceList | `Application.VisaType.PdfForm_Code` | BS1 and TR2 both save as `14`. Fill keeps `14` on the case-summary visa type so the dropdown shows that row. |
+| `topmostSubform[0].Page2[0]._30[0]` | 30. Soňky berlen wiza | textEdit | `Pdf_LastIssuedVisaSummary` | Latest linked visa, including an expired one on Çakylyk Almak: degree, entry type, number, start-end. |
 | `topmostSubform[0].Page2[0]._27[0]` | Duration of stay | textEdit | `Application.VisaPeriod.PdfForm_Count` | |
 | `topmostSubform[0].Page2[0]._271[0]`| Duration unit | choiceList | `Application.VisaPeriod.PdfForm__Code` | Raw: 'GUN', 'AY', 'YYL' |
 | `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | When the profile Invitation address switch is on: `InvitationAddress.Region.PdfForm_Code` |

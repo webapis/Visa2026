@@ -1,3 +1,12 @@
+### 2026-10-05 — Çakylyk Almak links last visa, not salary or medical
+
+- **Need**: Application for Invitation (Çakylyk Almak) should not require EmployeeSalary or MedicalRecord. It should pin the person's latest visa even when that visa has expired, so form field 30 can show it.
+- **Cause**: Profile seed `get_invitation` had `RequirePersonSalary` and `RequirePersonMedical`. `RequirePersonVisa` was off, and officer visa linking rejected expired visas.
+- **Fix**: Seed `application-profile.calik-energi.json` and `App_Inv` in `ApplicationTypeConfigurationCatalog.json`. Auto-link for this profile keeps the latest visa, including an expired one.
+- **Officer**: Restart so lookup sync applies. Open Çakylyk Almak. Salary and Medical tiles should be gone. Visa should show the latest visa, expired or not. Relink if an existing case still has the old pins.
+- **Prevent**: Do not turn salary or medical back on for `App_Inv` / `get_invitation`. Other invitation profiles are unchanged.
+- **Cross-skill**: pdf-form-mapping
+
 ### 2026-09-30 — Wizard Back label follows the theme
 
 - **Need**: ← Back stayed near-black on the dark button on every Configure Application Profile step.

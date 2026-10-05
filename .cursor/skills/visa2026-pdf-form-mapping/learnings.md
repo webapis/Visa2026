@@ -25,6 +25,36 @@ Purpose: **XFA fill, PdfFormMapping rules, template, gates, converters** — not
 
 ## Entries
 
+### 2026-10-05 — Field 30 last issued visa (mapping)
+
+- **Symptom**: Application form section 30 (Soňky berlen wiza) was empty. Çakylyk Almak did not link a previous visa.
+- **Try**: Field `_30` had no seed mapping.
+- **Test**: `PdfMappingHelperTests.LastIssuedVisaSummary_JoinsDegreeTypeNumberAndValidity` and seed path `_30` → `Pdf_LastIssuedVisaSummary`. Full solution test was not re-run.
+- **Root cause**: No mapping, and the invitation profile did not pin the latest visa.
+- **Fix**: Map `_30` to degree, entry type, number, and start–end from the linked visa. Expired visas are included for Çakylyk Almak.
+- **Prevent**: Section 30 is the linked last visa, not the visa type being requested on the case summary.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-10-05 — Fields 6 and 7 citizenship vs birth country swapped (mapping)
+
+- **Symptom**: Application form **6. Raýatlygy** showed `Person.CountryOfBirth` (for example BGR). That value belongs on **7. Doglan ýurdy**.
+- **Try**: Seed mapped `_06` → `CountryOfBirth` and `_07` → `Nationality`, matching an old field-reference note. The XFA template tooltips are the opposite: `_06` is Raýatlygy, `_07` is Doglan ýurdy.
+- **Test**: `PdfMappingHelperTests.FinalizeMappings_AssignsCitizenshipAndBirthCountryToPrintedLabels`. Full solution test was not re-run.
+- **Root cause**: Printed labels and XFA names were swapped in the mapping notes. `_06` is citizenship; `_07` is country of birth.
+- **Fix**: `_06` → `Person.Nationality.Code`; `_07` → `Person.CountryOfBirth.Code`.
+- **Prevent**: Trust the template tooltip/caption on `_06` and `_07`, not the old “14/15” labels in the field reference.
+- **Cross-skill**: —
+
+### 2026-10-05 — Field 25 visa degree shows TR2 for BS1 (filler)
+
+- **Symptom**: Case summary Visa type **BS1 — Entrepreneurship**; application form field **25. Wizanyň derejesi** showed **TR2 - USTASYR**.
+- **Try**: Catalog `PdfForm_Code` for BS1 is 14, and the filler already wrote 14. The XFA choice list also stores 14 on TR2.
+- **Test**: Loaded `Visa_Application_TM_QR_08.pdf`, unbound TR2 from 14, saved, reloaded. Save code for BS1 stayed 14; TR2 no longer used 14; datasets `_25` stayed `14`. Full `dotnet test` was stopped because the solution compile did not finish.
+- **Root cause**: Template field `_25` uses save value `14` for both **BS1 - ISEWURLIK** and **TR2 - USTASYR**. The viewer binds 14 to the later row.
+- **Fix**: On fill, keep 14 only on the case `VisaType.LocalizationKey` (`PdfVisaDegreeChoiceList`).
+- **Prevent**: Do not give BS1 and TR2 different catalog codes; the ministry raw value for this slot is still 14. Disambiguate the choice list in the filled PDF.
+- **Cross-skill**: —
+
 ### 2026-08-17 — Foxit paints ImageField1; pdf.js preview does not (filler)
 
 - **Symptom**: Officers saw the photo in Foxit after Download, but browser Application form Preview left FOTO empty.

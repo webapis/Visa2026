@@ -169,6 +169,12 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequirePersonBorderZoneItem = type.ShowBorderZoneLocation;
         profile.RequirePersonSalary = type.ShowCurrentSalary;
         profile.RequirePersonMedical = type.ShowCurrentMedicalRecord;
+        if (caklykAlmak)
+        {
+            profile.RequirePersonVisa = true;
+            profile.RequirePersonSalary = false;
+            profile.RequirePersonMedical = false;
+        }
         profile.RequirePersonRejectionItem = type.ShowRejections;
         profile.RequirePersonTravelHistory =
             ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile);

@@ -323,7 +323,7 @@ public static class ApplicationProfileInstancePersonResolver
             if (entity is not BaseObject bo || bo.ID == Guid.Empty)
                 continue;
             if (ApplicationProfileInstancePersonValidItems.EnforceOfficerLinkValidity
-                && !ApplicationProfileInstancePersonValidItems.CanLinkEntity(entity))
+                && !ApplicationProfileInstancePersonValidItems.CanAutoLink(application, kind, entity))
                 continue;
 
             if (!existingIdsByKind.TryGetValue(kind, out var existingIds))
@@ -469,7 +469,8 @@ public static class ApplicationProfileInstancePersonResolver
             ApplicationProfileInstancePersonValidItems.ResolveVisas(
                 objectSpace,
                 person,
-                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa)));
+                ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa),
+                includeExpired: ApplicationProfileInstancePersonValidItems.LinksLastIssuedVisaIncludingExpired(application)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)));
         if (person.IsEmployee)

@@ -752,6 +752,10 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
 
+        /// <summary>Application form 30. Soňky berlen wiza: degree, entry type, number, validity.</summary>
+        [XafDisplayName("Last issued visa (PDF)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_LastIssuedVisaSummary => PdfLastIssuedVisaText.Format(CurrentVisa);
+
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_NumberAndType => string.Join(" ", new[] { CurrentVisa?.VisaNumber, CurrentVisa?.VisaCategory?.NameTm }.Where(s => !string.IsNullOrEmpty(s)));
 

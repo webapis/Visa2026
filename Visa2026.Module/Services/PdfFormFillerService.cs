@@ -241,6 +241,19 @@ namespace Visa2026.Module.Services
                         _pendingImageBase64[pair.Key] = b64;
                 }
 
+                if (form.XFAForm?.XmlTemplate != null
+                    && data.TryGetValue(PdfVisaDegreeChoiceList.LocalizationKeyDataKey, out var visaDegreeKey)
+                    && visaDegreeKey is string visaDegreeLocalizationKey
+                    && PdfXfaFieldValueLookup.TryGetValue(data, PdfVisaDegreeChoiceList.FieldKey, out _))
+                {
+                    if (PdfVisaDegreeChoiceList.Disambiguate(form.XFAForm.XmlTemplate, visaDegreeLocalizationKey))
+                    {
+                        _logger.LogInformation(
+                            "XFA field _25: save code kept on visa type {LocalizationKey}; duplicate choice unbound.",
+                            visaDegreeLocalizationKey);
+                    }
+                }
+
                 // Direct XML edit is required: ImageValueBase64 is a no-op in Spire 12.x.
                 // pdf.js XFA preview also needs <value><image> on the template field (not datasets only).
                 if (_pendingImageBase64.Count > 0 && form.XFAForm != null)

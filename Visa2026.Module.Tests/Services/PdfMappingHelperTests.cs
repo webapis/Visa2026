@@ -9,6 +9,37 @@ namespace Visa2026.Module.Tests.Services;
 public class PdfMappingHelperTests
 {
     [Fact]
+    public void FinalizeMappings_AssignsCitizenshipAndBirthCountryToPrintedLabels()
+    {
+        var mappings = PdfMappingHelper.FinalizeMappings(Array.Empty<PdfFormMappingDefinition>());
+
+        var citizenship = mappings.Single(m => m.PdfFieldKey == "topmostSubform[0].Page1[0]._06[0]");
+        var birthCountry = mappings.Single(m => m.PdfFieldKey == "topmostSubform[0].Page1[0]._07[0]");
+
+        Assert.Equal("Person.Nationality.Code", citizenship.PropertyPath);
+        Assert.Equal("Person.CountryOfBirth.Code", birthCountry.PropertyPath);
+
+        var lastVisa = mappings.Single(m => m.PdfFieldKey == "topmostSubform[0].Page2[0]._30[0]");
+        Assert.Equal("Pdf_LastIssuedVisaSummary", lastVisa.PropertyPath);
+    }
+
+    [Fact]
+    public void LastIssuedVisaSummary_JoinsDegreeTypeNumberAndValidity()
+    {
+        var text = PdfLastIssuedVisaText.Format(new Visa
+        {
+            VisaNumber = "A1",
+            IssueDate = new DateTime(2024, 1, 1),
+            StartDate = new DateTime(2024, 1, 1),
+            ExpirationDate = new DateTime(2024, 6, 1),
+            VisaType = new VisaType { NameTm = "BS1" },
+            VisaCategory = new VisaCategory { NameTm = "iki gezeklik" },
+        });
+
+        Assert.Equal("BS1, iki gezeklik, A1, 01.01.2024-01.06.2024", text);
+    }
+
+    [Fact]
     public void MapApplicationData_FillsPersonNameFromMergeLine()
     {
         var application = new ApplicationProfileInstance
