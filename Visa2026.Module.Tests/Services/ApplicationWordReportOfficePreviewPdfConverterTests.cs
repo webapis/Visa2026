@@ -16,6 +16,30 @@ public class ApplicationWordReportOfficePreviewPdfConverterTests
     }
 
     [Fact]
+    public void AlignDownloadFileName_renames_docx_label_when_bytes_are_xlsx()
+    {
+        var xlsx = CreateMinimalXlsx();
+
+        var name = ApplicationWordReportOfficePreviewPdfConverter.AlignDownloadFileName(
+            "Dasary_yurt_rayatlarynyn_sanawy_cakylyk.docx",
+            xlsx);
+
+        Assert.Equal("Dasary_yurt_rayatlarynyn_sanawy_cakylyk.xlsx", name);
+    }
+
+    [Fact]
+    public void AlignDownloadFileName_keeps_docx_for_word_bytes()
+    {
+        var docx = Visa2026.Module.Tests.TemplateScan.ScanOfficeYellowExtractorTests.CreateWordFixture("Çalyk");
+
+        var name = ApplicationWordReportOfficePreviewPdfConverter.AlignDownloadFileName(
+            "yuztutma.docx",
+            docx);
+
+        Assert.Equal("yuztutma.docx", name);
+    }
+
+    [Fact]
     public void TryConvertToPdf_uses_spreadsheet_path_when_xlsx_is_named_docx()
     {
         var xlsx = CreateMinimalXlsx();

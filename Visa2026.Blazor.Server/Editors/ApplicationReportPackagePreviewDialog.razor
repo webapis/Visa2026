@@ -134,8 +134,8 @@
     private string _officeContentType = "application/octet-stream";
     private IReadOnlyList<ApplicationWordReportGeneratedFile> _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
     private readonly DocumentPreviewPopupWindowState _windowState = new();
-    private int _layoutSyncGeneration;
     private string _previewLoadingLabel = string.Empty;
+    private int _layoutSyncGeneration;
 
     private Dictionary<string, object> PopupAttributes => new()
     {
@@ -169,7 +169,14 @@
     private string ActionDownloadOffice =>
         _officeOriginals.Count > 1
             ? Msg("ApplicationReportPackage.Preview.DownloadOfficeZip")
-            : Msg("ApplicationReportPackage.Preview.DownloadOffice");
+            : IsExcelFileName(_officeDownloadFileName)
+                ? Msg("ApplicationReportPackage.Preview.DownloadExcel")
+                : Msg("ApplicationReportPackage.Preview.DownloadWord");
+
+    private static bool IsExcelFileName(string? fileName) =>
+        fileName != null
+        && (fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
+            || fileName.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase));
 
     private string PreviewTitle => Msg("ApplicationReportPackage.Preview.Title");
     private string PreviewError => Msg("ApplicationReportPackage.Preview.Error");

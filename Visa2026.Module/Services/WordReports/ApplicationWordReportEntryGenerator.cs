@@ -150,21 +150,27 @@ public sealed class ApplicationWordReportEntryGenerator
     {
         if (ApplicationProfileNestedTemplateCatalogHelper.TryParseEntryKey(entryKey, out var profileTemplateId))
         {
-            return await GenerateProfileEntryOutputsAsync(
+            return AlignOutputNames(await GenerateProfileEntryOutputsAsync(
                     objectSpace,
                     application,
                     profileTemplateId,
                     context,
                     catalogEntries,
                     cancellationToken)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false));
         }
 
         if (entryKey.StartsWith("user:", StringComparison.Ordinal)
             && Guid.TryParse(entryKey.AsSpan(5), out var templateId))
         {
-            return await GenerateUserEntryOutputsAsync(objectSpace, application, templateId, context, catalogEntries, cancellationToken)
-                .ConfigureAwait(false);
+            return AlignOutputNames(await GenerateUserEntryOutputsAsync(
+                    objectSpace,
+                    application,
+                    templateId,
+                    context,
+                    catalogEntries,
+                    cancellationToken)
+                .ConfigureAwait(false));
         }
 
         return new List<(string, MemoryStream)>();
@@ -201,7 +207,8 @@ public sealed class ApplicationWordReportEntryGenerator
                 context,
                 catalogEntries,
                 cancellationToken,
-                skipVisibilityCheck: true)
+                skipVisibilityCheck: true,
+                profileFileSource: profileTemplate)
             .ConfigureAwait(false);
     }
 
@@ -212,7 +219,8 @@ public sealed class ApplicationWordReportEntryGenerator
         WordReportGenerationContext context,
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
         CancellationToken cancellationToken,
-        bool skipVisibilityCheck = false)
+        bool skipVisibilityCheck = false,
+        ApplicationProfileTemplate? profileFileSource = null)
     {
         var visibilityService = serviceProvider.GetService<IUserReportVisibilityService>();
         if (visibilityService == null && !skipVisibilityCheck)
@@ -240,6 +248,9 @@ public sealed class ApplicationWordReportEntryGenerator
                 && !skipVisibilityCheck
                 && !visibilityService.IsTemplateVisible(template, application)))
             return new List<(string, MemoryStream)>();
+
+        if (profileFileSource != null)
+            template = ApplicationProfileNestedTemplateCatalogHelper.WithProfileFile(template, profileFileSource);
 
         var defaultFileName = ResolveDownloadFileName(template, catalogEntries);
 
@@ -432,6 +443,36 @@ public sealed class ApplicationWordReportEntryGenerator
             displayName = template.TemplateName;
 
         return ZipEntryFileNameSanitizer.BuildReportEntryName(displayName, extension);
+    }
+
+    /// <summary>
+    /// Docker Preview runs LibreOffice, which picks Word vs Excel from the file extension.
+    /// A <c>.docx</c> name on spreadsheet bytes downloaded as Word. Sniff the package and rename.
+    /// </summary>
+    private static List<(string FileName, MemoryStream Stream)> AlignOutputNames(
+        List<(string FileName, MemoryStream Stream)> outputs)
+    {
+        if (outputs == null || outputs.Count == 0)
+            return outputs ?? new List<(string, MemoryStream)>();
+
+        var aligned = new List<(string FileName, MemoryStream Stream)>(outputs.Count);
+        foreach (var (fileName, stream) in outputs)
+        {
+            if (stream == null || !stream.CanSeek || stream.Length == 0)
+            {
+                aligned.Add((fileName, stream));
+                continue;
+            }
+
+            stream.Position = 0;
+            var bytes = stream.ToArray();
+            stream.Position = 0;
+            aligned.Add((
+                ApplicationWordReportOfficePreviewPdfConverter.AlignDownloadFileName(fileName, bytes),
+                stream));
+        }
+
+        return aligned;
     }
 
     private static string GetContentType(string fileName)

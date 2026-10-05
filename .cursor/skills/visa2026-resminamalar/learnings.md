@@ -69,6 +69,46 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-10-05 — Excel-to-Word preview download cancelled (Application)
+
+- **Symptom**: Exporting an Excel sanaw as Word still looked wrong. Officers asked to drop that export.
+- **Try**: Redeploy, hard-refresh. Excel row preview has one **Download Excel** and saves `.xlsx`. Word row preview has one **Download Word** and saves `.docx`.
+- **Test**: Exporter and its tests removed. Native type still covered by `ApplicationProfileNestedTemplateCatalogHelperTests` and `AlignDownloadFileName_*`.
+- **Root cause**: A second download converted the spreadsheet into a Word table. That copy did not match the sheet officers expected.
+- **Fix**: Preview downloads the generated file only. Excel stays Excel. Word stays Word. Same-name Word and Excel rows still resolve by kind and by the nested file.
+- **Prevent**: Do not add an Excel-to-Word download on Resminamalar preview.
+- **Cross-skill**: —
+
+### 2026-10-05 — Excel downloaded as Word lost the sanaw layout (Application)
+
+- **Symptom**: Download Word on an Excel sanaw opened as a squeezed portrait table (Compatibility Mode). Download Excel kept the wide sheet, merged title, and Times New Roman.
+- **Try**: Redeploy, hard-refresh. Download Word again — landscape page, merged title, column widths, and the same fonts. Download Excel stays `.xlsx`.
+- **Test**: `ExcelSpreadsheetWordExporterTests.TryConvert_keeps_merged_title_column_widths_font_and_landscape` (3 passed).
+- **Root cause**: Docker LibreOffice converted `.xlsx` to `.docx` and dropped column widths and merges.
+- **Fix**: Build the Word file from the sheet (fixed column widths, merged cells, fonts, landscape or a wider page). Do not send the spreadsheet through LibreOffice.
+- **Prevent**: Do not use `soffice --convert-to docx` for Resminamalar Excel downloads.
+- **Cross-skill**: —
+
+### 2026-10-05 — Excel preview can download as Excel or Word (Application)
+
+- **Symptom**: Officers wanted an Excel catalog row saved as `.xlsx` or as `.docx`, whichever they choose.
+- **Try**: Redeploy, hard-refresh. Preview an Excel row — **Download Excel** and **Download Word**. Preview a Word row — **Download Word** only.
+- **Test**: `ExcelSpreadsheetWordExporterTests.TryConvert_writes_sheet_cells_into_a_docx` (2 passed).
+- **Root cause**: Preview had one **Download Word/Excel** action and always used the generated package’s own extension.
+- **Fix**: Excel preview offers both buttons. Word download converts the sheet (LibreOffice on Docker, otherwise a Word table of the used range).
+- **Prevent**: Do not label an Excel download as Word. Do not hide the `.xlsx` download when a Word copy is added.
+- **Cross-skill**: —
+
+### 2026-10-05 — Excel preview download saved as .docx on Docker (Application)
+
+- **Symptom**: Case NT 10/-1904 on `10.100.128.26`. This profile has Word and Excel rows with the same name. Preview of the Excel row was titled `….docx`. Download Word/Excel saved a Word file. Local F5 did not show it.
+- **Try**: Redeploy the image, hard-refresh. Preview the Excel row — header and download end in `.xlsx`. Preview the Word row — `.docx`.
+- **Test**: `ApplicationProfileNestedTemplateCatalogHelperTests` (same-name pick + nested Excel bytes), `ApplicationWordReportOfficePreviewPdfConverterTests.AlignDownloadFileName_renames_docx_label_when_bytes_are_xlsx`. 26 passed.
+- **Root cause**: Merge looked up `UserReportTemplate` by name only. PostgreSQL `FirstOrDefault` returned the Word row. Docker LibreOffice converts by extension, so a `.docx` name on that file downloaded as Word. A workstation without LibreOffice sniffs the zip and hid the bad name.
+- **Fix**: Pick the user template by Word vs Excel. Preview/ZIP use the nested row’s own file. Rename the download from the package (`xl/` → `.xlsx`, `word/` → `.docx`) before LibreOffice.
+- **Prevent**: Do not resolve a shared display name with unordered `FirstOrDefault`. Do not let LibreOffice see a `.docx` path for spreadsheet bytes.
+- **Cross-skill**: —
+
 ### 2026-09-17 — Add existing template shows CHECK (Application)
 
 - **Symptom**: Case 6/-1024. This-profile GT-15 letter added via **Add existing template** showed **CHECK** and “placeholders were not extracted or validated.” Yellow-marks Approve on the same catalog is **Ready**.

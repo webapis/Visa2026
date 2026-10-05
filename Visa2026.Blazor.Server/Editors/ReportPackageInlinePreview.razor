@@ -123,7 +123,14 @@
     private string ActionDownloadOffice =>
         _officeOriginals.Count > 1
             ? Msg("ApplicationReportPackage.Preview.DownloadOfficeZip")
-            : Msg("ApplicationReportPackage.Preview.DownloadOffice");
+            : IsExcelFileName(_officeDownloadFileName)
+                ? Msg("ApplicationReportPackage.Preview.DownloadExcel")
+                : Msg("ApplicationReportPackage.Preview.DownloadWord");
+
+    private static bool IsExcelFileName(string? fileName) =>
+        fileName != null
+        && (fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
+            || fileName.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase));
 
     private string PreviewTitle => Msg("ApplicationReportPackage.Preview.Title");
     private string PreviewError => Msg("ApplicationReportPackage.Preview.Error");

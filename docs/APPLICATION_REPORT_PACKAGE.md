@@ -46,7 +46,7 @@ This document describes **why** it replaced one-click Resminamalar, **what** off
 
 | No pre-flight check | **Readiness chips** + **gap confirm** for checked warnings |
 
-| Download after batch | **Preview** per row — in-app **PDF viewer** (Office → PDF) + optional **Download Word/Excel** |
+| Download after batch | **Preview** per row — in-app **PDF viewer** (Office → PDF). Excel preview downloads **`.xlsx`**. Word preview downloads **`.docx`** |
 
 | Success toast only | **Resminamalar batch toast** with **Download ZIP** |
 
@@ -217,7 +217,7 @@ flowchart LR
 
 
 
-**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API** (`ApplicationWordReportOfficePreviewPdfConverter` — not an XAF / XtraReports preview), and shows the PDF in the **inline slot** (`ReportPackageInlinePreview` — same iframe/blob pattern as Document copies). Excel page orientation is **A4 landscape or portrait from the sheet** (workbook PageSetup, otherwise used-range width) — no officer control. Legacy modal `ApplicationReportPackagePreviewDialog` remains for property-editor hosts only.
+**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API** (`ApplicationWordReportOfficePreviewPdfConverter` — not an XAF / XtraReports preview), and shows the PDF in the **inline slot** (`ReportPackageInlinePreview` — same iframe/blob pattern as Document copies). The header download keeps the generated file type: an Excel preview downloads **`.xlsx`**, a Word preview downloads **`.docx`**. Excel page orientation in the PDF is **A4 landscape or portrait from the sheet** (workbook PageSetup, otherwise used-range width) — no officer control. Legacy modal `ApplicationReportPackagePreviewDialog` remains for property-editor hosts only.
 
 
 

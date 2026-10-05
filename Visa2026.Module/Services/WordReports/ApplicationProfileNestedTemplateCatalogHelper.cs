@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EFCore;
+using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 
@@ -286,20 +287,108 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
             return null;
 
         var lowered = name.ToLower();
-        return objectSpace.GetObjectsQuery<UserReportTemplate>()
+        var matches = objectSpace.GetObjectsQuery<UserReportTemplate>()
             .Include(t => t.Placeholders)
             .Include(t => t.TemplateFile)
             .Where(t => t.IsActive
                 && t.TemplateName != null
                 && t.TemplateName.ToLower() == lowered)
+            .OrderBy(t => t.ID)
+            .ToList();
+
+        // Word and Excel nested rows may share a display name. FirstOrDefault is unordered in
+        // PostgreSQL, so Docker and a local database can each return the other file.
+        return PickMergeTemplate(matches, profileTemplate.TemplateKind);
+    }
+
+    /// <summary>
+    /// When several active templates share a name, keep the one whose output format matches
+    /// <paramref name="kind"/>. A single name match is kept even when its format differs so an
+    /// older row still merges; the caller overlays the nested file when that row has its own bytes.
+    /// </summary>
+    public static UserReportTemplate? PickMergeTemplate(
+        IReadOnlyList<UserReportTemplate>? matches,
+        ApplicationProfileTemplateKind kind,
+        bool allowUnmatchedFallback = true)
+    {
+        if (matches == null || matches.Count == 0)
+            return null;
+
+        var wantExcel = kind == ApplicationProfileTemplateKind.Excel;
+        var typed = matches
+            .Where(template => (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel) == wantExcel)
+            .OrderBy(template => template.ID)
             .FirstOrDefault();
+        if (typed != null)
+            return typed;
+
+        if (!allowUnmatchedFallback || matches.Count != 1)
+            return null;
+
+        return matches[0];
+    }
+
+    /// <summary>
+    /// Preview and ZIP follow the nested row's own Word/Excel bytes. A shared
+    /// <see cref="UserReportTemplate"/> looked up by name alone is the other format when both
+    /// rows exist, which made the Excel download a <c>.docx</c>.
+    /// </summary>
+    public static UserReportTemplate WithProfileFile(
+        UserReportTemplate userTemplate,
+        ApplicationProfileTemplate profileTemplate)
+    {
+        ArgumentNullException.ThrowIfNull(userTemplate);
+        ArgumentNullException.ThrowIfNull(profileTemplate);
+
+        var file = profileTemplate.TemplateFile;
+        var bytes = file?.Content;
+        if (bytes == null || bytes.Length == 0)
+            return userTemplate;
+
+        var format = profileTemplate.TemplateKind == ApplicationProfileTemplateKind.Excel
+            ? TemplateOutputFormat.Excel
+            : TemplateOutputFormat.Word;
+        var extension = format == TemplateOutputFormat.Excel ? ".xlsx" : ".docx";
+        var fileName = file!.FileName;
+        if (string.IsNullOrWhiteSpace(fileName)
+            || !fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+        {
+            fileName = ZipEntryFileNameSanitizer.BuildReportEntryName(
+                string.IsNullOrWhiteSpace(profileTemplate.TemplateName)
+                    ? userTemplate.TemplateName
+                    : profileTemplate.TemplateName,
+                extension);
+        }
+
+        var excelMode = format == TemplateOutputFormat.Excel
+            && userTemplate.GetEffectiveOutputFormat() != TemplateOutputFormat.Excel
+            ? ExcelMergeMode.ItemList
+            : userTemplate.ExcelMergeMode;
+
+        return new UserReportTemplate
+        {
+            ID = userTemplate.ID,
+            TemplateName = string.IsNullOrWhiteSpace(profileTemplate.TemplateName)
+                ? userTemplate.TemplateName
+                : profileTemplate.TemplateName,
+            TemplateOutputFormat = format,
+            ExcelMergeMode = excelMode,
+            RootBoType = userTemplate.RootBoType,
+            IsActive = true,
+            Placeholders = userTemplate.Placeholders,
+            TemplateFile = new FileData
+            {
+                FileName = fileName,
+                Content = bytes,
+            },
+        };
     }
 
     /// <summary>
     /// Active user templates matching nested catalog names. Placeholders only — do not
     /// load <see cref="UserReportTemplate.TemplateFile"/> (that is the Word/Excel blob).
     /// </summary>
-    public static IReadOnlyDictionary<string, UserReportTemplate> LoadActiveUserTemplatesByName(
+    public static IReadOnlyDictionary<string, IReadOnlyList<UserReportTemplate>> LoadActiveUserTemplatesByName(
         IObjectSpace objectSpace,
         IEnumerable<string?> names)
     {
@@ -309,7 +398,7 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
         if (objectSpace == null || wanted.Count == 0)
-            return new Dictionary<string, UserReportTemplate>(StringComparer.OrdinalIgnoreCase);
+            return new Dictionary<string, IReadOnlyList<UserReportTemplate>>(StringComparer.OrdinalIgnoreCase);
 
         var lowered = wanted.Select(name => name.ToLower()).ToList();
         var matches = objectSpace.GetObjectsQuery<UserReportTemplate>()
@@ -317,17 +406,28 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
             .Where(t => t.IsActive
                 && t.TemplateName != null
                 && lowered.Contains(t.TemplateName.ToLower()))
+            .OrderBy(t => t.ID)
             .ToList();
 
-        var map = new Dictionary<string, UserReportTemplate>(StringComparer.OrdinalIgnoreCase);
+        var map = new Dictionary<string, List<UserReportTemplate>>(StringComparer.OrdinalIgnoreCase);
         foreach (var template in matches)
         {
-            if (string.IsNullOrWhiteSpace(template.TemplateName) || map.ContainsKey(template.TemplateName))
+            if (string.IsNullOrWhiteSpace(template.TemplateName))
                 continue;
-            map[template.TemplateName] = template;
+            if (!map.TryGetValue(template.TemplateName, out var list))
+            {
+                list = new List<UserReportTemplate>();
+                map[template.TemplateName] = list;
+            }
+
+            list.Add(template);
         }
 
-        return map;
+        var published = new Dictionary<string, IReadOnlyList<UserReportTemplate>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in map)
+            published[pair.Key] = pair.Value;
+
+        return published;
     }
 
     public static bool HasMergeableFile(ApplicationProfileTemplate profileTemplate, UserReportTemplate? userTemplate) =>

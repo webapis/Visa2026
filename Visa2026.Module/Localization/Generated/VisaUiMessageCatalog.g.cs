@@ -1335,83 +1335,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Iş sapary salgysy",
             ["ru-RU"] = "Адрес командировки",
         },
-        ["ApplicationProfile.Field.InvitationAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Invitation address",
-            ["tr-TR"] = "Davet adresi",
-            ["tk-TM"] = "Çakylyk salgysy",
-            ["ru-RU"] = "Адрес приглашения",
-        },
-        ["ApplicationProfile.Field.InvitationRegion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Invitation region",
-            ["tr-TR"] = "Davet bölgesi",
-            ["tk-TM"] = "Çakylyk welaýaty",
-            ["ru-RU"] = "Велаят приглашения",
-        },
-        ["ApplicationProfile.Field.InvitationCity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Invitation city",
-            ["tr-TR"] = "Davet şehri",
-            ["tk-TM"] = "Çakylyk şäheri",
-            ["ru-RU"] = "Город приглашения",
-        },
-        ["ApplicationProfile.Field.InvitationAlternativeAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Other invitation places",
-            ["tr-TR"] = "Diğer davet yerleri",
-            ["tk-TM"] = "Beýleki çakylyk ýerleri",
-            ["ru-RU"] = "Другие места приглашения",
-        },
-        ["ApplicationProfile.Field.InvitationPlace"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Invitation place",
-            ["tr-TR"] = "Davet yeri",
-            ["tk-TM"] = "Çakylyk ýeri",
-            ["ru-RU"] = "Место приглашения",
-        },
-        ["ApplicationProfile.Field.InvitationAddressType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Address type",
-            ["tr-TR"] = "Adres türü",
-            ["tk-TM"] = "Salgy görnüşi",
-            ["ru-RU"] = "Тип адреса",
-        },
-        ["ApplicationProfile.Field.InvitationLodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Lodging",
-            ["tr-TR"] = "Konaklama",
-            ["tk-TM"] = "Ýaşaýyş jaýy",
-            ["ru-RU"] = "Проживание",
-        },
-        ["ApplicationProfile.Field.InvitationHotel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Hotel",
-            ["tr-TR"] = "Otel",
-            ["tk-TM"] = "Myhmanhana",
-            ["ru-RU"] = "Гостиница",
-        },
-        ["ApplicationProfile.Field.InvitationHospital"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Hospital",
-            ["tr-TR"] = "Hastane",
-            ["tk-TM"] = "Hassahana",
-            ["ru-RU"] = "Больница",
-        },
-        ["ApplicationProfile.Field.InvitationOtherSite"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Other site",
-            ["tr-TR"] = "Diğer yer",
-            ["tk-TM"] = "Başga ýer",
-            ["ru-RU"] = "Другой объект",
-        },
-        ["ApplicationProfile.Field.InvitationPrivateHouse"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Private house",
-            ["tr-TR"] = "Müstakil ev",
-            ["tk-TM"] = "Hususy jaý",
-            ["ru-RU"] = "Частный дом",
-        },
         ["ApplicationProfile.Field.BusinessTripAddressLegacy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Business trip address (legacy)",
@@ -1502,6 +1425,83 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Çıkış bölgesi",
             ["tk-TM"] = "Çykyş welaýaty",
             ["ru-RU"] = "Регион отправления",
+        },
+        ["ApplicationProfile.Field.InvitationAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation address",
+            ["tr-TR"] = "Davet adresi",
+            ["tk-TM"] = "Çakylyk salgysy",
+            ["ru-RU"] = "Адрес приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationAddressType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address type",
+            ["tr-TR"] = "Adres türü",
+            ["tk-TM"] = "Salgy görnüşi",
+            ["ru-RU"] = "Тип адреса",
+        },
+        ["ApplicationProfile.Field.InvitationAlternativeAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other invitation places",
+            ["tr-TR"] = "Diğer davet yerleri",
+            ["tk-TM"] = "Beýleki çakylyk ýerleri",
+            ["ru-RU"] = "Другие места приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationCity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation city",
+            ["tr-TR"] = "Davet şehri",
+            ["tk-TM"] = "Çakylyk şäheri",
+            ["ru-RU"] = "Город приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationHospital"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hospital",
+            ["tr-TR"] = "Hastane",
+            ["tk-TM"] = "Hassahana",
+            ["ru-RU"] = "Больница",
+        },
+        ["ApplicationProfile.Field.InvitationHotel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hotel",
+            ["tr-TR"] = "Otel",
+            ["tk-TM"] = "Myhmanhana",
+            ["ru-RU"] = "Гостиница",
+        },
+        ["ApplicationProfile.Field.InvitationLodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lodging",
+            ["tr-TR"] = "Konaklama",
+            ["tk-TM"] = "Ýaşaýyş jaýy",
+            ["ru-RU"] = "Проживание",
+        },
+        ["ApplicationProfile.Field.InvitationOtherSite"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other site",
+            ["tr-TR"] = "Diğer yer",
+            ["tk-TM"] = "Başga ýer",
+            ["ru-RU"] = "Другой объект",
+        },
+        ["ApplicationProfile.Field.InvitationPlace"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation place",
+            ["tr-TR"] = "Davet yeri",
+            ["tk-TM"] = "Çakylyk ýeri",
+            ["ru-RU"] = "Место приглашения",
+        },
+        ["ApplicationProfile.Field.InvitationPrivateHouse"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Private house",
+            ["tr-TR"] = "Müstakil ev",
+            ["tk-TM"] = "Hususy jaý",
+            ["ru-RU"] = "Частный дом",
+        },
+        ["ApplicationProfile.Field.InvitationRegion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation region",
+            ["tr-TR"] = "Davet bölgesi",
+            ["tk-TM"] = "Çakylyk welaýaty",
+            ["ru-RU"] = "Велаят приглашения",
         },
         ["ApplicationProfile.Field.MigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -5549,6 +5549,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} göçürildi. Word ýa-da Excel-de görmek üçin brauzeriň göçürme panelinden Aç-y saýlaň.",
             ["ru-RU"] = "Скачан {0}. В панели загрузок браузера выберите «Открыть» для Word или Excel.",
         },
+        ["ApplicationReportPackage.Preview.DownloadExcel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download Excel",
+            ["tr-TR"] = "Excel indir",
+            ["tk-TM"] = "Excel göçür",
+            ["ru-RU"] = "Скачать Excel",
+        },
         ["ApplicationReportPackage.Preview.Downloading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Generating {0}…",
@@ -5569,6 +5576,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Word/Excel indir (ZIP)",
             ["tk-TM"] = "Word/Excel göçür (ZIP)",
             ["ru-RU"] = "Скачать Word/Excel (ZIP)",
+        },
+        ["ApplicationReportPackage.Preview.DownloadWord"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download Word",
+            ["tr-TR"] = "Word indir",
+            ["tk-TM"] = "Word göçür",
+            ["ru-RU"] = "Скачать Word",
         },
         ["ApplicationReportPackage.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -12241,48 +12255,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýatyr",
             ["ru-RU"] = "Отмена",
         },
-        ["TemplateScan.Manual.Mode"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "How marks are chosen",
-            ["tr-TR"] = "İşaretlerin nasıl seçildiği",
-            ["tk-TM"] = "Bellikleriň saýlanyşy",
-            ["ru-RU"] = "Как выбираются метки",
-        },
-        ["TemplateScan.Manual.Yellow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Yellow marks",
-            ["tr-TR"] = "Sarı işaretler",
-            ["tk-TM"] = "Sary bellikler",
-            ["ru-RU"] = "Жёлтые метки",
-        },
-        ["TemplateScan.Manual.Place"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Place manually",
-            ["tr-TR"] = "Elle yerleştir",
-            ["tk-TM"] = "El bilen goý",
-            ["ru-RU"] = "Поставить вручную",
-        },
-        ["TemplateScan.Manual.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Select text in the document. A row opens on the right for that place in the file. Choose the placeholder, then Lock. Continue stays off until every mark you place is locked. The uploaded file is not changed.",
-            ["tr-TR"] = "Belgedeki metni seçin. Dosyadaki o yer için sağda bir satır açılır. Yer tutucuyu seçin, sonra Kilitle. Koyduğunuz her işaret kilitlenene kadar Devam kapalı kalır. Yüklenen dosya değişmez.",
-            ["tk-TM"] = "Resminamdaky teksti saýlaň. Faýldaky şol ýer üçin sagda setir açylýar. Belliji saýlaň, soňra Gulplaň. Goýan her bellik gulplanýança Dowam et öçük galýar. Ýüklenen faýl üýtgemeýär.",
-            ["ru-RU"] = "Выделите текст в документе. Справа откроется строка для этого места в файле. Выберите заполнитель и нажмите Блок. Далее недоступно, пока каждая поставленная метка не заблокирована. Загруженный файл не изменяется.",
-        },
-        ["TemplateScan.Manual.LockBeforeContinue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Lock each mark you placed before Continue.",
-            ["tr-TR"] = "Devam etmeden önce yerleştirdiğiniz her işareti kilitleyin.",
-            ["tk-TM"] = "Dowam etmezden ozal goýan her bellik gulplaň.",
-            ["ru-RU"] = "Заблокируйте каждую поставленную метку перед Далее.",
-        },
-        ["TemplateScan.Manual.LockThese"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "These placed rows still say Lock: {0}",
-            ["tr-TR"] = "Bu yerleştirilen satırlar hâlâ Kilitle diyor: {0}",
-            ["tk-TM"] = "Bu goýlan setirler entek Gulpla diýýär: {0}",
-            ["ru-RU"] = "У этих поставленных строк всё ещё написано Блок: {0}",
-        },
         ["TemplateScan.Btn.Continue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Continue",
@@ -13004,13 +12976,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Doldurylan nusgany ýükläň. Sözbaşy bahalaryny sary bilen belläň (hat belgisi, senesi, gol çeken). Adamlaryň sanawyny ýaşyl bilen belläň — ilkinji ýaşyl setir saýlanan her adam üçin gaýtalanýar, goşmaça nusga atlar aýrylýar. Word tekst ýagtylandyrmasy ýa-da Excel öýjük reňki. Beýleki tekst çap edilen ýaly galýar.",
             ["ru-RU"] = "Загрузите заполненный образец. Значения шапки выделите жёлтым (номер, дата, подписант). Список людей выделите зелёным — первая зелёная строка повторяется для каждого выбранного человека, лишние примеры имён убираются. Выделение текста в Word или заливка ячейки в Excel. Остальной текст остаётся как напечатан.",
         },
-        ["TemplateScan.RosterMark"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Roster",
-            ["tr-TR"] = "Liste",
-            ["tk-TM"] = "Sanaw",
-            ["ru-RU"] = "Список",
-        },
         ["TemplateScan.Hint.MigrationServices"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "All migration services = every direct-migration case of this profile. Pick one service to show only on matching cases.",
@@ -13199,6 +13164,48 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} düşük güven",
             ["tk-TM"] = "{0} pes ynam",
             ["ru-RU"] = "низкая уверенность: {0}",
+        },
+        ["TemplateScan.Manual.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select text in the document. A row opens on the right for that place in the file. Choose the placeholder, then Lock. Continue stays off until every mark you place is locked. The uploaded file is not changed.",
+            ["tr-TR"] = "Belgedeki metni seçin. Dosyadaki o yer için sağda bir satır açılır. Yer tutucuyu seçin, sonra Kilitle. Koyduğunuz her işaret kilitlenene kadar Devam kapalı kalır. Yüklenen dosya değişmez.",
+            ["tk-TM"] = "Resminamdaky teksti saýlaň. Faýldaky şol ýer üçin sagda setir açylýar. Belliji saýlaň, soňra Gulplaň. Goýan her bellik gulplanýança Dowam et öçük galýar. Ýüklenen faýl üýtgemeýär.",
+            ["ru-RU"] = "Выделите текст в документе. Справа откроется строка для этого места в файле. Выберите заполнитель и нажмите Блок. Далее недоступно, пока каждая поставленная метка не заблокирована. Загруженный файл не изменяется.",
+        },
+        ["TemplateScan.Manual.LockBeforeContinue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lock each mark you placed before Continue.",
+            ["tr-TR"] = "Devam etmeden önce yerleştirdiğiniz her işareti kilitleyin.",
+            ["tk-TM"] = "Dowam etmezden ozal goýan her bellik gulplaň.",
+            ["ru-RU"] = "Заблокируйте каждую поставленную метку перед Далее.",
+        },
+        ["TemplateScan.Manual.LockThese"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "These placed rows still say Lock: {0}",
+            ["tr-TR"] = "Bu yerleştirilen satırlar hâlâ Kilitle diyor: {0}",
+            ["tk-TM"] = "Bu goýlan setirler entek Gulpla diýýär: {0}",
+            ["ru-RU"] = "У этих поставленных строк всё ещё написано Блок: {0}",
+        },
+        ["TemplateScan.Manual.Mode"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "How marks are chosen",
+            ["tr-TR"] = "İşaretlerin nasıl seçildiği",
+            ["tk-TM"] = "Bellikleriň saýlanyşy",
+            ["ru-RU"] = "Как выбираются метки",
+        },
+        ["TemplateScan.Manual.Place"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Place manually",
+            ["tr-TR"] = "Elle yerleştir",
+            ["tk-TM"] = "El bilen goý",
+            ["ru-RU"] = "Поставить вручную",
+        },
+        ["TemplateScan.Manual.Yellow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Yellow marks",
+            ["tr-TR"] = "Sarı işaretler",
+            ["tk-TM"] = "Sary bellikler",
+            ["ru-RU"] = "Жёлтые метки",
         },
         ["TemplateScan.Mapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -13626,6 +13633,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Yüklenen dosyayla aynı sayfalar. Numaralı işaretler Algılanan alanlarla eşleşir — birleşim (pasaport numarası, veriliş yeri, tarih) ayrı kenarlıkla 6.1 / 6.2 / 6.3 kullanır. Bir satıra tıklayın, sonra Kısa listeden yer tutucu ekleyin.",
             ["tk-TM"] = "Ýüklenen faýl bilen şol bir sahypalar. Sanly bellikler Tapylan meýdanlar bilen gabat gelýär — birleşme (pasport belgisi, berlen ýeri, sene) aýratyn çäk bilen 6.1 / 6.2 / 6.3 ulanýar. Setire basyň, soň Gysga sanawdan bellik goşuň.",
             ["ru-RU"] = "Те же страницы, что в загруженном файле. Номера совпадают с найденными полями — сочетание (номер паспорта, место выдачи, дата) идёт как 6.1 / 6.2 / 6.3 с отдельной рамкой. Щёлкните строку и добавьте заполнители из списка коротких кодов.",
+        },
+        ["TemplateScan.RosterMark"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Roster",
+            ["tr-TR"] = "Liste",
+            ["tk-TM"] = "Sanaw",
+            ["ru-RU"] = "Список",
         },
         ["TemplateScan.ScanPageAlt"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -13,10 +13,18 @@ internal static class LibreOfficePreviewPdfConverter
 {
     internal static bool IsAvailable() => !string.IsNullOrWhiteSpace(ResolveSofficePath());
 
-    internal static byte[]? TryConvertToPdf(byte[] officeContent, string fileName)
+    internal static byte[]? TryConvertToPdf(byte[] officeContent, string fileName) =>
+        TryConvert(officeContent, fileName, "pdf");
+
+    /// <summary><paramref name="targetExtension"/> is <c>pdf</c> or <c>docx</c> only.</summary>
+    internal static byte[]? TryConvert(byte[] officeContent, string fileName, string targetExtension)
     {
         var soffice = ResolveSofficePath();
         if (soffice == null || officeContent == null || officeContent.Length == 0)
+            return null;
+
+        var target = targetExtension.Trim().TrimStart('.').ToLowerInvariant();
+        if (target is not ("pdf" or "docx"))
             return null;
 
         var ext = Path.GetExtension(fileName);
@@ -33,7 +41,8 @@ internal static class LibreOfficePreviewPdfConverter
             var start = new ProcessStartInfo
             {
                 FileName = soffice,
-                Arguments = "--headless --nologo --nolockcheck --norestore --convert-to pdf --outdir \"" + work + "\" \"" + inputPath + "\"",
+                Arguments = "--headless --nologo --nolockcheck --norestore --convert-to " + target
+                    + " --outdir \"" + work + "\" \"" + inputPath + "\"",
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
@@ -55,11 +64,11 @@ internal static class LibreOfficePreviewPdfConverter
             if (process.ExitCode != 0)
                 return null;
 
-            var pdf = Directory.GetFiles(work, "*.pdf").FirstOrDefault();
-            if (pdf == null)
+            var produced = Directory.GetFiles(work, "*." + target).FirstOrDefault();
+            if (produced == null)
                 return null;
 
-            var bytes = File.ReadAllBytes(pdf);
+            var bytes = File.ReadAllBytes(produced);
             return bytes.Length > 0 ? bytes : null;
         }
         catch

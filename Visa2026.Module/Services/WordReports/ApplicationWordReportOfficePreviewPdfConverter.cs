@@ -19,6 +19,10 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         if (officeContent == null || officeContent.Length == 0 || string.IsNullOrWhiteSpace(fileName))
             return null;
 
+        // LibreOffice (Docker runtime image) converts by extension. DevExpress on a workstation
+        // sniffs the zip, so the same Excel bytes named .docx preview correctly only off Docker.
+        fileName = AlignDownloadFileName(fileName, officeContent);
+
         // Nested catalog filename bugs used to label Excel bytes as .docx. ZIP parts win over
         // the extension so Preview still uses Spreadsheet ExportToPdf.
         if (LooksLikeOpenXmlExcel(officeContent))
@@ -39,6 +43,30 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
 
     internal static bool LooksLikeOpenXmlWord(byte[] content) =>
         OpenXmlPackageHasEntryPrefix(content, "word/");
+
+    /// <summary>Download and LibreOffice need an extension that matches the package, not the catalog label.</summary>
+    internal static string AlignDownloadFileName(string fileName, byte[] content)
+    {
+        if (string.IsNullOrWhiteSpace(fileName) || content == null || content.Length == 0)
+            return fileName ?? string.Empty;
+
+        if (LooksLikeOpenXmlExcel(content))
+            return WithExtension(fileName, ".xlsx");
+        if (LooksLikeOpenXmlWord(content))
+            return WithExtension(fileName, ".docx");
+        return fileName;
+    }
+
+    private static string WithExtension(string fileName, string extension)
+    {
+        if (Path.GetExtension(fileName).Equals(extension, StringComparison.OrdinalIgnoreCase))
+            return fileName;
+
+        var stem = Path.GetFileNameWithoutExtension(fileName);
+        if (string.IsNullOrWhiteSpace(stem))
+            stem = "report";
+        return stem + extension;
+    }
 
     private static bool OpenXmlPackageHasEntryPrefix(byte[] content, string prefix)
     {

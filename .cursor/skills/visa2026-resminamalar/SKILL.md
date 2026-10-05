@@ -73,6 +73,7 @@ disable-model-invocation: false
 | Cancel-visa Ýüztutma CVCNT is 1 with two linked visas | People & links 2/2 but letter `1 (bir)`. Rebuild; Preview — `2 (iki)`. No Re-Approve | **user-report-templates** — `ApplicationProfileInstanceCancelCounts` |
 | Cover letter Preview repeats the same page once per selected person | Header-only Word (`{{ds.*}}`) must be one file. Rebuild; Preview Yuztutma — **one page**. Şahsy / Forma 16 stay per person | **This skill** + template-scan |
 | Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
+| Excel **Download Word/Excel** saves `.docx` on Docker only; catalog has Word and Excel with the same name | Same display name; Postgres returned the Word template. LibreOffice trusts the extension | **This skill** — learnings *Excel preview download saved as .docx on Docker* |
 | Excel Preview is **portrait** for a wide sanaw (Hasaba almak, squeezed columns) | Custom Office→PDF converter, **not** XAF / XtraReports. `ExcelPreviewPageLayout` + `ApplicationWordReportOfficePreviewPdfConverter` | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |

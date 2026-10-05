@@ -1727,6 +1727,18 @@
     "tk-TM": "Word/Excel göçür",
     "ru-RU": "Скачать Word/Excel"
   },
+  "ApplicationReportPackage.Preview.DownloadExcel": {
+    "en": "Download Excel",
+    "tr-TR": "Excel indir",
+    "tk-TM": "Excel göçür",
+    "ru-RU": "Скачать Excel"
+  },
+  "ApplicationReportPackage.Preview.DownloadWord": {
+    "en": "Download Word",
+    "tr-TR": "Word indir",
+    "tk-TM": "Word göçür",
+    "ru-RU": "Скачать Word"
+  },
   "ApplicationReportPackage.Preview.PdfConversionError": {
     "en": "The report was generated but PDF preview failed. Download the Word or Excel file instead.",
     "tr-TR": "Rapor oluşturuldu ancak PDF önizlemesi başarısız oldu. Bunun yerine Word veya Excel dosyasını indirin.",

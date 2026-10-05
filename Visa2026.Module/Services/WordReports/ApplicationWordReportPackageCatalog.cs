@@ -202,7 +202,10 @@ public sealed class ApplicationWordReportPackageCatalogService
 
         foreach (var profileTemplate in profileTemplates)
         {
-            userByName.TryGetValue(profileTemplate.TemplateName ?? string.Empty, out var userTemplate);
+            userByName.TryGetValue(profileTemplate.TemplateName ?? string.Empty, out var nameMatches);
+            var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.PickMergeTemplate(
+                nameMatches,
+                profileTemplate.TemplateKind);
 
             var (level, messageKey) = EvaluateProfileTemplateReadiness(
                 objectSpace,
@@ -316,7 +319,10 @@ public sealed class ApplicationWordReportPackageCatalogService
 
         foreach (var profileTemplate in recycled)
         {
-            userByName.TryGetValue(profileTemplate.TemplateName ?? string.Empty, out var userTemplate);
+            userByName.TryGetValue(profileTemplate.TemplateName ?? string.Empty, out var nameMatches);
+            var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.PickMergeTemplate(
+                nameMatches,
+                profileTemplate.TemplateKind);
 
             yield return new ApplicationWordReportPackageCatalogEntry
             {

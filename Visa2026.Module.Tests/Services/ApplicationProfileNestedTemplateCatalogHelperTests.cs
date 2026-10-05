@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.WordReports;
 using Xunit;
@@ -148,6 +149,84 @@ public class ApplicationProfileNestedTemplateCatalogHelperTests
     {
         Assert.False(ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(
             new ApplicationProfileInstance()));
+    }
+
+    [Fact]
+    public void PickMergeTemplate_same_name_keeps_excel_and_word_apart()
+    {
+        var wordId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var excelId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+        var matches = new[]
+        {
+            new UserReportTemplate
+            {
+                ID = wordId,
+                TemplateName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK",
+                TemplateOutputFormat = TemplateOutputFormat.Word,
+            },
+            new UserReportTemplate
+            {
+                ID = excelId,
+                TemplateName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK",
+                TemplateOutputFormat = TemplateOutputFormat.Excel,
+            },
+        };
+
+        Assert.Equal(excelId, ApplicationProfileNestedTemplateCatalogHelper.PickMergeTemplate(
+            matches, ApplicationProfileTemplateKind.Excel)!.ID);
+        Assert.Equal(wordId, ApplicationProfileNestedTemplateCatalogHelper.PickMergeTemplate(
+            matches, ApplicationProfileTemplateKind.Word)!.ID);
+    }
+
+    [Fact]
+    public void PickMergeTemplate_does_not_revive_the_other_format_when_fallback_is_off()
+    {
+        var word = new UserReportTemplate
+        {
+            ID = Guid.NewGuid(),
+            TemplateName = "SANAW",
+            TemplateOutputFormat = TemplateOutputFormat.Word,
+        };
+
+        Assert.Null(ApplicationProfileNestedTemplateCatalogHelper.PickMergeTemplate(
+            new[] { word },
+            ApplicationProfileTemplateKind.Excel,
+            allowUnmatchedFallback: false));
+    }
+
+    [Fact]
+    public void WithProfileFile_excel_row_downloads_as_xlsx_when_shared_user_template_is_word()
+    {
+        var userTemplate = new UserReportTemplate
+        {
+            ID = Guid.NewGuid(),
+            TemplateName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK",
+            TemplateOutputFormat = TemplateOutputFormat.Word,
+            ExcelMergeMode = ExcelMergeMode.SingleItem,
+            TemplateFile = new FileData
+            {
+                FileName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK.docx",
+                Content = new byte[] { 1, 2, 3 },
+            },
+        };
+        var profileTemplate = new ApplicationProfileTemplate
+        {
+            TemplateName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK",
+            TemplateKind = ApplicationProfileTemplateKind.Excel,
+            TemplateFile = new FileData
+            {
+                FileName = "sanaw.xlsx",
+                Content = new byte[] { 9, 9, 9, 9 },
+            },
+        };
+
+        var merge = ApplicationProfileNestedTemplateCatalogHelper.WithProfileFile(userTemplate, profileTemplate);
+
+        Assert.Equal(TemplateOutputFormat.Excel, merge.GetEffectiveOutputFormat());
+        Assert.Equal(ExcelMergeMode.ItemList, merge.ExcelMergeMode);
+        Assert.EndsWith(".xlsx", merge.TemplateFile.FileName, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(new byte[] { 9, 9, 9, 9 }, merge.TemplateFile.Content);
+        Assert.Equal(TemplateOutputFormat.Word, userTemplate.GetEffectiveOutputFormat());
     }
 
     private static ApplicationProfileTemplate ProfileTemplate() =>

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.WordReports;
 
@@ -52,11 +53,20 @@ public static class ApplicationProfileTemplateUserReportBridge
             return existing;
         }
 
-        // Inactive / soft-deleted name match — prefer revive over duplicate
-        var inactive = objectSpace.GetObjectsQuery<UserReportTemplate>()
-            .AsEnumerable()
-            .FirstOrDefault(t =>
-                string.Equals(t.TemplateName, name, StringComparison.OrdinalIgnoreCase));
+        // Inactive / soft-deleted name match — prefer revive over duplicate, but never
+        // revive the other format (Word vs Excel) that shares this display name.
+        var lowered = name.ToLower();
+        var inactiveMatches = objectSpace.GetObjectsQuery<UserReportTemplate>()
+            .Include(t => t.TemplateFile)
+            .Where(t => !t.IsActive
+                && t.TemplateName != null
+                && t.TemplateName.ToLower() == lowered)
+            .OrderBy(t => t.ID)
+            .ToList();
+        var inactive = ApplicationProfileNestedTemplateCatalogHelper.PickMergeTemplate(
+            inactiveMatches,
+            profileTemplate.TemplateKind,
+            allowUnmatchedFallback: false);
         if (inactive != null)
         {
             inactive.IsActive = true;
