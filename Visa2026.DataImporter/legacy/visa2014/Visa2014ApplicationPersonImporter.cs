@@ -45,7 +45,8 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         string? educationIdMapPath = null,
         string? addressIdMapPath = null,
         string? positionHistoryIdMapPath = null,
-        string? travelHistoryIdMapPath = null)
+        string? travelHistoryIdMapPath = null,
+        string? applicationTypeName = null)
     {
         if (!dryRun && objectSpaceFactory == null)
         {
@@ -104,13 +105,15 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         var rawRows = Visa2014ApplicationProfileInstancePersonTransform.LoadRawRows(legacyConnectionString, maxRows, verbose);
         var rawByOid = rawRows.ToDictionary(r => r.LegacyOid);
         var batch = Visa2014ApplicationProfileInstancePersonTransform.Transform(rawRows, out var skipped, out _);
+        var importRows = Visa2014ApplicationTransform.FilterPreparedRowsByApplicationType(
+            batch.ImportRows, lookupTranslationPaths, applicationTypeName);
         var existingMap = LoadOptionalIdMap(applicationPersonIdMapOutputPath);
 
         if (dryRun)
         {
-            var gap = AnalyzeGap(batch.ImportRows, applicationIdMap, personIdMap, existingMap);
+            var gap = AnalyzeGap(importRows, applicationIdMap, personIdMap, existingMap);
             Console.WriteLine(
-                $"DRY RUN: {batch.ImportRows.Count} prepared ApplicationProfileInstancePerson row(s) " +
+                $"DRY RUN: {importRows.Count} prepared ApplicationProfileInstancePerson row(s) " +
                 $"({skipped.Count} transform-skipped).");
             Console.WriteLine($"INF Already imported (id-map): {gap.AlreadyImported}");
             Console.WriteLine($"INF Missing parent id-map: {gap.MissingRequiredIdMap}");
@@ -118,7 +121,7 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
             return new Visa2014ApplicationProfileInstancePersonImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
-                PreparedCount = batch.ImportRows.Count,
+                PreparedCount = importRows.Count,
                 SkippedCount = skipped.Count,
                 SkippedMissingRequiredIdMap = gap.MissingRequiredIdMap,
                 SkippedAlreadyImported = gap.AlreadyImported,
@@ -133,7 +136,7 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         var processed = 0;
         var errors = new List<string>();
         var idMap = new Dictionary<Guid, Guid>(existingMap);
-        var total = batch.ImportRows.Count;
+        var total = importRows.Count;
         if (batchSize < 1)
             batchSize = 50;
 
@@ -144,18 +147,22 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
 
         var pendingInBatch = 0;
-        foreach (var row in batch.ImportRows)
+        foreach (var row in importRows)
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
             processed++;
 
-            var alreadyImported = idMap.ContainsKey(legacyOid);
+            // A saved id-map entry already committed LinkPerson and pins for this row.
+            if (idMap.ContainsKey(legacyOid))
+            {
+                skippedAlready++;
+                ReportProgress(applicationPersonIdMapOutputPath, processed, total, posted, failed, skippedAlready + skippedMissing);
+                continue;
+            }
+
             if (!TryResolveIds(row, applicationIdMap, personIdMap, out var applicationId, out var personId, out var miss))
             {
-                if (alreadyImported)
-                    skippedAlready++;
-                else
-                    skippedMissing++;
+                skippedMissing++;
                 if (verbose)
                     Console.WriteLine($"  SKIP {legacyOid}: {miss}");
                 ReportProgress(applicationPersonIdMapOutputPath, processed, total, posted, failed, skippedAlready + skippedMissing);
@@ -168,10 +175,7 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
                 var person = objectSpace.GetObjectByKey<Bo.Person>(personId);
                 if (application == null || person == null)
                 {
-                    if (alreadyImported)
-                        skippedAlready++;
-                    else
-                        skippedMissing++;
+                    skippedMissing++;
                     if (verbose)
                         Console.WriteLine($"  SKIP {legacyOid}: target Application/Person missing in DB");
                     ReportProgress(applicationPersonIdMapOutputPath, processed, total, posted, failed, skippedAlready + skippedMissing);
@@ -198,13 +202,8 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
                         pinTravel: false);
                 }
 
-                if (alreadyImported)
-                    skippedAlready++;
-                else
-                {
-                    idMap[legacyOid] = personId;
-                    posted++;
-                }
+                idMap[legacyOid] = personId;
+                posted++;
 
                 autoLinked += ApplicationProfileInstancePersonResolver.LoadLinks(objectSpace, application.ID, personId).Count;
                 pendingInBatch++;
@@ -245,7 +244,7 @@ internal static class Visa2014ApplicationProfileInstancePersonImporter
         return new Visa2014ApplicationProfileInstancePersonImportResult
         {
             LegacyRowCount = batch.LegacyRowCount,
-            PreparedCount = batch.ImportRows.Count,
+            PreparedCount = importRows.Count,
             SkippedCount = skipped.Count,
             SkippedMissingRequiredIdMap = skippedMissing,
             SkippedAlreadyImported = skippedAlready,

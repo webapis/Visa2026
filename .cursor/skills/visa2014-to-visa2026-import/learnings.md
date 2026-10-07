@@ -1,3 +1,38 @@
+### 2026-10-05 — Staging document-links resumed after tunnel 255
+
+- **Phase**: scalar post-all corrections
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Done before halt**: RejectionItem 254; BorderZone 110; BorderZoneItem 209; Visa/remainder Posted 400 (+388 no issuing instance).
+- **Why**: SSH tunnel exited 255 during `document-links` (Npgsql `Failed to connect to 127.0.0.1:15433`). Stuck chain process stopped.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt document-links -SkipLookupPreflight`.
+### 2026-10-05 — Staging RejectionItem after Passport id-map copy
+
+- **Phase**: scalar import resumed (post-all)
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: `App_Business_Trip_Departure/progress` Posted **1166**; `Rejection` Posted **207**. `RejectionItem` halted: `Id-map not found` under `bin\Release\net8.0\legacy\...\Passport.json` (source map existed; Release output folder missing).
+- **Fix**: Copied `id-maps/calik-energi-onprem-staging/*` into the Release bin path (19 files).
+- **Resume**: `Run-StagingScalar.ps1 -StartAt RejectionItem -SkipLookupPreflight`. Next: BorderZone / Visa remainder / corrections.
+### 2026-10-05 — Staging App_Business_Trip_Departure/progress resumed
+
+- **Phase**: scalar import resumed
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Roster wave finished (Posted 526 / skipped 200 / missing id-map 1). Progress died in `resolve-legs` when SSH tunnel exited 255 (`Failed to connect to 127.0.0.1:15433`).
+- **Resume**: `Run-StagingScalar.ps1 -StartAt App_Business_Trip_Departure/progress -SkipLookupPreflight`.
+- **Prevent**: Do not re-run roster; person id-map already complete for this type.
+### 2026-10-05 — Staging App_Business_Trip_Departure/roster resumed
+
+- **Phase**: scalar import resumed
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Wave `summary-20261003-110622` finished through `App_Business_Trip_Departure/header` (592). Roster stopped at `200/726` posted (`failed=0`) when the chain/tunnel died; no summary exit line for roster.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt App_Business_Trip_Departure/roster -SkipLookupPreflight`. Already-posted 200 roster rows stay in the id-map.
+- **Prevent**: Do not restart from Person or earlier reg types.
+### 2026-10-03 — Staging App_Reg_ext/progress resumed
+
+- **Phase**: scalar import resumed
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Prior wave `summary-20261002-122100` completed `App_Reg_ext` header (1255) + roster (2682), then progress died in `resolve-legs` with `Exception while reading from stream` (tunnel down). Sync-progress stayed at `processed: 0`.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt App_Reg_ext/progress -SkipLookupPreflight`. Log `20261003-110622`. Filter `App_Reg_ext`.
+- **Prevent**: Do not restart from Person/header/roster. Already-posted header+roster stay in id-map.
 ### 2026-10-02 — Staging SSH reset during morning App_Visa_Ext_FM
 
 - **Phase**: scalar import stopped and resumed

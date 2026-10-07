@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Compression;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.WordReports;
@@ -227,6 +229,52 @@ public class ApplicationProfileNestedTemplateCatalogHelperTests
         Assert.EndsWith(".xlsx", merge.TemplateFile.FileName, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(new byte[] { 9, 9, 9, 9 }, merge.TemplateFile.Content);
         Assert.Equal(TemplateOutputFormat.Word, userTemplate.GetEffectiveOutputFormat());
+    }
+
+    [Fact]
+    public void WithProfileFile_excel_kind_keeps_word_when_the_saved_file_is_a_word_package()
+    {
+        var userTemplate = new UserReportTemplate
+        {
+            ID = Guid.NewGuid(),
+            TemplateName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK",
+            TemplateOutputFormat = TemplateOutputFormat.Word,
+            ExcelMergeMode = ExcelMergeMode.ItemList,
+            TemplateFile = new FileData
+            {
+                FileName = "shared.docx",
+                Content = MinimalOpenXml("word/document.xml"),
+            },
+        };
+        var profileTemplate = new ApplicationProfileTemplate
+        {
+            TemplateName = "DASARY_YURT_RAYATLARYNYN_SANAWY_CAKYLYK",
+            TemplateKind = ApplicationProfileTemplateKind.Excel,
+            TemplateFile = new FileData
+            {
+                FileName = "Dasary_yurt_rayatlarynyn_sanawy_cakylyk.docx",
+                Content = MinimalOpenXml("word/document.xml"),
+            },
+        };
+
+        var merge = ApplicationProfileNestedTemplateCatalogHelper.WithProfileFile(userTemplate, profileTemplate);
+
+        Assert.Equal(TemplateOutputFormat.Word, merge.GetEffectiveOutputFormat());
+        Assert.EndsWith(".docx", merge.TemplateFile.FileName, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(profileTemplate.TemplateFile.Content, merge.TemplateFile.Content);
+    }
+
+    private static byte[] MinimalOpenXml(string entryName)
+    {
+        using var stream = new MemoryStream();
+        using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            var entry = archive.CreateEntry(entryName);
+            using var writer = new StreamWriter(entry.Open());
+            writer.Write("<xml/>");
+        }
+
+        return stream.ToArray();
     }
 
     private static ApplicationProfileTemplate ProfileTemplate() =>

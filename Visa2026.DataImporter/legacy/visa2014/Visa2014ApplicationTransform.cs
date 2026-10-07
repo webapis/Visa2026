@@ -673,6 +673,39 @@ internal static class Visa2014ApplicationTransform
     internal static bool IsSkippedApplicationTypeComposite(string composite) =>
         ApplicationTypeSkipComposites.Contains(composite);
 
+    /// <summary>
+    /// Type-slice waves must not open staging rows for every legacy case.
+    /// Match the same ApplicationType translation the header wave uses.
+    /// </summary>
+    internal static List<Dictionary<string, object?>> FilterPreparedRowsByApplicationType(
+        IReadOnlyList<Dictionary<string, object?>> rows,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string? applicationTypeName)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        if (string.IsNullOrWhiteSpace(applicationTypeName))
+            return rows as List<Dictionary<string, object?>> ?? rows.ToList();
+
+        var filter = applicationTypeName.Trim();
+        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
+        var matched = new List<Dictionary<string, object?>>();
+        foreach (var row in rows)
+        {
+            var composite = row.GetValueOrDefault("_legacy_ApplicationTypeComposite") as string;
+            if (!Visa2014LookupTranslator.TryTranslate(
+                    catalogs, "ApplicationType", composite, out var target, out _)
+                || string.IsNullOrWhiteSpace(target))
+                continue;
+
+            if (string.Equals(target.Trim(), filter, StringComparison.OrdinalIgnoreCase))
+                matched.Add(row);
+        }
+
+        Console.WriteLine(
+            $"INF ApplicationType filter '{filter}': {matched.Count} of {rows.Count} prepared row(s).");
+        return matched;
+    }
+
     private static bool TrySetApplicationType(
         Dictionary<string, object?> row,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,

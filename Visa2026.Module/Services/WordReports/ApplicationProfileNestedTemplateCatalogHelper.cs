@@ -345,9 +345,10 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
         if (bytes == null || bytes.Length == 0)
             return userTemplate;
 
-        var format = profileTemplate.TemplateKind == ApplicationProfileTemplateKind.Excel
-            ? TemplateOutputFormat.Excel
-            : TemplateOutputFormat.Word;
+        // Catalog kind can say Excel while the saved file is a Word package (case 10/-1904
+        // on prod). Forcing Excel renamed that .docx to .xlsx and ClosedXML rejected it.
+        // The package decides the generator; kind is only the fallback when the zip is unclear.
+        var format = ResolveProfileFileFormat(bytes, profileTemplate.TemplateKind);
         var extension = format == TemplateOutputFormat.Excel ? ".xlsx" : ".docx";
         var fileName = file!.FileName;
         if (string.IsNullOrWhiteSpace(fileName)
@@ -382,6 +383,20 @@ public static class ApplicationProfileNestedTemplateCatalogHelper
                 Content = bytes,
             },
         };
+    }
+
+    private static TemplateOutputFormat ResolveProfileFileFormat(
+        byte[] bytes,
+        ApplicationProfileTemplateKind kind)
+    {
+        if (ApplicationWordReportOfficePreviewPdfConverter.LooksLikeOpenXmlExcel(bytes))
+            return TemplateOutputFormat.Excel;
+        if (ApplicationWordReportOfficePreviewPdfConverter.LooksLikeOpenXmlWord(bytes))
+            return TemplateOutputFormat.Word;
+
+        return kind == ApplicationProfileTemplateKind.Excel
+            ? TemplateOutputFormat.Excel
+            : TemplateOutputFormat.Word;
     }
 
     /// <summary>

@@ -79,6 +79,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 - **Prevent**: Do not send Excel Preview through `soffice` while a clean DevExpress PDF is available. Word Preview can still prefer LibreOffice.
 - **Cross-skill**: template-scan | lifecycle-docker
 
+### 2026-10-05 — Excel preview fails only on prod when the Excel card stores a Word file (Application)
+
+- **Symptom**: Case 10/-1904 on `10.100.128.26`. Excel row **Preview could not be generated**. Same row on local F5 previews the spreadsheet. Browser console 404s and Helvetica warnings are unrelated.
+- **Try**: Redeploy, hard-refresh. Preview that Excel card — it opens as the Word file that is actually stored. A card whose file is `.xlsx` still previews as Excel.
+- **Test**: `WithProfileFile_excel_kind_keeps_word_when_the_saved_file_is_a_word_package` added. Module compile was not run in this session.
+- **Root cause**: Profile `25d917a7-c2f0-44a0-bae1-c1fb6a786a9e` Excel row is `word/` bytes named `.docx` (25,911 bytes). Kind forced Excel, the name became `.xlsx`, and ClosedXML rejected the Word package. Local has a real workbook.
+- **Fix**: The saved package chooses Word vs Excel. Kind is used only when the zip is neither.
+- **Prevent**: Do not rename a `word/` package to `.xlsx` because the catalog kind is Excel.
+- **Cross-skill**: —
+
 ### 2026-10-05 — Excel-to-Word preview download cancelled (Application)
 
 - **Symptom**: Exporting an Excel sanaw as Word still looked wrong. Officers asked to drop that export.

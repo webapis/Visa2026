@@ -690,7 +690,8 @@ internal static class Visa2014ImportCommand
             headlessSession?.ObjectSpaceFactory,
             GetTargetConnection(args),
             Visa2014ParallelImportPoster.ResolveDegree(args),
-            ResolveBatchSize(args));
+            ResolveBatchSize(args),
+            GetOptionValue(args, "--application-type"));
 
         Console.WriteLine($"INF Legacy applications: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Parent-skipped: {result.SkippedCount}");
@@ -837,7 +838,8 @@ internal static class Visa2014ImportCommand
                 educationIdMapPath,
                 addressIdMapPath,
                 positionHistoryIdMapPath,
-                travelHistoryIdMapPath);
+                travelHistoryIdMapPath,
+                GetOptionValue(args, "--application-type"));
 
             Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
             Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}");

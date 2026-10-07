@@ -27,6 +27,27 @@ public class Visa2014ApplicationTypeProfileLockTests
     }
 
     [Fact]
+    public void FilterPreparedRowsByApplicationType_KeepsOnlyTheRequestedType()
+    {
+        var solutionRoot = Visa2014ContentRoot.FindSolutionRoot();
+        Assert.NotNull(solutionRoot);
+        var yamlPath = Visa2014ContentRoot.LookupTranslationsPath(solutionRoot);
+        Assert.NotNull(yamlPath);
+
+        var rows = new List<Dictionary<string, object?>>
+        {
+            new(StringComparer.Ordinal) { ["_legacy_ApplicationTypeComposite"] = "F:0:na:na:na" },
+            new(StringComparer.Ordinal) { ["_legacy_ApplicationTypeComposite"] = "E:0:0:na:na" },
+        };
+
+        var matched = Visa2014ApplicationTransform.FilterPreparedRowsByApplicationType(
+            rows, [yamlPath!], "App_Inv_FM");
+
+        var only = Assert.Single(matched);
+        Assert.Equal("F:0:na:na:na", only["_legacy_ApplicationTypeComposite"]);
+    }
+
+    [Fact]
     public void LookupTranslationsApplicationTypeValues_MatchLockTargets()
     {
         var solutionRoot = Visa2014ContentRoot.FindSolutionRoot();

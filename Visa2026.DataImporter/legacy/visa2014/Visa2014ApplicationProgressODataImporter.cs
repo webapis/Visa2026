@@ -38,7 +38,8 @@ internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
         string? targetConnectionForLegCounts = null,
         // Retained for call-site compatibility; ApplicationProfileInstanceProgress posts sequentially (flush per row).
         int parallelism = 0,
-        int batchSize = 50)
+        int batchSize = 50,
+        string? applicationTypeName = null)
     {
         _ = parallelism;
         _ = batchSize;
@@ -65,17 +66,19 @@ internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
             maxRows,
             verbose,
             ministryLegCountByLegacyApplicationProfileInstanceOid);
+        var importRows = Visa2014ApplicationTransform.FilterPreparedRowsByApplicationType(
+            batch.ImportRows, lookupTranslationPaths, applicationTypeName);
 
         if (dryRun)
         {
-            int missingApp = CountMissingApplicationMap(batch.ImportRows, applicationIdMap);
+            int missingApp = CountMissingApplicationMap(importRows, applicationIdMap);
             Console.WriteLine(
-                $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
+                $"DRY RUN: {importRows.Count} row(s) ready to POST " +
                 $"({batch.Skipped.Count} parent-skipped, {missingApp} missing ApplicationProfileInstance id-map).");
             return new Visa2014ApplicationProfileInstanceProgressImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
-                PreparedCount = batch.ImportRows.Count,
+                PreparedCount = importRows.Count,
                 SkippedCount = batch.Skipped.Count,
                 SkippedNoApplicationMap = missingApp,
             };
@@ -102,7 +105,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
         if (verbose && progressIdMap.Count > 0)
             Console.WriteLine($"INF Existing ApplicationProfileInstanceProgress id-map entries: {progressIdMap.Count}");
 
-        var total = batch.ImportRows.Count;
+        var total = importRows.Count;
         // One progress row per CommitChanges: batching multiple steps for the same ApplicationProfileInstance
         // fights Application.LatestProgress optimistic lock (and hung Prod at posted~49 / batch-size 50).
         Console.WriteLine(
@@ -136,7 +139,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
 
         try
         {
-            foreach (var row in batch.ImportRows)
+            foreach (var row in importRows)
             {
                 var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
                     ?? row.GetValueOrDefault("_legacyRowId") as string;
@@ -306,7 +309,7 @@ internal static class Visa2014ApplicationProfileInstanceProgressODataImporter
         return new Visa2014ApplicationProfileInstanceProgressImportResult
         {
             LegacyRowCount = batch.LegacyRowCount,
-            PreparedCount = batch.ImportRows.Count,
+            PreparedCount = importRows.Count,
             SkippedCount = batch.Skipped.Count,
             SkippedNoApplicationMap = skippedMissing,
             SkippedAlreadyImported = skippedAlready,
