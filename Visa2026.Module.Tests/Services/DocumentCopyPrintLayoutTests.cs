@@ -118,4 +118,49 @@ public class DocumentCopyPrintLayoutTests
         Assert.Equal(DocumentCopyPrintLayout.A4HeightPt, rect.PageHeightPt);
         Assert.True(rect.Height > DocumentCopyPrintLayout.MillimetersToPoints(200));
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("Education.")]
+    public void DefaultFor_NonPassportVisa_IsFitA4(string? key)
+    {
+        var layout = DocumentCopyPrintLayout.DefaultFor(key);
+        Assert.Equal(DocumentCopyPrintSize.FitA4, layout.Size);
+        Assert.False(layout.UsesDocumentSize);
+        Assert.False(DocumentCopyPrintLayout.AppliesTo(key));
+    }
+
+    [Fact]
+    public void FitA4_CentersOnPortraitPage()
+    {
+        var rect = DocumentCopyPrintLayout.FitA4.Measure(200, 100);
+
+        Assert.Equal(DocumentCopyPrintLayout.A4WidthPt, rect.PageWidthPt);
+        Assert.Equal(DocumentCopyPrintLayout.A4HeightPt, rect.PageHeightPt);
+        // Wide aspect fills the content width, so X sits on the left margin and Y is centered.
+        Assert.Equal(DocumentCopyPrintLayout.FitMarginPt, rect.X, 1);
+        Assert.Equal(
+            DocumentCopyPrintLayout.FitMarginPt
+                + (DocumentCopyPrintLayout.A4HeightPt - 2 * DocumentCopyPrintLayout.FitMarginPt - rect.Height) / 2.0,
+            rect.Y,
+            1);
+        Assert.Equal(DocumentCopyPrintLayout.A4WidthPt - 2 * DocumentCopyPrintLayout.FitMarginPt, rect.Width, 1);
+    }
+
+    [Fact]
+    public void Measure_NonPositiveSource_UsesUnitFallback()
+    {
+        var rect = DocumentCopyPrintLayout.DefaultFor("Passport.").Measure(0, -5);
+        Assert.True(rect.Width > 0);
+        Assert.True(rect.Height > 0);
+    }
+
+    [Fact]
+    public void Rotate_NegativeDegrees_WrapsIntoRange()
+    {
+        var layout = DocumentCopyPrintLayout.DefaultFor("Visa.").Rotate(-90);
+        Assert.Equal(270, layout.RotationDegrees);
+    }
 }
