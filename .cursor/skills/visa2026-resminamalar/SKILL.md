@@ -75,6 +75,7 @@ disable-model-invocation: false
 | Excel catalog Preview is a **blank PDF**; Word Preview OK; title is `report_….docx` | Nested catalog keys are `profile:{id}` not `user:{id}` — `ResolveDownloadFileName` fell back to `.docx` so Word PDF ran on Excel bytes | **This skill** |
 | Excel **Download Word/Excel** saves `.docx` on Docker only; catalog has Word and Excel with the same name | Same display name; Postgres returned the Word template. LibreOffice trusts the extension | **This skill** — learnings *Excel preview download saved as .docx on Docker* |
 | Excel Preview is **portrait** for a wide sanaw (Hasaba almak, squeezed columns) | Custom Office→PDF converter, **not** XAF / XtraReports. `ExcelPreviewPageLayout` + `ApplicationWordReportOfficePreviewPdfConverter` | **This skill** |
+| Excel Preview on Docker does not match the same sanaw on local F5 | Excel PDF uses DevExpress (print area + fit-to-page), same as F5. LibreOffice only if that PDF has the evaluation stamp. Redeploy the image | **This skill** |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |
 | Shared catalog row has no trash (this-profile does) | Gear (details) on; Shared Word/Excel uses the same Recycle Bin as this-profile. Restart, hard-refresh | **This skill** |

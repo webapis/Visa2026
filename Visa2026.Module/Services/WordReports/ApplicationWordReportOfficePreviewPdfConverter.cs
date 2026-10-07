@@ -26,14 +26,14 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         // Nested catalog filename bugs used to label Excel bytes as .docx. ZIP parts win over
         // the extension so Preview still uses Spreadsheet ExportToPdf.
         if (LooksLikeOpenXmlExcel(officeContent))
-            return ConvertPreferringLibreOffice(officeContent, fileName, ConvertExcelToPdf);
+            return ConvertExcelMatchingWorkstation(officeContent, fileName);
         if (LooksLikeOpenXmlWord(officeContent))
             return ConvertPreferringLibreOffice(officeContent, fileName, ConvertWordToPdf);
 
         return Path.GetExtension(fileName).ToLowerInvariant() switch
         {
             ".docx" => ConvertPreferringLibreOffice(officeContent, fileName, ConvertWordToPdf),
-            ".xlsx" or ".xlsm" => ConvertPreferringLibreOffice(officeContent, fileName, ConvertExcelToPdf),
+            ".xlsx" or ".xlsm" => ConvertExcelMatchingWorkstation(officeContent, fileName),
             _ => null
         };
     }
@@ -90,6 +90,32 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
         }
     }
 
+    /// <summary>
+    /// Same Excel PDF as a workstation: DevExpress clears the print area, prints the used range,
+    /// and fits the page. LibreOffice is only the fallback when that PDF carries the evaluation stamp.
+    /// </summary>
+    private static byte[]? ConvertExcelMatchingWorkstation(byte[] officeContent, string fileName)
+    {
+        var fromOfficeFileApi = ConvertExcelToPdf(officeContent);
+        if (IsCleanPreviewPdf(fromOfficeFileApi))
+            return fromOfficeFileApi;
+
+        if (LibreOfficePreviewPdfConverter.IsAvailable())
+        {
+            var prepared = SavePreparedExcel(officeContent) ?? officeContent;
+            var fromLibreOffice = LibreOfficePreviewPdfConverter.TryConvertToPdf(
+                prepared,
+                AlignDownloadFileName(fileName, prepared));
+            if (fromLibreOffice != null && fromLibreOffice.Length > 0)
+                return fromLibreOffice;
+        }
+
+        return fromOfficeFileApi;
+    }
+
+    private static bool IsCleanPreviewPdf(byte[]? pdf) =>
+        pdf != null && pdf.Length > 0 && !OfficePreviewEvaluationStamp.ContainsStamp(pdf);
+
     private static byte[]? ConvertPreferringLibreOffice(
         byte[] officeContent,
         string fileName,
@@ -129,13 +155,48 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
 
     private static byte[]? ConvertExcelToPdf(byte[] content)
     {
+        using var workbook = OpenPreparedExcel(content);
+        if (workbook == null)
+            return null;
+
+        var worksheet = workbook.Worksheets[0];
+        using var output = new MemoryStream();
+        workbook.ExportToPdf(output, new PdfExportOptions(), worksheet.Name);
+        return ToByteArray(output);
+    }
+
+    /// <summary>Same print area and page fit as <see cref="ConvertExcelToPdf"/>, saved for the LibreOffice fallback.</summary>
+    private static byte[]? SavePreparedExcel(byte[] content)
+    {
+        using var workbook = OpenPreparedExcel(content);
+        if (workbook == null)
+            return null;
+
+        using var output = new MemoryStream();
+        workbook.SaveDocument(output, DevExpress.Spreadsheet.DocumentFormat.Xlsx);
+        return ToByteArray(output);
+    }
+
+    private static Workbook? OpenPreparedExcel(byte[] content)
+    {
         using var input = new MemoryStream(content, writable: false);
-        using var workbook = new Workbook();
-        workbook.LoadDocument(input);
-        workbook.CalculateFull();
+        var workbook = new Workbook();
+        try
+        {
+            workbook.LoadDocument(input);
+            workbook.CalculateFull();
+        }
+        catch
+        {
+            workbook.Dispose();
+            throw;
+        }
 
         if (workbook.Worksheets.Count == 0)
+        {
+            workbook.Dispose();
             return null;
+        }
 
         // Match merge + yellow-mark scan: preview only the first worksheet. Drop extras so
         // DevExpress does not emit blank leading pages from unused sheets.
@@ -153,10 +214,7 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
             worksheet.SetPrintRange(usedRange);
 
         ExcelPreviewPageLayout.ApplyToWorksheet(worksheet);
-
-        using var output = new MemoryStream();
-        workbook.ExportToPdf(output, new PdfExportOptions(), worksheet.Name);
-        return ToByteArray(output);
+        return workbook;
     }
 
     private static byte[]? ToByteArray(MemoryStream stream)

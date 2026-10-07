@@ -34,6 +34,19 @@ public class ExcelPreviewPageLayoutTests
     }
 
     [Fact]
+    public void TryConvertToPdf_ignores_stale_print_area_on_a_wide_sanaw()
+    {
+        var pdf = new ApplicationWordReportOfficePreviewPdfConverter()
+            .TryConvertToPdf(WideSanawWithStalePrintArea(), "Dasary_yurt_rayatlarynyn_sanawy.xlsx");
+
+        Assert.NotNull(pdf);
+        using var document = PdfReader.Open(new MemoryStream(pdf!), PdfDocumentOpenMode.Import);
+        var page = document.Pages[0];
+        Assert.True(page.Width.Point > page.Height.Point);
+        Assert.True(page.Width.Point > 400, "Stale print area must not collapse the sanaw to a narrow page.");
+    }
+
+    [Fact]
     public void TryConvertToPdf_wide_sanaw_page_is_landscape()
     {
         var pdf = new ApplicationWordReportOfficePreviewPdfConverter()
@@ -61,6 +74,18 @@ public class ExcelPreviewPageLayoutTests
             sheet.Column(i + 1).Width = 14;
         }
 
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
+    }
+
+    private static byte[] WideSanawWithStalePrintArea()
+    {
+        var bytes = WideSanawXlsx();
+        using var workbook = new XLWorkbook(new MemoryStream(bytes));
+        var sheet = workbook.Worksheet(1);
+        sheet.PageSetup.PrintAreas.Clear();
+        sheet.PageSetup.PrintAreas.Add("A1");
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         return stream.ToArray();

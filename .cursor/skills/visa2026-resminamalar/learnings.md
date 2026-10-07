@@ -69,6 +69,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-10-07 — Excel Preview on Docker does not match the downloaded sheet (Application)
+
+- **Symptom**: Same yellow-marks sanaw. Local F5 Preview matches the sheet. On `10.100.128.26` Preview does not. Download Excel from Docker opens correctly in Excel (merged title, columns, both people, signatory).
+- **Try**: Redeploy the image, hard-refresh. Preview that Excel card. It should match the downloaded `.xlsx`. Download Excel stays the same file.
+- **Test**: `ExcelPreviewPageLayoutTests` and `ApplicationWordReportOfficePreviewPdfConverterTests` — 14 passed, including a wide sanaw whose print area was only `A1`.
+- **Root cause**: Docker has LibreOffice, and Excel Preview used it first. That path skips clearing the print area and fit-to-page. Local F5 has no LibreOffice, so Preview uses DevExpress Spreadsheet. The downloaded workbook never goes through that PDF step.
+- **Fix**: Excel Preview uses DevExpress first, same as F5. LibreOffice runs only when that PDF still has the evaluation stamp, and then on the prepared sheet.
+- **Prevent**: Do not send Excel Preview through `soffice` while a clean DevExpress PDF is available. Word Preview can still prefer LibreOffice.
+- **Cross-skill**: template-scan | lifecycle-docker
+
 ### 2026-10-05 — Excel-to-Word preview download cancelled (Application)
 
 - **Symptom**: Exporting an Excel sanaw as Word still looked wrong. Officers asked to drop that export.
