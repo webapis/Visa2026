@@ -69,6 +69,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-10-07 — Docker Hub Excel Preview matches the downloaded sanaw (Application)
+
+- **Symptom**: Same yellow-marks sanaw. Local F5 Preview was right. `10.100.128.26` Preview was not. Download Excel from that host already opened correctly in Excel.
+- **Try**: Pull the Docker Hub image, hard-refresh, Preview the Excel card.
+- **Test**: Officer confirmed the Hub image. Preview on `10.100.128.26` matches the sheet.
+- **Root cause**: The container converted Excel to PDF with LibreOffice and skipped the print-area and fit-to-page steps. The downloaded `.xlsx` never used that step.
+- **Fix**: Excel Preview uses DevExpress first, same as local F5. Shipped in the Docker Hub image.
+- **Prevent**: Do not send Excel Preview through `soffice` while a clean DevExpress PDF is available.
+- **Cross-skill**: template-scan | lifecycle-docker
+
 ### 2026-10-07 — Excel Preview on Docker does not match the downloaded sheet (Application)
 
 - **Symptom**: Same yellow-marks sanaw. Local F5 Preview matches the sheet. On `10.100.128.26` Preview does not. Download Excel from Docker opens correctly in Excel (merged title, columns, both people, signatory).
