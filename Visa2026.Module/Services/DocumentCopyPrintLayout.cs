@@ -4,9 +4,10 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// How a passport or visa scan is placed for preview and print.
-/// The PDF page stays A4 so office printers keep the scale. The scan is drawn
-/// at its original size and sits along the bottom of the page. It is scaled
-/// down only when it would not fit the sheet.
+/// The PDF page stays A4 so office printers keep the scale. Passport and visa
+/// scans default to a landscape sheet: the scan keeps its original size and
+/// sits on the left, with the right side left blank. It is scaled down only
+/// when it would not fit the sheet.
 /// </summary>
 public enum DocumentCopyPrintSize
 {
@@ -62,10 +63,10 @@ public readonly record struct DocumentCopyPrintLayout(
     public static DocumentCopyPrintLayout DefaultFor(string? key)
     {
         if (IsVisaKey(key))
-            return new(DocumentCopyPrintSize.Visa, 0, DocumentCopyPageOrientation.Auto);
+            return new(DocumentCopyPrintSize.Visa, 0, DocumentCopyPageOrientation.Landscape);
 
         if (IsPassportKey(key))
-            return new(DocumentCopyPrintSize.PassportPage, 0, DocumentCopyPageOrientation.Auto);
+            return new(DocumentCopyPrintSize.PassportPage, 0, DocumentCopyPageOrientation.Landscape);
 
         return FitA4;
     }

@@ -103,13 +103,19 @@
                                             <div class="doc-copies-catalog__row-meta">
                                                 <div class="doc-copies-catalog__col-files" role="columnheader">@ColumnFiles</div>
                                                 <div class="doc-copies-catalog__col-status" role="columnheader">@ColumnStatus</div>
+                                                <div class="doc-copies-catalog__col-action" role="columnheader" aria-hidden="true"></div>
                                             </div>
                                         </div>
 
                                         @foreach (var row in typeSection.Rows)
                                         {
-                                            <div class="doc-copies-catalog__row @(row.IsReady ? null : "doc-copies-catalog__row--empty doc-copies-catalog__row--missing")"
-                                                 role="row">
+                                            var rowPreviewKey = PersonPreviewKey(row.PersonId, row.SlotKey);
+                                            var rowLoading = IsPreviewLoading(rowPreviewKey);
+                                            var canPreviewRow = row.IsReady && !rowLoading;
+
+                                            <div class="@GetTypeRowCssClass(row, canPreviewRow, rowLoading)"
+                                                 role="row"
+                                                 @onclick="@(() => OnTypeRowClickAsync(typeSection, row))">
                                                 <div class="doc-copies-catalog__col-person" role="cell">
                                                     <span class="doc-copies-catalog__record-label" title="@row.PersonName">@row.PersonName</span>
                                                 </div>
@@ -118,15 +124,39 @@
                                                 </div>
                                                 <div class="doc-copies-catalog__row-meta">
                                                     <div class="doc-copies-catalog__col-files" role="cell">
-                                                        @(row.IsReady ? row.FileCount.ToString() : "—")
+                                                        @(row.IsReady && row.FileCount > 0 ? row.FileCount.ToString() : "—")
                                                     </div>
                                                     <div class="doc-copies-catalog__col-status" role="cell">
                                                         <span class="@(row.IsReady ? "person-dossier__pill st-approved doc-copies-catalog__pill" : "person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing")">
                                                             @(row.IsReady ? StatusReady : StatusMissing)
                                                         </span>
                                                     </div>
+                                                    <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
+                                                        @if (canPreviewRow)
+                                                        {
+                                                            <button type="button"
+                                                                    class="doc-copies-catalog__preview-link"
+                                                                    disabled="@IsAnyPreviewLoading"
+                                                                    aria-label="@ActionPreview"
+                                                                    @onclick="@(() => PreviewTypeRowAsync(typeSection, row))">
+                                                                @ActionPreview
+                                                            </button>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
+
+                                            @if (rowLoading)
+                                            {
+                                                <div class="doc-copies-catalog__progress-row">
+                                                    <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                                         aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", row.PersonName)">
+                                                        <div class="app-report-package__preview-progress-track">
+                                                            <div class="app-report-package__preview-progress-indeterminate"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
                                         }
                                     </div>
                                 }
@@ -970,6 +1000,60 @@
             return;
 
         await PreviewMergedAsync(group);
+    }
+
+    private static string GetTypeRowCssClass(
+        ApplicationItemDocumentCopiesTypeRow row,
+        bool canPreview,
+        bool rowLoading)
+    {
+        var classes = new List<string> { "doc-copies-catalog__row" };
+        if (!row.IsReady)
+        {
+            classes.Add("doc-copies-catalog__row--empty");
+            classes.Add("doc-copies-catalog__row--missing");
+        }
+
+        if (canPreview)
+            classes.Add("doc-copies-catalog__row--clickable");
+        if (rowLoading)
+            classes.Add("doc-copies-catalog__row--loading");
+        return string.Join(' ', classes);
+    }
+
+    private async Task OnTypeRowClickAsync(
+        ApplicationItemDocumentCopiesTypeSection section,
+        ApplicationItemDocumentCopiesTypeRow row)
+    {
+        if (!row.IsReady || IsAnyPreviewLoading)
+            return;
+
+        await PreviewTypeRowAsync(section, row);
+    }
+
+    private async Task PreviewTypeRowAsync(
+        ApplicationItemDocumentCopiesTypeSection section,
+        ApplicationItemDocumentCopiesTypeRow row)
+    {
+        if (!row.IsReady || IsAnyPreviewLoading || row.PersonId == Guid.Empty)
+            return;
+
+        if (ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(row.SlotKey, section.FamilyKey))
+        {
+            await PreviewApplicationFormForPersonAsync(row.PersonId, row.PersonName);
+            return;
+        }
+
+        var line = PersonLines.FirstOrDefault(item => item.ApplicationItemId == row.PersonId);
+        if (line == null)
+            return;
+
+        var group = ApplicationItemLinkedDocumentsMerger.MergeBySlot([line])
+            .FirstOrDefault(item => string.Equals(item.SlotKey, row.SlotKey, StringComparison.Ordinal));
+        if (group == null || group.Files.Count == 0)
+            return;
+
+        await PreviewMergedAsync(group, row.PersonId, row.PersonName);
     }
 
     private async Task OnPersonGroupRowClickAsync(

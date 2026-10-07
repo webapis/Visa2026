@@ -81,7 +81,7 @@ disable-model-invocation: false
 | Where | Action |
 |-------|--------|
 | **`ApplicationItem`** ListView (multi-select) | **Document copies** (`ApplicationItemDocumentCopiesController`) |
-| Case workspace **Document copies** tab | **By person** / **By type** catalog of **linked records** (ID numbers); header chips filter roster; Preview → slot viewer only |
+| Case workspace **Document copies** tab | **By type** catalog of **linked records** (ID numbers); header chips filter roster; type Preview opens every ready file, person-row Preview opens one file; Preview → slot viewer only |
 
 Generate PDF / My PDF Jobs are **hidden** — document copies is the supported path.
 

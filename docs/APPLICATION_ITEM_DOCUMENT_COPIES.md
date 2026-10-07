@@ -158,7 +158,7 @@ Multi-select on **Application items** → **Document copies**. Scan slots appear
 
 ### Preview (inline slot or modal)
 
-**Preview** on a scan slot shows merged PDF in the global right-side preview slot (ListView) or in a resizable modal (legacy `ApplicationItemDocumentCopiesListHost` path). **Download** and **Batch summary** (multi-line) are in the preview header. **Application form** Preview on the case workspace (By person / By type) opens the same slot viewer; ListView catalog Preview also uses the slot when inline preview is on.
+**Preview** on a scan slot shows merged PDF in the global right-side preview slot (ListView) or in a resizable modal (legacy `ApplicationItemDocumentCopiesListHost` path). **Download** and **Batch summary** (multi-line) are in the preview header. **Application form** Preview on the case workspace opens the same slot viewer; ListView catalog Preview also uses the slot when inline preview is on.
 
 ## User-facing behaviour
 
@@ -185,7 +185,7 @@ The action is enabled only when at least one line is selected. Content opens in 
 ### Inline preview
 
 - **Scan slots:** merged PDF in the preview slot iframe; header offers **Download** (the PDF), **Download image**, and **Batch summary** (when 2+ lines and merge options allow). **Download image** returns the uploaded picture when the preview is a single image file. A one-page PDF becomes one JPEG. Several pages or several files become a ZIP of images named `{label}-images.zip` (original pictures kept as stored; PDF pages as `name-page-01.jpg`). Exclusive mode hides the slot list while previewing (same pattern as Resminamalar).
-- **Passport and visa scans:** the PDF page stays A4 so a normal print keeps scale. The scan is drawn at its original size and sits along the bottom of the page, with the rest of the sheet left blank. It is scaled down only when it would not fit the page. The preview header can rotate the scan and switch portrait or landscape paper. Download uses that placement. Person copies and header visa copies use the same controls. The package ZIP uses the same placement for current passport and visa copies, without the preview rotation.
+- **Passport and visa scans:** the PDF page stays A4 so a normal print keeps scale. The scan is drawn at its original size on a landscape sheet, on the left, with the right side left blank. It is scaled down only when it would not fit the page. The preview opens fit-to-page so the whole sheet is visible. Other copies stay fit-to-width. The preview header can rotate the scan and switch portrait or landscape paper. Download uses that placement. Person copies and header visa copies use the same controls. The package ZIP uses the same placement for current passport and visa copies, without the preview rotation.
 - **Application form:** **Preview** on a person row or the **Application form** type section opens `#visa-preview-slot` (same OpenPreviewOnly viewer as scans). Chrome/Edge cannot iframe XFA, so the slot renders the filled form with **pdf.js** (`enableXfa`, local `wwwroot/lib/pdfjs/`). Page paper is an SVG rect; dark fills are remapped to white for display. **Download** in the preview header still returns the filled XFA (or a ZIP of filled forms for several people). The application form does not offer **Download image**. **Download package** stays a PDF ZIP. Legacy hosts without inline preview still download immediately.
 
 ### Download package (replaces Generate PDF accept)
@@ -198,14 +198,13 @@ This is the **improved export action** — same ZIP as v1 **Generate PDF**, with
 
 Default package options mirror `PdfBatchEnqueueOptions` / full supporting-document ZIP defaults (`ApplicationItemDocumentPackageOptions.CreateDefaults()`).
 
-### Case workspace (By person / By type)
+### Case workspace (By type)
 
 On the in-process case **Document copies** tab:
 
 - Header people chips **include or hide** roster people (default: all selected). Catalog, Preview, and **Download package** use the filtered `Person.ID` set.
-- A **By person / By type** switch sits next to the Document copies title (not in case chrome). **By person** is the default.
-- **By person:** one section per selected person. Rows are **linked records** plus a generated **Application form** row. Row Preview opens that record (or that person's filled form) for that person.
-- **By type:** one section per document family (Passport, Education, Visa, …, **Application form** last). Rows are Person | Record | Files | Status. Section **Preview** merges all Ready files of that family for the chip-selected people (`Family:{family}` → `TryGetMergedFamilyPdf`). Application form Preview shows each filled XFA in the pdf.js viewer.
+- The catalog is grouped by document type only. There is no By person / By type switch.
+- One section per document family (Passport, Education, Visa, …, **Application form** last). Rows are Person | Record | Files | Status | Preview. Section **Preview** merges all Ready files of that family for the chip-selected people (`Family:{family}` → `TryGetMergedFamilyPdf`). A person-row **Preview** opens only that person's file, or that person's filled application form. Application form Preview shows each filled XFA in the pdf.js viewer.
 - Only records that are actually linked appear. Unlinked kinds are omitted (no phantom “Current passport / Missing”).
 - **Preview** still opens `#visa-preview-slot` as **viewer only** (`OpenPreviewOnly`). Package download uses the current header filter (unchanged).
 - Per-row checkboxes, person-section “preview all”, and a custom “Preview selected files” package are **out of scope**.

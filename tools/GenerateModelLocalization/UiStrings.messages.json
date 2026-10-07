@@ -4878,10 +4878,10 @@
     "ru-RU": "Альбомная"
   },
   "ApplicationItemDocumentCopies.PrintLayout.Hint": {
-    "en": "Original size, along the bottom of the A4 page.",
-    "tr-TR": "Özgün boyutta, A4 sayfanın altında.",
-    "tk-TM": "Asyl ölçegde, A4 sahypanyň aşagynda.",
-    "ru-RU": "В исходном размере, у нижнего края листа A4."
+    "en": "Original size, on the left of a landscape A4 page.",
+    "tr-TR": "Özgün boyutta, yatay A4 sayfanın solunda.",
+    "tk-TM": "Asyl ölçegde, keseligine A4 sahypanyň çepinde.",
+    "ru-RU": "В исходном размере, слева на альбомном листе A4."
   },
   "ApplicationItemDocumentCopies.DownloadImage.Error": {
     "en": "Could not download this file as an image.",

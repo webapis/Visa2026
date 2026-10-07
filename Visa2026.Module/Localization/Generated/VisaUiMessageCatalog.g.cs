@@ -273,10 +273,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationItemDocumentCopies.PrintLayout.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Original size, along the bottom of the A4 page.",
-            ["tr-TR"] = "Özgün boyutta, A4 sayfanın altında.",
-            ["tk-TM"] = "Asyl ölçegde, A4 sahypanyň aşagynda.",
-            ["ru-RU"] = "В исходном размере, у нижнего края листа A4.",
+            ["en-US"] = "Original size, on the left of a landscape A4 page.",
+            ["tr-TR"] = "Özgün boyutta, yatay A4 sayfanın solunda.",
+            ["tk-TM"] = "Asyl ölçegde, keseligine A4 sahypanyň çepinde.",
+            ["ru-RU"] = "В исходном размере, слева на альбомном листе A4.",
         },
         ["ApplicationItemDocumentCopies.Action.DownloadAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

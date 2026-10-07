@@ -12,16 +12,17 @@ public class DocumentCopyPrintLayoutTests
         var rect = layout.Measure(200, 120);
 
         Assert.Equal(DocumentCopyPrintSize.PassportPage, layout.Size);
-        Assert.Equal(DocumentCopyPrintLayout.A4WidthPt, rect.PageWidthPt);
-        Assert.Equal(DocumentCopyPrintLayout.A4HeightPt, rect.PageHeightPt);
+        Assert.Equal(DocumentCopyPageOrientation.Landscape, layout.Orientation);
+        Assert.Equal(DocumentCopyPrintLayout.A4HeightPt, rect.PageWidthPt);
+        Assert.Equal(DocumentCopyPrintLayout.A4WidthPt, rect.PageHeightPt);
         Assert.Equal(200, rect.Width, 1);
         Assert.Equal(120, rect.Height, 1);
         Assert.Equal(DocumentCopyPrintLayout.FitMarginPt, rect.X, 1);
         Assert.Equal(
-            DocumentCopyPrintLayout.A4HeightPt - DocumentCopyPrintLayout.FitMarginPt - 120,
+            DocumentCopyPrintLayout.A4WidthPt - DocumentCopyPrintLayout.FitMarginPt - 120,
             rect.Y,
             1);
-        Assert.True(rect.Y > DocumentCopyPrintLayout.A4HeightPt / 2);
+        Assert.True(rect.X + rect.Width < DocumentCopyPrintLayout.A4HeightPt / 2);
     }
 
     [Fact]
@@ -31,10 +32,13 @@ public class DocumentCopyPrintLayoutTests
         var rect = layout.Measure(180, 100);
 
         Assert.Equal(DocumentCopyPrintSize.Visa, layout.Size);
+        Assert.Equal(DocumentCopyPageOrientation.Landscape, layout.Orientation);
+        Assert.Equal(DocumentCopyPrintLayout.A4HeightPt, rect.PageWidthPt);
+        Assert.Equal(DocumentCopyPrintLayout.A4WidthPt, rect.PageHeightPt);
         Assert.Equal(180, rect.Width, 1);
         Assert.Equal(100, rect.Height, 1);
         Assert.Equal(
-            DocumentCopyPrintLayout.A4HeightPt - DocumentCopyPrintLayout.FitMarginPt - 100,
+            DocumentCopyPrintLayout.A4WidthPt - DocumentCopyPrintLayout.FitMarginPt - 100,
             rect.Y,
             1);
     }
@@ -45,12 +49,12 @@ public class DocumentCopyPrintLayoutTests
         var layout = DocumentCopyPrintLayout.DefaultFor("Passport.");
         var rect = layout.Measure(2000, 1000);
 
-        double maxW = DocumentCopyPrintLayout.A4WidthPt - 2 * DocumentCopyPrintLayout.FitMarginPt;
+        double maxW = DocumentCopyPrintLayout.A4HeightPt - 2 * DocumentCopyPrintLayout.FitMarginPt;
         Assert.Equal(maxW, rect.Width, 1);
         Assert.Equal(maxW / 2, rect.Height, 1);
         Assert.Equal(DocumentCopyPrintLayout.FitMarginPt, rect.X, 1);
         Assert.Equal(
-            DocumentCopyPrintLayout.A4HeightPt - DocumentCopyPrintLayout.FitMarginPt - rect.Height,
+            DocumentCopyPrintLayout.A4WidthPt - DocumentCopyPrintLayout.FitMarginPt - rect.Height,
             rect.Y,
             1);
     }
@@ -65,7 +69,7 @@ public class DocumentCopyPrintLayoutTests
         Assert.Equal(200, rect.Width, 1);
         Assert.Equal(120, rect.Height, 1);
         Assert.Equal(
-            DocumentCopyPrintLayout.A4HeightPt - DocumentCopyPrintLayout.FitMarginPt - 120,
+            DocumentCopyPrintLayout.A4WidthPt - DocumentCopyPrintLayout.FitMarginPt - 120,
             rect.Y,
             1);
     }

@@ -468,11 +468,11 @@
         (function () {
             window.visaDocumentCopyPreview = window.visaDocumentCopyPreview || {};
 
-            window.visaDocumentCopyPreview.createPdfBlobUrl = function (byteArray) {
+            window.visaDocumentCopyPreview.createPdfBlobUrl = function (byteArray, fitPage) {
                 var bytes = byteArray instanceof Uint8Array ? byteArray : new Uint8Array(byteArray);
                 var blob = new Blob([bytes], { type: "application/pdf" });
                 var baseUrl = URL.createObjectURL(blob);
-                return baseUrl + "#view=FitH";
+                return baseUrl + (fitPage ? "#view=Fit" : "#view=FitH");
             };
 
             window.visaDocumentCopyPreview.revokePdfBlobUrl = function (url) {

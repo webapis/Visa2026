@@ -11,26 +11,7 @@
 
 <div class="dc-page">
     <header class="dc-page__head">
-        <div class="dc-page__head-row">
-            <h2>Document copies</h2>
-            @if (_rosterIds.Count > 0 && _lineIds.Count > 0)
-            {
-                <div class="dc-view-switch" role="group" aria-label="Document copies layout">
-                    <button type="button"
-                            class="dc-view-switch__btn @(!_groupByType ? "is-active" : null)"
-                            aria-pressed="@(!_groupByType)"
-                            @onclick="@(() => SetGroupByType(false))">
-                        By person
-                    </button>
-                    <button type="button"
-                            class="dc-view-switch__btn @(_groupByType ? "is-active" : null)"
-                            aria-pressed="@_groupByType"
-                            @onclick="@(() => SetGroupByType(true))">
-                        By type
-                    </button>
-                </div>
-            }
-        </div>
+        <h2>Document copies</h2>
         <p>@DocumentsSubtitle</p>
     </header>
 
@@ -50,8 +31,8 @@
                                                         ApplicationProfileInstanceId="ApplicationProfileInstanceId"
                                                         MergedGroups="_mergedGroups"
                                                         PersonLines="_personLines"
-                                                        GroupByPerson="@(!_groupByType)"
-                                                        GroupByDocumentType="@_groupByType"
+                                                        GroupByPerson="false"
+                                                        GroupByDocumentType="true"
                                                         UiCultureName="_uiCultureName"
                                                         UseInlinePreview="true"
                                                         RefreshRequested="_refreshRequested"
@@ -71,7 +52,6 @@
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
-    private bool _groupByType;
     private IReadOnlyList<Guid> _rosterIds = Array.Empty<Guid>();
     private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
     private IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> _personLines =
@@ -91,18 +71,10 @@
             if (_lineIds.Count == 0)
                 return "Click a person in the header to include them in Document copies.";
 
-            if (_groupByType)
-            {
-                if (_lineIds.Count == _rosterIds.Count)
-                    return "Grouped by document type. Preview a type to open all ready files for the selected people.";
-
-                return $"Showing {_lineIds.Count} of {_rosterIds.Count} people by document type. Click a header chip to include or hide someone.";
-            }
-
             if (_lineIds.Count == _rosterIds.Count)
-                return "Scan and manage required document copies. Click a header chip to hide a person.";
+                return "Grouped by document type. Preview a type to open all ready files. Preview a person to open only that file.";
 
-            return $"Showing {_lineIds.Count} of {_rosterIds.Count} people. Click a header chip to include or hide someone.";
+            return $"Showing {_lineIds.Count} of {_rosterIds.Count} people by document type. Preview a type to open all ready files. Preview a person to open only that file.";
         }
     }
 
@@ -162,14 +134,6 @@
         if (CatalogReloaded.HasDelegate)
             await CatalogReloaded.InvokeAsync();
         await InvokeAsync(StateHasChanged);
-    }
-
-    private void SetGroupByType(bool groupByType)
-    {
-        if (_groupByType == groupByType)
-            return;
-
-        _groupByType = groupByType;
     }
 
     private async Task HandleInlinePreviewAsync(DocumentCopiesInlinePreviewRequest request)

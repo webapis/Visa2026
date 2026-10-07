@@ -348,7 +348,10 @@
             _pdfDownloadContent = content;
             _pdfDownloadFileName = string.IsNullOrWhiteSpace(fileName) ? "document-copies.pdf" : fileName;
             _pdfDownloadContentType = "application/pdf";
-            _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", content);
+            _pdfBlobUrl = await JS.InvokeAsync<string>(
+                "visaDocumentCopyPreview.createPdfBlobUrl",
+                content,
+                _printLayout.UsesDocumentSize);
         }
         catch (Exception ex)
         {

@@ -25,6 +25,26 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-10-07 — Passport and visa default to landscape, scan on the left (preview)
+
+- **Symptom**: Fit-to-page did not change the default. A portrait sheet scales an open passport until it fills the page. The wanted default is the scan on the left of a landscape sheet, with the right side blank, for visa as well.
+- **Try**: Person preview of a passport. Landscape gives the left-side placement. Portrait fills the sheet.
+- **Test**: `DocumentCopyPrintLayoutTests` updated for the landscape default. Restart the app and open a passport and a visa preview. Landscape should already be selected.
+- **Root cause**: `DefaultFor` used `Auto`, and `Auto` still built a portrait page.
+- **Fix**: Passport and visa defaults are landscape A4. The scan stays at original size on the left. Portrait is still available from the preview header.
+- **Prevent**: Do not default passport or visa copies to a portrait page.
+- **Cross-skill**: document-copies | visa2026-preview-slot
+
+### 2026-10-07 — Passport and visa preview opens fit-to-page (preview)
+
+- **Symptom**: Passport preview opened zoomed to the scan (about 116%, fit width), so the A4 sheet and the blank side were off screen. The whole-page view (about 64%) is what officers want as the default, for visa as well.
+- **Try**: Document copies preview of a passport. Compare fit-width with the whole A4 page.
+- **Test**: Not rebuilt in this session; the running app had the output DLLs locked. Restart and open a passport and a visa preview.
+- **Root cause**: `createPdfBlobUrl` always appended `#view=FitH`.
+- **Fix**: Passport and visa previews use `#view=Fit` so the whole A4 page is visible. Other copies stay fit-to-width.
+- **Prevent**: Do not open passport or visa copies fit-to-width. Letters and diplomas stay fit-to-width.
+- **Cross-skill**: document-copies | visa2026-preview-slot
+
 ### 2026-10-07 — Passport and visa copies sit at original size on the bottom of A4 (preview)
 
 - **Symptom**: After the document-size change, passport and visa scans were still a small box floating in the center of the A4. The source photo has the booklet along the bottom, with the rest of the frame blank.

@@ -193,7 +193,10 @@
             _fileName = string.IsNullOrWhiteSpace(fileName) ? headerLabel : fileName;
             _pdfDownloadContent = content;
             _pdfDownloadFileName = string.IsNullOrWhiteSpace(fileName) ? "document-copies.pdf" : fileName;
-            _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", content);
+            _pdfBlobUrl = await JS.InvokeAsync<string>(
+                "visaDocumentCopyPreview.createPdfBlobUrl",
+                content,
+                _printLayout.UsesDocumentSize);
         }
         catch (Exception ex)
         {
