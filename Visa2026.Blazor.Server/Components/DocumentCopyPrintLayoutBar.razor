@@ -1,0 +1,74 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+
+<div class="doc-copy-print-layout" role="group" aria-label="@GroupLabel">
+    <div class="doc-copy-print-layout__group" role="group" aria-label="@RotateGroupLabel">
+        <button type="button"
+                class="doc-copy-print-layout__btn"
+                disabled="@Disabled"
+                title="@RotateLeftLabel"
+                aria-label="@RotateLeftLabel"
+                @onclick="RotateLeft">↺</button>
+        <button type="button"
+                class="doc-copy-print-layout__btn"
+                disabled="@Disabled"
+                title="@RotateRightLabel"
+                aria-label="@RotateRightLabel"
+                @onclick="RotateRight">↻</button>
+    </div>
+    <div class="doc-copy-print-layout__group" role="group" aria-label="@OrientationGroupLabel">
+        <button type="button"
+                class="doc-copy-print-layout__btn"
+                disabled="@Disabled"
+                aria-pressed="@IsOrientation(DocumentCopyPageOrientation.Portrait)"
+                @onclick="() => SetOrientation(DocumentCopyPageOrientation.Portrait)">@PortraitLabel</button>
+        <button type="button"
+                class="doc-copy-print-layout__btn"
+                disabled="@Disabled"
+                aria-pressed="@IsOrientation(DocumentCopyPageOrientation.Landscape)"
+                @onclick="() => SetOrientation(DocumentCopyPageOrientation.Landscape)">@LandscapeLabel</button>
+    </div>
+    <p class="doc-copy-print-layout__hint">@Hint</p>
+</div>
+
+@code {
+    [Parameter] public DocumentCopyPrintLayout Layout { get; set; }
+    [Parameter] public EventCallback<DocumentCopyPrintLayout> LayoutChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private string Culture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, Culture);
+
+    private string GroupLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.Group");
+    private string RotateGroupLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.RotateGroup");
+    private string RotateLeftLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.RotateLeft");
+    private string RotateRightLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.RotateRight");
+    private string OrientationGroupLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.OrientationGroup");
+    private string PortraitLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.Portrait");
+    private string LandscapeLabel => Msg("ApplicationItemDocumentCopies.PrintLayout.Landscape");
+    private string Hint => Msg("ApplicationItemDocumentCopies.PrintLayout.Hint");
+
+    private bool IsOrientation(DocumentCopyPageOrientation orientation) => Layout.Orientation == orientation;
+
+    private Task RotateLeft() => LayoutChanged.InvokeAsync(Layout.Rotate(-90));
+
+    private Task RotateRight() => LayoutChanged.InvokeAsync(Layout.Rotate(90));
+
+    private Task SetOrientation(DocumentCopyPageOrientation orientation)
+    {
+        if (Layout.Orientation == orientation)
+            return Task.CompletedTask;
+
+        return LayoutChanged.InvokeAsync(Layout.WithOrientation(orientation));
+    }
+}

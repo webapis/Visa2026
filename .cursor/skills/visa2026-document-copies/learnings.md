@@ -25,6 +25,26 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-10-07 — Passport and visa copies sit at original size on the bottom of A4 (preview)
+
+- **Symptom**: After the document-size change, passport and visa scans were still a small box floating in the center of the A4. The source photo has the booklet along the bottom, with the rest of the frame blank.
+- **Try**: Document copies preview of an open passport and a visa. Compare with the source photo.
+- **Test**: `DocumentCopyPrintLayoutTests` 15 passed.
+- **Root cause**: `Measure` fitted the scan into a standard millimetre box and centered that box on the page.
+- **Fix**: Passport and visa scans are drawn at their original point size and aligned to the bottom-left of the A4, with a small margin. A scan larger than the page is scaled down to fit and still sits on the bottom. Rotate and portrait/landscape remain. Letters and diplomas stay fit-to-A4 and centered.
+- **Prevent**: Do not center a passport or visa scan, and do not rescale it into a fixed millimetre box. Keep the page A4.
+- **Cross-skill**: document-copies | visa2026-preview-slot
+
+### 2026-10-07 — Passport and visa copies print at document size (preview)
+
+- **Symptom**: Passport and visa scans in Document copies were scaled to fill an A4 page, so preview and print were larger than the real document. Scans also arrived sideways.
+- **Try**: Document copies preview of a passport raster. Header offers rotate, portrait/landscape, and Passport page / Open passport / Visa.
+- **Test**: `DocumentCopyPrintLayoutTests` 15 passed. Module compile succeeded.
+- **Root cause**: `TryWriteSinglePagePdfFromRasterBytes` always fitted the image to A4 (landscape only for visas).
+- **Fix**: Passport and visa slices stay on A4 paper but are drawn at ID-3 (125×88 mm), open passport (176×125 mm), or visa sticker (120×80 mm). Preview passes `DocumentCopyPrintLayout` through the item, person, and header mergers. Package ZIP uses the default size without the preview rotation.
+- **Prevent**: Do not scale passport or visa rasters to the full A4 content box. Letters and diplomas stay fit-to-A4.
+- **Cross-skill**: document-copies | visa2026-preview-slot
+
 ### 2026-09-21 — Child dependent has no Education.Current gap (readiness)
 
 - **Symptom**: Family-member cases treated missing Education as a required diploma slot. Children usually have no Education BO; import does not create one.

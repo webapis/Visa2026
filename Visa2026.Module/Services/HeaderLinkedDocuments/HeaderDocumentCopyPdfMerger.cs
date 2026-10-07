@@ -30,7 +30,8 @@ public sealed class HeaderDocumentCopyPdfMerger
         string recordKey,
         string recordLabel,
         out byte[]? content,
-        out string? fileName)
+        out string? fileName,
+        DocumentCopyPrintLayout? printLayout = null)
     {
         content = null;
         fileName = null;
@@ -59,7 +60,12 @@ public sealed class HeaderDocumentCopyPdfMerger
                 if (!TryLoadFileContent(objectSpace, file.FileDataId, out var fileContent, out var fileNameForExt))
                     continue;
 
-                if (!TryCreateMergeSlicePdfStream(fileContent, fileNameForExt, recordKey, out var pdfStream))
+                if (!TryCreateMergeSlicePdfStream(
+                        fileContent,
+                        fileNameForExt,
+                        recordKey,
+                        printLayout ?? DocumentCopyPrintLayout.DefaultFor(recordKey),
+                        out var pdfStream))
                     continue;
 
                 pdfStreams.Add(pdfStream);
@@ -125,6 +131,7 @@ public sealed class HeaderDocumentCopyPdfMerger
         byte[] content,
         string sourceFileName,
         string recordKey,
+        DocumentCopyPrintLayout layout,
         out MemoryStream pdfStream)
     {
         pdfStream = null!;
@@ -132,17 +139,7 @@ public sealed class HeaderDocumentCopyPdfMerger
             return false;
 
         string ext = Path.GetExtension(sourceFileName ?? string.Empty);
-
-        if (DocumentFileUploadConstraints.IsLikelyPdf(content))
-        {
-            var copy = new MemoryStream(content.Length);
-            copy.Write(content, 0, content.Length);
-            copy.Position = 0;
-            pdfStream = copy;
-            return true;
-        }
-
-        if (IsPdfExtension(ext))
+        if (IsPdfExtension(ext) && !DocumentFileUploadConstraints.IsLikelyPdf(content))
         {
             logger.LogWarning(
                 "Header document copies merge: file {FileName} has PDF extension but payload is not a PDF signature; trying image decode for record {RecordKey}.",
@@ -151,7 +148,7 @@ public sealed class HeaderDocumentCopyPdfMerger
         }
 
         var outMs = new MemoryStream();
-        if (!SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes(content, outMs, logger, landscape: false))
+        if (!SupportingDocumentsPdfSharpHelper.TryWriteSlice(content, outMs, logger, layout, fitA4Landscape: false))
             return false;
 
         outMs.Position = 0;

@@ -31,6 +31,14 @@
         </div>
     </div>
 
+    @if (ShowPrintLayout)
+    {
+        <DocumentCopyPrintLayoutBar Layout="_printLayout"
+                                    Disabled="_loading"
+                                    UiCultureName="@EffectiveUiCulture"
+                                    LayoutChanged="OnPrintLayoutChanged" />
+    }
+
     <div class="report-package-inline-preview__body app-item-doc-copies-preview">
         @if (_loading)
         {
@@ -81,6 +89,8 @@
     private byte[]? _pdfDownloadContent;
     private string _pdfDownloadFileName = string.Empty;
     private string _activeRecordKey = string.Empty;
+    private string _previewHeaderLabel = string.Empty;
+    private DocumentCopyPrintLayout _printLayout;
     private string _previewLoadingLabel = string.Empty;
     private int _layoutSyncGeneration;
 
@@ -102,19 +112,35 @@
     private string ActionClose => Msg("PersonDocumentCopies.Action.Close");
     private string ActionDownload => Msg("PersonDocumentCopies.Action.Download");
 
+    private bool ShowPrintLayout => DocumentCopyPrintLayout.AppliesTo(_activeRecordKey);
+
     public async Task OpenAsync(PersonDocumentCopiesInlinePreviewRequest request)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.RecordKey))
             return;
 
-        _activeRecordKey = request.RecordKey;
-        _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
+        if (!string.Equals(_activeRecordKey, request.RecordKey, StringComparison.Ordinal))
+            _printLayout = DocumentCopyPrintLayout.DefaultFor(request.RecordKey);
 
+        _activeRecordKey = request.RecordKey;
+        _previewHeaderLabel = request.DisplayName;
+        _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
+        await LoadCurrentPdfAsync();
+    }
+
+    private async Task OnPrintLayoutChanged(DocumentCopyPrintLayout layout)
+    {
+        _printLayout = layout;
+        await LoadCurrentPdfAsync();
+    }
+
+    private async Task LoadCurrentPdfAsync()
+    {
         await OpenPdfAsync(
-            request.DisplayName,
+            _previewHeaderLabel,
             () =>
             {
-                if (!FileAccess.TryGetMergedRecordPdf(PersonId, request.RecordKey, out var result) || result == null)
+                if (!FileAccess.TryGetMergedRecordPdf(PersonId, _activeRecordKey, out var result, _printLayout) || result == null)
                     return (null, null, PreviewError);
 
                 return (result.Content, result.FileName, null);
@@ -221,6 +247,8 @@
         _error = string.Empty;
         _loading = false;
         _activeRecordKey = string.Empty;
+        _previewHeaderLabel = string.Empty;
+        _printLayout = default;
         _previewLoadingLabel = string.Empty;
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;

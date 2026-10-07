@@ -23,7 +23,8 @@ public sealed class PersonDocumentFileAccess
     public bool TryGetMergedRecordPdf(
         Guid personId,
         string recordKey,
-        out ApplicationItemDocumentFileResult? result)
+        out ApplicationItemDocumentFileResult? result,
+        DocumentCopyPrintLayout? printLayout = null)
     {
         result = null;
         if (personId == Guid.Empty || string.IsNullOrWhiteSpace(recordKey))
@@ -39,7 +40,7 @@ public sealed class PersonDocumentFileAccess
         if (record == null)
             return false;
 
-        if (!pdfMerger.TryBuildMergedPdf(personId, recordKey, record.RecordLabel, out var content, out var fileName)
+        if (!pdfMerger.TryBuildMergedPdf(personId, recordKey, record.RecordLabel, out var content, out var fileName, printLayout)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))

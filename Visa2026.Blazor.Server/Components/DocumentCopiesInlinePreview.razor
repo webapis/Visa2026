@@ -49,6 +49,14 @@
         </div>
     </div>
 
+    @if (ShowPrintLayout)
+    {
+        <DocumentCopyPrintLayoutBar Layout="_printLayout"
+                                    Disabled="_loading"
+                                    UiCultureName="@EffectiveUiCulture"
+                                    LayoutChanged="OnPrintLayoutChanged" />
+    }
+
     @if (!string.IsNullOrWhiteSpace(_imageDownloadError))
     {
         <div class="app-item-doc-copies-preview__image-error" role="alert">@_imageDownloadError</div>
@@ -122,6 +130,9 @@
     private string _pdfDownloadFileName = string.Empty;
     private string _pdfDownloadContentType = "application/pdf";
     private string _activeSlotKey = string.Empty;
+    private string _printLayoutKey = string.Empty;
+    private string _previewHeaderLabel = string.Empty;
+    private DocumentCopyPrintLayout _printLayout;
     private string _imageFamilyKey = string.Empty;
     private bool _offerImageDownload;
     private bool _imageDownloadBusy;
@@ -162,6 +173,10 @@
         && ApplicationItemIds.Count >= 2
         && ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, _packageOptions, out _);
 
+    private bool ShowPrintLayout =>
+        DocumentCopyPrintLayout.AppliesTo(_printLayoutKey)
+        && !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(_activeSlotKey, _imageFamilyKey);
+
     public async Task OpenAsync(DocumentCopiesInlinePreviewRequest request)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.SlotKey))
@@ -177,28 +192,47 @@
             ApplicationItemDocumentCopiesTypeCatalog.TryParseFamilyPreviewKey(request.SlotKey, out familyKey);
         _imageFamilyKey = familyKey ?? string.Empty;
         _offerImageDownload = !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(request.SlotKey, _imageFamilyKey);
+        _previewHeaderLabel = request.DisplayName;
 
         if (ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(request.SlotKey, request.FamilyKey))
         {
+            _printLayoutKey = string.Empty;
             await OpenApplicationFormAsync(request.DisplayName);
             return;
         }
 
+        var layoutKey = !string.IsNullOrWhiteSpace(_imageFamilyKey)
+            ? _imageFamilyKey + "."
+            : request.SlotKey;
+        if (!string.Equals(_printLayoutKey, layoutKey, StringComparison.Ordinal))
+        {
+            _printLayoutKey = layoutKey;
+            _printLayout = DocumentCopyPrintLayout.DefaultFor(layoutKey);
+        }
+
+        await LoadCurrentPdfAsync();
+    }
+
+    private async Task OnPrintLayoutChanged(DocumentCopyPrintLayout layout)
+    {
+        _printLayout = layout;
+        await LoadCurrentPdfAsync();
+    }
+
+    private async Task LoadCurrentPdfAsync()
+    {
         await OpenPdfAsync(
-            request.DisplayName,
+            _previewHeaderLabel,
             () =>
             {
-                var familyKey = request.FamilyKey;
-                if (string.IsNullOrWhiteSpace(familyKey))
-                    ApplicationItemDocumentCopiesTypeCatalog.TryParseFamilyPreviewKey(request.SlotKey, out familyKey);
-
-                if (!string.IsNullOrWhiteSpace(familyKey))
+                if (!string.IsNullOrWhiteSpace(_imageFamilyKey))
                 {
                     if (!FileAccess.TryGetMergedFamilyPdf(
                             ApplicationItemIds,
-                            familyKey,
+                            _imageFamilyKey,
                             out var familyResult,
-                            ApplicationProfileInstanceId)
+                            ApplicationProfileInstanceId,
+                            _printLayout)
                         || familyResult == null)
                         return (null, null, PreviewError);
 
@@ -207,9 +241,10 @@
 
                 if (!FileAccess.TryGetMergedSlotPdf(
                         ApplicationItemIds,
-                        request.SlotKey,
+                        _activeSlotKey,
                         out var result,
-                        ApplicationProfileInstanceId)
+                        ApplicationProfileInstanceId,
+                        _printLayout)
                     || result == null)
                     return (null, null, PreviewError);
 
@@ -510,6 +545,9 @@
         _error = string.Empty;
         _loading = false;
         _activeSlotKey = string.Empty;
+        _printLayoutKey = string.Empty;
+        _previewHeaderLabel = string.Empty;
+        _printLayout = default;
         _previewLoadingLabel = string.Empty;
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;

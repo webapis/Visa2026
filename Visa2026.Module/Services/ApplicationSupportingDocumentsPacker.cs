@@ -1546,16 +1546,7 @@ public static class ApplicationSupportingDocumentsPacker
         if (content == null || content.Length == 0)
             return false;
 
-        if (DocumentFileUploadConstraints.IsLikelyPdf(content))
-        {
-            var copy = new MemoryStream(content.Length);
-            copy.Write(content, 0, content.Length);
-            copy.Position = 0;
-            pdfStream = copy;
-            return true;
-        }
-
-        if (IsPdfExtension(ext))
+        if (IsPdfExtension(ext) && !DocumentFileUploadConstraints.IsLikelyPdf(content))
         {
             logger.LogWarning(
                 "ZIP packer: file has extension {Ext} but payload is not a PDF signature; trying image decode for {MergeKind} merge.",
@@ -1563,12 +1554,14 @@ public static class ApplicationSupportingDocumentsPacker
                 mergeKind);
         }
 
-        bool landscapePage = mergeKind.Equals("CurrentVisas", StringComparison.OrdinalIgnoreCase);
+        var layout = DocumentCopyPrintLayout.DefaultFor(mergeKind);
+        bool landscapePage = !layout.UsesDocumentSize
+            && mergeKind.Equals("CurrentVisas", StringComparison.OrdinalIgnoreCase);
 
         try
         {
             var outMs = new MemoryStream();
-            if (!SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes(content, outMs, logger, landscapePage))
+            if (!SupportingDocumentsPdfSharpHelper.TryWriteSlice(content, outMs, logger, layout, landscapePage))
                 return false;
             outMs.Position = 0;
             pdfStream = outMs;

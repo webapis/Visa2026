@@ -10,6 +10,7 @@
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.RuntimeLogging
+@using Visa2026.Blazor.Server.Components
 @inject ApplicationItemDocumentFileAccess FileAccess
 @inject IFileDownloader FileDownloader
 @inject IXafCultureInfoService CultureInfoService
@@ -85,6 +86,13 @@
     </HeaderContentTemplate>
     <BodyContentTemplate>
         <div class="app-item-doc-copies-preview">
+            @if (ShowPrintLayout)
+            {
+                <DocumentCopyPrintLayoutBar Layout="_printLayout"
+                                            Disabled="_loading"
+                                            UiCultureName="@EffectiveUiCulture"
+                                            LayoutChanged="OnPrintLayoutChanged" />
+            }
             @if (!string.IsNullOrWhiteSpace(_imageDownloadError) && !_loading)
             {
                 <div class="app-item-doc-copies-preview__image-error" role="alert">@_imageDownloadError</div>
@@ -136,6 +144,8 @@
     private byte[]? _pdfDownloadContent;
     private string _pdfDownloadFileName = string.Empty;
     private string _activeSlotKey = string.Empty;
+    private string _slotLabel = string.Empty;
+    private DocumentCopyPrintLayout _printLayout;
     private bool _offerImageDownload;
     private bool _imageDownloadBusy;
     private string _imageDownloadError = string.Empty;
@@ -190,6 +200,10 @@
         && ApplicationItemIds.Count >= 2
         && ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, PackageOptions, out _);
 
+    private bool ShowPrintLayout =>
+        DocumentCopyPrintLayout.AppliesTo(_activeSlotKey)
+        && !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(_activeSlotKey);
+
     private string FormatPreviewLoadingLabel(string displayName) =>
         VisaUiMessages.FormatForCulture(
             EffectiveUiCulture,
@@ -198,30 +212,48 @@
 
     public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
     {
+        if (!string.Equals(_activeSlotKey, slotKey, StringComparison.Ordinal))
+            _printLayout = DocumentCopyPrintLayout.DefaultFor(slotKey);
+
         _activeSlotKey = slotKey;
+        _slotLabel = slotLabel;
         _imageDownloadError = string.Empty;
         _imageDownloadBusy = false;
         _offerImageDownload = !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(slotKey);
         _previewLoadingLabel = FormatPreviewLoadingLabel(slotLabel);
+        await LoadSlotPdfAsync(resetWindow: true);
+    }
+
+    private async Task OnPrintLayoutChanged(DocumentCopyPrintLayout layout)
+    {
+        _printLayout = layout;
+        await LoadSlotPdfAsync(resetWindow: false);
+    }
+
+    private async Task LoadSlotPdfAsync(bool resetWindow)
+    {
         await OpenPdfAsync(
-            slotLabel,
+            _slotLabel,
             () =>
             {
                 if (!FileAccess.TryGetMergedSlotPdf(
                         ApplicationItemIds,
-                        slotKey,
+                        _activeSlotKey,
                         out var result,
-                        ApplicationProfileInstanceId)
+                        ApplicationProfileInstanceId,
+                        _printLayout)
                     || result == null)
                     return (null, null, PreviewError);
 
                 return (result.Content, result.FileName, null);
-            });
+            },
+            resetWindow);
     }
 
     private async Task OpenPdfAsync(
         string headerLabel,
-        Func<(byte[]? Content, string? FileName, string? Error)> loadPdf)
+        Func<(byte[]? Content, string? FileName, string? Error)> loadPdf,
+        bool resetWindow = true)
     {
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;
@@ -229,7 +261,8 @@
         _previewLoadingLabel = FormatPreviewLoadingLabel(headerLabel);
         _error = string.Empty;
         _loading = true;
-        _windowState.Reset();
+        if (resetWindow)
+            _windowState.Reset();
         _visible = true;
 
         await RevokePdfBlobUrlAsync();

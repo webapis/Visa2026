@@ -194,6 +194,90 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Surat göçür",
             ["ru-RU"] = "Скачать изображение",
         },
+        ["ApplicationItemDocumentCopies.PrintLayout.Group"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport and visa page size",
+            ["tr-TR"] = "Pasaport ve vize sayfa boyutu",
+            ["tk-TM"] = "Pasport we wiza sahypa ölçegi",
+            ["ru-RU"] = "Размер страницы паспорта и визы",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.RotateGroup"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rotation",
+            ["tr-TR"] = "Döndürme",
+            ["tk-TM"] = "Aýlamak",
+            ["ru-RU"] = "Поворот",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.RotateLeft"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rotate left",
+            ["tr-TR"] = "Sola döndür",
+            ["tk-TM"] = "Çepe aýla",
+            ["ru-RU"] = "Повернуть влево",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.RotateRight"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rotate right",
+            ["tr-TR"] = "Sağa döndür",
+            ["tk-TM"] = "Saga aýla",
+            ["ru-RU"] = "Повернуть вправо",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.SizeGroup"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document size",
+            ["tr-TR"] = "Belge boyutu",
+            ["tk-TM"] = "Resminama ölçegi",
+            ["ru-RU"] = "Размер документа",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.PassportPage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport page",
+            ["tr-TR"] = "Pasaport sayfası",
+            ["tk-TM"] = "Pasport sahypasy",
+            ["ru-RU"] = "Страница паспорта",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.PassportOpen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open passport",
+            ["tr-TR"] = "Açık pasaport",
+            ["tk-TM"] = "Açyk pasport",
+            ["ru-RU"] = "Раскрытый паспорт",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.OrientationGroup"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Orientation",
+            ["tr-TR"] = "Yön",
+            ["tk-TM"] = "Ugur",
+            ["ru-RU"] = "Ориентация",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.Portrait"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Portrait",
+            ["tr-TR"] = "Dikey",
+            ["tk-TM"] = "Dik",
+            ["ru-RU"] = "Книжная",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.Landscape"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Landscape",
+            ["tr-TR"] = "Yatay",
+            ["tk-TM"] = "Keseligine",
+            ["ru-RU"] = "Альбомная",
+        },
+        ["ApplicationItemDocumentCopies.PrintLayout.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Original size, along the bottom of the A4 page.",
+            ["tr-TR"] = "Özgün boyutta, A4 sayfanın altında.",
+            ["tk-TM"] = "Asyl ölçegde, A4 sahypanyň aşagynda.",
+            ["ru-RU"] = "В исходном размере, у нижнего края листа A4.",
+        },
         ["ApplicationItemDocumentCopies.Action.DownloadAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Download all",

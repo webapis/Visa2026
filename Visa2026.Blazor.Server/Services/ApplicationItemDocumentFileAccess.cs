@@ -103,7 +103,8 @@ public sealed class ApplicationItemDocumentFileAccess
         IReadOnlyList<Guid> applicationPersonIds,
         string slotKey,
         out ApplicationItemDocumentFileResult? result,
-        Guid applicationId = default)
+        Guid applicationId = default,
+        DocumentCopyPrintLayout? printLayout = null)
     {
         result = null;
         if (applicationPersonIds == null || applicationPersonIds.Count == 0 || string.IsNullOrWhiteSpace(slotKey))
@@ -144,7 +145,8 @@ public sealed class ApplicationItemDocumentFileAccess
                 mergedGroup.Files,
                 out var content,
                 out var fileName,
-                application.ID)
+                application.ID,
+                printLayout)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))
@@ -165,7 +167,8 @@ public sealed class ApplicationItemDocumentFileAccess
         IReadOnlyList<Guid> applicationPersonIds,
         string familyKey,
         out ApplicationItemDocumentFileResult? result,
-        Guid applicationId = default)
+        Guid applicationId = default,
+        DocumentCopyPrintLayout? printLayout = null)
     {
         result = null;
         if (applicationPersonIds == null
@@ -208,7 +211,8 @@ public sealed class ApplicationItemDocumentFileAccess
                 files,
                 out var content,
                 out var fileName,
-                application.ID)
+                application.ID,
+                printLayout)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))

@@ -24,7 +24,8 @@ public sealed class HeaderDocumentFileAccess
         HeaderDocumentCopiesFamily family,
         Guid parentId,
         string recordKey,
-        out ApplicationItemDocumentFileResult? result)
+        out ApplicationItemDocumentFileResult? result,
+        DocumentCopyPrintLayout? printLayout = null)
     {
         result = null;
         if (parentId == Guid.Empty || string.IsNullOrWhiteSpace(recordKey))
@@ -39,7 +40,7 @@ public sealed class HeaderDocumentFileAccess
         if (record == null)
             return false;
 
-        if (!pdfMerger.TryBuildMergedPdf(family, parentId, recordKey, record.RecordLabel, out var content, out var fileName)
+        if (!pdfMerger.TryBuildMergedPdf(family, parentId, recordKey, record.RecordLabel, out var content, out var fileName, printLayout)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))

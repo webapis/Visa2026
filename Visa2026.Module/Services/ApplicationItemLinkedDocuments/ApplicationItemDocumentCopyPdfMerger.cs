@@ -37,7 +37,8 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> entries,
         out byte[]? content,
         out string? fileName,
-        Guid applicationId = default)
+        Guid applicationId = default,
+        DocumentCopyPrintLayout? printLayout = null)
     {
         content = null;
         fileName = null;
@@ -86,6 +87,7 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
                 return false;
         }
 
+        var layout = printLayout ?? DocumentCopyPrintLayout.DefaultFor(slotKey);
         var pdfStreams = new List<MemoryStream>();
         try
         {
@@ -94,7 +96,7 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
                 if (!TryLoadFileContent(objectSpace, entry.File.FileDataId, out var fileContent, out var fileNameForExt))
                     continue;
 
-                if (!TryCreateMergeSlicePdfStream(fileContent, fileNameForExt, slotKey, out var pdfStream))
+                if (!TryCreateMergeSlicePdfStream(fileContent, fileNameForExt, slotKey, layout, out var pdfStream))
                     continue;
 
                 pdfStreams.Add(pdfStream);
@@ -224,6 +226,7 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         byte[] content,
         string sourceFileName,
         string slotKey,
+        DocumentCopyPrintLayout layout,
         out MemoryStream pdfStream)
     {
         pdfStream = null!;
@@ -231,17 +234,7 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
             return false;
 
         string ext = Path.GetExtension(sourceFileName ?? string.Empty);
-
-        if (DocumentFileUploadConstraints.IsLikelyPdf(content))
-        {
-            var copy = new MemoryStream(content.Length);
-            copy.Write(content, 0, content.Length);
-            copy.Position = 0;
-            pdfStream = copy;
-            return true;
-        }
-
-        if (IsPdfExtension(ext))
+        if (IsPdfExtension(ext) && !DocumentFileUploadConstraints.IsLikelyPdf(content))
         {
             logger.LogWarning(
                 "Document copies merge: file {FileName} has PDF extension but payload is not a PDF signature; trying image decode for slot {SlotKey}.",
@@ -249,9 +242,10 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
                 slotKey);
         }
 
-        bool landscapePage = slotKey.StartsWith("Visa.", StringComparison.OrdinalIgnoreCase);
+        bool landscapePage = !layout.UsesDocumentSize
+            && slotKey.StartsWith("Visa.", StringComparison.OrdinalIgnoreCase);
         var outMs = new MemoryStream();
-        if (!SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes(content, outMs, logger, landscapePage))
+        if (!SupportingDocumentsPdfSharpHelper.TryWriteSlice(content, outMs, logger, layout, landscapePage))
             return false;
 
         outMs.Position = 0;
