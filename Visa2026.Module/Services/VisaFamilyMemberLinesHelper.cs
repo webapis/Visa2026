@@ -145,8 +145,8 @@ public static class VisaFamilyMemberLinesHelper
     }
 
     /// <summary>
-    /// Maşgala ýagdaýy family block for the TM visa XFA PDF (item 18 area), e.g.
-    /// <c>AYALY ESRA AKSOY 12.10.1989, OGLY YUSUF METE AKSOY 06.12.2012, GYZY ASYA AKSOY 26.03.2016 TUR.</c>
+    /// Maşgala ýagdaýy family block for the TM visa XFA PDF (item 18 area). Each member keeps their own citizenship, e.g.
+    /// <c>AYALY ESRA AKSOY 12.10.1989 TUR., OGLY YUSUF METE AKSOY 06.12.2012 TUR., GYZY ASYA AKSOY 26.03.2016 BGR.</c>
     /// </summary>
     public static string? FormatForVisaPdfMaritalFamilyBlock(string? text)
     {
@@ -674,7 +674,7 @@ public static class VisaFamilyMemberLinesHelper
         var segments = new List<string>(rows.Count);
         for (var i = 0; i < rows.Count; i++)
         {
-            var segment = FormatVisaPdfMaritalFamilySegment(rows[i], includeCountry: i == rows.Count - 1);
+            var segment = FormatVisaPdfMaritalFamilySegment(rows[i], includeCountry: true);
             if (!string.IsNullOrWhiteSpace(segment))
             {
                 segments.Add(segment);

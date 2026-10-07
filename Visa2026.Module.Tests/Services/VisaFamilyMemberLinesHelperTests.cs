@@ -53,6 +53,21 @@ public sealed class VisaFamilyMemberLinesHelperTests
     }
 
     [Fact]
+    public void FormatForVisaPdfMaritalFamilyBlock_includesCitizenshipOnEveryMember()
+    {
+        const string manual =
+            "Esra Aksoy; 12.10.1989; aýaly; TUR" + "\n" +
+            "Yusuf Mete Aksoy; 06.12.2012; ogly; TUR" + "\n" +
+            "Asya Aksoy; 26.03.2016; gyzy; BGR";
+
+        var text = VisaFamilyMemberLinesHelper.FormatForVisaPdfMaritalFamilyBlock(manual);
+
+        Assert.Equal(
+            "AÝALY Esra Aksoy 12.10.1989 TUR., OGLY Yusuf Mete Aksoy 06.12.2012 TUR., GYZY Asya Aksoy 26.03.2016 BGR.",
+            text);
+    }
+
+    [Fact]
     public void FormatForVisaPdfMaritalFamilyBlock_returnsNullWhenManualIsYok()
     {
         Assert.Null(VisaFamilyMemberLinesHelper.FormatForVisaPdfMaritalFamilyBlock(VisaFamilyMemberLinesHelper.NoneValue));

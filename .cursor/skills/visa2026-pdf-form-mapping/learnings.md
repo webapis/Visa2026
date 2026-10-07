@@ -25,6 +25,16 @@ Purpose: **XFA fill, PdfFormMapping rules, template, gates, converters** — not
 
 ## Entries
 
+### 2026-10-07 — Family citizenship on every Maşgala line (mapping)
+
+- **Symptom**: Application form item 18 showed citizenship only after the last family member.
+- **Try**: `BuildVisaPdfMaritalFamilySegments` passed `includeCountry` only when `i == rows.Count - 1`.
+- **Test**: `VisaFamilyMemberLinesHelperTests.FormatForVisaPdfMaritalFamilyBlock_includesCitizenshipOnEveryMember`.
+- **Root cause**: The visa PDF marital block attached `CountryCode` to the final segment only.
+- **Fix**: Each family segment includes that member's citizenship code.
+- **Prevent**: Do not gate `includeCountry` on the last row.
+- **Cross-skill**: —
+
 ### 2026-10-05 — Field 30 last issued visa (mapping)
 
 - **Symptom**: Application form section 30 (Soňky berlen wiza) was empty. Çakylyk Almak did not link a previous visa.
