@@ -148,6 +148,34 @@ public class ApplicationWordReportEntryGeneratorTests
     }
 
     [Fact]
+    public void UsesPerItemWordOutput_false_when_catalog_data_scope_is_header_and_people()
+    {
+        var templateId = Guid.NewGuid();
+        var template = new UserReportTemplate
+        {
+            ID = templateId,
+            TemplateName = "Yuztutma-Hasapdan Cykarmak",
+            TemplateOutputFormat = TemplateOutputFormat.Word,
+            RootBoType = UserReportBoType.ApplicationItem,
+        };
+        var context = WordReportGenerationContext.ForRosterPersons(new[] { Guid.NewGuid(), Guid.NewGuid() });
+        var catalog = new[]
+        {
+            new ApplicationWordReportPackageCatalogEntry
+            {
+                EntryKey = $"profile:{Guid.NewGuid():D}",
+                DisplayName = template.TemplateName,
+                OutputFileName = "Yuztutma.docx",
+                Kind = ApplicationWordReportPackageEntryKind.UserWord,
+                UserReportTemplateId = templateId,
+                DataScope = ApplicationProfileTemplateDataScope.Both,
+            }
+        };
+
+        Assert.False(ApplicationWordReportEntryGenerator.UsesPerItemWordOutput(template, context, catalog));
+    }
+
+    [Fact]
     public void UsesPerItemWordOutput_false_for_scan_sanaw_name_even_when_item_root()
     {
         var template = WordItemRoot("Dasary_yurt_rayatlarynyn_sanawy_cakylyk", ".PLN", ".PFNM");

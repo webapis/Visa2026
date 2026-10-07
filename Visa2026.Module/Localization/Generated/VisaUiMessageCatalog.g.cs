@@ -12983,6 +12983,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Gözden geçirilen meýdan meýilnamasy birleşme şablonyna öwrülýär… Soň bellikler barlanýar.",
             ["ru-RU"] = "Проверенный план полей превращается в шаблон подстановки… Затем выполняется проверка заполнителей.",
         },
+        ["TemplateScan.Field.DataScope"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Data",
+            ["tr-TR"] = "Veri",
+            ["tk-TM"] = "Maglumat",
+            ["ru-RU"] = "Данные",
+        },
+        ["TemplateScan.DataScope.Header"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Case header — one document per case",
+            ["tr-TR"] = "Dava başlığı — dava başına bir belge",
+            ["tk-TM"] = "Ýüztutma sözbaşy — her ýüztutma üçin bir resminama",
+            ["ru-RU"] = "Шапка дела — один документ на дело",
+        },
+        ["TemplateScan.DataScope.People"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "People — one document per person",
+            ["tr-TR"] = "Kişiler — kişi başına bir belge",
+            ["tk-TM"] = "Adamlar — her adam üçin bir resminama",
+            ["ru-RU"] = "Люди — один документ на человека",
+        },
+        ["TemplateScan.DataScope.Both"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Header and people — letter once, list per person",
+            ["tr-TR"] = "Başlık ve kişiler — mektup bir kez, liste kişi başına",
+            ["tk-TM"] = "Sözbaşy we adamlar — hat bir gezek, sanaw her adam üçin",
+            ["ru-RU"] = "Шапка и люди — письмо один раз, список по людям",
+        },
+        ["TemplateScan.DataScope.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Suggested from the yellow marks. Case header prints once. People prints once per selected person.",
+            ["tr-TR"] = "Sarı işaretlerden önerilir. Dava başlığı bir kez yazılır. Kişiler, seçilen her kişi için bir kez yazılır.",
+            ["tk-TM"] = "Sary belliklerden hödürlenýär. Ýüztutma sözbaşy bir gezek çap edilýär. Adamlar saýlanan her adam üçin bir gezek çap edilýär.",
+            ["ru-RU"] = "Предложено по жёлтым меткам. Шапка дела печатается один раз. Люди — по одному документу на каждого выбранного.",
+        },
         ["TemplateScan.Generate.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Building draft template…",

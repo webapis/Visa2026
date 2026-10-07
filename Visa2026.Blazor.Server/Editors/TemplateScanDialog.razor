@@ -86,6 +86,16 @@
                             }
                         </div>
 
+                        <div class="tas-field">
+                            <label class="tas-field__label" for="tas-upload-data-scope">@Msg("TemplateScan.Field.DataScope")</label>
+                            <select id="tas-upload-data-scope" class="tas-input" value="@_dataScope" @onchange="OnDataScopeChanged">
+                                <option value="@ApplicationProfileTemplateDataScope.ApplicationHeader">@Msg("TemplateScan.DataScope.Header")</option>
+                                <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">@Msg("TemplateScan.DataScope.People")</option>
+                                <option value="@ApplicationProfileTemplateDataScope.Both">@Msg("TemplateScan.DataScope.Both")</option>
+                            </select>
+                            <small>@Msg("TemplateScan.DataScope.Hint")</small>
+                        </div>
+
                         @if (_source != EntrySource.Instance)
                         {
                             <div class="tas-field">
@@ -202,6 +212,18 @@
                         </div>
                     }
 
+                    <div class="tas-form" style="margin-bottom:0.75rem">
+                        <div class="tas-field">
+                            <label class="tas-field__label" for="tas-review-data-scope">@Msg("TemplateScan.Field.DataScope")</label>
+                            <select id="tas-review-data-scope" class="tas-input" value="@_dataScope" @onchange="OnDataScopeChanged">
+                                <option value="@ApplicationProfileTemplateDataScope.ApplicationHeader">@Msg("TemplateScan.DataScope.Header")</option>
+                                <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">@Msg("TemplateScan.DataScope.People")</option>
+                                <option value="@ApplicationProfileTemplateDataScope.Both">@Msg("TemplateScan.DataScope.Both")</option>
+                            </select>
+                            <small>@Msg("TemplateScan.DataScope.Hint")</small>
+                        </div>
+                    </div>
+
                     <TemplateScanFieldReviewView FieldPlan="plan"
                                                  Pages="ingest.Input.Pages"
                                                  FileName="@_fileName"
@@ -295,6 +317,17 @@
                             </div>
                         </div>
                     }
+                    <div class="tas-form" style="margin-bottom:0.75rem">
+                        <div class="tas-field">
+                            <label class="tas-field__label" for="tas-preview-data-scope">@Msg("TemplateScan.Field.DataScope")</label>
+                            <select id="tas-preview-data-scope" class="tas-input" value="@_dataScope" @onchange="OnDataScopeChanged">
+                                <option value="@ApplicationProfileTemplateDataScope.ApplicationHeader">@Msg("TemplateScan.DataScope.Header")</option>
+                                <option value="@ApplicationProfileTemplateDataScope.PeopleM2M">@Msg("TemplateScan.DataScope.People")</option>
+                                <option value="@ApplicationProfileTemplateDataScope.Both">@Msg("TemplateScan.DataScope.Both")</option>
+                            </select>
+                            <small>@Msg("TemplateScan.DataScope.Hint")</small>
+                        </div>
+                    </div>
                     <TemplateScanPreviewView Outcome="outcome"
                                              TemplateName="@_templateName"
                                              ShowWarningAcknowledgement="outcome.HasWarnings && !outcome.HasErrors"
@@ -549,6 +582,7 @@
     private IReadOnlyList<ApplicationProfileWizardLookupItem> _applicabilityLookups =
         Array.Empty<ApplicationProfileWizardLookupItem>();
     private ApplicationProfileTemplateDataScope _dataScope = ApplicationProfileTemplateDataScope.Both;
+    private bool _dataScopeChosen;
     private ScanKind _scanKind = ScanKind.FilledSample;
 
     private int _pdfPageCount;
@@ -676,6 +710,7 @@
         _templateName = templateName?.Trim() ?? string.Empty;
         _editingOriginalName = _templateName;
         _dataScope = dataScope;
+        _dataScopeChosen = true;
         _catalogScope = catalogScope;
         _applicabilityId = FormatApplicabilityId(applicableProjectContractId, applicableMigrationServiceId);
         await RestoreApprovedReviewAsync();
@@ -724,6 +759,7 @@
         _applicabilityId = string.Empty;
         _applicabilityLookups = Array.Empty<ApplicationProfileWizardLookupItem>();
         _dataScope = ApplicationProfileTemplateDataScope.Both;
+        _dataScopeChosen = false;
         _scanKind = ScanKind.FilledSample;
         _pdfPageCount = 0;
         _selectedPdfPages.Clear();
@@ -962,7 +998,7 @@
         if (string.IsNullOrWhiteSpace(_templateName))
             _templateName = Path.GetFileNameWithoutExtension(file.Name);
 
-        if (!IsEditingExisting)
+        if (!IsEditingExisting && !_dataScopeChosen)
             _dataScope = ApplicationProfileTemplateDataScope.Both;
 
         if (extension == ".pdf")
@@ -1182,6 +1218,7 @@
 
             _ingest = ingest;
             _fieldPlan = fieldPlan;
+            SuggestDataScope(fieldPlan);
             _restoredApprovedReview = true;
             _reviewPageIndex = 0;
             _reviewSelectedFieldId = null;
@@ -1412,6 +1449,7 @@
 
             _ingest = ingest;
             _fieldPlan = fieldPlan;
+            SuggestDataScope(fieldPlan);
             if (remap)
             {
                 ApplyRemapReviewSelection(fieldPlan, selectionKey);
@@ -1972,6 +2010,23 @@
         };
     }
 
+    private void OnDataScopeChanged(ChangeEventArgs args)
+    {
+        if (!Enum.TryParse<ApplicationProfileTemplateDataScope>(args.Value?.ToString(), out var scope))
+            return;
+
+        _dataScope = scope;
+        _dataScopeChosen = true;
+    }
+
+    private void SuggestDataScope(ScanFieldPlan? plan)
+    {
+        if (_dataScopeChosen || plan == null)
+            return;
+
+        _dataScope = ScanTemplateDataScope.FromFieldPlan(plan, _dataScope);
+    }
+
     private async Task GenerateAsync()
     {
         if (!ScanWizardGenerateGuard.AllowStart(
@@ -2035,8 +2090,6 @@
 
         try
         {
-            _dataScope = ScanTemplateDataScope.FromFieldPlan(_fieldPlan, _dataScope);
-
             var objectSpace = ownedObjectSpace ?? _hostObjectSpace!;
             var profile = _source == EntrySource.Profile
                 ? _hostProfile!

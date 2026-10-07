@@ -59,6 +59,7 @@ Officers submit **wizard step screenshots** + optional **catalog Preview** + the
 
 | Symptom | First step | Owner |
 |---------|------------|--------|
+| Header letter prints once per selected person | On Review or Preview, set **Data** to **Case header — one document per case**, then Approve again. People stays one document per person. Restart, hard-refresh | **This skill** |
 | Review short codes, full names, search, or Add placeholder stay light on Fluent Dark | `.tas-token-select` and `.tas-field-table code` were fixed light fills. Hard-refresh. Letter page stays white | **This skill** |
 | Done step Next card stays mint on Fluent Dark | `.tas-done__note` used `#f0fdf4`. Hard-refresh. The card follows the dialog; the check stays green | **This skill** |
 | Sanaw #13 TUR + street maps only to Foreign address (PFAD), country missing | Comma in the yellow = two placeholders: **PFAC** then **PFAD**. Stop F5, rebuild, **Analyze** | **This skill** |

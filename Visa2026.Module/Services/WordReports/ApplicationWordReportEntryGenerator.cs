@@ -380,7 +380,7 @@ public sealed class ApplicationWordReportEntryGenerator
                 var sameTemplate = entry.UserReportTemplateId == template.ID
                     || string.Equals(entry.DisplayName, template.TemplateName, StringComparison.OrdinalIgnoreCase);
                 if (sameTemplate
-                    && entry.DataScope == ApplicationProfileTemplateDataScope.ApplicationHeader)
+                    && entry.DataScope != ApplicationProfileTemplateDataScope.PeopleM2M)
                 {
                     return false;
                 }

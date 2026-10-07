@@ -2,6 +2,22 @@
 
 Append-only. Newest first under **## Entries**.
 
+### 2026-10-07 — Data choice is on the yellow-marks upload step
+
+- **Need**: The Data list was only on Review and Preview. The upload dialog (Save to, Project contract, file) had no way to choose header vs people.
+- **Fix**: **Data** sits on Upload, between Project contract and the file. The same list stays on Review and Preview. A choice made before Analyze is kept.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Create from yellow marks. **Data** is under Project contract.
+- **Prevent**: Do not hide the data-type choice until Review.
+- **Cross-skill**: visa2026-resminamalar
+
+### 2026-10-07 — Officer picks header vs people on yellow-marks Review
+
+- **Need**: A header letter (number, date, addressee) printed once per selected person. Data type was chosen from the yellow marks, with no way to override it.
+- **Fix**: Review and Preview have **Data**. Case header is one document. People is one document per person. Header and people is one letter with the person list inside. The yellow-mark guess fills the list until the officer changes it. Approve keeps that choice. Header and people no longer clones the whole file per person.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open the letter in Create from yellow marks. Set **Data** to **Case header — one document per case**. Approve. Preview again — one page, not one per person.
+- **Prevent**: Do not overwrite the officer's Data choice from the token guess on Approve. Do not print a case-header or header-and-people template once per roster person.
+- **Cross-skill**: visa2026-resminamalar | visa2026-user-report-templates
+
 ### 2026-10-01 — Review editor maps letter header text
 
 - **Need**: Place manually on the PDF page missed the words the officer selected.
