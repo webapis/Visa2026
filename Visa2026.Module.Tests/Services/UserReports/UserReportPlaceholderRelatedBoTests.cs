@@ -276,6 +276,29 @@ public class UserReportPlaceholderRelatedBoTests
         Assert.Equal("Aşgabat şäheri", row["WPLC"]);
     }
 
+    [Fact]
+    public void Work_duty_description_is_catalogued_and_aliased_on_excel_rows()
+    {
+        var catalog = new UserReportPlaceholderCatalogService();
+        var entry = catalog.GetEntries().Single(e =>
+            string.Equals(e.ShortCode, "WDUT", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Equal("WorkDuty_Description", entry.CanonicalPath);
+        Assert.Equal(UserReportPlaceholderPack.PersonPosition, entry.Pack);
+        Assert.Equal(UserReportPlaceholderRelatedBo.WorkDuty, entry.RelatedBo);
+        Assert.Equal(UserReportPlaceholderScope.Row, entry.Scope);
+
+        var duty = "Enjamlaryň toplumlaýyn tehniki barlag hyzmatlaryny ýerine ýetirmek";
+        var line = new ApplicationRosterMergeLine
+        {
+            CurrentWorkDuty = new WorkDuty { Description = duty },
+        };
+        var row = UserReportMergeDataHelper.BuildExcelItemListRowDictionary(line, 1);
+
+        Assert.Equal(duty, row["WorkDuty_Description"]);
+        Assert.Equal(duty, row["WDUT"]);
+    }
+
     [Theory]
     [InlineData("BTSD", "BusinessTripStartDateText")]
     [InlineData("BTED", "BusinessTripEndDateText")]

@@ -9161,6 +9161,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wezipe",
             ["ru-RU"] = "Должность",
         },
+        ["PlaceholderManual.Group.WorkDuty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work duty (Gelmeginiň maksady)",
+            ["tr-TR"] = "İş görevi (Geliş amacı)",
+            ["tk-TM"] = "Gelmeginiň maksady",
+            ["ru-RU"] = "Цель прибытия (обязанности)",
+        },
         ["PlaceholderManual.Group.RosterRow"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Roster row",

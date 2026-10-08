@@ -38,6 +38,7 @@ internal static class ApplicationWorkspaceTabBuilder
             InvitationTab(application, people, linksByPerson, linkedEntities),
             BorderZoneTab(application, people, linksByPerson, linkedEntities),
             PositionTab(application, people, linksByPerson, linkedEntities),
+            WorkDutyTab(application, people, linksByPerson, linkedEntities),
             SalaryTab(application, people, linksByPerson, linkedEntities),
             MedicalTab(application, people, linksByPerson, linkedEntities),
             TravelTab(application, people, linksByPerson, linkedEntities),
@@ -127,6 +128,9 @@ internal static class ApplicationWorkspaceTabBuilder
         if (idsByKind.TryGetValue(ApplicationProfileInstancePersonLinkKind.Position, out var positionIds))
             AddRange(ApplicationProfileInstancePersonLinkKind.Position,
                 objectSpace.GetObjectsQuery<EmployeePositionHistory>().Include(p => p.Position).Where(p => positionIds.Contains(p.ID)).ToList());
+        if (idsByKind.TryGetValue(ApplicationProfileInstancePersonLinkKind.WorkDuty, out var workDutyIds))
+            AddRange(ApplicationProfileInstancePersonLinkKind.WorkDuty,
+                objectSpace.GetObjectsQuery<WorkDuty>().Where(w => workDutyIds.Contains(w.ID)).ToList());
         if (idsByKind.TryGetValue(ApplicationProfileInstancePersonLinkKind.Salary, out var salaryIds))
             AddRange(ApplicationProfileInstancePersonLinkKind.Salary,
                 objectSpace.GetObjectsQuery<EmployeeSalary>().Where(s => salaryIds.Contains(s.ID)).ToList());
@@ -302,6 +306,21 @@ internal static class ApplicationWorkspaceTabBuilder
             ]),
             emptyMessage: "No position linked.");
 
+    private static ApplicationWorkspaceTab WorkDutyTab(
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
+        Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
+        Tab("workduty", "Gelmeginiň maksady",
+            ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.WorkDuty),
+            ["Person", "Description"],
+            RowsForKind<WorkDuty>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.WorkDuty, (person, duty) =>
+            [
+                PersonName(person),
+                TruncateDescription(duty.Description),
+            ]),
+            emptyMessage: "No work duty linked.");
+
     private static ApplicationWorkspaceTab SalaryTab(
         ApplicationProfileInstance application,
         IReadOnlyList<Person> people,
@@ -423,6 +442,14 @@ internal static class ApplicationWorkspaceTabBuilder
     }
 
     private static string PersonName(Person? person) => person?.FullName ?? "—";
+
+    private static string TruncateDescription(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "—";
+        var trimmed = text.Trim();
+        return trimmed.Length <= 120 ? trimmed : trimmed[..117] + "…";
+    }
 
     private static string Fmt(DateTime? date) =>
         date.HasValue && date.Value != default

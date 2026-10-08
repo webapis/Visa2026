@@ -38,6 +38,8 @@ public enum UserReportPlaceholderRelatedBo
     /// <summary>Labor-contract salary and period (Zähmet şertnamasy).</summary>
     Contract = 26,
     InvitationAddress = 27,
+    /// <summary>Visit purpose / duty text (Gelmeginiň maksady). Gated by the Position pack.</summary>
+    WorkDuty = 28,
 }
 
 public static class UserReportPlaceholderRelatedBoCatalog
@@ -79,6 +81,7 @@ public static class UserReportPlaceholderRelatedBoCatalog
         UserReportPlaceholderRelatedBo.AddressOfResidence => "Address of residence",
         UserReportPlaceholderRelatedBo.InvitationAddress => "Invitation address",
         UserReportPlaceholderRelatedBo.Position => "Position",
+        UserReportPlaceholderRelatedBo.WorkDuty => "Work duty (Gelmeginiň maksady)",
         UserReportPlaceholderRelatedBo.Contract => "Contract",
         UserReportPlaceholderRelatedBo.Salary => "Salary",
         UserReportPlaceholderRelatedBo.Invitation => "Invitation",

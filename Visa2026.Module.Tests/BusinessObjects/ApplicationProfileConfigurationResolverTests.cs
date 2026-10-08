@@ -364,4 +364,39 @@ public class ApplicationProfileConfigurationResolverTests
         Assert.False(ApplicationProfileConfigurationResolver.ProcessNumberUseLocked(
             profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa));
     }
+
+    [Fact]
+    public void ShowCurrentPosition_FollowsRequirePersonPosition()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { RequirePersonPosition = true },
+        };
+        Assert.True(ApplicationProfileConfigurationResolver.ShowCurrentPosition(app));
+        app.ApplicationProfile.RequirePersonPosition = false;
+        Assert.False(ApplicationProfileConfigurationResolver.ShowCurrentPosition(app));
+    }
+
+    [Fact]
+    public void ShowCurrentWorkDuty_RequiresPositionAndWorkPermitStyleProfile()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                Code = "get_invitation_wp",
+                RequirePersonPosition = true,
+                ProduceWorkPermit = true,
+            },
+        };
+        Assert.True(ApplicationProfileConfigurationResolver.ShowCurrentWorkDuty(app));
+
+        app.ApplicationProfile.ProduceWorkPermit = false;
+        app.ApplicationProfile.Code = "get_invitation";
+        Assert.False(ApplicationProfileConfigurationResolver.ShowCurrentWorkDuty(app));
+
+        app.ApplicationProfile = null;
+        app.ApplicationType = new ApplicationType { ShowCurrentWorkDuty = true };
+        Assert.True(ApplicationProfileConfigurationResolver.ShowCurrentWorkDuty(app));
+    }
 }

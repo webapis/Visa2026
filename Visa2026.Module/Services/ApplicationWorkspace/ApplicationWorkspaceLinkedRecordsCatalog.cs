@@ -26,6 +26,8 @@ public static class ApplicationWorkspaceLinkedRecordsCatalog
         new(ApplicationProfileInstancePersonLinkKind.Education, "education", "education", "Education", "🎓",
             ApplicationProfileConfigurationResolver.ShowCurrentEducation),
         new(ApplicationProfileInstancePersonLinkKind.Position, "position", "position", "Position", "💼",
+            ApplicationProfileConfigurationResolver.ShowCurrentPosition),
+        new(ApplicationProfileInstancePersonLinkKind.WorkDuty, "workduty", "workduty", "Gelmeginiň maksady", "📋",
             ApplicationProfileConfigurationResolver.ShowCurrentWorkDuty),
         new(ApplicationProfileInstancePersonLinkKind.AddressOfResidence, "address", "address", "Address", "📍",
             ApplicationProfileConfigurationResolver.ShowCurrentAddressOfResidence),

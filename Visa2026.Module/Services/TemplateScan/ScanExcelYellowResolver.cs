@@ -801,7 +801,7 @@ internal static class ScanExcelColumnProfiles
         new(["wezipesi", "wezepe", "pozisyon", "position"], ["FMWZP", "POSN"], false),
         new(["onki islan yerleri", "previous workplaces"], ["PWTM"], false),
         new(["wiza ucin masgala", "family members for visa", "visa application family"], ["PVFM"], false),
-        new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL"], false),
+        new(["gelmeginin maksady", "gelmegin maksady", "purpose of arrival"], ["RGEL", "WDUT"], false),
         new(["cagyran tarap", "inviting party"], ["ACNAM"], false),
         new(["mohleti we gezekligi", "mohleti we gerekligi"], ["VNUM", "VTYP", "VSTD", "VEDT"], true),
         new(["wiza belgisi", "visa number"], ["VNUM"], false),

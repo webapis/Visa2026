@@ -324,7 +324,7 @@ Case-linked `TravelHistory` (latest linked row). Short codes in the **Travel his
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `WorkDuty_Description` | `string` | *(duty text)* | |
+| `WorkDuty_Description` | `string` | *(duty text)* | Short **WDUT**. Person's current `WorkDuty.Description`; empty when the profile disables the Position pack |
 
 ### Education
 

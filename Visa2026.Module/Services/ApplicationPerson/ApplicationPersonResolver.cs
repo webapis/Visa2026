@@ -266,7 +266,7 @@ public static class ApplicationProfileInstancePersonResolver
             ApplicationProfileInstancePersonLinkKind.AddressOfResidence =>
                 ApplicationProfileConfigurationResolver.ShowCurrentAddressOfResidence(application),
             ApplicationProfileInstancePersonLinkKind.Position =>
-                ApplicationProfileConfigurationResolver.ShowCurrentWorkDuty(application),
+                ApplicationProfileConfigurationResolver.ShowCurrentPosition(application),
             ApplicationProfileInstancePersonLinkKind.WorkDuty =>
                 ApplicationProfileConfigurationResolver.ShowCurrentWorkDuty(application),
             ApplicationProfileInstancePersonLinkKind.Salary =>

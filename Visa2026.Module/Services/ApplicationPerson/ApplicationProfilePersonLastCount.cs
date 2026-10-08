@@ -46,7 +46,10 @@ public static class ApplicationProfilePersonLastCount
             ApplicationProfileInstancePersonLinkKind.Position =>
                 profile.RequirePersonPosition ? Default : 0,
             ApplicationProfileInstancePersonLinkKind.WorkDuty =>
-                profile.RequirePersonPosition ? Default : 0,
+                profile.RequirePersonPosition
+                && ApplicationProfileConfigurationResolver.IsWorkPermitStyleForWorkDuty(profile)
+                    ? Default
+                    : 0,
             ApplicationProfileInstancePersonLinkKind.Salary =>
                 profile.RequirePersonSalary ? Default : 0,
             ApplicationProfileInstancePersonLinkKind.MedicalRecord =>

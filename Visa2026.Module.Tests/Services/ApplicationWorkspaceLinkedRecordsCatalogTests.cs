@@ -90,4 +90,41 @@ public class ApplicationWorkspaceLinkedRecordsCatalogTests
         Assert.Contains(ApplicationWorkspaceLinkedRecordsCatalog.Definitions,
             d => d.TabKey == "rejection" && d.PersonRecordKey == "rejection");
     }
+
+    [Fact]
+    public void Definitions_IncludesWorkDutyTileSeparateFromPosition()
+    {
+        Assert.Contains(ApplicationWorkspaceLinkedRecordsCatalog.Definitions,
+            d => d.Kind == ApplicationProfileInstancePersonLinkKind.WorkDuty
+                && d.TabKey == "workduty"
+                && d.PersonRecordKey == "workduty");
+
+        var invAndWp = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                Code = "get_invitation_wp",
+                RequirePersonPosition = true,
+                ProduceWorkPermit = true,
+            },
+        };
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(
+            invAndWp, ApplicationProfileInstancePersonLinkKind.Position));
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(
+            invAndWp, ApplicationProfileInstancePersonLinkKind.WorkDuty));
+
+        var invitationOnly = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                Code = "get_invitation",
+                RequirePersonPosition = true,
+                ProduceWorkPermit = false,
+            },
+        };
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(
+            invitationOnly, ApplicationProfileInstancePersonLinkKind.Position));
+        Assert.False(ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(
+            invitationOnly, ApplicationProfileInstancePersonLinkKind.WorkDuty));
+    }
 }

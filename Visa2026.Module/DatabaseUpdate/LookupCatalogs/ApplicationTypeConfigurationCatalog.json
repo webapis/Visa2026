@@ -211,7 +211,8 @@
                 "ShowPreviousInvitationItem": false,
                 "ShowPreviousWorkPermitItem": false,
                 "ShowVisaType": false,
-                "ShowNextVisa": false
+                "ShowNextVisa": false,
+                "ShowCurrentWorkDuty": true
             }
         },
         {
@@ -459,6 +460,7 @@
                 "ShowCurrentAddressOfResidence": true,
                 "ShowCurrentEmployeeContract": true,
                 "ShowCurrentSalary": true,
+                "ShowCurrentWorkDuty": true,
                 "ShowCurrentMedicalRecord": true,
                 "ShowCurrentEducation": true,
                 "ShowInvitationItemIsIssued": true,
@@ -693,7 +695,8 @@
                 "ShowPreviousInvitationItem": true,
                 "ShowPreviousWorkPermitItem": true,
                 "ShowVisaType": false,
-                "ShowNextVisa": false
+                "ShowNextVisa": false,
+                "ShowCurrentWorkDuty": true
             }
         },
         {
@@ -1311,6 +1314,7 @@
                 "ShowCurrentAddressOfResidence": true,
                 "ShowCurrentEmployeeContract": true,
                 "ShowCurrentSalary": true,
+                "ShowCurrentWorkDuty": true,
                 "ShowCurrentMedicalRecord": true,
                 "ShowCurrentEducation": true,
                 "ShowInvitationItemIsIssued": false,
@@ -1701,7 +1705,8 @@
                 "ShowPreviousInvitationItem": false,
                 "ShowPreviousWorkPermitItem": true,
                 "ShowVisaType": false,
-                "ShowNextVisa": true
+                "ShowNextVisa": true,
+                "ShowCurrentWorkDuty": true
             }
         },
         {
@@ -1792,6 +1797,7 @@
                 "ShowCurrentAddressOfResidence": true,
                 "ShowCurrentEmployeeContract": true,
                 "ShowCurrentSalary": true,
+                "ShowCurrentWorkDuty": true,
                 "ShowWorkPermittedLocations": true,
                 "ShowCurrentMedicalRecord": true,
                 "ShowCurrentEducation": true,
@@ -1865,7 +1871,8 @@
                 "ShowPreviousInvitationItem": false,
                 "ShowPreviousWorkPermitItem": true,
                 "ShowVisaType": false,
-                "ShowNextVisa": false
+                "ShowNextVisa": false,
+                "ShowCurrentWorkDuty": true
             }
         },
         {
@@ -1900,6 +1907,7 @@
                 "ShowCurrentAddressOfResidence": false,
                 "ShowCurrentEmployeeContract": false,
                 "ShowCurrentSalary": true,
+                "ShowCurrentWorkDuty": true,
                 "ShowCurrentMedicalRecord": false,
                 "ShowCurrentEducation": true,
                 "ShowInvitationItemIsIssued": false,

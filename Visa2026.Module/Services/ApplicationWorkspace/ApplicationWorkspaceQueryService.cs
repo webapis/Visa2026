@@ -258,6 +258,9 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             items.Add("Education");
         if (profile.RequirePersonSalary) items.Add("EmployeeSalary");
         if (profile.RequirePersonPosition) items.Add("EmployeePositionHistory");
+        if (profile.RequirePersonPosition
+            && ApplicationProfileConfigurationResolver.IsWorkPermitStyleForWorkDuty(profile))
+            items.Add("WorkDuty");
         if (profile.RequirePersonMedical) items.Add("MedicalRecord");
         if (profile.RequirePersonTravelHistory
             && ApplicationProfileTravelHistoryPolicy.AllowsPersonTravelHistory(profile))

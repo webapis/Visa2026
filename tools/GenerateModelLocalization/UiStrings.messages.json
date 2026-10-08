@@ -2189,6 +2189,12 @@
     "tk-TM": "Wezipe",
     "ru-RU": "Должность"
   },
+  "PlaceholderManual.Group.WorkDuty": {
+    "en": "Work duty (Gelmeginiň maksady)",
+    "tr-TR": "İş görevi (Geliş amacı)",
+    "tk-TM": "Gelmeginiň maksady",
+    "ru-RU": "Цель прибытия (обязанности)"
+  },
   "PlaceholderManual.Group.RosterRow": {
     "en": "Roster row",
     "tr-TR": "Liste satırı",

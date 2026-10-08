@@ -235,6 +235,7 @@ public class ScanGuessingPatternRegistryTests
     public void Excel_profiles_match_purpose_and_inviting_party()
     {
         Assert.Equal("RGEL", ScanExcelColumnProfiles.Match("Gelmeginin maksady")!.ShortCodes[0]);
+        Assert.Contains("WDUT", ScanExcelColumnProfiles.Match("Gelmeginin maksady")!.ShortCodes);
         Assert.Equal("ACNAM", ScanExcelColumnProfiles.Match("Cagyran Tarap")!.ShortCodes[0]);
         Assert.Equal("CWAB", ScanExcelColumnProfiles.Match("AS-№")!.ShortCodes[0]);
         Assert.Equal("CWNB", ScanExcelColumnProfiles.Match("Tassyknama belgisi")!.ShortCodes[0]);

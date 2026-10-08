@@ -189,8 +189,17 @@ public static class ScanPlaceholderChoiceList
             || term.Contains("tocity", StringComparison.OrdinalIgnoreCase))
             yield return "To City";
         if (term.Contains("maksady", StringComparison.OrdinalIgnoreCase)
-            || term.Contains("purpose", StringComparison.OrdinalIgnoreCase))
+            || term.Contains("gelmegin", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("purpose", StringComparison.OrdinalIgnoreCase)
+            || term.Contains("work duty", StringComparison.OrdinalIgnoreCase)
+            || term.Equals("WDUT", StringComparison.OrdinalIgnoreCase))
+        {
             yield return "Purpose";
+            yield return "WDUT";
+            yield return "WorkDuty_Description";
+            yield return "Gelmeginiň maksady";
+            yield return "purpose of arrival";
+        }
         if (term.Contains("currency", StringComparison.OrdinalIgnoreCase)
             || term.Contains("waluta", StringComparison.OrdinalIgnoreCase)
             || term.Contains("walýuta", StringComparison.OrdinalIgnoreCase)

@@ -330,8 +330,53 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowCurrentAddressOfResidence(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonAddressOfResidence, t => t.ShowCurrentAddressOfResidence);
 
-    public static bool ShowCurrentWorkDuty(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequirePersonPosition, t => t.ShowCurrentWorkDuty);
+    /// <summary>
+    /// Employee position history tile / auto-link. Profile <see cref="ApplicationProfile.RequirePersonPosition"/>;
+    /// Type fallback uses salary/work-duty era flags (no dedicated ShowCurrentPosition on Type).
+    /// </summary>
+    public static bool ShowCurrentPosition(ApplicationProfileInstance? application) =>
+        Resolve(
+            application,
+            p => p.RequirePersonPosition,
+            t => t.ShowCurrentSalary || t.ShowCurrentWorkDuty);
+
+    /// <summary>
+    /// Work duty (Gelmeginiň maksady) tile / auto-link. Requires Position on the profile and a
+    /// work-permit-style profile (produce/cancel WP or WP-related code). Type fallback:
+    /// <see cref="ApplicationType.ShowCurrentWorkDuty"/>.
+    /// </summary>
+    public static bool ShowCurrentWorkDuty(ApplicationProfileInstance? application)
+    {
+        if (application?.ApplicationProfile is { } profile)
+            return profile.RequirePersonPosition && IsWorkPermitStyleForWorkDuty(profile);
+
+        return application?.ApplicationType?.ShowCurrentWorkDuty == true;
+    }
+
+    /// <summary>
+    /// Profiles that should show/link <see cref="WorkDuty"/> when Position is required.
+    /// </summary>
+    public static bool IsWorkPermitStyleForWorkDuty(ApplicationProfile? profile)
+    {
+        if (profile == null)
+            return false;
+
+        if (profile.ProduceWorkPermit || profile.CancelWorkPermits || profile.ProduceWorkLocation)
+            return true;
+
+        var code = profile.Code ?? string.Empty;
+        return code.Contains("workpermit", StringComparison.OrdinalIgnoreCase)
+            || code.Contains("invitation_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Contains("according_to_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Contains("visa_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("extend_visa_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("get_invitation_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("cancel_invitation_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("cancel_visa_wp", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("cancel_visa_wp_ext", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("cancel_workpermit", StringComparison.OrdinalIgnoreCase)
+            || code.Equals("change_workpermit", StringComparison.OrdinalIgnoreCase);
+    }
 
     public static bool ShowCurrentSalary(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonSalary, t => t.ShowCurrentSalary);
