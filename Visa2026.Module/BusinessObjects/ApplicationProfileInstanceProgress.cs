@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -55,7 +56,14 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime Date { get; set; }
 
+        /// <summary>
+        /// Officer notes. Hidden in the case workspace and progress views until the field is needed again.
+        /// Still copied from office preparation onto the first progress row.
+        /// </summary>
         [MaxLength(255)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         public virtual string Description { get; set; }
 
         /// <summary>
@@ -65,6 +73,21 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Process number")]
         [MaxLength(100)]
         public virtual string? ProcessNumber { get; set; }
+
+        /// <summary>
+        /// Number on the approval or disapproval letter for a ministry decision
+        /// (<c>*_REVIEW_APPROVED</c> / <c>*_REVIEW_REJECTED</c>).
+        /// </summary>
+        [XafDisplayName("Result number")]
+        [MaxLength(ApplicationProgressResultNumberHelper.MaxLength)]
+        [Appearance(
+            "ApplicationProfileInstanceProgress_HideResultNumberUnlessDecision",
+            AppearanceItemType = "ViewItem",
+            TargetItems = nameof(ResultNumber),
+            Criteria = "Not IsMinistryDecisionStep",
+            Visibility = ViewItemVisibility.Hide,
+            Context = "DetailView")]
+        public virtual string? ResultNumber { get; set; }
 
         [XafDisplayName("Ministrlik")]
         [VisibleInDetailView(false)]

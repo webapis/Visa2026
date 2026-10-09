@@ -152,6 +152,7 @@ namespace Visa2026.Blazor.Server
                     {
                         ApplicationProfileInstanceCutoverSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceProgressResultNumberSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                         BusinessTripLookupSchemaSql.ApplyIfMissing(connectionString);
@@ -341,6 +342,7 @@ namespace Visa2026.Blazor.Server
                 // Additive ProcessNumber / capability / Person incomplete columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
                 ApplicationProfileInstanceCutoverSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceProgressResultNumberSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                 BusinessTripLookupSchemaSql.ApplyIfMissing(connectionString);

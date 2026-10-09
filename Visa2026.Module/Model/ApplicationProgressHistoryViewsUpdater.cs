@@ -10,7 +10,7 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Model;
 
 /// <summary>
-/// Progress history list views: combined status column (state + ministry), date, description, letter file name.
+/// Progress history list views: combined status column (state + ministry), date, process number, result number, letter file name.
 /// </summary>
 public sealed class ApplicationProfileInstanceProgressHistoryViewsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
@@ -23,7 +23,7 @@ public sealed class ApplicationProfileInstanceProgressHistoryViewsUpdater : Mode
         nameof(ApplicationProfileInstanceProgress.StatusListLabel),
         nameof(ApplicationProfileInstanceProgress.Date),
         nameof(ApplicationProfileInstanceProgress.ProcessNumber),
-        nameof(ApplicationProfileInstanceProgress.Description),
+        nameof(ApplicationProfileInstanceProgress.ResultNumber),
         nameof(ApplicationProfileInstanceProgress.MinistryLetterFileName),
     ];
 

@@ -80,6 +80,7 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-prog-v:last-child .ct-prog-v__line { display: none; }
 .ct-prog-v__body { padding-bottom: 18px; }
 .ct-prog-v__head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ct-prog-v__result-number { margin: 0 0 8px; font-size: 0.82rem; font-weight: 600; color: var(--os-ink); }
 .ct-prog-v__letter { margin: 0 0 8px; font-size: 0.82rem; }
 .ct-prog-v__letter .ct-letter-preview {
   display: inline-block;

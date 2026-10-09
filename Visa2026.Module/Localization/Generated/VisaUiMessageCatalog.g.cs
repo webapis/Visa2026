@@ -4814,6 +4814,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Netije",
             ["ru-RU"] = "Результат",
         },
+        ["ApplicationProfileInstance.Workspace.ResultNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Result number",
+            ["tr-TR"] = "Sonuç numarası",
+            ["tk-TM"] = "Netije belgisi",
+            ["ru-RU"] = "Номер результата",
+        },
+        ["ApplicationProfileInstance.Workspace.ResultNumberPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Number on the approval or disapproval letter",
+            ["tr-TR"] = "Onay veya ret yazısındaki numara",
+            ["tk-TM"] = "Ylalaşyk ýa-da ret hatyndaky belgi",
+            ["ru-RU"] = "Номер в письме согласования или отказа",
+        },
+        ["ApplicationProfileInstance.Workspace.ResultNumberRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Result number is required for an approval or disapproval.",
+            ["tr-TR"] = "Onay veya ret için sonuç numarası zorunlu.",
+            ["tk-TM"] = "Ylalaşyk ýa-da ret üçin netije belgisi hökmany.",
+            ["ru-RU"] = "Для согласования или отказа нужен номер результата.",
+        },
+        ["ApplicationProfileInstance.Workspace.ResultNumberTooLong"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Result number cannot exceed 100 characters.",
+            ["tr-TR"] = "Sonuç numarası 100 karakteri aşamaz.",
+            ["tk-TM"] = "Netije belgisi 100 belgiden köp bolup bilmez.",
+            ["ru-RU"] = "Номер результата не может быть длиннее 100 символов.",
+        },
+        ["ApplicationProfileInstance.Workspace.ResultNumberValue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Result number: {0}",
+            ["tr-TR"] = "Sonuç numarası: {0}",
+            ["tk-TM"] = "Netije belgisi: {0}",
+            ["ru-RU"] = "Номер результата: {0}",
+        },
         ["ApplicationProfileInstance.Workspace.ResultRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Result is required to advance progress.",

@@ -63,7 +63,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         DateTime? stepDate,
         string? letterFileName = null,
         byte[]? letterContent = null,
-        string? processNumber = null)
+        string? processNumber = null,
+        string? resultNumber = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -104,6 +105,14 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (date == default)
             return OfficerShellCaseProgressResult.Failed("Date is required.");
 
+        string? normalizedResultNumber = null;
+        if (ApplicationProgressResultNumberHelper.AppliesTo(chosenCode)
+            && !ApplicationProgressResultNumberHelper.TryNormalize(resultNumber, required: true, out normalizedResultNumber, out var resultNumberError))
+        {
+            return OfficerShellCaseProgressResult.Failed(
+                resultNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberRequired"));
+        }
+
         var requireProcessNumber = ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
             && ApplicationProfileConfigurationResolver.ShowProcessNumber(application);
         if (requireProcessNumber)
@@ -137,6 +146,9 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         {
             progress.ProcessNumber = application.ProcessNumber.Trim();
         }
+
+        if (normalizedResultNumber != null)
+            progress.ResultNumber = normalizedResultNumber;
 
         if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
             return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));

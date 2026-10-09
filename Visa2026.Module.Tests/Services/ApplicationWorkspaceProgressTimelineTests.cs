@@ -280,6 +280,28 @@ public class ApplicationWorkspaceProgressTimelineTests
     }
 
     [Fact]
+    public void Build_ApprovedLeg_ShowsResultNumberUnderThatStepOnly()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        var approved = ApprovedLeg(application, 1, null, Guid.NewGuid());
+        approved.ResultNumber = " 12/2026 ";
+        application.ProgressHistory.Add(approved);
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("12/2026", steps[1].ResultNumber);
+        Assert.Equal(string.Empty, steps[0].ResultNumber);
+        Assert.Equal(string.Empty, steps[2].ResultNumber);
+        Assert.Equal(string.Empty, steps[4].ResultNumber);
+    }
+
+    [Fact]
     public void Build_FirstLegApproved_NextMinistryIsCurrent()
     {
         var profile = ThreeLegProfile();

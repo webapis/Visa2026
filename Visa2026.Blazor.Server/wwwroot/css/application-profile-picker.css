@@ -541,3 +541,38 @@
     background: var(--ap-panel);
     color: var(--ap-ink);
 }
+.ap-picker .cw-summary-date {
+    width: 100%;
+    max-width: 100%;
+}
+.ap-picker .cw-summary-date .dxbl-text-edit {
+    width: 100%;
+    border-radius: 8px;
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+    border: 1px solid var(--ap-line);
+}
+.ap-picker .cw-summary-date .dxbl-text-edit-input {
+    color: var(--ap-ink);
+    -webkit-text-fill-color: var(--ap-ink);
+    background: transparent;
+    font: inherit;
+}
+.ap-picker .cw-summary-field--fill-empty .cw-summary-date .dxbl-text-edit {
+    border-color: var(--ap-bad);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ap-hue-bad) 28%, transparent);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-picker .cw-summary-field--fill-default .cw-summary-date .dxbl-text-edit {
+    border-color: var(--ap-info);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ap-hue-info) 28%, transparent);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-picker .cw-summary-field--fill-officer .cw-summary-date .dxbl-text-edit {
+    border-color: var(--ap-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ap-hue-accent) 28%, transparent);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}

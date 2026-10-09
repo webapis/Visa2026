@@ -830,7 +830,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 request.Date,
                 request.LetterFileName,
                 request.LetterContent,
-                request.ProcessNumber);
+                request.ProcessNumber,
+                request.ResultNumber);
 
             if (!result.Success)
             {

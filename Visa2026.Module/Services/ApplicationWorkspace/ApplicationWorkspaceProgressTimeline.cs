@@ -414,7 +414,24 @@ internal static class ApplicationWorkspaceProgressTimeline
             AdvanceOptions = isCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             ResultOptions = resultOptions,
             OutcomeKind = ResolveOutcomeKind(slotState, row?.State?.Code),
+            ResultNumber = ResolveResultNumber(key, history),
         };
+    }
+
+    private static string ResolveResultNumber(
+        string key,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history)
+    {
+        if (!key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
+            || !int.TryParse(key.AsSpan(4), out var sequence))
+            return string.Empty;
+
+        var decision = history.LastOrDefault(p =>
+            MatchesMinistryDisplayLeg(p.State?.Code, sequence)
+            && ApplicationProfileInstanceProgressLegCodes.IsMinistryDecisionStateCode(p.State?.Code));
+        return string.IsNullOrWhiteSpace(decision?.ResultNumber)
+            ? string.Empty
+            : decision.ResultNumber.Trim();
     }
 
     private static bool CanRevertLast(ApplicationProfileInstanceProgress? latest, string stepKey)

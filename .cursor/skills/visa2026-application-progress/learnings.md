@@ -6,6 +6,14 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-09 — Progress Date and Application date use dd.MM.yyyy
+
+- **Need**: Case workspace Progress **Date** and Overview **Application date** used the browser date box, so Windows showed month/day/year (`10/09/2026`). Officers type day.month.year.
+- **Fix**: Both fields (and the same date control on the profile picker, plus start/end dates on that form) use `OfficerDateEdit` (`dd.MM.yyyy`, advancing caret, calendar). Saved value stays `yyyy-MM-dd`. Business objects already had `DisplayFormat` / `EditMask`.
+- **Test**: `Build_AlwaysIncludesApplicationNumberAndDate` (EditorDate `2024-08-25`). Blazor Debug build succeeded (0 errors).
+- **Prevent**: Do not put `<input type="date">` back on Application date or the progress advance Date. The browser locale ignores the officer mask.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-09-04 — Upload missing approval letter without Revert
 
 - **Need**: If the approval/disapproval letter was not attached when the ministry was Approved or Unapproved, the officer must upload it on that completed step. Revert is not required. Advance stays allowed (cue only).

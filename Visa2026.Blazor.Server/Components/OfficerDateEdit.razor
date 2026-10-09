@@ -5,8 +5,10 @@
   Shared officer date field: dd.MM.yyyy + advancing caret (same UX as Passport DetailView
   DateTimeMaskAdvancingController / VisaFamilyMembersTextComponent).
 *@
-<DxDateEdit @bind-Date="Date"
+<DxDateEdit @ref="_editor"
+            @bind-Date="Date"
             @bind-Date:after="NotifyDateChangedAsync"
+            InputId="@InputId"
             CssClass="@ResolvedCssClass"
             Mask="dd.MM.yyyy"
             DisplayFormat="dd.MM.yyyy"
@@ -22,8 +24,14 @@
     [Parameter] public DateTime? Date { get; set; }
     [Parameter] public EventCallback<DateTime?> DateChanged { get; set; }
     [Parameter] public string? CssClass { get; set; }
+    [Parameter] public string? InputId { get; set; }
     [Parameter] public bool Enabled { get; set; } = true;
     [Parameter] public bool ReadOnly { get; set; }
+
+    private DxDateEdit<DateTime?>? _editor;
+
+    public Task FocusAsync() =>
+        _editor is null ? Task.CompletedTask : _editor.FocusAsync().AsTask();
 
     private string ResolvedCssClass =>
         string.IsNullOrWhiteSpace(CssClass)

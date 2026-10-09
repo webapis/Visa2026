@@ -133,6 +133,9 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var date = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate);
         Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Date, date.Kind);
         Assert.Equal("25.08.2024", date.DisplayValue);
+        Assert.Equal("2024-08-25", date.Value);
+        Assert.Equal(new DateTime(2024, 8, 25), date.EditorDate);
+        Assert.Equal("2024-08-25", ApplicationWorkspaceCaseHeaderField.FormatEditorDate(date.EditorDate));
     }
 
     [Fact]
