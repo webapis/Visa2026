@@ -320,3 +320,21 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Recreate **prod app only**.
 - **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain.
 - **Skill**: setup-docker-engine
+
+### 2026-10-08 — Hub latest recreate on `10.100.128.26` staging only (`1.0.0.837`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu staging. Staging was still pinned to `2442442f7559` (`1.0.0.829`) from Oct 5.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-staging`: two `-f` files (no scan override), `pull app` (already current) then `up -d --force-recreate --no-deps app`. Did **not** recreate `visa2026-prod-app-1` (still Created `2026-10-07T11:12:54Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:9bcb5232a821` Created `2026-10-07T11:05:05Z` (replaces staging `2442442f7559`). Module assembly `1.0.0.837`. Staging postgres stayed **healthy** (Up 2 months, `127.0.0.1:5433`). Seed gates quick (profile updated=36; approval-leg scanned=4877 assigned=0 names=0; org FKs filled=0). Host poll 3 and LAN `http://10.100.128.26:8080/LoginPage` → **200**.
+- **Fix**: Recreate **staging app only**.
+- **Prevent**: When the request names staging, do not recreate the prod app. Hub had nothing newer than the image already on disk from the Oct 7 prod pull.
+- **Skill**: setup-docker-engine
+
+### 2026-10-08 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.839`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:6b147e65b14d` Created `2026-10-08T12:34:58Z` (replaces `9bcb5232a821` `2026-10-07T11:05Z`). Module assembly `1.0.0.839`. Prod postgres stayed **healthy** (Up 2 months). Seed gates quick (profile updated=36; approval-leg scanned=4838 assigned=0; org FKs filled=0). Host poll 3 and LAN `http://10.100.128.26/LoginPage` → **200**. Scan override still on (`AzureOpenAI` / `true`).
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. The pull updates the shared `webapia/visa2026:latest` tag on disk; the running staging container stays on `9bcb5232a821` until the next staging recreate.
+- **Skill**: setup-docker-engine
