@@ -1,8 +1,11 @@
--- Hard-delete ApplicationProfileInstance rows on Visa2026 PostgreSQL (local reimport).
--- Unlink issued headers first: WorkPermit / Invitation / Rejection FKs are ON DELETE CASCADE
--- (a bare DELETE of instances would wipe those letters). BorderZone / Visa issuing /
--- WordReportGenerationBatch are NO ACTION. LatestProgressId is NO ACTION onto progress.
--- Preserves: ApplicationProfiles catalog, Person and other master data, WP/Inv/Rejection/Visa rows.
+-- Hard-delete ApplicationProfileInstance rows on Visa2026 PostgreSQL.
+-- Visa, WorkPermit, and Invitation instance FKs are nullable NO ACTION: clear them first
+-- so the letters stay. Rejection and BorderZone instance FKs are NOT NULL, so those
+-- case rows cannot survive without an instance and are deleted here (documents and
+-- items cascade). Clear ApplicationProfileInstanceBorderZoneItems first; that join
+-- RESTRICT-references BorderZoneItems. LatestProgressId is cleared so progress rows
+-- can cascade with the instance.
+-- Preserves: ApplicationProfiles catalog, Person and other master data, WP/Inv/Visa rows.
 -- Run against Visa2026 PostgreSQL only — never VISA2015.
 
 BEGIN;
@@ -35,14 +38,6 @@ BEGIN
     SET "ApplicationProfileInstanceID" = NULL
     WHERE "ApplicationProfileInstanceID" IS NOT NULL;
 
-    UPDATE "Rejections"
-    SET "ApplicationProfileInstanceID" = NULL
-    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
-
-    UPDATE "BorderZones"
-    SET "ApplicationProfileInstanceID" = NULL
-    WHERE "ApplicationProfileInstanceID" IS NOT NULL;
-
     UPDATE "Visas"
     SET "IssuingApplicationProfileInstanceID" = NULL
     WHERE "IssuingApplicationProfileInstanceID" IS NOT NULL;
@@ -50,6 +45,10 @@ BEGIN
     UPDATE "WordReportGenerationBatches"
     SET "ApplicationProfileInstanceID" = NULL
     WHERE "ApplicationProfileInstanceID" IS NOT NULL;
+
+    DELETE FROM "ApplicationProfileInstanceBorderZoneItems";
+    DELETE FROM "BorderZones";
+    DELETE FROM "Rejections";
 
     DELETE FROM "ApplicationProfileInstances";
 

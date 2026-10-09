@@ -21,7 +21,8 @@ internal static class Visa2014InvitationDocumentImporter
         string? documentIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose) =>
+        bool verbose,
+        string? targetConnection = null) =>
         Visa2014PassportCopyLinkedDocumentImporter.RunAsync(
             target,
             legacyConnectionString,
@@ -30,5 +31,8 @@ internal static class Visa2014InvitationDocumentImporter
             Spec,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            targetConnection,
+            "InvitationDocuments",
+            "InvitationID");
 }

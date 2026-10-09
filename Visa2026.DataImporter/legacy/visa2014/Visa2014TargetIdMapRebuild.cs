@@ -1,5 +1,9 @@
+using System.Data.Common;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
+using Npgsql;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -76,8 +80,18 @@ internal static class Visa2014TargetIdMapRebuild
         var map = new Dictionary<Guid, Guid>();
         int matched = 0;
         int skipped = 0;
+        var postgres = DatabaseProviderDetector.IsPostgreSql(targetConnection);
 
-        await using var conn = new SqlConnection(targetConnection);
+        if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase) && postgres)
+        {
+            Console.WriteLine(
+                "INF Application id-map rebuild skipped on PostgreSQL (production scope has no application profile instances).");
+            return 0;
+        }
+
+        await using DbConnection conn = postgres
+            ? new NpgsqlConnection(DatabaseProviderDetector.StripEfCoreProvider(targetConnection))
+            : new SqlConnection(targetConnection);
         await conn.OpenAsync();
 
         if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
@@ -85,7 +99,7 @@ internal static class Visa2014TargetIdMapRebuild
             var previousMap = File.Exists(mapPath) ? Visa2014IdMapHelper.Load(mapPath) : null;
             var applicationItemIdMapPath = Path.Combine(mapDir, "ApplicationItem.json");
             var rebuild = await Visa2014ApplicationProfileInstanceIdMapRebuild.RebuildAsync(
-                conn,
+                (SqlConnection)conn,
                 source.ConnectionString,
                 source.LookupTranslationPaths,
                 File.Exists(applicationItemIdMapPath) ? applicationItemIdMapPath : null,
@@ -368,7 +382,9 @@ internal static class Visa2014TargetIdMapRebuild
                     continue;
                 }
 
-                var targetId = await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(conn, personId, row);
+                var targetId = conn is NpgsqlConnection npgsql
+                    ? await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(npgsql, personId, row)
+                    : await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync((SqlConnection)conn, personId, row);
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -636,15 +652,51 @@ internal static class Visa2014TargetIdMapRebuild
         return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyOid);
     }
 
+    internal static string ToPostgresIdMatchSql(string sqlServerSql)
+    {
+        var sql = sqlServerSql.Trim();
+        sql = Regex.Replace(
+            sql,
+            @"SELECT\s+TOP\s+1\s+CAST\(\s*ID\s+AS\s+varchar\(36\)\s*\)",
+            "SELECT \"ID\"::text",
+            RegexOptions.IgnoreCase);
+        sql = Regex.Replace(sql, @"\bFROM\s+([A-Za-z][A-Za-z0-9]*)\b", "FROM \"$1\"");
+        foreach (var column in new[]
+                 {
+                     "GraduationYear", "WorkPermitNumber", "InvitationNumber", "PassportNumber",
+                     "InvitationID", "PassportID", "VisaNumber", "PersonID", "StartDate", "GCRecord", "ID",
+                 })
+        {
+            sql = Regex.Replace(sql, $@"(?<![\""@])\b{column}\b", $"\"{column}\"");
+        }
+
+        sql = Regex.Replace(
+            sql,
+            @"CAST\(\s*""([^""]+)""\s+AS\s+date\s*\)",
+            "\"$1\"::date",
+            RegexOptions.IgnoreCase);
+        if (!Regex.IsMatch(sql, @"\bLIMIT\s+1\b", RegexOptions.IgnoreCase))
+            sql += " LIMIT 1";
+        return sql;
+    }
+
     private static async Task<Guid?> ScalarGuidAsync(
-        SqlConnection conn,
+        DbConnection conn,
         string sql,
         params (string Name, object Value)[] parameters)
     {
+        if (conn is NpgsqlConnection)
+            sql = ToPostgresIdMatchSql(sql);
+
         await using var cmd = conn.CreateCommand();
         cmd.CommandText = sql;
         foreach (var (name, value) in parameters)
-            cmd.Parameters.AddWithValue(name, value);
+        {
+            var parameter = cmd.CreateParameter();
+            parameter.ParameterName = name;
+            parameter.Value = value ?? DBNull.Value;
+            cmd.Parameters.Add(parameter);
+        }
 
         var text = await cmd.ExecuteScalarAsync() as string;
         return Guid.TryParse(text, out var id) ? id : null;

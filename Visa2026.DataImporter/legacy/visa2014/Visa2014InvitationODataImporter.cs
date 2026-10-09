@@ -14,6 +14,7 @@ internal sealed class Visa2014InvitationImportResult
     public int SkippedAlreadyImported { get; init; }
     public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
     public int PatchedApplicationProfileInstanceCount { get; init; }
+    public int PostedRemainderWithoutInstanceCount { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -31,7 +32,8 @@ internal static class Visa2014InvitationODataImporter
         string? invitationIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool invitationRemainder = false)
     {
         var batch = Visa2014InvitationTransform.PrepareImportBatch(
             legacyConnectionString,
@@ -43,7 +45,9 @@ internal static class Visa2014InvitationODataImporter
         {
             Console.WriteLine(
                 $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
-                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged).");
+                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged" +
+                (invitationRemainder ? "; remainder will POST without ApplicationProfileInstance" : "") +
+                ").");
             return new Visa2014InvitationImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
@@ -67,8 +71,10 @@ internal static class Visa2014InvitationODataImporter
         int posted = 0;
         int failed = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
         int skippedMissingApplicationProfileInstanceIdMap = 0;
         int patchedApplication = 0;
+        int postedRemainderWithoutInstance = 0;
         var pendingBackfill = 0;
 
         using var backfillSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Invitation));
@@ -79,7 +85,8 @@ internal static class Visa2014InvitationODataImporter
             if (invitationIdMap.TryGetValue(legacyOid, out var existingInvitationId))
             {
                 skippedAlreadyImported++;
-                if (TryBackfillApplicationProfileInstance(
+                if (!invitationRemainder
+                    && TryBackfillApplicationProfileInstance(
                         backfillSpace,
                         row,
                         existingInvitationId,
@@ -98,8 +105,22 @@ internal static class Visa2014InvitationODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForInvitation(
+                    row.GetValueOrDefault("InvitationNumber"),
+                    row.GetValueOrDefault("IssuedDate"));
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, invitationIdMap, verbose, "Invitation"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, applicationIdMap, objectSpaceFactory, out var missingApplication);
                 if (payload == null)
                 {
@@ -109,12 +130,16 @@ internal static class Visa2014InvitationODataImporter
                 }
 
                 // Type-slice import: only post invitations whose Application is in the
-                // current ApplicationProfileInstance id-map. Other types post later;
-                // do not create header-only rows with a null instance FK.
-                if (missingApplication || !payload.ContainsKey("ApplicationProfileInstance"))
+                // current ApplicationProfileInstance id-map. Remainder (--invitation-remainder)
+                // posts the rest with a null instance link and does not update existing rows.
+                var hasInstance = payload.ContainsKey("ApplicationProfileInstance");
+                if (missingApplication || !hasInstance)
                 {
-                    skippedMissingApplicationProfileInstanceIdMap++;
-                    continue;
+                    if (!invitationRemainder)
+                    {
+                        skippedMissingApplicationProfileInstanceIdMap++;
+                        continue;
+                    }
                 }
 
                 var createdId = await target.CreateAsync(typeof(Bo.Invitation), payload);
@@ -126,7 +151,11 @@ internal static class Visa2014InvitationODataImporter
                 }
 
                 invitationIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
+                if (missingApplication || !hasInstance)
+                    postedRemainderWithoutInstance++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {patchedApplication} Application FK patched...");
                 if (verbose)
@@ -144,6 +173,8 @@ internal static class Visa2014InvitationODataImporter
             backfillSpace.CommitChanges();
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (invitationIdMap.Count > 0 && !string.IsNullOrWhiteSpace(invitationIdMapOutputPath))
@@ -167,6 +198,7 @@ internal static class Visa2014InvitationODataImporter
             SkippedAlreadyImported = skippedAlreadyImported,
             SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
             PatchedApplicationProfileInstanceCount = patchedApplication,
+            PostedRemainderWithoutInstanceCount = postedRemainderWithoutInstance,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,

@@ -14,6 +14,7 @@ internal sealed class Visa2014WorkPermitImportResult
     public int SkippedAlreadyImported { get; init; }
     public int SkippedMissingApplicationProfileInstanceIdMap { get; init; }
     public int PatchedApplicationProfileInstanceCount { get; init; }
+    public int PostedRemainderWithoutInstanceCount { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -31,7 +32,8 @@ internal static class Visa2014WorkPermitODataImporter
         string? workPermitIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool workPermitRemainder = false)
     {
         var batch = Visa2014WorkPermitTransform.PrepareImportBatch(
             legacyConnectionString,
@@ -43,7 +45,9 @@ internal static class Visa2014WorkPermitODataImporter
         {
             Console.WriteLine(
                 $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
-                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged).");
+                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged" +
+                (workPermitRemainder ? "; remainder will POST without ApplicationProfileInstance" : "") +
+                ").");
             return new Visa2014WorkPermitImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
@@ -61,8 +65,10 @@ internal static class Visa2014WorkPermitODataImporter
         int posted = 0;
         int failed = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
         int skippedMissingApplicationProfileInstanceIdMap = 0;
         int patchedApplication = 0;
+        int postedRemainderWithoutInstance = 0;
         var pendingBackfill = 0;
 
         using var backfillSpace = objectSpaceFactory?.CreateNonSecuredObjectSpace(typeof(Bo.WorkPermit));
@@ -73,7 +79,8 @@ internal static class Visa2014WorkPermitODataImporter
             if (workPermitIdMap.TryGetValue(legacyOid, out var existingWorkPermitId))
             {
                 skippedAlreadyImported++;
-                if (backfillSpace != null
+                if (!workPermitRemainder
+                    && backfillSpace != null
                     && TryBackfillApplicationProfileInstance(
                         backfillSpace,
                         row,
@@ -93,8 +100,22 @@ internal static class Visa2014WorkPermitODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForWorkPermit(
+                    row.GetValueOrDefault("WorkPermitNumber"),
+                    row.GetValueOrDefault("IssuedDate"));
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, workPermitIdMap, verbose, "WorkPermit"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, applicationIdMap, out var missingApplication);
                 if (payload == null)
                 {
@@ -104,12 +125,16 @@ internal static class Visa2014WorkPermitODataImporter
                 }
 
                 // Type-slice import: only post work permits whose Application is in the
-                // current ApplicationProfileInstance id-map. Other types post later; do
-                // not create header-only rows with a null instance FK.
-                if (missingApplication || !payload.ContainsKey("ApplicationProfileInstance"))
+                // current ApplicationProfileInstance id-map. Remainder (--work-permit-remainder)
+                // posts the rest with a null instance link and does not update existing rows.
+                var hasInstance = payload.ContainsKey("ApplicationProfileInstance");
+                if (missingApplication || !hasInstance)
                 {
-                    skippedMissingApplicationProfileInstanceIdMap++;
-                    continue;
+                    if (!workPermitRemainder)
+                    {
+                        skippedMissingApplicationProfileInstanceIdMap++;
+                        continue;
+                    }
                 }
 
                 var createdId = await target.CreateAsync(typeof(Bo.WorkPermit), payload);
@@ -121,7 +146,11 @@ internal static class Visa2014WorkPermitODataImporter
                 }
 
                 workPermitIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
+                if (missingApplication || !hasInstance)
+                    postedRemainderWithoutInstance++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {patchedApplication} Application FK patched...");
                 if (verbose)
@@ -139,6 +168,8 @@ internal static class Visa2014WorkPermitODataImporter
             backfillSpace.CommitChanges();
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (workPermitIdMap.Count > 0 && !string.IsNullOrWhiteSpace(workPermitIdMapOutputPath))
@@ -162,6 +193,7 @@ internal static class Visa2014WorkPermitODataImporter
             SkippedAlreadyImported = skippedAlreadyImported,
             SkippedMissingApplicationProfileInstanceIdMap = skippedMissingApplicationProfileInstanceIdMap,
             PatchedApplicationProfileInstanceCount = patchedApplication,
+            PostedRemainderWithoutInstanceCount = postedRemainderWithoutInstance,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,

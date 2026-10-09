@@ -45,7 +45,8 @@ internal static class Visa2014PassportCopyImporter
         string? copyIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnection = null)
     {
         var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
         var existingCopyMap = LoadOptionalCopyIdMap(copyIdMapOutputPath);
@@ -66,6 +67,10 @@ internal static class Visa2014PassportCopyImporter
         int skippedDuplicateBlob = 0;
         var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
         var copyIndexByPassport = new Dictionary<Guid, int>();
+        var existingOnTarget = await Visa2014ExistingTargetBlobIndex.SeedAsync(
+            targetConnection, "PassportDocuments", "PassportID", importedBlobKeys, copyIndexByPassport);
+        if (existingOnTarget > 0)
+            Console.WriteLine($"INF Passport scans already on target: {existingOnTarget} (same bytes are not inserted again)");
 
         foreach (var (legacyCopyOid, legacyPassportOid, passportNumber) in copyRows)
         {

@@ -41,10 +41,16 @@ internal static class Visa2014VisaDocumentImporter
         string? documentIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnection = null)
     {
         var visaIdMap = Visa2014IdMapHelper.Load(visaIdMapPath);
         var existingDocMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
+        var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
+        var existingOnTarget = await Visa2014ExistingTargetBlobIndex.SeedAsync(
+            targetConnection, "VisaDocument", "VisaID", importedBlobKeys);
+        if (existingOnTarget > 0)
+            Console.WriteLine($"INF Visa scans already on target: {existingOnTarget} (same bytes are not inserted again)");
 
         await using var connection = new SqlConnection(legacyConnectionString);
         await connection.OpenAsync();
@@ -102,6 +108,12 @@ internal static class Visa2014VisaDocumentImporter
                 skippedOversize++;
                 if (verbose)
                     Console.WriteLine($"  SKIP visa {legacyVisaOid}: {blob.Length} bytes exceeds {MaxDocumentBytes} limit");
+                continue;
+            }
+
+            if (!importedBlobKeys.Add(Visa2014LegacyBlobDedupeHelper.BuildKey(targetVisaId, blob)))
+            {
+                skippedAlreadyImported++;
                 continue;
             }
 

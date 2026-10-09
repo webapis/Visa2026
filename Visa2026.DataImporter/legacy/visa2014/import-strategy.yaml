@@ -332,6 +332,98 @@ onPremDeployment:
       staging: restore_from_prod_bak
       demo: manual_import_or_clone
 
+  # Locked 2026-10-09 (developer chat). Live Calik prod/staging Postgres is on .26.
+  # visa2026Host above remains the older IIS note (.25). Do not import application
+  # profile instances onto visa2026_prod. Full history waits for a later archive DB.
+  calikProductionScope:
+    lockedAt: 2026-10-09
+    approvedBy: developer (chat)
+    host: 10.100.128.26
+    composeProject: visa2026-prod
+    database: visa2026_prod
+    include:
+      - seeded lookup catalogs and ApplicationProfiles
+      - person-domain (Person, Passport, Education, and other person children)
+      - Visa, WorkPermit, Invitation (headers, items, and their documents)
+    exclude:
+      - ApplicationProfileInstance
+      - ApplicationProfileInstancePerson
+      - ApplicationProfileInstanceProgress
+    issuedDocumentsWithoutInstance: true
+    why: >
+      Application profile instance import is too slow for the working production
+      database. Officers start new cases by hand. Historical cases go to a
+      separate archive database later. Visa, work permit, and invitation rows
+      stay, with the issuing-instance foreign key left null.
+    catchUp: >
+      Insert new legacy rows only. A legacy id already in the production
+      id-map is skipped and the Visa2026 row is left unchanged, including
+      edits later made on 10.100.128.15. Use id-maps/calik-energi-onprem-prod
+      rebuilt from visa2026_prod (--rebuild-visa2014-id-maps). Do not use the
+      staging id-map. Do not run application-type slices, --correct-*, or
+      pass an application id-map on Visa or WorkPermit (those paths rewrite
+      rows already imported). Photo and scan bytes are a separate fill-missing
+      pass (fileCatchUp), not part of the scalar catch-up. New Visa, WorkPermit, and
+      Invitation headers use --visa-remainder, --work-permit-remainder, and
+      --invitation-remainder so the instance link stays null. Remainder mode
+      does not patch rows already imported.
+    insertOnly: true
+    insertOnlyLockedAt: 2026-10-09
+    duplicatePolicy:
+      lockedAt: 2026-10-09
+      appliesTo: every business object
+      onLegacyIdInMap: skip_no_update
+      onNaturalKeyAlreadyOnTarget: link_id_map_and_skip
+      never: [insert_second_row, update_existing_row]
+      beforeCatchUp: rebuild production id-maps from visa2026_prod so every row already there is mapped
+      notes: >
+        Same rule for the later archive database. Person, Passport, Visa,
+        Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence,
+        WorkPermit, WorkPermitItem, Invitation, and InvitationItem link an
+        existing natural key into the id-map and skip. The existing row is
+        not updated.
+    fileCatchUp:
+      lockedAt: 2026-10-09
+      fillMissingOnly: true
+      doNotReplaceExistingBytes: true
+      command: --import-visa2014-files --inprocess
+      steps:
+        - entity: Person
+          property: Photo
+        - entity: Passport
+          property: PassportDocument
+        - entity: Visa
+          property: VisaDocument
+        - entity: Education
+          property: EducationDocument
+        - entity: WorkPermit
+          property: WorkPermitDocument
+        - entity: Invitation
+          property: InvitationDocument
+        - entity: Person
+          property: FamilyProofDocument
+      excluded: [MedicalRecord, Rejection, BorderZone]
+      notes: >
+        Fill a photo only when the person row has no photo bytes. Fill a
+        document only when the parent does not already store the same bytes.
+        The July document id-maps are not for visa2026_prod; those target ids
+        are absent there. Do not replace bytes already on visa2026_prod.
+    instanceCleanup: scripts/visa2014-migration/cleanup/ImportedApplications.postgres.sql
+    instanceCleanupCompletedAt: 2026-10-09
+    instanceCleanupResult: >
+      visa2026_prod instances, roster, and progress deleted (12599 / 22615 / 38903).
+      Rejections and BorderZones deleted because the instance FK is NOT NULL.
+      People, Passports, Visas, WorkPermits, Invitations, and ApplicationProfiles kept.
+      Issued-document instance links set null. Staging not modified.
+    archiveLater:
+      host: 10.100.128.26
+      database: visa2026_archive
+      scope: full chain including application profile instances
+      stagingRehearsal: visa2026_staging
+      stagingNote: >
+        Do not delete application profile instances from visa2026_staging.
+        That database is the rehearsal for the archive server.
+
 openDecisions:
   - id: odata-service-account
     question: Service account for OData import

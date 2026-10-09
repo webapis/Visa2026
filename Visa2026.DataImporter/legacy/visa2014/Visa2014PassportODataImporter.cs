@@ -85,6 +85,7 @@ internal static class Visa2014PassportODataImporter
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -112,8 +113,20 @@ internal static class Visa2014PassportODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForPassport(personId, row.GetValueOrDefault("PassportNumber"));
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, passportIdMap, verbose, "Passport"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, resolver, personId);
                 if (payload == null)
                 {
@@ -131,6 +144,8 @@ internal static class Visa2014PassportODataImporter
                 }
 
                 passportIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                 {
@@ -150,6 +165,8 @@ internal static class Visa2014PassportODataImporter
         }
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (passportIdMap.Count > 0 && !string.IsNullOrWhiteSpace(passportIdMapOutputPath))

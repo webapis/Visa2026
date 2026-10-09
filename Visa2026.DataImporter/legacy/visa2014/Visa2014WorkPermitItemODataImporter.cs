@@ -88,6 +88,7 @@ internal static class Visa2014WorkPermitItemODataImporter
         int failed = 0;
         int skippedMissingRequired = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
         int positionResolvedViaFallback = 0;
 
         foreach (var row in batch.ImportRows)
@@ -123,8 +124,23 @@ internal static class Visa2014WorkPermitItemODataImporter
             if (usedPositionFallback)
                 positionResolvedViaFallback++;
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForWorkPermitItem(
+                    personId,
+                    row.GetValueOrDefault("WorkPermitNumber"),
+                    row.GetValueOrDefault("StartDate"));
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, workPermitItemIdMap, verbose, "WorkPermitItem"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, personId, passportId, positionHistoryId, workPermitId);
                 if (payload == null)
                 {
@@ -142,6 +158,8 @@ internal static class Visa2014WorkPermitItemODataImporter
                 }
 
                 workPermitItemIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedMissingRequired} missing id-map...");
@@ -157,6 +175,8 @@ internal static class Visa2014WorkPermitItemODataImporter
         }
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (workPermitItemIdMap.Count > 0 && !string.IsNullOrWhiteSpace(workPermitItemIdMapOutputPath))

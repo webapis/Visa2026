@@ -72,6 +72,7 @@ internal static class Visa2014InvitationItemODataImporter
         int failed = 0;
         int skippedMissingRequired = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -100,8 +101,20 @@ internal static class Visa2014InvitationItemODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForInvitationItem(personId, invitationId);
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, invitationItemIdMap, verbose, "InvitationItem"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, personId, passportId, invitationId);
                 if (payload == null)
                 {
@@ -119,6 +132,8 @@ internal static class Visa2014InvitationItemODataImporter
                 }
 
                 invitationItemIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedMissingRequired} missing id-map...");
@@ -134,6 +149,8 @@ internal static class Visa2014InvitationItemODataImporter
         }
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (invitationItemIdMap.Count > 0 && !string.IsNullOrWhiteSpace(invitationItemIdMapOutputPath))

@@ -1,3 +1,102 @@
+### 2026-10-09 — Production file catch-up filled missing photos and scans
+
+- **Phase**: `--import-visa2014-files --inprocess` on `visa2026_prod` (tunnel `127.0.0.1:15432`). Staging was not touched. Medical records, rejections, and border zones were not included.
+- **Rule**: A photo is written only when the person has no photo bytes. A scan is inserted only when that parent does not already store the same bytes. Existing bytes were not replaced. July document id-maps were not used; those target ids are not on `visa2026_prod`.
+- **Person.Photo**: exit 0. Patched 57, already had a photo 3340, no blob 71, failed 0.
+- **Passport.PassportDocument**: exit 0. Posted 78, duplicate bytes 3737, no passport map 11, no blob 1, oversize 37, failed 0.
+- **Visa.VisaDocument**: exit 0. Posted 167, already stored 6126, no visa map 67, no blob 46, oversize 154, failed 0.
+- **Education.EducationDocument**: exit 0. Posted 73, duplicate bytes 4410, no blob 35, oversize 40, failed 0.
+- **WorkPermit.WorkPermitDocument**: exit 0. Posted 115, duplicate bytes 915, no blob 2, failed 0.
+- **Invitation.InvitationDocument**: exit 0. Posted 73, duplicate bytes 3044, no parent map 204, no blob 5, failed 0.
+- **Person.FamilyProofDocument**: exit 0. Posted 0, duplicate bytes 449, oversize 1, failed 0.
+- **Recorded**: `import-strategy.yaml` `calikProductionScope.fileCatchUp`.
+### 2026-10-09 — Production catch-up finished after the Türkmenabat lodging
+
+- **Phase**: insert-only catch-up resume (`visa2026_prod`, tunnel `127.0.0.1:15432`). No application id-map. Staging was not touched.
+- **Lodging**: The one address failure was a lodging already listed in `lodging.calik-energi.json` for Türkmenabat şäheri / Lebap welaýaty and missing from production. Inserted that one row (`CityID` of the existing city, `GCRecord` 0).
+- **AddressOfResidence**: exit 0. Posted 1, failed 0, skipped already imported 4257.
+- **EmployeeSalary**: exit 0. Posted 56, relinked 132, failed 0, skipped already imported 3052.
+- **Visa** (`--visa-remainder`): exit 0. Posted 167 with a null issuing instance, patched 0, failed 0, skipped already imported 6326, skipped (no passport map) 25.
+- **WorkPermit** (`--work-permit-remainder`): exit 0. Posted 53 with a null instance, patched 0, failed 0, skipped already imported 361.
+- **WorkPermitItem**: exit 0. Posted 173, relinked 25, failed 0, skipped already imported 3796, skipped (missing required id-map) 2567.
+- **Invitation** (`--invitation-remainder`): exit 0. Posted 71 with a null instance, patched 0, failed 0, skipped already imported 2939.
+- **InvitationItem**: exit 0. Posted 156, relinked 192, failed 0, skipped already imported 5271, skipped (missing required id-map) 28.
+- **Follow-up**: Person-domain catch-up for this production scope is complete. Rows skipped for a missing parent id-map were not inserted. Do not run application slices, corrections, or photo/scan waves on this database.
+### 2026-10-09 — Education lookups filled from VISA2015, then Education re-run
+
+- **Phase**: production lookup insert, then insert-only Education re-run (`visa2026_prod`, tunnel `127.0.0.1:15432`). Staging was not touched.
+- **Lookups**: Compared active legacy education titles with production `NameTm`. Inserted the missing identity pass-through labels only: 54 `EducationInstitutions` and 31 `Specialties` (`GCRecord` 0, `IsDefault` false). Live counts afterward: institutions 1645, specialties 1168. Appended 19 institution and 10 specialty titles to `education-institution.calik-energi.json` and `specialty.calik-energi.json`; the rest were already in those files and only missing from the database.
+- **Education re-run**: exit 0. Posted 41, failed 0, skipped already imported 3296. These 41 are the rows that failed the first Education pass.
+- **Catch-up**: Person, Passport, Education, and EmployeePositionHistory finished. AddressOfResidence posted 779 and then stopped (exit 1) on one unresolved Lodging. EmployeeSalary, Visa, WorkPermit, WorkPermitItem, Invitation, and InvitationItem are still not run.
+### 2026-10-09 — Production catch-up stopped on Education lookups
+
+- **Phase**: insert-only catch-up (`--inprocess`, `calik-energi-onprem-prod`, tunnel `127.0.0.1:15432` → `visa2026_prod`)
+- **Outcome**: partial. Person posted 57, relinked 135, skipped already imported 3273, failed 0. Passport posted 69, relinked 139, skipped already imported 3762, failed 0. Education posted 16, relinked 135, skipped already imported 3280, failed 41, exit 1.
+- **Error**: incomplete payload for EducationInstitution / Specialty values that are not in the Visa2026 catalogs (examples: Gadjah Mada uniwersiteti, Aeronawtika, Andhra uniwersiteti).
+- **Follow-up**: Resume from EmployeePositionHistory. Do not invent catalog rows for the 41 education failures in this run.
+
+### 2026-10-09 — Remainder path for new work permits and invitations
+
+- **Phase**: importer change (no import run, no target writes)
+- **Change**: `--work-permit-remainder` and `--invitation-remainder` post a new header when the application profile instance is not in the id-map. The instance link stays null. Rows already in the id-map are not patched while the remainder flag is set. `--visa-remainder` now skips that issuing-instance patch as well. Work permit items and invitation items still follow their parent id-map.
+- **Verified**: DataImporter Debug build succeeded. `Visa2014NaturalKeyLookupTests` passed (5).
+- **Follow-up**: Production catch-up is still not started. When it runs, use `--inprocess`, the production id-map, insert-only, and the three remainder flags. No application id-map, no corrections, no photo or scan waves.
+
+### 2026-10-09 — Natural-key link-and-skip before production catch-up
+
+- **Phase**: importer change (no import run, no target writes)
+- **Change**: In-process import now links a legacy id onto an existing target row and skips when the natural key is already there. The existing row is not updated. Applies to Passport (person + number), Visa (passport + number), Education (person + graduation year), EmployeePositionHistory (person + start date), EmployeeSalary (person, latest row), WorkPermit (number + issued date), WorkPermitItem (person + number + start date), Invitation (number + issued date), InvitationItem (person + invitation). AddressOfResidence and Person already did this. OData write path does not look up existing rows.
+- **Verified**: `Visa2014NaturalKeyLookupTests` and the PostgreSQL id-match SQL tests passed (7).
+- **Follow-up**: Do not start the production catch-up yet. WorkPermit and Invitation still refuse to insert a new header when the application id-map is empty. New headers need the same remainder path Visa already has (`--visa-remainder`) before a catch-up can add them with a null instance link.
+
+### 2026-10-09 — Production id-map rebuilt from visa2026_prod
+
+- **Phase**: id-map rebuild only (no import, no target row writes)
+- **Environment**: legacy `10.100.128.15` / `VISA2015` → tunnel `127.0.0.1:15432` → `visa2026_prod`. Staging was not touched.
+- **Outcome**: exit 0 (~5.5 min). Person 3276 linked by identity (the log label “PN collision” is that counter). Application skipped. Passport 3623 matched / 208 skipped. Visa 6216 / 302. Education 3145 / 192. EmployeePositionHistory 3029 / 193. EmployeeSalary 2920 / 188. AddressOfResidence 3384 / 874. WorkPermit 361 / 53. WorkPermitItem 3771 / 2765. Invitation 2939 / 71. InvitationItem 5079 / 376.
+- **Maps**: copied from the Debug output folder to `Visa2026.DataImporter/legacy/visa2014/id-maps/calik-energi-onprem-prod`. July 2026 application and document maps in that folder were moved to `id-maps/calik-energi-onprem-prod-stale-202607` so a later run does not use them.
+- **Follow-up**: Do not start catch-up until Passport, Visa, Education, WorkPermit, Invitation, and their item importers link an existing natural key and skip. Person already does this.
+
+### 2026-10-09 — No duplicate import on any business object
+
+- **Phase**: strategy lock (no import run)
+- **Decision**: Every BO. Legacy id already in the production id-map → skip, leave the row unchanged. Natural key already on the target and legacy id missing from the map → add the id to the map and skip. Never insert a second row. Never update the existing row. Rebuild `id-maps/calik-energi-onprem-prod` from `visa2026_prod` before the first catch-up. Same rule later for the archive database.
+- **Recorded**: `import-strategy.yaml` `calikProductionScope.duplicatePolicy`.
+
+### 2026-10-09 — Production catch-up is insert-only
+
+- **Phase**: strategy lock (no import run)
+- **Decision**: `visa2026_prod` catch-up inserts new legacy person, passport, education, visa, work permit, and invitation rows only. Rows already imported are not updated. Id-map `id-maps/calik-energi-onprem-prod`, rebuilt from production before the first catch-up. No application slices, no `--correct-*`, no photo or scan waves, no application id-map on Visa or WorkPermit.
+- **Recorded**: `import-strategy.yaml` `calikProductionScope.insertOnly` and `IMPORT_PLAN_AND_STRATEGY.md`.
+
+### 2026-10-09 — Production application profile instances removed (.26)
+
+- **Phase**: production scope cleanup (not an import)
+- **Environment**: `10.100.128.26` `visa2026_prod` (`visa2026-prod-postgres-1`). Staging `visa2026_staging` was not touched. No backup (developer declined).
+- **Script**: `scripts/visa2014-migration/cleanup/ImportedApplications.postgres.sql`
+- **Outcome**: success (COMMIT). Production app stopped during the transaction, then started. `http://127.0.0.1/LoginPage` **200**.
+- **Removed**: ApplicationProfileInstances 12599, roster 22615, progress 38903, Rejections 207, BorderZones 110. Rejection and BorderZone instance FKs are NOT NULL, so those rows were deleted. First attempt rolled back on the Rejection null update.
+- **Kept**: People 3417, Passports 3771, Visas 6334, WorkPermits 364, Invitations 2945, ApplicationProfiles 36. Issuing-instance links on visa, work permit, and invitation are null.
+- **Follow-up**: Do not run the application-type slice chain against `visa2026_prod`. Full history stays on staging until `visa2026_archive`.
+
+### 2026-10-08 — Staging visa-invitation-item third retry
+
+- **Phase**: scalar chain final correction (retry)
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Second resume `20261008-150252` aborted; `exit=1` with Npgsql `Failed to connect to 127.0.0.1:15433` / transient failure. Still no `SCALAR_CHAIN_COMPLETE`.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt visa-invitation-item -SkipLookupPreflight` (idempotent).
+### 2026-10-08 — Staging visa-invitation-item retried after tunnel abort
+
+- **Phase**: scalar chain final correction (retry)
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Prior `visa-invitation-item` run (`20261008-104906`) failed after ~4h with Npgsql transient / `Failed to connect to 127.0.0.1:15433`; shell tasks aborted. Correction is idempotent (`AlreadyCorrect` skips).
+- **Resume**: `Run-StagingScalar.ps1 -StartAt visa-invitation-item -SkipLookupPreflight`.
+### 2026-10-08 — Staging visa-invitation-item resumed
+
+- **Phase**: scalar chain final correction
+- **Environment**: `10.100.128.15` / `VISA2015` -> `10.100.128.26` `visa2026_staging`. Tunnel `127.0.0.1:15433`.
+- **Why**: Wave `summary-20261005-110820` finished corrections through `visa-type`. `visa-invitation-item` exited `1073807364` (process killed) with no Posted line; no `SCALAR_CHAIN_COMPLETE`.
+- **Resume**: `Run-StagingScalar.ps1 -StartAt visa-invitation-item -SkipLookupPreflight`.
 ### 2026-10-05 — Staging document-links resumed after tunnel 255
 
 - **Phase**: scalar post-all corrections

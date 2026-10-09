@@ -8,6 +8,7 @@ internal sealed class Visa2014PersonPhotoImportResult
     public int IdMapEntries { get; init; }
     public int Processed { get; init; }
     public int Patched { get; init; }
+    public int SkippedAlreadyHasPhoto { get; init; }
     public int SkippedNoBlob { get; init; }
     public int Failed { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
@@ -23,10 +24,17 @@ internal static class Visa2014PersonPhotoImporter
         string idMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnection = null)
     {
         if (!File.Exists(idMapPath))
             throw new FileNotFoundException("Person id-map not found. Run scalar --import-visa2014 first.", idMapPath);
+
+        var alreadyHasPhoto = string.IsNullOrWhiteSpace(targetConnection)
+            ? new HashSet<Guid>()
+            : await Visa2014ExistingTargetBlobIndex.LoadPersonIdsWithPhotoAsync(targetConnection);
+        if (alreadyHasPhoto.Count > 0)
+            Console.WriteLine($"INF People already with a photo: {alreadyHasPhoto.Count} (those rows are not updated)");
 
         var idMap = LoadIdMap(idMapPath);
         var entries = maxRows is > 0
@@ -37,9 +45,16 @@ internal static class Visa2014PersonPhotoImporter
         int patched = 0;
         int failed = 0;
         int skippedNoBlob = 0;
+        int skippedAlreadyHasPhoto = 0;
 
         foreach (var (legacyOid, targetId) in entries)
         {
+            if (alreadyHasPhoto.Contains(targetId))
+            {
+                skippedAlreadyHasPhoto++;
+                continue;
+            }
+
             byte[]? photo;
             try
             {
@@ -99,6 +114,7 @@ internal static class Visa2014PersonPhotoImporter
             IdMapEntries = idMap.Count,
             Processed = entries.Count,
             Patched = patched,
+            SkippedAlreadyHasPhoto = skippedAlreadyHasPhoto,
             SkippedNoBlob = skippedNoBlob,
             Failed = failed,
             Errors = errors,

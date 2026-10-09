@@ -30,6 +30,14 @@ internal interface IVisa2014ImportTarget
         string firstName,
         string lastName,
         DateTime dateOfBirth);
+
+    /// <summary>
+    /// Row already stored for this natural key, including one created earlier in this import.
+    /// The caller records the legacy id and does not update the row.
+    /// </summary>
+    Task<Guid?> TryFindExistingByNaturalKeyAsync(Visa2014NaturalKeyLookup lookup);
+
+    void RememberNaturalKey(Visa2014NaturalKeyLookup lookup, Guid id);
 }
 
 internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
@@ -78,6 +86,13 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
         string lastName,
         DateTime dateOfBirth) =>
         Task.FromResult<Guid?>(null);
+
+    public Task<Guid?> TryFindExistingByNaturalKeyAsync(Visa2014NaturalKeyLookup lookup) =>
+        Task.FromResult<Guid?>(null);
+
+    public void RememberNaturalKey(Visa2014NaturalKeyLookup lookup, Guid id)
+    {
+    }
 }
 
 internal sealed class Visa2014DryRunImportTarget : IVisa2014ImportTarget
@@ -99,6 +114,13 @@ internal sealed class Visa2014DryRunImportTarget : IVisa2014ImportTarget
         string lastName,
         DateTime dateOfBirth) =>
         Task.FromResult<Guid?>(null);
+
+    public Task<Guid?> TryFindExistingByNaturalKeyAsync(Visa2014NaturalKeyLookup lookup) =>
+        Task.FromResult<Guid?>(null);
+
+    public void RememberNaturalKey(Visa2014NaturalKeyLookup lookup, Guid id)
+    {
+    }
 }
 
 internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, IDisposable
@@ -106,6 +128,7 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
     private readonly INonSecuredObjectSpaceFactory _factory;
     private readonly int _batchSize;
     private readonly Dictionary<string, BatchState> _batches = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Guid> _naturalKeys = new(StringComparer.Ordinal);
 
     public Visa2014ObjectSpaceImportTarget(INonSecuredObjectSpaceFactory factory, int batchSize = 50)
     {
@@ -208,6 +231,21 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
 
         return Task.FromResult(hit?.ID);
     }
+
+    public Task<Guid?> TryFindExistingByNaturalKeyAsync(Visa2014NaturalKeyLookup lookup)
+    {
+        if (_naturalKeys.TryGetValue(lookup.CacheKey, out var known))
+            return Task.FromResult<Guid?>(known);
+
+        var objectSpace = GetOrCreateBatch(lookup.EntityType).ObjectSpace;
+        var found = Visa2014NaturalKeyLinker.TryFind(objectSpace, lookup);
+        if (found.HasValue)
+            _naturalKeys[lookup.CacheKey] = found.Value;
+        return Task.FromResult(found);
+    }
+
+    public void RememberNaturalKey(Visa2014NaturalKeyLookup lookup, Guid id) =>
+        _naturalKeys[lookup.CacheKey] = id;
 
     public void Dispose()
     {

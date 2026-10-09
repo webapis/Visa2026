@@ -79,6 +79,7 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
         int actualPositionsCreated = 0;
         int positionsCreated = 0;
         int departmentsCreated = 0;
@@ -109,8 +110,21 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForEmployeePositionHistory(
+                    personId, row.GetValueOrDefault("StartDate"));
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, historyIdMap, verbose, "EmployeePositionHistory"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var actualPositionName = Visa2014ActualPositionNormalizer.Normalize(
                     row.GetValueOrDefault("ActualPosition") as string);
                 var (actualPositionId, createdActual) = await ResolveOrCreateActualPositionAsync(
@@ -168,6 +182,8 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                 }
 
                 historyIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
@@ -183,6 +199,8 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
         }
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (historyIdMap.Count > 0 && !string.IsNullOrWhiteSpace(historyIdMapOutputPath))

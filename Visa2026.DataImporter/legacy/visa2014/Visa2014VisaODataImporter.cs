@@ -81,6 +81,7 @@ internal static class Visa2014VisaODataImporter
         int failed = 0;
         int skippedNoPassport = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
         int skippedMissingApplicationProfileInstanceIdMap = 0;
         int patchedIssuingApplication = 0;
         int postedRemainderWithoutIssuing = 0;
@@ -93,7 +94,8 @@ internal static class Visa2014VisaODataImporter
             if (visaIdMap.TryGetValue(legacyOid, out var existingVisaId))
             {
                 skippedAlreadyImported++;
-                if (backfillSpace != null
+                if (!visaRemainder
+                    && backfillSpace != null
                     && TryBackfillIssuingApplicationProfileInstance(
                         backfillSpace,
                         row,
@@ -124,8 +126,20 @@ internal static class Visa2014VisaODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForVisa(passportId, row.GetValueOrDefault("VisaNumber"));
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, visaIdMap, verbose, "Visa"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, resolver, passportId, applicationIdMap, out var missingApplication);
                 if (payload == null)
                 {
@@ -157,6 +171,8 @@ internal static class Visa2014VisaODataImporter
                 }
 
                 visaIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
                 if (missingApplication || !hasIssuing)
                     postedRemainderWithoutIssuing++;
@@ -177,6 +193,8 @@ internal static class Visa2014VisaODataImporter
             backfillSpace.CommitChanges();
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (visaIdMap.Count > 0 && !string.IsNullOrWhiteSpace(visaIdMapOutputPath))

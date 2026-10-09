@@ -50,7 +50,8 @@ internal static class Visa2014EducationDocumentImporter
         string? documentIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnection = null)
     {
         var educationIdMap = Visa2014IdMapHelper.Load(educationIdMapPath);
         var docMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
@@ -64,6 +65,10 @@ internal static class Visa2014EducationDocumentImporter
         var errors = new List<string>();
         var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
         var copyIndexByEducation = new Dictionary<Guid, int>();
+        var existingOnTarget = await Visa2014ExistingTargetBlobIndex.SeedAsync(
+            targetConnection, "EducationDocument", "EducationID", importedBlobKeys, copyIndexByEducation);
+        if (existingOnTarget > 0)
+            Console.WriteLine($"INF Education scans already on target: {existingOnTarget} (same bytes are not inserted again)");
         int posted = 0;
         int failed = 0;
         int skippedNoEducationMap = 0;

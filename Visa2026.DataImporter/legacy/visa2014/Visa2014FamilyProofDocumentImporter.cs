@@ -30,7 +30,8 @@ internal static class Visa2014FamilyProofDocumentImporter
         string? documentIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnection = null)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         var docMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
@@ -48,6 +49,13 @@ internal static class Visa2014FamilyProofDocumentImporter
         var errors = new List<string>();
         var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
         var copyIndexByPerson = new Dictionary<Guid, int>();
+        var existingPersonDocs = await Visa2014ExistingTargetBlobIndex.SeedAsync(
+            targetConnection, "PersonDocuments", "PersonID", importedBlobKeys, copyIndexByPerson);
+        var existingFamilyDocs = await Visa2014ExistingTargetBlobIndex.SeedAsync(
+            targetConnection, "PersonFamilyRelationDocuments", "PersonID", importedBlobKeys, copyIndexByPerson);
+        var existingOnTarget = existingPersonDocs + existingFamilyDocs;
+        if (existingOnTarget > 0)
+            Console.WriteLine($"INF Family-proof scans already on target: {existingOnTarget} (same bytes are not inserted again)");
         int postedPersonDocument = 0;
         int postedFamilyRelationDocument = 0;
         int failed = 0;

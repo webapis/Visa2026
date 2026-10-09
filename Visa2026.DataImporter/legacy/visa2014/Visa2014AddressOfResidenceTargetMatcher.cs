@@ -36,6 +36,12 @@ internal static class Visa2014AddressOfResidenceTargetMatcher
         IReadOnlyDictionary<string, object?> importRow) =>
         TryMatchTargetIdAsync(conn, personId, importRow, postgres: false, CancellationToken.None);
 
+    internal static Task<Guid?> TryMatchTargetIdAsync(
+        NpgsqlConnection conn,
+        Guid personId,
+        IReadOnlyDictionary<string, object?> importRow) =>
+        TryMatchTargetIdAsync(conn, personId, importRow, postgres: true, CancellationToken.None);
+
     private static async Task<Guid?> TryMatchTargetIdAsync(
         DbConnection conn,
         Guid personId,

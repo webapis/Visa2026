@@ -1,5 +1,7 @@
+using System.Data.Common;
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
+using Npgsql;
 using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -59,70 +61,24 @@ internal static class Visa2014PersonIdMapExpander
         var rowsToExpand = batch.ImportRows.Concat(supplementBatch.ImportRows).ToList();
 
         int addedFromPn = 0;
-        // PN collision scan uses SqlClient + T-SQL (TOP 1 / N''). Skip on PostgreSQL
-        // targets (Demo dual-provider pilot); dedupe aliases above still apply.
         if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
         {
+            await using var pg = new NpgsqlConnection(
+                DatabaseProviderDetector.StripEfCoreProvider(targetConnectionString));
+            await pg.OpenAsync();
+            addedFromPn = await MatchPeopleByIdentityAsync(pg, rowsToExpand, idMap, postgres: true);
             await File.WriteAllTextAsync(
                 idMapPath,
                 JsonSerializer.Serialize(idMap, new JsonSerializerOptions { WriteIndented = true }));
             Console.WriteLine(
-                $"INF Id-map expanded: {before} → {idMap.Count} (+{idMap.Count - before}; dedupe {addedFromDedupe}, PN collision skipped on PostgreSQL)");
+                $"INF Id-map expanded: {before} → {idMap.Count} (+{idMap.Count - before}; dedupe {addedFromDedupe}, PN collision {addedFromPn})");
             return 0;
         }
 
         await using (var conn = new SqlConnection(targetConnectionString))
         {
             await conn.OpenAsync();
-            foreach (var row in rowsToExpand)
-            {
-                var legacyKey = ((Guid)row["_legacyRowId"]!).ToString();
-                if (idMap.ContainsKey(legacyKey))
-                    continue;
-
-                var pn = row.GetValueOrDefault("PersonalNumber") as string;
-                if (string.IsNullOrWhiteSpace(pn))
-                    continue;
-
-                await using var cmd = conn.CreateCommand();
-                if (Visa2014PersonTransform.IsSentinelPersonalNumber(pn))
-                {
-                    if (row.GetValueOrDefault("FirstName") is not string firstName ||
-                        row.GetValueOrDefault("LastName") is not string lastName ||
-                        row.GetValueOrDefault("DateOfBirth") is not DateTime dateOfBirth)
-                        continue;
-
-                    cmd.CommandText = """
-                        SELECT TOP 1 CAST(ID AS varchar(36))
-                        FROM People
-                        WHERE (GCRecord IS NULL OR GCRecord = 0)
-                          AND PersonalNumber = N'0'
-                          AND UPPER(LTRIM(RTRIM(FirstName))) = @fn
-                          AND UPPER(LTRIM(RTRIM(LastName))) = @ln
-                          AND CAST(DateOfBirth AS date) = CAST(@dob AS date)
-                        ORDER BY ID
-                        """;
-                    cmd.Parameters.AddWithValue("@fn", firstName.Trim().ToUpperInvariant());
-                    cmd.Parameters.AddWithValue("@ln", lastName.Trim().ToUpperInvariant());
-                    cmd.Parameters.AddWithValue("@dob", dateOfBirth.Date);
-                }
-                else
-                {
-                    cmd.CommandText = """
-                        SELECT TOP 1 CAST(ID AS varchar(36))
-                        FROM People
-                        WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonalNumber = @pn
-                        ORDER BY ID
-                        """;
-                    cmd.Parameters.AddWithValue("@pn", pn);
-                }
-                var existing = await cmd.ExecuteScalarAsync() as string;
-                if (string.IsNullOrWhiteSpace(existing))
-                    continue;
-
-                idMap[legacyKey] = existing;
-                addedFromPn++;
-            }
+            addedFromPn = await MatchPeopleByIdentityAsync(conn, rowsToExpand, idMap, postgres: false);
         }
 
         await File.WriteAllTextAsync(
@@ -131,5 +87,94 @@ internal static class Visa2014PersonIdMapExpander
 
         Console.WriteLine($"INF Id-map expanded: {before} → {idMap.Count} (+{idMap.Count - before}; dedupe {addedFromDedupe}, PN collision {addedFromPn})");
         return 0;
+    }
+
+    private static async Task<int> MatchPeopleByIdentityAsync(
+        DbConnection conn,
+        IReadOnlyList<Dictionary<string, object?>> rowsToExpand,
+        Dictionary<string, string> idMap,
+        bool postgres)
+    {
+        int added = 0;
+        foreach (var row in rowsToExpand)
+        {
+            var legacyKey = ((Guid)row["_legacyRowId"]!).ToString();
+            if (idMap.ContainsKey(legacyKey))
+                continue;
+
+            var pn = row.GetValueOrDefault("PersonalNumber") as string;
+            if (string.IsNullOrWhiteSpace(pn))
+                continue;
+
+            await using var cmd = conn.CreateCommand();
+            if (Visa2014PersonTransform.IsSentinelPersonalNumber(pn))
+            {
+                if (row.GetValueOrDefault("FirstName") is not string firstName ||
+                    row.GetValueOrDefault("LastName") is not string lastName ||
+                    row.GetValueOrDefault("DateOfBirth") is not DateTime dateOfBirth)
+                    continue;
+
+                cmd.CommandText = postgres
+                    ? """
+                      SELECT "ID"::text
+                      FROM "People"
+                      WHERE COALESCE("GCRecord", 0) = 0
+                        AND "PersonalNumber" = '0'
+                        AND UPPER(BTRIM("FirstName")) = @fn
+                        AND UPPER(BTRIM("LastName")) = @ln
+                        AND "DateOfBirth"::date = @dob::date
+                      ORDER BY "ID"
+                      LIMIT 1
+                      """
+                    : """
+                      SELECT TOP 1 CAST(ID AS varchar(36))
+                      FROM People
+                      WHERE (GCRecord IS NULL OR GCRecord = 0)
+                        AND PersonalNumber = N'0'
+                        AND UPPER(LTRIM(RTRIM(FirstName))) = @fn
+                        AND UPPER(LTRIM(RTRIM(LastName))) = @ln
+                        AND CAST(DateOfBirth AS date) = CAST(@dob AS date)
+                      ORDER BY ID
+                      """;
+                cmd.Parameters.Add(CreateParameter(cmd, "@fn", firstName.Trim().ToUpperInvariant()));
+                cmd.Parameters.Add(CreateParameter(cmd, "@ln", lastName.Trim().ToUpperInvariant()));
+                cmd.Parameters.Add(CreateParameter(cmd, "@dob", dateOfBirth.Date));
+            }
+            else
+            {
+                cmd.CommandText = postgres
+                    ? """
+                      SELECT "ID"::text
+                      FROM "People"
+                      WHERE COALESCE("GCRecord", 0) = 0 AND "PersonalNumber" = @pn
+                      ORDER BY "ID"
+                      LIMIT 1
+                      """
+                    : """
+                      SELECT TOP 1 CAST(ID AS varchar(36))
+                      FROM People
+                      WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonalNumber = @pn
+                      ORDER BY ID
+                      """;
+                cmd.Parameters.Add(CreateParameter(cmd, "@pn", pn));
+            }
+
+            var existing = await cmd.ExecuteScalarAsync() as string;
+            if (string.IsNullOrWhiteSpace(existing))
+                continue;
+
+            idMap[legacyKey] = existing;
+            added++;
+        }
+
+        return added;
+    }
+
+    private static DbParameter CreateParameter(DbCommand cmd, string name, object value)
+    {
+        var parameter = cmd.CreateParameter();
+        parameter.ParameterName = name;
+        parameter.Value = value;
+        return parameter;
     }
 }

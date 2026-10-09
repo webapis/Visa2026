@@ -445,7 +445,7 @@ internal static class Visa2014ImportCommand
         Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
         bool visaRemainder = HasArg(args, "--visa-remainder");
         if (visaRemainder)
-            Console.WriteLine("INF Visa remainder: POST rows with no issuing instance in id-map (null IssuingApplicationProfileInstance).");
+            Console.WriteLine("INF Visa remainder: POST rows with no issuing instance in id-map (null IssuingApplicationProfileInstance). Existing rows are not updated.");
         if (!dryRun && objectSpaceFactory == null && applicationIdMap.Count > 0)
         {
             Console.WriteLine(
@@ -1079,6 +1079,9 @@ internal static class Visa2014ImportCommand
             : new Dictionary<Guid, Guid>();
 
         Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+        bool workPermitRemainder = HasArg(args, "--work-permit-remainder");
+        if (workPermitRemainder)
+            Console.WriteLine("INF WorkPermit remainder: POST rows with no instance in id-map (null ApplicationProfileInstance). Existing rows are not updated.");
         if (!dryRun && objectSpaceFactory == null && applicationIdMap.Count > 0)
         {
             Console.WriteLine(
@@ -1095,14 +1098,15 @@ internal static class Visa2014ImportCommand
             dryRun ? null : workPermitIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            workPermitRemainder);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application FK patched: {result.PatchedApplicationProfileInstanceCount}  Skipped (instance not in id-map): {result.SkippedMissingApplicationProfileInstanceIdMap}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application FK patched: {result.PatchedApplicationProfileInstanceCount}  Skipped (instance not in id-map): {result.SkippedMissingApplicationProfileInstanceIdMap}  Posted remainder (no instance): {result.PostedRemainderWithoutInstanceCount}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -1208,6 +1212,9 @@ internal static class Visa2014ImportCommand
             : new Dictionary<Guid, Guid>();
 
         Console.WriteLine($"INF ApplicationProfileInstance id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+        bool invitationRemainder = HasArg(args, "--invitation-remainder");
+        if (invitationRemainder)
+            Console.WriteLine("INF Invitation remainder: POST rows with no instance in id-map (null ApplicationProfileInstance). Existing rows are not updated.");
 
         var result = await Visa2014InvitationODataImporter.RunAsync(
             target,
@@ -1218,14 +1225,15 @@ internal static class Visa2014ImportCommand
             dryRun ? null : invitationIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            invitationRemainder);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application FK patched: {result.PatchedApplicationProfileInstanceCount}  Skipped (instance not in id-map): {result.SkippedMissingApplicationProfileInstanceIdMap}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application FK patched: {result.PatchedApplicationProfileInstanceCount}  Skipped (instance not in id-map): {result.SkippedMissingApplicationProfileInstanceIdMap}  Posted remainder (no instance): {result.PostedRemainderWithoutInstanceCount}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }

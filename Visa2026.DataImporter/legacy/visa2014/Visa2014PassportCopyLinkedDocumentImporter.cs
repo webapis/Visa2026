@@ -41,7 +41,10 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
         Visa2014PassportCopyLinkSpec spec,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnection = null,
+        string? existingBlobDocumentTable = null,
+        string? existingBlobParentIdColumn = null)
     {
         var parentIdMap = Visa2014IdMapHelper.Load(parentIdMapPath);
         var docMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
@@ -61,6 +64,13 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
         var errors = new List<string>();
         var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
         var copyIndexByParent = new Dictionary<Guid, int>();
+        if (!string.IsNullOrWhiteSpace(existingBlobDocumentTable) && !string.IsNullOrWhiteSpace(existingBlobParentIdColumn))
+        {
+            var existingOnTarget = await Visa2014ExistingTargetBlobIndex.SeedAsync(
+                targetConnection, existingBlobDocumentTable, existingBlobParentIdColumn, importedBlobKeys, copyIndexByParent);
+            if (existingOnTarget > 0)
+                Console.WriteLine($"INF {spec.TargetDocumentType.Name} scans already on target: {existingOnTarget} (same bytes are not inserted again)");
+        }
         int posted = 0;
         int failed = 0;
         int skippedNoParentMap = 0;

@@ -5,7 +5,10 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 internal static class Visa2014LegacyBlobDedupeHelper
 {
     public static string BuildKey(Guid targetParentId, byte[] blob) =>
-        $"{targetParentId:N}:{blob.Length}:{Convert.ToHexString(SHA256.HashData(blob))}";
+        BuildKey(targetParentId, blob.Length, Convert.ToHexString(SHA256.HashData(blob)));
+
+    public static string BuildKey(Guid targetParentId, int length, string sha256Hex) =>
+        $"{targetParentId:N}:{length}:{sha256Hex.ToUpperInvariant()}";
 
     public static bool TryRegisterDistinctBlob(
         HashSet<string> importedBlobKeys,

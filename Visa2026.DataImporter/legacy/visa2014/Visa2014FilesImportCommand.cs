@@ -192,7 +192,8 @@ internal static class Visa2014FilesImportCommand
                 dryRun ? null : documentIdMapPath,
                 maxRows,
                 dryRun,
-                verbose);
+                verbose,
+                GetTargetConnection(args));
 
             Console.WriteLine($"INF Person id-map entries: {familyProofResult.PersonIdMapEntries}");
             Console.WriteLine($"INF Legacy family-proof rows: {familyProofResult.LegacyRows}");
@@ -251,10 +252,13 @@ internal static class Visa2014FilesImportCommand
                 idMapPath,
                 maxRows,
                 dryRun,
-                verbose);
+                verbose,
+                GetTargetConnection(args));
 
             Console.WriteLine($"INF Id-map entries: {result.IdMapEntries}");
-            Console.WriteLine($"INF Processed: {result.Processed}  Patched: {result.Patched}  No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
+            Console.WriteLine(
+                $"INF Processed: {result.Processed}  Patched: {result.Patched}  " +
+                $"Already has photo: {result.SkippedAlreadyHasPhoto}  No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
 
             foreach (var error in result.Errors.Take(20))
                 Console.Error.WriteLine($"ERR {error}");
@@ -320,7 +324,8 @@ internal static class Visa2014FilesImportCommand
             dryRun ? null : copyIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            GetTargetConnection(args));
 
         Console.WriteLine($"INF Passport id-map entries: {result.PassportIdMapEntries}");
         Console.WriteLine($"INF Legacy copy rows: {result.LegacyCopyRows}");
@@ -374,7 +379,8 @@ internal static class Visa2014FilesImportCommand
             dryRun ? null : documentIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            GetTargetConnection(args));
 
         Console.WriteLine($"INF Visa id-map entries: {result.VisaIdMapEntries}");
         Console.WriteLine($"INF Rows with blob processed: {result.LegacyRowsWithBlob}");
@@ -428,7 +434,8 @@ internal static class Visa2014FilesImportCommand
             dryRun ? null : documentIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            GetTargetConnection(args));
 
         Console.WriteLine($"INF Education id-map entries: {result.EducationIdMapEntries}");
         Console.WriteLine($"INF Legacy diploma copy rows: {result.LegacyCopyRows}");
@@ -546,7 +553,8 @@ internal static class Visa2014FilesImportCommand
             dryRun ? null : documentIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            GetTargetConnection(args));
 
         PrintPassportCopyLinkedResult("WorkPermit", result);
         return result.Failed > 0 ? 1 : 0;
@@ -586,7 +594,8 @@ internal static class Visa2014FilesImportCommand
             dryRun ? null : documentIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            GetTargetConnection(args));
 
         PrintPassportCopyLinkedResult("Invitation", result);
         return result.Failed > 0 ? 1 : 0;

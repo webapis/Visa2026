@@ -64,6 +64,7 @@ internal static class Visa2014EmployeeSalaryODataImporter
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
+        int relinked = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -91,8 +92,20 @@ internal static class Visa2014EmployeeSalaryODataImporter
                 continue;
             }
 
+            Visa2014NaturalKeyLookup? naturalKey = null;
             try
             {
+                naturalKey = Visa2014NaturalKeyLookup.ForEmployeeSalary(personId);
+                if (await Visa2014NaturalKeyRelink.TryLinkAsync(
+                        target, naturalKey, legacyOid, salaryIdMap, verbose, "EmployeeSalary"))
+                {
+                    skippedAlreadyImported++;
+                    relinked++;
+                    if (relinked % 250 == 0)
+                        Console.WriteLine($"INF Progress: {relinked} relinked by natural key...");
+                    continue;
+                }
+
                 var payload = BuildPayload(row, personId);
                 if (payload == null)
                 {
@@ -110,6 +123,8 @@ internal static class Visa2014EmployeeSalaryODataImporter
                 }
 
                 salaryIdMap[legacyOid] = createdId.Value;
+                if (naturalKey != null)
+                    target.RememberNaturalKey(naturalKey, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
@@ -125,6 +140,8 @@ internal static class Visa2014EmployeeSalaryODataImporter
         }
 
         await target.FlushAsync();
+        if (relinked > 0)
+            Console.WriteLine($"INF Relinked by natural key: {relinked}");
 
         string? idMapPath = null;
         if (salaryIdMap.Count > 0 && !string.IsNullOrWhiteSpace(salaryIdMapOutputPath))
