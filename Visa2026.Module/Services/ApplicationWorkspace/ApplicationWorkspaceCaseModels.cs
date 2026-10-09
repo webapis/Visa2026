@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
 
@@ -132,6 +133,19 @@ public sealed class ApplicationWorkspaceCaseHeaderField
     public IReadOnlyList<string> MultiSelectOptions { get; init; } = Array.Empty<string>();
 
     public ApplicationWorkspaceCaseSummaryFillState FillState { get; init; }
+
+    /// <summary>
+    /// Calendar value for <see cref="ApplicationWorkspaceCaseHeaderFieldKind.Date"/>.
+    /// <see cref="Value"/> stays <c>yyyy-MM-dd</c> so save parsing is unchanged.
+    /// </summary>
+    public DateTime? EditorDate =>
+        Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date
+        && DateTime.TryParseExact(Value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+            ? date
+            : null;
+
+    public static string FormatEditorDate(DateTime? date) =>
+        date.HasValue ? date.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : string.Empty;
 }
 
 public sealed class ApplicationWorkspaceCaseHeaderFieldUpdate

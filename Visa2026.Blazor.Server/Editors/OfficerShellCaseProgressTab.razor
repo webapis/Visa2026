@@ -6,6 +6,7 @@
 @using Visa2026.Module.BusinessObjects.ApplicationWorkspace
 @using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Components
 @using Visa2026.Module.Services.ApplicationWorkspace
 
 <div class="ct-page">
@@ -121,14 +122,11 @@
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
                                     <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="advance-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
-                                    <input id="advance-date-@ApplicationProfileInstanceId"
-                                           @ref="_advanceDateInput"
-                                           type="date"
-                                           class="os-input @(IsDateInvalid ? "is-invalid" : null)"
-                                           aria-invalid="@IsDateInvalid"
-                                           @bind="_advanceDate"
-                                           @bind:format="yyyy-MM-dd"
-                                           disabled="@_busy" />
+                                    <OfficerDateEdit @ref="_advanceDateEdit"
+                                                     InputId="@($"advance-date-{ApplicationProfileInstanceId}")"
+                                                     @bind-Date="_advanceDate"
+                                                     CssClass="@AdvanceDateCssClass"
+                                                     Enabled="@(!_busy)" />
                                     @if (step.ResultOptions.Count > 0)
                                     {
                                         <label class="ct-label @(IsResultInvalid ? "ct-label--error" : null)" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Result")</label>
@@ -287,7 +285,7 @@
     private string _officerNotes = string.Empty;
     private string _selectedAdvanceStateCode = string.Empty;
     private string _processNumber = string.Empty;
-    private DateTime _advanceDate = DateTime.Today;
+    private DateTime? _advanceDate = DateTime.Today;
     private bool _busy;
     private bool _notesDirty;
     private string _pendingLetterStepKey = string.Empty;
@@ -297,11 +295,17 @@
     private bool _advanceFieldErrors;
     private bool _wasStatusError;
     private bool _focusInvalidAdvanceField;
-    private ElementReference _advanceDateInput;
+    private OfficerDateEdit? _advanceDateEdit;
     private ElementReference _advanceResultInput;
     private ElementReference _advanceProcessNumberInput;
 
-    internal DateTime AdvanceDate => _advanceDate == default ? DateTime.Today : _advanceDate.Date;
+    internal DateTime AdvanceDate =>
+        _advanceDate is DateTime date && date != default ? date.Date : DateTime.Today;
+
+    private string AdvanceDateCssClass => IsDateInvalid ? "ct-prog-date is-invalid" : "ct-prog-date";
+
+    private static bool IsMissingAdvanceDate(DateTime? value) =>
+        value is not DateTime date || date == default;
 
     internal string SelectedAdvanceStateCode => _selectedAdvanceStateCode;
 
@@ -319,7 +323,7 @@
 
     private bool IsAdvanceFieldErrorMode => _advanceFieldErrors || IsStatusError;
 
-    private bool IsDateInvalid => IsAdvanceFieldErrorMode && _advanceDate == default;
+    private bool IsDateInvalid => IsAdvanceFieldErrorMode && IsMissingAdvanceDate(_advanceDate);
 
     private bool IsResultInvalid
     {
@@ -543,7 +547,7 @@
 
     private bool TryValidateAdvance(string code, out string? error)
     {
-        if (_advanceDate == default)
+        if (IsMissingAdvanceDate(_advanceDate))
         {
             error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired");
             return false;
@@ -574,8 +578,8 @@
     {
         try
         {
-            if (IsDateInvalid)
-                await _advanceDateInput.FocusAsync();
+            if (IsDateInvalid && _advanceDateEdit != null)
+                await _advanceDateEdit.FocusAsync();
             else if (IsResultInvalid)
                 await _advanceResultInput.FocusAsync();
             else if (IsProcessNumberInvalid)

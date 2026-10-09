@@ -12,6 +12,7 @@
 @using Visa2026.Module.Editors
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.HeaderLinkedDocuments
+@using Visa2026.Blazor.Server.Components
 @using Visa2026.Blazor.Server.Services
 @implements IDisposable
 @inject IJSRuntime JS
@@ -999,6 +1000,9 @@
             ? InvitationSiteCreateRequested.InvokeAsync(fieldKey)
             : Task.CompletedTask;
 
+    private Task OnHeaderDateChanged(string key, DateTime? value) =>
+        OnHeaderFieldChanged(key, ApplicationWorkspaceCaseHeaderField.FormatEditorDate(value));
+
     private Task OnHeaderFieldChanged(string key, string? value)
     {
         if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
@@ -1459,11 +1463,11 @@
             <span class="cw-summary-field__label">@field.Label</span>
             @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
             {
-                <input type="date"
-                       class="cw-summary-field__input"
-                       value="@field.Value"
-                       disabled="@field.ReadOnly"
-                       @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
+                <OfficerDateEdit Date="@field.EditorDate"
+                                 DateChanged="value => OnHeaderDateChanged(field.Key, value)"
+                                 CssClass="cw-summary-date"
+                                 ReadOnly="@field.ReadOnly"
+                                 Enabled="@(!field.ReadOnly)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
             {

@@ -1763,3 +1763,43 @@ select.cw-summary-field__input option {
   font-family: inherit;
 }
 
+/* OfficerDateEdit: Application date and progress Date (dd.MM.yyyy). */
+.officer-case-workspace .cw-summary-date,
+.officer-case-workspace .ct-prog-date {
+  width: 100%;
+  max-width: 100%;
+}
+.officer-case-workspace .cw-summary-date .dxbl-text-edit,
+.officer-case-workspace .ct-prog-date .dxbl-text-edit {
+  width: 100%;
+  border-radius: 8px;
+  background: var(--os-panel);
+  color: var(--os-ink);
+  border: 1px solid var(--os-line);
+}
+.officer-case-workspace .cw-summary-date .dxbl-text-edit-input,
+.officer-case-workspace .ct-prog-date .dxbl-text-edit-input {
+  color: var(--os-ink);
+  -webkit-text-fill-color: var(--os-ink);
+  background: transparent;
+  font: inherit;
+  font-size: var(--cw-type);
+}
+.officer-case-workspace .cw-summary-field--fill-empty .cw-summary-date .dxbl-text-edit {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #dc2626 22%, transparent);
+}
+.officer-case-workspace .cw-summary-field--fill-default .cw-summary-date .dxbl-text-edit {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #2563eb 18%, transparent);
+}
+.officer-case-workspace .cw-summary-field--fill-officer .cw-summary-date .dxbl-text-edit {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #059669 18%, transparent);
+}
+.officer-case-workspace .ct-prog-date.is-invalid .dxbl-text-edit {
+  border-color: var(--os-bad);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--os-bad) 22%, transparent);
+  background: var(--os-bad-soft);
+}
+
