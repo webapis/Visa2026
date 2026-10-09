@@ -1710,6 +1710,10 @@
                                 {
                                     <span class="cw-prog-step__date">@step.Date</span>
                                 }
+                                @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+                                {
+                                    <span class="cw-prog-step__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
+                                }
                                 @if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid)
                                 {
                                     <span class="cw-prog-step__letter">
@@ -2714,7 +2718,7 @@
                 current.Key,
                 current.AdvanceOptions,
                 _progressTab?.SelectedAdvanceStateCode) ?? string.Empty,
-            Notes = current.OfficerNotes ?? string.Empty,
+            Notes = null,
             Date = _progressTab?.AdvanceDate ?? DateTime.Today,
             LetterFileName = _progressTab?.PendingLetterFileName,
             LetterContent = _progressTab?.PendingLetterContent,

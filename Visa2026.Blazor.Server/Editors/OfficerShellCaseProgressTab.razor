@@ -61,6 +61,10 @@
                             <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
                         }
                     </div>
+                    @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+                    {
+                        <p class="ct-prog-v__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</p>
+                    }
                     @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
                     {
                         <p style="margin:6px 0 0">
@@ -97,26 +101,11 @@
                     @if (step.State == "current")
                     {
                         <div class="ct-prog-detail">
-                            <div class="ct-prog-detail__grid">
-                                <div>
-                                    <label class="ct-label" for="officer-notes-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OfficerNotes")</label>
-                                    <textarea id="officer-notes-@ApplicationProfileInstanceId"
-                                              class="ct-textarea"
-                                              rows="3"
-                                              placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.NotesPlaceholder")"
-                                              value="@_officerNotes"
-                                              @oninput="OnNotesInput"
-                                              disabled="@_busy"></textarea>
-                                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-                                        <button type="button" class="os-btn" disabled="@(_busy || _notesDirty == false)" @onclick="SaveNotesAsync">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SaveNotes")</button>
-                                    </div>
-                                </div>
-                                <dl class="ct-meta">
-                                    <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt><dd><span class="os-status os-status--process">@StepText(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
-                                    <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
-                                    <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
-                                </dl>
-                            </div>
+                            <dl class="ct-meta">
+                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt><dd><span class="os-status os-status--process">@StepText(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
+                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
+                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
+                            </dl>
 
                             @if (step.CanAdvance)
                             {
@@ -145,6 +134,20 @@
                                                 <option value="@option.StateCode">@StepText(option.Label)</option>
                                             }
                                         </select>
+                                    }
+                                    @if (ShowResultNumberOnAdvance)
+                                    {
+                                        <label class="ct-label @(IsResultNumberInvalid ? "ct-label--error" : null)" for="advance-result-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")</label>
+                                        <input id="advance-result-number-@ApplicationProfileInstanceId"
+                                               @ref="_advanceResultNumberInput"
+                                               type="text"
+                                               class="os-input @(IsResultNumberInvalid ? "is-invalid" : null)"
+                                               aria-invalid="@IsResultNumberInvalid"
+                                               maxlength="@ApplicationProgressResultNumberHelper.MaxLength"
+                                               @bind="_resultNumber"
+                                               @bind:event="oninput"
+                                               disabled="@_busy"
+                                               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberPlaceholder")" />
                                     }
                                     @if (ShowProcessNumberOnAdvance)
                                     {
@@ -282,21 +285,22 @@
     [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
-    private string _officerNotes = string.Empty;
     private string _selectedAdvanceStateCode = string.Empty;
     private string _processNumber = string.Empty;
+    private string _resultNumber = string.Empty;
     private DateTime? _advanceDate = DateTime.Today;
     private bool _busy;
-    private bool _notesDirty;
     private string _pendingLetterStepKey = string.Empty;
     private string _pendingLetterName = string.Empty;
     private byte[]? _pendingLetterContent;
     private string? _localAdvanceError;
     private bool _advanceFieldErrors;
     private bool _wasStatusError;
+    private string? _previousStatusMessage;
     private bool _focusInvalidAdvanceField;
     private OfficerDateEdit? _advanceDateEdit;
     private ElementReference _advanceResultInput;
+    private ElementReference _advanceResultNumberInput;
     private ElementReference _advanceProcessNumberInput;
 
     internal DateTime AdvanceDate =>
@@ -314,6 +318,9 @@
     private bool ShowProcessNumberOnAdvance =>
         view.Chrome.ShowProcessNumber
         && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode);
+
+    private bool ShowResultNumberOnAdvance =>
+        ApplicationProgressResultNumberHelper.AppliesTo(_selectedAdvanceStateCode);
 
     private string? DisplayStatusMessage =>
         !string.IsNullOrWhiteSpace(_localAdvanceError) ? _localAdvanceError : StatusMessage;
@@ -336,6 +343,17 @@
             return current != null
                 && current.ResultOptions.Count > 0
                 && string.IsNullOrWhiteSpace(_selectedAdvanceStateCode);
+        }
+    }
+
+    private bool IsResultNumberInvalid
+    {
+        get
+        {
+            if (!IsAdvanceFieldErrorMode || !ShowResultNumberOnAdvance)
+                return false;
+
+            return !ApplicationProgressResultNumberHelper.TryNormalize(_resultNumber, required: true, out _, out _);
         }
     }
 
@@ -376,9 +394,12 @@
         {
             _advanceFieldErrors = false;
             _localAdvanceError = null;
+            if (!string.Equals(_previousStatusMessage, StatusMessage, StringComparison.Ordinal))
+                _resultNumber = string.Empty;
         }
 
         _wasStatusError = IsStatusError;
+        _previousStatusMessage = StatusMessage;
 
         var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
         if (current == null)
@@ -390,9 +411,6 @@
             _pendingLetterName = string.Empty;
             _pendingLetterContent = null;
         }
-
-        if (!_notesDirty)
-            _officerNotes = current.OfficerNotes ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(_processNumber) && !string.IsNullOrWhiteSpace(view.Chrome.ProcessNumber))
             _processNumber = view.Chrome.ProcessNumber;
@@ -438,29 +456,6 @@
                 return current.Label;
 
             return $"{current.Label} · {result}";
-        }
-    }
-
-    private void OnNotesInput(ChangeEventArgs e)
-    {
-        _officerNotes = e.Value?.ToString() ?? string.Empty;
-        _notesDirty = true;
-    }
-
-    private async Task SaveNotesAsync()
-    {
-        if (_busy)
-            return;
-
-        _busy = true;
-        try
-        {
-            await SaveNotesRequested.InvokeAsync(_officerNotes);
-            _notesDirty = false;
-        }
-        finally
-        {
-            _busy = false;
         }
     }
 
@@ -531,13 +526,12 @@
             await AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
             {
                 StateCode = code,
-                Notes = _officerNotes,
                 Date = AdvanceDate,
                 LetterFileName = _pendingLetterName,
                 LetterContent = _pendingLetterContent,
                 ProcessNumber = _processNumber,
+                ResultNumber = ApplicationProgressResultNumberHelper.AppliesTo(code) ? _resultNumber : null,
             });
-            _notesDirty = false;
         }
         finally
         {
@@ -562,6 +556,13 @@
             return false;
         }
 
+        if (ApplicationProgressResultNumberHelper.AppliesTo(code)
+            && !ApplicationProgressResultNumberHelper.TryNormalize(_resultNumber, required: true, out _, out var resultNumberError))
+        {
+            error = resultNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberRequired");
+            return false;
+        }
+
         var requireProcessNumber = view.Chrome.ShowProcessNumber
             && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
         if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
@@ -582,6 +583,8 @@
                 await _advanceDateEdit.FocusAsync();
             else if (IsResultInvalid)
                 await _advanceResultInput.FocusAsync();
+            else if (IsResultNumberInvalid)
+                await _advanceResultNumberInput.FocusAsync();
             else if (IsProcessNumberInvalid)
                 await _advanceProcessNumberInput.FocusAsync();
         }
@@ -611,7 +614,6 @@
             {
                 StepKey = step.CanRevertToHere && !step.CanRevert ? step.Key : null,
             });
-            _notesDirty = false;
         }
         finally
         {

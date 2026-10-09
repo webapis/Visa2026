@@ -499,6 +499,7 @@ select.cw-summary-field__input option {
 .cw-prog-step__badge--active { background: var(--os-accent-soft); color: var(--os-muted); }
 .cw-prog-step__badge--muted { background: var(--os-surface); color: var(--os-muted); }
 .cw-prog-step__date { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--os-muted); }
+.cw-prog-step__result-number { display: block; margin-top: 2px; font-size: 0.72rem; font-weight: 600; color: var(--os-ink); }
 .cw-prog-step__letter { display: block; margin-top: 4px; max-width: 100%; }
 .cw-prog-step__letter .ct-letter-preview {
   font-size: 0.72rem;
@@ -1632,6 +1633,7 @@ select.cw-summary-field__input option {
   .cw-sum-tile__label,
   .cw-prog-step__body strong,
   .cw-prog-step__date,
+  .cw-prog-step__result-number,
   .cw-prog-step__letter,
   .cw-link-tile__label,
   .cw-link-tile__caption,
@@ -1681,6 +1683,7 @@ select.cw-summary-field__input option {
   .ct-summary-list,
   .ct-rail-foot,
   .ct-prog-v__date,
+  .ct-prog-v__result-number,
   .ct-prog-v__letter,
   .ct-label,
   .ct-textarea,

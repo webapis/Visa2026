@@ -254,6 +254,9 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public string OfficerNotes { get; init; } = string.Empty;
 
+    /// <summary>Ministry decision number stored on the Approved or Unapproved row for this leg.</summary>
+    public string ResultNumber { get; init; } = string.Empty;
+
     public string MinistryLetterFileName { get; init; } = string.Empty;
 
     public bool ShowMinistryLetterUpload { get; init; }
