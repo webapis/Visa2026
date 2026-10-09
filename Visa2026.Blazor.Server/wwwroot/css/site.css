@@ -3964,15 +3964,17 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 }
 
 /* List column captions wrap on word boundaries. Cell values stay one line
-   (DxGrid TextWrapEnabled remains off / dxbl-grid-nowrap). */
+   (DxGrid TextWrapEnabled remains off / dxbl-grid-nowrap).
+   min-width: min-content keeps a squeezed column from stacking one letter per line. */
 .dxbl-grid.dxbl-grid-nowrap .dxbl-grid-table > thead .dxbl-grid-header-row > th:not(.dxbl-grid-command-cell):not(.dxbl-grid-selection-cell) > .dxbl-grid-header-content > span {
     white-space: normal;
     overflow: visible;
     text-overflow: unset;
     line-height: 1.2;
     max-width: 7.5rem;
-    min-width: 0;
-    overflow-wrap: break-word;
+    min-width: min-content;
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 /* Filtered column header (ListViewTotalCountController CustomizeElement). */

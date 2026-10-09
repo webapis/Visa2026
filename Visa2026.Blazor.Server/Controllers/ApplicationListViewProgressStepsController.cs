@@ -3,6 +3,7 @@ using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Model;
 using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Controllers;
@@ -55,6 +56,9 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
 
     private void AutoFitColumns()
     {
+        if (PersonLinkedApplicationsColumnWidths.SkipAutoFit(View?.Id))
+            return;
+
         if (View?.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
             grid.AutoFitColumnWidths();
     }

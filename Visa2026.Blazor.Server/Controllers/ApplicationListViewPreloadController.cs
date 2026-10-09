@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Model;
 using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Controllers;
@@ -140,7 +141,8 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
                 suppressCollectionReloadPreload = false;
             }
 
-            if (View.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
+            if (!PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id)
+                && View.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
                 grid.AutoFitColumnWidths();
         }
 

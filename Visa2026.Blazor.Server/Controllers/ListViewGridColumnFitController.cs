@@ -2,6 +2,7 @@ using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
+using Visa2026.Module.Model;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
@@ -36,5 +37,6 @@ public sealed class ListViewGridColumnFitController : ViewController<ListView>
     }
 
     private bool ShouldSkipListView() =>
-        View.Id.EndsWith("_LookupListView", StringComparison.Ordinal);
+        View.Id.EndsWith("_LookupListView", StringComparison.Ordinal)
+        || PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id);
 }
