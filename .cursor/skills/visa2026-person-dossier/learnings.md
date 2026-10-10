@@ -146,3 +146,11 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 - Copy on file (Invitation.Documents with File): **Preview** opens `OpenHeaderDocumentCopiesAsync` (Family=Invitation, `OpenPreviewOnly`) with owner `PersonDossierViewIds.DetailView`.
 - No copy: amber **No copy** pill + **Upload**. With a case (Invitation.ApplicationProfileInstance) it opens `IssueIssuedHeaderSlotRequest` in edit mode (`ExistingHeaderId`), reusing the workspace panel's Upload copy. Without a case (legacy) it opens the Invitation DetailView in a new tab.
 - Editor watches `IVisaPreviewSlotService.StateChanged`; when the upload occupant leaves the slot it reloads the snapshot so Preview appears. Unsubscribe in `BreakLinksToControl`.
+
+### 2026-10-10 — Dossier links stay visible on Fluent Dark
+
+- **Ask**: Preview and application links were blue and unreadable on the dark dossier.
+- **Cause**: `.person-dossier__app-link` used `#1d4ed8`, and hover mixed that blue toward black.
+- **Fix**: The link color is the theme accent (`--DS-color-content-primary-default-rest`), with a light blue fallback on Fluent Dark. Hover mixes toward the dossier text color.
+- **Officer**: Hard-refresh. Open a person dossier. Preview, Upload, and the application name should be readable. Check light once.
+- **Prevent**: Do not put `#1d4ed8` back on `.person-dossier__app-link`. Do not mix the link color toward black.

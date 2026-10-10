@@ -10,6 +10,7 @@
 .person-dossier {
   --pd-surface: var(--bs-body-bg, #ffffff);
   --pd-text: var(--bs-body-color, #1e293b);
+  --pd-link: var(--DS-color-content-primary-default-rest, var(--bs-link-color, #1d4ed8));
 
   --pd-hue-green: #2f8f4e;
   --pd-hue-amber: #c1841f;
@@ -32,6 +33,7 @@
   --pd-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   color: var(--pd-text);
+  color-scheme: inherit;
   /* Soft desk behind centered Screen column (Word-like side gutters). */
   background: color-mix(in srgb, var(--pd-surface) 90%, var(--pd-text));
   padding: 0;
@@ -547,20 +549,26 @@
   padding: 0;
   margin: 0;
   font: inherit;
-  color: var(--pd-link, #1d4ed8);
+  color: var(--pd-link);
+  -webkit-text-fill-color: var(--pd-link);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
 }
 
 .person-dossier__app-link:hover {
-  color: color-mix(in srgb, var(--pd-link, #1d4ed8) 80%, #000);
+  color: color-mix(in srgb, var(--pd-link) 70%, var(--pd-text));
+  -webkit-text-fill-color: color-mix(in srgb, var(--pd-link) 70%, var(--pd-text));
 }
 
 .person-dossier__app-link:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--pd-link, #1d4ed8) 50%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--pd-link) 50%, transparent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+.dxbl-theme-fluent-mode-dark .person-dossier {
+  --pd-link: var(--DS-color-content-primary-default-rest, #93c5fd);
 }
 
 .person-dossier__col-copy {

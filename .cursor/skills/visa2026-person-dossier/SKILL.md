@@ -94,6 +94,7 @@ disable-model-invocation: false
 | Controller on host never runs | Prefer `View.Id` match, not `ObjectViewController<, PersonDossierHost>` | **This skill** |
 | Search term misses ü/ğ | Fold / `vw_rd_person_search` | **report-dashboard** |
 | Catalog empty / preview narrow | Copies content vs slot CSS | **person-document-copies** / **preview-slot** |
+| Preview / application links disappear on Fluent Dark | `.person-dossier__app-link` was `#1d4ed8`. Hard-refresh. Links use the theme accent | **This skill** |
 
 ---
 
