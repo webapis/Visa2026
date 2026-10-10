@@ -23,7 +23,7 @@ sourceDocs:
 
 ## Gysga ädimler
 
-1. Arzada **Templates** açyň.
+1. Ýüztutmada **Templates** açyň.
 2. Bir gezek: **Change template folder** — `%LOCALAPPDATA%\Visa2026\TemplateEdit`
 3. **Tigir** bilen **Edit template** görkeziň.
 4. Redaktirle, ýazdyr, Word/Excel ýapyň.

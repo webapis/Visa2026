@@ -25,8 +25,8 @@ PDF üçin [Document copies](document-copies.md).
 
 | Ugur | Nireden |
 |------|---------|
-| Arza | Application jikme-jik → **Templates** |
-| Setirler | Application items → saýla → **Templates** (şol arza) |
+| Ýüztutma | Application jikme-jik → **Templates** |
+| Setirler | Application items → saýla → **Templates** (şol ýüztutma) |
 
 ## Ädimler
 

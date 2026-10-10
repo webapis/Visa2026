@@ -40,4 +40,4 @@ Girişden soň **Hasabat paneli** — gündelik işi görmek üçin esasy sahypa
 ## Indiki
 
 - [Esasy navigasiýa](../getting-started/navigation.md)
-- [Arzalar](../applications/overview.md)
+- [Ýüztutmalar](../applications/overview.md)

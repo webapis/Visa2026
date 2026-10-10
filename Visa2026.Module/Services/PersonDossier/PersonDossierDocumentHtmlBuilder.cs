@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Visa2026.Module.Localization;
@@ -155,6 +156,8 @@ public static class PersonDossierDocumentHtmlBuilder
     private static void AppendSections(StringBuilder html, PersonDossierSnapshot snapshot, string? culture)
     {
         string statusHeader = Msg("PersonDossier.Column.Status", culture);
+        string progressHeader = Msg("PersonDossier.Column.Progress", culture);
+        string issuedHeader = Msg("PersonDossier.Column.Issued", culture);
 
         foreach (var section in snapshot.Sections)
         {
@@ -167,30 +170,174 @@ public static class PersonDossierDocumentHtmlBuilder
             html.Append(CultureInfo.InvariantCulture, $"<tr style=\"background-color:{HeadBackground};\">");
             foreach (var header in section.ColumnHeaders)
                 AppendHeaderCell(html, header);
-            AppendHeaderCell(html, statusHeader);
+            if (section.ShowsStatusColumn)
+                AppendHeaderCell(html, statusHeader);
+            if (section.HasProgressColumn)
+                AppendHeaderCell(html, progressHeader);
+            if (section.HasIssuedOutcomeColumn)
+                AppendHeaderCell(html, issuedHeader);
             html.Append("</tr>");
 
             foreach (var record in section.Records)
             {
                 html.Append("<tr>");
-                foreach (var cell in record.Cells)
+                for (var cellIndex = 0; cellIndex < record.Cells.Count; cellIndex++)
                 {
+                    var cell = record.Cells[cellIndex];
+                    var detail = cellIndex == 0 && !string.IsNullOrWhiteSpace(record.FirstCellDetail)
+                        ? $"<br />{Enc(record.FirstCellDetail)}"
+                        : string.Empty;
+                    var note = cellIndex == 0 && !string.IsNullOrWhiteSpace(record.FirstCellNote)
+                        ? $"<br />{Enc(record.FirstCellNote)}"
+                        : string.Empty;
                     html.Append(CultureInfo.InvariantCulture,
-                        $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">{Enc(cell)}</td>");
+                        $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">{Enc(cell)}{detail}{note}</td>");
                 }
 
-                html.Append(CultureInfo.InvariantCulture,
-                    $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">");
-                if (record.IsCurrent)
-                    AppendPill(html, Msg("PersonDossier.Status.Current", culture), "st-approved");
-                if (!string.IsNullOrWhiteSpace(record.StatusLabel))
-                    AppendPill(html, record.StatusLabel, record.StatusCssClass);
-                html.Append("</td></tr>");
+                if (section.ShowsStatusColumn)
+                {
+                    html.Append(CultureInfo.InvariantCulture,
+                        $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">");
+                    if (record.IsCurrent)
+                        AppendPill(html, Msg("PersonDossier.Status.Current", culture), "st-approved");
+                    if (!string.IsNullOrWhiteSpace(record.StatusLabel))
+                        AppendPill(html, record.StatusLabel, record.StatusCssClass);
+                    html.Append("</td>");
+                }
+
+                if (section.HasProgressColumn)
+                    AppendProgressCell(html, record, culture);
+                if (section.HasIssuedOutcomeColumn)
+                    AppendIssuedOutcomeCell(html, record);
+
+                html.Append("</tr>");
             }
 
             html.Append("</table>");
         }
     }
+
+    private static void AppendIssuedOutcomeCell(StringBuilder html, PersonDossierRecord record)
+    {
+        html.Append(CultureInfo.InvariantCulture,
+            $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">");
+        var outcome = record.IssuedOutcome;
+        if (outcome == null || string.IsNullOrWhiteSpace(outcome.Number))
+            html.Append("\u2014");
+        else
+        {
+            html.Append(Enc(outcome.Number));
+            if (!string.IsNullOrWhiteSpace(outcome.StatusLabel))
+            {
+                html.Append("<br />");
+                AppendPill(html, outcome.StatusLabel, outcome.StatusCssClass);
+            }
+        }
+
+        html.Append("</td>");
+    }
+
+    /// <summary>
+    /// Same dots, checks, and dates as the screen stepper. Tables and inline colors only —
+    /// RichEdit's HTML importer does not keep flex layout.
+    /// </summary>
+    private static void AppendProgressCell(StringBuilder html, PersonDossierRecord record, string? culture)
+    {
+        html.Append(CultureInfo.InvariantCulture,
+            $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:7pt;vertical-align:top;\">");
+        if (record.ProgressSteps.Count == 0)
+        {
+            html.Append("\u2014");
+            html.Append("</td>");
+            return;
+        }
+
+        html.Append("<table style=\"border-collapse:collapse;width:100%;\"><tr>");
+        for (var i = 0; i < record.ProgressSteps.Count; i++)
+        {
+            var step = record.ProgressSteps[i];
+            AppendGlyphCell(html, step);
+            if (i < record.ProgressSteps.Count - 1)
+                AppendConnectorCell(html, step.ConnectorDone);
+        }
+
+        html.Append("</tr><tr>");
+        for (var i = 0; i < record.ProgressSteps.Count; i++)
+        {
+            var step = record.ProgressSteps[i];
+            html.Append(CultureInfo.InvariantCulture,
+                $"<td style=\"font-size:7pt;font-weight:bold;text-align:center;padding:2pt 1pt 0 1pt;vertical-align:top;\">{Enc(step.Label)}</td>");
+            if (i < record.ProgressSteps.Count - 1)
+                html.Append("<td></td>");
+        }
+
+        html.Append("</tr><tr>");
+        for (var i = 0; i < record.ProgressSteps.Count; i++)
+        {
+            html.Append("<td style=\"font-size:6pt;text-align:center;padding:1pt 2pt 0 2pt;vertical-align:top;\">");
+            AppendStepFacts(html, record.ProgressSteps[i], culture);
+            html.Append("</td>");
+            if (i < record.ProgressSteps.Count - 1)
+                html.Append("<td></td>");
+        }
+
+        html.Append("</tr></table></td>");
+    }
+
+    /// <summary>
+    /// Read-only facts from the case progress track. Paper prints the letter file name;
+    /// the screen opens that file in the preview slot.
+    /// </summary>
+    private static void AppendStepFacts(StringBuilder html, PersonDossierProgressStep step, string? culture)
+    {
+        var lines = new List<string>();
+        if (!string.IsNullOrWhiteSpace(step.StatusLabel))
+            lines.Add(step.StatusLabel);
+        if (!string.IsNullOrWhiteSpace(step.Date))
+            lines.Add(step.Date);
+        if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+        {
+            lines.Add(VisaUiMessages.FormatForCulture(
+                culture,
+                "ApplicationProfileInstance.Workspace.ResultNumberValue",
+                step.ResultNumber));
+        }
+
+        if (step.ShowLetter)
+            lines.Add(step.LetterFileName);
+        else if (step.ShowMissingLetter)
+            lines.Add(Msg("ApplicationProfileInstance.Workspace.Missing", culture));
+
+        if (lines.Count == 0)
+            return;
+
+        html.Append(CultureInfo.InvariantCulture,
+            $"<div style=\"color:{MutedColor};\">{string.Join("<br />", lines.Select(Enc))}</div>");
+    }
+
+    private static void AppendGlyphCell(StringBuilder html, PersonDossierProgressStep step)
+    {
+        var (ink, fill, border) = ToneColors(step.Tone);
+        html.Append(CultureInfo.InvariantCulture,
+            $"<td style=\"width:14pt;text-align:center;vertical-align:middle;font-size:8pt;font-weight:bold;color:{ink};background-color:{fill};border:1px solid {border};\">{Enc(step.Glyph)}</td>");
+    }
+
+    private static void AppendConnectorCell(StringBuilder html, bool done)
+    {
+        var color = done ? "#027a48" : "#d0d5dd";
+        html.Append(CultureInfo.InvariantCulture,
+            $"<td style=\"width:8pt;text-align:center;color:{color};font-size:8pt;\">\u2014</td>");
+    }
+
+    private static (string Ink, string Fill, string Border) ToneColors(string tone) => tone switch
+    {
+        "done" => ("#027a48", "#e7f6ee", "#12b76a"),
+        "issued" => ("#ffffff", "#12b76a", "#12b76a"),
+        "current" => ("#175cd3", "#eff8ff", "#2563eb"),
+        "rej" => ("#b42318", "#fef3f2", "#f04438"),
+        "cancel" => ("#667085", "#f2f4f7", "#98a2b3"),
+        _ => ("#667085", "#ffffff", "#d0d5dd"),
+    };
 
     private static void AppendHeaderCell(StringBuilder html, string caption)
     {

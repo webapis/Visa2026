@@ -85,8 +85,8 @@
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
-        "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Arza ösüşi", "ru-RU": "Прогресс заявки" },
-        "ResultCoverageDisplay": { "en-US": "Application result", "tr-TR": "Başvuru sonucu", "tk-TM": "Arzanyň netijesi", "ru-RU": "Результат заявки" }
+        "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" },
+        "ResultCoverageDisplay": { "en-US": "Application result", "tr-TR": "Başvuru sonucu", "tk-TM": "Ýüztutmanyň netijesi", "ru-RU": "Результат заявки" }
       }
     },
     "Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost": {

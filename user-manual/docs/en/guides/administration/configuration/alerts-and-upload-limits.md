@@ -35,7 +35,7 @@ Each row defines thresholds for a document family (visa, passport, work permit i
 2. Open the row for the document type (display name identifies the rule).
 3. Set:
    - **Duýduryş (gün)** / **Expiring soon days** — calendar days **before** `Expiration date` when the record becomes expiring-soon (required, > 0)
-   - **Uzaltma arzasy (gün)** / **Extension application days** — optional; only for **Visa** and **Work permit item** rules — days before expiry when an extension application should start
+   - **Uzaltma ýüztutmasy (gün)** / **Extension application days** — optional; only for **Visa** and **Work permit item** rules — days before expiry when an extension application should start
 4. **Save**.
 
 !!! note "Seeded document types"

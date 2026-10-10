@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.PreviewSlot;
 
@@ -210,8 +211,9 @@ public static class PersonDossierResolver
             yield return BuildFamilyMembers(person);
 
         yield return BuildApplications(objectSpace, person);
-        yield return BuildInvitations(objectSpace, person);
-        yield return BuildRejections(person);
+        var rejections = BuildRejections(person);
+        if (rejections.Records.Count > 0)
+            yield return rejections;
     }
 
     private static PersonDossierSection BuildPassports(Person person)
@@ -514,6 +516,14 @@ public static class PersonDossierResolver
 
         var apps = Safe(person.ApplicationProfileInstances)
             .OrderByDescending(app => app.ApplicationDate)
+            .ToList();
+        var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(objectSpace, apps);
+        var invitationItems = Safe(person.InvitationItems).ToList();
+        var usedInvitationIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            invitationItems.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+
+        var records = apps
             .Select(app =>
             {
                 if (!exclusions.TryGetValue(app.ID, out var letter)
@@ -523,6 +533,7 @@ public static class PersonDossierResolver
                     exclusions[app.ID] = letter;
                 }
 
+                timelines.TryGetValue(app.ID, out var timeline);
                 var excluded = exclusions.ContainsKey(app.ID);
                 return new PersonDossierRecord
                 {
@@ -532,20 +543,77 @@ public static class PersonDossierResolver
                     Cells =
                     [
                         app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
-                        app.ApplicationProfile?.Name ?? Describe(app.ApplicationType),
-                        FormatDate(app.ApplicationDate),
                     ],
+                    FirstCellDetail = app.ApplicationProfile?.Name ?? Describe(app.ApplicationType),
+                    FirstCellNote = FormatDate(app.ApplicationDate),
                     StatusLabel = excluded
                         ? FormatExcludedStatus(letter.LetterNumber, letter.LetterDate)
-                        : app.LatestProgress?.State?.NameTm ?? string.Empty,
+                        : string.Empty,
                     StatusCssClass = excluded ? "st-expiring" : string.Empty,
+                    ApplicationGroupId = PersonDossierApplicationGroups.Resolve(app.ApplicationProfile),
+                    ProgressSteps = ToDossierProgressSteps(timeline),
+                    IssuedOutcome = ResolveIssuedOutcome(
+                        timeline,
+                        invitationItems.FirstOrDefault(item => item.Invitation?.ApplicationProfileInstance?.ID == app.ID),
+                        Safe(person.RejectionItems).FirstOrDefault(item => item.Rejection?.ApplicationProfileInstance?.ID == app.ID),
+                        usedInvitationIds),
                 };
             })
             .ToList();
 
         return Section("applications", 100,
-            ["ApplicationNumber", "ApplicationProfile", "ApplicationDate"], apps);
+            ["ApplicationProfile"], records,
+            hasProgressColumn: true,
+            hasIssuedOutcomeColumn: true,
+            applicationGroups: BuildApplicationGroups(records));
     }
+
+    /// <summary>Maps the workspace progress track onto dossier rows (screen and paper share this).</summary>
+    internal static IReadOnlyList<PersonDossierProgressStep> ToDossierProgressSteps(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? steps)
+    {
+        if (steps == null || steps.Count == 0)
+            return Array.Empty<PersonDossierProgressStep>();
+
+        var result = new List<PersonDossierProgressStep>(steps.Count);
+        for (var i = 0; i < steps.Count; i++)
+        {
+            var step = steps[i];
+            var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
+            var isOffice = string.Equals(
+                step.Key,
+                ApplicationWorkspaceProgressTimeline.OfficeKey,
+                StringComparison.OrdinalIgnoreCase);
+            var fileName = step.MinistryLetterFileName ?? string.Empty;
+            result.Add(new PersonDossierProgressStep
+            {
+                Label = ApplicationProfileLocalization.ProgressStepLabel(step.Label),
+                Date = step.Date ?? string.Empty,
+                StatusLabel = ApplicationWorkspaceListProgressSteps.Badge(step),
+                ResultNumber = step.ResultNumber ?? string.Empty,
+                IsOfficeFile = isOffice,
+                LetterFileName = fileName,
+                LetterProgressId = step.ProgressId,
+                MissingLetter = step.MissingMinistryLetter
+                    || (isOffice && !isCurrent && string.IsNullOrWhiteSpace(fileName)),
+                IsCurrentStep = isCurrent,
+                Tone = ApplicationWorkspaceListProgressSteps.Tone(ToCompact(step)),
+                Glyph = ApplicationWorkspaceListProgressSteps.Glyph(ToCompact(step), i + 1),
+                ConnectorDone = string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase),
+            });
+        }
+
+        return result;
+    }
+
+    private static ApplicationWorkspaceListProgressSteps.Step ToCompact(ApplicationWorkspaceCaseProgressStep step) =>
+        new(
+            step.Key,
+            step.Label,
+            step.State,
+            step.OutcomeKind,
+            step.Date ?? string.Empty,
+            step.CurrentStateLabel ?? string.Empty);
 
     /// <summary>Same wording as People &amp; links Seretmezlik badge (localized).</summary>
     internal static string FormatExcludedStatus(string? letterNumber, DateTime letterDate) =>
@@ -617,51 +685,6 @@ public static class PersonDossierResolver
         return map;
     }
 
-    private static PersonDossierSection BuildInvitations(IObjectSpace objectSpace, Person person)
-    {
-        var items = Safe(person.InvitationItems).ToList();
-        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
-            objectSpace,
-            items.Select(i => i.ID).Where(id => id != Guid.Empty).ToList());
-
-        var records = items
-            .OrderByDescending(item => item.Invitation?.IssuedDate ?? DateTime.MinValue)
-            .Select(item =>
-            {
-                var status = ClassifyInvitationItem(item, usedIds);
-                var invitation = item.Invitation;
-                var hasCopy = invitation != null
-                    && invitation.ID != Guid.Empty
-                    && Safe(invitation.Documents).Any(d => d.File != null);
-                return new PersonDossierRecord
-                {
-                    RecordKey = $"InvitationItem:{item.ID}",
-                    SourceObjectId = item.ID,
-                    SourceObjectType = typeof(InvitationItem),
-                    PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
-                    PreviewParentId = hasCopy ? invitation!.ID : null,
-                    UploadHeaderId = !hasCopy && invitation != null && invitation.ID != Guid.Empty ? invitation.ID : null,
-                    UploadIssuedKind = !hasCopy && invitation != null && invitation.ID != Guid.Empty
-                        ? IssueIssuedHeaderKind.Invitation
-                        : null,
-                    UploadApplicationProfileInstanceId = !hasCopy ? invitation?.ApplicationProfileInstance?.ID : null,
-                    Cells =
-                    [
-                        item.Invitation?.InvitationNumber ?? string.Empty,
-                        Describe(item.Invitation?.VisaCategory),
-                        FormatDate(item.Invitation?.IssuedDate),
-                        FormatDate(item.Invitation?.ExpirationDate),
-                    ],
-                    StatusLabel = status.Label,
-                    StatusCssClass = status.CssClass,
-                };
-            })
-            .ToList();
-
-        return Section("invitations", 110,
-            ["Number", "Category", "Issued", "Expiry"], records, hasCopyColumn: true);
-    }
-
     /// <summary>
     /// InvitationItem dossier status — mutually exclusive:
     /// Cancelled (cancellation instance) → Used (visa issued) → Expired → Valid to {expiry}.
@@ -688,9 +711,83 @@ public static class PersonDossierResolver
         return (string.Empty, string.Empty);
     }
 
+    /// <summary>
+    /// Invitation or rejection for this person, shown only after Migration service is finished.
+    /// A rejection on that step replaces the invitation.
+    /// </summary>
+    internal static PersonDossierIssuedOutcome? ResolveIssuedOutcome(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? timeline,
+        InvitationItem? invitationItem,
+        RejectionItem? rejectionItem,
+        IReadOnlySet<Guid>? usedInvitationItemIds = null)
+    {
+        var migration = timeline?.FirstOrDefault(step =>
+            string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase));
+        if (migration == null
+            || string.Equals(migration.State, "current", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(migration.State, "pending", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var rejected = string.Equals(migration.OutcomeKind, "rejected", StringComparison.OrdinalIgnoreCase);
+        if (rejected)
+            return BuildRejectionOutcome(rejectionItem);
+
+        return BuildInvitationOutcome(invitationItem, usedInvitationItemIds)
+            ?? BuildRejectionOutcome(rejectionItem);
+    }
+
+    private static PersonDossierIssuedOutcome? BuildInvitationOutcome(
+        InvitationItem? item,
+        IReadOnlySet<Guid>? usedInvitationItemIds)
+    {
+        var invitation = item?.Invitation;
+        if (item == null || invitation == null || string.IsNullOrWhiteSpace(invitation.InvitationNumber))
+            return null;
+
+        var status = ClassifyInvitationItem(item, usedInvitationItemIds);
+        var hasCopy = invitation.ID != Guid.Empty
+            && Safe(invitation.Documents).Any(document => document.File != null);
+        return new PersonDossierIssuedOutcome
+        {
+            Number = invitation.InvitationNumber,
+            StatusLabel = status.Label,
+            StatusCssClass = status.CssClass,
+            PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
+            PreviewParentId = hasCopy ? invitation.ID : null,
+        };
+    }
+
+    private static PersonDossierIssuedOutcome? BuildRejectionOutcome(RejectionItem? item)
+    {
+        var rejection = item?.Rejection;
+        var number = rejection?.RejectedDocNumber;
+        if (rejection == null || string.IsNullOrWhiteSpace(number))
+            return null;
+
+        var hasCopy = rejection.ID != Guid.Empty
+            && Safe(rejection.Documents).Any(document => document.File != null);
+        return new PersonDossierIssuedOutcome
+        {
+            Number = number,
+            StatusLabel = L("Status.Rejected"),
+            StatusCssClass = "st-expiring",
+            PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Rejection : null,
+            PreviewParentId = hasCopy ? rejection.ID : null,
+        };
+    }
+
     private static PersonDossierSection BuildRejections(Person person)
     {
+        var applicationIds = Safe(person.ApplicationProfileInstances)
+            .Select(app => app.ID)
+            .Where(id => id != Guid.Empty)
+            .ToHashSet();
         var records = Safe(person.RejectionItems)
+            .Where(item =>
+            {
+                var applicationId = item.Rejection?.ApplicationProfileInstance?.ID ?? Guid.Empty;
+                return applicationId == Guid.Empty || !applicationIds.Contains(applicationId);
+            })
             .Select(item => new PersonDossierRecord
             {
                 RecordKey = $"RejectionItem:{item.ID}",
@@ -718,7 +815,10 @@ public static class PersonDossierResolver
 
     private static PersonDossierSection Section(
         string sectionId, int sortOrder, string[] columnKeys, List<PersonDossierRecord> records,
-        bool hasCopyColumn = false) => new()
+        bool hasCopyColumn = false,
+        bool hasProgressColumn = false,
+        bool hasIssuedOutcomeColumn = false,
+        IReadOnlyList<PersonDossierApplicationGroup>? applicationGroups = null) => new()
         {
             SectionId = sectionId,
             SectionLabel = L($"Section.{sectionId}"),
@@ -726,7 +826,37 @@ public static class PersonDossierResolver
             ColumnHeaders = columnKeys.Select(key => L($"Column.{key}")).ToList(),
             Records = records,
             HasCopyColumn = hasCopyColumn,
+            HasProgressColumn = hasProgressColumn,
+            HasIssuedOutcomeColumn = hasIssuedOutcomeColumn,
+            ApplicationGroups = applicationGroups ?? Array.Empty<PersonDossierApplicationGroup>(),
         };
+
+    private static List<PersonDossierApplicationGroup> BuildApplicationGroups(
+        IReadOnlyList<PersonDossierRecord> records)
+    {
+        var groups = new List<PersonDossierApplicationGroup>(PersonDossierApplicationGroups.ButtonOrder.Length);
+        foreach (var groupId in PersonDossierApplicationGroups.ButtonOrder)
+        {
+            var count = groupId == PersonDossierApplicationGroups.All
+                ? records.Count
+                : records.Count(record =>
+                    string.Equals(record.ApplicationGroupId, groupId, StringComparison.Ordinal));
+            var always = groupId == PersonDossierApplicationGroups.Invitation
+                || groupId == PersonDossierApplicationGroups.All;
+            if (!always && count == 0)
+                continue;
+
+            groups.Add(new PersonDossierApplicationGroup
+            {
+                GroupId = groupId,
+                Label = L(PersonDossierApplicationGroups.LabelSuffix(groupId)),
+                Count = count,
+                AlwaysVisible = always,
+            });
+        }
+
+        return groups;
+    }
 
     private static IEnumerable<T> Safe<T>(IList<T>? source) where T : class =>
         source == null ? Enumerable.Empty<T>() : source.Where(item => item != null);

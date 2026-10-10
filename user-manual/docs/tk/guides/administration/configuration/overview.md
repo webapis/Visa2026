@@ -15,7 +15,7 @@ verified: false
 
 # Sazlamalar — umumy syn
 
-**Configuration** menýusy kompaniýa maglumatlaryny, arza belgilerini, tassyklama ugurlaryny, SLA we ýükleme çäglerini dolandyrýar. Köpçülikleýin ofiserler bu menýuny görmeýär; **VisaOffice** / administrator hasaplary ulanýar.
+**Configuration** menýusy kompaniýa maglumatlaryny, ýüztutma belgilerini, tassyklama ugurlaryny, SLA we ýükleme çäglerini dolandyrýar. Köpçülikleýin ofiserler bu menýuny görmeýär; **VisaOffice** / administrator hasaplary ulanýar.
 
 ## Menýu gysgaça
 

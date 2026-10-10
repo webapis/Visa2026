@@ -147,6 +147,36 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 - No copy: amber **No copy** pill + **Upload**. With a case (Invitation.ApplicationProfileInstance) it opens `IssueIssuedHeaderSlotRequest` in edit mode (`ExistingHeaderId`), reusing the workspace panel's Upload copy. Without a case (legacy) it opens the Invitation DetailView in a new tab.
 - Editor watches `IVisaPreviewSlotService.StateChanged`; when the upload occupant leaves the slot it reloads the snapshot so Preview appears. Unsubscribe in `BreakLinksToControl`.
 
+### 2026-10-10 — Applications row uses the instance-list progress track
+
+- **Ask**: Dossier Applications should show the same process track as the Application Profile instance list (1A / 2A / 3A).
+- **Fix**: `BuildApplications` calls `ApplicationWorkspaceListProgressSteps.ApplyTo`. Screen renders `lv-progress-stepper`. Paper and the director PDF draw the same dots with print-safe tables (`PersonDossierDocumentHtmlBuilder`). The state pill is gone. Seretmezlik stays in Status only when this person is excluded, beside the track.
+- **Verified**: `PersonDossierProgressTrackTests` 3 passed; Blazor host Debug build 0 errors. Live dossier was not opened in the browser in this session.
+- **Prevent**: Do not put `LatestProgress.State.NameTm` back in the Applications status pill. Do not drop the stepper when Seretmezlik applies. Do not use flex CSS in the PDF fragment — RichEdit drops it.
+- **Cross-skill**: person-dossier | application-profile
+
+### 2026-10-10 — Dossier progress steps show workspace facts
+
+- **Ask**: Each Arzalar step should show the same read-only facts as the case workspace progress track.
+- **Fix**: `LoadTimelines` / `BuildTimeline` feed `ApplicationWorkspaceCaseProgressStep` into the dossier. Under each dot: state badge, date, result number, and ministry letter. Screen **View letter** uses `ProgressMinistryLetterPreviewLink` with owner `PersonDossierHost_DetailView`. Paper and the director PDF print the file name, or Missing. No advance, revert, upload, or SLA.
+- **Verified**: `PersonDossierProgressTrackTests` 3 passed. Live dossier was not opened in the browser in this session.
+- **Prevent**: Do not open the letter from a current step (workspace shows the letter only after the step is done). Do not add upload on the dossier. Keep `OwnerViewId` as the dossier view so the copies slot stays open.
+- **Cross-skill**: person-dossier | application-profile | preview-slot
+
+### 2026-10-10 — Office preparation file on the dossier track
+
+- **Ask**: A finished Office preparation step should link the uploaded file, and show Missing when that file is absent.
+- **Fix**: `ToDossierProgressSteps` marks a done office step with no file as missing. Screen uses **View file** (`PersonDossier.Progress.ViewFile`) for that step and **View letter** for ministry steps. The current step shows neither. Paper and the director PDF print the file name or Missing.
+- **Verified**: `PersonDossierProgressTrackTests` 5 passed. Live dossier was not opened in the browser in this session.
+- **Prevent**: Do not show the office file or Missing while Office preparation is still the current step. Do not add an upload box on the dossier.
+
+### 2026-10-10 — Invitation and rejection move onto the application row
+
+- **Ask**: Drop the separate Invitations section. After Migration service finishes, show this person's invitation or rejection in its own column. Put the application date under the application number.
+- **Fix**: Applications columns are number (date underneath), profile, progress, then Issued. `ResolveIssuedOutcome` fills that column only when the migration step is no longer current or pending. A rejected migration shows the rejection number instead of the invitation. The number opens the issued copy when a file is stored. Rejections already shown on an application leave the Rejections section.
+- **Verified**: `PersonDossierProgressTrackTests` 8 passed. Live dossier was not opened in the browser in this session.
+- **Prevent**: Do not list every person on the application. Do not show the Issued column value while Migration service is still the current step.
+
 ### 2026-10-10 — Dossier links stay visible on Fluent Dark
 
 - **Ask**: Preview and application links were blue and unreadable on the dark dossier.
@@ -154,3 +184,17 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 - **Fix**: The link color is the theme accent (`--DS-color-content-primary-default-rest`), with a light blue fallback on Fluent Dark. Hover mixes toward the dossier text color.
 - **Officer**: Hard-refresh. Open a person dossier. Preview, Upload, and the application name should be readable. Check light once.
 - **Prevent**: Do not put `#1d4ed8` back on `.person-dossier__app-link`. Do not mix the link color toward black.
+
+### 2026-10-10 — Application number, profile, and date share one column
+
+- **Ask**: Remove the separate application-number column and give that width to the remaining application column. Leave the Applications section where it is.
+- **Fix**: One cell holds the application number (workspace link), the profile name, and the date. Sort order stays 100, after family members.
+- **Verified**: Officer confirmed the live dossier.
+- **Prevent**: Do not yield Applications before passports. Do not put the date back in its own column.
+
+### 2026-10-10 — Screen sections show five rows until Show more
+
+- **Ask**: When a person has more than five visas, work permits, passports, applications, or other dossier rows, show only the five newest until the officer asks for the rest, and say how many remain.
+- **Fix**: Screen keeps the first five rows. **Show more** opens the rest and shows the hidden count. **Show less** returns that section to five. Applications apply the limit inside the selected group. Paper and the director PDF still list every row.
+- **Verified**: Officer confirmed the live dossier. Blazor host Debug build had 0 errors before the commit; the commit itself was not rebuilt.
+- **Prevent**: Do not cap Paper or the director PDF. Do not reveal another five on each click.

@@ -93,7 +93,7 @@
     "ApplicationItems": {
       "en": "Application Items",
       "tr-TR": "Başvuru Kalemleri",
-      "tk-TM": "Arza elementleri",
+      "tk-TM": "Ýüztutma elementleri",
       "ru-RU": "Позиции заявки"
     },
     "CurrentState": {
@@ -171,7 +171,7 @@
     "Application": {
       "en": "Application",
       "tr-TR": "Başvuru",
-      "tk-TM": "Arza",
+      "tk-TM": "Ýüztutma",
       "ru-RU": "Заявка"
     },
     "State": {

@@ -111,7 +111,7 @@
         "Item2": { "tr-TR": "Güncel Durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
         "Item3": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
         "Item5": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
-        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Ýüztutma elementleri", "ru-RU": "Позиции заявки" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
         "WorkPermitItems": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
@@ -150,7 +150,7 @@
         {
           "path": ["PersonCollectionSections", "IssuedDocumentsTabs"],
           "groups": {
-            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Arzalar (baglanan)", "ru-RU": "Заявки (связанные)" },
+            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Ýüztutmalar (baglanan)", "ru-RU": "Заявки (связанные)" },
             "WorkPermitItems": { "tr-TR": "İş izinleri (verilen)", "tk-TM": "Iş rugsatlary (berlen)", "ru-RU": "Разрешения на работу (выданные)" },
             "InvitationItems": { "tr-TR": "Davetler (verilen)", "tk-TM": "Çakylyklar (berlen)", "ru-RU": "Приглашения (выданные)" },
             "RejectionItems": { "tr-TR": "Retler (verilen)", "tk-TM": "Retler (berlen)", "ru-RU": "Отказы (выданные)" },
@@ -187,7 +187,7 @@
         {
           "path": ["PersonCollectionSections", "IssuedDocumentsTabs"],
           "groups": {
-            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Arzalar (baglanan)", "ru-RU": "Заявки (связанные)" },
+            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Ýüztutmalar (baglanan)", "ru-RU": "Заявки (связанные)" },
             "WorkPermitItems": { "tr-TR": "İş izinleri (verilen)", "tk-TM": "Iş rugsatlary (berlen)", "ru-RU": "Разрешения на работу (выданные)" },
             "InvitationItems": { "tr-TR": "Davetler (verilen)", "tk-TM": "Çakylyklar (berlen)", "ru-RU": "Приглашения (выданные)" },
             "RejectionItems": { "tr-TR": "Retler (verilen)", "tk-TM": "Retler (berlen)", "ru-RU": "Отказы (выданные)" },
@@ -218,7 +218,7 @@
         {
           "path": ["PersonCollectionSections", "IssuedDocumentsTabs"],
           "groups": {
-            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Arzalar (baglanan)", "ru-RU": "Заявки (связанные)" },
+            "ApplicationProfileInstances": { "tr-TR": "Başvurular (bağlı)", "tk-TM": "Ýüztutmalar (baglanan)", "ru-RU": "Заявки (связанные)" },
             "InvitationItems": { "tr-TR": "Davetler (verilen)", "tk-TM": "Çakylyklar (berlen)", "ru-RU": "Приглашения (выданные)" },
             "RejectionItems": { "tr-TR": "Retler (verilen)", "tk-TM": "Retler (berlen)", "ru-RU": "Отказы (выданные)" }
           }
@@ -276,7 +276,7 @@
     "ApplicationItem_ListView": {
       "columns": {
         "ApplicationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Ýüztutma", "ru-RU": "Заявка" },
         "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
       }
     },

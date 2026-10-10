@@ -95,6 +95,24 @@ public sealed class PersonDossierSection
 
     /// <summary>Screen mode shows a Copy column (Preview link or "No copy") for this section.</summary>
     public bool HasCopyColumn { get; init; }
+
+    /// <summary>
+    /// Applications: the instance-list progress track. The generic Status column stays only when a
+    /// row still has its own pill (Seretmezlik).
+    /// </summary>
+    public bool HasProgressColumn { get; init; }
+
+    /// <summary>Screen filter chips for Applications. Paper still prints every row.</summary>
+    public IReadOnlyList<PersonDossierApplicationGroup> ApplicationGroups { get; init; } =
+        Array.Empty<PersonDossierApplicationGroup>();
+
+    /// <summary>Applications: invitation or rejection column after the progress track.</summary>
+    public bool HasIssuedOutcomeColumn { get; init; }
+
+    public bool ShowsStatusColumn =>
+        !HasProgressColumn
+        || Records.Any(record =>
+            record.IsCurrent || !string.IsNullOrWhiteSpace(record.StatusLabel));
 }
 
 /// <summary>One child business object rendered as a summary row.</summary>
@@ -105,9 +123,25 @@ public sealed class PersonDossierRecord
 
     public IReadOnlyList<string> Cells { get; init; } = Array.Empty<string>();
 
+    /// <summary>Profile name under the application number, in the same column as the date.</summary>
+    public string FirstCellDetail { get; init; } = string.Empty;
+
+    /// <summary>Second line under the first cell. Applications use it for the application date.</summary>
+    public string FirstCellNote { get; init; } = string.Empty;
+
+    /// <summary>This person's invitation or rejection, once Migration service is finished.</summary>
+    public PersonDossierIssuedOutcome? IssuedOutcome { get; init; }
+
     public string StatusLabel { get; init; } = string.Empty;
 
     public string StatusCssClass { get; init; } = string.Empty;
+
+    /// <summary>Screen group id for the Applications filter. Empty rows appear only under All.</summary>
+    public string ApplicationGroupId { get; init; } = string.Empty;
+
+    /// <summary>Instance-list progress track. Empty on sections that are not applications.</summary>
+    public IReadOnlyList<PersonDossierProgressStep> ProgressSteps { get; init; } =
+        Array.Empty<PersonDossierProgressStep>();
 
     public bool IsCurrent { get; init; }
 
@@ -161,4 +195,84 @@ public sealed class PersonDossierRecord
         && detailId != Guid.Empty;
 
     public bool CanUpload => CanUploadHeader || CanUploadDetail;
+}
+
+/// <summary>
+/// One step of the application progress track, same tones and glyphs as the instance ListView stepper.
+/// </summary>
+public sealed class PersonDossierProgressStep
+{
+    public string Label { get; init; } = string.Empty;
+
+    public string Date { get; init; } = string.Empty;
+
+    /// <summary>Submitted, Approved, In progress, Pending — the workspace step badge.</summary>
+    public string StatusLabel { get; init; } = string.Empty;
+
+    /// <summary>Ministry decision number. Empty when this step has none.</summary>
+    public string ResultNumber { get; init; } = string.Empty;
+
+    /// <summary>Office preparation uses View file. Ministry steps use View letter.</summary>
+    public bool IsOfficeFile { get; init; }
+
+    /// <summary>Ministry letter or office file name. Empty when there is no copy.</summary>
+    public string LetterFileName { get; init; } = string.Empty;
+
+    /// <summary>Progress row that holds the letter, for the preview slot.</summary>
+    public Guid? LetterProgressId { get; init; }
+
+    /// <summary>Approved or unapproved ministry step with no letter file.</summary>
+    public bool MissingLetter { get; init; }
+
+    /// <summary>True for the step the case is on now. Letter actions stay off that step.</summary>
+    public bool IsCurrentStep { get; init; }
+
+    /// <summary>done / issued / current / pending / rej / cancel.</summary>
+    public string Tone { get; init; } = "pending";
+
+    public string Glyph { get; init; } = string.Empty;
+
+    /// <summary>The line after this step is complete (same rule as the instance list).</summary>
+    public bool ConnectorDone { get; init; }
+
+    public bool ShowLetter =>
+        !IsCurrentStep
+        && LetterProgressId is Guid id
+        && id != Guid.Empty
+        && !string.IsNullOrWhiteSpace(LetterFileName);
+
+    public bool ShowMissingLetter =>
+        !IsCurrentStep
+        && MissingLetter
+        && string.IsNullOrWhiteSpace(LetterFileName);
+}
+
+/// <summary>Invitation or rejection shown after the progress track for this person only.</summary>
+public sealed class PersonDossierIssuedOutcome
+{
+    public string Number { get; init; } = string.Empty;
+
+    public string StatusLabel { get; init; } = string.Empty;
+
+    public string StatusCssClass { get; init; } = string.Empty;
+
+    public HeaderDocumentCopiesFamily? PreviewFamily { get; init; }
+
+    public Guid? PreviewParentId { get; init; }
+
+    public bool HasPreview =>
+        PreviewFamily != null && PreviewParentId is { } id && id != Guid.Empty;
+}
+
+/// <summary>One Applications filter button (Çakylyklar, Wizalar, …).</summary>
+public sealed class PersonDossierApplicationGroup
+{
+    public string GroupId { get; init; } = string.Empty;
+
+    public string Label { get; init; } = string.Empty;
+
+    public int Count { get; init; }
+
+    /// <summary>Shown even when the count is zero (the default invitation group).</summary>
+    public bool AlwaysVisible { get; init; }
 }

@@ -1727,6 +1727,12 @@
     "tk-TM": "{0} pozulsynmy? Yza alyp bolmaýar.",
     "ru-RU": "Удалить {0}? Это нельзя отменить."
   },
+  "ApplicationProfileInstance.Workspace.OfficeFile": {
+    "en-US": "File",
+    "tr-TR": "Dosya",
+    "tk-TM": "Faýl",
+    "ru-RU": "Файл"
+  },
   "ApplicationProfileInstance.Workspace.OfficePreparation": {
     "en-US": "Office preparation",
     "tr-TR": "Ofis hazırlığı",

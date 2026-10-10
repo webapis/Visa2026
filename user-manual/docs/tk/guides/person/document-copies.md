@@ -19,7 +19,7 @@ sourceDocs:
 
 # Adam resminama nusgalary
 
-Şahsy ýazgynyň skanlaryny bir **önizleme panelinde** bölümler boýunça görüň. Ministrlik PDF ZIP üçin [Arza resminama nusgalary](../applications/document-copies.md).
+Şahsy ýazgynyň skanlaryny bir **önizleme panelinde** bölümler boýunça görüň. Ministrlik PDF ZIP üçin [Ýüztutma resminama nusgalary](../applications/document-copies.md).
 
 ## Giriş
 

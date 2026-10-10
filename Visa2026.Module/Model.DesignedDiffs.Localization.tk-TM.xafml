@@ -38,8 +38,8 @@
       <Action Id="ClearVisibilityCache" Caption="Görünüşlik keşini arassala" />
       <Action Id="RefreshReportVisibilityCache" Caption="Hasabat görünüşligini täzele" />
       <Action Id="DownloadAllApplicationItemsAsPdf" Caption="Hemmesini PDF hökmünde göçür" />
-      <Action Id="OpenApplicationFromVisaStatus" Caption="Arzany aç" />
-      <Action Id="OpenApplicationFromTransferStatus" Caption="Arzany aç" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Ýüztutmany aç" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Ýüztutmany aç" />
       <Action Id="CloneSyncRule" Caption="Düzgüni göçür" />
       <Action Id="GenerateWordReports" Caption="Şablonlar" />
       <Action Id="OpenSourceObject" Caption="Çeşme obýekti aç" />
@@ -91,7 +91,7 @@
       <Item Id="InvitationItem" Caption="Çakylyk elementleri" />
       <Item Id="Lookup" Caption="Maglumat">
         <Items>
-          <Item Id="Application" Caption="Arza">
+          <Item Id="Application" Caption="Ýüztutma">
             <Items>
               <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
@@ -257,9 +257,9 @@
         <Member Name="WarningDaysBeforeMax" Caption="Duýduryş (iş günleri)" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Arza elementi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Ýüztutma elementi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="ApplicationItemName" Caption="Ady" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
         <Member Name="BusinessTripAddress" Caption="Iş sapary salgysy" />
@@ -297,9 +297,9 @@
         <Member Name="Stay" Caption="Galyş" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Arza ýeri">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Ýüztutma ýeri">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -316,7 +316,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -324,7 +324,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -338,12 +338,12 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Arza belgileme">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Ýüztutma belgileme">
       <OwnMembers>
-        <Member Name="ApplicationNumberPadding" Caption="Arza belgisi uzynlygy" />
-        <Member Name="ApplicationNumberSeed" Caption="Arza belgisi başlangyjy" />
-        <Member Name="AppNumberFormat" Caption="Arza belgisi formaty" />
-        <Member Name="AppNumberPrefix" Caption="Arza belgisi prefiksi" />
+        <Member Name="ApplicationNumberPadding" Caption="Ýüztutma belgisi uzynlygy" />
+        <Member Name="ApplicationNumberSeed" Caption="Ýüztutma belgisi başlangyjy" />
+        <Member Name="AppNumberFormat" Caption="Ýüztutma belgisi formaty" />
+        <Member Name="AppNumberPrefix" Caption="Ýüztutma belgisi prefiksi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
@@ -389,12 +389,12 @@
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProfileInstance" Caption="Ýüztutma profiliniň ýüzlemesi">
       <OwnMembers>
         <Member Name="ApplicationDate" Caption="Ýüztutma senesi" />
-        <Member Name="ApplicationItems" Caption="Arza elementleri" />
+        <Member Name="ApplicationItems" Caption="Ýüztutma elementleri" />
         <Member Name="ApplicationNumber" Caption="Ýüztutma belgisi" />
         <Member Name="ApplicationProfile" Caption="Ýüztutma profili" />
-        <Member Name="ApplicationReason" Caption="Arza sebäbi" />
-        <Member Name="ApplicationType" Caption="Arza görnüşi" />
-        <Member Name="ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi" />
+        <Member Name="ApplicationReason" Caption="Ýüztutma sebäbi" />
+        <Member Name="ApplicationType" Caption="Ýüztutma görnüşi" />
+        <Member Name="ApplicationTypeFilter" Caption="Ýüztutma görnüşi süzgüçi" />
         <Member Name="ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
         <Member Name="BusinessTripAddressType" Caption="Iş sapary salgy görnüşi" />
@@ -409,7 +409,7 @@
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FromCity" Caption="Çykyş şäheri" />
         <Member Name="FromRegion" Caption="Çykyş welaýaty" />
-        <Member Name="FullApplicationNumber" Caption="Doly arza belgisi" />
+        <Member Name="FullApplicationNumber" Caption="Doly ýüztutma belgisi" />
         <Member Name="Invitations" Caption="Çakylyklar" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsForFamily" Caption="Maşgala üçin" />
@@ -423,11 +423,11 @@
         <Member Name="People" Caption="Adamlar" />
         <Member Name="ProcessNumber" Caption="Proses belgisi" />
         <Member Name="ProgressSlaStatement" Caption="Tassyklama möhleti" />
-        <Member Name="ProgressStepsDisplay" Caption="Arza ösüşi" />
+        <Member Name="ProgressStepsDisplay" Caption="Ýüztutma ösüşi" />
         <Member Name="ProjectContract" Caption="Taslama belgisi" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Wekil" />
-        <Member Name="ResultCoverageDisplay" Caption="Arzanyň netijesi" />
+        <Member Name="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
         <Member Name="ToCity" Caption="Baryş şäheri" />
         <Member Name="ToRegion" Caption="Baryş welaýaty" />
         <Member Name="TotalPersonCount" Caption="Adam sany" />
@@ -465,9 +465,9 @@
         <Member Name="TemplateName" Caption="Şablon ady" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Arza ösüşi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Ýüztutma ösüşi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Date" Caption="Sene" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -487,9 +487,9 @@
         <Member Name="ViaMinistries" Caption="Ministrlik arkaly" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Arza sebäbi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Ýüztutma sebäbi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -506,7 +506,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -514,7 +514,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -528,9 +528,9 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationState" Caption="Arza ýagdaýy">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationState" Caption="Ýüztutma ýagdaýy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -547,7 +547,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -555,7 +555,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -569,9 +569,9 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Arza görnüşi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Ýüztutma görnüşi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="ApplicationProgressRoute" Caption="Ösüş ugry" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
@@ -590,7 +590,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -598,7 +598,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="LifecycleStage" Caption="Durmuş tapgyry" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="MinistryReviewDepth" Caption="Ministrlik barlag çuňlugy" />
@@ -614,16 +614,16 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Arza kategoriýasy">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Ýüztutma kategoriýasy">
       <OwnMembers>
         <Member Name="Both" Caption="Ikisi hem" />
         <Member Name="Employee" Caption="Işgär" />
         <Member Name="FamilyMember" Caption="Maşgala agzy" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Ýüztutma görnüşi süzgüçi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
@@ -641,7 +641,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -649,7 +649,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -663,13 +663,13 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Arza görnüşi topary">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Ýüztutma görnüşi topary">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Arza görnüşi topary agzasy">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Ýüztutma görnüşi topary agzasy">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -690,7 +690,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri profili">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -707,7 +707,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -715,7 +715,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="MinistriesLabel" Caption="Ministrlikler" />
         <Member Name="MinistryLegs" Caption="Ministrlik ädimleri" />
@@ -741,7 +741,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApprovingMinistry" Caption="Tassyklýan ministrlik">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -758,7 +758,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -766,7 +766,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -852,7 +852,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="Kontrol nokady">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -869,7 +869,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -877,7 +877,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -930,7 +930,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Ýurt">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -947,7 +947,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -955,7 +955,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -971,7 +971,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Department" Caption="Bölüm">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -988,7 +988,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -996,7 +996,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1025,7 +1025,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EducationInstitution" Caption="Bilim edarasy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1042,7 +1042,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1050,7 +1050,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1066,7 +1066,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EducationLevel" Caption="Bilim derejesi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1083,7 +1083,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1091,7 +1091,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1206,7 +1206,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Jynsy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1223,7 +1223,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1231,7 +1231,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1259,7 +1259,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Çakylyk">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Documents" Caption="Çakylyk nusgalary" />
@@ -1304,7 +1304,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Maşgala ýagdaýy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1321,7 +1321,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1329,7 +1329,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1358,7 +1358,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MigrationService" Caption="Migrasiýa gullugy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1375,7 +1375,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1383,7 +1383,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1414,7 +1414,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hereket rugsady ýeri">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1431,7 +1431,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1439,7 +1439,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1478,7 +1478,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PassportType" Caption="Pasport görnüşi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1495,7 +1495,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1503,7 +1503,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1563,7 +1563,7 @@
       <OwnMembers>
         <Member Name="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
         <Member Name="Age" Caption="Ýaşy" />
-        <Member Name="ApplicationItems" Caption="Arza elementleri" />
+        <Member Name="ApplicationItems" Caption="Ýüztutma elementleri" />
         <Member Name="BirthPlace" Caption="Doglan ýeri" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CountryOfBirth" Caption="Doglan ýurdy" />
@@ -1629,7 +1629,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Wezipesi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1646,7 +1646,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1654,7 +1654,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1670,7 +1670,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Taslama belgisi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1688,7 +1688,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1696,7 +1696,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="MinistryLegs" Caption="Ministrlik ädimleri" />
         <Member Name="Name" Caption="Ady" />
@@ -1721,7 +1721,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Syýahat maksady">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1738,7 +1738,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1746,7 +1746,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1762,7 +1762,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Region" Caption="Welaýat">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1779,7 +1779,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1787,7 +1787,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1803,7 +1803,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Ret">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Documents" Caption="Ret nusgalary" />
@@ -1827,7 +1827,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Relationship" Caption="Gatnaşyk">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1844,7 +1844,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1852,7 +1852,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1893,7 +1893,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Hünär">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1910,7 +1910,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1918,7 +1918,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -1946,7 +1946,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Subpudarçy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1963,7 +1963,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1971,7 +1971,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2014,8 +2014,8 @@
         <Member Name="Notes" Caption="Syýahat bellikleri" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="Region" Caption="Welaýat" />
-        <Member Name="SourceApplication_ApplicationDate" Caption="Arza senesi" />
-        <Member Name="SourceApplication_FullApplicationNumber" Caption="Arza belgisi" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Ýüztutma senesi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Ýüztutma belgisi" />
         <Member Name="Title" Caption="Ady" />
         <Member Name="TravelDate" Caption="Syýahat senesi" />
         <Member Name="TravelType" Caption="Syýahat görnüşi" />
@@ -2029,7 +2029,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Gyssaglylyk">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2046,7 +2046,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2054,7 +2054,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2074,7 +2074,7 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Hasabat şablony — arza görnüşi topary">
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Hasabat şablony — ýüztutma görnüşi topary">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -2082,7 +2082,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Möhleti">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2099,7 +2099,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2107,7 +2107,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2123,7 +2123,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Wiza">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
@@ -2133,14 +2133,14 @@
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Notes" Caption="Bellikler" />
         <Member Name="Passport" Caption="Pasport" />
         <Member Name="RegistrationState" Caption="Hasaba alnyş ýagdaýy" />
@@ -2166,7 +2166,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Wiza kategoriýasy">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2183,7 +2183,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2191,7 +2191,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2227,7 +2227,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Wiza berlen ýeri">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2244,7 +2244,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2252,7 +2252,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2268,7 +2268,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaPeriod" Caption="Wiza möhleti">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2285,7 +2285,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2293,7 +2293,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2315,7 +2315,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Wiza görnüşi">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2332,7 +2332,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2340,7 +2340,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2368,11 +2368,11 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermit" Caption="Iş rugsady">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Documents" Caption="Iş rugsady nusgalary" />
-        <Member Name="IsApplicationNotRequired" Caption="Arza gerek däl" />
+        <Member Name="IsApplicationNotRequired" Caption="Ýüztutma gerek däl" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IssuedDate" Caption="Berlen senesi" />
         <Member Name="WorkPermitNumber" Caption="Iş rugsady belgisi" />
@@ -2419,7 +2419,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="Iş rugsady ýeri">
       <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
+        <Member Name="Application" Caption="Ýüztutma" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -2436,7 +2436,7 @@
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän ýüztutma ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2444,7 +2444,7 @@
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IsExtended" Caption="Uzaldy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän ýüztutma elementi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
@@ -2471,13 +2471,13 @@
       </Layout>
     </DetailView>
     <ListView Id="AddressOfResidence_ListView" Caption="Ýaşaýyş salgylary" />
-    <ListView Id="Application_ApplicationItems_ListView" Caption="Arza elementleri" />
-    <DetailView Id="Application_DetailView" Caption="Arza">
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Ýüztutma elementleri" />
+    <DetailView Id="Application_DetailView" Caption="Ýüztutma">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors">
             <TabbedGroup Id="Item1">
-              <LayoutGroup Id="Application" Caption="Arza" />
+              <LayoutGroup Id="Application" Caption="Ýüztutma" />
               <LayoutGroup Id="Item2" Caption="Ýagdaýy">
                 <LayoutGroup Id="ProgressHistory" Caption="Ösüş taryhy" />
               </LayoutGroup>
@@ -2486,7 +2486,7 @@
             </TabbedGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
+            <LayoutGroup Id="ApplicationItems" Caption="Ýüztutma elementleri" />
             <LayoutGroup Id="Invitations" Caption="Çakylyklar" />
             <LayoutGroup Id="Rejections" Caption="Retler" />
             <LayoutGroup Id="WorkPermits" Caption="Iş rugsatnamalary" />
@@ -2587,10 +2587,10 @@
     </ListView>
     <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Tassyklama ministrlik suraty" />
     <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Tassyklama ministrlik suratlary" />
-    <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi" />
-    <ListView Id="ApplicationItem_ListView" Caption="Arza elementleri">
+    <DetailView Id="ApplicationItem_DetailView" Caption="Ýüztutma elementi" />
+    <ListView Id="ApplicationItem_ListView" Caption="Ýüztutma elementleri">
       <Columns>
-        <ColumnInfo Id="Application" Caption="Arza" />
+        <ColumnInfo Id="Application" Caption="Ýüztutma" />
         <ColumnInfo Id="ApplicationItemName" Caption="Ady" />
         <ColumnInfo Id="CheckPoint" Caption="Kontrol nokady" />
         <ColumnInfo Id="Person" Caption="Adam" />
@@ -2602,10 +2602,10 @@
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Ýüztutmadaky raýatlar" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Resminama nusgalary" />
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Şablonlar" />
-    <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
-    <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
-    <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Arza belgileme" />
-    <ListView Id="ApplicationNumberingProfile_ListView" Caption="Arza belgileme" />
+    <DetailView Id="ApplicationLocation_DetailView" Caption="Ýüztutma ýeri" />
+    <ListView Id="ApplicationLocation_ListView" Caption="Ýüztutma ýerleri" />
+    <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Ýüztutma belgileme" />
+    <ListView Id="ApplicationNumberingProfile_ListView" Caption="Ýüztutma belgileme" />
     <DetailView Id="ApplicationProfile_DetailView" Caption="Ýüztutma profili" />
     <ListView Id="ApplicationProfile_ListView" Caption="Ýüztutma profilleri" />
     <DetailView Id="ApplicationProfileCatalogHost_DetailView" Caption="Ýüztutma profil şablonlary" />
@@ -2625,8 +2625,8 @@
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Arza ösüşi" />
-    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Arza ösüşleri">
+    <DetailView Id="ApplicationProfileInstanceProgress_DetailView" Caption="Ýüztutma ösüşi" />
+    <ListView Id="ApplicationProfileInstanceProgress_ListView" Caption="Ýüztutma ösüşleri">
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
@@ -2634,20 +2634,20 @@
         <ColumnInfo Id="StatusListLabel" Caption="Ýagdaý" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
-    <ListView Id="ApplicationProgress_ListView" Caption="Arza ösüşleri" />
-    <DetailView Id="ApplicationReason_DetailView" Caption="Arza sebäbi" />
-    <ListView Id="ApplicationReason_ListView" Caption="Arza sebäpleri" />
+    <DetailView Id="ApplicationProgress_DetailView" Caption="Ýüztutma ösüşi" />
+    <ListView Id="ApplicationProgress_ListView" Caption="Ýüztutma ösüşleri" />
+    <DetailView Id="ApplicationReason_DetailView" Caption="Ýüztutma sebäbi" />
+    <ListView Id="ApplicationReason_ListView" Caption="Ýüztutma sebäpleri" />
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
-    <DetailView Id="ApplicationState_DetailView" Caption="Arza ýagdaýy" />
-    <ListView Id="ApplicationState_ListView" Caption="Arza ýagdaýlary" />
-    <DetailView Id="ApplicationType_DetailView" Caption="Arza görnüşi" />
-    <ListView Id="ApplicationType_ListView" Caption="Arza görnüşleri" />
-    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Arza görnüşi süzgüçi" />
-    <ListView Id="ApplicationTypeFilter_ListView" Caption="Arza görnüşi süzgüçleri" />
-    <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Arza görnüşi topary" />
-    <ListView Id="ApplicationTypeGroup_ListView" Caption="Arza görnüşi toparlary" />
-    <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Arza görnüşi topary agzasy" />
+    <DetailView Id="ApplicationState_DetailView" Caption="Ýüztutma ýagdaýy" />
+    <ListView Id="ApplicationState_ListView" Caption="Ýüztutma ýagdaýlary" />
+    <DetailView Id="ApplicationType_DetailView" Caption="Ýüztutma görnüşi" />
+    <ListView Id="ApplicationType_ListView" Caption="Ýüztutma görnüşleri" />
+    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Ýüztutma görnüşi süzgüçi" />
+    <ListView Id="ApplicationTypeFilter_ListView" Caption="Ýüztutma görnüşi süzgüçleri" />
+    <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Ýüztutma görnüşi topary" />
+    <ListView Id="ApplicationTypeGroup_ListView" Caption="Ýüztutma görnüşi toparlary" />
+    <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Ýüztutma görnüşi topary agzasy" />
     <DetailView Id="ApplicationUser_DetailView" Caption="Ulanyjy">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2910,7 +2910,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
-          <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
+          <LayoutGroup Id="ApplicationItems" Caption="Ýüztutma elementleri" />
           <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
           <LayoutGroup Id="Educations" Caption="Bilim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Işgär şertnamalary" />
@@ -2961,7 +2961,7 @@
               <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
             </TabbedGroup>
             <TabbedGroup Id="IssuedDocumentsTabs">
-              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
               <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
               <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
               <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
@@ -2995,7 +2995,7 @@
               <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
             </TabbedGroup>
             <TabbedGroup Id="IssuedDocumentsTabs">
-              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
               <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
               <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
               <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
@@ -3022,7 +3022,7 @@
               <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
             </TabbedGroup>
             <TabbedGroup Id="IssuedDocumentsTabs">
-              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
               <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
               <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
             </TabbedGroup>
@@ -3134,8 +3134,8 @@
         <ColumnInfo Id="CheckPoint" Caption="Kontrol nokady" />
         <ColumnInfo Id="MovementType" Caption="Hereket görnüşi" />
         <ColumnInfo Id="Notes" Caption="Syýahat bellikleri" />
-        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Arza senesi" />
-        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Ýüztutma senesi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Ýüztutma belgisi" />
         <ColumnInfo Id="TravelDate" Caption="Syýahat senesi" />
         <ColumnInfo Id="TravelType" Caption="Syýahat görnüşi" />
       </Columns>
@@ -3167,7 +3167,7 @@
     </DetailView>
     <ListView Id="Rejection_ListView" Caption="Retler">
       <Columns>
-        <ColumnInfo Id="Application" Caption="Arza" />
+        <ColumnInfo Id="Application" Caption="Ýüztutma" />
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="Reason" Caption="Sebäp" />
@@ -3231,7 +3231,7 @@
     </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Hasabat şablony" />
     <ListView Id="UserReportTemplate_ListView" Caption="Hasabat şablonlary" />
-    <DetailView Id="UserReportTemplateApplicationTypeGroup_DetailView" Caption="Hasabat şablony — arza görnüşi topary" />
+    <DetailView Id="UserReportTemplateApplicationTypeGroup_DetailView" Caption="Hasabat şablony — ýüztutma görnüşi topary" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Möhleti" />
     <ListView Id="ValidityDuration_ListView" Caption="Möhletler" />
     <DetailView Id="Visa_DetailView" Caption="Wiza">
@@ -3246,7 +3246,7 @@
     </DetailView>
     <ListView Id="Visa_ListView" Caption="Wizalar">
       <Columns>
-        <ColumnInfo Id="Application" Caption="Arza" />
+        <ColumnInfo Id="Application" Caption="Ýüztutma" />
         <ColumnInfo Id="DaysRemaining" Caption="Galan gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
         <ColumnInfo Id="IsActive" Caption="Aktiw" />
@@ -3267,7 +3267,7 @@
     <DetailView Id="VisaExtensionStatus_DetailView" Caption="Wizany uzaltmak ýagdaýy" />
     <ListView Id="VisaExtensionStatus_ListView" Caption="Wizany uzaltmak">
       <Columns>
-        <ColumnInfo Id="ApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="ApplicationNumber" Caption="Ýüztutma belgisi" />
         <ColumnInfo Id="CurrentState" Caption="Ýagdaýy" />
         <ColumnInfo Id="DaysRemainingOnVisa" Caption="Galan gün" />
         <ColumnInfo Id="ExpiringVisa" Caption="Gutýan wiza" />
@@ -3497,8 +3497,8 @@
     <LocalizationGroup Name="Texts">
       <LocalizationItem Name="AdditionalInformation" Value="Goşmaça maglumat" />
       <LocalizationItem Name="AdditionalInformations" Value="Goşmaça maglumat" />
-      <LocalizationItem Name="Application" Value="Arza" />
-      <LocalizationItem Name="ApplicationItems" Value="Arza elementleri" />
+      <LocalizationItem Name="Application" Value="Ýüztutma" />
+      <LocalizationItem Name="ApplicationItems" Value="Ýüztutma elementleri" />
       <LocalizationItem Name="CurrentState" Value="Häzirki ýagdaý" />
       <LocalizationItem Name="Filter" Value="Süzgüç" />
       <LocalizationItem Name="Filters" Value="Süzgüçler" />

@@ -321,6 +321,13 @@ internal static class ApplicationWorkspaceProgressTimeline
             : submitted != null
                 ? FormatProfileStateLabel(submitted.State?.Code)
                 : isCurrent ? OfficeLabel : string.Empty;
+        var fileRow = cancelled ? latest : submitted;
+        var officeFileName = string.IsNullOrWhiteSpace(fileRow?.MinistryLetterFileName)
+            ? string.Empty
+            : fileRow.MinistryLetterFileName;
+        var officeFileId = !string.IsNullOrEmpty(officeFileName) && fileRow!.ID != Guid.Empty
+            ? fileRow.ID
+            : (Guid?)null;
 
         return new ApplicationWorkspaceCaseProgressStep
         {
@@ -331,7 +338,13 @@ internal static class ApplicationWorkspaceProgressTimeline
             CurrentStateLabel = stateLabel,
             SlaTargetDate = isCurrent ? FormatSlaTarget(application.ApplicationDate, currentSla) : string.Empty,
             SlaDaysRemaining = isCurrent ? DaysLeft(currentSla) : null,
+            ProgressId = officeFileId,
             OfficerNotes = isCurrent ? application.OfficePreparationNotes ?? string.Empty : string.Empty,
+            MinistryLetterFileName = officeFileName,
+            ShowMinistryLetterUpload = isCurrent && (canAdvance || cancelled),
+            DecisionProgressId = cancelled && latest?.ID is Guid cancelledId && cancelledId != Guid.Empty
+                ? cancelledId
+                : null,
             CanAdvance = isCurrent && canAdvance,
             CanRevert = cancelled,
             CanRevertToHere = !isCurrent && history.Count > 0,
@@ -369,7 +382,10 @@ internal static class ApplicationWorkspaceProgressTimeline
         var stateLabel = row == null
             ? string.Empty
             : FormatProfileStateLabel(row.State?.Code);
-        var letter = letterRow ?? (string.IsNullOrWhiteSpace(row?.MinistryLetterFileName) ? null : row);
+        var letter = letterRow
+            ?? (row?.IsMinistryDecisionStep == true && !string.IsNullOrWhiteSpace(row.MinistryLetterFileName)
+                ? row
+                : null);
         var letterId = letter != null && letter.ID != Guid.Empty
             ? letter.ID
             : (row != null && row.ID != Guid.Empty ? row.ID : (Guid?)null);
@@ -558,6 +574,7 @@ internal static class ApplicationWorkspaceProgressTimeline
         int sequence) =>
         history.LastOrDefault(p =>
             MatchesMinistryDisplayLeg(p.State?.Code, sequence)
+            && ApplicationProfileInstanceProgressLegCodes.IsMinistryDecisionStateCode(p.State?.Code)
             && !string.IsNullOrWhiteSpace(p.MinistryLetterFileName));
 
     private static bool MatchesMinistryDisplayLeg(string? stateCode, int sequence)

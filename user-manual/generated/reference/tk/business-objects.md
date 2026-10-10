@@ -34,7 +34,7 @@ Category: Administration
 | Display Name | Yes |  |
 | Duýduryş (gün) | No |  |
 | ID | No |  |
-| Uzaltma arzasy (gün) | No |  |
+| Uzaltma ýüztutmasy (gün) | No |  |
 
 ## Project Contract
 

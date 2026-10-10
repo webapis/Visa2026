@@ -5,8 +5,7 @@
 per-section deep-linking from a row to its own copies record is still open.
 
 **Localization:** all `PersonDossier.*` keys carry **en / tr-TR / tk-TM / ru-RU**, verified on screen
-and in the exported PDF. One value still renders English - the Applications status, which comes from
-the denormalized `ApplicationItem.LastApplicationState` column rather than a UI string.
+and in the exported PDF. Application progress uses the same localized step labels as the instance list.
 
 Single-person 360 page: identity, current status, and every visa/permit/travel record for one
 `Person`, in one read-only screen, with the existing document-copies catalog beside it.
@@ -87,9 +86,11 @@ employment block.
 | Travel history | `Person.TravelHistories` | In/out movement |
 | Medical records | `Person.MedicalRecords` | |
 | Family members | `Person.FamilyMembers` | Employee only (self-ref via `SponsoringEmployee`) |
-| Applications | `Person.ApplicationItems` | Read-only issued workflow output |
-| Invitations | `Person.InvitationItems` | |
+| Applications | `Person.ApplicationProfileInstances` | Same progress track as the instance list. Seretmezlik stays a status pill beside that track |
+| Invitations | Shown on the Applications row, in the Issued column after the progress track, for this person only | |
 | Rejections | `Person.RejectionItems` | |
+
+Screen keeps the five newest rows in each section. **Show more** opens the rest and shows how many are hidden. **Show less** returns that section to five. Applications apply the limit inside the selected group. Paper and the director PDF still list every row.
 
 ### Status tiles
 
@@ -199,9 +200,20 @@ on purpose - `CaptionHelper` is not dependable inside the background export work
 application context, and a silent fall back to English in a director's PDF is worse than a duplicated
 string.
 
-**Still English:** the Applications section status (`Issued`). It comes from the denormalized
-`ApplicationItem.LastApplicationState` column, not a UI string, so localizing it means resolving the
-`ApplicationState` lookup - see [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md), not this feature.
+Applications use the same progress track as the case workspace. Each step shows the state badge,
+date, result number, and the step file. Ministry steps open **View letter**. A finished Office
+preparation step opens **View file** when a file is stored, and shows Missing when it is not. The
+current step hides both. Paper and the director PDF print the file name, or Missing when the copy
+is absent. Advance, revert, and upload stay on the case Progress tab. When this person is on a Seretmezlik letter, that badge
+stays in the Status column and the track stays beside it. On screen, group buttons filter the
+table. **Çakylyklar** is selected by default (profiles that produce an invitation, plus the
+service-passport invitation and change-invitation). **Iş sapary** is departure and arrival.
+**Bellige alyş** is check-in, check-out, and registration changes. Empty groups are hidden.
+Paper and the director PDF still list every application. The application number, profile, and
+date share one column. After Migration service is finished, the Issued column shows this person's
+invitation number and status (valid to, used, expired, cancelled). A rejection on that step replaces
+the invitation. The number opens the issued copy when a file is stored. The separate Invitations
+section is no longer printed.
 
 ### Schema note
 

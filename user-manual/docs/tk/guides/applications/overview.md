@@ -16,7 +16,7 @@ verified: false
 
 # Applications — ministrlik we göni migrasiýa
 
-Visa2026 arza işini **iki ugur** boýunça bölýär. Her ugurda aýratyn **başlyk sanawy** we **application items sanawy** bar.
+Visa2026 ýüztutma işini **iki ugur** boýunça bölýär. Her ugurda aýratyn **başlyk sanawy** we **application items sanawy** bar.
 
 ## Iki ugur
 
@@ -40,5 +40,5 @@ Visa2026 arza işini **iki ugur** boýunça bölýär. Her ugurda aýratyn **ba�
 
 ## Indiki
 
-- [Arza döretmek](create.md)
+- [Ýüztutma döretmek](create.md)
 - [Application items goşmak](add-items.md)

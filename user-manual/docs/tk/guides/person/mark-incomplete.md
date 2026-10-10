@@ -19,7 +19,7 @@ verified: false
 
 Bu gollanma esasy maglumatlary heniz doly däl adamy **Incomplete** hökmünde bellemegi, näme ýetmezçiligini ýazmagy we taýýar bolanda belgini arassalamagy görkezýär.
 
-**Incomplete** baydagy ýumşak ýatlatmadyr — arza döretmegi **bloklaýan däl**.
+**Incomplete** baydagy ýumşak ýatlatmadyr — ýüztutma döretmegi **bloklaýan däl**.
 
 !!! tip "Öňünden"
     [Adamy tapmak we açmak](open-and-search.md).

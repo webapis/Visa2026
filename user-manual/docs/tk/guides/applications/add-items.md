@@ -23,7 +23,7 @@ verified: false
 **Iki ugur:** ministrlik — **Applications (via ministry)** / **Application items (ministry)**; göni migrasiýa — **Applications (direct migration)** / **Application items (migration)**. [Applications gysgaça](overview.md).
 
 !!! tip "Öňünden"
-    [Arza döretmek](create.md) we doly şahsy ýazgylar.
+    [Ýüztutma döretmek](create.md) we doly şahsy ýazgylar.
 
 ## Ugurlar
 
@@ -38,9 +38,9 @@ verified: false
 2. **Application items** → **New**.
 3. **Person** saýlaň; **Current\*** meýdanlar dolar → **Save**.
 
-Köp arza boýunça gözleg: degişli **Application items (ministry/migration)** sanawy.
+Köp ýüztutma boýunça gözleg: degişli **Application items (ministry/migration)** sanawy.
 
 ## Indiki
 
 - [Applications — ministrlik we göni migrasiýa](overview.md)
-- [Arza döretmek](create.md)
+- [Ýüztutma döretmek](create.md)

@@ -8,7 +8,7 @@ Wiza bölümine daşary ýurtly işgärler we migrasiýa resminamalary üçin **
 
 1. **Report Dashboard** — şu gün haýsy iş gerek
 2. **Şahsy maglumatlar** — pasport, wiza, tibbiýa, salgy
-3. **Applications** — bakanlyk we göni migrasiýa arzalary
+3. **Applications** — bakanlyk we göni migrasiýa ýüztutmalary
 4. **Application progress** — dosyanyň ýeri
 5. **Document copies we Templates** — PDF we hasabat paketleri
 

@@ -24,7 +24,7 @@ verified: false
 ## Sanawlar
 
 - **Application items (ministry)** ýa-da **Application items (migration)**
-- Ýa-da arza → **Application items** goýmasy
+- Ýa-da ýüztutma → **Application items** goýmasy
 
 ## Ädimler
 

@@ -1,5 +1,5 @@
 ---
-title: Arza döretmek
+title: Ýüztutma döretmek
 slug: applications/create
 locale: tk
 tier: 4
@@ -17,9 +17,9 @@ e2eScenarioId: person-officer-journey
 verified: false
 ---
 
-# Arza döretmek
+# Ýüztutma döretmek
 
-Bu gollanma täze **application** (arza başy) döretmegi görkezýär.
+Bu gollanma täze **application** (ýüztutma başy) döretmegi görkezýär.
 
 **Iki başlyk sanawy:** **Applications (via ministry)** ýa-da **Applications (direct migration)** — [Applications — ministrlik we göni migrasiýa](overview.md).
 
@@ -39,7 +39,7 @@ Adamlar **application items** tabynyň içinde goşulýar (aýratyn gollanma).
 **Applications** → **Applications (direct migration)** → **New** (göni migrasiýa).
 
 !!! warning "Sanawlar aýratyn"
-    Ministrlik arzasy diňe **via ministry** sanawynda; göni migrasiýa arzasy — **direct migration** sanawynda.
+    Ministrlik ýüztutmasy diňe **via ministry** sanawynda; göni migrasiýa ýüztutmasy — **direct migration** sanawynda.
 
 ## Adym 2 — Application Type Code
 

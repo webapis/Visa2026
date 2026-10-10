@@ -1316,7 +1316,7 @@
         },
         {
           "name": "ExtensionApplicationRequiredDays",
-          "displayName": "Uzaltma arzasy (g\u00FCn)",
+          "displayName": "Uzaltma ýüztutmasy (g\u00FCn)",
           "required": false
         }
       ],

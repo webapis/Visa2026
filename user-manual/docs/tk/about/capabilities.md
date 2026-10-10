@@ -19,7 +19,7 @@ Aşakdaky sanaw **möhümlilik** boýunça tertiplenen — her gün ulanylýan f
 
 ## 1. Report Dashboard
 
-**Mesele:** Haýsy wiza, pasport, hasaba alyş ýa-da arza işlemeli — bir gözde görünmeýär; iş gijä galýar.
+**Mesele:** Haýsy wiza, pasport, hasaba alyş ýa-da ýüztutma işlemeli — bir gözde görünmeýär; iş gijä galýar.
 
 **Visa2026 näme edýär:** Girişden soň **Report Dashboard** — kategoriýa boýunça grafikler (wiza, pasport, hasaba alyş, iş rugsady, syýahat, doly däl adamlar, adamy gözlemek we ş.m.). Grafik bölegine basyp filtered sanawa ýa-da Excel-e geçiň.
 
@@ -31,7 +31,7 @@ Aşakdaky sanaw **möhümlilik** boýunça tertiplenen — her gün ulanylýan f
 
 **Mesele:** Bir işgäriň köp resminamasy (pasport, wiza, tibbiýa, salgy, bilim, syýahat…) kagyzda ýa-da tablisada dargyn — doly we ylalaşykly saklamak kyn.
 
-**Visa2026 näme edýär:** Her adamy bir gezek **Employees**, **Family Members** ýa-da **Temporary visitor** astynda saklaň; içki tablarda pasport, wiza, tibbiýa ýazgylary we beýlekiler. Arza setirlerinde dogry **häzirki** resminamalar awtomatik doldurylýar.
+**Visa2026 näme edýär:** Her adamy bir gezek **Employees**, **Family Members** ýa-da **Temporary visitor** astynda saklaň; içki tablarda pasport, wiza, tibbiýa ýazgylary we beýlekiler. Ýüztutma setirlerinde dogry **häzirki** resminamalar awtomatik doldurylýar.
 
 **Gollanmalar:** [Adamy tapmak we açmak](../guides/person/open-and-search.md) · [Işgäri hasaba almak](../guides/employee/register.md) · [Maşgala agzasy](../guides/family-member/register.md) · [Wagtlaýyn myhman](../guides/temporary-visitor/register.md)
 
@@ -39,11 +39,11 @@ Aşakdaky sanaw **möhümlilik** boýunça tertiplenen — her gün ulanylýan f
 
 ## 3. Applications we application items
 
-**Mesele:** Çakylyk, wiza+iş rugsady, uzaltma, hasaba alyş giriş/çykyş, serhet guşagy, iş syýahaty, ýatyryş we ş.m. bir arza faýlynda birleşdirilmeýär.
+**Mesele:** Çakylyk, wiza+iş rugsady, uzaltma, hasaba alyş giriş/çykyş, serhet guşagy, iş syýahaty, ýatyryş we ş.m. bir ýüztutma faýlynda birleşdirilmeýär.
 
 **Visa2026 näme edýär:** **Application** (görnüş, şertnama, seneler) dörediň we **application items** goşuň — her adam üçin bir setir. Aýratyn menýu: **Applications (via ministry)** we **Applications (direct migration)**.
 
-**Gollanmalar:** [Applications — ministrlik we göni migrasiýa](../guides/applications/overview.md) · [Arza döretmek](../guides/applications/create.md) · [Application items goşmak](../guides/applications/add-items.md) — ilki şahsy ýazgylar doly bolmaly.
+**Gollanmalar:** [Applications — ministrlik we göni migrasiýa](../guides/applications/overview.md) · [Ýüztutma döretmek](../guides/applications/create.md) · [Application items goşmak](../guides/applications/add-items.md) — ilki şahsy ýazgylar doly bolmaly.
 
 ---
 
@@ -53,7 +53,7 @@ Aşakdaky sanaw **möhümlilik** boýunça tertiplenen — her gün ulanylýan f
 
 **Visa2026 näme edýär:** **Application progress** setirleri — her **state** iş akymyndaky ädim. Soňky setir häzirki ýagdaý; karar haty goşup bolýar.
 
-**Gollanma:** [Arza ösüşini yzarlamak](../guides/applications/progress.md)
+**Gollanma:** [Ýüztutma ösüşini yzarlamak](../guides/applications/progress.md)
 
 ---
 
@@ -113,7 +113,7 @@ Aşakdaky sanaw **möhümlilik** boýunça tertiplenen — her gün ulanylýan f
 
 **Visa2026 näme edýär:** Şahsy jikme-jik formasynda **Document copies** (ýa-da sanawda **Copies**) — ähli tablardaky skanlary bir öňünden görmek panelinde görüň. Bakanlyk ZIP üçin **application item** üstündeki **Document copies** ulanylýar.
 
-**Gollanma:** [Adam resminama nusgalary](../guides/person/document-copies.md). Bakanlyk ZIP: [Arza resminama nusgalary](../guides/applications/document-copies.md).
+**Gollanma:** [Adam resminama nusgalary](../guides/person/document-copies.md). Bakanlyk ZIP: [Ýüztutma resminama nusgalary](../guides/applications/document-copies.md).
 
 ---
 
@@ -131,7 +131,7 @@ Aşakdaky sanaw **möhümlilik** boýunça tertiplenen — her gün ulanylýan f
 
 | Rol | Adaty ulanylyş |
 |-----|----------------|
-| **Visa Officer** | Şahsy ýazgylar, arzalar, resminama paketleri, dashboard |
+| **Visa Officer** | Şahsy ýazgylar, ýüztutmalar, resminama paketleri, dashboard |
 | **Visa Chief / ýolbaşçy** | Dashboard, dossier, Excel, doly däl adamlar |
 | **Administrator** | [Sazlamalar](../guides/administration/configuration/overview.md), [Hasabat şablonlary](../guides/administration/user-report-templates.md), [Şablon sinhronizasiýasy](../guides/administration/template-staging.md), rollar |
 

@@ -27,6 +27,6 @@ sourceDocs:
 3. Görünýänlik: programma görnüşleri, toparlar, **Is Active**.
 4. **Extract Placeholders** we **Validate Placeholders**.
 5. **Placeholder manual** — rugsat berlen bellikler.
-6. Synag arzasynda **Templates** bilen barlaň.
+6. Synag ýüztutmasynda **Templates** bilen barlaň.
 
 Masaýstok redaktirleme: [Şablony redaktirle we sinhronla](template-staging.md).

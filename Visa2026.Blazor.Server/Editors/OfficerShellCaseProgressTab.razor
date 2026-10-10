@@ -91,7 +91,7 @@
                     {
                         <div class="ct-prog-v__letter-missing">
                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
-                            <label class="ct-label">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter")</label>
+                            <label class="ct-label">@FileUploadLabel(step)</label>
                             <label class="ct-upload ct-upload--action ct-upload--missing">
                                 <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
                                 <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadApprovalCopy")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
@@ -165,7 +165,7 @@
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter")</label>
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">@FileUploadLabel(step)</label>
                                         @if (step.MissingMinistryLetter)
                                         {
                                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
@@ -218,7 +218,7 @@
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter")</label>
+                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">@FileUploadLabel(step)</label>
                                         @if (step.MissingMinistryLetter)
                                         {
                                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
@@ -428,6 +428,11 @@
     private string LocalizedCurrentStepHeading => StepText(CurrentStepHeading);
 
     private static string StepText(string? label) => ApplicationProfileLocalization.ProgressStepLabel(label);
+
+    private static string FileUploadLabel(ApplicationWorkspaceCaseProgressStep step) =>
+        string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
+            ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OfficeFile")
+            : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter");
 
     private static string StepBadge(ApplicationWorkspaceCaseProgressStep step, bool isCurrent)
     {

@@ -46,7 +46,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.DoesNotContain(
             steps[0].ResultOptions,
             o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Rejected);
-        Assert.False(steps[0].ShowMinistryLetterUpload);
+        Assert.True(steps[0].ShowMinistryLetterUpload);
+        Assert.False(steps[0].MissingMinistryLetter);
         Assert.Equal(
             ApplicationWorkspaceProgressTimeline.OfficeLabel,
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
@@ -277,6 +278,42 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(
             "Turkmenenergetika · Cancelled",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
+    }
+
+    [Fact]
+    public void Build_OfficeSubmittedFile_ShowsOnOfficeNotOnMinistry()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        var submittedId = Guid.NewGuid();
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = submittedId,
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = new DateTime(2026, 10, 10),
+            State = new ApplicationState
+            {
+                Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+                NameTm = "Submitted",
+            },
+            MinistryLetterFile = new FileData { FileName = "office-pack.pdf" },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.Equal("done", steps[0].State);
+        Assert.Equal("office-pack.pdf", steps[0].MinistryLetterFileName);
+        Assert.Equal(submittedId, steps[0].ProgressId);
+        Assert.Equal("current", steps[1].State);
+        Assert.True(string.IsNullOrEmpty(steps[1].MinistryLetterFileName));
+        Assert.True(steps[1].ShowMinistryLetterUpload);
+        Assert.False(steps[1].MissingMinistryLetter);
     }
 
     [Fact]

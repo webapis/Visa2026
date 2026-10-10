@@ -29,7 +29,7 @@
   },
   "views": {
     "Application_ApplicationItems_ListView": {
-      "caption": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" }
+      "caption": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Ýüztutma elementleri", "ru-RU": "Позиции заявки" }
     },
     "Person_FamilyMembers_ListView": {
       "caption": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }
@@ -43,7 +43,7 @@
     "VisaExtensionStatus_ListView": {
       "caption": { "tr-TR": "Vize Uzatma", "tk-TM": "Wizany uzaltmak", "ru-RU": "Продление визы" },
       "columns": {
-        "ApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
+        "ApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Ýüztutma belgisi", "ru-RU": "Номер заявки" },
         "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
         "ExpiringVisa": { "tr-TR": "Süresi Dolan Vize", "tk-TM": "Gutýan wiza", "ru-RU": "Истекающая виза" },
         "DaysRemainingOnVisa": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
@@ -108,7 +108,7 @@
         "Item9": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
         "Item10": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
         "Item13": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
-        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Ýüztutma elementleri", "ru-RU": "Позиции заявки" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
         "WorkPermitItems": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },

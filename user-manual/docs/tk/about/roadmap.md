@@ -17,9 +17,9 @@ Bu sahypa **haýsy nädip edilýär gollanmalarynyň neşir edilendigini** gysga
 2. Şahsy tapmak we açmak  
 3. Täze işgär hasaba almak we pasport goşmak  
 4. Şahsy maglumatlary täzelemek  
-5. Arza döretmek we element goşmak  
+5. Ýüztutma döretmek we element goşmak  
 
-Ösen mowzuklar (resminama nusgalary, dosye, hasabat paketleri, şablonlar) esasy şahsy we arza wezipelerinden soň gelýär.
+Ösen mowzuklar (resminama nusgalary, dosye, hasabat paketleri, şablonlar) esasy şahsy we ýüztutma wezipelerinden soň gelýär.
 
 ## Neşir
 

@@ -15,7 +15,7 @@ verified: false
 
 # Şertnamalar we tassyklamalar
 
-**Approving ministries** — gysga ministrlik atlary. **Approval Leg Profile** — ministrlikler yzygiderliligi. **Project contracts** — arzada saýlanýan şertnama; profile baglanýar.
+**Approving ministries** — gysga ministrlik atlary. **Approval Leg Profile** — ministrlikler yzygiderliligi. **Project contracts** — ýüztutmada saýlanýan şertnama; profile baglanýar.
 
 ## Ädimler
 
@@ -23,4 +23,4 @@ verified: false
 2. **Approval Leg Profile**-da **Ministry legs** tertibini sazlaň.
 3. **Project contracts**-da profile baglaň.
 
-[Arza döretmek](../../applications/create.md) · [Ösüş](../../applications/progress.md) · [Umumy syn](overview.md)
+[Ýüztutma döretmek](../../applications/create.md) · [Ösüş](../../applications/progress.md) · [Umumy syn](overview.md)

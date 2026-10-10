@@ -58,7 +58,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0,
             TargetCriteria = "ExtensionApplicationRequiredDays Is Not Null")]
-        [XafDisplayName("Uzaltma arzasy (gün)")]
+        [XafDisplayName("Uzaltma ýüztutmasy (gün)")]
         [ToolTip("Calendar days before expiration when an extension application should be started (Visa and Work permit item only).")]
         public virtual int? ExtensionApplicationRequiredDays { get; set; }
     }

@@ -3,6 +3,7 @@
 @using System.Threading.Tasks
 @using Microsoft.AspNetCore.Components
 @using Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.BusinessObjects.PersonDossier
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.PersonDossier
 
@@ -176,11 +177,33 @@
             <div class="person-dossier__sections">
                 @foreach (var section in Snapshot.Sections)
                 {
+                    var visibleRecords = VisibleRecords(section);
+                    var displayedRecords = DisplayedRecords(section, visibleRecords);
+                    var hiddenCount = visibleRecords.Count - displayedRecords.Count;
+                    var canCollapse = IsSectionExpanded(section) && visibleRecords.Count > SectionPreviewLimit;
                     <section class="person-dossier__section">
                         <header class="person-dossier__section-head">
                             <span class="person-dossier__section-title">@(section.SectionLabel)</span>
-                            <span class="person-dossier__section-count">@(section.Records.Count)</span>
+                            <span class="person-dossier__section-count">@visibleRecords.Count</span>
                         </header>
+                        @if (section.ApplicationGroups.Count > 0)
+                        {
+                            <div class="person-dossier__groups" role="tablist">
+                                @foreach (var group in section.ApplicationGroups)
+                                {
+                                    var groupId = group.GroupId;
+                                    var selected = string.Equals(SelectedApplicationGroup, groupId, StringComparison.Ordinal);
+                                    <button type="button"
+                                            class="person-dossier__group @(selected ? "is-selected" : null)"
+                                            role="tab"
+                                            aria-selected="@selected"
+                                            @onclick="() => SelectApplicationGroup(groupId)">
+                                        <span>@group.Label</span>
+                                        <span class="person-dossier__group-count">@group.Count</span>
+                                    </button>
+                                }
+                            </div>
+                        }
 
                         <div class="person-dossier__table-scroll">
                             <table class="person-dossier__table">
@@ -190,7 +213,18 @@
                                         {
                                             <th>@header</th>
                                         }
-                                        <th class="person-dossier__col-status">@Msg("PersonDossier.Column.Status")</th>
+                                        @if (section.ShowsStatusColumn)
+                                        {
+                                            <th class="person-dossier__col-status">@Msg("PersonDossier.Column.Status")</th>
+                                        }
+                                        @if (section.HasProgressColumn)
+                                        {
+                                            <th class="person-dossier__col-progress">@Msg("PersonDossier.Column.Progress")</th>
+                                        }
+                                        @if (section.HasIssuedOutcomeColumn)
+                                        {
+                                            <th class="person-dossier__col-issued">@Msg("PersonDossier.Column.Issued")</th>
+                                        }
                                         @if (section.HasCopyColumn)
                                         {
                                             <th class="person-dossier__col-copy">@Msg("PersonDossier.Column.Copy")</th>
@@ -198,13 +232,21 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var record in section.Records)
+                                    @if (visibleRecords.Count == 0 && section.ApplicationGroups.Count > 0)
+                                    {
+                                        <tr>
+                                            <td class="person-dossier__group-empty" colspan="@SectionColumnCount(section)">
+                                                @Msg("PersonDossier.ApplicationGroup.Empty")
+                                            </td>
+                                        </tr>
+                                    }
+                                    @foreach (var record in displayedRecords)
                                     {
                                         <tr class="@(record.IsCurrent ? "person-dossier__row--current" : null)">
                                             @for (var cellIndex = 0; cellIndex < record.Cells.Count; cellIndex++)
                                             {
                                                 var cell = record.Cells[cellIndex];
-                                                <td>
+                                                <td class="@(section.HasIssuedOutcomeColumn && cellIndex == 0 ? "person-dossier__col-application" : null)">
                                                     @if (IsApplicationNumberLink(section, record, cellIndex))
                                                     {
                                                         <button type="button"
@@ -218,18 +260,112 @@
                                                     {
                                                         @cell
                                                     }
+                                                    @if (cellIndex == 0 && !string.IsNullOrWhiteSpace(record.FirstCellDetail))
+                                                    {
+                                                        <span class="person-dossier__cell-detail">@record.FirstCellDetail</span>
+                                                    }
+                                                    @if (cellIndex == 0 && !string.IsNullOrWhiteSpace(record.FirstCellNote))
+                                                    {
+                                                        <span class="person-dossier__cell-note">@record.FirstCellNote</span>
+                                                    }
                                                 </td>
                                             }
-                                            <td class="person-dossier__col-status">
-                                                @if (record.IsCurrent)
-                                                {
-                                                    <span class="person-dossier__pill st-approved">@Msg("PersonDossier.Status.Current")</span>
-                                                }
-                                                @if (!string.IsNullOrWhiteSpace(record.StatusLabel))
-                                                {
-                                                    <span class="person-dossier__pill @record.StatusCssClass">@record.StatusLabel</span>
-                                                }
-                                            </td>
+                                            @if (section.ShowsStatusColumn)
+                                            {
+                                                <td class="person-dossier__col-status">
+                                                    @if (record.IsCurrent)
+                                                    {
+                                                        <span class="person-dossier__pill st-approved">@Msg("PersonDossier.Status.Current")</span>
+                                                    }
+                                                    @if (!string.IsNullOrWhiteSpace(record.StatusLabel))
+                                                    {
+                                                        <span class="person-dossier__pill @record.StatusCssClass">@record.StatusLabel</span>
+                                                    }
+                                                </td>
+                                            }
+                                            @if (section.HasProgressColumn)
+                                            {
+                                                <td class="person-dossier__col-progress">
+                                                    @if (record.ProgressSteps.Count == 0)
+                                                    {
+                                                        <span class="person-dossier__progress-empty">—</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="lv-progress-stepper">
+                                                            @for (var stepIndex = 0; stepIndex < record.ProgressSteps.Count; stepIndex++)
+                                                            {
+                                                                var step = record.ProgressSteps[stepIndex];
+                                                                <div class="lv-progress-step lv-progress-step--@(step.Tone)">
+                                                                    <div class="lv-progress-step__track">
+                                                                        <span class="lv-progress-step__dot">@step.Glyph</span>
+                                                                        @if (stepIndex < record.ProgressSteps.Count - 1)
+                                                                        {
+                                                                            <span class="lv-progress-step__line @(step.ConnectorDone ? "lv-progress-step__line--done" : null)"></span>
+                                                                        }
+                                                                    </div>
+                                                                    <div class="lv-progress-step__meta">
+                                                                        <div class="lv-progress-step__label">@step.Label</div>
+                                                                        @if (!string.IsNullOrWhiteSpace(step.StatusLabel))
+                                                                        {
+                                                                            <span class="lv-progress-step__status">@step.StatusLabel</span>
+                                                                        }
+                                                                        @if (!string.IsNullOrWhiteSpace(step.Date))
+                                                                        {
+                                                                            <span class="lv-progress-step__date">@step.Date</span>
+                                                                        }
+                                                                        @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+                                                                        {
+                                                                            <span class="person-dossier__progress-result">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
+                                                                        }
+                                                                        @if (step.ShowLetter && record.SourceObjectId is Guid instanceId)
+                                                                        {
+                                                                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="instanceId"
+                                                                                                               ProgressId="step.LetterProgressId"
+                                                                                                               FileName="@step.LetterFileName"
+                                                                                                               OwnerViewId="@PersonDossierViewIds.DetailView"
+                                                                                                               LinkText="@Msg(step.IsOfficeFile ? "PersonDossier.Progress.ViewFile" : "PersonDossier.Progress.ViewLetter")"
+                                                                                                               CssClass="person-dossier__progress-letter" />
+                                                                        }
+                                                                        else if (step.ShowMissingLetter)
+                                                                        {
+                                                                            <span class="person-dossier__pill st-pending">@Msg("ApplicationProfileInstance.Workspace.Missing")</span>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </td>
+                                            }
+                                            @if (section.HasIssuedOutcomeColumn)
+                                            {
+                                                <td class="person-dossier__col-issued">
+                                                    @if (record.IssuedOutcome is { } outcome)
+                                                    {
+                                                        @if (outcome.HasPreview)
+                                                        {
+                                                            <button type="button"
+                                                                    class="person-dossier__app-link"
+                                                                    @onclick="() => OnPreviewIssuedOutcome(outcome)">
+                                                                @outcome.Number
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>@outcome.Number</span>
+                                                        }
+                                                        @if (!string.IsNullOrWhiteSpace(outcome.StatusLabel))
+                                                        {
+                                                            <span class="person-dossier__pill @outcome.StatusCssClass">@outcome.StatusLabel</span>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="person-dossier__progress-empty">—</span>
+                                                    }
+                                                </td>
+                                            }
                                             @if (section.HasCopyColumn)
                                             {
                                                 <td class="person-dossier__col-copy">
@@ -260,6 +396,25 @@
                                 </tbody>
                             </table>
                         </div>
+                        @if (hiddenCount > 0 || canCollapse)
+                        {
+                            <div class="person-dossier__more">
+                                <button type="button"
+                                        class="person-dossier__more-btn"
+                                        aria-expanded="@canCollapse"
+                                        @onclick="() => ToggleSectionExpansion(section)">
+                                    @if (canCollapse)
+                                    {
+                                        @Msg("PersonDossier.Section.ShowLess")
+                                    }
+                                    else
+                                    {
+                                        <span>@Msg("PersonDossier.Section.ShowMore")</span>
+                                        <span class="person-dossier__more-count">@VisaUiMessages.Format("PersonDossier.Section.MoreCount", hiddenCount)</span>
+                                    }
+                                </button>
+                            </div>
+                        }
                     </section>
                 }
             </div>
@@ -293,6 +448,64 @@
     private int EffectiveLoadingPercent => IsLoading && LoadingProgressPercent >= 0 ? LoadingProgressPercent : 0;
 
     private bool _initialLoadStarted;
+    private const int SectionPreviewLimit = 5;
+    private readonly HashSet<string> _expandedSections = new(StringComparer.Ordinal);
+    private Guid _expandedForPersonId;
+    private string _applicationGroupId = PersonDossierApplicationGroups.Invitation;
+
+    private string SelectedApplicationGroup =>
+        string.IsNullOrWhiteSpace(_applicationGroupId)
+            ? PersonDossierApplicationGroups.Invitation
+            : _applicationGroupId;
+
+    private void SelectApplicationGroup(string groupId) => _applicationGroupId = groupId;
+
+    private static int SectionColumnCount(PersonDossierSection section)
+    {
+        var count = section.ColumnHeaders.Count;
+        if (section.ShowsStatusColumn)
+            count++;
+        if (section.HasProgressColumn)
+            count++;
+        if (section.HasIssuedOutcomeColumn)
+            count++;
+        if (section.HasCopyColumn)
+            count++;
+        return count;
+    }
+
+    private IReadOnlyList<PersonDossierRecord> VisibleRecords(PersonDossierSection section)
+    {
+        if (section.ApplicationGroups.Count == 0
+            || string.Equals(SelectedApplicationGroup, PersonDossierApplicationGroups.All, StringComparison.Ordinal))
+            return section.Records;
+
+        return section.Records
+            .Where(record => string.Equals(record.ApplicationGroupId, SelectedApplicationGroup, StringComparison.Ordinal))
+            .ToList();
+    }
+
+    private IReadOnlyList<PersonDossierRecord> DisplayedRecords(
+        PersonDossierSection section,
+        IReadOnlyList<PersonDossierRecord> visibleRecords) =>
+        IsSectionExpanded(section) || visibleRecords.Count <= SectionPreviewLimit
+            ? visibleRecords
+            : visibleRecords.Take(SectionPreviewLimit).ToList();
+
+    private string ExpansionKey(PersonDossierSection section) =>
+        section.ApplicationGroups.Count == 0
+            ? section.SectionId
+            : section.SectionId + "|" + SelectedApplicationGroup;
+
+    private bool IsSectionExpanded(PersonDossierSection section) =>
+        _expandedSections.Contains(ExpansionKey(section));
+
+    private void ToggleSectionExpansion(PersonDossierSection section)
+    {
+        var key = ExpansionKey(section);
+        if (!_expandedSections.Add(key))
+            _expandedSections.Remove(key);
+    }
     private DossierViewMode _viewMode = DossierViewMode.Screen;
     private string _paperHtml = string.Empty;
     private PersonDossierSnapshot? _paperSnapshotRef;
@@ -305,6 +518,14 @@
         && id != Guid.Empty
         && record.Cells.Count > 0
         && !string.IsNullOrWhiteSpace(record.Cells[0]);
+
+    private Task OnPreviewIssuedOutcome(PersonDossierIssuedOutcome outcome) =>
+        OnPreviewRecord(new PersonDossierRecord
+        {
+            PreviewFamily = outcome.PreviewFamily,
+            PreviewParentId = outcome.PreviewParentId,
+            Cells = [outcome.Number],
+        });
 
     private async Task OnPreviewRecord(PersonDossierRecord record)
     {
@@ -326,6 +547,13 @@
 
     protected override void OnParametersSet()
     {
+        var personId = Snapshot?.PersonId ?? Guid.Empty;
+        if (personId != _expandedForPersonId)
+        {
+            _expandedForPersonId = personId;
+            _expandedSections.Clear();
+        }
+
         // Snapshot arrives after InitialLoadRequested — refresh Paper if that mode is already open.
         if (_viewMode == DossierViewMode.Paper)
             RebuildPaperHtmlIfNeeded();

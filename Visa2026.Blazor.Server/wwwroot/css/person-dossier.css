@@ -495,6 +495,49 @@
   text-transform: uppercase;
 }
 
+.person-dossier__groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px 0;
+  margin: 0 0 10px;
+}
+
+.person-dossier__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--pd-border);
+  background: transparent;
+  color: var(--pd-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.person-dossier__group.is-selected {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.person-dossier__group-count {
+  min-width: 1.1em;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  font-size: 11px;
+  text-align: center;
+}
+
+.person-dossier__group-empty {
+  color: var(--pd-muted);
+  font-size: 12px;
+}
+
 .person-dossier__section-count {
   min-width: 20px;
   padding: 0 6px;
@@ -505,6 +548,38 @@
   font-size: 11px;
   font-weight: 600;
   text-align: center;
+}
+
+.person-dossier__more {
+  padding: 8px 12px 10px;
+}
+
+.person-dossier__more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--pd-border);
+  background: transparent;
+  color: var(--pd-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.person-dossier__more-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.person-dossier__more-count {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .person-dossier__table-scroll {
@@ -586,6 +661,81 @@
 .person-dossier__col-status {
   text-align: right;
   white-space: nowrap;
+}
+
+/* Applications: same track as the instance list, sized to the dossier column. */
+.person-dossier__col-application {
+  width: 22%;
+  min-width: 200px;
+  overflow-wrap: break-word;
+}
+
+.person-dossier__col-progress {
+  width: 48%;
+  min-width: 220px;
+  vertical-align: top;
+}
+
+.person-dossier__cell-detail,
+.person-dossier__cell-note {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.person-dossier__cell-detail {
+  color: var(--pd-text);
+  font-size: 12px;
+}
+
+.person-dossier__cell-note {
+  color: var(--pd-muted);
+  font-size: 11px;
+}
+
+.person-dossier__col-issued {
+  min-width: 120px;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.person-dossier__col-issued .person-dossier__pill {
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.person-dossier .lv-progress-stepper {
+  width: 100%;
+  max-width: 100%;
+}
+
+.person-dossier .lv-progress-step,
+.person-dossier .lv-progress-step:last-child {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.person-dossier__progress-empty {
+  color: var(--pd-muted);
+}
+
+.person-dossier__progress-result,
+.person-dossier .lv-progress-step__status,
+.person-dossier .lv-progress-step__date {
+  display: block;
+  margin-top: 2px;
+}
+
+.person-dossier__progress-result {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.person-dossier__progress-letter {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 /* --------------------------------------------------------------- status pill

@@ -29,14 +29,14 @@
     "HasInvitation": { "tr-TR": "Davet Var", "tk-TM": "Çakylyk bar", "ru-RU": "Есть приглашение" },
     "ExtensionRequired": { "tr-TR": "Uzatma Gerekli", "tk-TM": "Uzadylmagy gerek", "ru-RU": "Требуется продление" },
     "InvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
-    "IssuingApplicationItem": { "tr-TR": "Veren Başvuru Kalemi", "tk-TM": "Berýän arza elementi", "ru-RU": "Позиция заявки на выдачу" },
-    "HistoricalImport": { "tr-TR": "Geçmiş kayıt (veren başvuru yok)", "tk-TM": "Taryhy ýazgy (berýän arza ýok)", "ru-RU": "Историческая запись (без заявки)" },
+    "IssuingApplicationItem": { "tr-TR": "Veren Başvuru Kalemi", "tk-TM": "Berýän ýüztutma elementi", "ru-RU": "Позиция заявки на выдачу" },
+    "HistoricalImport": { "tr-TR": "Geçmiş kayıt (veren başvuru yok)", "tk-TM": "Taryhy ýazgy (berýän ýüztutma ýok)", "ru-RU": "Историческая запись (без заявки)" },
     "RegistrationState": { "tr-TR": "Kayıt Durumu", "tk-TM": "Hasaba alnyş ýagdaýy", "ru-RU": "Статус регистрации" },
     "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" },
     "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
     "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
     "IsExtended": { "tr-TR": "Uzatıldı", "tk-TM": "Uzaldy", "ru-RU": "Продлено" },
-    "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" }
+    "Application": { "tr-TR": "Başvuru", "tk-TM": "Ýüztutma", "ru-RU": "Заявка" }
   },
   "entities": {
     "Invitation": {
@@ -85,15 +85,15 @@
         "HasInvitation": { "tr-TR": "Davet Var", "tk-TM": "Çakylyk bar", "ru-RU": "Есть приглашение" },
         "InvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
         "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
-        "HistoricalImport": { "tr-TR": "Geçmiş kayıt (veren başvuru yok)", "tk-TM": "Taryhy ýazgy (berýän arza ýok)", "ru-RU": "Историческая запись (без заявки)" },
-        "IssuingApplicationItem": { "tr-TR": "Veren Başvuru Kalemi", "tk-TM": "Berýän arza elementi", "ru-RU": "Позиция заявки на выдачу" },
+        "HistoricalImport": { "tr-TR": "Geçmiş kayıt (veren başvuru yok)", "tk-TM": "Taryhy ýazgy (berýän ýüztutma ýok)", "ru-RU": "Историческая запись (без заявки)" },
+        "IssuingApplicationItem": { "tr-TR": "Veren Başvuru Kalemi", "tk-TM": "Berýän ýüztutma elementi", "ru-RU": "Позиция заявки на выдачу" },
         "Notes": { "tr-TR": "Notlar", "tk-TM": "Bellikler", "ru-RU": "Примечания" },
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
         "IsActive": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "ExtensionRequired": { "tr-TR": "Uzatma Gerekli", "tk-TM": "Uzadylmagy gerek", "ru-RU": "Требуется продление" },
         "RegistrationState": { "tr-TR": "Kayıt Durumu", "tk-TM": "Hasaba alnyş ýagdaýy", "ru-RU": "Статус регистрации" },
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Ýüztutma", "ru-RU": "Заявка" },
         "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
         "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
         "IsExtended": { "tr-TR": "Uzatıldı", "tk-TM": "Uzaldy", "ru-RU": "Продлено" },
@@ -134,13 +134,13 @@
       }
     },
     "ApplicationNumberingProfile": {
-      "caption": { "tr-TR": "Başvuru Numaralandırma", "tk-TM": "Arza belgileme", "ru-RU": "Нумерация заявок" },
-      "listCaption": { "tr-TR": "Başvuru Numaralandırma", "tk-TM": "Arza belgileme", "ru-RU": "Нумерация заявок" },
+      "caption": { "tr-TR": "Başvuru Numaralandırma", "tk-TM": "Ýüztutma belgileme", "ru-RU": "Нумерация заявок" },
+      "listCaption": { "tr-TR": "Başvuru Numaralandırma", "tk-TM": "Ýüztutma belgileme", "ru-RU": "Нумерация заявок" },
       "members": {
-        "AppNumberPrefix": { "tr-TR": "Başvuru No Öneki", "tk-TM": "Arza belgisi prefiksi", "ru-RU": "Префикс номера заявки" },
-        "AppNumberFormat": { "tr-TR": "Başvuru No Formatı", "tk-TM": "Arza belgisi formaty", "ru-RU": "Формат номера заявки" },
-        "ApplicationNumberSeed": { "tr-TR": "Başvuru No Başlangıç", "tk-TM": "Arza belgisi başlangyjy", "ru-RU": "Начальный номер заявки" },
-        "ApplicationNumberPadding": { "tr-TR": "Başvuru No Uzunluğu", "tk-TM": "Arza belgisi uzynlygy", "ru-RU": "Длина номера заявки" }
+        "AppNumberPrefix": { "tr-TR": "Başvuru No Öneki", "tk-TM": "Ýüztutma belgisi prefiksi", "ru-RU": "Префикс номера заявки" },
+        "AppNumberFormat": { "tr-TR": "Başvuru No Formatı", "tk-TM": "Ýüztutma belgisi formaty", "ru-RU": "Формат номера заявки" },
+        "ApplicationNumberSeed": { "tr-TR": "Başvuru No Başlangıç", "tk-TM": "Ýüztutma belgisi başlangyjy", "ru-RU": "Начальный номер заявки" },
+        "ApplicationNumberPadding": { "tr-TR": "Başvuru No Uzunluğu", "tk-TM": "Ýüztutma belgisi uzynlygy", "ru-RU": "Длина номера заявки" }
       }
     },
     "AuthorizedSignatory": {
@@ -300,9 +300,9 @@
     "EmployeeSalary": { "caption": { "tr-TR": "Maaş", "tk-TM": "Aýlyk", "ru-RU": "Зарплата" }, "listCaption": { "tr-TR": "Maaşlar", "tk-TM": "Aýlyklar", "ru-RU": "Зарплаты" } },
     "WorkDuty": { "caption": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цель визита" }, "listCaption": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цели визита" } },
     "UserReportTemplate": { "caption": { "tr-TR": "Rapor Şablonu", "tk-TM": "Hasabat şablony", "ru-RU": "Шаблон отчёта" }, "listCaption": { "tr-TR": "Rapor Şablonları", "tk-TM": "Hasabat şablonlary", "ru-RU": "Шаблоны отчётов" } },
-    "ApplicationTypeGroup": { "caption": { "tr-TR": "Başvuru Türü Grubu", "tk-TM": "Arza görnüşi topary", "ru-RU": "Группа типов заявок" }, "listCaption": { "tr-TR": "Başvuru Türü Grupları", "tk-TM": "Arza görnüşi toparlary", "ru-RU": "Группы типов заявок" } },
-    "ApplicationTypeGroupMember": { "caption": { "tr-TR": "Başvuru Türü Grubu Üyesi", "tk-TM": "Arza görnüşi topary agzasy", "ru-RU": "Участник группы типов заявок" } },
-    "UserReportTemplateApplicationTypeGroup": { "caption": { "tr-TR": "Rapor Şablonu — Başvuru Türü Grubu", "tk-TM": "Hasabat şablony — arza görnüşi topary", "ru-RU": "Шаблон отчёта — группа типов заявок" } },
+    "ApplicationTypeGroup": { "caption": { "tr-TR": "Başvuru Türü Grubu", "tk-TM": "Ýüztutma görnüşi topary", "ru-RU": "Группа типов заявок" }, "listCaption": { "tr-TR": "Başvuru Türü Grupları", "tk-TM": "Ýüztutma görnüşi toparlary", "ru-RU": "Группы типов заявок" } },
+    "ApplicationTypeGroupMember": { "caption": { "tr-TR": "Başvuru Türü Grubu Üyesi", "tk-TM": "Ýüztutma görnüşi topary agzasy", "ru-RU": "Участник группы типов заявок" } },
+    "UserReportTemplateApplicationTypeGroup": { "caption": { "tr-TR": "Rapor Şablonu — Başvuru Türü Grubu", "tk-TM": "Hasabat şablony — ýüztutma görnüşi topary", "ru-RU": "Шаблон отчёта — группа типов заявок" } },
     "PdfFormMapping": { "caption": { "tr-TR": "PDF Form Eşlemesi", "tk-TM": "PDF formyň deňagrammasy", "ru-RU": "Сопоставление PDF" }, "listCaption": { "tr-TR": "PDF Form Eşlemeleri", "tk-TM": "PDF formyň deňagrammalary", "ru-RU": "Сопоставления PDF" } },
     "SyncRule": { "caption": { "tr-TR": "Senkronizasyon Kuralı", "tk-TM": "Sinhronizasiýa düzgüni", "ru-RU": "Правило синхронизации" }, "listCaption": { "tr-TR": "Senkronizasyon Kuralları", "tk-TM": "Sinhronizasiýa düzgünleri", "ru-RU": "Правила синхронизации" } },
     "SyncRuleLog": { "caption": { "tr-TR": "Senkronizasyon Günlüğü", "tk-TM": "Sinhronizasiýa gündeligi", "ru-RU": "Журнал синхронизации" }, "listCaption": { "tr-TR": "Senkronizasyon Günlükleri", "tk-TM": "Sinhronizasiýa gündelikleri", "ru-RU": "Журналы синхронизации" } },
@@ -357,8 +357,8 @@
     },
     "ContractTemplate": { "caption": { "tr-TR": "Sözleşme Şablonu", "tk-TM": "Şertnama şablony", "ru-RU": "Шаблон договора" }, "listCaption": { "tr-TR": "Sözleşme Şablonları", "tk-TM": "Şertnama şablonlary", "ru-RU": "Шаблоны договора" } },
     "ApplicationType": {
-      "caption": { "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
-      "listCaption": { "tr-TR": "Başvuru Türleri", "tk-TM": "Arza görnüşleri", "ru-RU": "Типы заявки" },
+      "caption": { "tr-TR": "Başvuru Türü", "tk-TM": "Ýüztutma görnüşi", "ru-RU": "Тип заявки" },
+      "listCaption": { "tr-TR": "Başvuru Türleri", "tk-TM": "Ýüztutma görnüşleri", "ru-RU": "Типы заявки" },
       "lookup": true,
       "members": {
         "ApplicationProgressRoute": {
@@ -373,14 +373,14 @@
         }
       }
     },
-    "ApplicationTypeFilter": { "caption": { "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа заявки" }, "listCaption": { "tr-TR": "Başvuru Türü Filtreleri", "tk-TM": "Arza görnüşi süzgüçleri", "ru-RU": "Фильтры типа" }, "lookup": true },
-    "ApplicationState": { "caption": { "tr-TR": "Başvuru Durumu", "tk-TM": "Arza ýagdaýy", "ru-RU": "Статус заявки" }, "listCaption": { "tr-TR": "Başvuru Durumları", "tk-TM": "Arza ýagdaýlary", "ru-RU": "Статусы заявки" }, "lookup": true },
-    "ApplicationLocation": { "caption": { "tr-TR": "Başvuru Yeri", "tk-TM": "Arza ýeri", "ru-RU": "Место заявки" }, "listCaption": { "tr-TR": "Başvuru Yerleri", "tk-TM": "Arza ýerleri", "ru-RU": "Места заявки" }, "lookup": true },
+    "ApplicationTypeFilter": { "caption": { "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Ýüztutma görnüşi süzgüçi", "ru-RU": "Фильтр типа заявки" }, "listCaption": { "tr-TR": "Başvuru Türü Filtreleri", "tk-TM": "Ýüztutma görnüşi süzgüçleri", "ru-RU": "Фильтры типа" }, "lookup": true },
+    "ApplicationState": { "caption": { "tr-TR": "Başvuru Durumu", "tk-TM": "Ýüztutma ýagdaýy", "ru-RU": "Статус заявки" }, "listCaption": { "tr-TR": "Başvuru Durumları", "tk-TM": "Ýüztutma ýagdaýlary", "ru-RU": "Статусы заявки" }, "lookup": true },
+    "ApplicationLocation": { "caption": { "tr-TR": "Başvuru Yeri", "tk-TM": "Ýüztutma ýeri", "ru-RU": "Место заявки" }, "listCaption": { "tr-TR": "Başvuru Yerleri", "tk-TM": "Ýüztutma ýerleri", "ru-RU": "Места заявки" }, "lookup": true },
     "ApplicationProgress": {
-      "caption": { "tr-TR": "Başvuru İlerlemesi", "tk-TM": "Arza ösüşi", "ru-RU": "Прогресс заявки" },
-      "listCaption": { "tr-TR": "Başvuru İlerlemeleri", "tk-TM": "Arza ösüşleri", "ru-RU": "Прогресс заявок" },
+      "caption": { "tr-TR": "Başvuru İlerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" },
+      "listCaption": { "tr-TR": "Başvuru İlerlemeleri", "tk-TM": "Ýüztutma ösüşleri", "ru-RU": "Прогресс заявок" },
       "members": {
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Ýüztutma", "ru-RU": "Заявка" },
         "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "StatusListLabel": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
@@ -397,7 +397,7 @@
         }
       }
     },
-    "ApplicationReason": { "caption": { "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина заявки" }, "listCaption": { "tr-TR": "Başvuru Nedenleri", "tk-TM": "Arza sebäpleri", "ru-RU": "Причины заявки" }, "lookup": true },
+    "ApplicationReason": { "caption": { "tr-TR": "Başvuru Nedeni", "tk-TM": "Ýüztutma sebäbi", "ru-RU": "Причина заявки" }, "listCaption": { "tr-TR": "Başvuru Nedenleri", "tk-TM": "Ýüztutma sebäpleri", "ru-RU": "Причины заявки" }, "lookup": true },
     "CheckPoint": { "caption": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" }, "listCaption": { "tr-TR": "Kontrol Noktaları", "tk-TM": "Kontrol nokadlary", "ru-RU": "КПП" }, "lookup": true },
     "Country": { "caption": { "tr-TR": "Ülke", "tk-TM": "Ýurt", "ru-RU": "Страна" }, "listCaption": { "tr-TR": "Ülkeler", "tk-TM": "Ýurtlar", "ru-RU": "Страны" }, "lookup": true },
     "Region": { "caption": { "tr-TR": "Bölge", "tk-TM": "Welaýat", "ru-RU": "Регион" }, "listCaption": { "tr-TR": "Bölgeler", "tk-TM": "Welaýatlar", "ru-RU": "Регионы" }, "lookup": true },

@@ -21,6 +21,19 @@ public static class ApplicationWorkspaceListProgressSteps
         string Date,
         string StatusLabel);
 
+    public static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildTimeline(
+        ApplicationProfileInstance? application,
+        IReadOnlyList<ApplicationProfileInstanceProgress>? history)
+    {
+        if (application == null)
+            return Array.Empty<ApplicationWorkspaceCaseProgressStep>();
+
+        return ApplicationWorkspaceProgressTimeline.BuildDisplay(
+            application,
+            application.ApplicationProfile,
+            history ?? Array.Empty<ApplicationProfileInstanceProgress>());
+    }
+
     public static IReadOnlyList<Step> Build(
         ApplicationProfileInstance? application,
         IReadOnlyList<ApplicationProfileInstanceProgress>? history)
@@ -94,6 +107,53 @@ public static class ApplicationWorkspaceListProgressSteps
             return "\u2014";
 
         return string.Join(" \u00b7 ", steps.Select(s => s.Label));
+    }
+
+    /// <summary>
+    /// Full workspace steps (state, result number, ministry letter) for dossier rows.
+    /// The list column keeps the compact <see cref="Step"/> from <see cref="ApplyTo"/>.
+    /// </summary>
+    public static IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>> LoadTimelines(
+        IObjectSpace? objectSpace,
+        IReadOnlyList<ApplicationProfileInstance> applications)
+    {
+        var result = new Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>();
+        if (applications == null || applications.Count == 0)
+            return result;
+
+        var ids = applications.Select(a => a.ID).Where(id => id != Guid.Empty).Distinct().ToList();
+        var historyByInstance = LoadHistory(objectSpace, ids);
+
+        foreach (var application in applications)
+        {
+            if (application.ID == Guid.Empty)
+                continue;
+
+            historyByInstance.TryGetValue(application.ID, out var rows);
+            result[application.ID] = BuildTimeline(application, rows);
+        }
+
+        return result;
+    }
+
+    /// <summary>Same badge text as the case workspace progress track.</summary>
+    public static string Badge(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (!string.IsNullOrWhiteSpace(step.CurrentStateLabel))
+            return ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel);
+
+        var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
+        if (string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.OfficeKey, StringComparison.OrdinalIgnoreCase))
+            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Completed");
+
+        if (isCurrent)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProgress");
+
+        if (string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase))
+            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Pending");
+
+        return string.Empty;
     }
 
     public static void ApplyTo(IObjectSpace? objectSpace, IReadOnlyList<ApplicationProfileInstance> applications)

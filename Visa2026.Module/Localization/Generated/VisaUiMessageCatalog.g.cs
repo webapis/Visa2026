@@ -72,21 +72,21 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Ministry approval depth changes from {0} to {1} for this application.",
             ["tr-TR"] = "Bu başvuru için bakanlık onay derinliği {0} → {1} olur.",
-            ["tk-TM"] = "Bu arza üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
+            ["tk-TM"] = "Bu ýüztutma üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
             ["ru-RU"] = "Глубина министерского согласования для заявки меняется: {0} → {1}.",
         },
         ["Application.FieldsLockedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application fields cannot be changed after ministry or migration progress was recorded.",
             ["tr-TR"] = "Bakanlık veya göç ilerlemesi kaydedildikten sonra arza alanları değiştirilemez.",
-            ["tk-TM"] = "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
+            ["tk-TM"] = "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň ýüztutma meýdanlaryny üýtgetmek bolmaýar.",
             ["ru-RU"] = "Поля заявки нельзя изменить после записи прогресса министерства или миграции.",
         },
         ["Application.FieldsLockedWhenWorkflowTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "This application is closed (issued, rejected, or cancelled). Edit the last progress step to reopen it.",
             ["tr-TR"] = "Bu arza kapatıldı (verildi, reddedildi veya iptal edildi). Yeniden açmak için son ilerleme adımını düzenleyin.",
-            ["tk-TM"] = "Bu arza ýapyldy (berildi, ret edildi ýa-da ýatyryldy). Täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
+            ["tk-TM"] = "Bu ýüztutma ýapyldy (berildi, ret edildi ýa-da ýatyryldy). Täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
             ["ru-RU"] = "Заявка закрыта (выдана, отклонена или отменена). Измените последний шаг прогресса, чтобы открыть снова.",
         },
         ["Application.ProjectContractChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -114,7 +114,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Ministry approval depth changes from {0} to {1} for this application.",
             ["tr-TR"] = "Bu başvuru için bakanlık onay derinliği {0} → {1} olur.",
-            ["tk-TM"] = "Bu arza üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
+            ["tk-TM"] = "Bu ýüztutma üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
             ["ru-RU"] = "Глубина министерского согласования для заявки меняется: {0} → {1}.",
         },
         ["ApplicationDocumentPreview.Window.Controls"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -149,7 +149,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Warning: {0} is archived. Confirm this person should be on the application line.",
             ["tr-TR"] = "Uyarı: {0} arşivlenmiş. Bu kişinin başvuru satırında olması gerektiğini onaylayın.",
-            ["tk-TM"] = "Duýduryş: {0} arhiwlenen. Bu adamyň arza setirinde bolmagy gerekdigini tassyklaň.",
+            ["tk-TM"] = "Duýduryş: {0} arhiwlenen. Bu adamyň ýüztutma setirinde bolmagy gerekdigini tassyklaň.",
             ["ru-RU"] = "Внимание: {0} в архиве. Подтвердите, что эта персона должна быть в строке заявки.",
         },
         ["ApplicationItem.SelectPassportBeforeVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -163,7 +163,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Please select Person on the application line first.",
             ["tr-TR"] = "Önce başvuru satırında Kişi seçin.",
-            ["tk-TM"] = "Ilki bilen arza setirinde Adam saýlaň.",
+            ["tk-TM"] = "Ilki bilen ýüztutma setirinde Adam saýlaň.",
             ["ru-RU"] = "Сначала выберите лицо в строке заявки.",
         },
         ["ApplicationItemDocumentCopies.Action.BatchSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -394,28 +394,28 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Select one or more application lines to view document copies.",
             ["tr-TR"] = "Belge kopyalarını görmek için bir veya daha fazla başvuru kalemi seçin.",
-            ["tk-TM"] = "Resminama nusgalaryny görmek üçin bir ýa-da has köp arza elementi saýlaň.",
+            ["tk-TM"] = "Resminama nusgalaryny görmek üçin bir ýa-da has köp ýüztutma elementi saýlaň.",
             ["ru-RU"] = "Выберите одну или несколько позиций, чтобы просмотреть копии документов.",
         },
         ["ApplicationItemDocumentCopies.Empty.NoSlots"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No document categories apply for this application type.",
             ["tr-TR"] = "Bu başvuru türü için belge kategorisi yok.",
-            ["tk-TM"] = "Bu arza görnüşi üçin resminama kategoriýasy ýok.",
+            ["tk-TM"] = "Bu ýüztutma görnüşi üçin resminama kategoriýasy ýok.",
             ["ru-RU"] = "Для этого типа заявки нет категорий документов.",
         },
         ["ApplicationItemDocumentCopies.GenerateForm.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Could not generate the application form PDF.",
             ["tr-TR"] = "Başvuru formu PDF'si oluşturulamadı.",
-            ["tk-TM"] = "Arza blankyny PDF döretmek mümkin bolmady.",
+            ["tk-TM"] = "Ýüztutma blankyny PDF döretmek mümkin bolmady.",
             ["ru-RU"] = "Не удалось создать PDF формы заявления.",
         },
         ["ApplicationItemDocumentCopies.GenerateForm.PreviewTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application form",
             ["tr-TR"] = "Başvuru formu",
-            ["tk-TM"] = "Arza blanky",
+            ["tk-TM"] = "Ýüztutma blanky",
             ["ru-RU"] = "Форма заявления",
         },
         ["ApplicationItemDocumentCopies.Hint.LinkMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -436,7 +436,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Scanned files for {0} selected application line(s) (same scope as PDF packaging).",
             ["tr-TR"] = "Seçilen {0} başvuru kalemine ait taranmış dosyalar (PDF paketleme ile aynı kapsam).",
-            ["tk-TM"] = "Saýlanan {0} arza elementi üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
+            ["tk-TM"] = "Saýlanan {0} ýüztutma elementi üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
             ["ru-RU"] = "Скан-копии для {0} выбранных позиций (тот же охват, что и PDF-пакет).",
         },
         ["ApplicationItemDocumentCopies.List.SubtitlePeople"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -450,7 +450,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Select the linked record on the Application Item tab first.",
             ["tr-TR"] = "Önce Başvuru Kalemi sekmesinde ilgili kaydı seçin.",
-            ["tk-TM"] = "Ilki bilen Arza elementi goýundasynda baglanan ýazgyny saýlaň.",
+            ["tk-TM"] = "Ilki bilen Ýüztutma elementi goýundasynda baglanan ýazgyny saýlaň.",
             ["ru-RU"] = "Сначала выберите связанную запись на вкладке позиции.",
         },
         ["ApplicationItemDocumentCopies.Package.CancelConfirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -527,7 +527,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application forms (PDF_Form)",
             ["tr-TR"] = "Başvuru formları (PDF_Form)",
-            ["tk-TM"] = "Arza blankalary (PDF_Form)",
+            ["tk-TM"] = "Ýüztutma blankalary (PDF_Form)",
             ["ru-RU"] = "Формы заявления (PDF_Form)",
         },
         ["ApplicationItemDocumentCopies.Package.Options.IncludeDiplomaFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -639,14 +639,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "The filled application form was downloaded. Open it in Adobe Reader or Foxit PDF Reader to view and print.",
             ["tr-TR"] = "Doldurulmuş başvuru formu indirildi. Görüntülemek ve yazdırmak için Adobe Reader veya Foxit PDF Reader ile açın.",
-            ["tk-TM"] = "Doldurylan arza blanky göçürildi. Görmek we çap etmek üçin Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
+            ["tk-TM"] = "Doldurylan ýüztutma blanky göçürildi. Görmek we çap etmek üçin Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
             ["ru-RU"] = "Заполненная форма заявления скачана. Откройте файл в Adobe Reader или Foxit PDF Reader.",
         },
         ["ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "A ZIP with one filled application form per selected line was downloaded (PDF_Form folder). Open each PDF in Adobe Reader or Foxit PDF Reader.",
             ["tr-TR"] = "Seçilen her satır için bir doldurulmuş başvuru formu içeren ZIP indirildi (PDF_Form klasörü). Her PDF'yi Adobe Reader veya Foxit PDF Reader ile açın.",
-            ["tk-TM"] = "Saýlanan her setir üçin bir doldurylan arza blanky bolan ZIP göçürildi (PDF_Form papkasy). Her PDF-i Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
+            ["tk-TM"] = "Saýlanan her setir üçin bir doldurylan ýüztutma blanky bolan ZIP göçürildi (PDF_Form papkasy). Her PDF-i Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
             ["ru-RU"] = "Скачан ZIP с одной заполненной формой на каждую выбранную позицию (папка PDF_Form). Откройте каждый PDF в Adobe Reader или Foxit PDF Reader.",
         },
         ["ApplicationItemDocumentCopies.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -744,7 +744,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application form",
             ["tr-TR"] = "Başvuru formu",
-            ["tk-TM"] = "Arza blanky",
+            ["tk-TM"] = "Ýüztutma blanky",
             ["ru-RU"] = "Форма заявления",
         },
         ["ApplicationItemDocumentCopies.Slot.Education.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -835,21 +835,21 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Scanned files linked to this application line (same scope as PDF packaging).",
             ["tr-TR"] = "Bu başvuru kalemine bağlı taranmış dosyalar (PDF paketleme ile aynı kapsam).",
-            ["tk-TM"] = "Bu arza elementine baglanan skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
+            ["tk-TM"] = "Bu ýüztutma elementine baglanan skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
             ["ru-RU"] = "Скан-копии, привязанные к этой позиции (тот же охват, что и PDF-пакет).",
         },
         ["ApplicationItemDocumentCopies.Summary.ApplicationForm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Filled visa application form from template.",
             ["tr-TR"] = "Şablondan doldurulmuş vize başvuru formu.",
-            ["tk-TM"] = "Şablondan doldurylan wiza arza blanky.",
+            ["tk-TM"] = "Şablondan doldurylan wiza ýüztutma blanky.",
             ["ru-RU"] = "Заполненная форма заявления на визу из шаблона.",
         },
         ["ApplicationItemDocumentCopies.Summary.ApplicationFormLines"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0} of {1} application lines",
             ["tr-TR"] = "{1} başvuru satırından {0} tanesi",
-            ["tk-TM"] = "{1} arza setirinden {0} sany",
+            ["tk-TM"] = "{1} ýüztutma setirinden {0} sany",
             ["ru-RU"] = "{0} из {1} позиций заявления",
         },
         ["ApplicationItemDocumentCopies.Summary.ApplicationFormPeople"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -905,14 +905,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Selected lines must belong to the same application.",
             ["tr-TR"] = "Seçili satırlar aynı başvuruya ait olmalıdır.",
-            ["tk-TM"] = "Saýlanan setirler bir arzanyň içinde bolmaly.",
+            ["tk-TM"] = "Saýlanan setirler bir ýüztutmanyň içinde bolmaly.",
             ["ru-RU"] = "Выбранные строки должны относиться к одной заявке.",
         },
         ["ApplicationItemReportPackage.ErrorNoSelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select at least one application line.",
             ["tr-TR"] = "En az bir başvuru satırı seçin.",
-            ["tk-TM"] = "Azyndan bir arza setiri saýlaň.",
+            ["tk-TM"] = "Azyndan bir ýüztutma setiri saýlaň.",
             ["ru-RU"] = "Выберите хотя бы одну строку заявки.",
         },
         ["ApplicationMigration.Sla.DefaultLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1010,7 +1010,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "People and linked records cannot be changed after the process is complete (issued, rejected, or cancelled). Edit the last progress step to reopen the case.",
             ["tr-TR"] = "Süreç tamamlandıktan sonra (verildi, reddedildi veya iptal edildi) kişiler ve bağlı kayıtlar değiştirilemez. Davayı yeniden açmak için son ilerleme adımını düzenleyin.",
-            ["tk-TM"] = "Proses tamamlandan soň (berildi, ret edildi ýa-da ýatyryldy) adamlar we baglanan ýazgylar üýtgedilip bolmaýar. Arzany täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
+            ["tk-TM"] = "Proses tamamlandan soň (berildi, ret edildi ýa-da ýatyryldy) adamlar we baglanan ýazgylar üýtgedilip bolmaýar. Ýüztutmany täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
             ["ru-RU"] = "После завершения процесса (выдано, отклонено или отменено) нельзя менять людей и связанные записи. Измените последний шаг прогресса, чтобы снова открыть дело.",
         },
         ["ApplicationProfile.ActionFamily.BusinessTrip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1297,7 +1297,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This application profile is locked because a linked application has left office preparation. Duplicate the profile to change configuration.",
             ["tr-TR"] = "Bağlı bir arza ofis hazırlığını geçtiği için bu profil kilitlendi. Yapılandırmayı değiştirmek için profili kopyalayın.",
-            ["tk-TM"] = "Baglanyşykly arza edara taýýarlygyny geçendigi üçin bu profil gulplandy. Sazlamany üýtgetmek üçin profili göçüriň.",
+            ["tk-TM"] = "Baglanyşykly ýüztutma edara taýýarlygyny geçendigi üçin bu profil gulplandy. Sazlamany üýtgetmek üçin profili göçüriň.",
             ["ru-RU"] = "Профиль заблокирован: связанная заявка вышла из офисной подготовки. Скопируйте профиль, чтобы изменить конфигурацию.",
         },
         ["ApplicationProfile.ConfigLockedCannotEditNested"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -4527,6 +4527,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Belgi bellenildi",
             ["ru-RU"] = "Номер присвоен",
         },
+        ["ApplicationProfileInstance.Workspace.OfficeFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File",
+            ["tr-TR"] = "Dosya",
+            ["tk-TM"] = "Faýl",
+            ["ru-RU"] = "Файл",
+        },
         ["ApplicationProfileInstance.Workspace.OfficePreparation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Office preparation",
@@ -5084,7 +5091,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This progress step is not allowed for the application's processing route.",
             ["tr-TR"] = "Bu ilerleme adımı başvurunun işlem süreci için geçerli değil.",
-            ["tk-TM"] = "Bu ösüş ädimi arzanyň iş prosesi üçin ýerlikli däl.",
+            ["tk-TM"] = "Bu ösüş ädimi ýüztutmanyň iş prosesi üçin ýerlikli däl.",
             ["ru-RU"] = "Этот шаг прогресса не допускается для маршрута заявки.",
         },
         ["ApplicationProgress.InvalidStateLocationPair"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5126,7 +5133,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This application type has no migration SLA profile (or max working days is not set). Assign a profile on the application type before moving to migration service.",
             ["tr-TR"] = "Bu başvuru türünde migrasyon SLA profili yok (veya azami iş günü tanımlı değil). Migrasyon servisine geçmeden önce başvuru türüne bir profil atayın.",
-            ["tk-TM"] = "Bu arza görnüşinde migrasiýa SLA profili ýok (ýa-da iň ýokary iş günleri bellenmedi). Migrasiýa gullugyna geçmezden öň arza görnüşine profil belläň.",
+            ["tk-TM"] = "Bu ýüztutma görnüşinde migrasiýa SLA profili ýok (ýa-da iň ýokary iş günleri bellenmedi). Migrasiýa gullugyna geçmezden öň ýüztutma görnüşine profil belläň.",
             ["ru-RU"] = "У типа заявки не задан профиль SLA миграционной службы (или не указано макс. число рабочих дней). Назначьте профиль типу заявки перед переводом в миграционную службу.",
         },
         ["ApplicationProgress.MinistryLetterPreview.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5147,14 +5154,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No ministry letter copies are attached to this application's progress history.",
             ["tr-TR"] = "Bu başvurunun ilerleme geçmişine ekli bakanlık yazısı kopyası yok.",
-            ["tk-TM"] = "Bu arzanyň ösüş taryhynda ministrlik hatynyň nusgasy ýok.",
+            ["tk-TM"] = "Bu ýüztutmanyň ösüş taryhynda ministrlik hatynyň nusgasy ýok.",
             ["ru-RU"] = "К истории прогресса этой заявки не прикреплены копии писем министерства.",
         },
         ["ApplicationProgress.MinistryLetters.NoApplication"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Open ministry letter copies from an application's progress history.",
             ["tr-TR"] = "Bakanlık yazısı kopyalarını bir başvurunun ilerleme geçmişinden açın.",
-            ["tk-TM"] = "Ministrlik hatlarynyň nusgalaryny arzanyň ösüş taryhyndan açyň.",
+            ["tk-TM"] = "Ministrlik hatlarynyň nusgalaryny ýüztutmanyň ösüş taryhyndan açyň.",
             ["ru-RU"] = "Откройте копии писем министерства из истории прогресса заявки.",
         },
         ["ApplicationProgress.MinistryLetters.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5364,7 +5371,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Download the saved Word or Excel template file (placeholders, not filled case data).",
             ["tr-TR"] = "Kayıtlı Word veya Excel şablon dosyasını indirir (yer tutucular; doldurulmuş başvuru verisi değil).",
-            ["tk-TM"] = "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan arza maglumaty däl).",
+            ["tk-TM"] = "Ýazdyrylan Word ýa-da Excel şablon faýlyny göçürýär (ýer tutujylar; doldurylan ýüztutma maglumaty däl).",
             ["ru-RU"] = "Скачать сохранённый файл шаблона Word или Excel (плейсхолдеры, не заполненные данные заявки).",
         },
         ["ApplicationReportPackage.EditTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5518,7 +5525,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No applicable reports for this application.",
             ["tr-TR"] = "Bu başvuru için uygun rapor yok.",
-            ["tk-TM"] = "Bu arza üçin laýyk hasabat ýok.",
+            ["tk-TM"] = "Bu ýüztutma üçin laýyk hasabat ýok.",
             ["ru-RU"] = "Нет подходящих отчётов для этой заявки.",
         },
         ["ApplicationReportPackage.EnqueueErrorNoSelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5546,7 +5553,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application field \"{0}\" is empty.",
             ["tr-TR"] = "Başvuru alanı \"{0}\" boş.",
-            ["tk-TM"] = "Arza meýdany \"{0}\" boş.",
+            ["tk-TM"] = "Ýüztutma meýdany \"{0}\" boş.",
             ["ru-RU"] = "Поле заявки \"{0}\" пусто.",
         },
         ["ApplicationReportPackage.Hint.EmptyCompanyHead"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5770,7 +5777,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No application lines are available for row-based merge.",
             ["tr-TR"] = "Satır birleştirmesi için başvuru satırı yok.",
-            ["tk-TM"] = "Setir birleşdirme üçin arza setiri ýok.",
+            ["tk-TM"] = "Setir birleşdirme üçin ýüztutma setiri ýok.",
             ["ru-RU"] = "Нет строк заявки для построчного объединения.",
         },
         ["ApplicationReportPackage.Readiness.NoTemplateFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5973,7 +5980,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Turn on to use a shared template on this case. Enabled templates also appear on This profile with a Shared mark.",
             ["tr-TR"] = "Bu davada ortak bir şablon kullanmak için açın. Açık şablonlar Bu profilde Ortak işaretiyle görünür.",
-            ["tk-TM"] = "Bu arzada umumy şablony ulanmak üçin açyň. Açyk şablonlar Bu profilde Umumy belgi bilen görünýär.",
+            ["tk-TM"] = "Bu ýüztutmada umumy şablony ulanmak üçin açyň. Açyk şablonlar Bu profilde Umumy belgi bilen görünýär.",
             ["ru-RU"] = "Включите, чтобы использовать общий шаблон в этом деле. Включённые шаблоны также видны на вкладке «Этот профиль» с меткой «Общий».",
         },
         ["ApplicationReportPackage.SharedTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6043,14 +6050,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "{0} report(s) for application {1} (same scope as the Resminamalar ZIP).",
             ["tr-TR"] = "Başvuru {1} için {0} rapor (Resminamalar ZIP kapsamıyla aynı).",
-            ["tk-TM"] = "Arza {1} üçin {0} hasabat (Resminamalar ZIP bilen birmeňzeş).",
+            ["tk-TM"] = "Ýüztutma {1} üçin {0} hasabat (Resminamalar ZIP bilen birmeňzeş).",
             ["ru-RU"] = "{0} отчёт(ов) для заявки {1} (тот же состав, что в ZIP Resminamalar).",
         },
         ["ApplicationReportPackage.SubtitleSelected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0} of {1} report(s) selected for application {2} (ZIP contains checked rows only).",
             ["tr-TR"] = "Başvuru {2} için {1} rapordan {0} tanesi seçildi (ZIP yalnızca işaretli satırları içerir).",
-            ["tk-TM"] = "Arza {2} üçin {1} hasabatdan {0} saýlandy (ZIP diňe bellikli setirleri goýýar).",
+            ["tk-TM"] = "Ýüztutma {2} üçin {1} hasabatdan {0} saýlandy (ZIP diňe bellikli setirleri goýýar).",
             ["ru-RU"] = "Выбрано {0} из {1} отчёт(ов) для заявки {2} (ZIP только с отмеченными строками).",
         },
         ["ApplicationReportPackage.SyncTemplates"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6106,21 +6113,21 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No application types have a selection code configured.",
             ["tr-TR"] = "Hiçbir başvuru türünde seçim kodu tanımlı değil.",
-            ["tk-TM"] = "Hiç hili arza görnüşinde saýlaw kody ýok.",
+            ["tk-TM"] = "Hiç hili ýüztutma görnüşinde saýlaw kody ýok.",
             ["ru-RU"] = "Ни у одного типа заявления не настроен код выбора.",
         },
         ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No application type found for code {0}.",
             ["tr-TR"] = "{0} kodu için başvuru türü bulunamadı.",
-            ["tk-TM"] = "{0} kody üçin arza görnüşi tapylmady.",
+            ["tk-TM"] = "{0} kody üçin ýüztutma görnüşi tapylmady.",
             ["ru-RU"] = "Тип заявления с кодом {0} не найден.",
         },
         ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application type \"{1}\" (code {0}) is not ready for use.",
             ["tr-TR"] = "\"{1}\" başvuru türü (kod {0}) kullanıma hazır değil.",
-            ["tk-TM"] = "\"{1}\" arza görnüşi ({0} kody) ulanyşa taýýar däl.",
+            ["tk-TM"] = "\"{1}\" ýüztutma görnüşi ({0} kody) ulanyşa taýýar däl.",
             ["ru-RU"] = "Тип «{1}» (код {0}) не готов к использованию.",
         },
         ["ApplicationTypeQuickCode.PickerAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6176,21 +6183,21 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application type",
             ["tr-TR"] = "Başvuru türü",
-            ["tk-TM"] = "Arza görnüşi",
+            ["tk-TM"] = "Ýüztutma görnüşi",
             ["ru-RU"] = "Тип заявления",
         },
         ["ApplicationTypeQuickCode.PickerEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No application types with selection codes were found.",
             ["tr-TR"] = "Seçim kodu tanımlı başvuru türü bulunamadı.",
-            ["tk-TM"] = "Saýlaw kody bar arza görnüşleri tapylmady.",
+            ["tk-TM"] = "Saýlaw kody bar ýüztutma görnüşleri tapylmady.",
             ["ru-RU"] = "Не найдено типов заявлений с кодами выбора.",
         },
         ["ApplicationTypeQuickCode.ReadinessBlockedPicker"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "This application type is not ready for use.",
             ["tr-TR"] = "Bu başvuru türü kullanıma hazır değil.",
-            ["tk-TM"] = "Bu arza görnüşi ulanyşa taýýar däl.",
+            ["tk-TM"] = "Bu ýüztutma görnüşi ulanyşa taýýar däl.",
             ["ru-RU"] = "Этот тип заявления не готов к использованию.",
         },
         ["ApplicationTypeQuickCode.ReadinessLegend"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6225,7 +6232,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Code {0} ({1}) is for the {3} workflow. Open this application from Applications ({2}) or choose another code.",
             ["tr-TR"] = "{0} kodu ({1}) {3} sürecine aittir. Bu başvuruyu Başvurular ({2}) menüsünden açın veya başka kod seçin.",
-            ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Arzany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
+            ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Ýüztutmany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
             ["ru-RU"] = "Код {0} ({1}) относится к маршруту «{3}». Откройте заявку из списка «{2}» или выберите другой код.",
         },
         ["ApprovalLegProfile.MinistryLegMaxDaysRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6253,7 +6260,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This approval leg profile is already used by applications. Duplicate it to change ministry legs.",
             ["tr-TR"] = "Bu onay bakanlık profili başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
-            ["tk-TM"] = "Bu ministrlik ylalaşyk ädimleri profili arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
+            ["tk-TM"] = "Bu ministrlik ylalaşyk ädimleri profili ýüztutmalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
             ["ru-RU"] = "Этот профиль этапов уже используется заявками. Скопируйте его, чтобы изменить этапы министерств.",
         },
         ["ApprovalLegProfile.MinistryLegWarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6309,7 +6316,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Open edits the shared chain used by every via-ministry application. This case only snapshots the card you pick.",
             ["tr-TR"] = "Aç, tüm bakanlık başvurularının kullandığı paylaşılan zinciri düzenler. Bu dosya yalnızca seçtiğiniz kartı kopyalar.",
-            ["tk-TM"] = "Aç ähli ministrlik arzalarynyň ulanýan paýlaşylan zynjyryny redaktirleýär. Bu arza diňe saýlan kartyň nusgasyny saklaýar.",
+            ["tk-TM"] = "Aç ähli ministrlik ýüztutmalarynyň ulanýan paýlaşylan zynjyryny redaktirleýär. Bu ýüztutma diňe saýlan kartyň nusgasyny saklaýar.",
             ["ru-RU"] = "Открыть правит общую цепочку для всех заявок через министерства. Эта заявка только снимает снимок выбранной карточки.",
         },
         ["ApprovalLegProfile.Slot.Code"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6379,7 +6386,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This chain is used by applications. It cannot be deleted.",
             ["tr-TR"] = "Bu zincir başvurularda kullanılıyor. Silinemez.",
-            ["tk-TM"] = "Bu zynjyr arzalarda ulanylýar. Ony pozup bolmaýar.",
+            ["tk-TM"] = "Bu zynjyr ýüztutmalarda ulanylýar. Ony pozup bolmaýar.",
             ["ru-RU"] = "Эта цепочка используется заявками. Её нельзя удалить.",
         },
         ["ApprovalLegProfile.Slot.Duplicate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6407,7 +6414,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Create the first shared ministry chain. It is available for every via-ministry application, not only this case.",
             ["tr-TR"] = "İlk paylaşılan bakanlık zincirini oluşturun. Yalnızca bu dosya için değil, tüm bakanlık başvuruları için geçerlidir.",
-            ["tk-TM"] = "Ilkinji paýlaşylan ministrlik zynjyryny dörediň. Diňe bu arza üçin däl, ähli ministrlik arzalary üçin elýeterli.",
+            ["tk-TM"] = "Ilkinji paýlaşylan ministrlik zynjyryny dörediň. Diňe bu ýüztutma üçin däl, ähli ministrlik ýüztutmalary üçin elýeterli.",
             ["ru-RU"] = "Создайте первую общую цепочку министерств. Она доступна всем заявкам через министерства, не только этой.",
         },
         ["ApprovalLegProfile.Slot.EmptyFooter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6435,7 +6442,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This chain is used by applications. Ministry order is locked.",
             ["tr-TR"] = "Bu zincir başvurularda kullanılıyor. Bakanlık sırası kilitli.",
-            ["tk-TM"] = "Bu zynjyr arzalarda ulanylýar. Ministrlik tertibi gulply.",
+            ["tk-TM"] = "Bu zynjyr ýüztutmalarda ulanylýar. Ministrlik tertibi gulply.",
             ["ru-RU"] = "Эта цепочка используется заявками. Порядок министерств заблокирован.",
         },
         ["ApprovalLegProfile.Slot.Ministries"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6484,7 +6491,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Create adds a shared catalog chain for every via-ministry application. It will appear as a card on Choose Approval legs.",
             ["tr-TR"] = "Oluştur, tüm bakanlık başvuruları için paylaşılan bir zincir ekler. Choose Approval legs adımında kart olarak görünür.",
-            ["tk-TM"] = "Döret ähli ministrlik arzalary üçin paýlaşylan katalog zynjyryny goşýar. Ol Choose Approval legs ädiminde kart bolup görünýär.",
+            ["tk-TM"] = "Döret ähli ministrlik ýüztutmalary üçin paýlaşylan katalog zynjyryny goşýar. Ol Choose Approval legs ädiminde kart bolup görünýär.",
             ["ru-RU"] = "Создать добавляет общую цепочку для всех заявок через министерства. Она появится карточкой на шаге Choose Approval legs.",
         },
         ["ApprovalLegProfile.Slot.NewMinistry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -6631,14 +6638,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Not used by applications yet. Ministry order can be changed.",
             ["tr-TR"] = "Henüz başvurularda kullanılmıyor. Bakanlık sırası değiştirilebilir.",
-            ["tk-TM"] = "Entak arzalarda ulanylmaýar. Ministrlik tertibini üýtgedip bolýar.",
+            ["tk-TM"] = "Entak ýüztutmalarda ulanylmaýar. Ministrlik tertibini üýtgedip bolýar.",
             ["ru-RU"] = "Пока не используется заявками. Порядок министерств можно менять.",
         },
         ["ApprovalLegProfile.Slot.UsedBy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Used by {0} applications",
             ["tr-TR"] = "{0} başvuruda kullanılıyor",
-            ["tk-TM"] = "{0} arzada ulanylýar",
+            ["tk-TM"] = "{0} ýüztutmada ulanylýar",
             ["ru-RU"] = "Используется в {0} заявках",
         },
         ["BorderZone.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7009,7 +7016,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application {0}",
             ["tr-TR"] = "Başvuru {0}",
-            ["tk-TM"] = "Arza {0}",
+            ["tk-TM"] = "Ýüztutma {0}",
             ["ru-RU"] = "Заявка {0}",
         },
         ["Invitation.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7051,7 +7058,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "The issuing application case cannot produce visas from invitations.",
             ["tr-TR"] = "Düzenleyen başvuru dosyası davetten vize üretemez.",
-            ["tk-TM"] = "Berijisi arza faýly çakylykdan wiza berip bilmeýär.",
+            ["tk-TM"] = "Berijisi ýüztutma faýly çakylykdan wiza berip bilmeýär.",
             ["ru-RU"] = "Выдавшее дело заявки не может оформить визу по приглашению.",
         },
         ["InvitationItem.IssueVisa.ItemUsedOrClosed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7086,7 +7093,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Create a new visa for this person using this invitation line and its issuing application case",
             ["tr-TR"] = "Bu davet satırı ve bağlı başvuru dosyası ile bu kişi için yeni vize oluştur",
-            ["tk-TM"] = "Bu çakylyk setiri we baglanyşykly arza faýly bilen bu adam üçin täze wiza döret",
+            ["tk-TM"] = "Bu çakylyk setiri we baglanyşykly ýüztutma faýly bilen bu adam üçin täze wiza döret",
             ["ru-RU"] = "Создать новую визу для этого лица по этой строке приглашения и связанному делу заявки",
         },
         ["InvitationItem.IssueVisa.VisaAlreadyIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7135,7 +7142,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application ID: {0}",
             ["tr-TR"] = "Başvuru kimliği: {0}",
-            ["tk-TM"] = "Arza ID: {0}",
+            ["tk-TM"] = "Ýüztutma ID: {0}",
             ["ru-RU"] = "ID заявки: {0}",
         },
         ["Pdf.Packaging.BatchId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7205,7 +7212,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "[{0}] Diplomas: no active Education rows for this application line (all-educations scope).",
             ["tr-TR"] = "[{0}] Diplomalar: bu başvuru satırı için aktif Eğitim kaydı yok (tüm eğitimler kapsamı).",
-            ["tk-TM"] = "[{0}] Diplomalar: bu arza setiri üçin aktiw Bilim ýazgysy ýok (ähli bilimler çägi).",
+            ["tk-TM"] = "[{0}] Diplomalar: bu ýüztutma setiri üçin aktiw Bilim ýazgysy ýok (ähli bilimler çägi).",
             ["ru-RU"] = "[{0}] Дипломы: нет активных записей об образовании для этой позиции (все образования).",
         },
         ["Pdf.Packaging.Gap.Diplomas.NoEduDocs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7345,7 +7352,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Gaps detected (included category + eligible ApplicationItem branch, but no usable FileData in the ZIP and/or no mergeable PDF slice where applicable):",
             ["tr-TR"] = "Eksikler tespit edildi (dahil edilen kategori + uygun Başvuru Kalemi dalı, ancak ZIP'te kullanılabilir FileData yok ve/veya birleştirilebilir PDF parçası yok):",
-            ["tk-TM"] = "Kemçilikler anyklandy (goşulan kategori + laýyk Arza elementi, ýöne ZIP-de ulanylyp bilinýän FileData ýok we/ýa-da birleşdirilip bilinýän PDF bölegi ýok):",
+            ["tk-TM"] = "Kemçilikler anyklandy (goşulan kategori + laýyk Ýüztutma elementi, ýöne ZIP-de ulanylyp bilinýän FileData ýok we/ýa-da birleşdirilip bilinýän PDF bölegi ýok):",
             ["ru-RU"] = "Обнаружены пробелы (включённая категория и подходящая позиция заявки, но нет пригодных FileData в ZIP и/или сводного PDF):",
         },
         ["Pdf.Packaging.Header"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7415,7 +7422,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Supporting ZIP mode is \"merged PDF summaries only\": separate per-line files under Passport/, Visa/, Diplomas/, and WorkPermit/ are omitted; batch merges include Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf, and WorkPermit/CurrentWorkPermits.pdf when those categories are included. Optional per-line merged diplomas use Diplomas/MergedByLine/ instead of one folder per person. Medical, address, invitation, and family documents are not included in batch merges and are omitted from the ZIP. Filled application PDFs remain one file per line under PDF_Form/.",
             ["tr-TR"] = "Destekleyici ZIP modu \"yalnızca birleştirilmiş PDF özetleri\": Passport/, Visa/, Diplomas/ ve WorkPermit/ altındaki satır başına ayrı dosyalar atlanır; ilgili kategoriler dahilse toplu birleştirmeler Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf ve WorkPermit/CurrentWorkPermits.pdf içerir. İsteğe bağlı satır başına birleştirilmiş diplomalar Diplomas/MergedByLine/ altındadır. Sağlık, adres, davet ve aile belgeleri toplu birleştirmeye dahil değildir ve ZIP'ten çıkarılır. Doldurulmuş başvuru PDF'leri PDF_Form/ altında satır başına bir dosya olarak kalır.",
-            ["tk-TM"] = "Goşmaça ZIP tertibi \"diňe birleşdirilen PDF jemlemeleri\": Passport/, Visa/, Diplomas/ we WorkPermit/ astyndaky aýry setir faýllary goýulmaýar; kategori goşulan bolsa jemleýji Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf we WorkPermit/CurrentWorkPermits.pdf döredilýär. Islege bagly setir başyna birleşdirilen diplomalar Diplomas/MergedByLine/ astynda. Saglyk, salgy, çakylyk we maşgala resminamalary jemleýjide ýok we ZIP-den çykarylýar. Doldurylan arza PDF-leri PDF_Form/ astynda setir başyna bir faýl bolup galýar.",
+            ["tk-TM"] = "Goşmaça ZIP tertibi \"diňe birleşdirilen PDF jemlemeleri\": Passport/, Visa/, Diplomas/ we WorkPermit/ astyndaky aýry setir faýllary goýulmaýar; kategori goşulan bolsa jemleýji Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf we WorkPermit/CurrentWorkPermits.pdf döredilýär. Islege bagly setir başyna birleşdirilen diplomalar Diplomas/MergedByLine/ astynda. Saglyk, salgy, çakylyk we maşgala resminamalary jemleýjide ýok we ZIP-den çykarylýar. Doldurylan ýüztutma PDF-leri PDF_Form/ astynda setir başyna bir faýl bolup galýar.",
             ["ru-RU"] = "Режим ZIP «только сводные PDF»: отдельные файлы по строкам в Passport/, Visa/, Diplomas/ и WorkPermit/ не добавляются; при включённых категориях создаются сводные Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf и WorkPermit/CurrentWorkPermits.pdf. Сводные дипломы по строке — в Diplomas/MergedByLine/. Мед., адрес, приглашение и родство в сводные PDF не входят. Заполненные PDF заявок — по одному файлу на строку в PDF_Form/.",
         },
         ["Pdf.QueuedNote.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7457,7 +7464,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Select at least one application item to run background PDF generation.",
             ["tr-TR"] = "Arka planda PDF üretimi için en az bir başvuru kalemi seçin.",
-            ["tk-TM"] = "Fonda PDF döretmek üçin azyndan bir arza elementi saýlaň.",
+            ["tk-TM"] = "Fonda PDF döretmek üçin azyndan bir ýüztutma elementi saýlaň.",
             ["ru-RU"] = "Выберите хотя бы одну позицию заявки для фоновой генерации PDF.",
         },
         ["Pdf.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7562,14 +7569,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application items, work permits, and invitations appear here after you process applications. Add passports, education, and other person data in the tabs above.",
             ["tr-TR"] = "Başvuru kalemleri, iş izinleri ve davetiyeler, başvuruları işledikten sonra burada görünür. Pasaport, eğitim ve diğer kişi verilerini yukarıdaki sekmelerden ekleyin.",
-            ["tk-TM"] = "Arza elementleri, iş rugsatlary we çakylyklar arzalary işläniňizden soň şu ýerde peýda bolýar. Pasport, bilim we beýleki şahsy maglumatlary ýokardaky goýmaklardan goşuň.",
+            ["tk-TM"] = "Ýüztutma elementleri, iş rugsatlary we çakylyklar ýüztutmalary işläniňizden soň şu ýerde peýda bolýar. Pasport, bilim we beýleki şahsy maglumatlary ýokardaky goýmaklardan goşuň.",
             ["ru-RU"] = "Позиции заявок, разрешения на работу и приглашения появятся здесь после обработки заявок. Паспорта, образование и другие данные лица добавляйте на вкладках выше.",
         },
         ["Person.DetailSection.NewRecordIssuedHint.Visitor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application items and invitations appear here after you process applications. Add passports and other person data in the tabs above.",
             ["tr-TR"] = "Başvuru kalemleri ve davetiyeler, başvuruları işledikten sonra burada görünür. Pasaport ve diğer kişi verilerini yukarıdaki sekmelerden ekleyin.",
-            ["tk-TM"] = "Arza elementleri we çakylyklar arzalary işläniňizden soň şu ýerde peýda bolýar. Pasport we beýleki maglumatlary ýokardaky goýmaklardan goşuň.",
+            ["tk-TM"] = "Ýüztutma elementleri we çakylyklar ýüztutmalary işläniňizden soň şu ýerde peýda bolýar. Pasport we beýleki maglumatlary ýokardaky goýmaklardan goşuň.",
             ["ru-RU"] = "Позиции заявок и приглашения появятся здесь после обработки заявок. Паспорта и другие данные добавляйте на вкладках выше.",
         },
         ["Person.DetailSection.PersonRecordData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -7590,7 +7597,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Applications (linked)",
             ["tr-TR"] = "Başvurular (bağlı)",
-            ["tk-TM"] = "Arzalar (baglanan)",
+            ["tk-TM"] = "Ýüztutmalar (baglanan)",
             ["ru-RU"] = "Заявки (связанные)",
         },
         ["Person.Tab.CvAndPersonalFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -8129,8 +8136,85 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Open application workspace",
             ["tr-TR"] = "Başvuru çalışma alanını aç",
-            ["tk-TM"] = "Arza iş ýerini aç",
+            ["tk-TM"] = "Ýüztutma iş ýerini aç",
             ["ru-RU"] = "Открыть рабочую область заявления",
+        },
+        ["PersonDossier.ApplicationGroup.All"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All",
+            ["tr-TR"] = "Tümü",
+            ["tk-TM"] = "Hemmesi",
+            ["ru-RU"] = "Все",
+        },
+        ["PersonDossier.ApplicationGroup.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone",
+            ["tr-TR"] = "Sınır bölgesi",
+            ["tk-TM"] = "Serhet zolagy",
+            ["ru-RU"] = "Приграничная зона",
+        },
+        ["PersonDossier.ApplicationGroup.BusinessTrip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Business trips",
+            ["tr-TR"] = "İş seyahatleri",
+            ["tk-TM"] = "Iş sapary",
+            ["ru-RU"] = "Командировки",
+        },
+        ["PersonDossier.ApplicationGroup.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No applications in this group",
+            ["tr-TR"] = "Bu grupta başvuru yok",
+            ["tk-TM"] = "Bu toparda ýüztutma ýok",
+            ["ru-RU"] = "В этой группе нет заявлений",
+        },
+        ["PersonDossier.Section.ShowMore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show more",
+            ["tr-TR"] = "Daha fazla göster",
+            ["tk-TM"] = "Has köp görkez",
+            ["ru-RU"] = "Показать ещё",
+        },
+        ["PersonDossier.Section.ShowLess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show less",
+            ["tr-TR"] = "Daha az göster",
+            ["tk-TM"] = "Az görkez",
+            ["ru-RU"] = "Свернуть",
+        },
+        ["PersonDossier.Section.MoreCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} more",
+            ["tr-TR"] = "{0} tane daha",
+            ["tk-TM"] = "ýene {0}",
+            ["ru-RU"] = "ещё {0}",
+        },
+        ["PersonDossier.ApplicationGroup.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitations",
+            ["tr-TR"] = "Davetler",
+            ["tk-TM"] = "Çakylyklar",
+            ["ru-RU"] = "Приглашения",
+        },
+        ["PersonDossier.ApplicationGroup.Registration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Bellige alyş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["PersonDossier.ApplicationGroup.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visas",
+            ["tr-TR"] = "Vizeler",
+            ["tk-TM"] = "Wizalar",
+            ["ru-RU"] = "Визы",
+        },
+        ["PersonDossier.ApplicationGroup.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permits",
+            ["tr-TR"] = "Çalışma izinleri",
+            ["tk-TM"] = "Iş rugsatnamalary",
+            ["ru-RU"] = "Разрешения на работу",
         },
         ["PersonDossier.Chrome.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -8206,28 +8290,35 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application date",
             ["tr-TR"] = "Başvuru tarihi",
-            ["tk-TM"] = "Arza senesi",
+            ["tk-TM"] = "Ýüztutma senesi",
             ["ru-RU"] = "Дата заявления",
         },
         ["PersonDossier.Column.ApplicationNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application #",
             ["tr-TR"] = "Başvuru No",
-            ["tk-TM"] = "Arza belgisi",
+            ["tk-TM"] = "Ýüztutma belgisi",
             ["ru-RU"] = "№ заявления",
+        },
+        ["PersonDossier.Column.Issued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued",
+            ["tr-TR"] = "Düzenlenen",
+            ["tk-TM"] = "Berlen",
+            ["ru-RU"] = "Выдано",
         },
         ["PersonDossier.Column.ApplicationProfile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application profile",
             ["tr-TR"] = "Başvuru profili",
-            ["tk-TM"] = "Arza profili",
+            ["tk-TM"] = "Ýüztutma profili",
             ["ru-RU"] = "Профиль заявления",
         },
         ["PersonDossier.Column.ApplicationType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application type",
             ["tr-TR"] = "Başvuru türü",
-            ["tk-TM"] = "Arza görnüşi",
+            ["tk-TM"] = "Ýüztutma görnüşi",
             ["ru-RU"] = "Тип заявления",
         },
         ["PersonDossier.Column.ASNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -8390,6 +8481,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Pozisyon",
             ["tk-TM"] = "Wezipe",
             ["ru-RU"] = "Должность",
+        },
+        ["PersonDossier.Column.Progress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application progress",
+            ["tr-TR"] = "Başvuru ilerlemesi",
+            ["tk-TM"] = "Ýüztutma ösüşi",
+            ["ru-RU"] = "Прогресс заявки",
         },
         ["PersonDossier.Column.Reason"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -8748,6 +8846,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Maşgala agzasy",
             ["ru-RU"] = "Член семьи",
         },
+        ["PersonDossier.Progress.ViewLetter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View letter",
+            ["tr-TR"] = "Yazıyı görüntüle",
+            ["tk-TM"] = "Haty görmek",
+            ["ru-RU"] = "Открыть письмо",
+        },
+        ["PersonDossier.Progress.ViewFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View file",
+            ["tr-TR"] = "Dosyayı görüntüle",
+            ["tk-TM"] = "Faýly görmek",
+            ["ru-RU"] = "Открыть файл",
+        },
         ["PersonDossier.Role.TemporaryVisitor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Temporary visitor",
@@ -8766,7 +8878,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Applications",
             ["tr-TR"] = "Başvurular",
-            ["tk-TM"] = "Arzalar",
+            ["tk-TM"] = "Ýüztutmalar",
             ["ru-RU"] = "Заявления",
         },
         ["PersonDossier.Section.education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -8859,6 +8971,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Güncel",
             ["tk-TM"] = "Häzirki",
             ["ru-RU"] = "Текущий",
+        },
+        ["PersonDossier.Status.Rejected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejected",
+            ["tr-TR"] = "Reddedildi",
+            ["tk-TM"] = "Ret edildi",
+            ["ru-RU"] = "Отклонено",
         },
         ["PersonDossier.Status.Excluded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -9060,7 +9179,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Header (application)",
             ["tr-TR"] = "Üst bilgi (başvuru)",
-            ["tk-TM"] = "Başlyk (arza)",
+            ["tk-TM"] = "Başlyk (ýüztutma)",
             ["ru-RU"] = "Шапка (заявка)",
         },
         ["PlaceholderManual.Filter.Row"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -9305,7 +9424,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "This project contract is already used by applications. Duplicate it to change ministry legs.",
             ["tr-TR"] = "Bu proje sözleşmesi başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
-            ["tk-TM"] = "Bu taslama şertnamasy arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin gaýtadan dörediň.",
+            ["tk-TM"] = "Bu taslama şertnamasy ýüztutmalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin gaýtadan dörediň.",
             ["ru-RU"] = "Этот контракт проекта уже используется заявками. Скопируйте его, чтобы изменить этапы министерств.",
         },
         ["ProjectContract.MinistryLegWarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -10005,7 +10124,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Application Type · Process State",
             ["tr-TR"] = "Başvuru türü · Süreç durumu",
-            ["tk-TM"] = "Arza görnüşi · Proses ýagdaýy",
+            ["tk-TM"] = "Ýüztutma görnüşi · Proses ýagdaýy",
             ["ru-RU"] = "Тип заявки · Состояние процесса",
         },
         ["ReportDashboard.Header.AppNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -11944,7 +12063,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Medical record will enter the warning window soon. Schedule renewal if required for the next application.",
             ["tr-TR"] = "Sağlık kaydı yakında uyarı penceresine girecek. Sonraki başvuru için gerekirse yenilemeyi planlayın.",
-            ["tk-TM"] = "Saglyk ýazgysy ýakynda duýduryş aralygyna girer. Indiki arza üçin gerek bolsa täzelemegi meýilleşdiriň.",
+            ["tk-TM"] = "Saglyk ýazgysy ýakynda duýduryş aralygyna girer. Indiki ýüztutma üçin gerek bolsa täzelemegi meýilleşdiriň.",
             ["ru-RU"] = "Мед. запись скоро войдёт в зону предупреждения. Запланируйте продление для следующей заявки.",
         },
         ["StateNotification.Sample.medical-expiring-soon.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -11965,7 +12084,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Education record exists but no diploma file is attached under Documents. Upload scanned diploma copies for application PDF packages.",
             ["tr-TR"] = "Eğitim kaydı var ancak Belgeler altında diploma dosyası yok. Başvuru PDF paketleri için taranmış diploma kopyalarını yükleyin.",
-            ["tk-TM"] = "Bilim ýazgysy bar, ýöne Resminamalar bölüminde diploma faýly ýok. Arza PDF paketleri üçin diploma nusgalaryny ýükläň.",
+            ["tk-TM"] = "Bilim ýazgysy bar, ýöne Resminamalar bölüminde diploma faýly ýok. Ýüztutma PDF paketleri üçin diploma nusgalaryny ýükläň.",
             ["ru-RU"] = "Запись об образовании есть, но файл диплома во вложениях отсутствует. Загрузите сканы диплома для PDF-пакетов заявки.",
         },
         ["StateNotification.Sample.missing-diploma-copies.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -12049,7 +12168,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No active passport on file for this employee. Add passport data before starting invitation, visa, or work-permit applications.",
             ["tr-TR"] = "Bu çalışan için aktif pasaport kaydı yok. Davet, vize veya çalışma izni başvurularından önce pasaport verilerini ekleyin.",
-            ["tk-TM"] = "Bu işgär üçin aktiw pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady arzalaryndan ozal pasport maglumatyny goşuň.",
+            ["tk-TM"] = "Bu işgär üçin aktiw pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady ýüztutmalaryndan ozal pasport maglumatyny goşuň.",
             ["ru-RU"] = "У сотрудника нет действующего паспорта в системе. Добавьте паспорт до заявлений на приглашение, визу или РНТ.",
         },
         ["StateNotification.Sample.missing-passport.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -12077,7 +12196,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Passport has expired. Request renewal from the employee before starting visa or work-permit applications.",
             ["tr-TR"] = "Pasaportun süresi doldu. Vize veya çalışma izni başvurularına başlamadan önce yenileme isteyin.",
-            ["tk-TM"] = "Pasportyň möhleti gutardy. Wiza ýa-da iş rugsady arzalaryna başlamazdan ozal täzelemegi haýyş ediň.",
+            ["tk-TM"] = "Pasportyň möhleti gutardy. Wiza ýa-da iş rugsady ýüztutmalaryna başlamazdan ozal täzelemegi haýyş ediň.",
             ["ru-RU"] = "Срок паспорта истёк. Запросите продление у сотрудника до подачи заявлений на визу или РНТ.",
         },
         ["StateNotification.Sample.passport-expired.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -12161,7 +12280,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Auto-resolved after state sync — visa extension application APP-2026-0412 is in progress.",
             ["tr-TR"] = "Durum senkronizasyonundan sonra otomatik çözüldü — vize uzatma başvurusu APP-2026-0412 devam ediyor.",
-            ["tk-TM"] = "Ýagdaý sinhronizasiýasyndan soň awtomatik çözüldi — wiza uzaltmak arzasy APP-2026-0412 dowam edýär.",
+            ["tk-TM"] = "Ýagdaý sinhronizasiýasyndan soň awtomatik çözüldi — wiza uzaltmak ýüztutmasy APP-2026-0412 dowam edýär.",
             ["ru-RU"] = "Автоматически снято после синхронизации — заявление на продление визы APP-2026-0412 в работе.",
         },
         ["StateNotification.Sample.visa-expiring-resolved.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -12182,7 +12301,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Visa expires within the renewal window. Consider opening or continuing an extension application.",
             ["tr-TR"] = "Vize yenileme penceresi içinde sona eriyor. Uzatma başvurusunu açmayı veya sürdürmeyi değerlendirin.",
-            ["tk-TM"] = "Wizanyň möhleti uzaltmak aralygynda gutarýar. Uzaltmak arzasyny açmagy ýa-da dowam etdirmegi göz öňünde tutuň.",
+            ["tk-TM"] = "Wizanyň möhleti uzaltmak aralygynda gutarýar. Uzaltmak ýüztutmasyny açmagy ýa-da dowam etdirmegi göz öňünde tutuň.",
             ["ru-RU"] = "Виза истекает в окне продления. Рассмотрите открытие или продолжение заявления на продление.",
         },
         ["StateNotification.Sample.visa-expiring-soon.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -12203,7 +12322,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Work permit is inside the 90-day extension window and no active extension application was found.",
             ["tr-TR"] = "Çalışma izni 90 günlük uzatma penceresinde ve aktif uzatma başvurusu bulunamadı.",
-            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we aktiw uzaltmak arzasy tapylmady.",
+            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we aktiw uzaltmak ýüztutmasy tapylmady.",
             ["ru-RU"] = "РНТ в 90-дневном окне продления, активное заявление на продление не найдено.",
         },
         ["StateNotification.Sample.work-permit-extension-required.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -14492,7 +14611,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Open the full Application record for the selected row",
             ["tr-TR"] = "Seçili satırın tam Başvuru kaydını aç",
-            ["tk-TM"] = "Saýlanan setiriň doly Arza ýazgysyny aç",
+            ["tk-TM"] = "Saýlanan setiriň doly Ýüztutma ýazgysyny aç",
             ["ru-RU"] = "Открыть полную запись заявки для выбранной строки",
         },
         ["Word.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -14548,7 +14667,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Generate a ZIP with {0} report(s) for this application?\n\n{1}",
             ["tr-TR"] = "Bu başvuru için {0} rapordan oluşan bir ZIP oluşturulsun mu?\n\n{1}",
-            ["tk-TM"] = "Bu arza üçin {0} hasabatly ZIP döredilsinmi?\n\n{1}",
+            ["tk-TM"] = "Bu ýüztutma üçin {0} hasabatly ZIP döredilsinmi?\n\n{1}",
             ["ru-RU"] = "Сформировать ZIP из {0} отчётов для этой заявки?\n\n{1}",
         },
         ["WordReports.ConfirmQueueMore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -14569,7 +14688,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No application is selected.",
             ["tr-TR"] = "Seçili başvuru yok.",
-            ["tk-TM"] = "Saýlanan arza ýok.",
+            ["tk-TM"] = "Saýlanan ýüztutma ýok.",
             ["ru-RU"] = "Заявка не выбрана.",
         },
         ["WordReports.EnqueueErrorNotSignedIn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -14583,14 +14702,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No applicable reports for this application type.",
             ["tr-TR"] = "Bu başvuru türü için uygun rapor yok.",
-            ["tk-TM"] = "Bu arza görnüşi üçin laýyk hasabat ýok.",
+            ["tk-TM"] = "Bu ýüztutma görnüşi üçin laýyk hasabat ýok.",
             ["ru-RU"] = "Нет подходящих отчётов для этого типа заявки.",
         },
         ["WordReports.NoApplicationScopeTemplates"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No application-level report templates are configured for “{0}”.",
             ["tr-TR"] = "“{0}” için uygulama düzeyinde rapor şablonu yapılandırılmamış.",
-            ["tk-TM"] = "“{0}” üçin arza derejesindäki hasabat şablonlary sazlanmady.",
+            ["tk-TM"] = "“{0}” üçin ýüztutma derejesindäki hasabat şablonlary sazlanmady.",
             ["ru-RU"] = "Для «{0}» не настроены шаблоны отчётов уровня заявки.",
         },
         ["WordReports.QueuedSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -14604,7 +14723,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Save the application before opening Resminamalar.",
             ["tr-TR"] = "Resminamalar'ı açmadan önce başvuruyu kaydedin.",
-            ["tk-TM"] = "Resminamalary açmazdan ozal arzany ýazdyryň.",
+            ["tk-TM"] = "Resminamalary açmazdan ozal ýüztutmany ýazdyryň.",
             ["ru-RU"] = "Сохраните заявку перед открытием Resminamalar.",
         },
         ["WorkPermit.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

@@ -62,8 +62,8 @@ Rolyňyza görä menýu üýtgeýär. Işgärler köplenç şulary görýär:
 | **Işgärler** | Işgär ýazgylary |
 | **Maşgalalar** | Maşgala agzalary |
 | **Wagtlaýyn myhman** | Wagtlaýyn myhman ýazgylary |
-| **Ýüztutmalar** | Ýokarky arza ýazgylary |
-| **Ministrlikler bilen ylalaşylýan ýüztutmalar** / **Gönümel migrasiýa** | Iş akymyna görä arzalar |
+| **Ýüztutmalar** | Ýokarky ýüztutma ýazgylary |
+| **Ministrlikler bilen ylalaşylýan ýüztutmalar** / **Gönümel migrasiýa** | Iş akymyna görä ýüztutmalar |
 | **Çakylyk** / **Ret** / **Iş rugsady** | Degişli iş akymy |
 | **Operasiýalar** | Işgär gurallary |
 | **Hasabatlar** | Ulanyjy hasabat şablonlary (rol rugsat berse) |

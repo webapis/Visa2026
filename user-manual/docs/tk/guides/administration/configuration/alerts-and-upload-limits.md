@@ -17,6 +17,6 @@ verified: false
 
 **Document expiration alerts** — resminama görnüşi boýunça gutarýan möhletden öňki kalenda günleri. **Upload limits** — surat we goşmaça faýl MB çägi.
 
-Wiza / iş rugsady elementi üçin goşmaça **uzaltma arzasy** meýdany görünýär.
+Wiza / iş rugsady elementi üçin goşmaça **uzaltma ýüztutmasy** meýdany görünýär.
 
 [Hasabat paneli](../../tracking/report-dashboard.md) · [Umumy syn](overview.md)

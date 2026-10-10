@@ -25,8 +25,8 @@
       <Action Id="Logon" Caption="Girmek" />
       <Action Id="MyDetails" Caption="Hasabym" />
       <Action Id="New" Caption="Täze" />
-      <Action Id="OpenApplicationFromTransferStatus" Caption="Arzany aç" />
-      <Action Id="OpenApplicationFromVisaStatus" Caption="Arzany aç" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Ýüztutmany aç" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Ýüztutmany aç" />
       <Action Id="OpenObject" Caption="Aç" />
       <Action Id="OpenSourceObject" Caption="Çeşme obýekti aç" />
       <Action Id="OpenTargetObject" Caption="Maksat obýekti aç" />
@@ -66,8 +66,8 @@
     <LocalizationGroup Name="Texts">
       <LocalizationItem Name="AdditionalInformation" Value="Goşmaça maglumat" />
       <LocalizationItem Name="AdditionalInformations" Value="Goşmaça maglumat" />
-      <LocalizationItem Name="Application" Value="Arza" />
-      <LocalizationItem Name="ApplicationItems" Value="Arza elementleri" />
+      <LocalizationItem Name="Application" Value="Ýüztutma" />
+      <LocalizationItem Name="ApplicationItems" Value="Ýüztutma elementleri" />
       <LocalizationItem Name="CurrentState" Value="Häzirki ýagdaý" />
       <LocalizationItem Name="Filter" Value="Süzgüç" />
       <LocalizationItem Name="Filters" Value="Süzgüçler" />
@@ -103,12 +103,12 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Application_DetailView" Caption="Arza">
+    <DetailView Id="Application_DetailView" Caption="Ýüztutma">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors">
             <TabbedGroup Id="Item1">
-              <LayoutGroup Id="Application" Caption="Arza" />
+              <LayoutGroup Id="Application" Caption="Ýüztutma" />
               <LayoutGroup Id="Item2" Caption="Ýagdaýy">
                 <LayoutGroup Id="ProgressHistory" Caption="Ösüş taryhy" />
               </LayoutGroup>
@@ -117,7 +117,7 @@
             </TabbedGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
+            <LayoutGroup Id="ApplicationItems" Caption="Ýüztutma elementleri" />
             <LayoutGroup Id="Invitations" Caption="Çakylyklar" />
             <LayoutGroup Id="Rejections" Caption="Retler" />
             <LayoutGroup Id="WorkPermits" Caption="Iş rugsatnamalary" />
@@ -136,7 +136,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
-          <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
+          <LayoutGroup Id="ApplicationItems" Caption="Ýüztutma elementleri" />
           <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
           <LayoutGroup Id="Educations" Caption="Bilim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Işgär şertnamalary" />
@@ -187,7 +187,7 @@
               <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
             </TabbedGroup>
             <TabbedGroup Id="IssuedDocumentsTabs">
-              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
               <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
               <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
               <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
@@ -221,7 +221,7 @@
               <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
             </TabbedGroup>
             <TabbedGroup Id="IssuedDocumentsTabs">
-              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
               <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
               <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
               <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
@@ -248,7 +248,7 @@
               <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
             </TabbedGroup>
             <TabbedGroup Id="IssuedDocumentsTabs">
-              <LayoutGroup Id="ApplicationProfileInstances" Caption="Arzalar (baglanan)" />
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
               <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
               <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
             </TabbedGroup>

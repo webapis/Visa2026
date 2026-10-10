@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Module.Services.OfficerShell;
 
@@ -156,9 +157,10 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (latest == null)
             ApplicationProfileInstanceOfficeNotesHelper.CopyOntoNewRow(application, progress, notesOnLatestStep);
 
-        if (letterContent is { Length: > 0 } && progress.IsMinistryDecisionStep)
+        if (letterContent is { Length: > 0 }
+            && (progress.IsMinistryDecisionStep || latest == null))
         {
-            var letterResult = AttachMinistryLetter(objectSpace, progress, letterFileName ?? "ministry-letter.pdf", letterContent);
+            var letterResult = AttachMinistryLetter(objectSpace, progress, letterFileName ?? "progress-file.pdf", letterContent);
             if (!letterResult.Success)
                 return letterResult;
         }
@@ -205,8 +207,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         string fileName,
         byte[] content)
     {
-        if (!row.IsMinistryDecisionStep)
-            return OfficerShellCaseProgressResult.Failed("Ministry letter upload is only available on ministry decision steps.");
+        if (!CanStoreProgressFile(row))
+            return OfficerShellCaseProgressResult.Failed("File upload is only available on office preparation or an approval leg.");
 
         var maxBytes = row.MaxDocumentSizeInMB * 1024L * 1024L;
         if (content.LongLength > maxBytes)
@@ -223,6 +225,16 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         row.MinistryLetterFile = file;
         return OfficerShellCaseProgressResult.Succeeded();
     }
+
+    private static bool CanStoreProgressFile(ApplicationProfileInstanceProgress row) =>
+        row.IsMinistryDecisionStep
+        || ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(
+            ApplicationWorkspaceProgressTimeline.OfficeKey,
+            row.State?.Code)
+        || string.Equals(
+            row.State?.Code,
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+            StringComparison.OrdinalIgnoreCase);
 
     private static ApplicationProfileInstance? LoadApplicationForAdvance(IObjectSpace objectSpace, Guid applicationId)
     {
