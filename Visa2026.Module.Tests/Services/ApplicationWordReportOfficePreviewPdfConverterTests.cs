@@ -89,6 +89,30 @@ public class ApplicationWordReportOfficePreviewPdfConverterTests
         Assert.Equal((byte)'F', merged[3]);
     }
 
+    [Fact]
+    public void RemoveInjectedSheet_drops_evaluation_warning_and_keeps_the_sanaw()
+    {
+        using var workbook = new XLWorkbook();
+        var sanaw = workbook.AddWorksheet("Sanaw");
+        sanaw.Cell("A1").Value = "Ferdi";
+        sanaw.PageSetup.PageOrientation = XLPageOrientation.Landscape;
+        sanaw.PageSetup.FitToPages(1, 0);
+        var warning = workbook.AddWorksheet("Evaluation Warning");
+        warning.Cell("A5").Value = "For evaluation purposes only";
+        workbook.AddWorksheet("Evaluation Warning (1)");
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+
+        var cleaned = ExcelPreviewEvaluationNotice.RemoveInjectedSheet(stream.ToArray());
+
+        using var again = new XLWorkbook(new MemoryStream(cleaned));
+        var only = Assert.Single(again.Worksheets);
+        Assert.Equal("Sanaw", only.Name);
+        Assert.Equal("Ferdi", only.Cell("A1").GetString());
+        Assert.Equal(XLPageOrientation.Landscape, only.PageSetup.PageOrientation);
+        Assert.Equal(1, only.PageSetup.PagesWide);
+    }
+
     private static byte[] CreateMinimalXlsx()
     {
         using var workbook = new XLWorkbook();

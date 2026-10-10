@@ -69,6 +69,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-10-10 — Excel Preview red evaluation line (Application)
+
+- **Symptom**: Resminamalar Excel Preview showed the red "For evaluation purposes only" line. The same `.xlsx` opened in Excel did not.
+- **Try**: Redeploy, hard-refresh. Preview that Excel card. The red line should be gone. Download Excel stays the same file.
+- **Test**: `ApplicationWordReportOfficePreviewPdfConverterTests` — 7 passed, including removal of the injected Evaluation Warning sheet. Module build succeeded.
+- **Root cause**: Office File API paints that line as vector art on the preview PDF when the process license does not cover Spreadsheet. A text search of the PDF misses it, so Preview kept the DevExpress PDF. The downloaded workbook never goes through that export.
+- **Fix**: When that export would paint the line, Preview uses LibreOffice on the prepared sheet and drops the injected Evaluation Warning sheet.
+- **Prevent**: Do not treat a DevExpress Excel PDF as clean only because the banner phrase is absent from the file bytes.
+- **Cross-skill**: —
+
 ### 2026-10-07 — Docker Hub Excel Preview matches the downloaded sanaw (Application)
 
 - **Symptom**: Same yellow-marks sanaw. Local F5 Preview was right. `10.100.128.26` Preview was not. Download Excel from that host already opened correctly in Excel.

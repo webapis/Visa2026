@@ -91,26 +91,37 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
     }
 
     /// <summary>
-    /// Same Excel PDF as a workstation: DevExpress clears the print area, prints the used range,
-    /// and fits the page. LibreOffice is only the fallback when that PDF carries the evaluation stamp.
+    /// Same Excel PDF as a workstation when Office File API is licensed: DevExpress clears the print
+    /// area, prints the used range, and fits the page. When that export would paint the red evaluation
+    /// line, LibreOffice converts the prepared sheet instead. The line is vector art, so a text search
+    /// of the PDF does not see it.
     /// </summary>
     private static byte[]? ConvertExcelMatchingWorkstation(byte[] officeContent, string fileName)
     {
-        var fromOfficeFileApi = ConvertExcelToPdf(officeContent);
-        if (IsCleanPreviewPdf(fromOfficeFileApi))
-            return fromOfficeFileApi;
+        if (!ExcelPreviewEvaluationNotice.WouldStampExcelPdf())
+        {
+            var fromOfficeFileApi = ConvertExcelToPdf(officeContent);
+            if (IsCleanPreviewPdf(fromOfficeFileApi))
+                return fromOfficeFileApi;
+        }
 
         if (LibreOfficePreviewPdfConverter.IsAvailable())
         {
-            var prepared = SavePreparedExcel(officeContent) ?? officeContent;
-            var fromLibreOffice = LibreOfficePreviewPdfConverter.TryConvertToPdf(
-                prepared,
-                AlignDownloadFileName(fileName, prepared));
+            var fromLibreOffice = TryLibreOfficePreparedExcel(officeContent, fileName);
             if (fromLibreOffice != null && fromLibreOffice.Length > 0)
                 return fromLibreOffice;
         }
 
-        return fromOfficeFileApi;
+        return ConvertExcelToPdf(officeContent);
+    }
+
+    private static byte[]? TryLibreOfficePreparedExcel(byte[] officeContent, string fileName)
+    {
+        var prepared = SavePreparedExcel(officeContent) ?? officeContent;
+        prepared = ExcelPreviewEvaluationNotice.RemoveInjectedSheet(prepared);
+        return LibreOfficePreviewPdfConverter.TryConvertToPdf(
+            prepared,
+            AlignDownloadFileName(fileName, prepared));
     }
 
     private static bool IsCleanPreviewPdf(byte[]? pdf) =>
