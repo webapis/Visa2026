@@ -2449,6 +2449,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         {
             IQueryable<VwRdInvitationInProcess> query = db.VwRdInvitationInProcess.AsNoTracking();
 
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
             query = query.Where(r => !r.IsArchived);
 
             if (cutoff > DateTime.MinValue)
@@ -2463,74 +2466,18 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             }
 
             var list = query.ToList();
-
-            // Person-type filter = any M2M roster person with that role.
-            if (role.HasValue)
-            {
-                var appIdsWithRole = ReportDashboardRosterQueryHelper.ApplicationProfileInstanceIdsWithPersonRole(db, role.Value);
-                list = list.Where(r => appIdsWithRole.Contains(r.ID)).ToList();
-            }
-
-            Dictionary<Guid, ApplicationProfileInstance> appsById = [];
-            Dictionary<Guid, string?> primaryCodeByAppId = [];
-            if (list.Count > 0)
-            {
-                var appIds = list.Select(r => r.ID).ToList();
-                // LatestPrimaryStateCode is authoritative when LatestProgress FK is unset but scalars are synced.
-                primaryCodeByAppId = db.ApplicationProfileInstances.AsNoTracking()
-                    .Where(a => appIds.Contains(a.ID))
-                    .Select(a => new { a.ID, a.LatestPrimaryStateCode })
-                    .AsEnumerable()
-                    .ToDictionary(a => a.ID, a => a.LatestPrimaryStateCode);
-
-                // Completed processes (view ProgressStateCode and/or Application.LatestPrimaryStateCode).
-                list = list
-                    .Where(r =>
-                    {
-                        if (IsInvitationProcessCompleted(r.ProgressStateCode))
-                            return false;
-                        primaryCodeByAppId.TryGetValue(r.ID, out var primary);
-                        return !IsInvitationProcessCompleted(primary);
-                    })
-                    .ToList();
-
-                if (list.Count > 0)
-                {
-                    var remainingIds = list.Select(r => r.ID).ToList();
-                    IQueryable<ApplicationProfileInstance> appQuery = db.ApplicationProfileInstances.AsNoTracking()
-                        .Where(a => remainingIds.Contains(a.ID));
-                    if (byPeriodCategoryType)
-                    {
-                        appQuery = appQuery
-                            .Include(a => a.VisaPeriod)
-                            .Include(a => a.VisaCategory)
-                            .Include(a => a.VisaType);
-                    }
-
-                    appsById = appQuery.ToList().ToDictionary(a => a.ID);
-                }
-            }
-
             var labeled = list.Select(r =>
             {
-                var processState = string.IsNullOrWhiteSpace(r.StatusLabel) ? "Being Prepared" : r.StatusLabel!.Trim();
-                string status;
-                if (byPeriodCategoryType)
-                {
-                    appsById.TryGetValue(r.ID, out var app);
-                    var period = LookupLabelOrMissing(app?.VisaPeriod, "(No period)");
-                    var category = LookupLabelOrMissing(app?.VisaCategory, "(No category)");
-                    var type = LookupLabelOrMissing(app?.VisaType, "(No type)");
-                    status = $"{period} · {category} · {type} · {processState}";
-                }
-                else
-                {
-                    var project = string.IsNullOrWhiteSpace(r.ProjectName)
+                var status = byPeriodCategoryType
+                    ? (string.IsNullOrWhiteSpace(r.PeriodCategoryTypeLabel)
+                        ? "(No period)"
+                        : r.PeriodCategoryTypeLabel.Trim())
+                    : (string.IsNullOrWhiteSpace(r.ChartStatusLabel)
                         ? "(No project)"
-                        : r.ProjectName.Trim();
-                    status = $"{project} · {processState}";
-                }
-
+                        : r.ChartStatusLabel.Trim());
+                var processState = string.IsNullOrWhiteSpace(r.StatusLabel)
+                    ? "Being Prepared"
+                    : r.StatusLabel.Trim();
                 return (Row: r, Status: status, ProcessState: processState);
             }).ToList();
 
@@ -2540,7 +2487,6 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 .OrderByDescending(g => g.Count)
                 .ToList();
             var buckets = AssignCategoricalCss(groups);
-            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
 
             var rows = labeled
                 .OrderByDescending(x => x.Row.ApplicationDate)
@@ -2548,18 +2494,27 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 .Take(PreviewLimit)
                 .Select(x =>
                 {
-                    var progressCss = StatusCss(x.ProcessState, null);
+                    var r = x.Row;
                     return new ReportDashboardPreviewRow
                     {
-                        RecordId = x.Row.ID,
-                        Name = x.Row.PersonName ?? string.Empty,
-                        Project = x.Row.ProjectName ?? string.Empty,
-                        ColumnA = x.Row.ApplicationNumber ?? string.Empty,
-                        ColumnB = FormatDate(x.Row.ApplicationDate),
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.PositionLabel ?? string.Empty,
+                        ColumnB = r.SubcontractorLabel ?? string.Empty,
+                        ColumnC = r.ApplicationNumber ?? string.Empty,
+                        ColumnD = FormatDate(r.ApplicationDate),
+                        ColumnE = x.ProcessState,
+                        ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
+                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
+                        MinistryCells =
+                        [
+                            FormatApproval(r.Approval1Date, r.Approval1Number, r.Approval1Ministry),
+                            FormatApproval(r.Approval2Date, r.Approval2Number, r.Approval2Ministry),
+                            FormatApproval(r.Approval3Date, r.Approval3Number, r.Approval3Ministry),
+                        ],
                         Status = x.Status,
-                        StatusCssClass = string.IsNullOrWhiteSpace(progressCss)
-                            ? (cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-pending")
-                            : progressCss
+                        StatusCssClass = string.IsNullOrWhiteSpace(r.StatusCssClass) ? "st-pending" : r.StatusCssClass
                     };
                 })
                 .ToList();

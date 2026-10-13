@@ -428,7 +428,7 @@
 
                     <div class="rd-chart-block @(ShowChartBody ? null : "rd-chart-block--collapsed")">
                         <div class="rd-chart-toolbar">
-                            @if (IsInvitationReadyTable)
+                            @if (IsInvitationOfficerTable)
                             {
                                 <button type="button"
                                         class="rd-chart-toggle @(_invitationChartOpen ? "active" : null)"
@@ -535,7 +535,7 @@
 
                     <div class="rd-listview-block">
                         <div class="rd-preview-actions">
-                            @if (IsInvitationReadyTable)
+                            @if (IsInvitationOfficerTable)
                             {
                                 <div class="rd-table-search-row">
                                 <div class="rd-search-box">
@@ -561,9 +561,9 @@
                                 </div>
                             }
                             <button type="button"
-                                    class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationReadyTable) ? null : "disabled")"
-                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationReadyTable) || ShowLoading || (IsInvitationReadyTable && DisplayedRows.Count == 0))"
-                                    title="@(IsInvitationReadyTable ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
+                                    class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationOfficerTable) ? null : "disabled")"
+                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationOfficerTable) || ShowLoading || (IsInvitationOfficerTable && DisplayedRows.Count == 0))"
+                                    title="@(IsInvitationOfficerTable ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
                                     @onclick="OnExcel">
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
                             </button>
@@ -574,13 +574,14 @@
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
                             </button>
                         </div>
-                        <div class="rd-listview-scroll @(IsInvitationReadyTable ? "rd-listview-scroll--fill" : null)">
-                            <table class="@(IsInvitationReadyTable ? "rd-invitation-table" : null)">
+                        <div class="rd-listview-scroll @(IsInvitationOfficerTable ? "rd-listview-scroll--fill" : null)">
+                            <table class="@(IsInvitationOfficerTable ? "rd-invitation-table" : null)">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            var stackColumn = IsInvitationReadyTable && i >= 4 && i <= 8;
+                                            var stackColumn = (IsInvitationReadyTable && i >= 4 && i <= 8)
+                                                || (IsInvitationProcessTable && i >= 4 && i <= 8);
                                             <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
@@ -602,7 +603,7 @@
                                                 <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
                                                 <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
                                                 <td class="@ColumnClass(3)">@row.ColumnB</td>
-                                                @if (IsInvitationReadyTable)
+                                                @if (IsInvitationOfficerTable)
                                                 {
                                                     <td class="rd-col-stack">
                                                         <div class="rd-cell-stack">
@@ -648,6 +649,8 @@
                                                             }
                                                         </div>
                                                     </td>
+                                                    @if (IsInvitationReadyTable)
+                                                    {
                                                     <td class="@ColumnClass(invitationStart + 1)" @onclick:stopPropagation="true">
                                                         @if (row.InvitationId is { } invitationId && invitationId != Guid.Empty && !string.IsNullOrEmpty(row.ColumnE))
                                                         {
@@ -679,6 +682,11 @@
                                                     @if (ShowInvitationChartColumn)
                                                     {
                                                         <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
+                                                    }
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="rd-cell-state">@StateLabel(row.ColumnE, row.StatusCssClass, true)</td>
                                                     }
                                                 }
                                                 else
@@ -719,7 +727,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        @if (!IsInvitationReadyTable && FilteredRows.Count > 0)
+                        @if (!IsInvitationOfficerTable && FilteredRows.Count > 0)
                         {
                             <div class="rd-preview-pager">
                                 <span class="rd-preview-pager-range">@PreviewRangeLabel</span>
@@ -840,6 +848,11 @@
             _previewPageIndex = 0;
             _invitationTableSearch = string.Empty;
             _chartBucketsExpanded = false;
+            if (!string.Equals(SubReport, _invitationChartSubReport, StringComparison.Ordinal))
+            {
+                _invitationChartSubReport = SubReport ?? string.Empty;
+                _invitationChartOpen = false;
+            }
             RebuildColumnClasses();
         }
 
@@ -1248,7 +1261,7 @@
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private async Task OnExcel()
     {
-        if (IsInvitationReadyTable)
+        if (IsInvitationOfficerTable)
         {
             await DownloadInvitationTableAsync();
             return;
@@ -1305,15 +1318,16 @@
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
 
     private bool _invitationChartOpen;
+    private string _invitationChartSubReport = string.Empty;
     private string _invitationTableSearch = string.Empty;
 
-    private bool ShowChartBody => !IsInvitationReadyTable || _invitationChartOpen;
+    private bool ShowChartBody => !IsInvitationOfficerTable || _invitationChartOpen;
 
     private IReadOnlyList<ReportDashboardPreviewRow> DisplayedRows
     {
         get
         {
-            if (!IsInvitationReadyTable || string.IsNullOrWhiteSpace(_invitationTableSearch))
+            if (!IsInvitationOfficerTable || string.IsNullOrWhiteSpace(_invitationTableSearch))
                 return FilteredRows;
 
             var term = _invitationTableSearch.Trim();
@@ -1329,7 +1343,7 @@
     }
 
     private IReadOnlyList<ReportDashboardPreviewRow> TableRows =>
-        IsInvitationReadyTable ? DisplayedRows : PagedRows;
+        IsInvitationOfficerTable ? DisplayedRows : PagedRows;
 
     private void OnInvitationTableSearch(ChangeEventArgs e) =>
         _invitationTableSearch = e.Value?.ToString() ?? string.Empty;
@@ -1373,7 +1387,8 @@
             return;
 
         var headers = Panel?.TableHeaders ?? Array.Empty<string>();
-        var bytes = ReportDashboardInvitationTableExcel.Build(headers, rows, ShowInvitationChartColumn);
+        var bytes = ReportDashboardInvitationTableExcel.Build(
+            headers, rows, ShowInvitationChartColumn, IsInvitationProcessTable);
         var label = "Active Invitation";
         foreach (var sub in ReportDashboardCatalog.SubReports(Category))
         {
@@ -1400,6 +1415,12 @@
     private bool IsInvitationReadyTable =>
         Category == ReportDashboardCategory.Invitation
         && ReportDashboardCatalog.IsInvitationReadySubReport(Panel?.SubReport ?? SubReport);
+
+    private bool IsInvitationProcessTable =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationProcessSubReport(Panel?.SubReport ?? SubReport);
+
+    private bool IsInvitationOfficerTable => IsInvitationReadyTable || IsInvitationProcessTable;
 
     private bool ShowInvitationChartColumn =>
         IsInvitationReadyTable

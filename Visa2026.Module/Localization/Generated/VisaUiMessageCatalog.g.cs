@@ -10344,6 +10344,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Aý",
             ["ru-RU"] = "Месяц",
         },
+        ["ReportDashboard.Header.FullName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Full name",
+            ["tr-TR"] = "Ad soyad",
+            ["tk-TM"] = "Doly ady",
+            ["ru-RU"] = "Полное имя",
+        },
         ["ReportDashboard.Header.Name"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Name",
@@ -10483,6 +10490,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Proje · Durum",
             ["tk-TM"] = "Taslama · Ýagdaý",
             ["ru-RU"] = "Проект · Состояние",
+        },
+        ["ReportDashboard.Header.ProcessState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process state",
+            ["tr-TR"] = "Süreç durumu",
+            ["tk-TM"] = "Ýagdaý",
+            ["ru-RU"] = "Состояние",
         },
         ["ReportDashboard.Header.Region"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -11349,14 +11363,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Invitation Process (P)",
             ["tr-TR"] = "Davetiye Süreci (P)",
-            ["tk-TM"] = "Çakylyk prosesi (P)",
+            ["tk-TM"] = "Işlenýän Çakylyklar",
             ["ru-RU"] = "Процесс приглашения (P)",
         },
         ["ReportDashboard.SubReport.in-process-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Invitation Process (V)",
             ["tr-TR"] = "Davetiye Süreci (V)",
-            ["tk-TM"] = "Çakylyk prosesi (V)",
+            ["tk-TM"] = "Işlenýän Çakylyklar",
             ["ru-RU"] = "Процесс приглашения (V)",
         },
         ["ReportDashboard.SubReport.IncompletePersons.by-missing-area"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

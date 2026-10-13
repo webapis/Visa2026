@@ -673,6 +673,10 @@ public static class ReportDashboardCatalog
     public static bool IsInvitationReadySubReport(string? subReport) =>
         subReport is "ready-by-project" or "ready-by-period-category";
 
+    /// <summary>Invitation Process: applications that produce an invitation and do not have one yet.</summary>
+    public static bool IsInvitationProcessSubReport(string? subReport) =>
+        subReport is "in-process" or "in-process-by-period-category-type";
+
     /// <summary>
     /// Approval-step columns on Active Invitation, in leg sequence order.
     /// The ministry name is inside the cell, under the decision date and letter number.
@@ -689,7 +693,7 @@ public static class ReportDashboardCatalog
         var approvalCount = ActiveInvitationApprovalHeaders.Length;
         var includeChart = !string.IsNullOrEmpty(chartHeader);
         var headers = new string[9 + approvalCount + (includeChart ? 1 : 0)];
-        headers[0] = "Name";
+        headers[0] = "Full name";
         headers[1] = "Project";
         headers[2] = "Position";
         headers[3] = "Subcontractor";
@@ -703,6 +707,22 @@ public static class ReportDashboardCatalog
         headers[migrationIndex + 3] = "Period";
         if (includeChart)
             headers[migrationIndex + 4] = chartHeader!;
+        return headers;
+    }
+
+    private static string[] InvitationProcessHeaders()
+    {
+        var approvalCount = ActiveInvitationApprovalHeaders.Length;
+        var headers = new string[7 + approvalCount];
+        headers[0] = "Full name";
+        headers[1] = "Project";
+        headers[2] = "Position";
+        headers[3] = "Subcontractor";
+        headers[4] = "App #";
+        for (var i = 0; i < approvalCount; i++)
+            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
+        headers[5 + approvalCount] = "Migration";
+        headers[6 + approvalCount] = "Process state";
         return headers;
     }
 
@@ -725,6 +745,9 @@ public static class ReportDashboardCatalog
                 ? ("VwRdInvitationReadyByPeriodCategory_ListView", typeof(VwRdInvitationReady))
                 : ("VwRdInvitationReady_ListView", typeof(VwRdInvitationReady));
         }
+
+        if (category == ReportDashboardCategory.Invitation && IsInvitationProcessSubReport(subReport))
+            return ("VwRdInvitationInProcess_ListView", typeof(VwRdInvitationInProcess));
 
         if (category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport))
@@ -946,9 +969,9 @@ public static class ReportDashboardCatalog
                 ActiveInvitationHeaders(null),
             (ReportDashboardCategory.Invitation, "ready-by-period-category") =>
                 ActiveInvitationHeaders("Period · Category · Type"),
-            (ReportDashboardCategory.Invitation, "in-process") => ["Name", "Project", "App #", "App Date", "Project · State"],
+            (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
-                ["Name", "Project", "App #", "App Date", "Period · Category · Type · State"],
+                InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "process-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.Invitation, "process-result-by-period-category-type") =>
                 ["Name", "Project", "App #", "App Date", "Period · Category · Type · State"],
@@ -1036,6 +1059,8 @@ public static class ReportDashboardCatalog
         var usesPersonSearchRd = category == ReportDashboardCategory.PersonSearch;
         var usesInvitationReady = category == ReportDashboardCategory.Invitation
             && IsInvitationReadySubReport(subReport);
+        var usesInvitationProcess = category == ReportDashboardCategory.Invitation
+            && IsInvitationProcessSubReport(subReport);
 
         string roleCriteria;
         if (usesPersonSearchRd)
@@ -1069,7 +1094,7 @@ public static class ReportDashboardCatalog
             if ((usesVisaActive || usesByDays) && oneLastValidVisaPerPerson)
                 roleCriteria = $"({roleCriteria}) And [IsOneLastValidPerPerson] = True";
         }
-        else if (usesInvitationReady)
+        else if (usesInvitationReady || usesInvitationProcess)
         {
             roleCriteria = IsAllPersonTypes(personType)
                 ? "[IsArchived] = False"
@@ -1132,7 +1157,7 @@ public static class ReportDashboardCatalog
         {
             var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
                     || usesIncompletePersonsRd || usesPersonSearchRd || usesRegistrationRd
-                    || usesInvitationReady
+                    || usesInvitationReady || usesInvitationProcess
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -1248,6 +1273,13 @@ public static class ReportDashboardCatalog
                 var field = string.Equals(subReport, "ready-by-period-category", StringComparison.OrdinalIgnoreCase)
                     ? "PeriodCategoryTypeLabel"
                     : "StatusLabel";
+                roleCriteria = $"({roleCriteria}) And [{field}] = '{Escape(statusLabel)}'";
+            }
+            else if (usesInvitationProcess)
+            {
+                var field = string.Equals(subReport, "in-process-by-period-category-type", StringComparison.OrdinalIgnoreCase)
+                    ? "PeriodCategoryTypeLabel"
+                    : "ChartStatusLabel";
                 roleCriteria = $"({roleCriteria}) And [{field}] = '{Escape(statusLabel)}'";
             }
             else if (category == ReportDashboardCategory.VisaExtension)

@@ -1015,7 +1015,7 @@
   }
 }
 
-/* Active Invitation: Name, Project, and Position stay narrow so the later columns remain on screen. */
+/* Active Invitation and Invitation Process: Full name and Project stay readable; Position stays narrow. */
 .rd-listview-block .rd-invitation-table th:nth-child(-n+3),
 .rd-listview-block .rd-invitation-table td:nth-child(-n+3):not(.rd-col-date):not(.rd-col-num) {
   width: 8rem;
@@ -1023,12 +1023,27 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+.rd-listview-block .rd-invitation-table th:nth-child(1),
+.rd-listview-block .rd-invitation-table td:nth-child(1):not(.rd-col-date):not(.rd-col-num),
+.rd-listview-block .rd-invitation-table td.rd-cell-name {
+  width: 13rem;
+  max-width: 14.5rem;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
 .rd-listview-block .rd-invitation-table th:nth-child(2),
 .rd-listview-block .rd-invitation-table td:nth-child(2):not(.rd-col-date):not(.rd-col-num) {
+  width: 10.5rem;
+  max-width: 11.5rem;
+  overflow-wrap: break-word;
+}
+.rd-listview-block .rd-invitation-table th:nth-child(4),
+.rd-listview-block .rd-invitation-table td:nth-child(4):not(.rd-col-date):not(.rd-col-num) {
   width: 6.25rem;
   max-width: 6.75rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
-.rd-listview-block .rd-invitation-table td.rd-cell-name { white-space: normal; max-width: 8.5rem; }
 .rd-listview-block .rd-invitation-table td:nth-child(2) .rd-project-tag { white-space: normal; }
 .rd-listview-block .rd-invitation-table th.rd-col-stack,
 .rd-listview-block .rd-invitation-table td.rd-col-stack:not(.rd-col-date):not(.rd-col-num) {

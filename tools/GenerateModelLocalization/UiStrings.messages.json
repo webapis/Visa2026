@@ -6770,13 +6770,13 @@
   "ReportDashboard.SubReport.in-process": {
     "en": "Invitation Process (P)",
     "tr-TR": "Davetiye Süreci (P)",
-    "tk-TM": "Çakylyk prosesi (P)",
+    "tk-TM": "Işlenýän Çakylyklar",
     "ru-RU": "Процесс приглашения (P)"
   },
   "ReportDashboard.SubReport.in-process-by-period-category-type": {
     "en": "Invitation Process (V)",
     "tr-TR": "Davetiye Süreci (V)",
-    "tk-TM": "Çakylyk prosesi (V)",
+    "tk-TM": "Işlenýän Çakylyklar",
     "ru-RU": "Процесс приглашения (V)"
   },
   "ReportDashboard.SubReport.process-result": {
@@ -7012,6 +7012,12 @@
     "tr-TR": "Ad",
     "tk-TM": "Ad",
     "ru-RU": "Имя"
+  },
+  "ReportDashboard.Header.FullName": {
+    "en": "Full name",
+    "tr-TR": "Ad soyad",
+    "tk-TM": "Doly ady",
+    "ru-RU": "Полное имя"
   },
   "ReportDashboard.Header.Project": {
     "en": "Project",
@@ -7708,6 +7714,12 @@
     "tr-TR": "Proje · Durum",
     "tk-TM": "Taslama · Ýagdaý",
     "ru-RU": "Проект · Состояние"
+  },
+  "ReportDashboard.Header.ProcessState": {
+    "en": "Process state",
+    "tr-TR": "Süreç durumu",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Состояние"
   },
   "ReportDashboard.Header.ApplicationTypeProcessState": {
     "en": "Application Type · Process State",

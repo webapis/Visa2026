@@ -17,10 +17,11 @@ public static class ReportDashboardInvitationTableExcel
     public static byte[] Build(
         IReadOnlyList<string> headers,
         IReadOnlyList<ReportDashboardPreviewRow> rows,
-        bool includeChartColumn)
+        bool includeChartColumn,
+        bool processTable = false)
     {
         using var workbook = new XLWorkbook();
-        var sheet = workbook.Worksheets.Add("Active Invitation");
+        var sheet = workbook.Worksheets.Add(processTable ? "Invitation Process" : "Active Invitation");
         var columnCount = Math.Max(1, headers.Count);
 
         for (var column = 0; column < headers.Count; column++)
@@ -31,7 +32,7 @@ public static class ReportDashboardInvitationTableExcel
 
         for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
         {
-            var values = Cells(rows[rowIndex], includeChartColumn);
+            var values = Cells(rows[rowIndex], includeChartColumn, processTable);
             var count = Math.Min(headers.Count, values.Count);
             for (var column = 0; column < count; column++)
             {
@@ -50,7 +51,7 @@ public static class ReportDashboardInvitationTableExcel
         return stream.ToArray();
     }
 
-    public static List<string> Cells(ReportDashboardPreviewRow row, bool includeChartColumn)
+    public static List<string> Cells(ReportDashboardPreviewRow row, bool includeChartColumn, bool processTable = false)
     {
         var values = new List<string>
         {
@@ -64,21 +65,33 @@ public static class ReportDashboardInvitationTableExcel
         foreach (var ministry in row.MinistryCells)
             values.Add((ministry ?? string.Empty).Replace("\r\n", "\n", StringComparison.Ordinal));
 
-        var migration = row.ColumnI ?? string.Empty;
-        if (!string.IsNullOrEmpty(row.ColumnBadge))
+        var migration = MigrationCell(row);
+        values.Add(migration);
+        if (processTable)
         {
-            migration = migration.Length == 0
-                ? row.ColumnBadge
-                : migration + "\n" + row.ColumnBadge;
+            values.Add(ReportDashboardLocalization.Status(row.ColumnE));
+            if (includeChartColumn)
+                values.Add(row.Status);
+            return values;
         }
 
-        values.Add(migration);
         values.Add(row.ColumnE);
         values.Add(JoinLines(row.ColumnF, ReportDashboardLocalization.Status(row.ExpiresBadge)));
         values.Add(row.ColumnH);
         if (includeChartColumn)
             values.Add(row.Status);
         return values;
+    }
+
+    private static string MigrationCell(ReportDashboardPreviewRow row)
+    {
+        var migration = row.ColumnI ?? string.Empty;
+        if (string.IsNullOrEmpty(row.ColumnBadge))
+            return migration;
+
+        return migration.Length == 0
+            ? row.ColumnBadge
+            : migration + "\n" + row.ColumnBadge;
     }
 
     private static string JoinLines(string? first, string? second)

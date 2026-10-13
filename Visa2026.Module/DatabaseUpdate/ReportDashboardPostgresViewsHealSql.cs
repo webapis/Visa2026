@@ -254,6 +254,25 @@ public static class ReportDashboardPostgresViewsHealSql
                 continue;
             }
 
+            if (viewName == "vw_rd_invitation_in_process")
+            {
+                var hasProcessColumns = (ColumnExists(connection, viewName, "PositionLabel")
+                        || ColumnExists(connection, viewName, "positionlabel"))
+                    && (ColumnExists(connection, viewName, "ApplicationOid")
+                        || ColumnExists(connection, viewName, "applicationoid"))
+                    && (ColumnExists(connection, viewName, "MigrationDate")
+                        || ColumnExists(connection, viewName, "migrationdate"));
+                if (ViewExists(connection, viewName)
+                    && hasProcessColumns
+                    && ViewDefinitionContains(connection, viewName, "\"Description\"")
+                    && ViewDefinitionContains(connection, viewName, "a.\"ProcessNumber\"")
+                    && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
+                    continue;
+
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+                continue;
+            }
+
             if (ViewExists(connection, viewName)
                 && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                 continue;

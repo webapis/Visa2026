@@ -29,7 +29,7 @@ public class VwRdInvitationReady
     public virtual Guid? PersonOid { get; set; }
 
     [ForeignKey(nameof(PersonOid))]
-    [ModelDefault("Caption", "Name")]
+    [ModelDefault("Caption", "Full name")]
     public virtual Person Person { get; set; }
 
     [Browsable(false)]

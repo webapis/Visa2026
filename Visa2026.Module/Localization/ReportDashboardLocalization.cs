@@ -137,6 +137,7 @@ public static class ReportDashboardLocalization
     public static string Header(string englishHeader) => englishHeader switch
     {
         "Name" => Get("ReportDashboard.Header.Name"),
+        "Full name" => Get("ReportDashboard.Header.FullName"),
         "Project" => Get("ReportDashboard.Header.Project"),
         "App #" => Get("ReportDashboard.Header.AppNumber"),
         "App Type" => Get("ReportDashboard.Header.AppType"),
@@ -183,6 +184,7 @@ public static class ReportDashboardLocalization
         "Period · Category · Type · State" => Get("ReportDashboard.Header.PeriodCategoryTypeState"),
         "Project · Period · Category · Type · State" => Get("ReportDashboard.Header.ProjectPeriodCategoryTypeState"),
         "Project · State" => Get("ReportDashboard.Header.ProjectState"),
+        "Process state" => Get("ReportDashboard.Header.ProcessState"),
         "ApplicationProfileInstance Type · Process State" => Get("ReportDashboard.Header.ApplicationTypeProcessState"),
         "Rejection #" => Get("ReportDashboard.Header.RejectionNumber"),
         "Date" => Get("ReportDashboard.Header.Date"),
