@@ -243,10 +243,13 @@ public static class ReportDashboardPostgresViewsHealSql
                 // Letter numbers live in the progress note when ResultNumber is empty.
                 var readsApprovalNote = ViewDefinitionContains(connection, viewName, "\"Description\"");
                 var stacksMigration = ViewDefinitionContains(connection, viewName, "chr(10)");
+                var requiresLinkedInstance = ViewDefinitionContains(
+                    connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL");
                 if (ViewExists(connection, viewName)
                     && hasActiveColumns
                     && readsApprovalNote
                     && stacksMigration
+                    && requiresLinkedInstance
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 

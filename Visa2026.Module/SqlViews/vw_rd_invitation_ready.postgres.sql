@@ -1,5 +1,6 @@
 -- Report Dashboard: Active Invitation (P)/(V) — PostgreSQL.
--- Population: issued invitation lines that are unused and not yet expired.
+-- Population: issued invitation lines that are unused, not yet expired,
+-- and linked to an Application Profile Instance.
 -- One row per person on the invitation.
 DROP VIEW IF EXISTS vw_rd_invitation_ready;
 CREATE VIEW vw_rd_invitation_ready AS
@@ -97,7 +98,7 @@ LEFT JOIN "VisaPeriods" vp
     ON vp."ID" = inv."VisaPeriodID" AND COALESCE(vp."GCRecord", 0) = 0
 LEFT JOIN "VisaCategories" vc
     ON vc."ID" = inv."VisaCategoryID" AND COALESCE(vc."GCRecord", 0) = 0
-LEFT JOIN "ApplicationProfileInstances" a
+INNER JOIN "ApplicationProfileInstances" a
     ON a."ID" = inv."ApplicationProfileInstanceID" AND COALESCE(a."GCRecord", 0) = 0
 LEFT JOIN "ApplicationProfiles" apf
     ON apf."ID" = a."ApplicationProfileID" AND COALESCE(apf."GCRecord", 0) = 0
@@ -211,6 +212,7 @@ LEFT JOIN LATERAL (
     ) dec ON TRUE
 ) ministries ON TRUE
 WHERE COALESCE(ii."GCRecord", 0) = 0
+  AND inv."ApplicationProfileInstanceID" IS NOT NULL
   AND NOT EXISTS (
       SELECT 1 FROM "Visas" vis
       WHERE vis."IssuingInvitationItemID" = ii."ID"
