@@ -1676,6 +1676,39 @@
         <ColumnInfo Id="MarkedLabel" Index="4" Width="160" Caption="Marked" IsNewNode="True" />
       </Columns>
     </ListView>
+    <ListView Id="VwRdInvitationReady_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationReady" Caption="Active Invitation (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Name" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" Caption="Project" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" Caption="Position" IsNewNode="True" />
+        <ColumnInfo Id="SubcontractorLabel" Index="3" Width="140" Caption="Subcontractor" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationLabel" Index="4" Width="110" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="Approval1Label" Index="5" Width="120" Caption="Approval 1" IsNewNode="True" />
+        <ColumnInfo Id="Approval2Label" Index="6" Width="120" Caption="Approval 2" IsNewNode="True" />
+        <ColumnInfo Id="Approval3Label" Index="7" Width="120" Caption="Approval 3" IsNewNode="True" />
+        <ColumnInfo Id="MigrationLabel" Index="8" Width="130" Caption="Migration" IsNewNode="True" />
+        <ColumnInfo Id="Invitation" Index="9" Width="120" Caption="Invitation #" IsNewNode="True" />
+        <ColumnInfo Id="ExpiresLabel" Index="10" Width="160" Caption="Expires" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="11" Width="100" Caption="Period" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdInvitationReadyByPeriodCategory_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationReady" Caption="Active Invitation (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Name" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" Caption="Project" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" Caption="Position" IsNewNode="True" />
+        <ColumnInfo Id="SubcontractorLabel" Index="3" Width="140" Caption="Subcontractor" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationLabel" Index="4" Width="110" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="Approval1Label" Index="5" Width="120" Caption="Approval 1" IsNewNode="True" />
+        <ColumnInfo Id="Approval2Label" Index="6" Width="120" Caption="Approval 2" IsNewNode="True" />
+        <ColumnInfo Id="Approval3Label" Index="7" Width="120" Caption="Approval 3" IsNewNode="True" />
+        <ColumnInfo Id="MigrationLabel" Index="8" Width="130" Caption="Migration" IsNewNode="True" />
+        <ColumnInfo Id="Invitation" Index="9" Width="120" Caption="Invitation #" IsNewNode="True" />
+        <ColumnInfo Id="ExpiresLabel" Index="10" Width="160" Caption="Expires" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="11" Width="100" Caption="Period" IsNewNode="True" />
+        <ColumnInfo Id="PeriodCategoryTypeLabel" Index="12" Width="220" Caption="Period · Category · Type" IsNewNode="True" />
+      </Columns>
+    </ListView>
     <ListView Id="VwRdPersonSearch_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdPersonSearch" Caption="Person search" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="180" Caption="Name" IsNewNode="True" />

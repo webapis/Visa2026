@@ -643,31 +643,70 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
 
     // ===== Invitation =====================================================
 
-    /// Ready: valid + not used; chart Status = Project.
+    /// Active Invitation (P): chart Status = Project.
     private static List<ReportDashboardPreviewRow> InvitationReadyByProject() =>
     [
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "INV-2026-0071", "Sep 30, 2026", "Gurlusyk UZT",     "st-cat-1"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "INV-2026-0058", "Oct 12, 2026", "Gurlusyk UZT",     "st-cat-1"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "INV-2026-0097", "Sep 01, 2026", "Gurlusyk UZT",     "st-cat-1"),
-        R("Hans Muller",         "Gaz Stansiasy",    "INV-2026-0053", "Aug 22, 2026", "Gaz Stansiasy",    "st-cat-2"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2026-0110", "Nov 05, 2026", "Gaz Stansiasy",    "st-cat-2"),
-        R("John Smith",          "Seismiki Barlag",  "INV-2026-0062", "Jul 28, 2026", "Seismiki Barlag",  "st-cat-3"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "INV-2026-0088", "Aug 05, 2026", "Seismiki Barlag",  "st-cat-3"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "INV-2026-0041", "Sep 18, 2026", "Elektrik Stansia", "st-cat-4"),
+        ActiveInvitation("Mehmet Yilmaz", "Gurlusyk UZT", "Electrical engineer", "Stelara Group", "3/477", "Mar 24, 2026", "INV-2026-0071", "Sep 30, 2026", "Oct 12, 2026", "1 month", "Apr 20, 2026 · № 12/26", "Gurlusyk UZT", "st-cat-1"),
+        ActiveInvitation("Viktor Petrov", "Gurlusyk UZT", "Site supervisor", "Stelara Group", "3/477", "Mar 24, 2026", "INV-2026-0058", "Oct 12, 2026", "Oct 12, 2026", "1 month", "Apr 20, 2026 · № 12/26", "Gurlusyk UZT", "st-cat-1"),
+        ActiveInvitation("Serdar Geldiyew", "Gurlusyk UZT", "Technician", "Alfa Teknik", "4/102", "Feb 02, 2026", "INV-2026-0097", "Sep 01, 2026", "Mar 18, 2026", "1 month", "Apr 15, 2026 · № 88/26", "Gurlusyk UZT", "st-cat-1"),
+        ActiveInvitation("Hans Muller", "Gaz Stansiasy", "Engineer", "Stelara Group", "1/055", "Jan 11, 2026", "INV-2026-0053", "Aug 22, 2026", "Mar 10, 2026", "1 month", "Apr 09, 2026 · № 40/26", "Gaz Stansiasy", "st-cat-2", "Validity extended"),
+        ActiveInvitation("Kemal Aydin", "Gaz Stansiasy", "Engineer", "Stelara Group", "1/056", "Jan 12, 2026", "INV-2026-0110", "Nov 05, 2026", "Mar 11, 2026", "6 months", "Apr 09, 2026 · № 41/26", "Gaz Stansiasy", "st-cat-2"),
+        ActiveInvitation("John Smith", "Seismiki Barlag", "Technician", "Alfa Teknik", "2/010", "Jan 08, 2026", "INV-2026-0062", "Jul 28, 2026", "Mar 01, 2026", "3 months", "Mar 20, 2026 · № 7/26", "Seismiki Barlag", "st-cat-3"),
+        ActiveInvitation("Oleg Kovalev", "Seismiki Barlag", "Engineer", "Alfa Teknik", "2/011", "Jan 09, 2026", "INV-2026-0088", "Aug 05, 2026", "Mar 02, 2026", "3 months", "Mar 21, 2026 · № 8/26", "Seismiki Barlag", "st-cat-3"),
+        ActiveInvitation("Bayrammyrat Rejepow", "Elektrik Stansia", "Electrical engineer", "Stelara Group", "5/201", "Feb 14, 2026", "INV-2026-0041", "Sep 18, 2026", "Mar 28, 2026", "1 month", "Apr 02, 2026 · № 19/26", "Elektrik Stansia", "st-cat-4"),
     ];
 
-    /// Ready: valid + not used; chart Status = VisaPeriod · VisaCategory · VisaType.
+    /// Active Invitation (V): chart Status = VisaPeriod · VisaCategory · VisaType.
     private static List<ReportDashboardPreviewRow> InvitationReadyByPeriodCategory() =>
     [
-        R("John Smith",          "Seismiki Barlag",  "INV-2026-0062", "Jul 28, 2026", "3 months · bir gezeklik · BS-1", "st-cat-1"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "INV-2026-0041", "Sep 18, 2026", "3 months · iki gezeklik · BS-1", "st-cat-2"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "INV-2026-0088", "Aug 05, 2026", "3 months · köp gezeklik · BS-1", "st-cat-3"),
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "INV-2026-0071", "Sep 30, 2026", "6 months · köp gezeklik · WP", "st-cat-4"),
-        R("Hans Muller",         "Gaz Stansiasy",    "INV-2026-0053", "Aug 22, 2026", "6 months · köp gezeklik · WP", "st-cat-4"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "INV-2026-0097", "Sep 01, 2026", "6 months · köp gezeklik · WP", "st-cat-4"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "INV-2026-0058", "Oct 12, 2026", "1 year · iki gezeklik · FM", "st-cat-5"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2026-0110", "Nov 05, 2026", "1 year · köp gezeklik · BS-1", "st-cat-6"),
+        ActiveInvitation("John Smith", "Seismiki Barlag", "Technician", "Alfa Teknik", "2/010", "Jan 08, 2026", "INV-2026-0062", "Jul 28, 2026", "Mar 01, 2026", "3 months", "Mar 20, 2026 · № 7/26", "3 months · bir gezeklik · BS-1", "st-cat-1"),
+        ActiveInvitation("Bayrammyrat Rejepow", "Elektrik Stansia", "Electrical engineer", "Stelara Group", "5/201", "Feb 14, 2026", "INV-2026-0041", "Sep 18, 2026", "Mar 28, 2026", "3 months", "Apr 02, 2026 · № 19/26", "3 months · iki gezeklik · BS-1", "st-cat-2"),
+        ActiveInvitation("Oleg Kovalev", "Seismiki Barlag", "Engineer", "Alfa Teknik", "2/011", "Jan 09, 2026", "INV-2026-0088", "Aug 05, 2026", "Mar 02, 2026", "3 months", "Mar 21, 2026 · № 8/26", "3 months · köp gezeklik · BS-1", "st-cat-3"),
+        ActiveInvitation("Mehmet Yilmaz", "Gurlusyk UZT", "Electrical engineer", "Stelara Group", "3/477", "Mar 24, 2026", "INV-2026-0071", "Sep 30, 2026", "Oct 12, 2026", "6 months", "Apr 20, 2026 · № 12/26", "6 months · köp gezeklik · WP", "st-cat-4"),
+        ActiveInvitation("Hans Muller", "Gaz Stansiasy", "Engineer", "Stelara Group", "1/055", "Jan 11, 2026", "INV-2026-0053", "Aug 22, 2026", "Mar 10, 2026", "6 months", "Apr 09, 2026 · № 40/26", "6 months · köp gezeklik · WP", "st-cat-4", "Validity extended"),
+        ActiveInvitation("Serdar Geldiyew", "Gurlusyk UZT", "Technician", "Alfa Teknik", "4/102", "Feb 02, 2026", "INV-2026-0097", "Sep 01, 2026", "Mar 18, 2026", "6 months", "Apr 15, 2026 · № 88/26", "6 months · köp gezeklik · WP", "st-cat-4"),
+        ActiveInvitation("Viktor Petrov", "Gurlusyk UZT", "Site supervisor", "Stelara Group", "3/478", "Mar 24, 2026", "INV-2026-0058", "Oct 12, 2026", "Oct 12, 2026", "1 year", "Apr 20, 2026 · № 13/26", "1 year · iki gezeklik · FM", "st-cat-5"),
+        ActiveInvitation("Kemal Aydin", "Gaz Stansiasy", "Engineer", "Stelara Group", "1/056", "Jan 12, 2026", "INV-2026-0110", "Nov 05, 2026", "Mar 11, 2026", "1 year", "Apr 09, 2026 · № 41/26", "1 year · köp gezeklik · BS-1", "st-cat-6"),
     ];
+
+    private static ReportDashboardPreviewRow ActiveInvitation(
+        string name, string project, string position, string subcontractor,
+        string appNo, string appDate, string invitationNo, string expires, string written,
+        string period, string migration, string status, string css, string? badge = null) =>
+        new()
+        {
+            Name = name,
+            Project = project,
+            ColumnA = position,
+            ColumnB = subcontractor,
+            ColumnC = appNo,
+            ColumnD = appDate,
+            ColumnE = invitationNo,
+            ColumnF = string.IsNullOrEmpty(expires) ? expires : expires + " · 120 days",
+            ColumnG = written,
+            ColumnH = period,
+            MinistryCells = MockMinistryCells(name),
+            ColumnI = migration,
+            ColumnBadge = badge ?? string.Empty,
+            Status = status,
+            StatusCssClass = css
+        };
+
+    private static IReadOnlyList<string> MockMinistryCells(string name)
+    {
+        var cells = new string[ReportDashboardCatalog.ActiveInvitationApprovalHeaders.Length];
+        for (var i = 0; i < cells.Length; i++)
+            cells[i] = string.Empty;
+
+        var n = Math.Abs(name.GetHashCode()) % 5;
+        if (cells.Length > 0)
+            cells[0] = "Mar 12, 2026\n№ TE-" + (10 + n) + "\nTürkmenenergo";
+        if (n % 2 == 0 && cells.Length > 1)
+            cells[1] = "Mar 28, 2026\n№ EN-" + (20 + n) + "\nEnergetika";
+        if (n % 3 == 0 && cells.Length > 2)
+            cells[2] = "Apr 04, 2026\n№ GU-" + (30 + n) + "\nGurluşyk";
+        return cells;
+    }
 
     /// In process: invitation-issuing application created, invitation not issued yet; Status = ApplicationProfileInstance Progress state.
     /// Invitation Process (P): Status = Project · ProcessState.

@@ -234,6 +234,26 @@ public static class ReportDashboardPostgresViewsHealSql
 
         foreach (var (viewName, resourceLeaf) in InvitationViews)
         {
+            if (viewName == "vw_rd_invitation_ready")
+            {
+                var hasActiveColumns = (ColumnExists(connection, viewName, "PositionLabel")
+                        || ColumnExists(connection, viewName, "positionlabel"))
+                    && (ColumnExists(connection, viewName, "Approval1Ministry")
+                        || ColumnExists(connection, viewName, "approval1ministry"));
+                // Letter numbers live in the progress note when ResultNumber is empty.
+                var readsApprovalNote = ViewDefinitionContains(connection, viewName, "\"Description\"");
+                var stacksMigration = ViewDefinitionContains(connection, viewName, "chr(10)");
+                if (ViewExists(connection, viewName)
+                    && hasActiveColumns
+                    && readsApprovalNote
+                    && stacksMigration
+                    && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
+                    continue;
+
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+                continue;
+            }
+
             if (ViewExists(connection, viewName)
                 && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                 continue;

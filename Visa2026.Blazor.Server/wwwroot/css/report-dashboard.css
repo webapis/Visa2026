@@ -7,6 +7,8 @@
 .dxbl-form-group-item:has(.report-dashboard) {
   padding: 0 !important;
   margin: 0 !important;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Hide the "Dashboard UI" XAF property label — covers dxbl-fl-* and legacy selectors */
@@ -116,7 +118,8 @@
   background: var(--rd-bg);
   font-size: 14px;
   width: 100%;
-  max-width: none;
+  max-width: 100%;
+  min-width: 0;
   margin: 0;
   padding: 0;
 }
@@ -470,6 +473,38 @@
   gap: 10px;
   margin-bottom: 14px;
 }
+.rd-chart-block--collapsed {
+  padding-bottom: 12px;
+}
+.rd-chart-block--collapsed .rd-chart-toolbar {
+  margin-bottom: 0;
+}
+.rd-chart-toggle {
+  margin-right: auto;
+  border: 1px solid var(--rd-border);
+  background: transparent;
+  color: var(--rd-text);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rd-chart-toggle.active {
+  border-color: var(--rd-accent);
+  color: var(--rd-accent);
+}
+.rd-invitation-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--rd-accent);
+  font: inherit;
+  text-align: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .rd-chart-toolbar-label {
   font-size: 11px;
   font-weight: 600;
@@ -506,6 +541,18 @@
    Status strings arrive as "Context · Context · State". The trailing segment
    carries the status colour; leading segments stay muted context. One token
    set (--rd-state-*) drives dot, text and pill surface per status family. */
+
+.rd-cell-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.rd-cell-badge,
+.rd-cell-approval-name {
+  font-size: 11px;
+}
 
 .rd-state {
   --rd-state-color: var(--rd-st-neutral);
@@ -825,7 +872,13 @@
 .rd-chart-more:hover { background: var(--rd-accent-soft); border-color: var(--rd-accent); }
 .rd-pie-legend .rd-chart-more { margin-top: 0; align-self: center; }
 
-.rd-listview-block { margin-top: 22px; }
+.rd-listview-block {
+  margin-top: 22px;
+  container-type: inline-size;
+  container-name: rd-table;
+  min-width: 0;
+  max-width: 100%;
+}
 .rd-preview-actions {
   display: flex;
   align-items: center;
@@ -836,13 +889,52 @@
 }
 .rd-listview-scroll {
   max-height: min(52vh, 560px);
+  max-width: 100%;
   overflow: auto;
   border: 1px solid var(--rd-border);
   border-radius: 10px;
   background: var(--rd-surface);
 }
+.rd-listview-scroll--fill {
+  max-height: none;
+  height: calc(100vh - 240px);
+  min-height: 520px;
+}
+.rd-table-search-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+.rd-table-search-row .rd-search-input {
+  min-width: 340px;
+  background-color: var(--rd-accent-soft);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='4.25' fill='none' stroke='%232f5d8a' stroke-width='1.8'/%3E%3Cpath d='M10.2 10.2L13.5 13.5' stroke='%232f5d8a' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  border: 2px solid var(--rd-accent);
+  padding: 8px 36px 8px 36px;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rd-hue-accent) 22%, transparent);
+}
+.rd-table-search-row .rd-search-input::placeholder {
+  color: var(--rd-accent);
+  font-weight: 600;
+  opacity: 0.9;
+}
+.rd-table-search-row .rd-search-input:focus {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--rd-hue-accent) 32%, transparent);
+}
+.rd-table-search-count {
+  color: var(--rd-muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .rd-listview-block table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13.5px;
@@ -874,12 +966,78 @@
 .rd-listview-block tbody tr:hover { background: var(--rd-accent-soft); }
 .rd-listview-block tbody tr:last-child td { border-bottom: none; }
 .rd-listview-block td.rd-cell-name { font-weight: 600; color: var(--rd-text); white-space: nowrap; }
+.rd-listview-block th:first-child,
+.rd-listview-block td.rd-cell-name {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--rd-surface);
+  box-shadow: 1px 0 0 var(--rd-border-soft);
+}
+.rd-listview-block thead th:first-child {
+  z-index: 3;
+  background: var(--rd-surface-2);
+}
+.rd-listview-block tbody tr:nth-child(even) td.rd-cell-name { background: var(--rd-surface-2); }
+.rd-listview-block tbody tr:hover td.rd-cell-name { background: var(--rd-accent-soft); }
 .rd-listview-block td.rd-cell-state { max-width: 340px; }
 /* Counts read as quantities (right-aligned); dates stay left but never wrap. */
 .rd-listview-block th.rd-col-num,
 .rd-listview-block td.rd-col-num { text-align: right; white-space: nowrap; }
 .rd-listview-block th.rd-col-date,
 .rd-listview-block td.rd-col-date { white-space: nowrap; }
+
+/* Narrow dashboard pane: tighter cells, wrapped long text, name stays pinned. */
+@container rd-table (max-width: 1180px) {
+  .rd-listview-block table { font-size: 12.5px; }
+  .rd-listview-block th,
+  .rd-listview-block td { padding: 6px 8px; }
+  .rd-listview-block th {
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+  .rd-listview-block td:not(.rd-col-date):not(.rd-col-num):not(.rd-cell-name) {
+    white-space: normal;
+    max-width: 11rem;
+  }
+  .rd-listview-block td.rd-cell-name {
+    white-space: normal;
+    max-width: 9rem;
+  }
+  .rd-table-search-row .rd-search-input { min-width: 0; width: 220px; }
+}
+@container rd-table (max-width: 860px) {
+  .rd-listview-block table { font-size: 12px; }
+  .rd-listview-block th,
+  .rd-listview-block td { padding: 5px 6px; }
+  .rd-listview-block td:not(.rd-col-date):not(.rd-col-num):not(.rd-cell-name) {
+    max-width: 8.5rem;
+  }
+}
+
+/* Active Invitation: Name, Project, and Position stay narrow so the later columns remain on screen. */
+.rd-listview-block .rd-invitation-table th:nth-child(-n+3),
+.rd-listview-block .rd-invitation-table td:nth-child(-n+3):not(.rd-col-date):not(.rd-col-num) {
+  width: 8rem;
+  max-width: 8.5rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.rd-listview-block .rd-invitation-table th:nth-child(2),
+.rd-listview-block .rd-invitation-table td:nth-child(2):not(.rd-col-date):not(.rd-col-num) {
+  width: 6.25rem;
+  max-width: 6.75rem;
+}
+.rd-listview-block .rd-invitation-table td.rd-cell-name { white-space: normal; max-width: 8.5rem; }
+.rd-listview-block .rd-invitation-table td:nth-child(2) .rd-project-tag { white-space: normal; }
+.rd-listview-block .rd-invitation-table th.rd-col-stack,
+.rd-listview-block .rd-invitation-table td.rd-col-stack:not(.rd-col-date):not(.rd-col-num) {
+  width: 6.75rem;
+  max-width: 7.25rem;
+  white-space: normal;
+}
+.rd-cell-stack { gap: 1px; }
+.rd-invitation-table .rd-expires { gap: 4px; }
 .rd-preview-pager {
   display: flex;
   flex-wrap: wrap;

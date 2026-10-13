@@ -386,8 +386,8 @@ public static class ReportDashboardCatalog
     };
 
     /// <summary>
-    /// Sub-report tabs for UI. Registration pins Active Registered (C)/(P)/(V), Expiring State,
-    /// To Be Checked In/Out, On process.
+    /// Sub-report tabs for UI. Period/category/type duplicates labeled (V) are omitted.
+    /// Registration pins Active Registered (C)/(P), Expiring State, To Be Checked In/Out, On process.
     /// </summary>
     public static IReadOnlyList<ReportDashboardSubReport> OrderedSubReports(
         ReportDashboardCategory category,
@@ -431,14 +431,10 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.ApplicationViaMinistry => [
             // Short labels (card is already "ApplicationProfileInstance (via ministry)") — match Invitation/Visa chip length
             new() { Key = AppViaMinistryInvitationOnProcessKey, Label = "Invitation on Process (P)" },
-            new() { Key = AppViaMinistryInvitationOnProcessVKey, Label = "Invitation on Process (V)" },
             new() { Key = AppViaMinistryVisaExtOnProcessKey, Label = "Visa Extension on Process (P)" },
-            new() { Key = AppViaMinistryVisaExtOnProcessVKey, Label = "Visa Extension on Process (V)" },
             new() { Key = AppViaMinistryOtherOnProcessKey, Label = "Other on Process (P)" },
             new() { Key = AppViaMinistryInvitationCompletedKey, Label = "Invitation Completed (P)" },
-            new() { Key = AppViaMinistryInvitationCompletedVKey, Label = "Invitation Completed (V)" },
             new() { Key = AppViaMinistryVisaExtCompletedKey, Label = "Visa Extension Completed (P)" },
-            new() { Key = AppViaMinistryVisaExtCompletedVKey, Label = "Visa Extension Completed (V)" },
             new() { Key = AppViaMinistryOtherCompletedKey, Label = "Other Process Completed (P)" },
         ],
         ReportDashboardCategory.ApplicationDirectMigration => [
@@ -447,30 +443,22 @@ public static class ReportDashboardCatalog
         ],
         ReportDashboardCategory.VisaExtension => [
             new() { Key = "active-by-project", Label = "Active Visa (P)" },
-            new() { Key = "by-period-category-type", Label = "Active Visa (V)" },
             new() { Key = "extension-required", Label = "Extension Required" },
             new() { Key = "on-extension", Label = "Visa On Extension (P)" },
-            new() { Key = "on-extension-by-period-category-type", Label = "Visa On Extension (V)" },
             new() { Key = "by-days-remaining", Label = "Visa Validity" },
             new() { Key = "extension-result", Label = "Extension Result (P)" },
-            new() { Key = "extension-result-by-period-category-type", Label = "Extension Result (V)" },
         ],
         ReportDashboardCategory.Invitation => [
             new() { Key = "ready-by-project", Label = "Active Invitation (P)" },
-            new() { Key = "ready-by-period-category", Label = "Active Invitation (V)" },
             new() { Key = "in-process", Label = "Invitation Process (P)" },
-            new() { Key = "in-process-by-period-category-type", Label = "Invitation Process (V)" },
             new() { Key = "process-result", Label = "Process Result (P)" },
-            new() { Key = "process-result-by-period-category-type", Label = "Process Result (V)" },
             new() { Key = "used", Label = "Used (P)" },
-            new() { Key = "used-by-period-category-type", Label = "Used (V)" },
             new() { Key = "valid-until", Label = "Invitation Validity" },
         ],
         ReportDashboardCategory.Registration =>
         [
             new() { Key = RegistrationCheckInByCitySubReportKey, Label = "Active Registered (C)" },
             new() { Key = RegistrationCheckInByProjectSubReportKey, Label = "Active Registered (P)" },
-            new() { Key = RegistrationCheckInByPeriodCategoryTypeSubReportKey, Label = "Active Registered (V)" },
             new() { Key = RegistrationExpiringStateSubReportKey, Label = "Expiring State" },
             new() { Key = RegistrationToBeCheckedInSubReportKey, Label = "To Be Checked In" },
             new() { Key = RegistrationToBeCheckedOutSubReportKey, Label = "To Be Checked Out" },
@@ -681,6 +669,43 @@ public static class ReportDashboardCatalog
             or AppViaMinistryInvitationCompletedVKey
             or AppViaMinistryVisaExtCompletedVKey;
 
+    /// <summary>Active Invitation (P)/(V): issued, unused, not yet expired.</summary>
+    public static bool IsInvitationReadySubReport(string? subReport) =>
+        subReport is "ready-by-project" or "ready-by-period-category";
+
+    /// <summary>
+    /// Approval-step columns on Active Invitation, in leg sequence order.
+    /// The ministry name is inside the cell, under the decision date and letter number.
+    /// </summary>
+    public static readonly string[] ActiveInvitationApprovalHeaders =
+    [
+        "Approval 1",
+        "Approval 2",
+        "Approval 3",
+    ];
+
+    private static string[] ActiveInvitationHeaders(string? chartHeader)
+    {
+        var approvalCount = ActiveInvitationApprovalHeaders.Length;
+        var includeChart = !string.IsNullOrEmpty(chartHeader);
+        var headers = new string[9 + approvalCount + (includeChart ? 1 : 0)];
+        headers[0] = "Name";
+        headers[1] = "Project";
+        headers[2] = "Position";
+        headers[3] = "Subcontractor";
+        headers[4] = "App #";
+        for (var i = 0; i < approvalCount; i++)
+            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
+        var migrationIndex = 5 + approvalCount;
+        headers[migrationIndex] = "Migration";
+        headers[migrationIndex + 1] = "Invitation #";
+        headers[migrationIndex + 2] = "Expires";
+        headers[migrationIndex + 3] = "Period";
+        if (includeChart)
+            headers[migrationIndex + 4] = chartHeader!;
+        return headers;
+    }
+
     /// <summary>Resolve ListView id + type for the active category / sub-report.</summary>
     public static (string ListViewId, Type ListViewType) ResolveListViewTarget(
         ReportDashboardCategory category, string? subReport = null)
@@ -693,6 +718,13 @@ public static class ReportDashboardCatalog
 
         if (category == ReportDashboardCategory.PersonSearch)
             return ("VwRdPersonSearch_ListView", typeof(VwRdPersonSearch));
+
+        if (category == ReportDashboardCategory.Invitation && IsInvitationReadySubReport(subReport))
+        {
+            return subReport == "ready-by-period-category"
+                ? ("VwRdInvitationReadyByPeriodCategory_ListView", typeof(VwRdInvitationReady))
+                : ("VwRdInvitationReady_ListView", typeof(VwRdInvitationReady));
+        }
 
         if (category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport))
@@ -910,8 +942,10 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.WorkPermit, "extension-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "by-status")         => ["Name", "Project", "WP Number",   "Expiry", "Status"],
             (ReportDashboardCategory.WorkPermit, "by-days-remaining") => ["Name", "Project", "WP Number",   "Expiry", "Days Remaining"],
-            (ReportDashboardCategory.Invitation, "ready-by-project") => ["Name", "Project", "Invitation #", "Expiry", "Project"],
-            (ReportDashboardCategory.Invitation, "ready-by-period-category") => ["Name", "Project", "Invitation #", "Expiry", "Period · Category · Type"],
+            (ReportDashboardCategory.Invitation, "ready-by-project") =>
+                ActiveInvitationHeaders(null),
+            (ReportDashboardCategory.Invitation, "ready-by-period-category") =>
+                ActiveInvitationHeaders("Period · Category · Type"),
             (ReportDashboardCategory.Invitation, "in-process") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 ["Name", "Project", "App #", "App Date", "Period · Category · Type · State"],
@@ -1000,6 +1034,8 @@ public static class ReportDashboardCatalog
         var usesRdAppRow = usesAppViaMinistryRd || usesAppDirectMigrationRd;
         var usesIncompletePersonsRd = category == ReportDashboardCategory.IncompletePersons;
         var usesPersonSearchRd = category == ReportDashboardCategory.PersonSearch;
+        var usesInvitationReady = category == ReportDashboardCategory.Invitation
+            && IsInvitationReadySubReport(subReport);
 
         string roleCriteria;
         if (usesPersonSearchRd)
@@ -1032,6 +1068,12 @@ public static class ReportDashboardCatalog
                 : $"[IsArchived] = False And [PersonRoleCode] = {(int)ToPersonRole(personType)}";
             if ((usesVisaActive || usesByDays) && oneLastValidVisaPerPerson)
                 roleCriteria = $"({roleCriteria}) And [IsOneLastValidPerPerson] = True";
+        }
+        else if (usesInvitationReady)
+        {
+            roleCriteria = IsAllPersonTypes(personType)
+                ? "[IsArchived] = False"
+                : $"[IsArchived] = False And [PersonRoleCode] = {(int)ToPersonRole(personType)}";
         }
         else if (IsAllPersonTypes(personType))
         {
@@ -1090,6 +1132,7 @@ public static class ReportDashboardCatalog
         {
             var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
                     || usesIncompletePersonsRd || usesPersonSearchRd || usesRegistrationRd
+                    || usesInvitationReady
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -1199,6 +1242,13 @@ public static class ReportDashboardCatalog
             else if (usesByDays)
             {
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
+            }
+            else if (usesInvitationReady)
+            {
+                var field = string.Equals(subReport, "ready-by-period-category", StringComparison.OrdinalIgnoreCase)
+                    ? "PeriodCategoryTypeLabel"
+                    : "StatusLabel";
+                roleCriteria = $"({roleCriteria}) And [{field}] = '{Escape(statusLabel)}'";
             }
             else if (category == ReportDashboardCategory.VisaExtension)
             {

@@ -1630,13 +1630,27 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 .Select(x =>
                 {
                     var r = x.Row;
+                    var expires = InvitationExpiration(r.ExpirationDate);
                     return new ReportDashboardPreviewRow
                     {
                         RecordId = r.ID,
+                        PersonId = r.PersonOid,
+                        InvitationId = r.InvitationOid,
                         Name = r.PersonName ?? string.Empty,
                         Project = r.ProjectName ?? string.Empty,
-                        ColumnA = r.InvitationNumber ?? string.Empty,
-                        ColumnB = FormatDate(r.ExpirationDate),
+                        ColumnA = r.PositionLabel ?? string.Empty,
+                        ColumnB = r.SubcontractorLabel ?? string.Empty,
+                        ColumnC = r.ApplicationNumber ?? string.Empty,
+                        ColumnD = FormatDate(r.ApplicationDate),
+                        ColumnE = r.InvitationNumber ?? string.Empty,
+                        ColumnF = expires.Date,
+                        ExpiresBadge = expires.Badge,
+                        ExpiresCssClass = expires.Css,
+                        ColumnG = FormatDate(r.IssuedDate),
+                        ColumnH = r.VisaPeriodLabel ?? string.Empty,
+                        MinistryCells = InvitationMinistryCells(r),
+                        ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
+                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
                         Status = x.Status,
                         StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                     };
@@ -1705,18 +1719,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             return EmptyPanel(personType, ReportDashboardCategory.Invitation, subReport, excelHint, excelConfigured);
         }
     }
-    private static (string Label, string Css) InvitationValidUntilBucket(int daysRemaining) =>
-        daysRemaining switch
-        {
-            < 1 => ("< 1 day", "st-expiring"),
-            < 7 => ("< 1 week", "st-expiring"),
-            < 14 => ("< 2 weeks", "st-pending"),
-            < 21 => ("< 3 weeks", "st-pending"),
-            < 30 => ("< 1 month", "st-pending"),
-            < 60 => ("< 2 months", "st-approved"),
-            < 90 => ("< 3 months", "st-approved"),
-            _ => ("≥ 3 months", "st-approved")
-        };
+    private static (string Label, string Css) InvitationValidUntilBucket(int daysRemaining)
+    {
+        var bucket = VwRdInvitationReady.ExpirationBucket(daysRemaining);
+        return (bucket.Label, bucket.CssClass);
+    }
 
     private static int InvitationValidUntilSortKey(string? label) => label switch
     {
@@ -5670,6 +5677,46 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string FormatDate(DateTime? value) =>
         value.HasValue ? value.Value.ToString("MMM dd, yyyy") : string.Empty;
+
+    private static string FormatMigration(DateTime? date, string? resultNumber)
+    {
+        var lines = new List<string>();
+        var written = FormatDate(date);
+        if (written.Length > 0)
+            lines.Add(written);
+        var number = resultNumber?.Trim() ?? string.Empty;
+        if (number.Length > 0)
+            lines.Add("№ " + number);
+        return string.Join("\n", lines);
+    }
+
+    private static (string Date, string Badge, string Css) InvitationExpiration(DateTime? date)
+    {
+        var written = FormatDate(date);
+        if (written.Length == 0 || date is not { } value)
+            return (written, string.Empty, string.Empty);
+
+        var days = (value.Date - DateTime.Today).Days;
+        var bucket = VwRdInvitationReady.ExpirationBucket(days);
+        return (written, bucket.Label, bucket.CssClass);
+    }
+
+    private static IReadOnlyList<string> InvitationMinistryCells(VwRdInvitationReady row) =>
+    [
+        FormatApproval(row.Approval1Date, row.Approval1Number, row.Approval1Ministry),
+        FormatApproval(row.Approval2Date, row.Approval2Number, row.Approval2Ministry),
+        FormatApproval(row.Approval3Date, row.Approval3Number, row.Approval3Ministry),
+    ];
+
+    private static string FormatApproval(DateTime? date, string? number, string? ministry)
+    {
+        var name = ministry?.Trim() ?? string.Empty;
+        if (name.Length == 0)
+            return string.Empty;
+
+        var written = FormatMigration(date, number);
+        return written.Length == 0 ? name : written + "\n" + name;
+    }
 
     /// <summary>4-bucket passport validity classification.</summary>
     private static string PassportValidityBucket(DateTime? expiration, DateTime today)

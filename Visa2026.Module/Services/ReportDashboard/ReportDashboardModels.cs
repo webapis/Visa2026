@@ -86,6 +86,20 @@ public sealed class ReportDashboardPreviewRow
     public string ColumnG       { get; init; } = string.Empty;
     /// <summary>Optional 11th column (e.g. App Date when Visa-on-extension / Issued Visa occupy E/F).</summary>
     public string ColumnH       { get; init; } = string.Empty;
+    /// <summary>Optional 12th column (Active Invitation migration date and letter number).</summary>
+    public string ColumnI       { get; init; } = string.Empty;
+    /// <summary>Active Invitation ministry cells, between Period and Migration, in catalog header order.</summary>
+    public IReadOnlyList<string> MinistryCells { get; init; } = Array.Empty<string>();
+    /// <summary>Optional pill under <see cref="ColumnI"/> (Active Invitation validity extended).</summary>
+    public string ColumnBadge   { get; init; } = string.Empty;
+    /// <summary>Active Invitation remaining-time pill under the expiry date (<see cref="ColumnF"/>).</summary>
+    public string ExpiresBadge  { get; init; } = string.Empty;
+    /// <summary>Css class for <see cref="ExpiresBadge"/> (same buckets as Invitation Validity).</summary>
+    public string ExpiresCssClass { get; init; } = string.Empty;
+    /// <summary>Person to open when the preview row opens the dossier.</summary>
+    public Guid?  PersonId      { get; init; }
+    /// <summary>Invitation whose scanned copies open from the invitation-number cell.</summary>
+    public Guid?  InvitationId  { get; init; }
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

@@ -1,4 +1,10 @@
 @namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using System.IO
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.HeaderLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.ReportDashboard
 @using Visa2026.Module.Localization
 
@@ -420,21 +426,32 @@
                         </div>
                     }
 
-                    <div class="rd-chart-block">
+                    <div class="rd-chart-block @(ShowChartBody ? null : "rd-chart-block--collapsed")">
                         <div class="rd-chart-toolbar">
-                            <span class="rd-chart-toolbar-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.View")</span>
-                            <div class="rd-view-switch">
-                                <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.PieChart")</button>
-                                <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.BarChart")</button>
-                                <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.List")</button>
-                            </div>
+                            @if (IsInvitationReadyTable)
+                            {
+                                <button type="button"
+                                        class="rd-chart-toggle @(_invitationChartOpen ? "active" : null)"
+                                        @onclick="ToggleInvitationChart">
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.Chart")
+                                </button>
+                            }
+                            @if (ShowChartBody)
+                            {
+                                <span class="rd-chart-toolbar-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.View")</span>
+                                <div class="rd-view-switch">
+                                    <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.PieChart")</button>
+                                    <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.BarChart")</button>
+                                    <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.List")</button>
+                                </div>
+                            }
                         </div>
 
-                        @if (FilteredBuckets.Count == 0 || FilteredTotal == 0)
+                        @if (ShowChartBody && (FilteredBuckets.Count == 0 || FilteredTotal == 0))
                         {
                             <div class="rd-chart-empty">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.EmptySelection")</div>
                         }
-                        else if (ChartView == "list")
+                        else if (ShowChartBody && ChartView == "list")
                         {
                             <div class="rd-stat-list">
                                 @foreach (var bucket in VisibleChartBuckets)
@@ -456,7 +473,7 @@
                                 @ChartBucketsExpander()
                             </div>
                         }
-                        else if (ChartView == "pie")
+                        else if (ShowChartBody && ChartView == "pie")
                         {
                             <div class="rd-pie-wrap">
                                 <div class="rd-pie-figure">
@@ -480,7 +497,7 @@
                                 </div>
                             </div>
                         }
-                        else
+                        else if (ShowChartBody)
                         {
                             var maxCount = FilteredBuckets.Max(b => b.Count);
                             <div class="rd-bar-rows">
@@ -518,10 +535,35 @@
 
                     <div class="rd-listview-block">
                         <div class="rd-preview-actions">
+                            @if (IsInvitationReadyTable)
+                            {
+                                <div class="rd-table-search-row">
+                                <div class="rd-search-box">
+                                    <input type="search"
+                                           class="rd-search-input"
+                                           placeholder="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.TableSearchPlaceholder")"
+                                           disabled="@ShowLoading"
+                                           value="@_invitationTableSearch"
+                                           @oninput="OnInvitationTableSearch" />
+                                    @if (!string.IsNullOrWhiteSpace(_invitationTableSearch))
+                                    {
+                                        <button type="button"
+                                                class="rd-search-clear"
+                                                disabled="@ShowLoading"
+                                                title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchClear")"
+                                                @onclick="ClearInvitationTableSearch">&times;</button>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(_invitationTableSearch))
+                                {
+                                    <span class="rd-table-search-count">@DisplayedRows.Count / @FilteredRows.Count</span>
+                                }
+                                </div>
+                            }
                             <button type="button"
-                                    class="rd-excel-link @(Panel.ExcelConfigured ? null : "disabled")"
-                                    disabled="@(!Panel.ExcelConfigured || ShowLoading)"
-                                    title="@(Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
+                                    class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationReadyTable) ? null : "disabled")"
+                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationReadyTable) || ShowLoading || (IsInvitationReadyTable && DisplayedRows.Count == 0))"
+                                    title="@(IsInvitationReadyTable ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
                                     @onclick="OnExcel">
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
                             </button>
@@ -532,24 +574,25 @@
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
                             </button>
                         </div>
-                        <div class="rd-listview-scroll">
-                            <table>
+                        <div class="rd-listview-scroll @(IsInvitationReadyTable ? "rd-listview-scroll--fill" : null)">
+                            <table class="@(IsInvitationReadyTable ? "rd-invitation-table" : null)">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            <th class="@ColumnClass(i)">@Panel.TableHeaders[i]</th>
+                                            var stackColumn = IsInvitationReadyTable && i >= 4 && i <= 8;
+                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (FilteredRows.Count == 0)
+                                    @if (TableRows.Count == 0)
                                     {
                                         <tr class="rd-empty-row"><td colspan="@Panel.TableHeaders.Count">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.EmptyProject")</td></tr>
                                     }
                                     else
                                     {
-                                        @foreach (var row in PagedRows)
+                                        @foreach (var row in TableRows)
                                         {
                                             var opensDossier = CanOpenDossier(row);
                                             <tr class="@(opensDossier ? "rd-row-clickable" : null)"
@@ -559,38 +602,124 @@
                                                 <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
                                                 <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
                                                 <td class="@ColumnClass(3)">@row.ColumnB</td>
-                                                @if (Panel.TableHeaders.Count >= 6)
+                                                @if (IsInvitationReadyTable)
                                                 {
-                                                    <td class="@ColumnClass(4)">@row.ColumnC</td>
+                                                    <td class="rd-col-stack">
+                                                        <div class="rd-cell-stack">
+                                                            @if (!string.IsNullOrEmpty(row.ColumnC))
+                                                            {
+                                                                <span>@row.ColumnC</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.ColumnD))
+                                                            {
+                                                                <span>@row.ColumnD</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    @for (var ministryIndex = 0; ministryIndex < row.MinistryCells.Count; ministryIndex++)
+                                                    {
+                                                        var approvalLines = row.MinistryCells[ministryIndex]
+                                                            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                                                        <td class="@($"{ColumnClass(5 + ministryIndex)} rd-col-stack")">
+                                                            @if (approvalLines.Length > 0)
+                                                            {
+                                                                <div class="rd-cell-stack">
+                                                                    @for (var lineIndex = 0; lineIndex < approvalLines.Length; lineIndex++)
+                                                                    {
+                                                                        var isMinistry = lineIndex == approvalLines.Length - 1 && approvalLines.Length > 1;
+                                                                        <span class="@(isMinistry ? "rd-cell-approval-name" : null)">@approvalLines[lineIndex]</span>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </td>
+                                                    }
+                                                    var invitationStart = 5 + row.MinistryCells.Count;
+                                                    var migrationLines = (row.ColumnI ?? string.Empty)
+                                                        .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                                                    <td class="@($"{ColumnClass(invitationStart)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in migrationLines)
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.ColumnBadge))
+                                                            {
+                                                                <span class="rd-state rd-state--pill st-pending rd-cell-badge">@ReportDashboardLocalization.Status(row.ColumnBadge)</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@ColumnClass(invitationStart + 1)" @onclick:stopPropagation="true">
+                                                        @if (row.InvitationId is { } invitationId && invitationId != Guid.Empty && !string.IsNullOrEmpty(row.ColumnE))
+                                                        {
+                                                            <button type="button"
+                                                                    class="rd-invitation-link"
+                                                                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInvitationCopy")"
+                                                                    @onclick="() => OnInvitationCopies(row)">
+                                                                @row.ColumnE
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            @row.ColumnE
+                                                        }
+                                                    </td>
+                                                    <td class="@ColumnClass(invitationStart + 2)">
+                                                        <div class="rd-cell-stack rd-expires">
+                                                            @if (!string.IsNullOrEmpty(row.ColumnF))
+                                                            {
+                                                                <span>@row.ColumnF</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.ExpiresBadge))
+                                                            {
+                                                                @StateLabel(row.ExpiresBadge, row.ExpiresCssClass, true)
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@ColumnClass(invitationStart + 3)">@row.ColumnH</td>
+                                                    @if (ShowInvitationChartColumn)
+                                                    {
+                                                        <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
+                                                    }
                                                 }
-                                                @if (Panel.TableHeaders.Count >= 7)
+                                                else
                                                 {
-                                                    <td class="@ColumnClass(5)">@row.ColumnD</td>
+                                                    @if (Panel.TableHeaders.Count >= 6)
+                                                    {
+                                                        <td class="@ColumnClass(4)">@row.ColumnC</td>
+                                                    }
+                                                    @if (Panel.TableHeaders.Count >= 7)
+                                                    {
+                                                        <td class="@ColumnClass(5)">@row.ColumnD</td>
+                                                    }
+                                                    @if (Panel.TableHeaders.Count >= 8)
+                                                    {
+                                                        <td class="@ColumnClass(6)">@row.ColumnE</td>
+                                                    }
+                                                    @if (Panel.TableHeaders.Count >= 9)
+                                                    {
+                                                        <td class="@ColumnClass(7)">@row.ColumnF</td>
+                                                    }
+                                                    @if (Panel.TableHeaders.Count >= 10)
+                                                    {
+                                                        <td class="@ColumnClass(8)">@row.ColumnG</td>
+                                                    }
+                                                    @if (Panel.TableHeaders.Count >= 11)
+                                                    {
+                                                        <td class="@ColumnClass(9)">@row.ColumnH</td>
+                                                    }
+                                                    @if (Panel.TableHeaders.Count >= 12)
+                                                    {
+                                                        <td class="@ColumnClass(10)">@row.ColumnI</td>
+                                                    }
+                                                    <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                                 }
-                                                @if (Panel.TableHeaders.Count >= 8)
-                                                {
-                                                    <td class="@ColumnClass(6)">@row.ColumnE</td>
-                                                }
-                                                @if (Panel.TableHeaders.Count >= 9)
-                                                {
-                                                    <td class="@ColumnClass(7)">@row.ColumnF</td>
-                                                }
-                                                @if (Panel.TableHeaders.Count >= 10)
-                                                {
-                                                    <td class="@ColumnClass(8)">@row.ColumnG</td>
-                                                }
-                                                @if (Panel.TableHeaders.Count >= 11)
-                                                {
-                                                    <td class="@ColumnClass(9)">@row.ColumnH</td>
-                                                }
-                                                <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                             </tr>
                                         }
                                     }
                                 </tbody>
                             </table>
                         </div>
-                        @if (FilteredRows.Count > 0)
+                        @if (!IsInvitationReadyTable && FilteredRows.Count > 0)
                         {
                             <div class="rd-preview-pager">
                                 <span class="rd-preview-pager-range">@PreviewRangeLabel</span>
@@ -709,6 +838,7 @@
         {
             _previewContextKey = key;
             _previewPageIndex = 0;
+            _invitationTableSearch = string.Empty;
             _chartBucketsExpanded = false;
             RebuildColumnClasses();
         }
@@ -773,7 +903,7 @@
     private static readonly HashSet<string> DateHeaders =
         new(StringComparer.Ordinal)
         {
-            "Expiry", "App Date", "Valid Until", "Travel Date", "Start", "Hire Date",
+            "Expiry", "Expires", "Written", "App Date", "Valid Until", "Travel Date", "Start", "Hire Date",
             "Issue Date", "Current Expiry", "Requested Until", "Date", "Issued", "Entry", "Month"
         };
 
@@ -1116,7 +1246,16 @@
     }
 
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
-    private async Task OnExcel()                                           => await OpenExcelRequested.InvokeAsync();
+    private async Task OnExcel()
+    {
+        if (IsInvitationReadyTable)
+        {
+            await DownloadInvitationTableAsync();
+            return;
+        }
+
+        await OpenExcelRequested.InvokeAsync();
+    }
     private async Task OnListView(string? status)
     {
         if (ShowLoading || !OpenListViewRequested.HasDelegate)
@@ -1161,11 +1300,158 @@
         await SearchTermChanged.InvokeAsync(string.Empty);
     }
 
-    private bool CanOpenDossier(ReportDashboardPreviewRow row) =>
-        ReportDashboardCatalog.SupportsPersonSearch(Category)
-        && row.RecordId is { } id
-        && id != Guid.Empty
-        && PersonSelected.HasDelegate;
+    [Inject] private IVisaPreviewSlotService PreviewSlot { get; set; } = null!;
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+
+    private bool _invitationChartOpen;
+    private string _invitationTableSearch = string.Empty;
+
+    private bool ShowChartBody => !IsInvitationReadyTable || _invitationChartOpen;
+
+    private IReadOnlyList<ReportDashboardPreviewRow> DisplayedRows
+    {
+        get
+        {
+            if (!IsInvitationReadyTable || string.IsNullOrWhiteSpace(_invitationTableSearch))
+                return FilteredRows;
+
+            var term = _invitationTableSearch.Trim();
+            var matched = new List<ReportDashboardPreviewRow>();
+            foreach (var row in FilteredRows)
+            {
+                if (InvitationRowMatches(row, term))
+                    matched.Add(row);
+            }
+
+            return matched;
+        }
+    }
+
+    private IReadOnlyList<ReportDashboardPreviewRow> TableRows =>
+        IsInvitationReadyTable ? DisplayedRows : PagedRows;
+
+    private void OnInvitationTableSearch(ChangeEventArgs e) =>
+        _invitationTableSearch = e.Value?.ToString() ?? string.Empty;
+
+    private void ClearInvitationTableSearch() => _invitationTableSearch = string.Empty;
+
+    private static bool InvitationRowMatches(ReportDashboardPreviewRow row, string term)
+    {
+        if (ContainsTerm(row.Name, term)
+            || ContainsTerm(row.Project, term)
+            || ContainsTerm(row.ColumnA, term)
+            || ContainsTerm(row.ColumnB, term)
+            || ContainsTerm(row.ColumnC, term)
+            || ContainsTerm(row.ColumnD, term)
+            || ContainsTerm(row.ColumnE, term)
+            || ContainsTerm(row.ColumnF, term)
+            || ContainsTerm(ReportDashboardLocalization.Status(row.ExpiresBadge), term)
+            || ContainsTerm(row.ColumnG, term)
+            || ContainsTerm(row.ColumnH, term)
+            || ContainsTerm(row.ColumnI, term)
+            || ContainsTerm(row.ColumnBadge, term)
+            || ContainsTerm(row.Status, term))
+            return true;
+
+        foreach (var cell in row.MinistryCells)
+        {
+            if (ContainsTerm(cell, term))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsTerm(string? value, string term) =>
+        !string.IsNullOrEmpty(value) && value.Contains(term, StringComparison.OrdinalIgnoreCase);
+
+    private async Task DownloadInvitationTableAsync()
+    {
+        var rows = DisplayedRows;
+        if (rows.Count == 0 || FileDownloader == null)
+            return;
+
+        var headers = Panel?.TableHeaders ?? Array.Empty<string>();
+        var bytes = ReportDashboardInvitationTableExcel.Build(headers, rows, ShowInvitationChartColumn);
+        var label = "Active Invitation";
+        foreach (var sub in ReportDashboardCatalog.SubReports(Category))
+        {
+            if (string.Equals(sub.Key, Panel?.SubReport ?? SubReport, StringComparison.OrdinalIgnoreCase))
+            {
+                label = sub.Label;
+                break;
+            }
+        }
+
+        var fileName = string.Join("_", label.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
+        if (fileName.Length == 0)
+            fileName = "Active Invitation";
+
+        await using var stream = new MemoryStream(bytes);
+        await FileDownloader.DownloadAsync(
+            fileName + ".xlsx",
+            stream,
+            ReportDashboardInvitationTableExcel.ContentType);
+    }
+
+    private void ToggleInvitationChart() => _invitationChartOpen = !_invitationChartOpen;
+
+    private bool IsInvitationReadyTable =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationReadySubReport(Panel?.SubReport ?? SubReport);
+
+    private bool ShowInvitationChartColumn =>
+        IsInvitationReadyTable
+        && string.Equals(Panel?.SubReport ?? SubReport, "ready-by-period-category", StringComparison.OrdinalIgnoreCase);
+
+    private bool CanOpenDossier(ReportDashboardPreviewRow row)
+    {
+        if (!PersonSelected.HasDelegate)
+            return false;
+
+        if (ReportDashboardCatalog.SupportsPersonSearch(Category))
+            return row.RecordId is { } id && id != Guid.Empty;
+
+        return false;
+    }
+
+    private Guid? DossierPersonId(ReportDashboardPreviewRow row) =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationReadySubReport(SubReport)
+            ? row.PersonId
+            : row.RecordId;
+
+    private async Task OnInvitationCopies(ReportDashboardPreviewRow row)
+    {
+        if (row.InvitationId is not { } invitationId || invitationId == Guid.Empty)
+            return;
+
+        HeaderLinkedDocumentRecord? onlyCopy = null;
+        using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Invitation>())
+        {
+            var snapshot = HeaderLinkedDocumentsResolver.Resolve(
+                objectSpace,
+                HeaderDocumentCopiesFamily.Invitation,
+                invitationId,
+                row.RecordId);
+            var copies = snapshot.Records
+                .Where(record => record.Files.Any(file => file.HasContent && file.FileDataId != Guid.Empty))
+                .ToList();
+            if (copies.Count == 1)
+                onlyCopy = copies[0];
+        }
+
+        await PreviewSlot.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = HeaderDocumentCopiesFamily.Invitation,
+            ParentId = invitationId,
+            ContextItemId = row.RecordId,
+            FocusRecordKey = onlyCopy?.RecordKey,
+            FocusDisplayName = onlyCopy?.RecordLabel ?? row.ColumnE,
+            OpenPreviewOnly = onlyCopy != null,
+        });
+    }
 
     private async Task OnRowSelected(ReportDashboardPreviewRow row)
     {
@@ -1179,7 +1465,9 @@
         await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpeningDossier"));
         try
         {
-            await PersonSelected.InvokeAsync(row.RecordId!.Value);
+            var personId = DossierPersonId(row);
+            if (personId is { } id && id != Guid.Empty)
+                await PersonSelected.InvokeAsync(id);
         }
         finally
         {
