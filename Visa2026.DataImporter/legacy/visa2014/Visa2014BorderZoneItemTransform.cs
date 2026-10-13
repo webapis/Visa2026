@@ -79,7 +79,8 @@ internal static class Visa2014BorderZoneItemTransform
     private static Guid? TryParseGuid(string? text) =>
         Guid.TryParse(text?.Trim(), out var oid) ? oid : null;
 
-    private static Visa2014PersonImportBatch TransformRows(IReadOnlyList<Visa2014BorderZoneItemRawRow> rawRows)
+    // internal for unit tests (skip / FK gates without SQL)
+    internal static Visa2014PersonImportBatch TransformRows(IReadOnlyList<Visa2014BorderZoneItemRawRow> rawRows)
     {
         var skipped = new List<Dictionary<string, object?>>();
         var importRows = new List<Dictionary<string, object?>>();
