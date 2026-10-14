@@ -218,6 +218,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
         public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
+        public DbSet<ReportDashboardExcelTemplate> ReportDashboardExcelTemplates { get; set; }
         public DbSet<UserReportTemplateApplicationType> UserReportTemplateApplicationTypes { get; set; }
         public DbSet<UserReportTemplateApplicationTypeGroup> UserReportTemplateApplicationTypeGroups { get; set; }
         public DbSet<UserReportTemplateProjectContract> UserReportTemplateProjectContracts { get; set; }
@@ -568,6 +569,13 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_to_be_checked_out");
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<ReportDashboardExcelTemplate>(b =>
+            {
+                b.HasIndex(e => new { e.Category, e.SubReportKey })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {

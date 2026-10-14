@@ -9777,6 +9777,48 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu şahsyň işini aç",
             ["ru-RU"] = "Открыть досье этого человека",
         },
+        ["ReportDashboard.Chrome.DownloadTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download template",
+            ["tr-TR"] = "Şablonu indir",
+            ["tk-TM"] = "Şablony göçürip al",
+            ["ru-RU"] = "Скачать шаблон",
+        },
+        ["ReportDashboard.Chrome.TemplateAdminOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Only an administrator can replace the template.",
+            ["tr-TR"] = "Şablonu yalnızca yönetici değiştirebilir.",
+            ["tk-TM"] = "Şablony diňe administrator çalşyp biler.",
+            ["ru-RU"] = "Шаблон может заменить только администратор.",
+        },
+        ["ReportDashboard.Chrome.TemplateColumns"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Keep the same columns. Change the title, header labels, fonts, colors, and column widths.",
+            ["tr-TR"] = "Sütunlar aynı kalmalı. Başlığı, başlık yazılarını, yazı tipini, renkleri ve sütun genişliklerini değiştirin.",
+            ["tk-TM"] = "Sütünler öňküligine galmaly. Diňe sözbaşyny, sözbaşy ýazgylaryny, şrifti, reňkleri we sütün inini üýtgediň.",
+            ["ru-RU"] = "Столбцы должны остаться теми же. Меняйте заголовок, подписи, шрифт, цвета и ширину столбцов.",
+        },
+        ["ReportDashboard.Chrome.TemplateNotExcel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Choose an Excel workbook (.xlsx).",
+            ["tr-TR"] = "Bir Excel çalışma kitabı (.xlsx) seçin.",
+            ["tk-TM"] = "Excel faýlyny (.xlsx) saýlaň.",
+            ["ru-RU"] = "Выберите книгу Excel (.xlsx).",
+        },
+        ["ReportDashboard.Chrome.TemplateSaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template saved. Open in Excel uses this format.",
+            ["tr-TR"] = "Şablon kaydedildi. Excel bu biçimi kullanır.",
+            ["tk-TM"] = "Şablon saklandy. Excel şu görnüşi ulanýar.",
+            ["ru-RU"] = "Шаблон сохранён. Excel использует этот формат.",
+        },
+        ["ReportDashboard.Chrome.UploadTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload template",
+            ["tr-TR"] = "Şablon yükle",
+            ["tk-TM"] = "Şablony ýükle",
+            ["ru-RU"] = "Загрузить шаблон",
+        },
         ["ReportDashboard.Chrome.OpenInExcel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Open in Excel",

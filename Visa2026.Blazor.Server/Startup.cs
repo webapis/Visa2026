@@ -171,6 +171,7 @@ namespace Visa2026.Blazor.Server
                         PersonPreviousWorkplacesInTurkmenistanSchemaSql.ApplyIfMissing(connectionString);
                         InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceListQueryIndexesSchemaSql.ApplyIfMissing(connectionString);
+                        ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
                 });
@@ -362,6 +363,7 @@ namespace Visa2026.Blazor.Server
                 InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceListQueryIndexesSchemaSql.ApplyIfMissing(connectionString);
+                ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
 

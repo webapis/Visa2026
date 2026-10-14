@@ -89,9 +89,8 @@ public static class ReportDashboardInvitationTableExcel
         if (string.IsNullOrEmpty(row.ColumnBadge))
             return migration;
 
-        return migration.Length == 0
-            ? row.ColumnBadge
-            : migration + "\n" + row.ColumnBadge;
+        var badge = ReportDashboardLocalization.Status(row.ColumnBadge);
+        return migration.Length == 0 ? badge : migration + "\n" + badge;
     }
 
     private static string JoinLines(string? first, string? second)

@@ -41,6 +41,7 @@ internal static class ReportDashboardRosterQueryHelper
     {
         var applications = RegistrationOnProcessApplicationsQuery(db, regTypes, cutoff)
             .Include(a => a.People)
+                .ThenInclude(p => p.ProjectContract)
             .Include(a => a.ApplicationProfile)
             .Include(a => a.ApplicationType)
             .Include(a => a.ProjectContract)

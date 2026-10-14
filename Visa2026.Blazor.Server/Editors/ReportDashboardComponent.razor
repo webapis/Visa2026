@@ -6,6 +6,7 @@
 @using Visa2026.Module.Services.HeaderLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.ReportDashboard
+@using Visa2026.Module.Services.RuntimeLogging
 @using Visa2026.Module.Localization
 
 <div class="report-dashboard">
@@ -561,12 +562,32 @@
                                 </div>
                             }
                             <button type="button"
-                                    class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationOfficerTable) ? null : "disabled")"
-                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationOfficerTable) || ShowLoading || (IsInvitationOfficerTable && DisplayedRows.Count == 0))"
-                                    title="@(IsInvitationOfficerTable ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
+                                    class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationTemplateReport) ? null : "disabled")"
+                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationTemplateReport) || ShowLoading || (IsInvitationTemplateReport && (Panel == null || Panel.PreviewRows.Count == 0)))"
+                                    title="@(IsInvitationTemplateReport ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
                                     @onclick="OnExcel">
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
                             </button>
+                            @if (CanManageInvitationTemplate)
+                            {
+                                <button type="button"
+                                        class="rd-list-link"
+                                        disabled="@ShowLoading"
+                                        @onclick="DownloadInvitationTemplate">
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.DownloadTemplate")
+                                </button>
+                                <label class="rd-list-link rd-template-upload @(ShowLoading ? "disabled" : null)">
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.UploadTemplate")
+                                    <InputFile OnChange="UploadInvitationTemplate"
+                                               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                               class="rd-template-file"
+                                               disabled="@ShowLoading" />
+                                </label>
+                            }
+                            @if (!string.IsNullOrEmpty(_templateNotice))
+                            {
+                                <span class="rd-template-notice">@_templateNotice</span>
+                            }
                             <button type="button"
                                     class="rd-list-link"
                                     disabled="@ShowLoading"
@@ -852,6 +873,7 @@
             {
                 _invitationChartSubReport = SubReport ?? string.Empty;
                 _invitationChartOpen = false;
+                _templateNotice = string.Empty;
             }
             RebuildColumnClasses();
         }
@@ -1261,9 +1283,9 @@
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private async Task OnExcel()
     {
-        if (IsInvitationOfficerTable)
+        if (IsInvitationTemplateReport)
         {
-            await DownloadInvitationTableAsync();
+            await DownloadInvitationWorkbookAsync(templateOnly: false);
             return;
         }
 
@@ -1320,6 +1342,7 @@
     private bool _invitationChartOpen;
     private string _invitationChartSubReport = string.Empty;
     private string _invitationTableSearch = string.Empty;
+    private string _templateNotice = string.Empty;
 
     private bool ShowChartBody => !IsInvitationOfficerTable || _invitationChartOpen;
 
@@ -1380,37 +1403,87 @@
     private static bool ContainsTerm(string? value, string term) =>
         !string.IsNullOrEmpty(value) && value.Contains(term, StringComparison.OrdinalIgnoreCase);
 
-    private async Task DownloadInvitationTableAsync()
+    private async Task DownloadInvitationWorkbookAsync(bool templateOnly)
     {
-        var rows = DisplayedRows;
-        if (rows.Count == 0 || FileDownloader == null)
+        if (FileDownloader == null || Panel == null)
             return;
 
-        var headers = Panel?.TableHeaders ?? Array.Empty<string>();
-        var bytes = ReportDashboardInvitationTableExcel.Build(
-            headers, rows, ShowInvitationChartColumn, IsInvitationProcessTable);
-        var label = "Active Invitation";
+        var headers = Panel.TableHeaders;
+        var subReport = Panel.SubReport ?? SubReport;
+        var label = InvitationExportLabel(subReport);
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
+        byte[] bytes = templateOnly
+            ? ReportDashboardExcelTemplateService.DownloadTemplate(
+                objectSpace, Category, subReport, label, headers)
+            : ReportDashboardExcelTemplateService.Export(
+                objectSpace, Category, subReport, label, headers, Panel.PreviewRows, ShowInvitationChartColumn);
+
+        var fileName = SafeFileName(templateOnly ? label + " template" : label);
+        await using var stream = new MemoryStream(bytes);
+        await FileDownloader.DownloadAsync(fileName + ".xlsx", stream, ReportDashboardInvitationTableExcel.ContentType);
+    }
+
+    private async Task DownloadInvitationTemplate()
+    {
+        if (ShowLoading || !CanManageInvitationTemplate)
+            return;
+
+        await DownloadInvitationWorkbookAsync(templateOnly: true);
+    }
+
+    private async Task UploadInvitationTemplate(InputFileChangeEventArgs e)
+    {
+        if (!CanManageInvitationTemplate || Panel == null)
+            return;
+
+        var file = e.File;
+        _templateNotice = string.Empty;
+        try
+        {
+            await using var read = file.OpenReadStream(ReportDashboardExcelTemplateService.MaxBytes);
+            using var buffer = new MemoryStream();
+            await read.CopyToAsync(buffer);
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
+            var key = ReportDashboardExcelTemplateService.Save(
+                objectSpace,
+                Category,
+                Panel.SubReport ?? SubReport,
+                file.Name,
+                buffer.ToArray(),
+                Panel.TableHeaders.Count);
+            _templateNotice = ReportDashboardLocalization.Get(key);
+        }
+        catch (IOException)
+        {
+            _templateNotice = ReportDashboardLocalization.Get(ReportDashboardExcelTemplateService.NotExcelKey);
+        }
+    }
+
+    private string InvitationExportLabel(string? subReport)
+    {
         foreach (var sub in ReportDashboardCatalog.SubReports(Category))
         {
-            if (string.Equals(sub.Key, Panel?.SubReport ?? SubReport, StringComparison.OrdinalIgnoreCase))
-            {
-                label = sub.Label;
-                break;
-            }
+            if (string.Equals(sub.Key, subReport, StringComparison.OrdinalIgnoreCase))
+                return sub.Label;
         }
 
-        var fileName = string.Join("_", label.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
-        if (fileName.Length == 0)
-            fileName = "Active Invitation";
+        return "Invitation";
+    }
 
-        await using var stream = new MemoryStream(bytes);
-        await FileDownloader.DownloadAsync(
-            fileName + ".xlsx",
-            stream,
-            ReportDashboardInvitationTableExcel.ContentType);
+    private static string SafeFileName(string label)
+    {
+        var fileName = string.Join("_", label.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries)).Trim();
+        return fileName.Length == 0 ? "Invitation" : fileName;
     }
 
     private void ToggleInvitationChart() => _invitationChartOpen = !_invitationChartOpen;
+
+    private bool IsInvitationTemplateReport =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardExcelTemplateService.Supports(Panel?.SubReport ?? SubReport);
+
+    private bool CanManageInvitationTemplate =>
+        IsInvitationTemplateReport && ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator();
 
     private bool IsInvitationReadyTable =>
         Category == ReportDashboardCategory.Invitation
