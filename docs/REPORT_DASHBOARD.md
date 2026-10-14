@@ -9,7 +9,7 @@
 After login, officers land on this dashboard to grasp process state (invitation, visa extension, work permit, registration, travel, border zone, passport), then act via:
 
 - **Charts** (list / pie / bar) of status buckets
-- **Open in Excel** — mapped `UserReportTemplate` (when configured)
+- **Open in Excel** — invitation tabs use a company workbook (`ReportDashboardExcelTemplate`); other categories use a mapped `UserReportTemplate` when one is configured
 - **Open ListView** — filtered XAF ListView matching the current selection (and chart segment when clicked)
 
 ## Information architecture
@@ -28,7 +28,7 @@ After login, officers land on this dashboard to grasp process state (invitation,
 |-------|----------|
 | Host BO | `ReportDashboardHost` (non-persistent) |
 | Blazor UI | `ReportDashboardComponent` + property editor |
-| Navigation | Top-level **Report Dashboard** (startup item; not under Home) |
+| Navigation | Root **Report Dashboard** folder (startup item; not under Home). The folder opens Overview and lists each category. The in-page category column is removed. Sub-report tabs stay in the page. |
 | Queries | `IReportDashboardQueryService` |
 
 
@@ -73,7 +73,85 @@ The only category that takes free text. It answers "find this person, then show 
 | **Person incomplete data** | Manual officer flag; category **Incomplete persons** — see [`PERSON_INCOMPLETE_DATA.md`](PERSON_INCOMPLETE_DATA.md) |
 | **Person dossier** | Category **Person search** is the dashboard entry point; rows open the read-only dossier — see [`PERSON_DOSSIER.md`](PERSON_DOSSIER.md) |
 | **State specifications / evaluators** | Still define BO state criteria for colors and notifications; **not** the home UI |
-| **Resminamalar / Document copies** | Unchanged; Excel action may reuse `UserReportTemplate` seeds |
+| **Resminamalar / Document copies** | Separate. Their Word/Excel files stay on `UserReportTemplate`. Dashboard invitation export does not read that table. |
+| **Invitation Excel template** | Company formatting workbook for the five invitation tabs — see [Excel templates](#excel-templates-invitation) below |
+
+## Excel templates (invitation)
+
+Invitation **Open in Excel** fills a company workbook. An administrator downloads that workbook, changes its look, and uploads it. Every officer then exports into that file. This store is only for the Report Dashboard. It is not `UserReportTemplate` and it is not the Application Profile Resminamalar package.
+
+### Who may change it
+
+| Action | Who |
+|--------|-----|
+| **Open in Excel** | Any officer who can open the tab. The button is disabled when the loaded preview has no rows. |
+| **Download template** / **Upload template** | An administrator only (`ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator`). The buttons are hidden for other users. |
+
+There is one stored file per tab. It is not per officer.
+
+### Tabs that use it
+
+`ReportDashboardExcelTemplateService.CanonicalKey` maps the visible tab and its hidden period/category twin onto one key:
+
+| Stored key | Also accepts |
+|------------|----------------|
+| `ready-by-project` | `ready-by-period-category` |
+| `in-process` | `in-process-by-period-category-type` |
+| `process-result` | `process-result-by-period-category-type`, `rejected-by-project`, `rejected-by-period-category-type` |
+| `used` | `used-by-period-category-type` |
+| `valid-until` | `expired` |
+
+`issued-inv` is not mapped. Other Report Dashboard categories still use `UserReportTemplate` when `ExcelConfigured` is true. Add a future tab by extending `CanonicalKey` and the cell writer. The table already stores any `Category` + `SubReportKey`. The Blazor buttons stay on Invitation until that gate is widened (`IsInvitationTemplateReport`).
+
+### What the administrator may change
+
+Formatting only: column widths, fonts, colors, header labels, and a title block above the header.
+
+The export does not let the file hide, reorder, or add columns. Values are written by column index in `TableHeaders` order. Header text already in the file is left as the administrator wrote it.
+
+### Workbook contract
+
+Defined names (workbook scope), written by `ReportDashboardExcelTemplateWorkbook`:
+
+| Name | Meaning |
+|------|---------|
+| `DashboardHeader` | The header row. Column count must equal the current `TableHeaders` count. |
+| `DashboardSample` | The empty row directly under the header. Its style is copied onto every data row. |
+
+The starter sheet is named `Report`. Row 1 is a merged title (localized tab label, bold 16pt). Row 2 is the localized headers. Row 3 is the blank sample row. Freeze is on row 2. Upload accepts another sheet name.
+
+Upload is rejected when the file is not `.xlsx`, is empty, is over 8 MB, is missing either defined name, or the two ranges do not have the same column count as the current headers. A hidden `(V)` twin that has one extra chart column will not match the `(P)` file; export then builds a fresh starter for that download and does not overwrite the stored file.
+
+On export, rows below the sample are deleted, the sample row is copied for each data row, and cells are filled by index. The title and header labels are not rewritten.
+
+### Which rows are exported
+
+The file contains `Panel.PreviewRows`: the loaded preview, still capped by `PreviewLimit` (10_000). The client search box on Active Invitation and Invitation Process is ignored. A chart click does not filter this download.
+
+Cell text:
+
+- Active Invitation and Invitation Process use `ReportDashboardInvitationTableExcel.Cells` (the same stacked cells as the preview).
+- Process Result, Used, and Invitation Validity use `GenericCells`: Name, Project, ColumnA, ColumnB, then ColumnC–I for the remaining headers, and the last column is the localized status.
+
+### Where it is stored
+
+`ReportDashboardExcelTemplate` (`ReportDashboardExcelTemplates`):
+
+| Column | Role |
+|--------|------|
+| `Category` | `ReportDashboardCategory` |
+| `SubReportKey` | Canonical key, max 80 characters |
+| `TemplateFile` | Aggregated `FileData` (file name, bytes, size) |
+
+Do not add `[FileAttachment]`. That attribute sends `FileData.Content` through Blazor browser storage and the server save does not keep the workbook. Do not add `[DomainComponent]`. `[NavigationItem(false)]` keeps it out of the officer menu.
+
+The unique index is `(Category, SubReportKey)`. The screen saves through `INonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>()`. The administrator check stays in `ReportDashboardExcelTemplateService.Save`, because that object space does not apply security.
+
+### Creating the table on an existing database
+
+XAF skips schema creation when `ModuleInfo` is already current, so adding the entity does not create the table. `ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing` runs from `Startup.cs` in both the compatibility callback and `Configure`, and only after `People` exists. A missing table (`42P01`) makes **Download template** return the starter workbook and makes upload report that the file was not stored. Restart the site after this code is deployed so the startup script creates `ReportDashboardExcelTemplates`.
+
+`GCRecord` and `OptimisticLockField` are `integer NOT NULL DEFAULT 0`. The startup unique index has no `GCRecord IS NULL` filter. The EF index filter `[GCRecord] IS NULL` does not match these rows.
 
 ## Application Profile join model
 

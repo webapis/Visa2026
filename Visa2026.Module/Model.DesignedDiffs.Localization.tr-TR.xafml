@@ -174,7 +174,26 @@
       <Item Id="Recycle Bin" Caption="Geri Dönüşüm" />
       <Item Id="Rejection" Caption="Ret" />
       <Item Id="RejectionItem" Caption="Ret Kalemleri" />
-      <Item Id="ReportDashboard" Caption="Rapor Panosu" />
+      <Item Id="ReportDashboard" Caption="Rapor Panosu">
+        <Items>
+          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Başvuru (bakanlık süreci)" />
+          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Başvuru (doğrudan migrasyon)" />
+          <Item Id="ReportDashboard_VisaExtension" Caption="Vize" />
+          <Item Id="ReportDashboard_Invitation" Caption="Davet" />
+          <Item Id="ReportDashboard_Registration" Caption="Kayıt" />
+          <Item Id="ReportDashboard_WorkPermit" Caption="Çalışma İzni" />
+          <Item Id="ReportDashboard_Travel" Caption="Seyahat" />
+          <Item Id="ReportDashboard_AddressOfResidence" Caption="İkamet Adresi" />
+          <Item Id="ReportDashboard_BorderZone" Caption="Sınır Bölgesi" />
+          <Item Id="ReportDashboard_Passport" Caption="Pasaport" />
+          <Item Id="ReportDashboard_Education" Caption="Eğitim" />
+          <Item Id="ReportDashboard_PositionHistory" Caption="Pozisyon Geçmişi" />
+          <Item Id="ReportDashboard_Subcontractor" Caption="Taşeron" />
+          <Item Id="ReportDashboard_MedicalRecord" Caption="Sağlık Kayıtları" />
+          <Item Id="ReportDashboard_IncompletePersons" Caption="Verileri eksik kişiler" />
+          <Item Id="ReportDashboard_PersonSearch" Caption="Kişi arama" />
+        </Items>
+      </Item>
       <Item Id="Reports" Caption="Raporlar" />
       <Item Id="StateNotifications" Caption="Durum bildirimleri" />
       <Item Id="System" Caption="Sistem" />

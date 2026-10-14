@@ -19,6 +19,7 @@ using Visa2026.Module.BusinessObjects.Operations;
 using Visa2026.Module.BusinessObjects.StateNotifications;
 using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ReportDashboard;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
@@ -633,11 +634,22 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 return;
 
             ReportDashboardOfficerPermissions.Ensure(role);
+            EnsureReportDashboardNavigation(role);
+        }
 
+        static void EnsureReportDashboardNavigation(PermissionPolicyRole role)
+        {
             EnsureNavigationPermission(
                 role,
                 @"Application/NavigationItems/Items/ReportDashboard",
                 SecurityPermissionState.Allow);
+            foreach (var category in ReportDashboardCatalog.Categories)
+            {
+                EnsureNavigationPermission(
+                    role,
+                    ReportDashboardNavigationItems.PermissionPath(category),
+                    SecurityPermissionState.Allow);
+            }
         }
 
         /// <summary>Shared case-officer navigation for <c>Users</c> and <c>UsersReadOnly</c> roles.</summary>

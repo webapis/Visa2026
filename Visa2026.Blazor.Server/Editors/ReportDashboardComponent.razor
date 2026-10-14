@@ -67,24 +67,6 @@
         </div>
 
         <div class="rd-body">
-            <div class="rd-cat-nav" role="tablist">
-                <button type="button"
-                        class="rd-cat-tab rd-cat-tab-overview @(ShowAllView ? "active" : null)"
-                        disabled="@ShowLoading"
-                        @onclick="OnShowAll">
-                    <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Overview")</span>
-                </button>
-                @foreach (var category in ReportDashboardCatalog.Categories)
-                {
-                    <button type="button"
-                            class="rd-cat-tab @(!ShowAllView && Category == category ? "active" : null)"
-                            disabled="@ShowLoading"
-                            @onclick="() => OnCategory(category)">
-                        <span>@ReportDashboardCatalog.CategoryLabel(category)</span>
-                    </button>
-                }
-            </div>
-
             <div class="rd-report-area @(ShowLoading ? "rd-report-area--loading" : null)">
                 @if (ShowLoading)
                 {
@@ -814,6 +796,7 @@
 
     [Parameter] public EventCallback<ReportDashboardPersonType> PersonTypeChanged   { get; set; }
     [Parameter] public EventCallback<ReportDashboardCategory>   CategoryChanged     { get; set; }
+    [Parameter] public EventCallback<ReportDashboardCategory>   CategoryNavigationRequested { get; set; }
     [Parameter] public EventCallback<string>                    SubReportChanged    { get; set; }
     [Parameter] public EventCallback<string>                    ProjectKeyChanged   { get; set; }
     [Parameter] public EventCallback<string>                    ChartViewChanged    { get; set; }
@@ -1264,6 +1247,15 @@
 
     private async Task OnCategory(ReportDashboardCategory category)
     {
+        if (ShowLoading)
+            return;
+
+        if (CategoryNavigationRequested.HasDelegate)
+        {
+            await CategoryNavigationRequested.InvokeAsync(category);
+            return;
+        }
+
         await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingReport"));
         await CategoryChanged.InvokeAsync(category);
     }
@@ -1296,12 +1288,6 @@
         if (ShowLoading || !OpenListViewRequested.HasDelegate)
             return;
         await OpenListViewRequested.InvokeAsync(status);
-    }
-
-    private async Task OnShowAll()
-    {
-        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview"));
-        await ShowAllViewChanged.InvokeAsync(true);
     }
 
     private async Task OnRefresh()

@@ -4,6 +4,30 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-14 — Category list lives in the main left menu
+
+**Ask:** One navigation bar. Move the in-page category column under a Report Dashboard folder. The folder opens Overview. A category click stays on the same dashboard tab and an Overview card selects that menu item. Sub-report tabs stay in the page. Folder starts expanded.
+
+**Now:** `ReportDashboardModelUpdater` adds one child per `ReportDashboardCatalog.Categories` (`ReportDashboard_{Category}`), all pointing at `ReportDashboardHost_DetailView`. `ReportDashboardNavigationController` switches the open editor via `IReportDashboardNavigationTarget` instead of opening another tab. `ReportDashboardNavigationExpandController` expands the folder and runs Overview when the folder caption is clicked. The `.rd-cat-nav` column is removed.
+
+**Prevent:** Do not create a new `ReportDashboardHost` when the dashboard is already the current view. Do not also run XAF's accordion click for the folder caption — that opened a second tab. Child navigation allows are written in `EnsureReportDashboardNavigation` for Users, UsersReadOnly, and VisaOffice.
+
+**Files:** `ReportDashboardNavigationItems.cs`, `ReportDashboardModelUpdater.cs`, `ReportDashboardNavigationController.cs`, `ReportDashboardNavigationExpandController.cs`, `ReportDashboardComponent.razor`, `report-dashboard.css`, localization xafml + `UiStrings.json`
+
+---
+
+## 2026-10-14 — Invitation Excel export is a company workbook
+
+**Ask:** Invitation dashboard Excel should keep an administrator's formatting (widths, fonts, colors, header labels, title), like a simpler Resminamalar template, stored in the database, and used only by this skill.
+
+**Now:** `ReportDashboardExcelTemplate` (one row per category + canonical subreport key). Invitation tabs `ready-by-project`, `in-process`, `process-result`, `used`, `valid-until`; hidden `(V)` twins share the `(P)` key. Admin download/upload; officers only Open in Excel. Named ranges `DashboardHeader` and `DashboardSample`. Export writes `PreviewRows` by column index and ignores the table search. Not `UserReportTemplate`. No `[FileAttachment]` (that path drops server bytes).
+
+**Prevent:** Do not wait for ModuleUpdater to create `ReportDashboardExcelTemplates` when ModuleInfo is current. `ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing` must stay on both `Startup.cs` sites. A missing table is `42P01` on Download template. Do not add `[DomainComponent]`. Do not let the workbook hide or reorder columns. Do not point other categories at this store until `CanonicalKey` and `IsInvitationTemplateReport` are widened together.
+
+**Files:** `ReportDashboardExcelTemplate.cs`, `ReportDashboardExcelTemplateService.cs`, `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardExcelTemplateSchemaSql.cs`, `ReportDashboardComponent.razor`, `Startup.cs`, `docs/REPORT_DASHBOARD.md`
+
+---
+
 ## 2026-09-21 — Residual Application Profile sync (not a rewrite)
 
 **Ask:** After Application / ApplicationItem / ApplicationType removal, do dashboard SQL views need a refactor?

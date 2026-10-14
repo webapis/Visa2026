@@ -6,7 +6,27 @@
     "ru-RU": "Управление визами"
   },
   "navigation": {
-    "ReportDashboard": { "tr-TR": "Rapor Panosu", "tk-TM": "Hasabat paneli", "ru-RU": "Панель отчётов" },
+    "ReportDashboard": {
+      "caption": { "tr-TR": "Rapor Panosu", "tk-TM": "Hasabat paneli", "ru-RU": "Панель отчётов" },
+      "children": {
+        "ReportDashboard_ApplicationViaMinistry": { "tr-TR": "Başvuru (bakanlık süreci)", "tk-TM": "Ýüztutma (ministrlik arkaly)", "ru-RU": "Заявка (через министерства)" },
+        "ReportDashboard_ApplicationDirectMigration": { "tr-TR": "Başvuru (doğrudan migrasyon)", "tk-TM": "Ýüztutma (gönümel migrasiýa)", "ru-RU": "Заявка (напрямую в миграцию)" },
+        "ReportDashboard_VisaExtension": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
+        "ReportDashboard_Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
+        "ReportDashboard_Registration": { "tr-TR": "Kayıt", "tk-TM": "Hasaba alyş", "ru-RU": "Регистрация" },
+        "ReportDashboard_WorkPermit": { "tr-TR": "Çalışma İzni", "tk-TM": "Iş rugsady", "ru-RU": "Разрешение на работу" },
+        "ReportDashboard_Travel": { "tr-TR": "Seyahat", "tk-TM": "Syýahat", "ru-RU": "Поездка" },
+        "ReportDashboard_AddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
+        "ReportDashboard_BorderZone": { "tr-TR": "Sınır Bölgesi", "tk-TM": "Serhet sebiti", "ru-RU": "Пограничная зона" },
+        "ReportDashboard_Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "ReportDashboard_Education": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+        "ReportDashboard_PositionHistory": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
+        "ReportDashboard_Subcontractor": { "tr-TR": "Taşeron", "tk-TM": "Subpodrýadçy", "ru-RU": "Субподрядчик" },
+        "ReportDashboard_MedicalRecord": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Медкарты" },
+        "ReportDashboard_IncompletePersons": { "tr-TR": "Verileri eksik kişiler", "tk-TM": "Maglumary doly däl şahslar", "ru-RU": "Лица с неполными данными" },
+        "ReportDashboard_PersonSearch": { "tr-TR": "Kişi arama", "tk-TM": "Şahs gözlegi", "ru-RU": "Поиск персон" }
+      }
+    },
     "People": {
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
       "children": {

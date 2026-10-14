@@ -295,6 +295,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ReportDashboardQueryService>();
             services.AddScoped<ReportDashboardMockQueryService>();
             services.AddScoped<IReportDashboardQueryService, ReportDashboardHybridQueryService>();
+            services.AddScoped<ReportDashboardNavigationRequest>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<PersonDocumentCopyPdfMerger>();
             services.AddScoped<PersonDossierPdfBuilder>();

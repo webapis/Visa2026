@@ -174,7 +174,26 @@
       <Item Id="Recycle Bin" Caption="Geri gaýtaryş" />
       <Item Id="Rejection" Caption="Ret" />
       <Item Id="RejectionItem" Caption="Ret elementleri" />
-      <Item Id="ReportDashboard" Caption="Hasabat paneli" />
+      <Item Id="ReportDashboard" Caption="Hasabat paneli">
+        <Items>
+          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Ýüztutma (ministrlik arkaly)" />
+          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Ýüztutma (gönümel migrasiýa)" />
+          <Item Id="ReportDashboard_VisaExtension" Caption="Wiza" />
+          <Item Id="ReportDashboard_Invitation" Caption="Çakylyk" />
+          <Item Id="ReportDashboard_Registration" Caption="Hasaba alyş" />
+          <Item Id="ReportDashboard_WorkPermit" Caption="Iş rugsady" />
+          <Item Id="ReportDashboard_Travel" Caption="Syýahat" />
+          <Item Id="ReportDashboard_AddressOfResidence" Caption="Ýaşaýyş salgysy" />
+          <Item Id="ReportDashboard_BorderZone" Caption="Serhet sebiti" />
+          <Item Id="ReportDashboard_Passport" Caption="Pasport" />
+          <Item Id="ReportDashboard_Education" Caption="Bilim" />
+          <Item Id="ReportDashboard_PositionHistory" Caption="Wezipe taryhy" />
+          <Item Id="ReportDashboard_Subcontractor" Caption="Subpodrýadçy" />
+          <Item Id="ReportDashboard_MedicalRecord" Caption="Saglyk ýazgylary" />
+          <Item Id="ReportDashboard_IncompletePersons" Caption="Maglumary doly däl şahslar" />
+          <Item Id="ReportDashboard_PersonSearch" Caption="Şahs gözlegi" />
+        </Items>
+      </Item>
       <Item Id="Reports" Caption="Hasabatlar" />
       <Item Id="StateNotifications" Caption="Ýagdaý habarnamalary" />
       <Item Id="System" Caption="Ulgam" />

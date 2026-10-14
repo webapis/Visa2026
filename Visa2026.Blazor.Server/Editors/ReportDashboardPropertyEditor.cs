@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,11 +24,14 @@ using Visa2026.Module.Services.ReportDashboard;
 namespace Visa2026.Blazor.Server.Editors;
 
 [PropertyEditor(typeof(string), ReportDashboardEditorAliases.Dashboard, false)]
-public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexViewItem
+public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexViewItem, IReportDashboardNavigationTarget
 {
     private XafApplication? _application;
     private IReportDashboardQueryService? _queryService;
     private int _refreshGeneration;
+    private bool _modelReady;
+    private bool _initialShowOverview = true;
+    private ReportDashboardCategory _initialCategory = ReportDashboardCategory.VisaExtension;
 
     public ReportDashboardPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -38,24 +42,70 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     {
         _application = application;
         _queryService = application.ServiceProvider?.GetService<IReportDashboardQueryService>();
+        var pending = application.ServiceProvider?.GetService<ReportDashboardNavigationRequest>();
+        if (pending != null)
+        {
+            _initialShowOverview = pending.ShowOverview;
+            _initialCategory = pending.Category;
+        }
+    }
+
+    public void ApplyNavigation(bool showOverview, ReportDashboardCategory category)
+    {
+        if (!_modelReady)
+        {
+            _initialShowOverview = showOverview;
+            _initialCategory = category;
+            return;
+        }
+
+        if (showOverview)
+        {
+            if (ComponentModel.ShowAllView)
+                return;
+
+            _ = OnShowAllViewChanged(true);
+            return;
+        }
+
+        if (!ComponentModel.ShowAllView && ComponentModel.Category == category)
+            return;
+
+        _ = OnCategoryChanged(category);
+    }
+
+    private void NavigateToCategory(ReportDashboardCategory category)
+    {
+        var showNav = _application?.MainWindow?.GetController<ShowNavigationItemController>();
+        var root = showNav?.ShowNavigationItemAction.Items.Find(ReportDashboardNavigationItems.RootId);
+        var child = ReportDashboardNavigationItems.FindChild(root, category);
+        if (showNav == null || child == null)
+        {
+            _ = OnCategoryChanged(category);
+            return;
+        }
+
+        showNav.ShowNavigationItemAction.DoExecute(child);
     }
 
     protected override IComponentModel CreateComponentModel()
     {
-        var initialCategory = ReportDashboardCategory.VisaExtension;
+        var initialCategory = _initialCategory;
         var model = new ReportDashboardModel
         {
             PersonType        = ReportDashboardPersonType.All,
             Category          = initialCategory,
             SubReport         = ReportDashboardCatalog.DefaultSubReport(initialCategory),
             ProjectKey        = "All",
-            ChartView         = "pie",
+            ChartView         = _initialShowOverview
+                ? "pie"
+                : DefaultChartViewFor(initialCategory, ReportDashboardCatalog.DefaultSubReport(initialCategory)),
             DateRangeMonths   = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             PassportDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             PositionHistoryDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             AddressOfResidenceDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             MedicalRecordDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
-            ShowAllView       = true,
+            ShowAllView       = _initialShowOverview,
             IncludeArchivedPersons = false,
             OneLastValidVisaPerPerson = true,
             OneLastValidWorkPermitPerPerson = true,
@@ -67,6 +117,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             PersonSelected = EventCallback.Factory.Create<Guid>(this, OnPersonSelected),
             PersonTypeChanged   = EventCallback.Factory.Create<ReportDashboardPersonType>(this, OnPersonTypeChanged),
             CategoryChanged     = EventCallback.Factory.Create<ReportDashboardCategory>(this, OnCategoryChanged),
+            CategoryNavigationRequested = EventCallback.Factory.Create<ReportDashboardCategory>(this, NavigateToCategory),
             SubReportChanged    = EventCallback.Factory.Create<string>(this, OnSubReportChanged),
             ProjectKeyChanged   = EventCallback.Factory.Create<string>(this, OnProjectKeyChanged),
             ChartViewChanged    = EventCallback.Factory.Create<string>(this, OnChartViewChanged),
@@ -89,6 +140,10 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             MedicalRecordDateRangeChanged = EventCallback.Factory.Create<int>(this, OnMedicalRecordDateRangeChanged)
         };
         model.InitialLoadRequested = EventCallback.Factory.Create(this, () => RefreshAsync(model));
+        model.LoadingMessage = _initialShowOverview
+            ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview")
+            : ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingReport");
+        _modelReady = true;
         return model;
     }
 

@@ -217,6 +217,11 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<EventCallback<ReportDashboardCategory>>();
         set => SetPropertyValue(value);
     }
+    public EventCallback<ReportDashboardCategory> CategoryNavigationRequested
+    {
+        get => GetPropertyValue<EventCallback<ReportDashboardCategory>>();
+        set => SetPropertyValue(value);
+    }
     public EventCallback<string> SubReportChanged
     {
         get => GetPropertyValue<EventCallback<string>>();

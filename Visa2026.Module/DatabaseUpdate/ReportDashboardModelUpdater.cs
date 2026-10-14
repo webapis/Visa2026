@@ -1,13 +1,15 @@
+using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.SystemModule;
-using System.Linq;
+using Visa2026.Module.Services.ReportDashboard;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Top-level navigation + startup item for the Report Dashboard.
+/// Report Dashboard is a root folder. The folder opens Overview.
+/// Each category is a child that opens that report on the same view.
 /// </summary>
 public sealed class ReportDashboardModelUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
 {
@@ -29,12 +31,22 @@ public sealed class ReportDashboardModelUpdater : ModelNodesGeneratorUpdater<Nav
                 home.Remove();
         }
 
-        var navItem = navigationItems["ReportDashboard"]
-            ?? navigationItems.AddNode<IModelNavigationItem>("ReportDashboard");
+        var navItem = navigationItems[ReportDashboardNavigationItems.RootId]
+            ?? navigationItems.AddNode<IModelNavigationItem>(ReportDashboardNavigationItems.RootId);
         navItem.View = detailView;
         navItem.Caption = "Report Dashboard";
         navItem.ImageName = "BO_Report";
         navItem.Index = -100;
+
+        var index = 0;
+        foreach (var category in ReportDashboardCatalog.Categories)
+        {
+            var id = ReportDashboardNavigationItems.ChildId(category);
+            var child = navItem.Items[id] ?? navItem.Items.AddNode<IModelNavigationItem>(id);
+            child.View = detailView;
+            child.Caption = ReportDashboardNavigationItems.EnglishCaption(category);
+            child.Index = index++;
+        }
 
         rootNode.StartupNavigationItem = navItem;
     }

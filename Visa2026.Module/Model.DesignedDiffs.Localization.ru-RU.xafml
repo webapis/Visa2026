@@ -174,7 +174,26 @@
       <Item Id="Recycle Bin" Caption="Корзина" />
       <Item Id="Rejection" Caption="Отказы" />
       <Item Id="RejectionItem" Caption="Позиции отказа" />
-      <Item Id="ReportDashboard" Caption="Панель отчётов" />
+      <Item Id="ReportDashboard" Caption="Панель отчётов">
+        <Items>
+          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Заявка (через министерства)" />
+          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Заявка (напрямую в миграцию)" />
+          <Item Id="ReportDashboard_VisaExtension" Caption="Виза" />
+          <Item Id="ReportDashboard_Invitation" Caption="Приглашение" />
+          <Item Id="ReportDashboard_Registration" Caption="Регистрация" />
+          <Item Id="ReportDashboard_WorkPermit" Caption="Разрешение на работу" />
+          <Item Id="ReportDashboard_Travel" Caption="Поездка" />
+          <Item Id="ReportDashboard_AddressOfResidence" Caption="Адрес проживания" />
+          <Item Id="ReportDashboard_BorderZone" Caption="Пограничная зона" />
+          <Item Id="ReportDashboard_Passport" Caption="Паспорт" />
+          <Item Id="ReportDashboard_Education" Caption="Образование" />
+          <Item Id="ReportDashboard_PositionHistory" Caption="История должностей" />
+          <Item Id="ReportDashboard_Subcontractor" Caption="Субподрядчик" />
+          <Item Id="ReportDashboard_MedicalRecord" Caption="Медкарты" />
+          <Item Id="ReportDashboard_IncompletePersons" Caption="Лица с неполными данными" />
+          <Item Id="ReportDashboard_PersonSearch" Caption="Поиск персон" />
+        </Items>
+      </Item>
       <Item Id="Reports" Caption="Отчёты" />
       <Item Id="StateNotifications" Caption="Уведомления о состоянии" />
       <Item Id="System" Caption="Система" />
