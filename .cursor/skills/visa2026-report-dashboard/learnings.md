@@ -4,6 +4,18 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-14 — Invitation Excel follows the table search
+
+**Ask:** Open in Excel should include only the rows the search box leaves on screen.
+
+**Now:** `DownloadInvitationWorkbookAsync` passes `DisplayedRows`. Empty search is the loaded preview. Process Result, Used, and Invitation Validity have no search box, so they still export the loaded preview. Download template stays the blank format. Open in Excel is disabled when the filtered list is empty.
+
+**Prevent:** Do not switch invitation export back to `Panel.PreviewRows` while a search term is set.
+
+**Files:** `ReportDashboardComponent.razor`, `docs/REPORT_DASHBOARD.md`
+
+---
+
 ## 2026-10-14 — Category list lives in the main left menu
 
 **Ask:** One navigation bar. Move the in-page category column under a Report Dashboard folder. The folder opens Overview. A category click stays on the same dashboard tab and an Overview card selects that menu item. Sub-report tabs stay in the page. Folder starts expanded.

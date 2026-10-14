@@ -10,8 +10,8 @@ namespace Visa2026.Module.Services.ReportDashboard;
 
 /// <summary>
 /// One company workbook per invitation subreport. The file keeps the administrator's
-/// title, header labels, fonts, colors, and column widths. Export writes the full row
-/// list into those fixed columns.
+/// title, header labels, fonts, colors, and column widths. Export writes the rows
+/// the caller passes into those fixed columns.
 /// </summary>
 public static class ReportDashboardExcelTemplateService
 {

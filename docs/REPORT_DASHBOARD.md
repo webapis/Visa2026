@@ -126,7 +126,7 @@ On export, rows below the sample are deleted, the sample row is copied for each 
 
 ### Which rows are exported
 
-The file contains `Panel.PreviewRows`: the loaded preview, still capped by `PreviewLimit` (10_000). The client search box on Active Invitation and Invitation Process is ignored. A chart click does not filter this download.
+**Open in Excel** writes the rows the table is showing. On Active Invitation and Invitation Process that is the search-box result: an empty box exports the loaded preview, and a typed search exports only the matching rows (the same `n / total` count on screen). Process Result, Used, and Invitation Validity have no search box, so they export the loaded preview. The list is still capped by `PreviewLimit` (10_000). **Download template** stays the blank format file. A chart click does not filter this download.
 
 Cell text:
 

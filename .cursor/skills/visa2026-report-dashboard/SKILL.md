@@ -38,7 +38,7 @@ Open in Excel  ←── same population + same filters ──┘
 2. **One subreport → one dedicated `vw_rd_*` SQL view → one dedicated XAF ListView** (read-only BO + `*_ListView`). Catalog key aligns with view/BO naming (see Naming below).
 3. **Parity gate:** ListView **visible columns** and **Total** must match the Preview table for the same subreport under the same filters (person type, project chip, archived / one-last-valid / other dashboard toggles).
 4. **ListView caption** = catalog subreport **Label** (e.g. `Active Visa (P)`), not a shared “Dashboard” caption.
-5. **Open in Excel** uses the **same population** as Preview / ListView (same view + same filters). Invitation tabs fill a company workbook and ignore the on-screen search box — see [Excel templates](#excel-templates-invitation) below.
+5. **Open in Excel** uses the **same population** as Preview / ListView (same view + same filters). Invitation tabs fill a company workbook; Active Invitation and Invitation Process also apply the on-screen search box — see [Excel templates](#excel-templates-invitation) below.
 
 ### (P) vs (V) when Totals are identical (chart axis only)
 
@@ -210,7 +210,7 @@ Invitation **Open in Excel** fills one company workbook per tab. It is not `User
 - Stored on `ReportDashboardExcelTemplate` (`Category` + canonical `SubReportKey` + aggregated `FileData`). No `[FileAttachment]`. No `[DomainComponent]`. No navigation item.
 - Keys today: `ready-by-project`, `in-process`, `process-result`, `used`, `valid-until`. Hidden `(V)` twins share the `(P)` key. `issued-inv` is not mapped.
 - Workbook names: `DashboardHeader` (header row) and `DashboardSample` (style row under it). Export keeps the title and header labels and writes values by column index. Column count must equal `TableHeaders`. Upload rejects a different count, a non-`.xlsx`, or a file over 8 MB.
-- Population is `Panel.PreviewRows` (capped by `PreviewLimit` 10_000). The Active Invitation / Invitation Process search box is ignored.
+- Population is the rows on screen. Active Invitation and Invitation Process pass the search-filtered table (`DisplayedRows`); an empty search is the loaded preview. Other invitation tabs have no search box and pass the loaded preview. Still capped by `PreviewLimit` 10_000. **Download template** is the blank workbook.
 - Buttons are Invitation-only (`IsInvitationTemplateReport`). Widen that gate together with `CanonicalKey` when another category should use the same store.
 - Existing databases: `ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing` in both `Startup.cs` sites. ModuleUpdater will not create the table while `ModuleInfo` is current. A missing table is `42P01`; restart after deploy.
 

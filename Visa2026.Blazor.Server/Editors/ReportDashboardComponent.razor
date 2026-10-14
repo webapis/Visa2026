@@ -545,7 +545,7 @@
                             }
                             <button type="button"
                                     class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationTemplateReport) ? null : "disabled")"
-                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationTemplateReport) || ShowLoading || (IsInvitationTemplateReport && (Panel == null || Panel.PreviewRows.Count == 0)))"
+                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationTemplateReport) || ShowLoading || (IsInvitationTemplateReport && DisplayedRows.Count == 0))"
                                     title="@(IsInvitationTemplateReport ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
                                     @onclick="OnExcel">
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
@@ -1394,15 +1394,19 @@
         if (FileDownloader == null || Panel == null)
             return;
 
+        if (!templateOnly && DisplayedRows.Count == 0)
+            return;
+
         var headers = Panel.TableHeaders;
         var subReport = Panel.SubReport ?? SubReport;
         var label = InvitationExportLabel(subReport);
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
+
         byte[] bytes = templateOnly
             ? ReportDashboardExcelTemplateService.DownloadTemplate(
                 objectSpace, Category, subReport, label, headers)
             : ReportDashboardExcelTemplateService.Export(
-                objectSpace, Category, subReport, label, headers, Panel.PreviewRows, ShowInvitationChartColumn);
+                objectSpace, Category, subReport, label, headers, DisplayedRows, ShowInvitationChartColumn);
 
         var fileName = SafeFileName(templateOnly ? label + " template" : label);
         await using var stream = new MemoryStream(bytes);
