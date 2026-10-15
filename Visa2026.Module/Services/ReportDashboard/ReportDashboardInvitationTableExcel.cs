@@ -83,6 +83,34 @@ public static class ReportDashboardInvitationTableExcel
         return values;
     }
 
+    public static List<string> UsedCells(ReportDashboardPreviewRow row, bool includeChartColumn)
+    {
+        var values = Cells(row, includeChartColumn: false, processTable: false);
+        values.Add(row.VisaNumber);
+        values.Add(row.VisaIssuedDate);
+        values.Add(row.VisaPlace);
+        values.Add(row.VisaStartDate);
+        values.Add(row.VisaEndDate);
+        if (includeChartColumn)
+            values.Add(row.Status);
+        return values;
+    }
+
+    public static List<string> CancelledCells(ReportDashboardPreviewRow row)
+    {
+        return
+        [
+            row.Name,
+            row.ColumnE,
+            row.ColumnA,
+            JoinLines(row.ColumnF, ReportDashboardLocalization.Status(row.ExpiresBadge)),
+            row.ColumnH,
+            row.ColumnC,
+            row.ColumnD,
+            row.ColumnI ?? string.Empty,
+        ];
+    }
+
     private static string MigrationCell(ReportDashboardPreviewRow row)
     {
         var migration = row.ColumnI ?? string.Empty;

@@ -100,6 +100,13 @@ public sealed class ReportDashboardPreviewRow
     public Guid?  PersonId      { get; init; }
     /// <summary>Invitation whose scanned copies open from the invitation-number cell.</summary>
     public Guid?  InvitationId  { get; init; }
+    /// <summary>Visa issued from this invitation. Its number opens scanned visa copies.</summary>
+    public Guid?  VisaId        { get; init; }
+    public string VisaNumber    { get; init; } = string.Empty;
+    public string VisaIssuedDate { get; init; } = string.Empty;
+    public string VisaPlace     { get; init; } = string.Empty;
+    public string VisaStartDate { get; init; } = string.Empty;
+    public string VisaEndDate   { get; init; } = string.Empty;
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

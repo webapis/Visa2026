@@ -4,6 +4,54 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-15 — Cancelled Invitation shows the invitation and the cancellation application
+
+**Ask:** Add Cancelled Invitation after Expired Invitation. Do not copy Active Invitation columns. Show the invitation and the application that cancelled it. That application has no ministry approval, only migration.
+
+**Now:** `vw_rd_invitation_cancelled` is one invitation line linked to a completed cancellation application (`ActionFamily` cancellation, `PROCESS_ISSUED`). Columns: Full name, Invitation #, Issued date, Expires, Period, App #, Date, Migration. No nine-month cutoff. Turkmen tab is Ýatyrylan Çakylyk.
+
+**Prevent:** Do not add approval columns. Do not apply the nine-month cutoff. A changed invitation is not a cancelled invitation.
+
+**Files:** `vw_rd_invitation_cancelled.postgres.sql`, `VwRdInvitationCancelled.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardComponent.razor`, `docs/REPORT_DASHBOARD.md`
+
+---
+
+## 2026-10-14 — Expired Invitation matches Active Invitation with the expiry test reversed
+
+**Ask:** Add Expired Invitation after Active Invitation. Same columns. Show invitations that expired before a visa was issued. Keep a later-cancelled visa on Used Invitations. Ignore the nine-month window. Turkmen tab is Möhleti geçen Çakylyk.
+
+**Now:** `vw_rd_invitation_expired` copies the Active Invitation view and keeps rows whose expiration date is before today and that have no visa. Preview, ListView, and Excel share that population. The key is `expired-invitation` so the old `expired` key still opens Invitation Validity.
+
+**Prevent:** Do not reuse the `expired` key. Do not apply the nine-month cutoff. Do not put a cancelled visa on this tab.
+
+**Files:** `vw_rd_invitation_expired.postgres.sql`, `VwRdInvitationExpired.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardComponent.razor`, `docs/REPORT_DASHBOARD.md`
+
+---
+
+## 2026-10-14 — Used Invitations matches Active Invitation plus the issued visa
+
+**Ask:** Replace Used with Used Invitations. Same columns as Active Invitation, then Visa #, Issued date, Place, Start date, End date. One invitation line issues one visa. Keep the row if that visa is later cancelled. The visa number opens scanned visa copies.
+
+**Now:** `vw_rd_invitation_used` is the Active Invitation shape plus one visa (`IssuingInvitationItemID`, latest issue date if more than one row exists). No expiry filter and no nine-month cutoff. Preview, ListView, and Excel share that population. Turkmen tab is Ulanylan Çakylyklar.
+
+**Prevent:** Do not drop a cancelled visa from this report. Do not add a second used tab. Heal recreates the view until it contains `VisaNumber` and `IssuingInvitationItemID`.
+
+**Files:** `vw_rd_invitation_used.postgres.sql`, `VwRdInvitationUsed.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardComponent.razor`, `docs/REPORT_DASHBOARD.md`
+
+---
+
+## 2026-10-14 — Hide Invitation Process Result and Invitation Validity
+
+**Ask:** Officers do not need Process Result or Invitation Validity on the Invitation report.
+
+**Now:** Those two keys are omitted from `RawSubReports`. The tab strip is Active Invitation, Invitation Process, and Used. Loaders, views, and ListViews stay so an old key still resolves. A selected key that is no longer a tab falls back to the category default and the model key is updated.
+
+**Prevent:** Do not put `process-result` or `valid-until` back on the Invitation tab list unless an officer asks for them.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardPropertyEditor.cs`, `docs/REPORT_DASHBOARD.md`
+
+---
+
 ## 2026-10-14 — Invitation Excel follows the table search
 
 **Ask:** Open in Excel should include only the rows the search box leaves on screen.

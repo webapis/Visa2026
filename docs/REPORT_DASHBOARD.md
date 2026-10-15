@@ -96,10 +96,16 @@ There is one stored file per tab. It is not per officer.
 | Stored key | Also accepts |
 |------------|----------------|
 | `ready-by-project` | `ready-by-period-category` |
+| `expired-invitation` | — |
+| `cancelled-invitation` | — |
 | `in-process` | `in-process-by-period-category-type` |
-| `process-result` | `process-result-by-period-category-type`, `rejected-by-project`, `rejected-by-period-category-type` |
 | `used` | `used-by-period-category-type` |
-| `valid-until` | `expired` |
+
+The officer tab for `cancelled-invitation` is **Cancelled Invitation**. Columns are the invitation (Full name, Invitation #, Issued date, Expires, Period) and the cancellation application (App #, Date, Migration). There are no approval columns. A row is one invitation line cancelled by a completed cancellation application. The nine-month dashboard window does not apply.
+
+The officer tab for `expired-invitation` is **Expired Invitation**. Its columns match Active Invitation. The row is an issued invitation that expired before a visa was issued. A visa cancelled later stays on Used Invitations. The nine-month dashboard window does not apply.
+
+The officer tab for `used` is **Used Invitations**. Its columns are the Active Invitation columns, then Visa #, Issued date, Place, Start date, and End date. One invitation line has one visa. A visa cancelled later stays on the report.
 
 `issued-inv` is not mapped. Other Report Dashboard categories still use `UserReportTemplate` when `ExcelConfigured` is true. Add a future tab by extending `CanonicalKey` and the cell writer. The table already stores any `Category` + `SubReportKey`. The Blazor buttons stay on Invitation until that gate is widened (`IsInvitationTemplateReport`).
 
@@ -126,12 +132,12 @@ On export, rows below the sample are deleted, the sample row is copied for each 
 
 ### Which rows are exported
 
-**Open in Excel** writes the rows the table is showing. On Active Invitation and Invitation Process that is the search-box result: an empty box exports the loaded preview, and a typed search exports only the matching rows (the same `n / total` count on screen). Process Result, Used, and Invitation Validity have no search box, so they export the loaded preview. The list is still capped by `PreviewLimit` (10_000). **Download template** stays the blank format file. A chart click does not filter this download.
+**Open in Excel** writes the rows the table is showing. On Active Invitation, Expired Invitation, Cancelled Invitation, Invitation Process, and Used Invitations that is the search-box result: an empty box exports the loaded preview, and a typed search exports only the matching rows (the same `n / total` count on screen). The list is still capped by `PreviewLimit` (10_000). **Download template** stays the blank format file. A chart click does not filter this download.
 
 Cell text:
 
-- Active Invitation and Invitation Process use `ReportDashboardInvitationTableExcel.Cells` (the same stacked cells as the preview).
-- Process Result, Used, and Invitation Validity use `GenericCells`: Name, Project, ColumnA, ColumnB, then ColumnC–I for the remaining headers, and the last column is the localized status.
+- Active Invitation, Expired Invitation, and Invitation Process use `ReportDashboardInvitationTableExcel.Cells` (the same stacked cells as the preview). Expired Invitation uses the Active Invitation columns. Cancelled Invitation uses `CancelledCells`: invitation columns, then the cancellation application's App #, Date, and Migration.
+- Used Invitations uses the Active Invitation cells, then Visa #, Issued date, Place, Start date, and End date.
 
 ### Where it is stored
 

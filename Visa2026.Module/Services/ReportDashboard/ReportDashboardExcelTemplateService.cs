@@ -28,6 +28,8 @@ public static class ReportDashboardExcelTemplateService
     public static string? CanonicalKey(string? subReport) => subReport switch
     {
         "ready-by-project" or "ready-by-period-category" => "ready-by-project",
+        "expired-invitation" => "expired-invitation",
+        "cancelled-invitation" => "cancelled-invitation",
         "in-process" or "in-process-by-period-category-type" => "in-process",
         "process-result" or "process-result-by-period-category-type"
             or "rejected-by-project" or "rejected-by-period-category-type" => "process-result",

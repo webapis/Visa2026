@@ -6167,6 +6167,12 @@
     "tk-TM": "Çakylyk nusgasyny aç",
     "ru-RU": "Открыть копию приглашения"
   },
+  "ReportDashboard.Chrome.OpenVisaCopy": {
+    "en": "Open visa copy",
+    "tr-TR": "Vize kopyasını aç",
+    "tk-TM": "Wiza nusgasyny aç",
+    "ru-RU": "Открыть копию визы"
+  },
   "ReportDashboard.Chrome.PieChart": {
     "en": "Pie Chart",
     "tr-TR": "Pasta grafik",
@@ -6839,11 +6845,23 @@
     "tk-TM": "Proses netijesi (V)",
     "ru-RU": "Результат процесса (V)"
   },
+  "ReportDashboard.SubReport.expired-invitation": {
+    "en": "Expired Invitation",
+    "tr-TR": "Süresi dolmuş davetiye",
+    "tk-TM": "Möhleti geçen Çakylyk",
+    "ru-RU": "Просроченное приглашение"
+  },
+  "ReportDashboard.SubReport.cancelled-invitation": {
+    "en": "Cancelled Invitation",
+    "tr-TR": "İptal edilen davetiye",
+    "tk-TM": "Ýatyrylan Çakylyk",
+    "ru-RU": "Аннулированное приглашение"
+  },
   "ReportDashboard.SubReport.used": {
-    "en": "Used (P)",
-    "tr-TR": "Kullanılan (P)",
-    "tk-TM": "Ulanylan (P)",
-    "ru-RU": "Использованные (P)"
+    "en": "Used Invitations",
+    "tr-TR": "Kullanılan davetiyeler",
+    "tk-TM": "Ulanylan Çakylyklar",
+    "ru-RU": "Использованные приглашения"
   },
   "ReportDashboard.SubReport.used-by-period-category-type": {
     "en": "Used (V)",
@@ -7138,6 +7156,30 @@
     "tr-TR": "Vize no",
     "tk-TM": "Wiza no",
     "ru-RU": "№ визы"
+  },
+  "ReportDashboard.Header.IssuedDate": {
+    "en": "Issued date",
+    "tr-TR": "Veriliş tarihi",
+    "tk-TM": "Berlen senesi",
+    "ru-RU": "Дата выдачи"
+  },
+  "ReportDashboard.Header.Place": {
+    "en": "Place",
+    "tr-TR": "Yer",
+    "tk-TM": "Ýeri",
+    "ru-RU": "Место"
+  },
+  "ReportDashboard.Header.StartDate": {
+    "en": "Start date",
+    "tr-TR": "Başlangıç tarihi",
+    "tk-TM": "Başlanýan senesi",
+    "ru-RU": "Дата начала"
+  },
+  "ReportDashboard.Header.EndDate": {
+    "en": "End date",
+    "tr-TR": "Bitiş tarihi",
+    "tk-TM": "Gutarýan senesi",
+    "ru-RU": "Дата окончания"
   },
   "ReportDashboard.Header.DaysRemaining": {
     "en": "Days Remaining",

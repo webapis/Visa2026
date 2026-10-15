@@ -1551,6 +1551,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "used" or "used-by-period-category-type" => LoadInvitationUsedFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            "expired-invitation" => LoadInvitationExpiredFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            "cancelled-invitation" => LoadInvitationCancelledFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "valid-until" or "expired" => LoadInvitationValidUntilFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "ready-by-period-category" => LoadInvitationReadyFromView(
@@ -1666,6 +1670,186 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             return EmptyPanel(personType, ReportDashboardCategory.Invitation, subReport, excelHint, excelConfigured);
         }
     }
+
+    private static ReportDashboardPanelData LoadInvitationExpiredFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        _ = cutoff;
+        subReport = "expired-invitation";
+
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Invitation, subReport, excelHint, excelConfigured);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationExpired> query = db.VwRdInvitationExpired.AsNoTracking();
+
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+
+            var labeled = list.Select(r =>
+            {
+                var status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim();
+                return (Row: r, Status: status);
+            }).ToList();
+
+            var groups = labeled
+                .GroupBy(x => x.Status, StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            var rows = labeled
+                .OrderByDescending(x => x.Row.ExpirationDate)
+                .ThenBy(x => x.Row.PersonName)
+                .Take(PreviewLimit)
+                .Select(x =>
+                {
+                    var r = x.Row;
+                    var expires = InvitationExpiration(r.ExpirationDate);
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        PersonId = r.PersonOid,
+                        InvitationId = r.InvitationOid,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.PositionLabel ?? string.Empty,
+                        ColumnB = r.SubcontractorLabel ?? string.Empty,
+                        ColumnC = r.ApplicationNumber ?? string.Empty,
+                        ColumnD = FormatDate(r.ApplicationDate),
+                        ColumnE = r.InvitationNumber ?? string.Empty,
+                        ColumnF = expires.Date,
+                        ExpiresBadge = expires.Badge,
+                        ExpiresCssClass = expires.Css,
+                        ColumnG = FormatDate(r.IssuedDate),
+                        ColumnH = r.VisaPeriodLabel ?? string.Empty,
+                        MinistryCells = InvitationMinistryCells(r),
+                        ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
+                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
+                        Status = x.Status,
+                        StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Invitation, subReport, rows,
+                excelHint, excelConfigured, buckets, labeled.Count);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Invitation, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadInvitationCancelledFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        _ = cutoff;
+        subReport = "cancelled-invitation";
+
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Invitation, subReport, excelHint, excelConfigured);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationCancelled> query = db.VwRdInvitationCancelled.AsNoTracking();
+
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            var labeled = list.Select(r =>
+            {
+                var status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim();
+                return (Row: r, Status: status);
+            }).ToList();
+
+            var groups = labeled
+                .GroupBy(x => x.Status, StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            var rows = labeled
+                .OrderByDescending(x => x.Row.CancelApplicationDate)
+                .ThenBy(x => x.Row.PersonName)
+                .Take(PreviewLimit)
+                .Select(x =>
+                {
+                    var r = x.Row;
+                    var expires = InvitationExpiration(r.ExpirationDate);
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        PersonId = r.PersonOid,
+                        InvitationId = r.InvitationOid,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = FormatDate(r.IssuedDate),
+                        ColumnC = r.CancelApplicationNumber ?? string.Empty,
+                        ColumnD = FormatDate(r.CancelApplicationDate),
+                        ColumnE = r.InvitationNumber ?? string.Empty,
+                        ColumnF = expires.Date,
+                        ExpiresBadge = expires.Badge,
+                        ExpiresCssClass = expires.Css,
+                        ColumnH = r.VisaPeriodLabel ?? string.Empty,
+                        ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
+                        Status = x.Status,
+                        StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Invitation, subReport, rows,
+                excelHint, excelConfigured, buckets, labeled.Count);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Invitation, subReport, excelHint, excelConfigured);
+        }
+    }
+
     private static ReportDashboardPanelData LoadInvitationValidUntilFromView(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
         ReportDashboardPersonType personType, string subReport,
@@ -1804,6 +1988,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (!byPeriodCategoryType)
             subReport = "used";
 
+        // Keep every used invitation, including ones older than the dashboard month window.
+        _ = cutoff;
+
         if (objectSpace is not EFCoreObjectSpace efOs
             || efOs.DbContext is not Visa2026EFCoreDbContext db)
         {
@@ -1819,9 +2006,6 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
             query = query.Where(r => !r.IsArchived);
 
-            if (cutoff > DateTime.MinValue)
-                query = query.Where(r => r.IssuedDate == null || r.IssuedDate >= cutoff);
-
             if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
             {
                 query = query.Where(r =>
@@ -1832,34 +2016,21 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             }
 
             var list = query.ToList();
-            Dictionary<Guid, string> pctByItemId = [];
-            if (byPeriodCategoryType && list.Count > 0)
-            {
-                var itemIds = list.Select(r => r.ID).ToList();
-                pctByItemId = db.InvitationItems.AsNoTracking()
-                    .Where(ii => itemIds.Contains(ii.ID))
-                    .Include(ii => ii.Invitation!).ThenInclude(inv => inv.VisaPeriod)
-                    .Include(ii => ii.Invitation!).ThenInclude(inv => inv.VisaCategory)
-                    .Include(ii => ii.Invitation!).ThenInclude(inv => inv.ApplicationProfileInstance!).ThenInclude(a => a.VisaType)
-                    .AsEnumerable()
-                    .ToDictionary(
-                        ii => ii.ID,
-                        ii =>
-                        {
-                            var period = LookupLabelOrMissing(ii.Invitation?.VisaPeriod, "(No period)");
-                            var category = LookupLabelOrMissing(ii.Invitation?.VisaCategory, "(No category)");
-                            var type = LookupLabelOrMissing(ii.Invitation?.ApplicationProfileInstance?.VisaType, "(No type)");
-                            return $"{period} · {category} · {type}";
-                        });
-            }
 
             var labeled = list.Select(r =>
             {
                 string status;
                 if (byPeriodCategoryType)
-                    status = pctByItemId.TryGetValue(r.ID, out var pct) ? pct : "(No period) · (No category) · (No type)";
+                {
+                    status = string.IsNullOrWhiteSpace(r.PeriodCategoryTypeLabel)
+                        ? "(No period) · (No category) · (No type)"
+                        : r.PeriodCategoryTypeLabel.Trim();
+                }
                 else
+                {
                     status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim();
+                }
+
                 return (Row: r, Status: status);
             }).ToList();
 
@@ -1872,18 +2043,41 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
 
             var rows = labeled
-                .OrderByDescending(x => x.Row.IssuedDate)
+                .OrderByDescending(x => x.Row.VisaIssueDate)
                 .ThenBy(x => x.Row.PersonName)
                 .Take(PreviewLimit)
-                .Select(x => new ReportDashboardPreviewRow
+                .Select(x =>
                 {
-                    RecordId = x.Row.ID,
-                    Name = x.Row.PersonName ?? string.Empty,
-                    Project = x.Row.ProjectName ?? string.Empty,
-                    ColumnA = x.Row.InvitationNumber ?? string.Empty,
-                    ColumnB = FormatDate(x.Row.IssuedDate),
-                    Status = x.Status,
-                    StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+                    var r = x.Row;
+                    var expires = InvitationExpiration(r.ExpirationDate);
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        PersonId = r.PersonOid,
+                        InvitationId = r.InvitationOid,
+                        VisaId = r.VisaOid,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.PositionLabel ?? string.Empty,
+                        ColumnB = r.SubcontractorLabel ?? string.Empty,
+                        ColumnC = r.ApplicationNumber ?? string.Empty,
+                        ColumnD = FormatDate(r.ApplicationDate),
+                        ColumnE = r.InvitationNumber ?? string.Empty,
+                        ColumnF = expires.Date,
+                        ExpiresBadge = expires.Badge,
+                        ExpiresCssClass = expires.Css,
+                        ColumnH = r.VisaPeriodLabel ?? string.Empty,
+                        MinistryCells = InvitationMinistryCells(r),
+                        ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
+                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
+                        VisaNumber = r.VisaNumber ?? string.Empty,
+                        VisaIssuedDate = FormatDate(r.VisaIssueDate),
+                        VisaPlace = r.VisaIssuedPlaceLabel ?? string.Empty,
+                        VisaStartDate = FormatDate(r.VisaStartDate),
+                        VisaEndDate = FormatDate(r.VisaEndDate),
+                        Status = x.Status,
+                        StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+                    };
                 })
                 .ToList();
 
@@ -5657,10 +5851,31 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     }
 
     private static IReadOnlyList<string> InvitationMinistryCells(VwRdInvitationReady row) =>
+        InvitationMinistryCells(
+            row.Approval1Date, row.Approval1Number, row.Approval1Ministry,
+            row.Approval2Date, row.Approval2Number, row.Approval2Ministry,
+            row.Approval3Date, row.Approval3Number, row.Approval3Ministry);
+
+    private static IReadOnlyList<string> InvitationMinistryCells(VwRdInvitationExpired row) =>
+        InvitationMinistryCells(
+            row.Approval1Date, row.Approval1Number, row.Approval1Ministry,
+            row.Approval2Date, row.Approval2Number, row.Approval2Ministry,
+            row.Approval3Date, row.Approval3Number, row.Approval3Ministry);
+
+    private static IReadOnlyList<string> InvitationMinistryCells(VwRdInvitationUsed row) =>
+        InvitationMinistryCells(
+            row.Approval1Date, row.Approval1Number, row.Approval1Ministry,
+            row.Approval2Date, row.Approval2Number, row.Approval2Ministry,
+            row.Approval3Date, row.Approval3Number, row.Approval3Ministry);
+
+    private static IReadOnlyList<string> InvitationMinistryCells(
+        DateTime? approval1Date, string? approval1Number, string? approval1Ministry,
+        DateTime? approval2Date, string? approval2Number, string? approval2Ministry,
+        DateTime? approval3Date, string? approval3Number, string? approval3Ministry) =>
     [
-        FormatApproval(row.Approval1Date, row.Approval1Number, row.Approval1Ministry),
-        FormatApproval(row.Approval2Date, row.Approval2Number, row.Approval2Ministry),
-        FormatApproval(row.Approval3Date, row.Approval3Number, row.Approval3Ministry),
+        FormatApproval(approval1Date, approval1Number, approval1Ministry),
+        FormatApproval(approval2Date, approval2Number, approval2Ministry),
+        FormatApproval(approval3Date, approval3Number, approval3Ministry),
     ];
 
     private static string FormatApproval(DateTime? date, string? number, string? ministry)

@@ -161,6 +161,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdWorkPermitActive> VwRdWorkPermitActive { get; set; }
         public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
         public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
+        public DbSet<VwRdInvitationExpired> VwRdInvitationExpired { get; set; }
+        public DbSet<VwRdInvitationCancelled> VwRdInvitationCancelled { get; set; }
         public DbSet<VwRdInvitationInProcess> VwRdInvitationInProcess { get; set; }
         public DbSet<VwRdApplicationViaMinistryInvitationOnProcess> VwRdApplicationViaMinistryInvitationOnProcess { get; set; }
         public DbSet<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType> VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType { get; set; }
@@ -336,6 +338,21 @@ namespace Visa2026.Module.BusinessObjects
                 b.ToView("vw_rd_invitation_ready");
             });
 
+            modelBuilder.Entity<VwRdInvitationExpired>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_expired");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Invitation).WithMany().HasForeignKey(t => t.InvitationOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdInvitationCancelled>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_cancelled");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Invitation).WithMany().HasForeignKey(t => t.InvitationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.CancelApplication).WithMany().HasForeignKey(t => t.CancelApplicationOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<VwRdInvitationInProcess>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_invitation_in_process");
@@ -399,6 +416,9 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdInvitationUsed>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_invitation_used");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Invitation).WithMany().HasForeignKey(t => t.InvitationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.VisaOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdInvitationValidUntil>(b => {

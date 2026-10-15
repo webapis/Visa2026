@@ -104,6 +104,8 @@ public static class ReportDashboardPostgresViewsHealSql
     private static readonly (string ViewName, string ResourceLeaf)[] InvitationViews =
     {
         ("vw_rd_invitation_ready", "vw_rd_invitation_ready.postgres.sql"),
+        ("vw_rd_invitation_expired", "vw_rd_invitation_expired.postgres.sql"),
+        ("vw_rd_invitation_cancelled", "vw_rd_invitation_cancelled.postgres.sql"),
         ("vw_rd_invitation_in_process", "vw_rd_invitation_in_process.postgres.sql"),
         ("vw_rd_invitation_rejected", "vw_rd_invitation_rejected.postgres.sql"),
         ("vw_rd_invitation_used", "vw_rd_invitation_used.postgres.sql"),
@@ -250,6 +252,46 @@ public static class ReportDashboardPostgresViewsHealSql
                     && readsApprovalNote
                     && stacksMigration
                     && requiresLinkedInstance
+                    && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
+                    continue;
+
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+                continue;
+            }
+
+            if (viewName == "vw_rd_invitation_cancelled")
+            {
+                if (ViewExists(connection, viewName)
+                    && ViewDefinitionContains(connection, viewName, "ActionFamily\" = 1")
+                    && ViewDefinitionContains(connection, viewName, "PROCESS_ISSUED")
+                    && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
+                    continue;
+
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+                continue;
+            }
+
+            if (viewName == "vw_rd_invitation_expired")
+            {
+                if (ViewExists(connection, viewName)
+                    && ViewDefinitionContains(connection, viewName, "::date < CURRENT_DATE")
+                    && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
+                    && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
+                    && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
+                    continue;
+
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+                continue;
+            }
+
+            if (viewName == "vw_rd_invitation_used")
+            {
+                var hasVisaColumns = ColumnExists(connection, viewName, "VisaNumber")
+                    || ColumnExists(connection, viewName, "visanumber");
+                if (ViewExists(connection, viewName)
+                    && hasVisaColumns
+                    && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
+                    && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 

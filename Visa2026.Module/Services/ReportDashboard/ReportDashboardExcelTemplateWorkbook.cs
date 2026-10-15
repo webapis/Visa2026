@@ -94,8 +94,15 @@ public static class ReportDashboardExcelTemplateWorkbook
         int headerCount,
         bool includeChartColumn)
     {
-        if (ReportDashboardCatalog.IsInvitationReadySubReport(subReport))
+        if (ReportDashboardCatalog.IsInvitationCancelledSubReport(subReport))
+            return ReportDashboardInvitationTableExcel.CancelledCells(row);
+
+        if (ReportDashboardCatalog.IsInvitationReadySubReport(subReport)
+            || ReportDashboardCatalog.IsInvitationExpiredSubReport(subReport))
             return ReportDashboardInvitationTableExcel.Cells(row, includeChartColumn, processTable: false);
+
+        if (ReportDashboardCatalog.IsInvitationUsedSubReport(subReport))
+            return ReportDashboardInvitationTableExcel.UsedCells(row, includeChartColumn);
 
         if (ReportDashboardCatalog.IsInvitationProcessSubReport(subReport))
             return ReportDashboardInvitationTableExcel.Cells(row, includeChartColumn: false, processTable: true);

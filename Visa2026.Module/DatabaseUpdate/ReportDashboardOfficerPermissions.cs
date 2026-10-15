@@ -54,6 +54,8 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdVisaByDaysRemaining>(role);
 
         EnsureViewReadPermission<VwRdInvitationReady>(role);
+        EnsureViewReadPermission<VwRdInvitationExpired>(role);
+        EnsureViewReadPermission<VwRdInvitationCancelled>(role);
         EnsureViewReadPermission<VwRdInvitationInProcess>(role);
         EnsureViewReadPermission<VwRdInvitationUsed>(role);
         EnsureViewReadPermission<VwRdInvitationValidUntil>(role);

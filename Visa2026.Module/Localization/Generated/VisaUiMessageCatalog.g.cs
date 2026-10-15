@@ -9938,6 +9938,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Çakylyk nusgasyny aç",
             ["ru-RU"] = "Открыть копию приглашения",
         },
+        ["ReportDashboard.Chrome.OpenVisaCopy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open visa copy",
+            ["tr-TR"] = "Vize kopyasını aç",
+            ["tk-TM"] = "Wiza nusgasyny aç",
+            ["ru-RU"] = "Открыть копию визы",
+        },
         ["ReportDashboard.Chrome.PieChart"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Pie Chart",
@@ -10644,6 +10651,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Vize no",
             ["tk-TM"] = "Wiza no",
             ["ru-RU"] = "№ визы",
+        },
+        ["ReportDashboard.Header.IssuedDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued date",
+            ["tr-TR"] = "Veriliş tarihi",
+            ["tk-TM"] = "Berlen senesi",
+            ["ru-RU"] = "Дата выдачи",
+        },
+        ["ReportDashboard.Header.Place"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Place",
+            ["tr-TR"] = "Yer",
+            ["tk-TM"] = "Ýeri",
+            ["ru-RU"] = "Место",
+        },
+        ["ReportDashboard.Header.StartDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Start date",
+            ["tr-TR"] = "Başlangıç tarihi",
+            ["tk-TM"] = "Başlanýan senesi",
+            ["ru-RU"] = "Дата начала",
+        },
+        ["ReportDashboard.Header.EndDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "End date",
+            ["tr-TR"] = "Bitiş tarihi",
+            ["tk-TM"] = "Gutarýan senesi",
+            ["ru-RU"] = "Дата окончания",
         },
         ["ReportDashboard.Header.VisaOnExtension"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -11569,12 +11604,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Çykyş etmeli",
             ["ru-RU"] = "К снятию с учёта",
         },
+        ["ReportDashboard.SubReport.expired-invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired Invitation",
+            ["tr-TR"] = "Süresi dolmuş davetiye",
+            ["tk-TM"] = "Möhleti geçen Çakylyk",
+            ["ru-RU"] = "Просроченное приглашение",
+        },
+        ["ReportDashboard.SubReport.cancelled-invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled Invitation",
+            ["tr-TR"] = "İptal edilen davetiye",
+            ["tk-TM"] = "Ýatyrylan Çakylyk",
+            ["ru-RU"] = "Аннулированное приглашение",
+        },
         ["ReportDashboard.SubReport.used"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Used (P)",
-            ["tr-TR"] = "Kullanılan (P)",
-            ["tk-TM"] = "Ulanylan (P)",
-            ["ru-RU"] = "Использованные (P)",
+            ["en-US"] = "Used Invitations",
+            ["tr-TR"] = "Kullanılan davetiyeler",
+            ["tk-TM"] = "Ulanylan Çakylyklar",
+            ["ru-RU"] = "Использованные приглашения",
         },
         ["ReportDashboard.SubReport.used-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

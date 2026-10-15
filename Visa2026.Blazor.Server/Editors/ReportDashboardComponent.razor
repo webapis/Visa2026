@@ -583,7 +583,8 @@
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            var stackColumn = (IsInvitationReadyTable && i >= 4 && i <= 8)
+                                            var stackColumn = (IsInvitationCancelledTable && (i == 3 || i == 7))
+                                                || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 4 && i <= 8)
                                                 || (IsInvitationProcessTable && i >= 4 && i <= 8);
                                             <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
@@ -603,6 +604,50 @@
                                                 title="@(opensDossier ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenDossierTitle") : null)"
                                                 @onclick="() => OnRowSelected(row)">
                                                 <td class="rd-cell-name">@row.Name</td>
+                                                @if (IsInvitationCancelledTable)
+                                                {
+                                                    <td class="@ColumnClass(1)" @onclick:stopPropagation="true">
+                                                        @if (row.InvitationId is { } cancelledInvitationId && cancelledInvitationId != Guid.Empty && !string.IsNullOrEmpty(row.ColumnE))
+                                                        {
+                                                            <button type="button"
+                                                                    class="rd-invitation-link"
+                                                                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInvitationCopy")"
+                                                                    @onclick="() => OnInvitationCopies(row)">
+                                                                @row.ColumnE
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            @row.ColumnE
+                                                        }
+                                                    </td>
+                                                    <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                    <td class="@($"{ColumnClass(3)} rd-col-stack")">
+                                                        <div class="rd-cell-stack rd-expires">
+                                                            @if (!string.IsNullOrEmpty(row.ColumnF))
+                                                            {
+                                                                <span>@row.ColumnF</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.ExpiresBadge))
+                                                            {
+                                                                @StateLabel(row.ExpiresBadge, row.ExpiresCssClass, true)
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnH</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnD</td>
+                                                    <td class="@($"{ColumnClass(7)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in (row.ColumnI ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                }
+                                                else
+                                                {
                                                 <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
                                                 <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
                                                 <td class="@ColumnClass(3)">@row.ColumnB</td>
@@ -652,7 +697,7 @@
                                                             }
                                                         </div>
                                                     </td>
-                                                    @if (IsInvitationReadyTable)
+                                                    @if (IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable)
                                                     {
                                                     <td class="@ColumnClass(invitationStart + 1)" @onclick:stopPropagation="true">
                                                         @if (row.InvitationId is { } invitationId && invitationId != Guid.Empty && !string.IsNullOrEmpty(row.ColumnE))
@@ -682,6 +727,28 @@
                                                         </div>
                                                     </td>
                                                     <td class="@ColumnClass(invitationStart + 3)">@row.ColumnH</td>
+                                                    @if (IsInvitationUsedTable)
+                                                    {
+                                                        <td class="@ColumnClass(invitationStart + 4)" @onclick:stopPropagation="true">
+                                                            @if (row.VisaId is { } visaId && visaId != Guid.Empty && !string.IsNullOrEmpty(row.VisaNumber))
+                                                            {
+                                                                <button type="button"
+                                                                        class="rd-invitation-link"
+                                                                        title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenVisaCopy")"
+                                                                        @onclick="() => OnVisaCopies(row)">
+                                                                    @row.VisaNumber
+                                                                </button>
+                                                            }
+                                                            else
+                                                            {
+                                                                @row.VisaNumber
+                                                            }
+                                                        </td>
+                                                        <td class="@ColumnClass(invitationStart + 5)">@row.VisaIssuedDate</td>
+                                                        <td class="@ColumnClass(invitationStart + 6)">@row.VisaPlace</td>
+                                                        <td class="@ColumnClass(invitationStart + 7)">@row.VisaStartDate</td>
+                                                        <td class="@ColumnClass(invitationStart + 8)">@row.VisaEndDate</td>
+                                                    }
                                                     @if (ShowInvitationChartColumn)
                                                     {
                                                         <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
@@ -723,6 +790,7 @@
                                                         <td class="@ColumnClass(10)">@row.ColumnI</td>
                                                     }
                                                     <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
+                                                }
                                                 }
                                             </tr>
                                         }
@@ -1374,6 +1442,11 @@
             || ContainsTerm(row.ColumnH, term)
             || ContainsTerm(row.ColumnI, term)
             || ContainsTerm(row.ColumnBadge, term)
+            || ContainsTerm(row.VisaNumber, term)
+            || ContainsTerm(row.VisaIssuedDate, term)
+            || ContainsTerm(row.VisaPlace, term)
+            || ContainsTerm(row.VisaStartDate, term)
+            || ContainsTerm(row.VisaEndDate, term)
             || ContainsTerm(row.Status, term))
             return true;
 
@@ -1479,11 +1552,24 @@
         Category == ReportDashboardCategory.Invitation
         && ReportDashboardCatalog.IsInvitationReadySubReport(Panel?.SubReport ?? SubReport);
 
+    private bool IsInvitationExpiredTable =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationExpiredSubReport(Panel?.SubReport ?? SubReport);
+
+    private bool IsInvitationCancelledTable =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationCancelledSubReport(Panel?.SubReport ?? SubReport);
+
     private bool IsInvitationProcessTable =>
         Category == ReportDashboardCategory.Invitation
         && ReportDashboardCatalog.IsInvitationProcessSubReport(Panel?.SubReport ?? SubReport);
 
-    private bool IsInvitationOfficerTable => IsInvitationReadyTable || IsInvitationProcessTable;
+    private bool IsInvitationUsedTable =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationUsedSubReport(Panel?.SubReport ?? SubReport);
+
+    private bool IsInvitationOfficerTable =>
+        IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationCancelledTable || IsInvitationProcessTable || IsInvitationUsedTable;
 
     private bool ShowInvitationChartColumn =>
         IsInvitationReadyTable
@@ -1533,6 +1619,36 @@
             ContextItemId = row.RecordId,
             FocusRecordKey = onlyCopy?.RecordKey,
             FocusDisplayName = onlyCopy?.RecordLabel ?? row.ColumnE,
+            OpenPreviewOnly = onlyCopy != null,
+        });
+    }
+
+    private async Task OnVisaCopies(ReportDashboardPreviewRow row)
+    {
+        if (row.VisaId is not { } visaId || visaId == Guid.Empty)
+            return;
+
+        HeaderLinkedDocumentRecord? onlyCopy = null;
+        using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Visa>())
+        {
+            var snapshot = HeaderLinkedDocumentsResolver.Resolve(
+                objectSpace,
+                HeaderDocumentCopiesFamily.Visa,
+                visaId,
+                null);
+            var copies = snapshot.Records
+                .Where(record => record.Files.Any(file => file.HasContent && file.FileDataId != Guid.Empty))
+                .ToList();
+            if (copies.Count == 1)
+                onlyCopy = copies[0];
+        }
+
+        await PreviewSlot.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = HeaderDocumentCopiesFamily.Visa,
+            ParentId = visaId,
+            FocusRecordKey = onlyCopy?.RecordKey,
+            FocusDisplayName = onlyCopy?.RecordLabel ?? row.VisaNumber,
             OpenPreviewOnly = onlyCopy != null,
         });
     }

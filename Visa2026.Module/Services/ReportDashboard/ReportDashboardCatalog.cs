@@ -450,10 +450,11 @@ public static class ReportDashboardCatalog
         ],
         ReportDashboardCategory.Invitation => [
             new() { Key = "ready-by-project", Label = "Active Invitation (P)" },
+            new() { Key = "expired-invitation", Label = "Expired Invitation" },
+            new() { Key = "cancelled-invitation", Label = "Cancelled Invitation" },
             new() { Key = "in-process", Label = "Invitation Process (P)" },
-            new() { Key = "process-result", Label = "Process Result (P)" },
-            new() { Key = "used", Label = "Used (P)" },
-            new() { Key = "valid-until", Label = "Invitation Validity" },
+            new() { Key = "used", Label = "Used Invitations" },
+            // Process Result and Invitation Validity stay loadable by key. Officers do not see them.
         ],
         ReportDashboardCategory.Registration =>
         [
@@ -677,6 +678,18 @@ public static class ReportDashboardCatalog
     public static bool IsInvitationProcessSubReport(string? subReport) =>
         subReport is "in-process" or "in-process-by-period-category-type";
 
+    /// <summary>Expired Invitation: issued, unused, expiration date already passed.</summary>
+    public static bool IsInvitationExpiredSubReport(string? subReport) =>
+        subReport is "expired-invitation";
+
+    /// <summary>Cancelled Invitation: one invitation line cancelled by a completed cancellation application.</summary>
+    public static bool IsInvitationCancelledSubReport(string? subReport) =>
+        subReport is "cancelled-invitation";
+
+    /// <summary>Used Invitations: one issued visa per invitation line, including a visa cancelled later.</summary>
+    public static bool IsInvitationUsedSubReport(string? subReport) =>
+        subReport is "used" or "used-by-period-category-type";
+
     /// <summary>
     /// Approval-step columns on Active Invitation, in leg sequence order.
     /// The ministry name is inside the cell, under the decision date and letter number.
@@ -707,6 +720,22 @@ public static class ReportDashboardCatalog
         headers[migrationIndex + 3] = "Period";
         if (includeChart)
             headers[migrationIndex + 4] = chartHeader!;
+        return headers;
+    }
+
+    private static string[] UsedInvitationHeaders(bool includeChart)
+    {
+        var core = ActiveInvitationHeaders(null);
+        var headers = new string[core.Length + 5 + (includeChart ? 1 : 0)];
+        core.CopyTo(headers, 0);
+        var visaIndex = core.Length;
+        headers[visaIndex] = "Visa #";
+        headers[visaIndex + 1] = "Issued date";
+        headers[visaIndex + 2] = "Place";
+        headers[visaIndex + 3] = "Start date";
+        headers[visaIndex + 4] = "End date";
+        if (includeChart)
+            headers[^1] = "Period · Category · Type";
         return headers;
     }
 
@@ -746,8 +775,17 @@ public static class ReportDashboardCatalog
                 : ("VwRdInvitationReady_ListView", typeof(VwRdInvitationReady));
         }
 
+        if (category == ReportDashboardCategory.Invitation && IsInvitationExpiredSubReport(subReport))
+            return ("VwRdInvitationExpired_ListView", typeof(VwRdInvitationExpired));
+
+        if (category == ReportDashboardCategory.Invitation && IsInvitationCancelledSubReport(subReport))
+            return ("VwRdInvitationCancelled_ListView", typeof(VwRdInvitationCancelled));
+
         if (category == ReportDashboardCategory.Invitation && IsInvitationProcessSubReport(subReport))
             return ("VwRdInvitationInProcess_ListView", typeof(VwRdInvitationInProcess));
+
+        if (category == ReportDashboardCategory.Invitation && IsInvitationUsedSubReport(subReport))
+            return ("VwRdInvitationUsed_ListView", typeof(VwRdInvitationUsed));
 
         if (category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport))
@@ -969,6 +1007,10 @@ public static class ReportDashboardCatalog
                 ActiveInvitationHeaders(null),
             (ReportDashboardCategory.Invitation, "ready-by-period-category") =>
                 ActiveInvitationHeaders("Period · Category · Type"),
+            (ReportDashboardCategory.Invitation, "expired-invitation") =>
+                ActiveInvitationHeaders(null),
+            (ReportDashboardCategory.Invitation, "cancelled-invitation") =>
+                ["Full name", "Invitation #", "Issued date", "Expires", "Period", "App #", "Date", "Migration"],
             (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 InvitationProcessHeaders(),
@@ -979,9 +1021,9 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Invitation, "rejected-by-project") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.Invitation, "rejected-by-period-category-type") =>
                 ["Name", "Project", "App #", "App Date", "Period · Category · Type · State"],
-            (ReportDashboardCategory.Invitation, "used") => ["Name", "Project", "Invitation #", "Issued", "Project"],
+            (ReportDashboardCategory.Invitation, "used") => UsedInvitationHeaders(includeChart: false),
             (ReportDashboardCategory.Invitation, "used-by-period-category-type") =>
-                ["Name", "Project", "Invitation #", "Issued", "Period · Category · Type"],
+                UsedInvitationHeaders(includeChart: true),
             (ReportDashboardCategory.Invitation, "valid-until") => ["Name", "Project", "Invitation #", "Expiry", "Valid Until"],
             (ReportDashboardCategory.Invitation, "expired") => ["Name", "Project", "Invitation #", "Expiry", "Valid Until"],
             (ReportDashboardCategory.Invitation, "issued-inv") => ["Name", "Project", "Invitation #", "Expiry", "Project"],
@@ -1059,8 +1101,14 @@ public static class ReportDashboardCatalog
         var usesPersonSearchRd = category == ReportDashboardCategory.PersonSearch;
         var usesInvitationReady = category == ReportDashboardCategory.Invitation
             && IsInvitationReadySubReport(subReport);
+        var usesInvitationExpired = category == ReportDashboardCategory.Invitation
+            && IsInvitationExpiredSubReport(subReport);
+        var usesInvitationCancelled = category == ReportDashboardCategory.Invitation
+            && IsInvitationCancelledSubReport(subReport);
         var usesInvitationProcess = category == ReportDashboardCategory.Invitation
             && IsInvitationProcessSubReport(subReport);
+        var usesInvitationUsed = category == ReportDashboardCategory.Invitation
+            && IsInvitationUsedSubReport(subReport);
 
         string roleCriteria;
         if (usesPersonSearchRd)
@@ -1094,7 +1142,7 @@ public static class ReportDashboardCatalog
             if ((usesVisaActive || usesByDays) && oneLastValidVisaPerPerson)
                 roleCriteria = $"({roleCriteria}) And [IsOneLastValidPerPerson] = True";
         }
-        else if (usesInvitationReady || usesInvitationProcess)
+        else if (usesInvitationReady || usesInvitationExpired || usesInvitationCancelled || usesInvitationProcess || usesInvitationUsed)
         {
             roleCriteria = IsAllPersonTypes(personType)
                 ? "[IsArchived] = False"
@@ -1157,7 +1205,7 @@ public static class ReportDashboardCatalog
         {
             var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
                     || usesIncompletePersonsRd || usesPersonSearchRd || usesRegistrationRd
-                    || usesInvitationReady || usesInvitationProcess
+                    || usesInvitationReady || usesInvitationExpired || usesInvitationCancelled || usesInvitationProcess || usesInvitationUsed
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -1268,9 +1316,20 @@ public static class ReportDashboardCatalog
             {
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
             }
-            else if (usesInvitationReady)
+            else if (usesInvitationReady || usesInvitationExpired)
             {
                 var field = string.Equals(subReport, "ready-by-period-category", StringComparison.OrdinalIgnoreCase)
+                    ? "PeriodCategoryTypeLabel"
+                    : "StatusLabel";
+                roleCriteria = $"({roleCriteria}) And [{field}] = '{Escape(statusLabel)}'";
+            }
+            else if (usesInvitationCancelled)
+            {
+                roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
+            }
+            else if (usesInvitationUsed)
+            {
+                var field = string.Equals(subReport, "used-by-period-category-type", StringComparison.OrdinalIgnoreCase)
                     ? "PeriodCategoryTypeLabel"
                     : "StatusLabel";
                 roleCriteria = $"({roleCriteria}) And [{field}] = '{Escape(statusLabel)}'";

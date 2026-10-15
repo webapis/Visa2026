@@ -429,6 +429,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                 if (activePanel == null)
                 {
                     var fallbackKey = ReportDashboardCatalog.DefaultSubReport(model.Category);
+                    model.SubReport = fallbackKey;
+                    model.ChartView = DefaultChartViewFor(model.Category, fallbackKey);
                     if (counts.ContainsKey(fallbackKey))
                     {
                         activePanel = LoadPanelFor(objectSpace, model, model.Category, fallbackKey);
