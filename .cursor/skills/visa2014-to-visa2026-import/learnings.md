@@ -1,3 +1,9 @@
+### 2026-10-15 — Production catch-up no longer imports visas, work permits, or invitations
+
+- **Phase**: strategy lock (no import run, no target writes)
+- **Decision**: Officers enter Visa, WorkPermit, WorkPermitItem, Invitation, and InvitationItem on `visa2026_prod`. The catch-up must not import those headers, items, or their scans. A catch-up insert of a record an officer already typed creates a second copy. Rows already on production stay. Do not delete them.
+- **Still imported**: person-domain scalars (Person, Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary) and fill-missing files for Person.Photo, Passport.PassportDocument, Education.EducationDocument, and Person.FamilyProofDocument.
+- **Recorded**: `import-strategy.yaml` `calikProductionScope.officerEnteredIssuedDocuments`, the production catch-up prompt, and `IMPORT_PLAN_AND_STRATEGY.md`.
 ### 2026-10-14 — Production catch-up inserted new people, visas, invitations, and their scans
 
 - **Phase**: insert-only catch-up on `visa2026_prod` (tunnel `127.0.0.1:15432`, `--inprocess`, `calik-energi-onprem-prod`). Staging was not touched. No backup. No application id-map. Application profile instances, roster, progress, rejections, border zones, and medical records were not imported.
