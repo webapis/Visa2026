@@ -104,7 +104,6 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApprovingMinistry> ApprovingMinistries { get; set; }
         public DbSet<ApprovalLegProfile> ApprovalLegProfiles { get; set; }
         public DbSet<ApprovalLegProfileMinistryLeg> ApprovalLegProfileMinistryLegs { get; set; }
-        public DbSet<ProjectContractApprovalLegProfile> ProjectContractApprovalLegProfiles { get; set; }
         public DbSet<ApplicationProfileInstanceApprovalLegSnapshot> ApplicationProfileInstanceApprovalLegSnapshots { get; set; }
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
         public DbSet<VisaCategory> VisaCategories { get; set; }
@@ -244,13 +243,6 @@ namespace Visa2026.Module.BusinessObjects
             // Match XAF template (DX 404292): notification strategy + UseChangeTrackingProxies() in Startup so BaseImpl entities
             // (e.g. FileData) get notification interfaces via proxies. Snapshot breaks Model Editor; notifications without proxies fail at runtime.
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
-
-            modelBuilder.Entity<ProjectContractApprovalLegProfile>(b =>
-            {
-                b.HasIndex(e => new { e.ProjectContractId, e.ApprovalLegProfileId })
-                    .IsUnique()
-                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
-            });
 
             modelBuilder.Entity<TravelHistory>(b =>
             {
@@ -1066,11 +1058,6 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.Ignore(c => c.Name);
                 b.Ignore(c => c.Code);
-                b.HasOne(c => c.ApprovalLegProfile)
-                    .WithMany(p => p.ProjectContracts)
-                    .HasForeignKey(c => c.ApprovalLegProfileId)
-                    .IsRequired(false)
-                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<SystemSettings>()

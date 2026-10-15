@@ -394,7 +394,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationProfileTemplate>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileProgressStateSetting>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ProjectContractApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceExclusion>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileInstanceExclusionPerson>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -862,11 +861,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationProfileProgressStateSetting>(role);
             EnsureReadOnlyPermission<ApplicationProfileInstancePersonResolvedLink>(role);
             EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
-            EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
 
             if (officerCanWriteProgress)
             {
-                // Process-tracking still needs Read; officers also edit contract title, note, active flag, and approval-leg profile.
+                // Process-tracking still needs Read; officers also edit contract title, note, and active flag.
                 EnsureOfficerCanAssignApplicationProfile(role);
                 // Create template (yellow marks) checks Write on ApplicationProfileTemplate.
                 EnsureReadWriteCreatePermission<ApplicationProfileTemplate>(role);

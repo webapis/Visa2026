@@ -144,16 +144,6 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
         ApprovalLegProfileMinistryHelper.ApplySnapshot(ObjectSpace, application, newProfile);
 
-        if (application.ProjectContract != null
-            && newProfile != null
-            && (application.ProjectContract.ApprovalLegProfile == null
-                || application.ProjectContract.ApprovalLegProfile.ID != newProfile.ID))
-        {
-            application.ProjectContract = null;
-        }
-
-
-
         if (!ApplicationProfileInstanceProgressProfileResolver.HasAnyProgressHistory(application, ObjectSpace))
 
             return;

@@ -8,13 +8,12 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Reusable ministry approval chain (ordered legs + SLA). Owns many <see cref="ProjectContract"/> rows;
-/// selected on <see cref="Application"/> when <see cref="ApplicationType.ShowApprovalLegProfile"/> applies.
+/// Reusable ministry approval chain (ordered legs + SLA).
+/// Chosen on an application profile instance. Independent of <see cref="ProjectContract"/>.
 /// </summary>
 [DefaultClassOptions]
 [DefaultProperty(nameof(MinistriesLabel))]
@@ -30,8 +29,6 @@ public class ApprovalLegProfile : LookupBase
     public ApprovalLegProfile()
     {
         MinistryLegs = new ObservableCollection<ApprovalLegProfileMinistryLeg>();
-        ProjectContracts = new ObservableCollection<ProjectContract>();
-        ContractLinks = new ObservableCollection<ProjectContractApprovalLegProfile>();
     }
 
     public virtual bool IsActive { get; set; } = true;
@@ -53,15 +50,6 @@ public class ApprovalLegProfile : LookupBase
     [Aggregated]
     [InverseProperty(nameof(ApprovalLegProfileMinistryLeg.ApprovalLegProfile))]
     public virtual IList<ApprovalLegProfileMinistryLeg> MinistryLegs { get; set; }
-
-    [InverseProperty(nameof(ProjectContract.ApprovalLegProfile))]
-    public virtual IList<ProjectContract> ProjectContracts { get; set; }
-
-    /// <summary>Legacy many-to-many join — use <see cref="ProjectContracts"/> instead.</summary>
-    [Obsolete("Use ProjectContracts (one-to-many). Retained for migration backfill only.")]
-    [Browsable(false)]
-    [InverseProperty(nameof(ProjectContractApprovalLegProfile.ApprovalLegProfile))]
-    public virtual IList<ProjectContractApprovalLegProfile> ContractLinks { get; set; }
 
     public override void OnSaving()
     {

@@ -124,7 +124,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationProfileApprovalLegVersionTenantCatalogSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.IssuedDocumentStatusColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractApprovalLegProfileSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaFamilyManualFromFamilyMembersMigrationUpdater(objectSpace, versionFromDB)
             };
         }

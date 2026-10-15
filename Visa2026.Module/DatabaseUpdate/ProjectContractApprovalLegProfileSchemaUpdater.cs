@@ -5,7 +5,8 @@ using DevExpress.ExpressApp.Updating;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Adds <see cref="BusinessObjects.ProjectContract.ApprovalLegProfileId"/> before EF schema sync.
+/// Drops <c>ProjectContracts.ApprovalLegProfileId</c> and the join table
+/// <c>ProjectContractApprovalLegProfiles</c> before EF schema sync.
 /// </summary>
 public sealed class ProjectContractApprovalLegProfileSchemaUpdater : ModuleUpdater
 {
@@ -17,18 +18,18 @@ public sealed class ProjectContractApprovalLegProfileSchemaUpdater : ModuleUpdat
     public override void UpdateDatabaseBeforeUpdateSchema()
     {
         base.UpdateDatabaseBeforeUpdateSchema();
-        ApplySchemaSql();
+        if (!DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+            return;
+
+        ExecuteNonQueryCommand(ProjectContractApprovalLegProfileSchemaSql.DropPostgres, false);
     }
 
     public override void UpdateDatabaseAfterUpdateSchema()
     {
         base.UpdateDatabaseAfterUpdateSchema();
-        ApplySchemaSql();
-    }
+        if (!DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+            return;
 
-    private void ApplySchemaSql()
-    {
-        ExecuteNonQueryCommand(ProjectContractApprovalLegProfileSchemaSql.EnsureApprovalLegProfileIdColumnSql, false);
-        ExecuteNonQueryCommand(ProjectContractApprovalLegProfileSchemaSql.EnsureApprovalLegProfileIdFkSql, false);
+        ExecuteNonQueryCommand(ProjectContractApprovalLegProfileSchemaSql.DropPostgres, false);
     }
 }

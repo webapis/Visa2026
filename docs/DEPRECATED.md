@@ -158,6 +158,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | `ProjectContractApprovalProfile`, `ProjectContractApprovalLeg` | Removed (2026-06 flatten) | One **`ProjectContract`** row per process; **`ProjectContractMinistryLeg`** |
 | `Application.ContractApprovalProfile` | Removed (2026-06 flatten) | **`Application.ProjectContract`** only |
 | `ProjectContracts.MinistryID` FK | `ProjectContractLegacyColumnsCleanupUpdater` | Approval profiles |
+| `ProjectContracts.ApprovalLegProfileId` and `ProjectContractApprovalLegProfiles` | `ProjectContractApprovalLegProfileSchemaUpdater` | Approval legs live on the application profile instance. A project contract does not store them |
 
 ---
 

@@ -156,7 +156,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `WorkPermit` | Read, Write, Create |
 | `WorkPermitItem` | Read, Write, Create |
 | `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative` | Read, Write, Create (Organization catalogs) |
-| `ProjectContract` | Read, Write, Create (Configuration → project contracts; no Delete). `ApprovalLegProfile` stays read-only so the dropdown can be selected |
+| `ProjectContract` | Read, Write, Create (Configuration → project contracts; no Delete). Approval legs are not on the contract |
 | `ApplicationProfileInstanceExclusion`, `ApplicationProfileInstanceExclusionPerson` | Read, Write, Create (numbering on new instances, plus Seretmezlik letters) |
 | `ApplicationProfileInstanceExclusionTemplate` | Full (company Seretmezlik template upload) |
 
@@ -191,7 +191,7 @@ Shared helper `EnsureApplicationProcessTrackingReadPermissions` — required for
 | Migration deadline / working days | `ApplicationProfile.MigrationSlaDays` |
 | Approval deadline / working days | `ApplicationApprovalLegSnapshot`, `ApprovingMinistry`, `ApprovalLegProfile` (+ legs) |
 | Current status | `ApplicationProgress`, `ApplicationState`, `ApplicationLocation`, `MigrationService` |
-| Project/Contract | `ProjectContract` (read-only; Users role may edit), `ProjectContractApprovalLegProfile` |
+| Project/Contract | `ProjectContract` (read-only; Users role may edit) |
 
 ---
 

@@ -904,9 +904,6 @@ internal static class LookupCatalogEntitySync
         }
 
         ApplyLocalizationKey(target, row);
-
-        if (target is ProjectContract contract)
-            ProjectContractApprovalLegProfileLinker.TryLinkContractFromCatalogRow(objectSpace, contract, row);
     }
 
     private static void ApplyLocalizationKey(object target, Dictionary<string, JsonElement> row)

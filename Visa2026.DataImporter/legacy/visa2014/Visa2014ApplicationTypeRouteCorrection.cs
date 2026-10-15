@@ -226,18 +226,16 @@ internal static class Visa2014ApplicationTypeRouteCorrection
 
     private static Bo.ApprovalLegProfile? ResolveApprovalLegProfileFromSponsorContract(IObjectSpace objectSpace, Bo.ProjectContract contract)
     {
-        var allowed = objectSpace.GetObjectsQuery<Bo.ProjectContractApprovalLegProfile>()
-            .Where(x => x.ProjectContract != null && x.ProjectContract.ID == contract.ID)
-            .Select(x => x.ApprovalLegProfile).Where(p => p != null && p.IsActive).ToList();
-        if (allowed.Count == 1) return allowed[0];
+        // Contracts do not store an approval-leg profile. Use the profile already chosen
+        // on employee instances that share this contract.
         var dominantProfileId = objectSpace.GetObjectsQuery<Bo.ApplicationProfileInstance>()
             .Where(a => a.ProjectContract != null && a.ProjectContract.ID == contract.ID
                 && a.ApprovalLegProfile != null && a.ApplicationType != null
                 && a.ApplicationType.Category == Bo.ApplicationTypeCategory.Employee)
             .GroupBy(a => a.ApprovalLegProfile!.ID).OrderByDescending(g => g.Count()).Select(g => g.Key).FirstOrDefault();
-        if (dominantProfileId != Guid.Empty)
-            return objectSpace.GetObjectByKey<Bo.ApprovalLegProfile>(dominantProfileId);
-        return allowed.FirstOrDefault();
+        if (dominantProfileId == Guid.Empty)
+            return null;
+        return objectSpace.GetObjectByKey<Bo.ApprovalLegProfile>(dominantProfileId);
     }
 
     private static void MergeProgressIdMap(string path, IReadOnlyDictionary<string, Guid> updates)

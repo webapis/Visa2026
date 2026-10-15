@@ -1852,16 +1852,8 @@ namespace Visa2026.Module.BusinessObjects
             if (objectSpace == null)
                 return Array.Empty<ProjectContract>();
 
-            var query = objectSpace.GetObjectsQuery<ProjectContract>()
-                .Where(contract => contract.IsActive);
-
-            if (ApplicationType?.ShowApprovalLegProfile == true && ApprovalLegProfile != null)
-            {
-                var profileId = ApprovalLegProfile.ID;
-                query = query.Where(contract => contract.ApprovalLegProfileId == profileId);
-            }
-
-            return query
+            return objectSpace.GetObjectsQuery<ProjectContract>()
+                .Where(contract => contract.IsActive)
                 .OrderBy(contract => contract.NameTm)
                 .ToList();
         }

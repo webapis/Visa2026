@@ -164,6 +164,7 @@ namespace Visa2026.Blazor.Server
                         VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationMigrationSlaProfileDropSchemaSql.ApplyIfMissing(connectionString);
+                        ProjectContractApprovalLegProfileSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                         PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                         CompanyProfileRegistrationDateSchemaSql.ApplyIfMissing(connectionString);
@@ -356,6 +357,7 @@ namespace Visa2026.Blazor.Server
                 VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationMigrationSlaProfileDropSchemaSql.ApplyIfMissing(connectionString);
+                ProjectContractApprovalLegProfileSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                 CompanyProfileRegistrationDateSchemaSql.ApplyIfMissing(connectionString);
