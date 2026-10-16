@@ -44,6 +44,25 @@ public class Visa2014NaturalKeyLookupTests
     }
 
     [Fact]
+    public void Only_one_matching_number_is_the_officer_row()
+    {
+        var id = Guid.Parse("55555555-5555-5555-5555-555555555555");
+        Assert.Equal(id, Visa2014NaturalKeyLinker.OnlyId([id]));
+        Assert.Null(Visa2014NaturalKeyLinker.OnlyId([]));
+        Assert.Null(Visa2014NaturalKeyLinker.OnlyId([id, Guid.Parse("66666666-6666-6666-6666-666666666666")]));
+    }
+
+    [Fact]
+    public void WorkPermit_key_without_a_date_still_uses_the_number()
+    {
+        var lookup = Visa2014NaturalKeyLookup.ForWorkPermit("WP-9", null);
+
+        Assert.NotNull(lookup);
+        Assert.Equal("workpermit|WP-9", lookup!.CacheKey);
+        Assert.Null(lookup.OnDate);
+    }
+
+    [Fact]
     public void InvitationItem_key_requires_both_ids()
     {
         Assert.Null(Visa2014NaturalKeyLookup.ForInvitationItem(Guid.Empty, Guid.NewGuid()));

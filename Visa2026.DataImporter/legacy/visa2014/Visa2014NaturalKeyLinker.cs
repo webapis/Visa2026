@@ -129,49 +129,52 @@ internal sealed class Visa2014NaturalKeyLookup
     public static Visa2014NaturalKeyLookup? ForWorkPermit(object? workPermitNumber, object? issuedDate)
     {
         var number = ReadText(workPermitNumber);
-        if (number == null || !TryReadDate(issuedDate, out var day))
+        if (number == null)
             return null;
 
+        var hasDay = TryReadDate(issuedDate, out var day);
         return new Visa2014NaturalKeyLookup(
             Visa2014NaturalKeyKind.WorkPermit,
             typeof(Bo.WorkPermit),
-            $"workpermit|{number}|{day:yyyy-MM-dd}",
+            hasDay ? $"workpermit|{number}|{day:yyyy-MM-dd}" : $"workpermit|{number}",
             Guid.Empty,
             Guid.Empty,
             number,
-            day);
+            hasDay ? day : null);
     }
 
     public static Visa2014NaturalKeyLookup? ForWorkPermitItem(Guid personId, object? workPermitNumber, object? startDate)
     {
         var number = ReadText(workPermitNumber);
-        if (personId == Guid.Empty || number == null || !TryReadDate(startDate, out var day))
+        if (personId == Guid.Empty || number == null)
             return null;
 
+        var hasDay = TryReadDate(startDate, out var day);
         return new Visa2014NaturalKeyLookup(
             Visa2014NaturalKeyKind.WorkPermitItem,
             typeof(Bo.WorkPermitItem),
-            $"workpermit-item|{personId:D}|{number}|{day:yyyy-MM-dd}",
+            hasDay ? $"workpermit-item|{personId:D}|{number}|{day:yyyy-MM-dd}" : $"workpermit-item|{personId:D}|{number}",
             personId,
             Guid.Empty,
             number,
-            day);
+            hasDay ? day : null);
     }
 
     public static Visa2014NaturalKeyLookup? ForInvitation(object? invitationNumber, object? issuedDate)
     {
         var number = ReadText(invitationNumber);
-        if (number == null || !TryReadDate(issuedDate, out var day))
+        if (number == null)
             return null;
 
+        var hasDay = TryReadDate(issuedDate, out var day);
         return new Visa2014NaturalKeyLookup(
             Visa2014NaturalKeyKind.Invitation,
             typeof(Bo.Invitation),
-            $"invitation|{number}|{day:yyyy-MM-dd}",
+            hasDay ? $"invitation|{number}|{day:yyyy-MM-dd}" : $"invitation|{number}",
             Guid.Empty,
             Guid.Empty,
             number,
-            day);
+            hasDay ? day : null);
     }
 
     public static Visa2014NaturalKeyLookup? ForInvitationItem(Guid personId, Guid invitationId)
@@ -225,11 +228,7 @@ internal static class Visa2014NaturalKeyLinker
                     .Where(p => p.Person != null && p.Person.ID == lookup.PersonId && p.PassportNumber == lookup.Number)
                     .OrderBy(p => p.ID)
                     .Select(p => (Guid?)p.ID)),
-            Visa2014NaturalKeyKind.Visa => FirstId(
-                objectSpace.GetObjectsQuery<Bo.Visa>()
-                    .Where(v => v.Passport != null && v.Passport.ID == lookup.RelatedId && v.VisaNumber == lookup.Number)
-                    .OrderBy(v => v.ID)
-                    .Select(v => (Guid?)v.ID)),
+            Visa2014NaturalKeyKind.Visa => FindVisa(objectSpace, lookup),
             Visa2014NaturalKeyKind.Education => FirstId(FindEducation(objectSpace, lookup)),
             Visa2014NaturalKeyKind.EmployeePositionHistory => FindPositionHistory(objectSpace, lookup),
             Visa2014NaturalKeyKind.EmployeeSalary => FirstId(
@@ -268,47 +267,93 @@ internal static class Visa2014NaturalKeyLinker
 
     private static Guid? FindWorkPermit(IObjectSpace objectSpace, Visa2014NaturalKeyLookup lookup)
     {
-        if (lookup.OnDate is not DateTime day)
-            return null;
-
-        var start = day.Date;
-        var next = start.AddDays(1);
-        return FirstId(
+        Guid? exact = null;
+        if (lookup.OnDate is DateTime day)
+        {
+            var start = day.Date;
+            var next = start.AddDays(1);
+            exact = FirstId(
             objectSpace.GetObjectsQuery<Bo.WorkPermit>()
                 .Where(w => w.WorkPermitNumber == lookup.Number && w.IssuedDate >= start && w.IssuedDate < next)
                 .OrderBy(w => w.ID)
                 .Select(w => (Guid?)w.ID));
+        }
+
+        return exact ?? OnlyId(
+            objectSpace.GetObjectsQuery<Bo.WorkPermit>()
+                .Where(w => w.WorkPermitNumber == lookup.Number)
+                .Select(w => w.ID)
+                .Take(2)
+                .ToList());
     }
 
     private static Guid? FindInvitation(IObjectSpace objectSpace, Visa2014NaturalKeyLookup lookup)
     {
-        if (lookup.OnDate is not DateTime day)
-            return null;
-
-        var start = day.Date;
-        var next = start.AddDays(1);
-        return FirstId(
+        Guid? exact = null;
+        if (lookup.OnDate is DateTime day)
+        {
+            var start = day.Date;
+            var next = start.AddDays(1);
+            exact = FirstId(
             objectSpace.GetObjectsQuery<Bo.Invitation>()
                 .Where(i => i.InvitationNumber == lookup.Number && i.IssuedDate >= start && i.IssuedDate < next)
                 .OrderBy(i => i.ID)
                 .Select(i => (Guid?)i.ID));
+        }
+
+        return exact ?? OnlyId(
+            objectSpace.GetObjectsQuery<Bo.Invitation>()
+                .Where(i => i.InvitationNumber == lookup.Number)
+                .Select(i => i.ID)
+                .Take(2)
+                .ToList());
     }
 
     private static Guid? FindWorkPermitItem(IObjectSpace objectSpace, Visa2014NaturalKeyLookup lookup)
     {
-        if (lookup.OnDate is not DateTime day)
-            return null;
-
-        var start = day.Date;
-        var next = start.AddDays(1);
-        return FirstId(
+        Guid? exact = null;
+        if (lookup.OnDate is DateTime day)
+        {
+            var start = day.Date;
+            var next = start.AddDays(1);
+            exact = FirstId(
             objectSpace.GetObjectsQuery<Bo.WorkPermitItem>()
                 .Where(i => i.Person != null && i.Person.ID == lookup.PersonId
                     && i.WorkPermitNumber == lookup.Number
                     && i.StartDate >= start && i.StartDate < next)
                 .OrderBy(i => i.ID)
                 .Select(i => (Guid?)i.ID));
+        }
+
+        return exact ?? OnlyId(
+            objectSpace.GetObjectsQuery<Bo.WorkPermitItem>()
+                .Where(i => i.Person != null && i.Person.ID == lookup.PersonId
+                    && i.WorkPermitNumber == lookup.Number)
+                .Select(i => i.ID)
+                .Take(2)
+                .ToList());
     }
+
+    private static Guid? FindVisa(IObjectSpace objectSpace, Visa2014NaturalKeyLookup lookup)
+    {
+        var exact = FirstId(
+            objectSpace.GetObjectsQuery<Bo.Visa>()
+                .Where(v => v.Passport != null && v.Passport.ID == lookup.RelatedId && v.VisaNumber == lookup.Number)
+                .OrderBy(v => v.ID)
+                .Select(v => (Guid?)v.ID));
+        return exact ?? OnlyId(
+            objectSpace.GetObjectsQuery<Bo.Visa>()
+                .Where(v => v.VisaNumber == lookup.Number)
+                .Select(v => v.ID)
+                .Take(2)
+                .ToList());
+    }
+
+    /// <summary>
+    /// One live row with this number is the officer's copy of the same document.
+    /// Two or more rows are left alone so a real second document can still be inserted.
+    /// </summary>
+    internal static Guid? OnlyId(IReadOnlyList<Guid> ids) => ids.Count == 1 ? ids[0] : null;
 
     private static IQueryable<Guid?> FindEducation(IObjectSpace objectSpace, Visa2014NaturalKeyLookup lookup)
     {

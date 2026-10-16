@@ -69,8 +69,13 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
             var existingOnTarget = await Visa2014ExistingTargetBlobIndex.SeedAsync(
                 targetConnection, existingBlobDocumentTable, existingBlobParentIdColumn, importedBlobKeys, copyIndexByParent);
             if (existingOnTarget > 0)
-                Console.WriteLine($"INF {spec.TargetDocumentType.Name} scans already on target: {existingOnTarget} (same bytes are not inserted again)");
+                Console.WriteLine($"INF {spec.TargetDocumentType.Name} scans already on target: {existingOnTarget} (a parent that already has a scan is not given another)");
         }
+
+        var parentsWithScan = string.IsNullOrWhiteSpace(existingBlobDocumentTable) || string.IsNullOrWhiteSpace(existingBlobParentIdColumn)
+            ? new HashSet<Guid>()
+            : await Visa2014ExistingTargetBlobIndex.LoadParentIdsWithDocumentAsync(
+                targetConnection, existingBlobDocumentTable, existingBlobParentIdColumn);
         int posted = 0;
         int failed = 0;
         int skippedNoParentMap = 0;
@@ -93,6 +98,12 @@ internal static class Visa2014PassportCopyLinkedDocumentImporter
             if (docMap.ContainsKey(legacyCopyOid))
             {
                 skippedAlreadyImported++;
+                continue;
+            }
+
+            if (parentsWithScan.Contains(targetParentId))
+            {
+                skippedDuplicateBlob++;
                 continue;
             }
 

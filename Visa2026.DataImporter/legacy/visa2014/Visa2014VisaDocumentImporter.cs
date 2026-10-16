@@ -49,8 +49,10 @@ internal static class Visa2014VisaDocumentImporter
         var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
         var existingOnTarget = await Visa2014ExistingTargetBlobIndex.SeedAsync(
             targetConnection, "VisaDocument", "VisaID", importedBlobKeys);
+        var parentsWithScan = await Visa2014ExistingTargetBlobIndex.LoadParentIdsWithDocumentAsync(
+            targetConnection, "VisaDocument", "VisaID");
         if (existingOnTarget > 0)
-            Console.WriteLine($"INF Visa scans already on target: {existingOnTarget} (same bytes are not inserted again)");
+            Console.WriteLine($"INF Visa scans already on target: {existingOnTarget} (a visa that already has a scan is not given another)");
 
         await using var connection = new SqlConnection(legacyConnectionString);
         await connection.OpenAsync();
@@ -80,6 +82,12 @@ internal static class Visa2014VisaDocumentImporter
                 skippedNoVisaMap++;
                 if (verbose)
                     Console.WriteLine($"  SKIP visa {legacyVisaOid}: not in Visa id-map");
+                continue;
+            }
+
+            if (parentsWithScan.Contains(targetVisaId))
+            {
+                skippedAlreadyImported++;
                 continue;
             }
 

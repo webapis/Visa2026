@@ -31,6 +31,36 @@ internal static class Visa2014ExistingTargetBlobIndex
         return ids;
     }
 
+    public static async Task<HashSet<Guid>> LoadParentIdsWithDocumentAsync(
+        string? targetConnection,
+        string documentTable,
+        string parentIdColumn,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = new HashSet<Guid>();
+        if (string.IsNullOrWhiteSpace(targetConnection) || !DatabaseProviderDetector.IsPostgreSql(targetConnection))
+            return ids;
+
+        RequireIdentifier(documentTable);
+        RequireIdentifier(parentIdColumn);
+        await using var connection = Open(targetConnection);
+        await using var command = new NpgsqlCommand(
+            $"""
+            SELECT DISTINCT d."{parentIdColumn}"
+            FROM "{documentTable}" d
+            INNER JOIN "FileData" f ON f."ID" = d."FileID"
+            WHERE d."GCRecord" = 0
+              AND f."Content" IS NOT NULL
+              AND octet_length(f."Content") > 0
+            """,
+            connection);
+        command.CommandTimeout = 120;
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+            ids.Add(reader.GetGuid(0));
+        return ids;
+    }
+
     public static async Task<int> SeedAsync(
         string? targetConnection,
         string documentTable,

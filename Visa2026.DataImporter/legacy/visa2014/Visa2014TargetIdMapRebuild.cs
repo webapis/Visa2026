@@ -202,24 +202,31 @@ internal static class Visa2014TargetIdMapRebuild
 
                 var legacyOid = (Guid)row["_legacyRowId"]!;
                 var visaNumber = row.GetValueOrDefault("VisaNumber") as string;
-                if (!TryParseLegacyGuid(row, "Passport", out var legacyPassportOid) ||
-                    string.IsNullOrWhiteSpace(visaNumber) ||
-                    !passportMap.TryGetValue(legacyPassportOid, out var passportId))
+                if (string.IsNullOrWhiteSpace(visaNumber))
                 {
                     skipped++;
                     continue;
                 }
 
-                var targetId = await ScalarGuidAsync(conn,
-                    """
-                    SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM Visas
-                    WHERE (GCRecord IS NULL OR GCRecord = 0)
-                      AND PassportID = @passportId
-                      AND VisaNumber = @visaNumber
-                    ORDER BY ID
-                    """,
-                    ("@passportId", passportId), ("@visaNumber", visaNumber.Trim()));
+                Guid? targetId = null;
+                if (TryParseLegacyGuid(row, "Passport", out var legacyPassportOid) &&
+                    passportMap.TryGetValue(legacyPassportOid, out var passportId))
+                {
+                    targetId = await ScalarGuidAsync(conn,
+                        """
+                        SELECT TOP 1 CAST(ID AS varchar(36))
+                        FROM Visas
+                        WHERE (GCRecord IS NULL OR GCRecord = 0)
+                          AND PassportID = @passportId
+                          AND VisaNumber = @visaNumber
+                        ORDER BY ID
+                        """,
+                        ("@passportId", passportId), ("@visaNumber", visaNumber.Trim()));
+                }
+
+                targetId ??= await ScalarGuidAsync(conn,
+                    UniqueLiveRowSql("Visas", "VisaNumber = @visaNumber"),
+                    ("@visaNumber", visaNumber.Trim()));
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -420,24 +427,31 @@ internal static class Visa2014TargetIdMapRebuild
                 var legacyOid = (Guid)row["_legacyRowId"]!;
                 var workPermitNumber = row.GetValueOrDefault("WorkPermitNumber") as string;
                 var issuedDateText = row.GetValueOrDefault("IssuedDate") as string;
-                if (string.IsNullOrWhiteSpace(workPermitNumber) ||
-                    !DateTime.TryParse(issuedDateText, out var issuedDate))
+                if (string.IsNullOrWhiteSpace(workPermitNumber))
                 {
                     skipped++;
                     continue;
                 }
 
-                var targetId = await ScalarGuidAsync(conn,
-                    """
-                    SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM WorkPermits
-                    WHERE (GCRecord IS NULL OR GCRecord = 0)
-                      AND WorkPermitNumber = @workPermitNumber
-                      AND CAST(StartDate AS date) = @issuedDate
-                    ORDER BY ID
-                    """,
-                    ("@workPermitNumber", workPermitNumber.Trim()),
-                    ("@issuedDate", issuedDate.Date));
+                Guid? targetId = null;
+                if (DateTime.TryParse(issuedDateText, out var issuedDate))
+                {
+                    targetId = await ScalarGuidAsync(conn,
+                        """
+                        SELECT TOP 1 CAST(ID AS varchar(36))
+                        FROM WorkPermits
+                        WHERE (GCRecord IS NULL OR GCRecord = 0)
+                          AND WorkPermitNumber = @workPermitNumber
+                          AND CAST(StartDate AS date) = @issuedDate
+                        ORDER BY ID
+                        """,
+                        ("@workPermitNumber", workPermitNumber.Trim()),
+                        ("@issuedDate", issuedDate.Date));
+                }
+
+                targetId ??= await ScalarGuidAsync(conn,
+                    UniqueLiveRowSql("WorkPermits", "WorkPermitNumber = @workPermitNumber"),
+                    ("@workPermitNumber", workPermitNumber.Trim()));
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -466,26 +480,36 @@ internal static class Visa2014TargetIdMapRebuild
                 var startDateText = row.GetValueOrDefault("StartDate") as string;
                 if (!TryParseLegacyGuid(row, "Person", out var legacyPersonOid) ||
                     string.IsNullOrWhiteSpace(workPermitNumber) ||
-                    !personMap.TryGetValue(legacyPersonOid, out var personId) ||
-                    !DateTime.TryParse(startDateText, out var startDate))
+                    !personMap.TryGetValue(legacyPersonOid, out var personId))
                 {
                     skipped++;
                     continue;
                 }
 
-                var targetId = await ScalarGuidAsync(conn,
-                    """
-                    SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM WorkPermitItems
-                    WHERE (GCRecord IS NULL OR GCRecord = 0)
-                      AND PersonID = @personId
-                      AND WorkPermitNumber = @workPermitNumber
-                      AND CAST(StartDate AS date) = @startDate
-                    ORDER BY ID
-                    """,
+                Guid? targetId = null;
+                if (DateTime.TryParse(startDateText, out var startDate))
+                {
+                    targetId = await ScalarGuidAsync(conn,
+                        """
+                        SELECT TOP 1 CAST(ID AS varchar(36))
+                        FROM WorkPermitItems
+                        WHERE (GCRecord IS NULL OR GCRecord = 0)
+                          AND PersonID = @personId
+                          AND WorkPermitNumber = @workPermitNumber
+                          AND CAST(StartDate AS date) = @startDate
+                        ORDER BY ID
+                        """,
+                        ("@personId", personId),
+                        ("@workPermitNumber", workPermitNumber.Trim()),
+                        ("@startDate", startDate.Date));
+                }
+
+                targetId ??= await ScalarGuidAsync(conn,
+                    UniqueLiveRowSql(
+                        "WorkPermitItems",
+                        "PersonID = @personId AND WorkPermitNumber = @workPermitNumber"),
                     ("@personId", personId),
-                    ("@workPermitNumber", workPermitNumber.Trim()),
-                    ("@startDate", startDate.Date));
+                    ("@workPermitNumber", workPermitNumber.Trim()));
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -511,25 +535,32 @@ internal static class Visa2014TargetIdMapRebuild
                 var legacyOid = (Guid)row["_legacyRowId"]!;
                 var invitationNumber = row.GetValueOrDefault("InvitationNumber") as string;
                 var issuedDateText = row.GetValueOrDefault("IssuedDate") as string;
-                if (string.IsNullOrWhiteSpace(invitationNumber) ||
-                    !DateTime.TryParse(issuedDateText, out var issuedDate))
+                if (string.IsNullOrWhiteSpace(invitationNumber))
                 {
                     skipped++;
                     continue;
                 }
 
                 // IssuedDate maps to DB column StartDate on Invitation.
-                var targetId = await ScalarGuidAsync(conn,
-                    """
-                    SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM Invitations
-                    WHERE (GCRecord IS NULL OR GCRecord = 0)
-                      AND InvitationNumber = @invitationNumber
-                      AND CAST(StartDate AS date) = @issuedDate
-                    ORDER BY ID
-                    """,
-                    ("@invitationNumber", invitationNumber.Trim()),
-                    ("@issuedDate", issuedDate.Date));
+                Guid? targetId = null;
+                if (DateTime.TryParse(issuedDateText, out var issuedDate))
+                {
+                    targetId = await ScalarGuidAsync(conn,
+                        """
+                        SELECT TOP 1 CAST(ID AS varchar(36))
+                        FROM Invitations
+                        WHERE (GCRecord IS NULL OR GCRecord = 0)
+                          AND InvitationNumber = @invitationNumber
+                          AND CAST(StartDate AS date) = @issuedDate
+                        ORDER BY ID
+                        """,
+                        ("@invitationNumber", invitationNumber.Trim()),
+                        ("@issuedDate", issuedDate.Date));
+                }
+
+                targetId ??= await ScalarGuidAsync(conn,
+                    UniqueLiveRowSql("Invitations", "InvitationNumber = @invitationNumber"),
+                    ("@invitationNumber", invitationNumber.Trim()));
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -651,6 +682,25 @@ internal static class Visa2014TargetIdMapRebuild
         var text = row.GetValueOrDefault(field) as string;
         return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyOid);
     }
+
+    /// <summary>
+    /// Returns the only live row matching <paramref name="predicate"/>.
+    /// Zero or several matches return no row, so a real second document can still be inserted.
+    /// </summary>
+    internal static string UniqueLiveRowSql(string table, string predicate) =>
+        $"""
+        SELECT TOP 1 CAST(ID AS varchar(36))
+        FROM {table}
+        WHERE (GCRecord IS NULL OR GCRecord = 0)
+          AND {predicate}
+          AND (
+            SELECT COUNT(*)
+            FROM {table} AS matchCount
+            WHERE (GCRecord IS NULL OR GCRecord = 0)
+              AND {predicate}
+          ) = 1
+        ORDER BY ID
+        """;
 
     internal static string ToPostgresIdMatchSql(string sqlServerSql)
     {

@@ -344,43 +344,57 @@ onPremDeployment:
     include:
       - seeded lookup catalogs and ApplicationProfiles
       - person-domain (Person, Passport, Education, and other person children)
+      - Visa, WorkPermit, Invitation (headers, items, and their documents)
     exclude:
-      - ApplicationProfileInstance
-      - ApplicationProfileInstancePerson
+      - ApplicationProfileInstance except checkInInstances below
       - ApplicationProfileInstanceProgress
-      - Visa
-      - WorkPermit
-      - WorkPermitItem
-      - Invitation
-      - InvitationItem
-    officerEnteredIssuedDocuments:
-      lockedAt: 2026-10-15
-      entities: [Visa, WorkPermit, WorkPermitItem, Invitation, InvitationItem]
-      alsoExcludeFileProperties: [VisaDocument, WorkPermitDocument, InvitationDocument]
+      - Rejection
+      - BorderZone
+      - MedicalRecord
+    checkInInstances:
+      lockedAt: 2026-10-16
+      approvedBy: developer (chat)
+      applicationType: App_Reg_Check_In
+      profileCode: check_in_from_abroad
+      notIncluded: [App_Reg_Check_In_Internal, App_Reg_Check_Out, App_Reg_ext, issuance types]
+      visa: valid_or_expiring
+      visaRule: >
+        The visa on the check-in is still in force: not cancelled, not changed,
+        and the expiration date is empty or still today or later. That is
+        Valid and Expiring. Skip Expired, Changed, and Cancelled.
+      whichCase: latest App_Reg_Check_In per person and visa
+      import: [ApplicationProfileInstance, ApplicationProfileInstancePerson, current visa link]
+      doNotImport: [ApplicationProfileInstanceProgress]
+      doNotSetVisaIssuingInstance: true
+      insertOnly: true
+      importerStatus: not_implemented
       why: >
-        Officers type these records on visa2026_prod. A catch-up insert of the
-        same legacy row creates a second copy, one entered by the officer and
-        one inserted by the importer. Do not import the headers, the items, or
-        their scans on this database. Rows already stored stay. Do not delete them.
+        Officers need the current arrival-from-abroad check-in for a person
+        whose visa is still in force. A check-in does not issue the visa, so
+        the visa issuing-instance link stays null. One latest case per person
+        and visa. Full history and progress stay on the later archive database.
     issuedDocumentsWithoutInstance: true
     why: >
-      Application profile instance import is too slow for the working production
-      database. Officers start new cases by hand. Historical cases go to a
-      separate archive database later. Visa, work permit, and invitation rows
-      already on production stay. From 2026-10-15 the catch-up does not add more
-      of them, because officers enter those records themselves.
+      Full application history is too slow for the working production database.
+      Officers start new cases by hand. The exception is the latest
+      arrival-from-abroad check-in whose visa is still in force
+      (checkInInstances). Historical cases go to a separate archive database
+      later. Visa, work permit, and invitation rows stay, with the
+      issuing-instance foreign key left null.
     catchUp: >
-      Insert new legacy person-domain rows only. A legacy id already in the
-      production id-map is skipped and the Visa2026 row is left unchanged,
-      including edits later made on 10.100.128.15. Use
-      id-maps/calik-energi-onprem-prod rebuilt from visa2026_prod
-      (--rebuild-visa2014-id-maps). Do not use the staging id-map. Do not run
-      application-type slices or --correct-*. Do not import Visa, WorkPermit,
-      WorkPermitItem, Invitation, or InvitationItem, and do not pass
-      --visa-remainder, --work-permit-remainder, or --invitation-remainder.
-      Photo and scan bytes for person, passport, education, and family proof
-      are a separate fill-missing pass (fileCatchUp). Do not import visa,
-      work permit, or invitation scans.
+      Insert new legacy rows only. A legacy id already in the production
+      id-map is skipped and the Visa2026 row is left unchanged, including
+      edits later made on 10.100.128.15. Use id-maps/calik-energi-onprem-prod
+      rebuilt from visa2026_prod (--rebuild-visa2014-id-maps). Do not use the
+      staging id-map. Do not run application-type slices, --correct-*, or
+      pass an application id-map on Visa or WorkPermit (those paths rewrite
+      rows already imported). Do not import check-in instances until
+      checkInInstances.importerStatus is implemented; a full application-type
+      slice is still forbidden. Photo and scan bytes are a separate fill-missing
+      pass (fileCatchUp), not part of the scalar catch-up. New Visa, WorkPermit, and
+      Invitation headers use --visa-remainder, --work-permit-remainder, and
+      --invitation-remainder so the instance link stays null. Remainder mode
+      does not patch rows already imported.
     insertOnly: true
     insertOnlyLockedAt: 2026-10-09
     duplicatePolicy:
@@ -391,12 +405,16 @@ onPremDeployment:
       never: [insert_second_row, update_existing_row]
       beforeCatchUp: rebuild production id-maps from visa2026_prod so every row already there is mapped
       notes: >
-        Same rule for the later archive database. Person, Passport,
-        Education, EmployeePositionHistory, EmployeeSalary, and
-        AddressOfResidence link an existing natural key into the id-map and
-        skip. The existing row is not updated. Visa, WorkPermit,
-        WorkPermitItem, Invitation, and InvitationItem are not part of the
-        visa2026_prod catch-up (officerEnteredIssuedDocuments, 2026-10-15).
+        Same rule for the later archive database. Person, Passport, Visa,
+        Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence,
+        WorkPermit, WorkPermitItem, Invitation, and InvitationItem link an
+        existing natural key into the id-map and skip. The existing row is
+        not updated. Officers may type Visa, WorkPermit, WorkPermitItem,
+        Invitation, and InvitationItem on visa2026_prod while catch-up reads
+        VISA2015. When exactly one live row has that document number, link it
+        and skip even if the issued date differs. Do not insert a second row.
+        When that parent already stores a scan, do not insert VisaDocument,
+        WorkPermitDocument, or InvitationDocument.
     fileCatchUp:
       lockedAt: 2026-10-09
       fillMissingOnly: true
@@ -407,17 +425,24 @@ onPremDeployment:
           property: Photo
         - entity: Passport
           property: PassportDocument
+        - entity: Visa
+          property: VisaDocument
         - entity: Education
           property: EducationDocument
+        - entity: WorkPermit
+          property: WorkPermitDocument
+        - entity: Invitation
+          property: InvitationDocument
         - entity: Person
           property: FamilyProofDocument
-      excluded: [MedicalRecord, Rejection, BorderZone, VisaDocument, WorkPermitDocument, InvitationDocument]
+      excluded: [MedicalRecord, Rejection, BorderZone]
       notes: >
         Fill a photo only when the person row has no photo bytes. Fill a
         document only when the parent does not already store the same bytes.
-        Do not import VisaDocument, WorkPermitDocument, or InvitationDocument.
-        The July document id-maps are not for visa2026_prod; those target ids
-        are absent there. Do not replace bytes already on visa2026_prod.
+        Visa, WorkPermit, and Invitation scans are also skipped when that
+        parent already stores any scan. The July document id-maps are not
+        for visa2026_prod; those target ids are absent there. Do not replace
+        bytes already on visa2026_prod.
     instanceCleanup: scripts/visa2014-migration/cleanup/ImportedApplications.postgres.sql
     instanceCleanupCompletedAt: 2026-10-09
     instanceCleanupResult: >

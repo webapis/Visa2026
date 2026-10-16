@@ -42,4 +42,17 @@ public class Visa2014TargetIdMapRebuildPostgresSqlTests
         Assert.Contains("\"StartDate\"::date = @issuedDate", postgres);
         Assert.DoesNotContain("CAST(", postgres);
     }
+
+    [Fact]
+    public void Unique_number_sql_keeps_the_single_row_guard()
+    {
+        var postgres = Visa2014TargetIdMapRebuild.ToPostgresIdMatchSql(
+            Visa2014TargetIdMapRebuild.UniqueLiveRowSql("WorkPermits", "WorkPermitNumber = @workPermitNumber"));
+
+        Assert.Contains("FROM \"WorkPermits\"", postgres);
+        Assert.Contains("\"WorkPermitNumber\" = @workPermitNumber", postgres);
+        Assert.Contains("COUNT(*)", postgres);
+        Assert.Contains("LIMIT 1", postgres);
+        Assert.DoesNotContain("TOP 1", postgres);
+    }
 }

@@ -1,9 +1,37 @@
-### 2026-10-15 — Production catch-up no longer imports visas, work permits, or invitations
+### 2026-10-16 — Production catch-up may import the latest abroad check-in for a visa still in force
 
 - **Phase**: strategy lock (no import run, no target writes)
-- **Decision**: Officers enter Visa, WorkPermit, WorkPermitItem, Invitation, and InvitationItem on `visa2026_prod`. The catch-up must not import those headers, items, or their scans. A catch-up insert of a record an officer already typed creates a second copy. Rows already on production stay. Do not delete them.
-- **Still imported**: person-domain scalars (Person, Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary) and fill-missing files for Person.Photo, Passport.PassportDocument, Education.EducationDocument, and Person.FamilyProofDocument.
-- **Recorded**: `import-strategy.yaml` `calikProductionScope.officerEnteredIssuedDocuments`, the production catch-up prompt, and `IMPORT_PLAN_AND_STRATEGY.md`.
+- **Decision**: `visa2026_prod` catch-up may import `App_Reg_Check_In` only (arrival from abroad). Only the latest check-in per person and visa, and only when that visa is still in force (Valid or Expiring: not cancelled, not changed, expiration empty or still today or later). Import the instance, the person on it, and the current visa link. Do not import progress. Do not set the visa issuing instance. `App_Reg_Check_In_Internal` and every other application type stay out. Insert-only still applies.
+- **Importer**: the filter is not implemented. A catch-up must not run an application-type slice until it is.
+- **Recorded**: `import-strategy.yaml` `calikProductionScope.checkInInstances`, the production catch-up prompt, and `IMPORT_PLAN_AND_STRATEGY.md`.
+### 2026-10-16 — Production catch-up inserted people, visas, invitations, and their scans
+
+- **Phase**: insert-only catch-up on `visa2026_prod` (tunnel `127.0.0.1:15432`, `--inprocess`, `calik-energi-onprem-prod`). Staging was not touched. No backup. No application id-map. Application profile instances, roster, progress, rejections, border zones, and medical records were not imported.
+- **Id-maps**: rebuilt from live `visa2026_prod` before import (exit 0). Person identity links stayed 3473 (+0). Application skipped. Passport 3837 matched / 1 skipped. Visa 6510 / 28. Education 3342 / 1. EmployeePositionHistory 3227 / 1. EmployeeSalary 3113 / 1. AddressOfResidence 4181 / 93. WorkPermit 414 / 0. WorkPermitItem 3969 / 2567. Invitation 3023 / 12. InvitationItem 5451 / 53. Document id-maps from the 2026-10-14 file pass were unchanged by the rebuild, including the empty family-proof map. July application and document maps were not restored.
+- **Education lookups**: the first Education pass exited 1 (posted 0, failed 1) because one institution title was missing. Inserted that exact legacy title into `EducationInstitutions` (`GCRecord` 0, `IsDefault` false) and appended it to `education-institution.calik-energi.json`. The specialty was already present. Education re-run exited 0.
+- **Scalars** (failed 0 after the Education re-run): Person posted 1, skipped already imported 3470. Passport posted 1, skipped 3837. Education posted 1, skipped 3342. EmployeePositionHistory posted 1, skipped 3227. AddressOfResidence posted 1, skipped 4274. EmployeeSalary posted 1, skipped 3113. Visa (`--visa-remainder`) posted 3 with a null issuing instance, patched 0, skipped already imported 6510, skipped (no passport map) 25. WorkPermit (`--work-permit-remainder`) posted 0, skipped 414. WorkPermitItem posted 0, skipped already imported 3969, skipped (missing required id-map) 2567. Invitation (`--invitation-remainder`) posted 12 with a null instance, patched 0, skipped 3023. InvitationItem posted 25, skipped already imported 5451, skipped (missing required id-map) 28.
+- **Files** (fill missing only, failed 0): Person.Photo patched 1, already had a photo 3402, no blob 71. Passport.PassportDocument posted 1, duplicate bytes 3736, already imported 85, no passport map 11, no blob 1, oversize 37. Visa.VisaDocument posted 3, already imported 6309, no visa map 67, no blob 47, oversize 154. Education.EducationDocument posted 1, duplicate bytes 4416, already imported 73, no blob 35, oversize 40. WorkPermit.WorkPermitDocument posted 0, duplicate bytes 917, already imported 115. Invitation.InvitationDocument posted 13, duplicate bytes 3064, already imported 73, no parent map 204. Person.FamilyProofDocument posted 0, duplicate bytes 449, oversize 1. A visa, work permit, or invitation that already had a scan was not given another.
+- **Follow-up**: Existing rows were not updated. The next catch-up should rebuild id-maps from live `visa2026_prod` again and keep the document maps from this file pass.
+### 2026-10-16 — Removed two catch-up invitation rows from visa2026_prod
+
+- **Phase**: production cleanup (no import run). Staging was not touched.
+- **Removed**: catch-up invitations CO336469 and CO336629 (no application), including their people and scans. The officer invitations with those numbers remain, each with its application, people, and one file.
+- **Id-map**: the legacy ids for those two invitations and their five people now point at the officer rows in `id-maps/calik-energi-onprem-prod`.
+### 2026-10-16 — Removed six duplicate invitation scans from visa2026_prod
+
+- **Phase**: production cleanup (no import run). Staging was not touched.
+- **Removed**: six InvitationDocument rows and their FileData, inserted by the 2026-10-14 catch-up beside a file the officer had already stored. Kept the officer file. Invitations CO336919, CO337065, CO337066, CO337067, CO337068, and CO337069 now have one file each.
+- **Left in place**: CO336469 and CO336629 each still have two invitation rows (officer row with an application, catch-up row with no application). CO302567 has two imported rows with different issued dates. CO236092 and CO235895 each have two different catch-up pages.
+### 2026-10-16 — Catch-up links an officer-typed visa, work permit, or invitation instead of inserting a second copy
+
+- **Phase**: importer change (no import run, no target writes)
+- **Decision**: Catch-up still imports Visa, WorkPermit, WorkPermitItem, Invitation, InvitationItem, and their scans. Officers may type those same records on visa2026_prod while catch-up copies them from VISA2015. After the exact natural key misses, a document number that matches exactly one live row is linked and the insert is skipped, even when the issued or start date differs. Two or more live rows with that number are left alone, so a real second document can still be inserted. Invitation items stay linked by person plus the already linked invitation. A visa, work permit, or invitation that already stores a scan does not receive another VisaDocument, WorkPermitDocument, or InvitationDocument. Same-hash skip remains for every scan. Existing production rows are not updated or deleted.
+- **Recorded**: `Visa2014NaturalKeyLinker`, `Visa2014TargetIdMapRebuild`, `Visa2014VisaDocumentImporter`, `Visa2014PassportCopyLinkedDocumentImporter`, `import-strategy.yaml` `duplicatePolicy`, the production catch-up prompt, and `IMPORT_PLAN_AND_STRATEGY.md`.
+### 2026-10-16 — Production catch-up includes visas, work permits, and invitations again
+
+- **Phase**: strategy revert (no import run, no target writes)
+- **Decision**: The 2026-10-15 exclusion is withdrawn. The `visa2026_prod` catch-up again imports Visa, WorkPermit, WorkPermitItem, Invitation, and InvitationItem, and fills missing VisaDocument, WorkPermitDocument, and InvitationDocument bytes. Insert-only still applies: a legacy id already in the id-map is skipped, and a natural key already on production is linked and skipped.
+- **Recorded**: `import-strategy.yaml` `calikProductionScope`, the production catch-up prompt, and `IMPORT_PLAN_AND_STRATEGY.md` restored to the 2026-10-09 scope.
 ### 2026-10-14 — Production catch-up inserted new people, visas, invitations, and their scans
 
 - **Phase**: insert-only catch-up on `visa2026_prod` (tunnel `127.0.0.1:15432`, `--inprocess`, `calik-energi-onprem-prod`). Staging was not touched. No backup. No application id-map. Application profile instances, roster, progress, rejections, border zones, and medical records were not imported.
