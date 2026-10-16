@@ -23,6 +23,14 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-10-16 — Work permit number opens every scan as pages (DocumentCopies)
+
+- **Symptom**: A Maglumat work-permit number with more than one scan opened the Resminamalar catalog. Each copy needed its own click.
+- **Fix**: That click sets `PreviewAllCopies`. The slot skips the catalog and shows every scan on the work permit as pages of one PDF, in catalog order.
+- **Test**: Rebuild, refresh. Click a permit number that has two scans. The preview opens on page 1; the next page is the second scan. Close leaves the catalog closed.
+- **Prevent**: Do not open the header catalog from the dashboard number. Other copy buttons still open one record.
+- **Cross-skill**: preview-slot | visa2026-report-dashboard
+
 ### 2026-09-03 — Catalog on Choose Approval legs opens the occupant list
 
 - **Symptom**: No picker action opened the approval-leg catalog list in `#visa-preview-slot` (only + New / per-card Open).

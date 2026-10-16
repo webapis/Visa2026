@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ReportDashboard;
 
@@ -107,6 +108,12 @@ public sealed class ReportDashboardPreviewRow
     public string VisaPlace     { get; init; } = string.Empty;
     public string VisaStartDate { get; init; } = string.Empty;
     public string VisaEndDate   { get; init; } = string.Empty;
+    /// <summary>Work permit header whose scanned copies open from the permit-number cell.</summary>
+    public Guid?  WorkPermitHeaderId { get; init; }
+    public string WorkPermitStart { get; init; } = string.Empty;
+    public string WorkPermitEnd   { get; init; } = string.Empty;
+    /// <summary>Every valid work permit on this person row, newest start date first.</summary>
+    public IReadOnlyList<WorkPermitBundleSlot> WorkPermits { get; init; } = Array.Empty<WorkPermitBundleSlot>();
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

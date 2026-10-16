@@ -107,6 +107,9 @@ public static class VisaPreviewSlotOccupantKeys
         };
 
         var key = $"{prefix}:{request.ParentId:N}";
+        if (request.PreviewAllCopies)
+            return $"{key}|preview:all";
+
         if (request.OpenPreviewOnly)
         {
             var focus = string.IsNullOrWhiteSpace(request.FocusRecordKey)

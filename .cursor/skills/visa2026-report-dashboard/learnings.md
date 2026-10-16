@@ -4,6 +4,66 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-16 — A Maglumat Bilimi includes the institution
+
+**Ask:** Show the education institution next to the level, as in the sanaw cell "Ýokary, Karabük uniwersiteti".
+
+**Now:** The current education (latest graduation year) supplies both. The cell is the level, then the institution (`EducationInstitution.NameTm`). The column title is Bilimi we okan ýeri. Heal recreates the view until `EducationInstitutionLabel` exists.
+
+**Prevent:** Do not add the other sanaw columns (specialty, gender, foreign address) in this change.
+
+**Files:** `vw_rd_work_permit_active.postgres.sql`, `VwRdWorkPermitActive.cs`, `ReportDashboardComponent.razor`
+
+---
+
+## 2026-10-16 — A Maglumat uses the invitation Excel template
+
+**Ask:** Edit the A Maglumat Excel format the same way as the Invitation tabs.
+
+**Now:** Work Permit `active-by-project` is a `ReportDashboardExcelTemplate` key. Administrators download and upload the workbook. Open in Excel fills that format with the rows on screen. The first `dd.MM.yyyy` in the title row becomes the export day. Visa `active-by-project` is not this template.
+
+**Prevent:** Do not map `active-by-project` without the category. That key is also Active Visa.
+
+**Files:** `ReportDashboardExcelTemplateService.cs`, `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardComponent.razor`, `docs/REPORT_DASHBOARD.md`
+
+---
+
+## 2026-10-16 — A Maglumat Wezipesi stays narrow
+
+**Ask:** Reduce the Wezipesi column. A large screen may leave empty space on the right of the table.
+
+**Now:** `rd-maglumat-table` sizes the table to its columns (`min-width: 0`). Wezipesi wraps inside 8.5rem.
+
+**Prevent:** Do not set `min-width: 100%` on this table. That stretches the job-title column across the pane.
+
+**Files:** `ReportDashboardComponent.razor`, `wwwroot/css/report-dashboard.css`
+
+---
+
+## 2026-10-16 — A Maglumat stacks every valid work permit in one cell
+
+**Ask:** A person may have two active work permits. Show both in the one person row.
+
+**Now:** `WorkPermitBundle` lists every not-cancelled, not-expired permit, newest start date first. The work-permit cell stacks number, start, and end for each, with a gap between permits. Each number opens that permit's copies. Local view: 258 people, 52 with more than one permit. Heal recreates the view until `WorkPermitBundle` exists.
+
+**Prevent:** Do not go back to `DISTINCT ON` alone. That drops the second permit. Passport and the scalar permit columns stay on the newest permit.
+
+**Files:** `vw_rd_work_permit_active.postgres.sql`, `WorkPermitBundleText.cs`, `ReportDashboardComponent.razor`, `ReportDashboardWorkPermitMaglumatExcel.cs`
+
+---
+
+## 2026-10-16 — A Maglumat is the active work-permit officer table
+
+**Ask:** Give Work Permit the Invitation officer-table UI, starting with Aktiw iş rugsady (P). Rename that tab to A Maglumat. Use the spreadsheet columns. One latest valid permit per person. Chart stays collapsed. Search limits the table and Excel. The Excel title date is the day the file is created.
+
+**Now:** `vw_rd_work_permit_active` keeps the newest not-cancelled, not-expired permit per person. Preview columns are №, F.A.A, birth and citizenship, passport and expiry, education level, actual job title, Turkmenistan address, work-permit number with dates, visa number with dates, and an empty Bellik. The work-permit number and the visa number open scanned copies. Excel is built in code, not from an uploaded template. Local view: 258 rows.
+
+**Prevent:** Do not overwrite `ReportDashboard.SubReport.active-by-project` (that label is Active Visa). Do not leave the inline CREATE in `CreateViewRdWorkPermitActive`; ModuleUpdater would restore the old view. Do not change the other Work Permit tabs in this pass.
+
+**Files:** `vw_rd_work_permit_active.postgres.sql`, `VwRdWorkPermitActive.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardComponent.razor`, `ReportDashboardWorkPermitMaglumatExcel.cs`, `docs/REPORT_DASHBOARD.md`
+
+---
+
 ## 2026-10-15 — Cancelled Invitation shows the invitation and the cancellation application
 
 **Ask:** Add Cancelled Invitation after Expired Invitation. Do not copy Active Invitation columns. Show the invitation and the application that cancelled it. That application has no ministry approval, only migration.

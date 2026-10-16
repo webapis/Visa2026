@@ -331,7 +331,10 @@ public static class ReportDashboardPostgresViewsHealSql
         foreach (var (viewName, resourceLeaf) in WorkPermitViews)
         {
             if (ViewExists(connection, viewName)
-                && !ViewHasLegacyApplicationOid(connection, viewName))
+                && !ViewHasLegacyApplicationOid(connection, viewName)
+                && (viewName != "vw_rd_work_permit_active"
+                    || ColumnExists(connection, viewName, "EducationInstitutionLabel")
+                    || ColumnExists(connection, viewName, "educationinstitutionlabel")))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);

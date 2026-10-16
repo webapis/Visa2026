@@ -6173,6 +6173,12 @@
     "tk-TM": "Wiza nusgasyny aç",
     "ru-RU": "Открыть копию визы"
   },
+  "ReportDashboard.Chrome.OpenWorkPermitCopy": {
+    "en": "Open work permit copy",
+    "tr-TR": "Çalışma izni kopyasını aç",
+    "tk-TM": "Iş rugsady nusgasyny aç",
+    "ru-RU": "Открыть копию разрешения на работу"
+  },
   "ReportDashboard.Chrome.PieChart": {
     "en": "Pie Chart",
     "tr-TR": "Pasta grafik",
@@ -7726,6 +7732,12 @@
     "tr-TR": "< 10 gün",
     "tk-TM": "< 10 gün",
     "ru-RU": "< 10 дн."
+  },
+  "ReportDashboard.SubReport.WorkPermit.active-by-project": {
+    "en": "A Maglumat",
+    "tr-TR": "A Maglumat",
+    "tk-TM": "A Maglumat",
+    "ru-RU": "A Maglumat"
   },
   "ReportDashboard.SubReport.active-by-project": {
     "en": "Active Visa (P)",

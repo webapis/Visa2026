@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using Visa2026.Module.Localization;
 
@@ -20,25 +21,27 @@ public static class ReportDashboardExcelTemplateWorkbook
         byte[]? template,
         string title,
         IReadOnlyList<string> headers,
+        ReportDashboardCategory category,
         string? subReport,
         IReadOnlyList<ReportDashboardPreviewRow> rows,
         bool includeChartColumn)
     {
         var source = template != null && MatchesColumns(template, headers.Count)
             ? template
-            : BuildStarter(title, headers);
+            : BuildStarter(title, headers, SheetName(category, subReport));
 
         var values = new List<IReadOnlyList<string>>(rows.Count);
-        foreach (var row in rows)
-            values.Add(ValuesFor(subReport, row, headers.Count, includeChartColumn));
+        for (var index = 0; index < rows.Count; index++)
+            values.Add(ValuesFor(category, subReport, rows[index], index + 1, headers.Count, includeChartColumn));
 
-        return Fill(source, values);
+        var titleDate = IsWorkPermitMaglumat(category, subReport) ? DateTime.Today : (DateTime?)null;
+        return Fill(source, values, titleDate);
     }
 
-    public static byte[] BuildStarter(string title, IReadOnlyList<string> headers)
+    public static byte[] BuildStarter(string title, IReadOnlyList<string> headers, string? sheetName = null)
     {
         using var workbook = new XLWorkbook();
-        var sheet = workbook.Worksheets.Add("Report");
+        var sheet = workbook.Worksheets.Add(string.IsNullOrWhiteSpace(sheetName) ? "Report" : sheetName);
         var columnCount = Math.Max(1, headers.Count);
 
         sheet.Cell(1, 1).Value = title;
@@ -46,7 +49,9 @@ public static class ReportDashboardExcelTemplateWorkbook
             sheet.Range(1, 1, 1, columnCount).Merge();
         sheet.Row(1).Style.Font.Bold = true;
         sheet.Row(1).Style.Font.FontSize = 16;
-        sheet.Row(1).Height = 24;
+        sheet.Row(1).Style.Alignment.WrapText = true;
+        sheet.Row(1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        sheet.Row(1).Height = 36;
 
         for (var column = 0; column < columnCount; column++)
             sheet.Cell(2, column + 1).Value = column < headers.Count ? headers[column] : string.Empty;
@@ -89,11 +94,16 @@ public static class ReportDashboardExcelTemplateWorkbook
     }
 
     public static IReadOnlyList<string> ValuesFor(
+        ReportDashboardCategory category,
         string? subReport,
         ReportDashboardPreviewRow row,
+        int rowNumber,
         int headerCount,
         bool includeChartColumn)
     {
+        if (IsWorkPermitMaglumat(category, subReport))
+            return ReportDashboardWorkPermitMaglumatExcel.Cells(row, rowNumber);
+
         if (ReportDashboardCatalog.IsInvitationCancelledSubReport(subReport))
             return ReportDashboardInvitationTableExcel.CancelledCells(row);
 
@@ -110,13 +120,15 @@ public static class ReportDashboardExcelTemplateWorkbook
         return GenericCells(row, headerCount);
     }
 
-    private static byte[] Fill(byte[] template, IReadOnlyList<IReadOnlyList<string>> rows)
+    private static byte[] Fill(byte[] template, IReadOnlyList<IReadOnlyList<string>> rows, DateTime? titleDate)
     {
         using var workbook = new XLWorkbook(new MemoryStream(template));
         if (!TryRanges(workbook, out var header, out var sample) || header == null || sample == null)
             return template;
 
         var sheet = sample.Worksheet;
+        if (titleDate is { } date)
+            RefreshTitleDate(sheet, header, date);
         var sampleRow = sample.RangeAddress.FirstAddress.RowNumber;
         var columnCount = header.ColumnCount();
         var last = sheet.LastRowUsed()?.RowNumber() ?? sampleRow;
@@ -162,6 +174,32 @@ public static class ReportDashboardExcelTemplateWorkbook
         while (values.Count < headerCount)
             values.Add(string.Empty);
         return values;
+    }
+
+    private static bool IsWorkPermitMaglumat(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.WorkPermit
+        && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase);
+
+    private static string SheetName(ReportDashboardCategory category, string? subReport) =>
+        IsWorkPermitMaglumat(category, subReport) ? "A.Maglumat" : "Report";
+
+    /// <summary>
+    /// A Maglumat keeps the administrator's title wording and replaces the first dd.MM.yyyy with the export day.
+    /// </summary>
+    private static void RefreshTitleDate(IXLWorksheet sheet, IXLRange header, DateTime date)
+    {
+        var headerRow = header.RangeAddress.FirstAddress.RowNumber;
+        if (headerRow <= 1)
+            return;
+
+        var cell = sheet.Cell(headerRow - 1, header.RangeAddress.FirstAddress.ColumnNumber);
+        var text = cell.GetString();
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        var updated = new Regex(@"\d{2}\.\d{2}\.\d{4}").Replace(text, date.ToString("dd.MM.yyyy"), 1);
+        if (!string.Equals(updated, text, StringComparison.Ordinal))
+            cell.Value = updated;
     }
 
     private static void WriteRow(IXLWorksheet sheet, int rowNumber, int columnCount, IReadOnlyList<string> values)

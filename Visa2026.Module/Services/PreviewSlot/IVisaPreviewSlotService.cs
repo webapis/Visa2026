@@ -167,6 +167,11 @@ public sealed class HeaderDocumentCopiesSlotRequest
     /// Used when the officer clicks Preview on an issued-header row in the case workspace.
     /// </summary>
     public bool OpenPreviewOnly { get; init; }
+
+    /// <summary>
+    /// When true, every scan on this header is one PDF in the preview. The catalog stays closed.
+    /// </summary>
+    public bool PreviewAllCopies { get; init; }
 }
 
 /// <summary>
@@ -260,4 +265,7 @@ public sealed class HeaderDocumentCopiesInlinePreviewRequest
     public required string RecordKey { get; init; }
 
     public required string DisplayName { get; init; }
+
+    /// <summary>Merge every scan on the header into the preview, in catalog order.</summary>
+    public bool PreviewAllCopies { get; init; }
 }

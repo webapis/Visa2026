@@ -116,7 +116,10 @@
     private string ActionClose => Msg("PersonDocumentCopies.Action.Close");
     private string ActionDownload => Msg("PersonDocumentCopies.Action.Download");
 
-    private bool ShowPrintLayout => DocumentCopyPrintLayout.AppliesTo(_activeRecordKey);
+    private bool _previewAllCopies;
+
+    private bool ShowPrintLayout =>
+        !_previewAllCopies && DocumentCopyPrintLayout.AppliesTo(_activeRecordKey);
 
     public async Task OpenAsync(HeaderDocumentCopiesInlinePreviewRequest request)
     {
@@ -126,6 +129,7 @@
         if (!string.Equals(_activeRecordKey, request.RecordKey, StringComparison.Ordinal))
             _printLayout = DocumentCopyPrintLayout.DefaultFor(request.RecordKey);
 
+        _previewAllCopies = request.PreviewAllCopies;
         _activeRecordKey = request.RecordKey;
         _parentId = request.ParentId;
         _family = request.Family;
@@ -142,6 +146,20 @@
 
     private async Task LoadCurrentPdfAsync()
     {
+        if (_previewAllCopies)
+        {
+            await OpenPdfAsync(
+                _previewHeaderLabel,
+                () =>
+                {
+                    if (!FileAccess.TryGetMergedAllCopiesPdf(_family, _parentId, _previewHeaderLabel, out var result) || result == null)
+                        return (null, null, PreviewError);
+
+                    return (result.Content, result.FileName, null);
+                });
+            return;
+        }
+
         await OpenPdfAsync(
             _previewHeaderLabel,
             () =>
@@ -256,6 +274,7 @@
         _error = string.Empty;
         _loading = false;
         _activeRecordKey = string.Empty;
+        _previewAllCopies = false;
         _previewHeaderLabel = string.Empty;
         _parentId = Guid.Empty;
         _printLayout = default;

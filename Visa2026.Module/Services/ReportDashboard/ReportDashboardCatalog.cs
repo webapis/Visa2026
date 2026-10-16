@@ -466,7 +466,7 @@ public static class ReportDashboardCatalog
             new() { Key = RegistrationOnProcessSubReportKey, Label = "On Process" },
         ],
         ReportDashboardCategory.WorkPermit => [
-            new() { Key = "active-by-project", Label = "Active WorkPermit (P)" },
+            new() { Key = "active-by-project", Label = "A Maglumat" },
             new() { Key = "on-extension", Label = "WorkPermit Extension (P)" },
             new() { Key = "extension-result", Label = "Extension Result (P)" },
             new() { Key = "by-days-remaining", Label = "WorkPermit Validity" },
@@ -787,6 +787,10 @@ public static class ReportDashboardCatalog
         if (category == ReportDashboardCategory.Invitation && IsInvitationUsedSubReport(subReport))
             return ("VwRdInvitationUsed_ListView", typeof(VwRdInvitationUsed));
 
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase))
+            return ("VwRdWorkPermitActive_ListView", typeof(VwRdWorkPermitActive));
+
         if (category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport))
         {
@@ -998,7 +1002,8 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.AddressOfResidence, "by-city")         => ["Name", "Project", "Address", "Expiry", "City"],
             (ReportDashboardCategory.AddressOfResidence, "by-address-type") => ["Name", "Project", "Address", "Expiry", "Address Type"],
             (ReportDashboardCategory.AddressOfResidence, "by-address")      => ["Name", "Project", "Region · City", "Expiry", "Address"],
-            (ReportDashboardCategory.WorkPermit, "active-by-project")  => ["Name", "Project", "WP Number",   "Expiry", "Project"],
+            (ReportDashboardCategory.WorkPermit, "active-by-project")  =>
+                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, "on-extension") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "extension-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "by-status")         => ["Name", "Project", "WP Number",   "Expiry", "Status"],
@@ -1109,6 +1114,8 @@ public static class ReportDashboardCatalog
             && IsInvitationProcessSubReport(subReport);
         var usesInvitationUsed = category == ReportDashboardCategory.Invitation
             && IsInvitationUsedSubReport(subReport);
+        var usesWorkPermitMaglumat = category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase);
 
         string roleCriteria;
         if (usesPersonSearchRd)
@@ -1206,6 +1213,7 @@ public static class ReportDashboardCatalog
             var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
                     || usesIncompletePersonsRd || usesPersonSearchRd || usesRegistrationRd
                     || usesInvitationReady || usesInvitationExpired || usesInvitationCancelled || usesInvitationProcess || usesInvitationUsed
+                    || usesWorkPermitMaglumat
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -1324,6 +1332,10 @@ public static class ReportDashboardCatalog
                 roleCriteria = $"({roleCriteria}) And [{field}] = '{Escape(statusLabel)}'";
             }
             else if (usesInvitationCancelled)
+            {
+                roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
+            }
+            else if (usesWorkPermitMaglumat)
             {
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
             }

@@ -9,7 +9,7 @@ using Visa2026.Module.Services.RuntimeLogging;
 namespace Visa2026.Module.Services.ReportDashboard;
 
 /// <summary>
-/// One company workbook per invitation subreport. The file keeps the administrator's
+/// One company workbook per officer-table subreport. The file keeps the administrator's
 /// title, header labels, fonts, colors, and column widths. Export writes the rows
 /// the caller passes into those fixed columns.
 /// </summary>
@@ -22,21 +22,32 @@ public static class ReportDashboardExcelTemplateService
     public const string ColumnsKey = "ReportDashboard.Chrome.TemplateColumns";
     public const string AdminOnlyKey = "ReportDashboard.Chrome.TemplateAdminOnly";
 
-    public static bool Supports(string? subReport) => CanonicalKey(subReport) != null;
+    public static bool Supports(ReportDashboardCategory category, string? subReport) =>
+        CanonicalKey(category, subReport) != null;
 
-    /// <summary>Visible invitation tab this workbook belongs to. Hidden (V) twins share it.</summary>
-    public static string? CanonicalKey(string? subReport) => subReport switch
+    /// <summary>Stored key for this tab. Invitation (V) twins share the (P) key. A Maglumat is Work Permit only.</summary>
+    public static string? CanonicalKey(ReportDashboardCategory category, string? subReport)
     {
-        "ready-by-project" or "ready-by-period-category" => "ready-by-project",
-        "expired-invitation" => "expired-invitation",
-        "cancelled-invitation" => "cancelled-invitation",
-        "in-process" or "in-process-by-period-category-type" => "in-process",
-        "process-result" or "process-result-by-period-category-type"
-            or "rejected-by-project" or "rejected-by-period-category-type" => "process-result",
-        "used" or "used-by-period-category-type" => "used",
-        "valid-until" or "expired" => "valid-until",
-        _ => null
-    };
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase))
+            return "active-by-project";
+
+        if (category != ReportDashboardCategory.Invitation)
+            return null;
+
+        return subReport switch
+        {
+            "ready-by-project" or "ready-by-period-category" => "ready-by-project",
+            "expired-invitation" => "expired-invitation",
+            "cancelled-invitation" => "cancelled-invitation",
+            "in-process" or "in-process-by-period-category-type" => "in-process",
+            "process-result" or "process-result-by-period-category-type"
+                or "rejected-by-project" or "rejected-by-period-category-type" => "process-result",
+            "used" or "used-by-period-category-type" => "used",
+            "valid-until" or "expired" => "valid-until",
+            _ => null
+        };
+    }
 
     public static byte[] Export(
         IObjectSpace objectSpace,
@@ -49,7 +60,7 @@ public static class ReportDashboardExcelTemplateService
     {
         var template = LoadContent(objectSpace, category, subReport);
         return ReportDashboardExcelTemplateWorkbook.Export(
-            template, title, headers, subReport, rows, includeChartColumn);
+            template, title, headers, category, subReport, rows, includeChartColumn);
     }
 
     public static byte[] DownloadTemplate(
@@ -66,7 +77,7 @@ public static class ReportDashboardExcelTemplateService
             return template;
         }
 
-        return ReportDashboardExcelTemplateWorkbook.BuildStarter(title, headers);
+        return ReportDashboardExcelTemplateWorkbook.BuildStarter(title, headers, SheetName(category, subReport));
     }
 
     /// <summary>Returns a localization key. <see cref="SavedKey"/> means the file was stored.</summary>
@@ -81,7 +92,7 @@ public static class ReportDashboardExcelTemplateService
         if (!ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator())
             return AdminOnlyKey;
 
-        var key = CanonicalKey(subReport);
+        var key = CanonicalKey(category, subReport);
         if (key == null)
             return NotExcelKey;
 
@@ -126,7 +137,7 @@ public static class ReportDashboardExcelTemplateService
     private static byte[]? LoadContent(
         IObjectSpace objectSpace, ReportDashboardCategory category, string? subReport)
     {
-        var key = CanonicalKey(subReport);
+        var key = CanonicalKey(category, subReport);
         if (key == null)
             return null;
 
@@ -142,6 +153,12 @@ public static class ReportDashboardExcelTemplateService
             return null;
         }
     }
+
+    private static string SheetName(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.WorkPermit
+        && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
+            ? "A.Maglumat"
+            : "Report";
 
     private static bool IsMissingTable(Exception ex)
     {

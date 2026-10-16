@@ -211,8 +211,12 @@ Invitation **Open in Excel** fills one company workbook per tab. It is not `User
 - Officer tabs: `ready-by-project`, `expired-invitation` (Expired Invitation: Active Invitation columns; expired before a visa was issued; no nine-month cutoff), `cancelled-invitation` (Cancelled Invitation: invitation columns plus the cancellation application's App #, Date, and Migration; no approval columns; no nine-month cutoff), `in-process`, `used` (Used Invitations: Active Invitation columns plus the one issued visa). Hidden `(V)` twins share the `(P)` key. Process Result and Invitation Validity are not shown. `issued-inv` is not mapped.
 - Workbook names: `DashboardHeader` (header row) and `DashboardSample` (style row under it). Export keeps the title and header labels and writes values by column index. Column count must equal `TableHeaders`. Upload rejects a different count, a non-`.xlsx`, or a file over 8 MB.
 - Population is the rows on screen. Active Invitation, Expired Invitation, Cancelled Invitation, Invitation Process, and Used Invitations pass the search-filtered table (`DisplayedRows`); an empty search is the loaded preview. Still capped by `PreviewLimit` 10_000. **Download template** is the blank workbook.
-- Buttons are Invitation-only (`IsInvitationTemplateReport`). Widen that gate together with `CanonicalKey` when another category should use the same store.
+- Buttons are the officer tables in `CanonicalKey`: Invitation tabs, and Work Permit **A Maglumat** (`active-by-project` stored per category, so Visa Active (P) is a different key).
 - Existing databases: `ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing` in both `Startup.cs` sites. ModuleUpdater will not create the table while `ModuleInfo` is current. A missing table is `42P01`; restart after deploy.
+
+## A Maglumat
+
+Work Permit tab `active-by-project` is **A Maglumat** (category key `ReportDashboard.SubReport.WorkPermit.active-by-project`; do not change the generic Visa key). `vw_rd_work_permit_active` is one person row. Every valid permit (not cancelled, expiration date on or after today) is stacked in `WorkPermitBundle`, newest start date first. Each number opens that permit's copies. Chart by project starts collapsed. Search limits the table and the company Excel template (`ReportDashboardExcelTemplate`); cell text is `ReportDashboardWorkPermitMaglumatExcel.Cells`. The first `dd.MM.yyyy` in the title becomes the export day. Work-permit number and visa number open scanned copies. Passport is text. Bellik stays empty. Heal recreates the view until it has `WorkPermitBundle`. Other Work Permit tabs stay as they are.
 
 ---
 

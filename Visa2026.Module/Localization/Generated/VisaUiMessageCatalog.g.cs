@@ -9945,6 +9945,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wiza nusgasyny aç",
             ["ru-RU"] = "Открыть копию визы",
         },
+        ["ReportDashboard.Chrome.OpenWorkPermitCopy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open work permit copy",
+            ["tr-TR"] = "Çalışma izni kopyasını aç",
+            ["tk-TM"] = "Iş rugsady nusgasyny aç",
+            ["ru-RU"] = "Открыть копию разрешения на работу",
+        },
         ["ReportDashboard.Chrome.PieChart"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Pie Chart",
@@ -11162,6 +11169,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Geçerli (>90 gün)",
             ["tk-TM"] = "Güýjünde (>90 gün)",
             ["ru-RU"] = "Действует (>90 дн.)",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A Maglumat",
+            ["tr-TR"] = "A Maglumat",
+            ["tk-TM"] = "A Maglumat",
+            ["ru-RU"] = "A Maglumat",
         },
         ["ReportDashboard.SubReport.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -1029,6 +1029,46 @@
   white-space: normal;
 }
 .rd-cell-stack { gap: 1px; }
+.rd-permit-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.rd-permit-block + .rd-permit-block { margin-top: 8px; }
+/* A Maglumat: Wezipesi wraps in a narrow column. The table stays as wide as its columns, so a large screen keeps empty space on the right. */
+.rd-listview-block table.rd-maglumat-table {
+  width: max-content;
+  min-width: 0;
+}
+.rd-listview-block .rd-maglumat-table th.rd-col-order,
+.rd-listview-block .rd-maglumat-table td.rd-col-order {
+  width: 2.5rem;
+  max-width: 2.5rem;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+.rd-listview-block .rd-maglumat-table td.rd-col-position {
+  width: 8.5rem;
+  max-width: 8.5rem;
+}
+.rd-maglumat-table .rd-col-position-text {
+  max-width: 8.5rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.rd-listview-block .rd-maglumat-table th.rd-col-education,
+.rd-listview-block .rd-maglumat-table td.rd-col-education {
+  width: 9rem;
+  max-width: 9rem;
+}
+.rd-maglumat-table .rd-col-education-text {
+  max-width: 9rem;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
 .rd-invitation-table .rd-expires { gap: 4px; }
 .rd-preview-pager {
   display: flex;

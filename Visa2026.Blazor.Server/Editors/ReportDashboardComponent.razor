@@ -411,7 +411,7 @@
 
                     <div class="rd-chart-block @(ShowChartBody ? null : "rd-chart-block--collapsed")">
                         <div class="rd-chart-toolbar">
-                            @if (IsInvitationOfficerTable)
+                            @if (IsOfficerFillTable)
                             {
                                 <button type="button"
                                         class="rd-chart-toggle @(_invitationChartOpen ? "active" : null)"
@@ -518,7 +518,7 @@
 
                     <div class="rd-listview-block">
                         <div class="rd-preview-actions">
-                            @if (IsInvitationOfficerTable)
+                            @if (IsOfficerFillTable)
                             {
                                 <div class="rd-table-search-row">
                                 <div class="rd-search-box">
@@ -544,13 +544,13 @@
                                 </div>
                             }
                             <button type="button"
-                                    class="rd-excel-link @((Panel.ExcelConfigured || IsInvitationTemplateReport) ? null : "disabled")"
-                                    disabled="@((!Panel.ExcelConfigured && !IsInvitationTemplateReport) || ShowLoading || (IsInvitationTemplateReport && DisplayedRows.Count == 0))"
-                                    title="@(IsInvitationTemplateReport ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
+                                    class="rd-excel-link @((Panel.ExcelConfigured || IsExcelTemplateReport) ? null : "disabled")"
+                                    disabled="@((!Panel.ExcelConfigured && !IsExcelTemplateReport) || ShowLoading || (IsExcelTemplateReport && DisplayedRows.Count == 0))"
+                                    title="@(IsExcelTemplateReport ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExportTableTitle") : Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
                                     @onclick="OnExcel">
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
                             </button>
-                            @if (CanManageInvitationTemplate)
+                            @if (CanManageExcelTemplate)
                             {
                                 <button type="button"
                                         class="rd-list-link"
@@ -577,16 +577,20 @@
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
                             </button>
                         </div>
-                        <div class="rd-listview-scroll @(IsInvitationOfficerTable ? "rd-listview-scroll--fill" : null)">
-                            <table class="@(IsInvitationOfficerTable ? "rd-invitation-table" : null)">
+                        <div class="rd-listview-scroll @(IsOfficerFillTable ? "rd-listview-scroll--fill" : null)">
+                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : ""))">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            var stackColumn = (IsInvitationCancelledTable && (i == 3 || i == 7))
+                                            var orderColumn = IsWorkPermitMaglumatTable && i == 0;
+                                            var positionColumn = IsWorkPermitMaglumatTable && i == 5;
+                                            var educationColumn = IsWorkPermitMaglumatTable && i == 4;
+                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 6 || i == 7 || i == 8))
+                                                || (IsInvitationCancelledTable && (i == 3 || i == 7))
                                                 || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 4 && i <= 8)
                                                 || (IsInvitationProcessTable && i >= 4 && i <= 8);
-                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}")">@Panel.TableHeaders[i]</th>
+                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
                                 </thead>
@@ -603,6 +607,115 @@
                                             <tr class="@(opensDossier ? "rd-row-clickable" : null)"
                                                 title="@(opensDossier ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenDossierTitle") : null)"
                                                 @onclick="() => OnRowSelected(row)">
+                                                @if (IsWorkPermitMaglumatTable)
+                                                {
+                                                    <td class="rd-col-order">@DisplayIndex(row)</td>
+                                                    <td class="rd-cell-name">@row.Name</td>
+                                                    <td class="@($"{ColumnClass(2)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in StackLines(row.ColumnA, row.ColumnB))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(3)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in StackLines(row.ColumnC, row.ColumnD))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="rd-col-education"><div class="rd-col-education-text">@row.ColumnE</div></td>
+                                                    <td class="rd-col-position"><div class="rd-col-position-text">@row.ColumnF</div></td>
+                                                    <td class="@($"{ColumnClass(6)} rd-col-stack")">@row.ColumnG</td>
+                                                    <td class="@($"{ColumnClass(7)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                        <div class="rd-cell-stack">
+                                                            @if (row.WorkPermits.Count > 0)
+                                                            {
+                                                                @foreach (var permit in row.WorkPermits)
+                                                                {
+                                                                    <div class="rd-permit-block">
+                                                                        @if (permit.HeaderId != Guid.Empty && !string.IsNullOrEmpty(permit.Number))
+                                                                        {
+                                                                            <button type="button"
+                                                                                    class="rd-invitation-link"
+                                                                                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenWorkPermitCopy")"
+                                                                                    @onclick="() => OnWorkPermitCopies(permit)">
+                                                                                @permit.Number
+                                                                            </button>
+                                                                        }
+                                                                        else if (!string.IsNullOrEmpty(permit.Number))
+                                                                        {
+                                                                            <span>@permit.Number</span>
+                                                                        }
+                                                                        @if (!string.IsNullOrEmpty(permit.Start))
+                                                                        {
+                                                                            <span>@permit.Start</span>
+                                                                        }
+                                                                        @if (!string.IsNullOrEmpty(permit.End))
+                                                                        {
+                                                                            <span>@permit.End</span>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                @if (row.WorkPermitHeaderId is { } workPermitId && workPermitId != Guid.Empty && !string.IsNullOrEmpty(row.ColumnH))
+                                                                {
+                                                                    <button type="button"
+                                                                            class="rd-invitation-link"
+                                                                            title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenWorkPermitCopy")"
+                                                                            @onclick="() => OnWorkPermitCopies(new WorkPermitBundleSlot { HeaderId = workPermitId, ItemId = row.RecordId ?? Guid.Empty, Number = row.ColumnH })">
+                                                                        @row.ColumnH
+                                                                    </button>
+                                                                }
+                                                                else if (!string.IsNullOrEmpty(row.ColumnH))
+                                                                {
+                                                                    <span>@row.ColumnH</span>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(row.WorkPermitStart))
+                                                                {
+                                                                    <span>@row.WorkPermitStart</span>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(row.WorkPermitEnd))
+                                                                {
+                                                                    <span>@row.WorkPermitEnd</span>
+                                                                }
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                        <div class="rd-cell-stack">
+                                                            @if (row.VisaId is { } maglumatVisaId && maglumatVisaId != Guid.Empty && !string.IsNullOrEmpty(row.VisaNumber))
+                                                            {
+                                                                <button type="button"
+                                                                        class="rd-invitation-link"
+                                                                        title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenVisaCopy")"
+                                                                        @onclick="() => OnVisaCopies(row)">
+                                                                    @row.VisaNumber
+                                                                </button>
+                                                            }
+                                                            else if (!string.IsNullOrEmpty(row.VisaNumber))
+                                                            {
+                                                                <span>@row.VisaNumber</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.VisaStartDate))
+                                                            {
+                                                                <span>@row.VisaStartDate</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.VisaEndDate))
+                                                            {
+                                                                <span>@row.VisaEndDate</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@ColumnClass(9)"></td>
+                                                }
+                                                else
+                                                {
                                                 <td class="rd-cell-name">@row.Name</td>
                                                 @if (IsInvitationCancelledTable)
                                                 {
@@ -792,13 +905,14 @@
                                                     <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                                 }
                                                 }
+                                                }
                                             </tr>
                                         }
                                     }
                                 </tbody>
                             </table>
                         </div>
-                        @if (!IsInvitationOfficerTable && FilteredRows.Count > 0)
+                        @if (!IsOfficerFillTable && FilteredRows.Count > 0)
                         {
                             <div class="rd-preview-pager">
                                 <span class="rd-preview-pager-range">@PreviewRangeLabel</span>
@@ -1343,7 +1457,7 @@
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private async Task OnExcel()
     {
-        if (IsInvitationTemplateReport)
+        if (IsExcelTemplateReport)
         {
             await DownloadInvitationWorkbookAsync(templateOnly: false);
             return;
@@ -1398,13 +1512,13 @@
     private string _invitationTableSearch = string.Empty;
     private string _templateNotice = string.Empty;
 
-    private bool ShowChartBody => !IsInvitationOfficerTable || _invitationChartOpen;
+    private bool ShowChartBody => !IsOfficerFillTable || _invitationChartOpen;
 
     private IReadOnlyList<ReportDashboardPreviewRow> DisplayedRows
     {
         get
         {
-            if (!IsInvitationOfficerTable || string.IsNullOrWhiteSpace(_invitationTableSearch))
+            if (!IsOfficerFillTable || string.IsNullOrWhiteSpace(_invitationTableSearch))
                 return FilteredRows;
 
             var term = _invitationTableSearch.Trim();
@@ -1420,7 +1534,7 @@
     }
 
     private IReadOnlyList<ReportDashboardPreviewRow> TableRows =>
-        IsInvitationOfficerTable ? DisplayedRows : PagedRows;
+        IsOfficerFillTable ? DisplayedRows : PagedRows;
 
     private void OnInvitationTableSearch(ChangeEventArgs e) =>
         _invitationTableSearch = e.Value?.ToString() ?? string.Empty;
@@ -1447,6 +1561,9 @@
             || ContainsTerm(row.VisaPlace, term)
             || ContainsTerm(row.VisaStartDate, term)
             || ContainsTerm(row.VisaEndDate, term)
+            || ContainsTerm(row.WorkPermitStart, term)
+            || ContainsTerm(row.WorkPermitEnd, term)
+            || WorkPermitMatches(row, term)
             || ContainsTerm(row.Status, term))
             return true;
 
@@ -1472,7 +1589,9 @@
 
         var headers = Panel.TableHeaders;
         var subReport = Panel.SubReport ?? SubReport;
-        var label = InvitationExportLabel(subReport);
+        var label = IsWorkPermitMaglumatTable
+            ? ReportDashboardWorkPermitMaglumatExcel.Title(DateTime.Today)
+            : InvitationExportLabel(subReport);
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
 
         byte[] bytes = templateOnly
@@ -1481,14 +1600,16 @@
             : ReportDashboardExcelTemplateService.Export(
                 objectSpace, Category, subReport, label, headers, DisplayedRows, ShowInvitationChartColumn);
 
-        var fileName = SafeFileName(templateOnly ? label + " template" : label);
+        var fileName = IsWorkPermitMaglumatTable
+            ? (templateOnly ? "A.Maglumat template" : "A.Maglumat")
+            : SafeFileName(templateOnly ? label + " template" : label);
         await using var stream = new MemoryStream(bytes);
         await FileDownloader.DownloadAsync(fileName + ".xlsx", stream, ReportDashboardInvitationTableExcel.ContentType);
     }
 
     private async Task DownloadInvitationTemplate()
     {
-        if (ShowLoading || !CanManageInvitationTemplate)
+        if (ShowLoading || !CanManageExcelTemplate)
             return;
 
         await DownloadInvitationWorkbookAsync(templateOnly: true);
@@ -1496,7 +1617,7 @@
 
     private async Task UploadInvitationTemplate(InputFileChangeEventArgs e)
     {
-        if (!CanManageInvitationTemplate || Panel == null)
+        if (!CanManageExcelTemplate || Panel == null)
             return;
 
         var file = e.File;
@@ -1541,12 +1662,11 @@
 
     private void ToggleInvitationChart() => _invitationChartOpen = !_invitationChartOpen;
 
-    private bool IsInvitationTemplateReport =>
-        Category == ReportDashboardCategory.Invitation
-        && ReportDashboardExcelTemplateService.Supports(Panel?.SubReport ?? SubReport);
+    private bool IsExcelTemplateReport =>
+        ReportDashboardExcelTemplateService.Supports(Category, Panel?.SubReport ?? SubReport);
 
-    private bool CanManageInvitationTemplate =>
-        IsInvitationTemplateReport && ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator();
+    private bool CanManageExcelTemplate =>
+        IsExcelTemplateReport && ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator();
 
     private bool IsInvitationReadyTable =>
         Category == ReportDashboardCategory.Invitation
@@ -1570,6 +1690,12 @@
 
     private bool IsInvitationOfficerTable =>
         IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationCancelledTable || IsInvitationProcessTable || IsInvitationUsedTable;
+
+    private bool IsWorkPermitMaglumatTable =>
+        Category == ReportDashboardCategory.WorkPermit
+        && string.Equals(Panel?.SubReport ?? SubReport, "active-by-project", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsOfficerFillTable => IsInvitationOfficerTable || IsWorkPermitMaglumatTable;
 
     private bool ShowInvitationChartColumn =>
         IsInvitationReadyTable
@@ -1620,6 +1746,69 @@
             FocusRecordKey = onlyCopy?.RecordKey,
             FocusDisplayName = onlyCopy?.RecordLabel ?? row.ColumnE,
             OpenPreviewOnly = onlyCopy != null,
+        });
+    }
+
+    private int DisplayIndex(ReportDashboardPreviewRow row)
+    {
+        for (var i = 0; i < TableRows.Count; i++)
+        {
+            if (ReferenceEquals(TableRows[i], row))
+                return i + 1;
+        }
+
+        return 0;
+    }
+
+    private static IEnumerable<string> StackLines(params string?[] lines)
+    {
+        foreach (var line in lines)
+        {
+            var text = line?.Trim() ?? string.Empty;
+            if (text.Length > 0)
+                yield return text;
+        }
+    }
+
+    private static bool WorkPermitMatches(ReportDashboardPreviewRow row, string term)
+    {
+        foreach (var permit in row.WorkPermits)
+        {
+            if (ContainsTerm(permit.Number, term)
+                || ContainsTerm(permit.Start, term)
+                || ContainsTerm(permit.End, term))
+                return true;
+        }
+
+        return false;
+    }
+
+    private async Task OnWorkPermitCopies(WorkPermitBundleSlot permit)
+    {
+        if (permit.HeaderId == Guid.Empty)
+            return;
+
+        var itemId = permit.ItemId == Guid.Empty ? (Guid?)null : permit.ItemId;
+        var copyCount = 0;
+        using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<WorkPermit>())
+        {
+            var snapshot = HeaderLinkedDocumentsResolver.Resolve(
+                objectSpace,
+                HeaderDocumentCopiesFamily.WorkPermit,
+                permit.HeaderId,
+                itemId);
+            copyCount = snapshot.Records
+                .Count(record => record.Files.Any(file => file.HasContent && file.FileDataId != Guid.Empty));
+        }
+
+        await PreviewSlot.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = HeaderDocumentCopiesFamily.WorkPermit,
+            ParentId = permit.HeaderId,
+            ContextItemId = itemId,
+            FocusDisplayName = permit.Number,
+            OpenPreviewOnly = true,
+            PreviewAllCopies = copyCount > 0,
         });
     }
 

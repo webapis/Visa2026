@@ -3762,17 +3762,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             if (oneLastValidWorkPermitPerPerson)
                 list = TakeOneLastValidVisaPerPerson(list, r => r.PersonOid, r => r.ExpirationDate, r => r.ID);
 
-            var labeled = list.Select(r =>
-            {
-                var status = string.IsNullOrWhiteSpace(r.StatusLabel)
-                    ? "(No project)"
-                    : r.StatusLabel.Trim();
-                return (Row: r, Status: status);
-            }).ToList();
-
-            return BuildWorkPermitActiveByProjectPanel(
-                personType, subReport, excelHint, excelConfigured, labeled,
-                r => r.ID, r => r.PersonName, r => r.ProjectName, r => r.WorkPermitNumber, r => r.ExpirationDate);
+            return BuildWorkPermitMaglumatPanel(
+                personType, subReport, excelHint, excelConfigured, list);
         }
         catch (Exception ex) when (IsMissingReportDashboardView(ex))
         {
@@ -3844,6 +3835,68 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured,
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
+    }
+
+    private static ReportDashboardPanelData BuildWorkPermitMaglumatPanel(
+        ReportDashboardPersonType personType,
+        string subReport,
+        string? excelHint,
+        bool excelConfigured,
+        List<VwRdWorkPermitActive> list)
+    {
+        var labeled = list.Select(row =>
+        {
+            var status = string.IsNullOrWhiteSpace(row.StatusLabel)
+                ? "(No project)"
+                : row.StatusLabel.Trim();
+            return (Row: row, Status: status);
+        }).ToList();
+        var groups = labeled
+            .GroupBy(x => x.Status, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+        var totalCount = buckets.Sum(b => b.Count);
+        var rows = labeled
+            .OrderBy(x => x.Row.PersonName)
+            .Take(PreviewLimit)
+            .Select(x =>
+            {
+                var row = x.Row;
+                return new ReportDashboardPreviewRow
+                {
+                    RecordId = row.ID,
+                    PersonId = row.PersonOid,
+                    Name = row.PersonName ?? string.Empty,
+                    Project = row.ProjectName ?? string.Empty,
+                    ColumnA = FormatOfficerDay(row.DateOfBirth),
+                    ColumnB = row.CitizenshipCode ?? string.Empty,
+                    ColumnC = row.PassportNumber ?? string.Empty,
+                    ColumnD = FormatOfficerDay(row.PassportExpirationDate),
+                    ColumnE = row.EducationLabel ?? string.Empty,
+                    ColumnF = row.PositionLabel ?? string.Empty,
+                    ColumnG = AddressOfResidenceReportText.CityAndStreet(
+                        row.AddressRegionTm, row.AddressCityTm, row.AddressStreet),
+                    ColumnH = row.WorkPermitNumber ?? string.Empty,
+                    WorkPermitHeaderId = row.WorkPermitOid,
+                    WorkPermitStart = FormatOfficerDay(row.StartDate),
+                    WorkPermitEnd = FormatOfficerDay(row.ExpirationDate),
+                    WorkPermits = WorkPermitBundleText.Parse(row.WorkPermitBundle),
+                    VisaId = row.VisaOid,
+                    VisaNumber = row.VisaNumber ?? string.Empty,
+                    VisaStartDate = FormatOfficerDay(row.VisaStartDate),
+                    VisaEndDate = FormatOfficerDay(row.VisaEndDate),
+                    Status = x.Status,
+                    StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
+                };
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.WorkPermit, subReport, rows,
+            excelHint, excelConfigured, buckets, totalCount);
     }
 
     private static ReportDashboardPanelData BuildWorkPermitActiveByProjectPanel<T>(
@@ -5826,6 +5879,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string FormatDate(DateTime? value) =>
         value.HasValue ? value.Value.ToString("MMM dd, yyyy") : string.Empty;
+
+    private static string FormatOfficerDay(DateTime? value) =>
+        value is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
 
     private static string FormatMigration(DateTime? date, string? resultNumber)
     {

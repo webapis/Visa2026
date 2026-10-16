@@ -87,6 +87,66 @@ public sealed class HeaderDocumentCopyPdfMerger
         }
     }
 
+    /// <summary>Every scan on the header, in catalog order, as one PDF.</summary>
+    public bool TryBuildAllCopiesPdf(
+        HeaderDocumentCopiesFamily family,
+        Guid parentId,
+        string headerLabel,
+        out byte[]? content,
+        out string? fileName)
+    {
+        content = null;
+        fileName = null;
+
+        if (parentId == Guid.Empty)
+            return false;
+
+        using var objectSpace = CreateObjectSpace(family);
+        if (objectSpace == null)
+            return false;
+
+        var snapshot = HeaderLinkedDocumentsResolver.Resolve(objectSpace, family, parentId);
+        var pdfStreams = new List<MemoryStream>();
+        try
+        {
+            foreach (var record in snapshot.Records)
+            {
+                if (string.IsNullOrWhiteSpace(record.RecordKey))
+                    continue;
+
+                foreach (var file in record.Files.Where(file => file.HasContent && file.FileDataId != Guid.Empty))
+                {
+                    if (!TryLoadFileContent(objectSpace, file.FileDataId, out var fileContent, out var fileNameForExt))
+                        continue;
+
+                    if (!TryCreateMergeSlicePdfStream(
+                            fileContent,
+                            fileNameForExt,
+                            record.RecordKey,
+                            DocumentCopyPrintLayout.DefaultFor(record.RecordKey),
+                            out var pdfStream))
+                        continue;
+
+                    pdfStreams.Add(pdfStream);
+                }
+            }
+
+            if (pdfStreams.Count == 0)
+                return false;
+
+            using var merged = new MemoryStream();
+            SupportingDocumentsPdfSharpHelper.MergePdfStreams(pdfStreams, merged);
+            content = merged.ToArray();
+            fileName = SanitizeFileName(string.IsNullOrWhiteSpace(headerLabel) ? "document-copies" : headerLabel) + ".pdf";
+            return content.Length > 0;
+        }
+        finally
+        {
+            foreach (var stream in pdfStreams)
+                stream.Dispose();
+        }
+    }
+
     private IObjectSpace? CreateObjectSpace(HeaderDocumentCopiesFamily family) =>
         family switch
         {

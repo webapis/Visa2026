@@ -121,7 +121,7 @@
         if (!string.Equals(_boundBindingKey, bindingKey, StringComparison.Ordinal))
         {
             _boundBindingKey = bindingKey;
-            _previewOnlyMode = Request.OpenPreviewOnly;
+            _previewOnlyMode = Request.OpenPreviewOnly || Request.PreviewAllCopies;
             _previewActive = false;
             _previewOnlyEmpty = false;
             _pendingPreviewRequest = null;
@@ -152,7 +152,8 @@
     {
         var occupant = VisaPreviewSlotOccupantKeys.ForHeaderDocumentCopies(request);
         var context = request.ContextItemId?.ToString("N") ?? string.Empty;
-        return $"{occupant}:{context}";
+        var all = request.PreviewAllCopies ? ":all" : string.Empty;
+        return $"{occupant}:{context}{all}";
     }
 
     private void ReloadSnapshot()
@@ -228,11 +229,11 @@
         HeaderLinkedDocumentsSnapshot snapshot)
     {
         HeaderLinkedDocumentRecord? record = null;
-        if (!string.IsNullOrWhiteSpace(request.FocusRecordKey))
+        if (!request.PreviewAllCopies && !string.IsNullOrWhiteSpace(request.FocusRecordKey))
             record = snapshot.FindRecord(request.FocusRecordKey.Trim());
 
         record ??= snapshot.Records?.FirstOrDefault(r =>
-            r.Files != null && r.Files.Any(f => f.FileDataId != Guid.Empty));
+            r.Files != null && r.Files.Any(f => f.FileDataId != Guid.Empty && f.HasContent));
 
         if (record == null || string.IsNullOrWhiteSpace(record.RecordKey))
             return null;
@@ -247,6 +248,7 @@
             ParentId = request.ParentId,
             RecordKey = record.RecordKey,
             DisplayName = string.IsNullOrWhiteSpace(display) ? "Document copy" : display,
+            PreviewAllCopies = request.PreviewAllCopies,
         };
     }
 

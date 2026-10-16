@@ -57,6 +57,33 @@ public sealed class HeaderDocumentFileAccess
         return true;
     }
 
+    public bool TryGetMergedAllCopiesPdf(
+        HeaderDocumentCopiesFamily family,
+        Guid parentId,
+        string headerLabel,
+        out ApplicationItemDocumentFileResult? result)
+    {
+        result = null;
+        if (parentId == Guid.Empty)
+            return false;
+
+        if (!pdfMerger.TryBuildAllCopiesPdf(family, parentId, headerLabel, out var content, out var fileName)
+            || content == null
+            || content.Length == 0
+            || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        result = new ApplicationItemDocumentFileResult
+        {
+            Content = content,
+            FileName = fileName,
+            ContentType = "application/pdf",
+        };
+        return true;
+    }
+
     public bool TryGetFile(
         HeaderDocumentCopiesFamily family,
         Guid parentId,

@@ -1720,6 +1720,19 @@
         <ColumnInfo Id="MigrationLabel" Index="7" Width="140" Caption="Migration" IsNewNode="True" />
       </Columns>
     </ListView>
+    <ListView Id="VwRdWorkPermitActive_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdWorkPermitActive" Caption="A Maglumat" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="220" Caption="F.A.A" IsNewNode="True" />
+        <ColumnInfo Id="BirthCitizenshipLabel" Index="1" Width="140" Caption="Doglan ýyly we raýatlygy" IsNewNode="True" />
+        <ColumnInfo Id="PassportLabel" Index="2" Width="140" Caption="Pasport belgesi we möhleti" IsNewNode="True" />
+        <ColumnInfo Id="EducationLabel" Index="3" Width="180" Caption="Bilimi we okan ýeri" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="4" Width="160" Caption="Wezipesi" IsNewNode="True" />
+        <ColumnInfo Id="AddressLabel" Index="5" Width="220" Caption="Türkmenistandaky anyk ýaşaýan salgysy" IsNewNode="True" />
+        <ColumnInfo Id="WorkPermitLabel" Index="6" Width="150" Caption="Rugsatnama belgesi we möhleti" IsNewNode="True" />
+        <ColumnInfo Id="VisaLabel" Index="7" Width="150" Caption="Wiza belgesi we möhleti" IsNewNode="True" />
+        <ColumnInfo Id="Notes" Index="8" Width="80" Caption="Bellik" IsNewNode="True" />
+      </Columns>
+    </ListView>
     <ListView Id="VwRdInvitationUsed_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationUsed" Caption="Used Invitations" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="240" Caption="Full name" IsNewNode="True" />

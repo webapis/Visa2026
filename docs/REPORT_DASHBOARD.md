@@ -139,6 +139,14 @@ Cell text:
 - Active Invitation, Expired Invitation, and Invitation Process use `ReportDashboardInvitationTableExcel.Cells` (the same stacked cells as the preview). Expired Invitation uses the Active Invitation columns. Cancelled Invitation uses `CancelledCells`: invitation columns, then the cancellation application's App #, Date, and Migration.
 - Used Invitations uses the Active Invitation cells, then Visa #, Issued date, Place, Start date, and End date.
 
+### A Maglumat
+
+The Work Permit tab `active-by-project` is **A Maglumat**. It uses the same company workbook as the Invitation tabs (`ReportDashboardExcelTemplate`, key `active-by-project` on category Work Permit). An administrator downloads the starter, changes formatting, and uploads it. Officers only export. **Open in Excel** keeps that formatting and writes `ReportDashboardWorkPermitMaglumatExcel.Cells` by column index. The first `dd.MM.yyyy` in the title row above the header becomes the day the file is created. The search box limits this file the same way it limits the table. Until a 10-column workbook is uploaded, export builds the starter.
+
+One row is one person. Every valid work permit stays in the work-permit cell: not cancelled, and the expiration date is today or later. Newest start date is first. Each number opens that permit's scanned copies. The chart is by project and starts collapsed. Project is not a table column.
+
+Columns: № (screen order of the rows on display), F.A.A, birth date and citizenship code, passport number and expiry (text), education level and institution, current actual job title, current Turkmenistan address, work-permit number with start and end (the number opens that permit's scanned copies), current valid visa number with start and end (the number opens visa copies), Bellik (empty). Passport text does not open copies. Other Work Permit tabs are unchanged.
+
 ### Where it is stored
 
 `ReportDashboardExcelTemplate` (`ReportDashboardExcelTemplates`):

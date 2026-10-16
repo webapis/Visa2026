@@ -318,6 +318,10 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdWorkPermitActive>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_work_permit_active");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.WorkPermit).WithMany().HasForeignKey(t => t.WorkPermitOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.VisaOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdWorkPermitAppProgress>(b => {
