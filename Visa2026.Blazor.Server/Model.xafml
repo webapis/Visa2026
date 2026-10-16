@@ -1720,7 +1720,7 @@
         <ColumnInfo Id="MigrationLabel" Index="7" Width="140" Caption="Migration" IsNewNode="True" />
       </Columns>
     </ListView>
-    <ListView Id="VwRdWorkPermitActive_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdWorkPermitActive" Caption="A Maglumat" IsNewNode="True">
+    <ListView Id="VwRdWorkPermitActive_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdWorkPermitActive" Caption="A. Maglumat" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="220" Caption="F.A.A" IsNewNode="True" />
         <ColumnInfo Id="BirthCitizenshipLabel" Index="1" Width="140" Caption="Doglan ýyly we raýatlygy" IsNewNode="True" />

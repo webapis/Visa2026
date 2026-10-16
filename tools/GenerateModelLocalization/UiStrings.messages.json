@@ -6780,10 +6780,10 @@
     "ru-RU": "Срок действия визы"
   },
   "ReportDashboard.SubReport.WorkPermit.active-by-project": {
-    "en": "Active WorkPermit (P)",
-    "tr-TR": "Aktif Çalışma İzni (P)",
-    "tk-TM": "Aktiw iş rugsady (P)",
-    "ru-RU": "Активное РНТ (P)"
+    "en": "A. Maglumat",
+    "tr-TR": "A. Maglumat",
+    "tk-TM": "A. Maglumat",
+    "ru-RU": "A. Maglumat"
   },
   "ReportDashboard.SubReport.WorkPermit.on-extension": {
     "en": "WorkPermit Extension (P)",
@@ -7732,12 +7732,6 @@
     "tr-TR": "< 10 gün",
     "tk-TM": "< 10 gün",
     "ru-RU": "< 10 дн."
-  },
-  "ReportDashboard.SubReport.WorkPermit.active-by-project": {
-    "en": "A Maglumat",
-    "tr-TR": "A Maglumat",
-    "tk-TM": "A Maglumat",
-    "ru-RU": "A Maglumat"
   },
   "ReportDashboard.SubReport.active-by-project": {
     "en": "Active Visa (P)",

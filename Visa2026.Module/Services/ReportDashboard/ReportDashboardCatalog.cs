@@ -466,7 +466,7 @@ public static class ReportDashboardCatalog
             new() { Key = RegistrationOnProcessSubReportKey, Label = "On Process" },
         ],
         ReportDashboardCategory.WorkPermit => [
-            new() { Key = "active-by-project", Label = "A Maglumat" },
+            new() { Key = "active-by-project", Label = "A. Maglumat" },
             new() { Key = "on-extension", Label = "WorkPermit Extension (P)" },
             new() { Key = "extension-result", Label = "Extension Result (P)" },
             new() { Key = "by-days-remaining", Label = "WorkPermit Validity" },

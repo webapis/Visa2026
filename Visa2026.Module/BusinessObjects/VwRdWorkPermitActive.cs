@@ -14,7 +14,7 @@ namespace Visa2026.Module.BusinessObjects;
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(PersonName))]
-[ModelDefault("Caption", "A Maglumat")]
+[ModelDefault("Caption", "A. Maglumat")]
 [ModelDefault("AllowEdit", "False")]
 [ModelDefault("AllowNew", "False")]
 [ModelDefault("AllowDelete", "False")]

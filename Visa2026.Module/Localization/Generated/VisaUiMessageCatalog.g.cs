@@ -11170,13 +11170,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Güýjünde (>90 gün)",
             ["ru-RU"] = "Действует (>90 дн.)",
         },
-        ["ReportDashboard.SubReport.WorkPermit.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "A Maglumat",
-            ["tr-TR"] = "A Maglumat",
-            ["tk-TM"] = "A Maglumat",
-            ["ru-RU"] = "A Maglumat",
-        },
         ["ReportDashboard.SubReport.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Active Visa (P)",
@@ -11697,10 +11690,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.SubReport.WorkPermit.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Active WorkPermit (P)",
-            ["tr-TR"] = "Aktif Çalışma İzni (P)",
-            ["tk-TM"] = "Aktiw iş rugsady (P)",
-            ["ru-RU"] = "Активное РНТ (P)",
+            ["en-US"] = "A. Maglumat",
+            ["tr-TR"] = "A. Maglumat",
+            ["tk-TM"] = "A. Maglumat",
+            ["ru-RU"] = "A. Maglumat",
         },
         ["ReportDashboard.SubReport.WorkPermit.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

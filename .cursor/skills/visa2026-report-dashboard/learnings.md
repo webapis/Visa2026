@@ -4,6 +4,14 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-16 — Work Permit tab label is A. Maglumat
+
+**Ask:** Rename Aktiw iş rugsady (P) to A. Maglumat.
+
+**Now:** `ReportDashboard.SubReport.WorkPermit.active-by-project` is A. Maglumat in every culture. The extra copy of that key was removed, because the later copy kept the old Turkmen label on screen. The ListView caption matches.
+
+**Prevent:** Do not add a second `WorkPermit.active-by-project` entry. The later one wins and hides the rename.
+
 ## 2026-10-16 — A Maglumat Bilimi includes the institution
 
 **Ask:** Show the education institution next to the level, as in the sanaw cell "Ýokary, Karabük uniwersiteti".
