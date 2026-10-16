@@ -1,3 +1,21 @@
+### 2026-10-16 — Instance list Refresh still cleared progress
+
+- **Need**: After the first fix, Refresh on Applications via ministry still replaced the progress stepper and result chips with `—`.
+- **Cause**: Toolbar Refresh recreates the collection and raises `CollectionChanged`. Preload only listened to `CollectionReloaded`, so the new rows never received the progress or result fill. `IGrid.Reload()` was the wrong follow-up: it can replace those rows again.
+- **Fix**: Also fill on `CollectionChanged`. Keep the fill by application id and copy it onto the new instances. The stepper and chip cells read that id cache. Do not reload the grid afterward.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. Open Applications via ministry. Click Refresh. The progress stepper and result chips should stay.
+- **Prevent**: Do not treat `CollectionReloaded` as the Refresh button. Do not call `View.Refresh()` or `IGrid.Reload()` from this preload.
+- **Cross-skill**: —
+
+### 2026-10-16 — Instance list Refresh keeps progress and result
+
+- **Need**: On Ministrlikler bilen ylalaşylýan ýüztutmalar, Refresh replaced the progress stepper and Ýüztutmanyň netijesi chips with `—`.
+- **Cause**: After the list cache was filled, preload called `View.Refresh()`. That loaded a new set of rows and skipped filling them again.
+- **Fix**: Repaint the same rows with `IGrid.Reload()`. Copy the progress and result cache onto the rows the grid is showing. Put the stepper and chip templates back on before that repaint.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. Open the ministry list. Click Refresh. The progress stepper and result chips should stay.
+- **Prevent**: Do not call `View.Refresh()` from the list preload. That reloads the collection and drops the in-memory progress and result cache.
+- **Cross-skill**: —
+
 ### 2026-10-05 — Organization letterhead fields follow Fluent Dark
 
 - **Need**: Organization on a case showed white Name, Address, and the other letterhead boxes on Fluent Dark.

@@ -72,7 +72,7 @@ public sealed class ApplicationListViewResultCoverageController : ViewController
         base.OnDeactivated();
     }
 
-    private void ApplyChipTemplate()
+    internal void ApplyChipTemplate()
     {
         if (View?.Editor is not DxGridListEditor gridListEditor)
             return;
@@ -103,6 +103,9 @@ public sealed class ApplicationListViewResultCoverageController : ViewController
                 }
 
                 var chips = application.ListViewResultCoverageChips;
+                if (chips.Count == 0)
+                    chips = Frame.GetController<ApplicationListViewPreloadController>()?.ResultChipsFor(application.ID)
+                        ?? chips;
                 if (chips.Count == 0)
                 {
                     builder.AddContent(0, application.ResultCoverageDisplay);

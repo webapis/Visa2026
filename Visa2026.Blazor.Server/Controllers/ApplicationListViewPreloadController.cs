@@ -22,11 +22,13 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     private const int BackgroundYieldEveryBatches = 3;
 
     private readonly HashSet<Guid> preloadedIds = new();
+    private readonly Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>> progressById = new();
+    private readonly Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>> resultById = new();
     private EventHandler? collectionReloadedHandler;
+    private EventHandler? collectionChangedHandler;
     private EventHandler<ComponentInstanceCapturedEventArgs<IGrid>>? gridCapturedHandler;
     private CancellationTokenSource? preloadCts;
     private int lastScrollAheadVisibleIndex = -1;
-    private bool suppressCollectionReloadPreload;
 
     public ApplicationListViewPreloadController()
     {
@@ -36,13 +38,11 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     protected override void OnActivated()
     {
         base.OnActivated();
-        collectionReloadedHandler ??= (_, _) =>
-        {
-            if (suppressCollectionReloadPreload)
-                return;
-            StartPreload(syncBatches: InitialSyncBatchCount);
-        };
+        // Toolbar Refresh recreates the collection (CollectionChanged). It does not raise CollectionReloaded.
+        collectionReloadedHandler ??= (_, _) => StartPreload(syncBatches: InitialSyncBatchCount);
+        collectionChangedHandler ??= (_, _) => StartPreload(syncBatches: InitialSyncBatchCount);
         View.CollectionSource.CollectionReloaded += collectionReloadedHandler;
+        View.CollectionSource.CollectionChanged += collectionChangedHandler;
     }
 
     protected override void OnViewControlsCreated()
@@ -71,9 +71,21 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
 
         if (collectionReloadedHandler != null)
             View.CollectionSource.CollectionReloaded -= collectionReloadedHandler;
+        if (collectionChangedHandler != null)
+            View.CollectionSource.CollectionChanged -= collectionChangedHandler;
 
         base.OnDeactivated();
     }
+
+    internal IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> ProgressStepsFor(Guid id) =>
+        id != Guid.Empty && progressById.TryGetValue(id, out var steps)
+            ? steps
+            : Array.Empty<ApplicationWorkspaceListProgressSteps.Step>();
+
+    internal IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> ResultChipsFor(Guid id) =>
+        id != Guid.Empty && resultById.TryGetValue(id, out var chips)
+            ? chips
+            : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
 
     internal void EnsureScrollAheadIfNeeded(IGrid grid, int visibleIndex)
     {
@@ -109,6 +121,12 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
 
     private void StartPreload(int syncBatches = 0)
     {
+        if (View?.CollectionSource.List == null || View.CollectionSource.List.Count == 0)
+            return;
+
+        // Paint the previous fill onto the new instances before the grid renders.
+        ApplyIdCacheToListRows();
+
         preloadCts?.Cancel();
         preloadCts?.Dispose();
         preloadCts = new CancellationTokenSource();
@@ -127,24 +145,8 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         for (var offset = 0; offset < syncRowCount; offset += BatchSize)
             PreloadByIds(ids.Skip(offset).Take(BatchSize).ToList());
 
-        if (syncRowCount > 0 && View != null)
-        {
-            // Grid may have bound empty NotMapped SLA values before ApplicationProfile was included.
-            // Force rebind so Migration deadline / working days pick up the warmed cache.
-            suppressCollectionReloadPreload = true;
-            try
-            {
-                View.Refresh();
-            }
-            finally
-            {
-                suppressCollectionReloadPreload = false;
-            }
-
-            if (!PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id)
-                && View.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
-                grid.AutoFitColumnWidths();
-        }
+        if (syncRowCount > 0)
+            RepaintLoadedRows();
 
         if (syncRowCount >= ids.Count)
             return;
@@ -212,7 +214,77 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             application.SetListViewTotalPersonCount(personCounts.GetValueOrDefault(application.ID, 0));
             application.InvalidateListViewDisplayCache();
             application.WarmListViewDisplayCache();
+            progressById[application.ID] = application.ListViewProgressSteps;
+            resultById[application.ID] = application.ListViewResultCoverageChips;
             preloadedIds.Add(application.ID);
         }
+
+        CopyDisplayCacheToListRows(applications);
+    }
+
+    /// <summary>
+    /// The grid is bound to the collection instances. A separate query can return
+    /// different objects; the progress and result caches have to be on the rows shown.
+    /// </summary>
+    private void CopyDisplayCacheToListRows(IReadOnlyList<ApplicationProfileInstance> loaded)
+    {
+        var list = View?.CollectionSource.List;
+        if (list == null || loaded.Count == 0)
+            return;
+
+        var loadedById = new Dictionary<Guid, ApplicationProfileInstance>(loaded.Count);
+        foreach (var application in loaded)
+            loadedById[application.ID] = application;
+
+        foreach (var row in list.OfType<ApplicationProfileInstance>())
+        {
+            if (!loadedById.TryGetValue(row.ID, out var source) || ReferenceEquals(source, row))
+                continue;
+
+            row.SetListViewTotalPersonCount(source.TotalPersonCount);
+            row.SetListViewResultCoverage(source.ListViewResultCoverageChips);
+            row.SetListViewProgressSteps(source.ListViewProgressSteps);
+            row.InvalidateListViewDisplayCache();
+            row.WarmListViewDisplayCache();
+        }
+    }
+
+    /// <summary>
+    /// Copies the id cache onto whatever instances the recreated collection is holding.
+    /// </summary>
+    private void ApplyIdCacheToListRows()
+    {
+        var list = View?.CollectionSource.List;
+        if (list == null)
+            return;
+
+        foreach (var row in list.OfType<ApplicationProfileInstance>())
+        {
+            if (row.ListViewProgressSteps.Count == 0
+                && progressById.TryGetValue(row.ID, out var steps)
+                && steps.Count > 0)
+                row.SetListViewProgressSteps(steps);
+
+            if (row.ListViewResultCoverageChips.Count == 0
+                && resultById.TryGetValue(row.ID, out var chips)
+                && chips.Count > 0)
+                row.SetListViewResultCoverage(chips);
+        }
+    }
+
+    /// <summary>
+    /// Puts the stepper and chip templates back on the columns. Does not reload the grid,
+    /// because a reload replaces the instances and drops the in-memory progress.
+    /// </summary>
+    private void RepaintLoadedRows()
+    {
+        ApplyIdCacheToListRows();
+        Frame.GetController<ApplicationListViewProgressStepsController>()?.ApplyStepperTemplate();
+        Frame.GetController<ApplicationListViewResultCoverageController>()?.ApplyChipTemplate();
+
+        if (View != null
+            && !PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id)
+            && View.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
+            grid.AutoFitColumnWidths();
     }
 }

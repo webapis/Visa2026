@@ -119,6 +119,7 @@ flowchart LR
 
 | Symptom | First step | Likely fix area |
 |---------|------------|-----------------|
+| Refresh on an instance list clears Application progress and Application result (`—`) | Toolbar Refresh recreates the collection via `CollectionChanged`, not `CollectionReloaded` | `ApplicationListViewPreloadController` fills the new rows from the id cache |
 | Start process on Person or Dossier | Hidden by design — create only from Application Profile Instances | Do not re-enable `PersonStartApplication` / `PersonDossierStartApplication` |
 | Profile picker empty / wrong rows | `IsActive`, audience flags | Profile list controller / criteria |
 | Defaults not applied on create | `Application.ApplyDefaultsForApplicationProfile` | Profile default FKs; ImmediatePostData |

@@ -71,7 +71,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         base.OnDeactivated();
     }
 
-    private void ApplyStepperTemplate()
+    internal void ApplyStepperTemplate()
     {
         if (View?.Editor is not DxGridListEditor gridListEditor)
             return;
@@ -120,6 +120,9 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                 }
 
                 var steps = application.ListViewProgressSteps;
+                if (steps.Count == 0)
+                    steps = Frame.GetController<ApplicationListViewPreloadController>()?.ProgressStepsFor(application.ID)
+                        ?? steps;
                 if (steps.Count == 0)
                 {
                     builder.AddContent(0, application.ProgressStepsDisplay);
