@@ -1606,6 +1606,12 @@
         <Member Name="Educations" Caption="Eğitimler" />
         <Member Name="Email" Caption="E-posta" />
         <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
+        <Member Name="EmployeeListActiveVisaNumbers" Caption="Aktif vizeler" />
+        <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Aktif çalışma izinleri" />
+        <Member Name="EmployeeListActualPositionName" Caption="Pozisyon (fiili / şirket)" />
+        <Member Name="EmployeeListDepartmentName" Caption="Departman" />
+        <Member Name="EmployeeListPositionName" Caption="Pozisyon (vize raporları)" />
+        <Member Name="EmployeeListResidenceAddress" Caption="İkamet adresi" />
         <Member Name="FamilyMembers" Caption="Aile Üyeleri" />
         <Member Name="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
         <Member Name="FirstName" Caption="Ad" />
@@ -3099,6 +3105,12 @@
         <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="Subcontractor" Caption="Şirket (Taşeron)" />
+        <ColumnInfo Id="EmployeeListPositionName" Caption="Pozisyon (vize raporları)" />
+        <ColumnInfo Id="EmployeeListActualPositionName" Caption="Pozisyon (fiili / şirket)" />
+        <ColumnInfo Id="EmployeeListDepartmentName" Caption="Departman" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Aktif vizeler" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Aktif çalışma izinleri" />
+        <ColumnInfo Id="EmployeeListResidenceAddress" Caption="İkamet adresi" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Aile Üyeleri">

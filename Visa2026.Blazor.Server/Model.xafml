@@ -1168,16 +1168,22 @@
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" Caption="Copies" />
+        <ColumnInfo Id="DocumentCopiesListLink" Removed="True" />
         <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="4" Width="88" />
-        <ColumnInfo Id="Age" Index="5" Width="41" />
+        <ColumnInfo Id="DateOfBirth" Removed="True" />
+        <ColumnInfo Id="Age" Removed="True" />
         <ColumnInfo Id="Gender" Index="6" Width="58" />
-        <ColumnInfo Id="MaritalStatus" Index="7" Width="92" />
+        <ColumnInfo Id="MaritalStatus" Removed="True" />
         <ColumnInfo Id="Nationality" Index="8" Width="78" />
         <ColumnInfo Id="ProjectContract" Index="9" Width="106" />
         <ColumnInfo Id="Subcontractor" Index="10" Width="158" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="11" Removed="True" />
+        <ColumnInfo Id="EmployeeListPositionName" Index="11" Width="160" />
+        <ColumnInfo Id="EmployeeListActualPositionName" Index="12" Width="180" />
+        <ColumnInfo Id="EmployeeListDepartmentName" Index="13" Width="120" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Index="14" Width="140" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Index="15" Width="160" />
+        <ColumnInfo Id="EmployeeListResidenceAddress" Index="16" Width="220" />
+        <ColumnInfo Id="CurrentPositionHistory" Removed="True" />
         <ColumnInfo Id="IsArchived" Index="19" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />

@@ -213,6 +213,66 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>Employees list: visa-report title of the current position-history row.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Position (visa reports)")]
+        public string EmployeeListPositionName =>
+            PersonCurrentItems.FormatEmployeeListPositionName(this);
+
+        /// <summary>Employees list: company title of the current position-history row.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Position (actual / company)")]
+        public string EmployeeListActualPositionName =>
+            PersonCurrentItems.FormatEmployeeListActualPositionName(this);
+
+        /// <summary>Employees list: department of the current position-history row.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Department")]
+        public string EmployeeListDepartmentName =>
+            PersonCurrentItems.FormatEmployeeListDepartmentName(this);
+
+        /// <summary>Employees list: visa numbers in force today, comma-separated.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Active visas")]
+        public string EmployeeListActiveVisaNumbers =>
+            PersonCurrentItems.FormatActiveVisaNumbers(this);
+
+        /// <summary>Employees list: work-permit numbers in force today, comma-separated.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Active work permits")]
+        public string EmployeeListActiveWorkPermitNumbers =>
+            PersonCurrentItems.FormatActiveWorkPermitNumbers(this);
+
+        /// <summary>Employees list: current residence as region, city, and street.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Address of residence")]
+        public string EmployeeListResidenceAddress =>
+            PersonCurrentItems.FormatEmployeeListResidenceAddress(this);
+
         /// <summary>ListView link column that opens the person dossier DetailView.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]

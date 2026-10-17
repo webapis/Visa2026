@@ -1606,6 +1606,12 @@
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
+        <Member Name="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
+        <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
+        <Member Name="EmployeeListActualPositionName" Caption="Должность (фактическая / компания)" />
+        <Member Name="EmployeeListDepartmentName" Caption="Отдел" />
+        <Member Name="EmployeeListPositionName" Caption="Должность (отчёты по визе)" />
+        <Member Name="EmployeeListResidenceAddress" Caption="Адрес проживания" />
         <Member Name="FamilyMembers" Caption="Родственники" />
         <Member Name="FamilyRelationDocuments" Caption="Копии доказательств родства" />
         <Member Name="FirstName" Caption="Имя" />
@@ -3099,6 +3105,12 @@
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
+        <ColumnInfo Id="EmployeeListPositionName" Caption="Должность (отчёты по визе)" />
+        <ColumnInfo Id="EmployeeListActualPositionName" Caption="Должность (фактическая / компания)" />
+        <ColumnInfo Id="EmployeeListDepartmentName" Caption="Отдел" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
+        <ColumnInfo Id="EmployeeListResidenceAddress" Caption="Адрес проживания" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Родственники">
