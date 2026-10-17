@@ -42,7 +42,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ActualPosition ActualPosition { get; set; }
 
         //[RuleRequiredField]
-        [VisibleInListView(false)]
+        [ExcludeFromOptionalDetailFields]
+        [Index(5)]
         public virtual Department Department { get; set; }
 
         [RuleRequiredField]

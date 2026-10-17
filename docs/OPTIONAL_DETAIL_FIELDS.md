@@ -24,7 +24,7 @@ Use this split everywhere in Visa2026 — not only on types with the gear contro
 | Business object | Required (always visible) | Optional (gear / auto-expand) |
 |-----------------|---------------------------|-------------------------------|
 | `EmployeeSalary` | `Person`, `Amount` | `StartDate`, `EndDate`, `Title` (computed) |
-| `EmployeePositionHistory` | `Position`, `ActualPosition`, `Person` | `StartDate`, `EndDate`, `Department`, `Title` (computed) |
+| `EmployeePositionHistory` | `Position`, `ActualPosition`, `Person`, `Department` (`[ExcludeFromOptionalDetailFields]`) | `StartDate`, `EndDate`, `Title` (computed) |
 | `Education` | `EducationLevel`, `EducationInstitution`, `EducationCountry`, `Specialty`, `Person`, `Documents` (required via `[RuleRequiredField]` on collection) | `GraduationYear` |
 | `Person` | Members with `[RuleRequiredField]` (incl. conditional), e.g. `FirstName`, `LastName`, `DateOfBirth`, `Age`, `ForeignAddress`, `ForeignAddressCountry`, `VisaApplicationFamilyMembersText` (employees, default `Ýok`), `SponsoringEmployee` + `Relationship` (family members), … | e.g. `MiddleName`, `Photo`, `Email`, `HireDate`, `PreviousWorkplacesInTurkmenistan`, `IsArchived` — not list tabs (`Documents`, `Passports`, … are optional collections) |
 | `Passport` | `PassportNumber`, `PassportType`, `IssueDate`, `ExpirationDate`, `Authority`, `IssuedCountry`, `Person`, `DaysRemaining` | `IsCancelled` — not `Documents` / `Visas` / `Images` |
