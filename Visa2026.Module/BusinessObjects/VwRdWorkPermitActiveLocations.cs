@@ -81,6 +81,9 @@ public class VwRdWorkPermitActiveLocations : IRdWorkPermitMaglumatRow
     [Browsable(false)]
     public virtual string EducationInstitutionLabel { get; set; }
 
+    [ModelDefault("Caption", "Bilimine görä hünäri")]
+    public virtual string SpecialtyLabel { get; set; }
+
     [NotMapped]
     [ModelDefault("Caption", "Bilimi we okan ýeri")]
     public string EducationLabel

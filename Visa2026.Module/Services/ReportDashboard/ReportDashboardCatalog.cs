@@ -716,15 +716,16 @@ public static class ReportDashboardCatalog
     {
         var approvalCount = ActiveInvitationApprovalHeaders.Length;
         var includeChart = !string.IsNullOrEmpty(chartHeader);
-        var headers = new string[9 + approvalCount + (includeChart ? 1 : 0)];
+        var headers = new string[10 + approvalCount + (includeChart ? 1 : 0)];
         headers[0] = "Full name";
         headers[1] = "Project";
-        headers[2] = "Position";
-        headers[3] = "Subcontractor";
-        headers[4] = "App #";
+        headers[2] = "Bölümi";
+        headers[3] = "Position";
+        headers[4] = "Subcontractor";
+        headers[5] = "App #";
         for (var i = 0; i < approvalCount; i++)
-            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
-        var migrationIndex = 5 + approvalCount;
+            headers[6 + i] = ActiveInvitationApprovalHeaders[i];
+        var migrationIndex = 6 + approvalCount;
         headers[migrationIndex] = "Migration";
         headers[migrationIndex + 1] = "Invitation #";
         headers[migrationIndex + 2] = "Expires";
@@ -753,16 +754,17 @@ public static class ReportDashboardCatalog
     private static string[] InvitationProcessHeaders()
     {
         var approvalCount = ActiveInvitationApprovalHeaders.Length;
-        var headers = new string[7 + approvalCount];
+        var headers = new string[8 + approvalCount];
         headers[0] = "Full name";
         headers[1] = "Project";
-        headers[2] = "Position";
-        headers[3] = "Subcontractor";
-        headers[4] = "App #";
+        headers[2] = "Bölümi";
+        headers[3] = "Position";
+        headers[4] = "Subcontractor";
+        headers[5] = "App #";
         for (var i = 0; i < approvalCount; i++)
-            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
-        headers[5 + approvalCount] = "Migration";
-        headers[6 + approvalCount] = "Process state";
+            headers[6 + i] = ActiveInvitationApprovalHeaders[i];
+        headers[6 + approvalCount] = "Migration";
+        headers[7 + approvalCount] = "Process state";
         return headers;
     }
 
@@ -1026,11 +1028,11 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.AddressOfResidence, "by-address-type") => ["Name", "Project", "Address", "Expiry", "Address Type"],
             (ReportDashboardCategory.AddressOfResidence, "by-address")      => ["Name", "Project", "Region · City", "Expiry", "Address"],
             (ReportDashboardCategory.WorkPermit, "active-by-project")  =>
-                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Wiza belgesi we möhleti", "Bellik"],
+                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat2Key)  =>
-                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Wiza belgesi we möhleti", "Bellik"],
+                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat3Key)  =>
-                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Goşmaça barjak ýerleri", "Wiza belgesi we möhleti", "Bellik"],
+                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Goşmaça barjak ýerleri", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitSanawKey) =>
                 ["№", "Familiýasy", "Ady", "Doglan senesi we ýeri", "Jynsy", "Raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Möhleti we gazanji", "Türkmenistandaky salgysy", "Daşary ýurtdaky salgysy", "Taslamasy", "Maşgala agzalary", "Adam sany"],
             (ReportDashboardCategory.WorkPermit, "on-extension") => ["Name", "Project", "App #", "App Date", "Project · State"],
@@ -1044,7 +1046,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Invitation, "expired-invitation") =>
                 ActiveInvitationHeaders(null),
             (ReportDashboardCategory.Invitation, "cancelled-invitation") =>
-                ["Full name", "Invitation #", "Issued date", "Expires", "Period", "App #", "Date", "Migration"],
+                ["Full name", "Bölümi", "Invitation #", "Issued date", "Expires", "Period", "App #", "Date", "Migration"],
             (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 InvitationProcessHeaders(),

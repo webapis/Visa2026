@@ -90,18 +90,36 @@ LEFT JOIN LATERAL (
 ) sal ON TRUE
 LEFT JOIN LATERAL (
     SELECT
-        string_agg(grp."MemberCount"::text || ' ' || grp."RelationName", E'\n' ORDER BY grp."RelationName") AS "Label",
-        SUM(grp."MemberCount")::int AS "MemberCount"
+        string_agg(
+            member."Seq"::text || ' ' ||
+            CASE
+                WHEN member."RelationName" = '' THEN member."FullName"
+                WHEN member."FullName" = '' THEN member."RelationName"
+                ELSE member."RelationName" || '-' || member."FullName"
+            END,
+            E'\n' ORDER BY member."Seq"
+        ) AS "Label",
+        COUNT(*)::int AS "MemberCount"
     FROM (
         SELECT
-            COUNT(*) AS "MemberCount",
-            COALESCE(NULLIF(BTRIM(rel."NameTm"), ''), NULLIF(BTRIM(rel."Name"), ''), '') AS "RelationName"
+            ROW_NUMBER() OVER (
+                ORDER BY
+                    COALESCE(NULLIF(BTRIM(rel."NameTm"), ''), NULLIF(BTRIM(rel."Name"), ''), ''),
+                    COALESCE(NULLIF(BTRIM(fm."LastName"), ''), ''),
+                    COALESCE(NULLIF(BTRIM(fm."FirstName"), ''), ''),
+                    fm."ID"
+            ) AS "Seq",
+            COALESCE(NULLIF(BTRIM(rel."NameTm"), ''), NULLIF(BTRIM(rel."Name"), ''), '') AS "RelationName",
+            CONCAT_WS(' ',
+                NULLIF(BTRIM(fm."FirstName"), ''),
+                NULLIF(BTRIM(fm."MiddleName"), ''),
+                NULLIF(BTRIM(fm."LastName"), '')
+            ) AS "FullName"
         FROM "People" fm
         LEFT JOIN "Relationships" rel
             ON rel."ID" = fm."RelationshipID" AND COALESCE(rel."GCRecord", 0) = 0
         WHERE fm."SponsoringEmployeeID" = p."ID"
           AND COALESCE(fm."GCRecord", 0) = 0
           AND fm."PersonRole" = 1
-        GROUP BY 2
-    ) grp
+    ) member
 ) fam ON TRUE;

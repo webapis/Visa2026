@@ -72,6 +72,7 @@ public static class ReportDashboardWorkPermitMaglumatExcel
         Join(row.ColumnA, row.ColumnB),
         Join(row.ColumnC, row.ColumnD),
         row.ColumnE ?? string.Empty,
+        row.Specialty ?? string.Empty,
         row.ColumnF ?? string.Empty,
         row.ColumnG ?? string.Empty,
         PermitCell(row),
@@ -82,14 +83,14 @@ public static class ReportDashboardWorkPermitMaglumatExcel
     public static List<string> CellsWithLocations(ReportDashboardPreviewRow row, int rowNumber)
     {
         var cells = Cells(row, rowNumber);
-        cells.Insert(8, LocationCell(row));
+        cells.Insert(9, LocationCell(row));
         return cells;
     }
 
     public static List<string> CellsWithAdditionalLocations(ReportDashboardPreviewRow row, int rowNumber)
     {
         var cells = CellsWithLocations(row, rowNumber);
-        cells.Insert(9, AdditionalCell(row));
+        cells.Insert(10, AdditionalCell(row));
         return cells;
     }
 

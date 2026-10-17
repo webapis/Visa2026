@@ -73,6 +73,10 @@ public sealed class ReportDashboardPreviewRow
     public Guid?  RecordId      { get; init; }
     public string Name          { get; init; } = string.Empty;
     public string Project       { get; init; } = string.Empty;
+    /// <summary>Invitation department, from the last position history. Empty on other categories.</summary>
+    public string Department    { get; init; } = string.Empty;
+    /// <summary>Work-permit specialty from the latest education. Empty on other categories.</summary>
+    public string Specialty     { get; init; } = string.Empty;
     public string ColumnA       { get; init; } = string.Empty;
     public string ColumnB       { get; init; } = string.Empty;
     /// <summary>Optional 6th column (e.g. expiry / app date before Days Remaining or Status).</summary>

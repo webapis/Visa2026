@@ -255,6 +255,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && readsApprovalNote
                     && stacksMigration
                     && requiresLinkedInstance
+                    && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -267,6 +268,7 @@ public static class ReportDashboardPostgresViewsHealSql
                 if (ViewExists(connection, viewName)
                     && ViewDefinitionContains(connection, viewName, "ActionFamily\" = 1")
                     && ViewDefinitionContains(connection, viewName, "PROCESS_ISSUED")
+                    && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -280,6 +282,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "::date < CURRENT_DATE")
                     && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
                     && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
+                    && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -295,6 +298,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && hasVisaColumns
                     && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
                     && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
+                    && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -314,6 +318,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && hasProcessColumns
                     && ViewDefinitionContains(connection, viewName, "\"Description\"")
                     && ViewDefinitionContains(connection, viewName, "a.\"ProcessNumber\"")
+                    && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -336,12 +341,15 @@ public static class ReportDashboardPostgresViewsHealSql
             if (ViewExists(connection, viewName)
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_work_permit_active"
-                    || ViewDefinitionContains(connection, viewName, "chr(29)"))
+                    || (ViewDefinitionContains(connection, viewName, "chr(29)")
+                        && (ColumnExists(connection, viewName, "SpecialtyLabel")
+                            || ColumnExists(connection, viewName, "specialtylabel"))))
                 && (viewName != "vw_rd_work_permit_a_maglumat_3"
                     || ColumnExists(connection, viewName, "WorkPermitAdditionalLocationsLabel")
                     || ColumnExists(connection, viewName, "workpermitadditionallocationslabel"))
                 && (viewName != "vw_rd_work_permit_sanaw"
-                    || ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")))
+                    || (ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
+                        && ViewDefinitionContains(connection, viewName, "fm.\"FirstName\""))))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);

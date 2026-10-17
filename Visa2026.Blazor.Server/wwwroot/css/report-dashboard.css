@@ -1022,6 +1022,20 @@
   overflow-wrap: anywhere;
 }
 .rd-listview-block .rd-invitation-table td:nth-child(2) .rd-project-tag { white-space: normal; }
+.rd-listview-block .rd-invitation-officer th:nth-child(4),
+.rd-listview-block .rd-invitation-officer td:nth-child(4):not(.rd-col-date):not(.rd-col-num):not(.rd-col-stack) {
+  width: 8rem;
+  max-width: 8.5rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.rd-listview-block .rd-invitation-officer th:nth-child(5),
+.rd-listview-block .rd-invitation-officer td:nth-child(5):not(.rd-col-date):not(.rd-col-num):not(.rd-col-stack) {
+  width: 6.25rem;
+  max-width: 6.75rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .rd-listview-block .rd-invitation-table th.rd-col-stack,
 .rd-listview-block .rd-invitation-table td.rd-col-stack:not(.rd-col-date):not(.rd-col-num) {
   width: 6.75rem;

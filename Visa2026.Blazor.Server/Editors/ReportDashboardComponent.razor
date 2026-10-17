@@ -578,19 +578,19 @@
                             </button>
                         </div>
                         <div class="rd-listview-scroll @(IsOfficerFillTable ? "rd-listview-scroll--fill" : null)">
-                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
+                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
                                             var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable) && i == 0;
-                                            var positionColumn = IsWorkPermitMaglumatTable && i == 5;
-                                            var educationColumn = IsWorkPermitMaglumatTable && i == 4;
-                                            var locationColumn = (IsWorkPermitMaglumat2Table && i == 8) || (IsWorkPermitMaglumat3Table && i == 9);
-                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 6 || i == 7 || i == 8 || (IsWorkPermitMaglumat2Table && i == 9) || (IsWorkPermitMaglumat3Table && i == 10)))
-                                                || (IsInvitationCancelledTable && (i == 3 || i == 7))
-                                                || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 4 && i <= 8)
-                                                || (IsInvitationProcessTable && i >= 4 && i <= 8);
+                                            var positionColumn = IsWorkPermitMaglumatTable && i == 6;
+                                            var educationColumn = IsWorkPermitMaglumatTable && (i == 4 || i == 5);
+                                            var locationColumn = (IsWorkPermitMaglumat2Table && i == 9) || (IsWorkPermitMaglumat3Table && i == 10);
+                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 7 || i == 8 || i == 9 || (IsWorkPermitMaglumat2Table && i == 10) || (IsWorkPermitMaglumat3Table && i == 11)))
+                                                || (IsInvitationCancelledTable && (i == 4 || i == 8))
+                                                || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 5 && i <= 9)
+                                                || (IsInvitationProcessTable && i >= 5 && i <= 9);
                                             <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
@@ -629,9 +629,10 @@
                                                         </div>
                                                     </td>
                                                     <td class="rd-col-education"><div class="rd-col-education-text">@row.ColumnE</div></td>
+                                                    <td class="rd-col-education"><div class="rd-col-education-text">@row.Specialty</div></td>
                                                     <td class="rd-col-position"><div class="rd-col-position-text">@row.ColumnF</div></td>
-                                                    <td class="@($"{ColumnClass(6)} rd-col-stack")">@row.ColumnG</td>
-                                                    <td class="@($"{ColumnClass(7)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                    <td class="@($"{ColumnClass(7)} rd-col-stack")">@row.ColumnG</td>
+                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")" @onclick:stopPropagation="true">
                                                         <div class="rd-cell-stack">
                                                             @if (row.WorkPermits.Count > 0)
                                                             {
@@ -690,7 +691,7 @@
                                                     </td>
                                                     @if (IsWorkPermitMaglumat2Table)
                                                     {
-                                                        <td class="@($"{ColumnClass(8)} rd-col-stack rd-col-locations")">
+                                                        <td class="@($"{ColumnClass(9)} rd-col-stack rd-col-locations")">
                                                             <div class="rd-cell-stack">
                                                                 @foreach (var permit in row.WorkPermits)
                                                                 {
@@ -706,7 +707,7 @@
                                                     }
                                                     @if (IsWorkPermitMaglumat3Table)
                                                     {
-                                                        <td class="@($"{ColumnClass(9)} rd-col-stack rd-col-locations")" @onclick:stopPropagation="true">
+                                                        <td class="@($"{ColumnClass(10)} rd-col-stack rd-col-locations")" @onclick:stopPropagation="true">
                                                             <div class="rd-cell-stack">
                                                                 @foreach (var permit in row.WorkPermits)
                                                                 {
@@ -748,7 +749,7 @@
                                                             </div>
                                                         </td>
                                                     }
-                                                    <td class="@($"{ColumnClass(IsWorkPermitMaglumat3Table ? 10 : IsWorkPermitMaglumat2Table ? 9 : 8)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                    <td class="@($"{ColumnClass(IsWorkPermitMaglumat3Table ? 11 : IsWorkPermitMaglumat2Table ? 10 : 9)} rd-col-stack")" @onclick:stopPropagation="true">
                                                         <div class="rd-cell-stack">
                                                             @if (row.VisaId is { } maglumatVisaId && maglumatVisaId != Guid.Empty && !string.IsNullOrEmpty(row.VisaNumber))
                                                             {
@@ -773,7 +774,7 @@
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td class="@ColumnClass(IsWorkPermitMaglumat3Table ? 11 : IsWorkPermitMaglumat2Table ? 10 : 9)"></td>
+                                                    <td class="@ColumnClass(IsWorkPermitMaglumat3Table ? 12 : IsWorkPermitMaglumat2Table ? 11 : 10)"></td>
                                                 }
                                                 else if (IsWorkPermitSanawTable)
                                                 {
@@ -796,7 +797,8 @@
                                                 <td class="rd-cell-name">@row.Name</td>
                                                 @if (IsInvitationCancelledTable)
                                                 {
-                                                    <td class="@ColumnClass(1)" @onclick:stopPropagation="true">
+                                                    <td class="@ColumnClass(1)">@row.Department</td>
+                                                    <td class="@ColumnClass(2)" @onclick:stopPropagation="true">
                                                         @if (row.InvitationId is { } cancelledInvitationId && cancelledInvitationId != Guid.Empty && !string.IsNullOrEmpty(row.ColumnE))
                                                         {
                                                             <button type="button"
@@ -811,8 +813,8 @@
                                                             @row.ColumnE
                                                         }
                                                     </td>
-                                                    <td class="@ColumnClass(2)">@row.ColumnA</td>
-                                                    <td class="@($"{ColumnClass(3)} rd-col-stack")">
+                                                    <td class="@ColumnClass(3)">@row.ColumnA</td>
+                                                    <td class="@($"{ColumnClass(4)} rd-col-stack")">
                                                         <div class="rd-cell-stack rd-expires">
                                                             @if (!string.IsNullOrEmpty(row.ColumnF))
                                                             {
@@ -824,10 +826,10 @@
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td class="@ColumnClass(4)">@row.ColumnH</td>
-                                                    <td class="@ColumnClass(5)">@row.ColumnC</td>
-                                                    <td class="@ColumnClass(6)">@row.ColumnD</td>
-                                                    <td class="@($"{ColumnClass(7)} rd-col-stack")">
+                                                    <td class="@ColumnClass(5)">@row.ColumnH</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(7)">@row.ColumnD</td>
+                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")">
                                                         <div class="rd-cell-stack">
                                                             @foreach (var line in (row.ColumnI ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
                                                             {
@@ -839,8 +841,12 @@
                                                 else
                                                 {
                                                 <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
-                                                <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
-                                                <td class="@ColumnClass(3)">@row.ColumnB</td>
+                                                @if (IsInvitationOfficerTable)
+                                                {
+                                                    <td class="@ColumnClass(2)">@row.Department</td>
+                                                }
+                                                <td class="@ColumnClass(IsInvitationOfficerTable ? 3 : 2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
+                                                <td class="@ColumnClass(IsInvitationOfficerTable ? 4 : 3)">@row.ColumnB</td>
                                                 @if (IsInvitationOfficerTable)
                                                 {
                                                     <td class="rd-col-stack">
@@ -859,7 +865,7 @@
                                                     {
                                                         var approvalLines = row.MinistryCells[ministryIndex]
                                                             .Split('\n', StringSplitOptions.RemoveEmptyEntries);
-                                                        <td class="@($"{ColumnClass(5 + ministryIndex)} rd-col-stack")">
+                                                        <td class="@($"{ColumnClass(6 + ministryIndex)} rd-col-stack")">
                                                             @if (approvalLines.Length > 0)
                                                             {
                                                                 <div class="rd-cell-stack">
@@ -872,7 +878,7 @@
                                                             }
                                                         </td>
                                                     }
-                                                    var invitationStart = 5 + row.MinistryCells.Count;
+                                                    var invitationStart = 6 + row.MinistryCells.Count;
                                                     var migrationLines = (row.ColumnI ?? string.Empty)
                                                         .Split('\n', StringSplitOptions.RemoveEmptyEntries);
                                                     <td class="@($"{ColumnClass(invitationStart)} rd-col-stack")">
@@ -1623,11 +1629,13 @@
     {
         if (ContainsTerm(row.Name, term)
             || ContainsTerm(row.Project, term)
+            || ContainsTerm(row.Department, term)
             || ContainsTerm(row.ColumnA, term)
             || ContainsTerm(row.ColumnB, term)
             || ContainsTerm(row.ColumnC, term)
             || ContainsTerm(row.ColumnD, term)
             || ContainsTerm(row.ColumnE, term)
+            || ContainsTerm(row.Specialty, term)
             || ContainsTerm(row.ColumnF, term)
             || ContainsTerm(ReportDashboardLocalization.Status(row.ExpiresBadge), term)
             || ContainsTerm(row.ColumnG, term)

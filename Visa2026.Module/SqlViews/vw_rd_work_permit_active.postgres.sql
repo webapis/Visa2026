@@ -28,6 +28,7 @@ SELECT
     END                                                                     AS "PassportExpirationDate",
     COALESCE(edu."LevelName", '')                                              AS "EducationLevelLabel",
     COALESCE(edu."InstitutionName", '')                                         AS "EducationInstitutionLabel",
+    COALESCE(edu."SpecialtyName", '')                                           AS "SpecialtyLabel",
     COALESCE(NULLIF(BTRIM(act."Name"), ''), '')                             AS "PositionLabel",
     COALESCE(NULLIF(BTRIM(reg."NameTm"), ''), '')                           AS "AddressRegionTm",
     COALESCE(NULLIF(BTRIM(city."NameTm"), ''), '')                          AS "AddressCityTm",
@@ -188,12 +189,15 @@ LEFT JOIN LATERAL (
 LEFT JOIN LATERAL (
     SELECT
         COALESCE(NULLIF(BTRIM(el."NameTm"), ''), NULLIF(BTRIM(el."Name"), ''), '') AS "LevelName",
-        COALESCE(NULLIF(BTRIM(ei."NameTm"), ''), NULLIF(BTRIM(ei."Name"), ''), '') AS "InstitutionName"
+        COALESCE(NULLIF(BTRIM(ei."NameTm"), ''), NULLIF(BTRIM(ei."Name"), ''), '') AS "InstitutionName",
+        COALESCE(NULLIF(BTRIM(spec."NameTm"), ''), NULLIF(BTRIM(spec."Name"), ''), '') AS "SpecialtyName"
     FROM "Educations" ed
     LEFT JOIN "EducationLevels" el
         ON el."ID" = ed."EducationLevelID" AND COALESCE(el."GCRecord", 0) = 0
     LEFT JOIN "EducationInstitutions" ei
         ON ei."ID" = ed."EducationInstitutionID" AND COALESCE(ei."GCRecord", 0) = 0
+    LEFT JOIN "Specialties" spec
+        ON spec."ID" = ed."SpecialtyID" AND COALESCE(spec."GCRecord", 0) = 0
     WHERE ed."PersonID" = p."ID"
       AND COALESCE(ed."GCRecord", 0) = 0
     ORDER BY ed."GraduationYear" DESC NULLS LAST, ed."ID" DESC

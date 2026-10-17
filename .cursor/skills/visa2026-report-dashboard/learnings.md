@@ -4,6 +4,36 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-17 — Sanaw family lines include the full name
+
+**Ask:** Show each family member's full name on Sanaw, as on the sanaw sheet.
+
+**Now:** Maşgala agzalary is one line per linked family member: `1 aýaly-Nina Sola`. The number is the line order (relationship, then last name, then first name). The name is first, middle, and last. Adam sany is unchanged. Heal recreates `vw_rd_work_permit_sanaw` until the definition contains `fm."FirstName"`.
+
+**Prevent:** Do not go back to a count grouped only by relationship. That drops the name.
+
+**Files:** `vw_rd_work_permit_sanaw.postgres.sql`
+
+## 2026-10-17 — Maglumat tables add Bilimine görä hünäri
+
+**Ask:** Add Speciality from Education to the Work Permit officer tables. Sanaw already has the column.
+
+**Now:** A. Maglumat, A. Maglumat 2, and Goşmaça barjak ýerleri show **Bilimine görä hünäri** immediately after **Bilimi we okan ýeri**. The text is Specialty `NameTm`, or `Name` when that is empty, from the same latest education (graduation year, then id). Sanaw is unchanged. Heal recreates `vw_rd_work_permit_active` until `SpecialtyLabel` exists. Workbooks are 11, 12, and 13 columns.
+
+**Prevent:** Do not take the specialty from a different education row than the level and institution. Do not add a second specialty column on Sanaw.
+
+**Files:** `vw_rd_work_permit_active.postgres.sql`, `ReportDashboardWorkPermitMaglumatExcel.cs`, `ReportDashboardComponent.razor`
+
+## 2026-10-17 — Invitation tables add Bölümi and keep Project
+
+**Ask:** Add a department column on the Invitation subreports. Do not replace Project. Do not add it to Work Permit.
+
+**Now:** Active, Expired, Process, and Used show **Bölümi** immediately after Project. Cancelled Invitation has no Project column, so Bölümi is the second column. The text is Department `NameTm`, or `Name` when that is empty, from the last position history (open period first, then latest start date, then id). A family member (`PersonRole` 1) uses the sponsoring employee's department. Heal recreates the five invitation views until the definition contains `DepartmentLabel`. Work Permit is unchanged.
+
+**Prevent:** Do not overwrite `ProjectName`, `StatusLabel`, or the chart. Do not add this column to A. Maglumat, A. Maglumat 2, Goşmaça barjak ýerleri, or Sanaw.
+
+**Files:** `vw_rd_invitation_ready.postgres.sql`, `vw_rd_invitation_expired.postgres.sql`, `vw_rd_invitation_cancelled.postgres.sql`, `vw_rd_invitation_in_process.postgres.sql`, `vw_rd_invitation_used.postgres.sql`, `ReportDashboardComponent.razor`, `ReportDashboardInvitationTableExcel.cs`
+
 ## 2026-10-17 — Extra-location block is three lines and the number opens the case
 
 **Ask:** Stack the additional-location information, and open the Application Profile instance from the application number.

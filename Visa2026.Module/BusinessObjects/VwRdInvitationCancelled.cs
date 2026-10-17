@@ -101,6 +101,9 @@ public class VwRdInvitationCancelled
     [Browsable(false)]
     public virtual string ProjectNameTm { get; set; }
 
+    [ModelDefault("Caption", "Bölümi")]
+    public virtual string DepartmentLabel { get; set; }
+
     [Browsable(false)]
     public virtual int PersonRoleCode { get; set; }
 

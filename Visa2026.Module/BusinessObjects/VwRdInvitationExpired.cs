@@ -57,6 +57,9 @@ public class VwRdInvitationExpired
     [ModelDefault("Caption", "Position")]
     public virtual string PositionLabel { get; set; }
 
+    [ModelDefault("Caption", "Bölümi")]
+    public virtual string DepartmentLabel { get; set; }
+
     [ModelDefault("Caption", "Subcontractor")]
     public virtual string SubcontractorLabel { get; set; }
 

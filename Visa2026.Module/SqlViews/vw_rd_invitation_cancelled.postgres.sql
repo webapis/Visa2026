@@ -59,6 +59,7 @@ SELECT
     )                                                                       AS "ProjectName",
     COALESCE(apc."NameTm", pc."NameTm", '')                                 AS "ProjectNameRaw",
     COALESCE(apc."NameTm", pc."NameTm", '')                                 AS "ProjectNameTm",
+    COALESCE(dept."Name", '')                                               AS "DepartmentLabel",
     p."PersonRole"                                                          AS "PersonRoleCode",
     COALESCE(
         NULLIF(BTRIM(apc."NameTm"), ''),
@@ -97,6 +98,31 @@ LEFT JOIN "ProjectContracts" apc
     ON apc."ID" = cancel."ProjectContractID" AND COALESCE(apc."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = p."ProjectContractID" AND COALESCE(pc."GCRecord", 0) = 0
+LEFT JOIN LATERAL (
+    SELECT COALESCE(NULLIF(BTRIM(dep."NameTm"), ''), NULLIF(BTRIM(dep."Name"), ''), '') AS "Name"
+    FROM "People" dept_person
+    LEFT JOIN "People" dept_sponsor
+        ON dept_sponsor."ID" = dept_person."SponsoringEmployeeID"
+       AND COALESCE(dept_sponsor."GCRecord", 0) = 0
+    INNER JOIN "EmployeePositionHistories" dept_eph
+        ON dept_eph."PersonID" = CASE
+            WHEN dept_person."PersonRole" = 1 AND dept_sponsor."ID" IS NOT NULL THEN dept_sponsor."ID"
+            ELSE dept_person."ID"
+        END
+       AND COALESCE(dept_eph."GCRecord", 0) = 0
+    LEFT JOIN "Departments" dep
+        ON dep."ID" = dept_eph."DepartmentID"
+       AND COALESCE(dep."GCRecord", 0) = 0
+    WHERE dept_person."ID" = p."ID"
+    ORDER BY
+        CASE
+            WHEN dept_eph."EndDate" IS NULL OR (dept_eph."EndDate")::date >= CURRENT_DATE THEN 0
+            ELSE 1
+        END,
+        dept_eph."StartDate" DESC NULLS LAST,
+        dept_eph."ID" DESC
+    LIMIT 1
+) dept ON TRUE
 LEFT JOIN LATERAL (
     SELECT pr."Date" AS "Date", NULLIF(BTRIM(pr."ProcessNumber"), '') AS "ProcessNumber"
     FROM "ApplicationProfileInstanceProgresses" pr

@@ -57,6 +57,7 @@ public static class ReportDashboardInvitationTableExcel
         {
             row.Name,
             row.Project,
+            row.Department,
             row.ColumnA,
             row.ColumnB,
             JoinLines(row.ColumnC, row.ColumnD),
@@ -101,6 +102,7 @@ public static class ReportDashboardInvitationTableExcel
         return
         [
             row.Name,
+            row.Department,
             row.ColumnE,
             row.ColumnA,
             JoinLines(row.ColumnF, ReportDashboardLocalization.Status(row.ExpiresBadge)),

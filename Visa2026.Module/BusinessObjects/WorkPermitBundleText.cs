@@ -15,6 +15,7 @@ public interface IRdWorkPermitMaglumatRow
     string PassportNumber { get; }
     DateTime? PassportExpirationDate { get; }
     string EducationLabel { get; }
+    string SpecialtyLabel { get; }
     string PositionLabel { get; }
     string AddressRegionTm { get; }
     string AddressCityTm { get; }
