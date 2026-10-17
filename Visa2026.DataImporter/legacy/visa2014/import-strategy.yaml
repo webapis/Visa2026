@@ -346,7 +346,7 @@ onPremDeployment:
       - person-domain (Person, Passport, Education, and other person children)
       - Visa, WorkPermit, Invitation (headers, items, and their documents)
     exclude:
-      - ApplicationProfileInstance except checkInInstances below
+      - ApplicationProfileInstance except checkInInstances and additionalWorkPermitLocationInstances below
       - ApplicationProfileInstanceProgress
       - Rejection
       - BorderZone
@@ -373,14 +373,36 @@ onPremDeployment:
         whose visa is still in force. A check-in does not issue the visa, so
         the visa issuing-instance link stays null. One latest case per person
         and visa. Full history and progress stay on the later archive database.
+    additionalWorkPermitLocationInstances:
+      lockedAt: 2026-10-17
+      approvedBy: developer (chat)
+      applicationType: App_Additional_WP_location
+      profileCode: change_workpermit
+      profileName: Iş Rugsatnama goşmaça barjak ýeri
+      workPermitItem: in_force
+      workPermitItemRule: >
+        The work-permit item on the case is still in force: Active, Expiring
+        soon, or Extension required. Skip Expired, Cancelled, and Archived.
+      whichCase: every App_Additional_WP_location whose work-permit item is still in force
+      import: [ApplicationProfileInstance, ApplicationProfileInstancePerson, current work-permit item link]
+      doNotImport: [ApplicationProfileInstanceProgress, WorkPermit, WorkPermitItem]
+      doNotUpdateWorkPermit: true
+      insertOnly: true
+      importerStatus: not_implemented
+      why: >
+        Officers need every additional work-location case whose work permit is
+        still in force. The work permit itself is already imported and is not
+        replaced. Progress and other application types stay out.
     issuedDocumentsWithoutInstance: true
     why: >
       Full application history is too slow for the working production database.
-      Officers start new cases by hand. The exception is the latest
+      Officers start new cases by hand. The exceptions are the latest
       arrival-from-abroad check-in whose visa is still in force
-      (checkInInstances). Historical cases go to a separate archive database
-      later. Visa, work permit, and invitation rows stay, with the
-      issuing-instance foreign key left null.
+      (checkInInstances) and every additional work-location case whose
+      work-permit item is still in force
+      (additionalWorkPermitLocationInstances). Historical cases go to a
+      separate archive database later. Visa, work permit, and invitation rows
+      stay, with the issuing-instance foreign key left null.
     catchUp: >
       Insert new legacy rows only. A legacy id already in the production
       id-map is skipped and the Visa2026 row is left unchanged, including
@@ -388,9 +410,10 @@ onPremDeployment:
       rebuilt from visa2026_prod (--rebuild-visa2014-id-maps). Do not use the
       staging id-map. Do not run application-type slices, --correct-*, or
       pass an application id-map on Visa or WorkPermit (those paths rewrite
-      rows already imported). Do not import check-in instances until
-      checkInInstances.importerStatus is implemented; a full application-type
-      slice is still forbidden. Photo and scan bytes are a separate fill-missing
+      rows already imported).       Do not import check-in or additional work-location instances until
+      checkInInstances.importerStatus and
+      additionalWorkPermitLocationInstances.importerStatus are implemented; a
+      full application-type slice is still forbidden. Photo and scan bytes are a separate fill-missing
       pass (fileCatchUp), not part of the scalar catch-up. New Visa, WorkPermit, and
       Invitation headers use --visa-remainder, --work-permit-remainder, and
       --invitation-remainder so the instance link stays null. Remainder mode
