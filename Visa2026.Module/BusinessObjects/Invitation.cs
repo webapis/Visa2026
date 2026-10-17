@@ -97,6 +97,16 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Visa End Date")]
         public virtual DateTime? VisaEndDate { get; set; }
 
+        /// <summary>
+        /// Calendar days from <see cref="IssuedDate"/> to the invitation letter expiry.
+        /// Visa period on the case is a separate lookup and does not change this offset.
+        /// </summary>
+        public const int ExpirationOffsetDays = 90;
+
+        /// <summary>Invitation letter expiry for an issued date (<see cref="ExpirationOffsetDays"/> calendar days later).</summary>
+        public static DateTime ExpirationFromIssued(DateTime issuedDate) =>
+            issuedDate.Date.AddDays(ExpirationOffsetDays);
+
         /// <summary>Invitation letter expiry (legacy Möhleti tamamlanýan sene / DateOfExpire).</summary>
         [RuleRequiredField]
         [ImmediatePostData]
@@ -289,16 +299,27 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             var objectSpace = ObjectSpaceHelper.Get(this);
-            if (objectSpace != null)
+            var instance = ApplicationProfileInstance;
+            if (VisaCategory == null)
             {
-                VisaCategory ??= objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(v => v.IsDefault);
-                VisaPeriod ??= objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(v => v.IsDefault);
+                VisaCategory = instance?.VisaCategory;
+                if (VisaCategory == null && objectSpace != null)
+                    VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(v => v.IsDefault);
+            }
+
+            if (VisaPeriod == null)
+            {
+                VisaPeriod = instance?.VisaPeriod;
+                if (VisaPeriod == null && objectSpace != null)
+                    VisaPeriod = objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(v => v.IsDefault);
             }
 
             if (IssuedDate == default)
             {
                 IssuedDate = DateTime.Today;
             }
+
+            ExpirationDate ??= ExpirationFromIssued(IssuedDate);
 
             if (string.IsNullOrWhiteSpace(BorderZoneLocation)
                 && ApplicationProfileInstance != null

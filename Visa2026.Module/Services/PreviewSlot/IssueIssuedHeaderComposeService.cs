@@ -603,12 +603,16 @@ public static class IssueIssuedHeaderComposeService
             : new List<IssueIssuedHeaderLookupOption>();
 
         Guid? defaultCategoryId = kind == IssueIssuedHeaderKind.Invitation
-            ? objectSpace.GetObjectsQuery<VisaCategory>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault()
-                ?? visaCategories.FirstOrDefault()?.Id
+            ? FirstAssignedId(
+                instance.VisaCategory?.ID,
+                objectSpace.GetObjectsQuery<VisaCategory>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault(),
+                visaCategories.FirstOrDefault()?.Id)
             : null;
         Guid? defaultPeriodId = kind == IssueIssuedHeaderKind.Invitation
-            ? objectSpace.GetObjectsQuery<VisaPeriod>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault()
-                ?? visaPeriods.FirstOrDefault()?.Id
+            ? FirstAssignedId(
+                instance.VisaPeriod?.ID,
+                objectSpace.GetObjectsQuery<VisaPeriod>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault(),
+                visaPeriods.FirstOrDefault()?.Id)
             : null;
         Guid? defaultDurationId = kind == IssueIssuedHeaderKind.BorderZone
             ? objectSpace.GetObjectsQuery<ValidityDuration>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault()
@@ -642,7 +646,9 @@ public static class IssueIssuedHeaderComposeService
             },
             HeaderNumber = string.Empty,
             PrimaryDate = DateTime.Today,
-            ExpirationDate = kind == IssueIssuedHeaderKind.Invitation ? DateTime.Today.AddMonths(6) : null,
+            ExpirationDate = kind == IssueIssuedHeaderKind.Invitation
+                ? Invitation.ExpirationFromIssued(DateTime.Today)
+                : null,
             VisaCategoryId = defaultCategoryId,
             VisaPeriodId = defaultPeriodId,
             BorderZoneLocation = defaultBorderZone,
@@ -1958,6 +1964,17 @@ public static class IssueIssuedHeaderComposeService
         item.WorkPermittedLocations = string.IsNullOrWhiteSpace(row.WorkPermittedLocations)
             ? defaultLocations
             : row.WorkPermittedLocations.Trim();
+    }
+
+    private static Guid? FirstAssignedId(params Guid?[] ids)
+    {
+        foreach (var id in ids)
+        {
+            if (id is Guid value && value != Guid.Empty)
+                return value;
+        }
+
+        return null;
     }
 
     private static IssueIssuedHeaderCreatedLine ToWorkPermitCreatedLine(WorkPermitItem item) =>

@@ -1023,6 +1023,8 @@
     private Task OnPrimaryDateChangedAsync(DateTime? value)
     {
         _primaryDate = value ?? DateTime.Today;
+        if (_draft?.Kind == IssueIssuedHeaderKind.Invitation)
+            _expirationDate = Invitation.ExpirationFromIssued(_primaryDate);
         ReviewField("header:date");
         return Task.CompletedTask;
     }
