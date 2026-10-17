@@ -29,6 +29,10 @@ public static class ReportDashboardExcelTemplateService
     public static string? CanonicalKey(ReportDashboardCategory category, string? subReport)
     {
         if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.WorkPermitMaglumat2Key;
+
+        if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase))
             return "active-by-project";
 
@@ -154,11 +158,16 @@ public static class ReportDashboardExcelTemplateService
         }
     }
 
-    private static string SheetName(ReportDashboardCategory category, string? subReport) =>
-        category == ReportDashboardCategory.WorkPermit
-        && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
-            ? "A.Maglumat"
-            : "Report";
+    private static string SheetName(ReportDashboardCategory category, string? subReport)
+    {
+        if (category != ReportDashboardCategory.WorkPermit)
+            return "Report";
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase))
+            return "A.Maglumat 2";
+        if (string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase))
+            return "A.Maglumat";
+        return "Report";
+    }
 
     private static bool IsMissingTable(Exception ex)
     {

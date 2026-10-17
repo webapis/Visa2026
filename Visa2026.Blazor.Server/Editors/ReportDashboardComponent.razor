@@ -586,11 +586,12 @@
                                             var orderColumn = IsWorkPermitMaglumatTable && i == 0;
                                             var positionColumn = IsWorkPermitMaglumatTable && i == 5;
                                             var educationColumn = IsWorkPermitMaglumatTable && i == 4;
-                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 6 || i == 7 || i == 8))
+                                            var locationColumn = IsWorkPermitMaglumat2Table && i == 8;
+                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 6 || i == 7 || i == 8 || (IsWorkPermitMaglumat2Table && i == 9)))
                                                 || (IsInvitationCancelledTable && (i == 3 || i == 7))
                                                 || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 4 && i <= 8)
                                                 || (IsInvitationProcessTable && i >= 4 && i <= 8);
-                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}")">@Panel.TableHeaders[i]</th>
+                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
                                 </thead>
@@ -687,7 +688,23 @@
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                    @if (IsWorkPermitMaglumat2Table)
+                                                    {
+                                                        <td class="@($"{ColumnClass(8)} rd-col-stack rd-col-locations")">
+                                                            <div class="rd-cell-stack">
+                                                                @foreach (var permit in row.WorkPermits)
+                                                                {
+                                                                    <div class="rd-permit-block">
+                                                                        @if (!string.IsNullOrEmpty(permit.Locations))
+                                                                        {
+                                                                            <span>@permit.Locations</span>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    }
+                                                    <td class="@($"{ColumnClass(IsWorkPermitMaglumat2Table ? 9 : 8)} rd-col-stack")" @onclick:stopPropagation="true">
                                                         <div class="rd-cell-stack">
                                                             @if (row.VisaId is { } maglumatVisaId && maglumatVisaId != Guid.Empty && !string.IsNullOrEmpty(row.VisaNumber))
                                                             {
@@ -712,7 +729,7 @@
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td class="@ColumnClass(9)"></td>
+                                                    <td class="@ColumnClass(IsWorkPermitMaglumat2Table ? 10 : 9)"></td>
                                                 }
                                                 else
                                                 {
@@ -1600,7 +1617,9 @@
             : ReportDashboardExcelTemplateService.Export(
                 objectSpace, Category, subReport, label, headers, DisplayedRows, ShowInvitationChartColumn);
 
-        var fileName = IsWorkPermitMaglumatTable
+        var fileName = IsWorkPermitMaglumat2Table
+            ? (templateOnly ? "A.Maglumat 2 template" : "A.Maglumat 2")
+            : IsWorkPermitMaglumatTable
             ? (templateOnly ? "A.Maglumat template" : "A.Maglumat")
             : SafeFileName(templateOnly ? label + " template" : label);
         await using var stream = new MemoryStream(bytes);
@@ -1691,9 +1710,14 @@
     private bool IsInvitationOfficerTable =>
         IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationCancelledTable || IsInvitationProcessTable || IsInvitationUsedTable;
 
+    private bool IsWorkPermitMaglumat2Table =>
+        Category == ReportDashboardCategory.WorkPermit
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase);
+
     private bool IsWorkPermitMaglumatTable =>
         Category == ReportDashboardCategory.WorkPermit
-        && string.Equals(Panel?.SubReport ?? SubReport, "active-by-project", StringComparison.OrdinalIgnoreCase);
+        && (string.Equals(Panel?.SubReport ?? SubReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
+            || IsWorkPermitMaglumat2Table);
 
     private bool IsOfficerFillTable => IsInvitationOfficerTable || IsWorkPermitMaglumatTable;
 
@@ -1776,7 +1800,8 @@
         {
             if (ContainsTerm(permit.Number, term)
                 || ContainsTerm(permit.Start, term)
-                || ContainsTerm(permit.End, term))
+                || ContainsTerm(permit.End, term)
+                || ContainsTerm(permit.Locations, term))
                 return true;
         }
 

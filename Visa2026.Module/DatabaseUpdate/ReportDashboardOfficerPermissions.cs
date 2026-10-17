@@ -67,6 +67,7 @@ public static class ReportDashboardOfficerPermissions
 
         EnsureViewReadPermission<VwRdWorkPermit>(role);
         EnsureViewReadPermission<VwRdWorkPermitActive>(role);
+        EnsureViewReadPermission<VwRdWorkPermitActiveLocations>(role);
         EnsureViewReadPermission<VwRdWorkPermitAppProgress>(role);
 
         EnsureViewReadPermission<VwRdPassport>(role);

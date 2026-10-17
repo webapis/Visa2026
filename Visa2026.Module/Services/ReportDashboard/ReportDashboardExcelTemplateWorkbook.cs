@@ -101,6 +101,8 @@ public static class ReportDashboardExcelTemplateWorkbook
         int headerCount,
         bool includeChartColumn)
     {
+        if (IsWorkPermitMaglumat2(category, subReport))
+            return ReportDashboardWorkPermitMaglumatExcel.CellsWithLocations(row, rowNumber);
         if (IsWorkPermitMaglumat(category, subReport))
             return ReportDashboardWorkPermitMaglumatExcel.Cells(row, rowNumber);
 
@@ -176,12 +178,21 @@ public static class ReportDashboardExcelTemplateWorkbook
         return values;
     }
 
+    private static bool IsWorkPermitMaglumat2(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.WorkPermit
+        && string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase);
+
     private static bool IsWorkPermitMaglumat(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.WorkPermit
-        && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase);
+        && (string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
+            || IsWorkPermitMaglumat2(category, subReport));
 
-    private static string SheetName(ReportDashboardCategory category, string? subReport) =>
-        IsWorkPermitMaglumat(category, subReport) ? "A.Maglumat" : "Report";
+    private static string SheetName(ReportDashboardCategory category, string? subReport)
+    {
+        if (IsWorkPermitMaglumat2(category, subReport))
+            return "A.Maglumat 2";
+        return IsWorkPermitMaglumat(category, subReport) ? "A.Maglumat" : "Report";
+    }
 
     /// <summary>
     /// A Maglumat keeps the administrator's title wording and replaces the first dd.MM.yyyy with the export day.

@@ -1069,6 +1069,13 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
+.rd-listview-block .rd-maglumat-table th.rd-col-locations,
+.rd-listview-block .rd-maglumat-table td.rd-col-locations {
+  width: 11rem;
+  max-width: 11rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .rd-invitation-table .rd-expires { gap: 4px; }
 .rd-preview-pager {
   display: flex;

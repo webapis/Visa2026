@@ -145,7 +145,9 @@ The Work Permit tab `active-by-project` is **A. Maglumat**. It uses the same com
 
 One row is one person. Every valid work permit stays in the work-permit cell: not cancelled, and the expiration date is today or later. Newest start date is first. Each number opens that permit's scanned copies. The chart is by project and starts collapsed. Project is not a table column.
 
-Columns: № (screen order of the rows on display), F.A.A, birth date and citizenship code, passport number and expiry (text), education level and institution, current actual job title, current Turkmenistan address, work-permit number with start and end (the number opens that permit's scanned copies), current valid visa number with start and end (the number opens visa copies), Bellik (empty). Passport text does not open copies. Other Work Permit tabs are unchanged.
+Columns: № (screen order of the rows on display), F.A.A, birth date and citizenship code, passport number and expiry (text), education level and institution, current actual job title, current Turkmenistan address, work-permit number with start and end (the number opens that permit's scanned copies), current valid visa number with start and end (the number opens visa copies), Bellik (empty). Passport text does not open copies.
+
+**A. Maglumat 2** (`a-maglumat-2`) is the same report. It adds **Rugsat berlen ýerler** immediately after the work-permit dates. A person with several valid permits gets one location block per permit, in that same order, with a blank line between blocks. The text is `WorkPermitItem.WorkPermittedLocations`. Its list is `VwRdWorkPermitActiveLocations_ListView` on `vw_rd_work_permit_active_locations`. Its company workbook is separate (`a-maglumat-2`, 11 columns, sheet `A.Maglumat 2`) and uses the same title, with the first `dd.MM.yyyy` replaced by the export day. Other Work Permit tabs are unchanged.
 
 ### Where it is stored
 

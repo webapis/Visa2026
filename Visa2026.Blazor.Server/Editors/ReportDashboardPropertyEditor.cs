@@ -233,6 +233,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             (ReportDashboardCategory.VisaExtension, "extension-required") => "bar",
             (ReportDashboardCategory.VisaExtension, "by-days-remaining") => "bar",
             (ReportDashboardCategory.WorkPermit, "active-by-project") => "bar",
+            (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitMaglumat2Key) => "bar",
             (ReportDashboardCategory.WorkPermit, "on-extension") => "bar",
             (ReportDashboardCategory.WorkPermit, "extension-result") => "bar",
             (ReportDashboardCategory.WorkPermit, "by-days-remaining") => "bar",

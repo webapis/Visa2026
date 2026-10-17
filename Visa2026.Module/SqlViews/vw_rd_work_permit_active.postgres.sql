@@ -2,6 +2,7 @@
 -- One person row. Every valid work permit (not cancelled, not yet expired) is listed
 -- in WorkPermitBundle, newest start date first. Passport and the scalar permit
 -- columns stay on the newest permit.
+DROP VIEW IF EXISTS vw_rd_work_permit_active_locations;
 DROP VIEW IF EXISTS vw_rd_work_permit_active;
 CREATE VIEW vw_rd_work_permit_active AS
 SELECT
@@ -33,6 +34,7 @@ SELECT
     CASE WHEN (picked."StartDate")::date > DATE '1900-01-01' THEN picked."StartDate" ELSE NULL END AS "StartDate",
     CASE WHEN (picked."ExpirationDate")::date > DATE '1900-01-01' THEN picked."ExpirationDate" ELSE NULL END AS "ExpirationDate",
     COALESCE(all_permits."Bundle", '')                                      AS "WorkPermitBundle",
+    COALESCE(all_permits."Locations", '')                                   AS "WorkPermitLocationsLabel",
     COALESCE(NULLIF(BTRIM(cur_visa."VisaNumber"), ''), '')                  AS "VisaNumber",
     CASE WHEN (cur_visa."StartDate")::date > DATE '1900-01-01' THEN cur_visa."StartDate" ELSE NULL END AS "VisaStartDate",
     CASE WHEN (cur_visa."ExpirationDate")::date > DATE '1900-01-01' THEN cur_visa."ExpirationDate" ELSE NULL END AS "VisaEndDate",
@@ -96,10 +98,16 @@ LEFT JOIN LATERAL (
         CASE
             WHEN (v."ExpirationDate")::date > DATE '1900-01-01' THEN to_char(v."ExpirationDate", 'DD.MM.YYYY')
             ELSE ''
-        END,
+        END || E'\x1e' ||
+        replace(replace(replace(COALESCE(BTRIM(v."WorkPermittedLocations"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '),
         E'\n'
         ORDER BY v."StartDate" DESC NULLS LAST, v."ExpirationDate" DESC NULLS LAST, v."ID" DESC
-    ) AS "Bundle"
+    ) AS "Bundle",
+    string_agg(
+        replace(replace(replace(COALESCE(BTRIM(v."WorkPermittedLocations"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '),
+        E'\n\n'
+        ORDER BY v."StartDate" DESC NULLS LAST, v."ExpirationDate" DESC NULLS LAST, v."ID" DESC
+    ) AS "Locations"
     FROM "WorkPermitItems" v
     WHERE v."PersonID" = picked."PersonID"
       AND COALESCE(v."GCRecord", 0) = 0
@@ -205,3 +213,6 @@ LEFT JOIN "People" sp
     ON sp."ID" = p."SponsoringEmployeeID" AND COALESCE(sp."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0;
+
+CREATE VIEW vw_rd_work_permit_active_locations AS
+SELECT * FROM vw_rd_work_permit_active;

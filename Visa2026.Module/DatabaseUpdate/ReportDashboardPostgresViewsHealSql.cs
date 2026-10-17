@@ -95,6 +95,7 @@ public static class ReportDashboardPostgresViewsHealSql
     {
         ("vw_rd_work_permit", "vw_rd_work_permit.postgres.sql"),
         ("vw_rd_work_permit_active", "vw_rd_work_permit_active.postgres.sql"),
+        ("vw_rd_work_permit_active_locations", "vw_rd_work_permit_active.postgres.sql"),
         ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
     };
 
@@ -333,8 +334,8 @@ public static class ReportDashboardPostgresViewsHealSql
             if (ViewExists(connection, viewName)
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_work_permit_active"
-                    || ColumnExists(connection, viewName, "EducationInstitutionLabel")
-                    || ColumnExists(connection, viewName, "educationinstitutionlabel")))
+                    || ColumnExists(connection, viewName, "WorkPermitLocationsLabel")
+                    || ColumnExists(connection, viewName, "workpermitlocationslabel")))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);

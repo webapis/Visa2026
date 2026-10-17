@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects;
 [ModelDefault("AllowEdit", "False")]
 [ModelDefault("AllowNew", "False")]
 [ModelDefault("AllowDelete", "False")]
-public class VwRdWorkPermitActive
+public class VwRdWorkPermitActive : IRdWorkPermitMaglumatRow
 {
     [Key]
     [Browsable(false)]

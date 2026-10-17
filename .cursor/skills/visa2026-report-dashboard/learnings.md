@@ -4,6 +4,14 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-17 — A. Maglumat 2 adds work-permit locations
+
+**Ask:** Add a tab that matches A. Maglumat and adds the work-permit locations column.
+
+**Now:** `a-maglumat-2` is A. Maglumat 2. Same people and valid permits. **Rugsat berlen ýerler** sits after the permit dates. Each permit's `WorkPermittedLocations` text is its own block. The list reads `vw_rd_work_permit_active_locations`. Excel is a separate 11-column workbook with the same title date. Heal recreates `vw_rd_work_permit_active` until `WorkPermitLocationsLabel` exists.
+
+**Prevent:** Do not reuse the A. Maglumat Excel key. That workbook has 10 columns. Do not set the heal sentinel back to `EducationInstitutionLabel`.
+
 ## 2026-10-16 — Work Permit tab label is A. Maglumat
 
 **Ask:** Rename Aktiw iş rugsady (P) to A. Maglumat.

@@ -79,6 +79,13 @@ public static class ReportDashboardWorkPermitMaglumatExcel
         string.Empty
     ];
 
+    public static List<string> CellsWithLocations(ReportDashboardPreviewRow row, int rowNumber)
+    {
+        var cells = Cells(row, rowNumber);
+        cells.Insert(8, LocationCell(row));
+        return cells;
+    }
+
     private static string PermitCell(ReportDashboardPreviewRow row)
     {
         if (row.WorkPermits.Count == 0)
@@ -93,6 +100,14 @@ public static class ReportDashboardWorkPermitMaglumatExcel
         }
 
         return string.Join("\n\n", blocks);
+    }
+
+    private static string LocationCell(ReportDashboardPreviewRow row)
+    {
+        if (row.WorkPermits.Count == 0)
+            return string.Empty;
+
+        return string.Join("\n\n", row.WorkPermits.Select(permit => permit.Locations ?? string.Empty));
     }
 
     private static string Join(params string?[] lines)

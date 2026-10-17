@@ -3,6 +3,34 @@ using System.Collections.Generic;
 
 namespace Visa2026.Module.BusinessObjects;
 
+/// <summary>Fields the A. Maglumat preview reads from either work-permit view.</summary>
+public interface IRdWorkPermitMaglumatRow
+{
+    Guid ID { get; }
+    Guid? PersonOid { get; }
+    string PersonName { get; }
+    string ProjectName { get; }
+    DateTime? DateOfBirth { get; }
+    string CitizenshipCode { get; }
+    string PassportNumber { get; }
+    DateTime? PassportExpirationDate { get; }
+    string EducationLabel { get; }
+    string PositionLabel { get; }
+    string AddressRegionTm { get; }
+    string AddressCityTm { get; }
+    string AddressStreet { get; }
+    string WorkPermitNumber { get; }
+    Guid? WorkPermitOid { get; }
+    DateTime? StartDate { get; }
+    DateTime? ExpirationDate { get; }
+    string WorkPermitBundle { get; }
+    Guid? VisaOid { get; }
+    string VisaNumber { get; }
+    DateTime? VisaStartDate { get; }
+    DateTime? VisaEndDate { get; }
+    string StatusLabel { get; }
+}
+
 /// <summary>One valid work permit inside an A Maglumat person row.</summary>
 public sealed class WorkPermitBundleSlot
 {
@@ -11,6 +39,7 @@ public sealed class WorkPermitBundleSlot
     public string Number { get; init; } = string.Empty;
     public string Start { get; init; } = string.Empty;
     public string End { get; init; } = string.Empty;
+    public string Locations { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -38,7 +67,8 @@ public static class WorkPermitBundleText
                 ItemId = Guid.TryParse(parts[1], out var item) ? item : Guid.Empty,
                 Number = parts[2].Trim(),
                 Start = parts[3].Trim(),
-                End = parts[4].Trim()
+                End = parts[4].Trim(),
+                Locations = parts.Length > 5 ? parts[5].Trim() : string.Empty
             });
         }
 

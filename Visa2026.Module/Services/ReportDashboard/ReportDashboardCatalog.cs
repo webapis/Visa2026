@@ -196,11 +196,17 @@ public static class ReportDashboardCatalog
             or "by-category" or "by-type" or "by-period" // legacy keys remapped
             or "by-days-remaining";
 
+    public const string WorkPermitMaglumat2Key = "a-maglumat-2";
+
+    public static bool IsWorkPermitMaglumatSubReport(string? subReport) =>
+        subReport is "active-by-project" or WorkPermitMaglumat2Key;
+
     /// <summary>
     /// Sub-reports that emit one row per valid work permit (persons may appear more than once).
     /// </summary>
     public static bool SubReportCountsValidWorkPermits(string subReport) =>
         subReport is "active-by-project"
+            or WorkPermitMaglumat2Key
             or "by-days-remaining"
             or "by-validity"; // legacy alias for WorkPermit Validity
 
@@ -467,6 +473,7 @@ public static class ReportDashboardCatalog
         ],
         ReportDashboardCategory.WorkPermit => [
             new() { Key = "active-by-project", Label = "A. Maglumat" },
+            new() { Key = WorkPermitMaglumat2Key, Label = "A. Maglumat 2" },
             new() { Key = "on-extension", Label = "WorkPermit Extension (P)" },
             new() { Key = "extension-result", Label = "Extension Result (P)" },
             new() { Key = "by-days-remaining", Label = "WorkPermit Validity" },
@@ -788,6 +795,10 @@ public static class ReportDashboardCatalog
             return ("VwRdInvitationUsed_ListView", typeof(VwRdInvitationUsed));
 
         if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase))
+            return ("VwRdWorkPermitActiveLocations_ListView", typeof(VwRdWorkPermitActiveLocations));
+
+        if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase))
             return ("VwRdWorkPermitActive_ListView", typeof(VwRdWorkPermitActive));
 
@@ -1004,6 +1015,8 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.AddressOfResidence, "by-address")      => ["Name", "Project", "Region · City", "Expiry", "Address"],
             (ReportDashboardCategory.WorkPermit, "active-by-project")  =>
                 ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Wiza belgesi we möhleti", "Bellik"],
+            (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat2Key)  =>
+                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, "on-extension") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "extension-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "by-status")         => ["Name", "Project", "WP Number",   "Expiry", "Status"],
@@ -1115,7 +1128,7 @@ public static class ReportDashboardCatalog
         var usesInvitationUsed = category == ReportDashboardCategory.Invitation
             && IsInvitationUsedSubReport(subReport);
         var usesWorkPermitMaglumat = category == ReportDashboardCategory.WorkPermit
-            && string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase);
+            && IsWorkPermitMaglumatSubReport(subReport);
 
         string roleCriteria;
         if (usesPersonSearchRd)
