@@ -586,8 +586,8 @@
                                             var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable) && i == 0;
                                             var positionColumn = IsWorkPermitMaglumatTable && i == 5;
                                             var educationColumn = IsWorkPermitMaglumatTable && i == 4;
-                                            var locationColumn = IsWorkPermitMaglumat2Table && i == 8;
-                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 6 || i == 7 || i == 8 || (IsWorkPermitMaglumat2Table && i == 9)))
+                                            var locationColumn = (IsWorkPermitMaglumat2Table && i == 8) || (IsWorkPermitMaglumat3Table && i == 9);
+                                            var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 6 || i == 7 || i == 8 || (IsWorkPermitMaglumat2Table && i == 9) || (IsWorkPermitMaglumat3Table && i == 10)))
                                                 || (IsInvitationCancelledTable && (i == 3 || i == 7))
                                                 || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 4 && i <= 8)
                                                 || (IsInvitationProcessTable && i >= 4 && i <= 8);
@@ -704,7 +704,51 @@
                                                             </div>
                                                         </td>
                                                     }
-                                                    <td class="@($"{ColumnClass(IsWorkPermitMaglumat2Table ? 9 : 8)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                    @if (IsWorkPermitMaglumat3Table)
+                                                    {
+                                                        <td class="@($"{ColumnClass(9)} rd-col-stack rd-col-locations")" @onclick:stopPropagation="true">
+                                                            <div class="rd-cell-stack">
+                                                                @foreach (var permit in row.WorkPermits)
+                                                                {
+                                                                    <div class="rd-permit-block">
+                                                                        @if (permit.AdditionalApplications.Count == 0)
+                                                                        {
+                                                                            <span>&nbsp;</span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            @foreach (var application in permit.AdditionalApplications)
+                                                                            {
+                                                                                <div class="rd-extra-app">
+                                                                                    @if (application.ApplicationId != Guid.Empty && !string.IsNullOrEmpty(application.Number))
+                                                                                    {
+                                                                                        <button type="button"
+                                                                                                class="rd-invitation-link"
+                                                                                                @onclick="() => OnOpenApplication(application.ApplicationId)">
+                                                                                            @application.Number
+                                                                                        </button>
+                                                                                    }
+                                                                                    else if (!string.IsNullOrEmpty(application.Number))
+                                                                                    {
+                                                                                        <span>@application.Number</span>
+                                                                                    }
+                                                                                    @if (!string.IsNullOrEmpty(application.Date))
+                                                                                    {
+                                                                                        <span>@application.Date</span>
+                                                                                    }
+                                                                                    @if (!string.IsNullOrEmpty(application.Locations))
+                                                                                    {
+                                                                                        <span>@application.Locations</span>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    }
+                                                    <td class="@($"{ColumnClass(IsWorkPermitMaglumat3Table ? 10 : IsWorkPermitMaglumat2Table ? 9 : 8)} rd-col-stack")" @onclick:stopPropagation="true">
                                                         <div class="rd-cell-stack">
                                                             @if (row.VisaId is { } maglumatVisaId && maglumatVisaId != Guid.Empty && !string.IsNullOrEmpty(row.VisaNumber))
                                                             {
@@ -729,7 +773,7 @@
                                                             }
                                                         </div>
                                                     </td>
-                                                    <td class="@ColumnClass(IsWorkPermitMaglumat2Table ? 10 : 9)"></td>
+                                                    <td class="@ColumnClass(IsWorkPermitMaglumat3Table ? 11 : IsWorkPermitMaglumat2Table ? 10 : 9)"></td>
                                                 }
                                                 else if (IsWorkPermitSanawTable)
                                                 {
@@ -1032,6 +1076,7 @@
     [Parameter] public EventCallback<int>                       MedicalRecordDateRangeChanged { get; set; }
     [Parameter] public EventCallback<string>                    SearchTermChanged   { get; set; }
     [Parameter] public EventCallback<Guid>                      PersonSelected      { get; set; }
+    [Parameter] public EventCallback<Guid>                      ApplicationSelected { get; set; }
 
     private bool _projectsExpanded;
     private bool _initialLoadStarted;
@@ -1638,6 +1683,8 @@
 
         var fileName = IsWorkPermitSanawTable
             ? (templateOnly ? "Sanaw template" : "Sanaw")
+            : IsWorkPermitMaglumat3Table
+            ? (templateOnly ? "Goşmaça barjak ýerleri template" : "Goşmaça barjak ýerleri")
             : IsWorkPermitMaglumat2Table
             ? (templateOnly ? "A.Maglumat 2 template" : "A.Maglumat 2")
             : IsWorkPermitMaglumatTable
@@ -1735,9 +1782,14 @@
         Category == ReportDashboardCategory.WorkPermit
         && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
 
+    private bool IsWorkPermitMaglumat3Table =>
+        Category == ReportDashboardCategory.WorkPermit
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitMaglumat3Key, StringComparison.OrdinalIgnoreCase);
+
     private bool IsWorkPermitMaglumat2Table =>
         Category == ReportDashboardCategory.WorkPermit
-        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase);
+        && (string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase)
+            || IsWorkPermitMaglumat3Table);
 
     private bool IsWorkPermitMaglumatTable =>
         Category == ReportDashboardCategory.WorkPermit
@@ -1837,11 +1889,20 @@
             if (ContainsTerm(permit.Number, term)
                 || ContainsTerm(permit.Start, term)
                 || ContainsTerm(permit.End, term)
-                || ContainsTerm(permit.Locations, term))
+                || ContainsTerm(permit.Locations, term)
+                || ContainsTerm(permit.AdditionalLocations, term))
                 return true;
         }
 
         return false;
+    }
+
+    private async Task OnOpenApplication(Guid applicationId)
+    {
+        if (applicationId == Guid.Empty || !ApplicationSelected.HasDelegate)
+            return;
+
+        await ApplicationSelected.InvokeAsync(applicationId);
     }
 
     private async Task OnWorkPermitCopies(WorkPermitBundleSlot permit)

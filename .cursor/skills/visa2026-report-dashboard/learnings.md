@@ -4,6 +4,38 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-17 — Extra-location block is three lines and the number opens the case
+
+**Ask:** Stack the additional-location information, and open the Application Profile instance from the application number.
+
+**Now:** Each issued application is its own block: number, date, then places, each on its own line. The number opens the case workspace (`ApplicationWorkspaceOpenHelper`), not the raw `ApplicationProfileInstance` detail form. The bundle stores the instance id with chr(31) and chr(29). Heal recreates `vw_rd_work_permit_active` until the definition contains `chr(29)`.
+
+**Prevent:** Do not put the number, date, and places back into one line. Do not open `ApplicationProfileInstance_DetailView` from this number. Do not open the work-permit copies from this number.
+
+## 2026-10-17 — Extra-locations tab is Goşmaça barjak ýerleri
+
+**Ask:** Put A. Maglumat 2 back on the locations tab, and name the extra-locations tab Goşmaça barjak ýerleri.
+
+**Now:** `a-maglumat-2` is A. Maglumat 2. `a-maglumat-3` is Goşmaça barjak ýerleri. The extra-locations column keeps that same caption.
+
+**Prevent:** Do not swap these labels again. The additional applications stay on `a-maglumat-3`.
+
+## 2026-10-17 — A. Maglumat 2 tab is Goşmaça barjak ýerleri
+
+**Ask:** Rename the A. Maglumat 2 tab to Goşmaça barjak ýerleri.
+
+**Now:** The officer label is Goşmaça barjak ýerleri in every culture. The key stays `a-maglumat-2`.
+
+**Prevent:** Do not put the label back to A. Maglumat 2. Do not change the key, or an uploaded workbook for that tab will no longer match.
+
+## 2026-10-17 — A. Maglumat 3 lists issued extra locations
+
+**Ask:** Same table as A. Maglumat 2, plus each issued Iş Rugsatnama goşmaça barjak ýeri application.
+
+**Now:** Tab `a-maglumat-3`. Column Goşmaça barjak ýerleri sits after Rugsat berlen ýerler. Each block is the application number, application date, and MovementPermitLocation. Newest application is first. Blocks stay with the permit they belong to. Only profile code `change_workpermit` at PROCESS_ISSUED. Workbook is 12 columns, sheet A.Maglumat 3.
+
+**Prevent:** Do not add a new column per application. Do not show applications that are not yet issued. Do not use the permit's own WorkPermittedLocations in this column.
+
 ## 2026-10-17 — Work Permit shows only the three officer tables
 
 **Ask:** Remove Iş rugsady uzatma (P), Uzatma netijesi (P), Iş rugsady möhleti, and Ýagdaý boýunça.

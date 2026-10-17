@@ -283,4 +283,11 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<EventCallback<Guid>>();
         set => SetPropertyValue(value);
     }
+
+    /// <summary>Additional-location application number picked by the officer.</summary>
+    public EventCallback<Guid> ApplicationSelected
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
 }

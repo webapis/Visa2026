@@ -18,6 +18,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.ReportDashboard;
 
@@ -115,6 +116,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             SearchTerm = string.Empty,
             SearchTermChanged = EventCallback.Factory.Create<string>(this, OnSearchTermChanged),
             PersonSelected = EventCallback.Factory.Create<Guid>(this, OnPersonSelected),
+            ApplicationSelected = EventCallback.Factory.Create<Guid>(this, OnApplicationSelected),
             PersonTypeChanged   = EventCallback.Factory.Create<ReportDashboardPersonType>(this, OnPersonTypeChanged),
             CategoryChanged     = EventCallback.Factory.Create<ReportDashboardCategory>(this, OnCategoryChanged),
             CategoryNavigationRequested = EventCallback.Factory.Create<ReportDashboardCategory>(this, NavigateToCategory),
@@ -206,6 +208,27 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             new ShowViewSource(window, null));
     }
 
+    private void OnApplicationSelected(Guid applicationId)
+    {
+        if (_application == null || applicationId == Guid.Empty)
+            return;
+
+        var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(_application, applicationId);
+        if (workspaceView == null)
+            return;
+
+        var window = _application.MainWindow;
+        if (window == null)
+        {
+            workspaceView.Dispose();
+            return;
+        }
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(window, null));
+    }
+
 
     private static string DefaultChartViewFor(ReportDashboardCategory category, string subReport) =>
         (category, subReport) switch
@@ -234,6 +257,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             (ReportDashboardCategory.VisaExtension, "by-days-remaining") => "bar",
             (ReportDashboardCategory.WorkPermit, "active-by-project") => "bar",
             (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitMaglumat2Key) => "bar",
+            (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitMaglumat3Key) => "bar",
             (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitSanawKey) => "bar",
             (ReportDashboardCategory.WorkPermit, "on-extension") => "bar",
             (ReportDashboardCategory.WorkPermit, "extension-result") => "bar",

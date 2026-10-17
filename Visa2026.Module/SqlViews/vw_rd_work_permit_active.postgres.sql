@@ -3,6 +3,7 @@
 -- in WorkPermitBundle, newest start date first. Passport and the scalar permit
 -- columns stay on the newest permit.
 DROP VIEW IF EXISTS vw_rd_work_permit_sanaw;
+DROP VIEW IF EXISTS vw_rd_work_permit_a_maglumat_3;
 DROP VIEW IF EXISTS vw_rd_work_permit_active_locations;
 DROP VIEW IF EXISTS vw_rd_work_permit_active;
 CREATE VIEW vw_rd_work_permit_active AS
@@ -36,6 +37,7 @@ SELECT
     CASE WHEN (picked."ExpirationDate")::date > DATE '1900-01-01' THEN picked."ExpirationDate" ELSE NULL END AS "ExpirationDate",
     COALESCE(all_permits."Bundle", '')                                      AS "WorkPermitBundle",
     COALESCE(all_permits."Locations", '')                                   AS "WorkPermitLocationsLabel",
+    COALESCE(all_permits."Additional", '')                                  AS "WorkPermitAdditionalLocationsLabel",
     COALESCE(NULLIF(BTRIM(cur_visa."VisaNumber"), ''), '')                  AS "VisaNumber",
     CASE WHEN (cur_visa."StartDate")::date > DATE '1900-01-01' THEN cur_visa."StartDate" ELSE NULL END AS "VisaStartDate",
     CASE WHEN (cur_visa."ExpirationDate")::date > DATE '1900-01-01' THEN cur_visa."ExpirationDate" ELSE NULL END AS "VisaEndDate",
@@ -100,7 +102,8 @@ LEFT JOIN LATERAL (
             WHEN (v."ExpirationDate")::date > DATE '1900-01-01' THEN to_char(v."ExpirationDate", 'DD.MM.YYYY')
             ELSE ''
         END || E'\x1e' ||
-        replace(replace(replace(COALESCE(BTRIM(v."WorkPermittedLocations"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '),
+        replace(replace(replace(COALESCE(BTRIM(v."WorkPermittedLocations"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' ') || E'\x1e' ||
+        replace(replace(COALESCE(extra."Encoded", ''), E'\x1e', ' '), E'\n', ' '),
         E'\n'
         ORDER BY v."StartDate" DESC NULLS LAST, v."ExpirationDate" DESC NULLS LAST, v."ID" DESC
     ) AS "Bundle",
@@ -108,8 +111,52 @@ LEFT JOIN LATERAL (
         replace(replace(replace(COALESCE(BTRIM(v."WorkPermittedLocations"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '),
         E'\n\n'
         ORDER BY v."StartDate" DESC NULLS LAST, v."ExpirationDate" DESC NULLS LAST, v."ID" DESC
-    ) AS "Locations"
+    ) AS "Locations",
+    string_agg(
+        COALESCE(extra."Text", ''),
+        E'\n\n'
+        ORDER BY v."StartDate" DESC NULLS LAST, v."ExpirationDate" DESC NULLS LAST, v."ID" DESC
+    ) AS "Additional"
     FROM "WorkPermitItems" v
+    LEFT JOIN LATERAL (
+        -- additional-application-lines: chr(31) separates id, number, date, places; chr(29) separates applications.
+        SELECT COALESCE(string_agg(
+            concat_ws(
+                E'\n',
+                NULLIF(BTRIM(COALESCE(NULLIF(BTRIM(api."FullApplicationNumber"), ''), NULLIF(BTRIM(api."ApplicationNumber"), ''))), ''),
+                CASE
+                    WHEN api."ApplicationDate" IS NOT NULL AND (api."ApplicationDate")::date > DATE '1900-01-01'
+                        THEN to_char(api."ApplicationDate", 'DD.MM.YYYY')
+                    ELSE NULL
+                END,
+                NULLIF(replace(replace(replace(COALESCE(BTRIM(api."MovementPermitLocation"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '), '')
+            ),
+            E'\n\n'
+            ORDER BY api."ApplicationDate" DESC NULLS LAST, api."ID" DESC
+        ), '') AS "Text",
+        COALESCE(string_agg(
+            api."ID"::text || chr(31) ||
+            replace(replace(replace(replace(
+                COALESCE(NULLIF(BTRIM(api."FullApplicationNumber"), ''), NULLIF(BTRIM(api."ApplicationNumber"), ''), ''),
+                chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' ') || chr(31) ||
+            CASE
+                WHEN api."ApplicationDate" IS NOT NULL AND (api."ApplicationDate")::date > DATE '1900-01-01'
+                    THEN to_char(api."ApplicationDate", 'DD.MM.YYYY')
+                ELSE ''
+            END || chr(31) ||
+            replace(replace(replace(replace(COALESCE(BTRIM(api."MovementPermitLocation"), ''), chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' '),
+            chr(29)
+            ORDER BY api."ApplicationDate" DESC NULLS LAST, api."ID" DESC
+        ), '') AS "Encoded"
+        FROM "ApplicationProfileInstanceWorkPermitItems" j
+        INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+        INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+        WHERE j."WorkPermitItemId" = v."ID"
+          AND COALESCE(api."GCRecord", 0) = 0
+          AND COALESCE(ap."GCRecord", 0) = 0
+          AND lower(BTRIM(COALESCE(ap."Code", ''))) = 'change_workpermit'
+          AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED'
+    ) extra ON TRUE
     WHERE v."PersonID" = picked."PersonID"
       AND COALESCE(v."GCRecord", 0) = 0
       AND v."ExpirationDate" IS NOT NULL
@@ -216,4 +263,7 @@ LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0;
 
 CREATE VIEW vw_rd_work_permit_active_locations AS
+SELECT * FROM vw_rd_work_permit_active;
+
+CREATE VIEW vw_rd_work_permit_a_maglumat_3 AS
 SELECT * FROM vw_rd_work_permit_active;

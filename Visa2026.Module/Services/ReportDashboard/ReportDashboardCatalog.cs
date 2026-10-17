@@ -198,10 +198,12 @@ public static class ReportDashboardCatalog
 
     public const string WorkPermitMaglumat2Key = "a-maglumat-2";
 
+    public const string WorkPermitMaglumat3Key = "a-maglumat-3";
+
     public const string WorkPermitSanawKey = "sanaw";
 
     public static bool IsWorkPermitMaglumatSubReport(string? subReport) =>
-        subReport is "active-by-project" or WorkPermitMaglumat2Key;
+        subReport is "active-by-project" or WorkPermitMaglumat2Key or WorkPermitMaglumat3Key;
 
     /// <summary>
     /// Sub-reports that emit one row per valid work permit (persons may appear more than once).
@@ -209,6 +211,7 @@ public static class ReportDashboardCatalog
     public static bool SubReportCountsValidWorkPermits(string subReport) =>
         subReport is "active-by-project"
             or WorkPermitMaglumat2Key
+            or WorkPermitMaglumat3Key
             or WorkPermitSanawKey
             or "by-days-remaining"
             or "by-validity"; // legacy alias for WorkPermit Validity
@@ -477,6 +480,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.WorkPermit => [
             new() { Key = "active-by-project", Label = "A. Maglumat" },
             new() { Key = WorkPermitMaglumat2Key, Label = "A. Maglumat 2" },
+            new() { Key = WorkPermitMaglumat3Key, Label = "Goşmaça barjak ýerleri" },
             new() { Key = WorkPermitSanawKey, Label = "Sanaw" },
         ],
         ReportDashboardCategory.Travel => [
@@ -799,6 +803,10 @@ public static class ReportDashboardCatalog
             return ("VwRdWorkPermitSanaw_ListView", typeof(VwRdWorkPermitSanaw));
 
         if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, WorkPermitMaglumat3Key, StringComparison.OrdinalIgnoreCase))
+            return ("VwRdWorkPermitMaglumat3_ListView", typeof(VwRdWorkPermitMaglumat3));
+
+        if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase))
             return ("VwRdWorkPermitActiveLocations_ListView", typeof(VwRdWorkPermitActiveLocations));
 
@@ -1021,6 +1029,8 @@ public static class ReportDashboardCatalog
                 ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat2Key)  =>
                 ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Wiza belgesi we möhleti", "Bellik"],
+            (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat3Key)  =>
+                ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Goşmaça barjak ýerleri", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitSanawKey) =>
                 ["№", "Familiýasy", "Ady", "Doglan senesi we ýeri", "Jynsy", "Raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Möhleti we gazanji", "Türkmenistandaky salgysy", "Daşary ýurtdaky salgysy", "Taslamasy", "Maşgala agzalary", "Adam sany"],
             (ReportDashboardCategory.WorkPermit, "on-extension") => ["Name", "Project", "App #", "App Date", "Project · State"],

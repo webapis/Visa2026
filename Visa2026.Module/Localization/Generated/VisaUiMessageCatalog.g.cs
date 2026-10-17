@@ -11702,6 +11702,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "A. Maglumat 2",
             ["ru-RU"] = "A. Maglumat 2",
         },
+        ["ReportDashboard.SubReport.WorkPermit.a-maglumat-3"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Goşmaça barjak ýerleri",
+            ["tr-TR"] = "Goşmaça barjak ýerleri",
+            ["tk-TM"] = "Goşmaça barjak ýerleri",
+            ["ru-RU"] = "Goşmaça barjak ýerleri",
+        },
         ["ReportDashboard.SubReport.WorkPermit.sanaw"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Sanaw",

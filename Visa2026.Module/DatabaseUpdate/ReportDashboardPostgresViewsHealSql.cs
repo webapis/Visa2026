@@ -96,6 +96,7 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_work_permit", "vw_rd_work_permit.postgres.sql"),
         ("vw_rd_work_permit_active", "vw_rd_work_permit_active.postgres.sql"),
         ("vw_rd_work_permit_active_locations", "vw_rd_work_permit_active.postgres.sql"),
+        ("vw_rd_work_permit_a_maglumat_3", "vw_rd_work_permit_active.postgres.sql"),
         ("vw_rd_work_permit_sanaw", "vw_rd_work_permit_sanaw.postgres.sql"),
         ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
     };
@@ -335,8 +336,10 @@ public static class ReportDashboardPostgresViewsHealSql
             if (ViewExists(connection, viewName)
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_work_permit_active"
-                    || ColumnExists(connection, viewName, "WorkPermitLocationsLabel")
-                    || ColumnExists(connection, viewName, "workpermitlocationslabel"))
+                    || ViewDefinitionContains(connection, viewName, "chr(29)"))
+                && (viewName != "vw_rd_work_permit_a_maglumat_3"
+                    || ColumnExists(connection, viewName, "WorkPermitAdditionalLocationsLabel")
+                    || ColumnExists(connection, viewName, "workpermitadditionallocationslabel"))
                 && (viewName != "vw_rd_work_permit_sanaw"
                     || ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")))
                 continue;

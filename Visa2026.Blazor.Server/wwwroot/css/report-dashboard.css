@@ -1092,6 +1092,15 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+.rd-maglumat-table .rd-extra-app {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.rd-maglumat-table .rd-extra-app + .rd-extra-app {
+  margin-top: 8px;
+}
 .rd-invitation-table .rd-expires { gap: 4px; }
 .rd-preview-pager {
   display: flex;

@@ -103,6 +103,8 @@ public static class ReportDashboardExcelTemplateWorkbook
     {
         if (IsWorkPermitSanaw(category, subReport))
             return ReportDashboardWorkPermitSanawExcel.Cells(row, rowNumber);
+        if (IsWorkPermitMaglumat3(category, subReport))
+            return ReportDashboardWorkPermitMaglumatExcel.CellsWithAdditionalLocations(row, rowNumber);
         if (IsWorkPermitMaglumat2(category, subReport))
             return ReportDashboardWorkPermitMaglumatExcel.CellsWithLocations(row, rowNumber);
         if (IsWorkPermitMaglumat(category, subReport))
@@ -184,6 +186,10 @@ public static class ReportDashboardExcelTemplateWorkbook
         category == ReportDashboardCategory.WorkPermit
         && string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
 
+    private static bool IsWorkPermitMaglumat3(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.WorkPermit
+        && string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat3Key, StringComparison.OrdinalIgnoreCase);
+
     private static bool IsWorkPermitMaglumat2(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.WorkPermit
         && string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase);
@@ -191,12 +197,15 @@ public static class ReportDashboardExcelTemplateWorkbook
     private static bool IsWorkPermitMaglumat(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.WorkPermit
         && (string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
-            || IsWorkPermitMaglumat2(category, subReport));
+            || IsWorkPermitMaglumat2(category, subReport)
+            || IsWorkPermitMaglumat3(category, subReport));
 
     private static string SheetName(ReportDashboardCategory category, string? subReport)
     {
         if (IsWorkPermitSanaw(category, subReport))
             return "Sanaw";
+        if (IsWorkPermitMaglumat3(category, subReport))
+            return "Goşmaça barjak ýerleri";
         if (IsWorkPermitMaglumat2(category, subReport))
             return "A.Maglumat 2";
         return IsWorkPermitMaglumat(category, subReport) ? "A.Maglumat" : "Report";

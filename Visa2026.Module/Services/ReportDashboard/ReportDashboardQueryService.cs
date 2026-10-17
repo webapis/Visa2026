@@ -3507,6 +3507,13 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
 
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat3Key, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadWorkPermitMaglumat3FromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
+        }
+
         if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
         {
             return LoadWorkPermitSanawFromView(
@@ -4015,6 +4022,62 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         catch (Exception ex) when (IsMissingReportDashboardView(ex))
         {
             return LoadWorkPermitActiveByProjectFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
+        }
+    }
+
+    /// <summary>
+    /// A. Maglumat 3: same rows as A. Maglumat 2, plus issued additional-location applications.
+    /// </summary>
+    private static ReportDashboardPanelData LoadWorkPermitMaglumat3FromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        bool includeArchivedPersons,
+        bool oneLastValidWorkPermitPerPerson = false,
+        HashSet<Guid>? validVisaPersonIds = null)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return LoadWorkPermitMaglumat2FromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
+        }
+
+        _ = cutoff;
+        try
+        {
+            IQueryable<VwRdWorkPermitMaglumat3> query = db.VwRdWorkPermitMaglumat3.AsNoTracking();
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            if (!includeArchivedPersons)
+                query = query.Where(r => !r.IsArchived);
+
+            if (validVisaPersonIds != null)
+                query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            if (oneLastValidWorkPermitPerPerson)
+                list = TakeOneLastValidVisaPerPerson(list, r => r.PersonOid, r => r.ExpirationDate, r => r.ID);
+
+            return BuildWorkPermitMaglumatPanel(
+                personType, subReport, excelHint, excelConfigured, list);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return LoadWorkPermitMaglumat2FromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
