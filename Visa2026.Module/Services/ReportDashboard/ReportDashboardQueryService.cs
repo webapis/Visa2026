@@ -3507,6 +3507,13 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
 
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadWorkPermitSanawFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
+        }
+
         if (subReport is "by-days-remaining" or "by-validity")
         {
             return LoadWorkPermitFromView(
@@ -3842,6 +3849,119 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured,
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
+    }
+
+    /// <summary>Sanaw: same people as A. Maglumat, columns from the sanaw sheet.</summary>
+    private static ReportDashboardPanelData LoadWorkPermitSanawFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        bool includeArchivedPersons,
+        bool oneLastValidWorkPermitPerPerson = false,
+        HashSet<Guid>? validVisaPersonIds = null)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+
+        _ = cutoff;
+        try
+        {
+            IQueryable<VwRdWorkPermitSanaw> query = db.VwRdWorkPermitSanaw.AsNoTracking();
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            if (!includeArchivedPersons)
+                query = query.Where(r => !r.IsArchived);
+
+            if (validVisaPersonIds != null)
+                query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            if (oneLastValidWorkPermitPerPerson)
+                list = TakeOneLastValidVisaPerPerson(list, r => r.PersonOid, r => r.DateOfBirth, r => r.ID);
+
+            return BuildWorkPermitSanawPanel(personType, subReport, excelHint, excelConfigured, list);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    private static ReportDashboardPanelData BuildWorkPermitSanawPanel(
+        ReportDashboardPersonType personType,
+        string subReport,
+        string? excelHint,
+        bool excelConfigured,
+        List<VwRdWorkPermitSanaw> list)
+    {
+        var labeled = list.Select(row =>
+        {
+            var status = string.IsNullOrWhiteSpace(row.StatusLabel)
+                ? "(No project)"
+                : row.StatusLabel.Trim();
+            return (Row: row, Status: status);
+        }).ToList();
+        var groups = labeled
+            .GroupBy(x => x.Status, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+        var totalCount = buckets.Sum(b => b.Count);
+        var rows = labeled
+            .OrderBy(x => x.Row.LastName)
+            .ThenBy(x => x.Row.FirstName)
+            .Take(PreviewLimit)
+            .Select(x =>
+            {
+                var row = x.Row;
+                return new ReportDashboardPreviewRow
+                {
+                    RecordId = row.ID,
+                    PersonId = row.PersonOid,
+                    Name = string.Join(' ', new[] { row.FirstName, row.LastName }.Where(part => !string.IsNullOrWhiteSpace(part))),
+                    Project = row.ProjectName ?? string.Empty,
+                    SanawCells =
+                    [
+                        row.LastName ?? string.Empty,
+                        row.FirstName ?? string.Empty,
+                        row.BirthPlaceLabel ?? string.Empty,
+                        row.GenderLabel ?? string.Empty,
+                        row.CitizenshipCode ?? string.Empty,
+                        row.PassportLabel ?? string.Empty,
+                        row.EducationLabel ?? string.Empty,
+                        row.SpecialtyLabel ?? string.Empty,
+                        row.PositionLabel ?? string.Empty,
+                        row.SalaryLabel ?? string.Empty,
+                        row.AddressLabel ?? string.Empty,
+                        row.ForeignAddressLabel ?? string.Empty,
+                        row.ProjectName ?? string.Empty,
+                        row.FamilyMembersLabel ?? string.Empty,
+                        row.PersonCountLabel ?? string.Empty
+                    ],
+                    Status = x.Status,
+                    StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
+                };
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.WorkPermit, subReport, rows,
+            excelHint, excelConfigured, buckets, totalCount);
     }
 
     /// <summary>

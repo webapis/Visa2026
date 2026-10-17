@@ -24,6 +24,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdPassport();
         CreateViewRdWorkPermit();
         CreateViewRdWorkPermitActive();
+        CreateViewRdWorkPermitSanaw();
         CreateViewRdWorkPermitAppProgress();
         CreateViewRdInvitationReady();
         CreateViewRdInvitationExpired();
@@ -245,6 +246,9 @@ WHERE COALESCE(wpi.""GCRecord"", 0) = 0
 
     private void CreateViewRdWorkPermitActive() =>
         ExecuteEmbeddedPostgresView("vw_rd_work_permit_active.postgres.sql");
+
+    private void CreateViewRdWorkPermitSanaw() =>
+        ExecuteEmbeddedPostgresView("vw_rd_work_permit_sanaw.postgres.sql");
 
 
     private void CreateViewRdWorkPermitAppProgress()

@@ -114,6 +114,8 @@ public sealed class ReportDashboardPreviewRow
     public string WorkPermitEnd   { get; init; } = string.Empty;
     /// <summary>Every valid work permit on this person row, newest start date first.</summary>
     public IReadOnlyList<WorkPermitBundleSlot> WorkPermits { get; init; } = Array.Empty<WorkPermitBundleSlot>();
+    /// <summary>Sanaw sheet cells, without the screen row number.</summary>
+    public IReadOnlyList<string> SanawCells { get; init; } = Array.Empty<string>();
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

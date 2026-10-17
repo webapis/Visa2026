@@ -29,6 +29,10 @@ public static class ReportDashboardExcelTemplateService
     public static string? CanonicalKey(ReportDashboardCategory category, string? subReport)
     {
         if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.WorkPermitSanawKey;
+
+        if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase))
             return ReportDashboardCatalog.WorkPermitMaglumat2Key;
 
@@ -162,6 +166,8 @@ public static class ReportDashboardExcelTemplateService
     {
         if (category != ReportDashboardCategory.WorkPermit)
             return "Report";
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
+            return "Sanaw";
         if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase))
             return "A.Maglumat 2";
         if (string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase))

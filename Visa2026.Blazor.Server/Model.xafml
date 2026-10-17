@@ -1747,6 +1747,25 @@
         <ColumnInfo Id="Notes" Index="9" Width="80" Caption="Bellik" IsNewNode="True" />
       </Columns>
     </ListView>
+    <ListView Id="VwRdWorkPermitSanaw_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdWorkPermitSanaw" Caption="Sanaw" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="LastName" Index="0" Width="120" Caption="Familiýasy" IsNewNode="True" />
+        <ColumnInfo Id="FirstName" Index="1" Width="120" Caption="Ady" IsNewNode="True" />
+        <ColumnInfo Id="BirthPlaceLabel" Index="2" Width="160" Caption="Doglan senesi we ýeri" IsNewNode="True" />
+        <ColumnInfo Id="GenderLabel" Index="3" Width="80" Caption="Jynsy" IsNewNode="True" />
+        <ColumnInfo Id="CitizenshipCode" Index="4" Width="80" Caption="Raýatlygy" IsNewNode="True" />
+        <ColumnInfo Id="PassportLabel" Index="5" Width="140" Caption="Pasport belgesi we möhleti" IsNewNode="True" />
+        <ColumnInfo Id="EducationLabel" Index="6" Width="180" Caption="Bilimi we okan ýeri" IsNewNode="True" />
+        <ColumnInfo Id="SpecialtyLabel" Index="7" Width="160" Caption="Bilimine görä hünäri" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="8" Width="140" Caption="Wezipesi" IsNewNode="True" />
+        <ColumnInfo Id="SalaryLabel" Index="9" Width="140" Caption="Möhleti we gazanji" IsNewNode="True" />
+        <ColumnInfo Id="AddressLabel" Index="10" Width="220" Caption="Türkmenistandaky salgysy" IsNewNode="True" />
+        <ColumnInfo Id="ForeignAddressLabel" Index="11" Width="200" Caption="Daşary ýurtdaky salgysy" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="12" Width="160" Caption="Taslamasy" IsNewNode="True" />
+        <ColumnInfo Id="FamilyMembersLabel" Index="13" Width="140" Caption="Maşgala agzalary" IsNewNode="True" />
+        <ColumnInfo Id="PersonCountLabel" Index="14" Width="70" Caption="Adam sany" IsNewNode="True" />
+      </Columns>
+    </ListView>
     <ListView Id="VwRdInvitationUsed_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationUsed" Caption="Used Invitations" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="240" Caption="Full name" IsNewNode="True" />

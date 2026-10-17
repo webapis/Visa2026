@@ -1069,6 +1069,22 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
+.rd-listview-block table.rd-sanaw-table {
+  width: max-content;
+  min-width: 0;
+}
+.rd-listview-block .rd-sanaw-table th.rd-col-order,
+.rd-listview-block .rd-sanaw-table td.rd-col-order {
+  width: 2.5rem;
+  max-width: 2.5rem;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+.rd-sanaw-table .rd-cell-stack {
+  white-space: pre-line;
+}
 .rd-listview-block .rd-maglumat-table th.rd-col-locations,
 .rd-listview-block .rd-maglumat-table td.rd-col-locations {
   width: 11rem;

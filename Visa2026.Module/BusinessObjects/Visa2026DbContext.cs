@@ -159,6 +159,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdWorkPermit> VwRdWorkPermit { get; set; }
         public DbSet<VwRdWorkPermitActive> VwRdWorkPermitActive { get; set; }
         public DbSet<VwRdWorkPermitActiveLocations> VwRdWorkPermitActiveLocations { get; set; }
+        public DbSet<VwRdWorkPermitSanaw> VwRdWorkPermitSanaw { get; set; }
         public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
         public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
         public DbSet<VwRdInvitationExpired> VwRdInvitationExpired { get; set; }
@@ -332,6 +333,12 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(t => t.WorkPermit).WithMany().HasForeignKey(t => t.WorkPermitOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportOid).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.VisaOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdWorkPermitSanaw>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit_sanaw");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdWorkPermitAppProgress>(b => {

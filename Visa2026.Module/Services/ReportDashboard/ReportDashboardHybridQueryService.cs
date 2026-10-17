@@ -47,6 +47,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.Passport, "by-citizenship"),
         (ReportDashboardCategory.WorkPermit, "active-by-project"),
         (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitMaglumat2Key),
+        (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitSanawKey),
         (ReportDashboardCategory.WorkPermit, "by-days-remaining"),
         (ReportDashboardCategory.WorkPermit, "extension-result"),
         (ReportDashboardCategory.Invitation, "ready-by-project"),

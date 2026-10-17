@@ -4,6 +4,30 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-17 — Work Permit shows only the three officer tables
+
+**Ask:** Remove Iş rugsady uzatma (P), Uzatma netijesi (P), Iş rugsady möhleti, and Ýagdaý boýunça.
+
+**Now:** The Work Permit catalog is A. Maglumat, A. Maglumat 2, and Sanaw. Those four tabs are not listed.
+
+**Prevent:** Do not put `on-extension`, `extension-result`, `by-days-remaining`, or `by-status` back on the Work Permit catalog. Visa still uses its own tabs with those keys.
+
+## 2026-10-17 — Sanaw Wezipesi is the visa-report position
+
+**Ask:** Sanaw Wezipesi showed the company position. Use Wezipesi (wiza hasabaty).
+
+**Now:** The current position history supplies `Position` (NameTm). ActualPosition stays off this column. Heal recreates `vw_rd_work_permit_sanaw` until the view reads `eph."PositionID"`.
+
+**Prevent:** Do not point this column at `ActualPositions`. That is Wezipesi (hakyky / kompaniýa).
+
+## 2026-10-17 — Sanaw uses the sanaw sheet columns
+
+**Ask:** Add a Work Permit tab like A. Maglumat with the sanaw sheet columns.
+
+**Now:** `sanaw` is Sanaw. Same people as A. Maglumat. Columns are the split name, birth place, gender, specialty, current salary, foreign address, project, family relationship counts, and person count. The workbook title is Daşary ýurt raýatlarynyň sanawy.
+
+**Prevent:** Do not reuse the A. Maglumat Excel key. This sheet has 16 columns.
+
 ## 2026-10-17 — A. Maglumat 2 adds work-permit locations
 
 **Ask:** Add a tab that matches A. Maglumat and adds the work-permit locations column.

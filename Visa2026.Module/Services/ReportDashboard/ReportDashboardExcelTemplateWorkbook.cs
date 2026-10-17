@@ -101,6 +101,8 @@ public static class ReportDashboardExcelTemplateWorkbook
         int headerCount,
         bool includeChartColumn)
     {
+        if (IsWorkPermitSanaw(category, subReport))
+            return ReportDashboardWorkPermitSanawExcel.Cells(row, rowNumber);
         if (IsWorkPermitMaglumat2(category, subReport))
             return ReportDashboardWorkPermitMaglumatExcel.CellsWithLocations(row, rowNumber);
         if (IsWorkPermitMaglumat(category, subReport))
@@ -178,6 +180,10 @@ public static class ReportDashboardExcelTemplateWorkbook
         return values;
     }
 
+    private static bool IsWorkPermitSanaw(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.WorkPermit
+        && string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
+
     private static bool IsWorkPermitMaglumat2(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.WorkPermit
         && string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat2Key, StringComparison.OrdinalIgnoreCase);
@@ -189,6 +195,8 @@ public static class ReportDashboardExcelTemplateWorkbook
 
     private static string SheetName(ReportDashboardCategory category, string? subReport)
     {
+        if (IsWorkPermitSanaw(category, subReport))
+            return "Sanaw";
         if (IsWorkPermitMaglumat2(category, subReport))
             return "A.Maglumat 2";
         return IsWorkPermitMaglumat(category, subReport) ? "A.Maglumat" : "Report";

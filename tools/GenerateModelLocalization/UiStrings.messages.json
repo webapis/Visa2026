@@ -6791,6 +6791,12 @@
     "tk-TM": "A. Maglumat 2",
     "ru-RU": "A. Maglumat 2"
   },
+  "ReportDashboard.SubReport.WorkPermit.sanaw": {
+    "en": "Sanaw",
+    "tr-TR": "Sanaw",
+    "tk-TM": "Sanaw",
+    "ru-RU": "Sanaw"
+  },
   "ReportDashboard.SubReport.WorkPermit.on-extension": {
     "en": "WorkPermit Extension (P)",
     "tr-TR": "Çalışma İzni Uzatma (P)",
