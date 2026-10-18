@@ -1966,7 +1966,10 @@ public static class IssueIssuedHeaderComposeService
             : row.WorkPermittedLocations.Trim();
     }
 
-    private static Guid? FirstAssignedId(params Guid?[] ids)
+    /// <summary>
+    /// First non-empty id wins (case summary, then catalog default, then first lookup option).
+    /// </summary>
+    internal static Guid? FirstAssignedId(params Guid?[] ids)
     {
         foreach (var id in ids)
         {
