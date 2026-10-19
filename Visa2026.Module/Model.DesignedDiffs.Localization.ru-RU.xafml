@@ -1606,12 +1606,15 @@
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
+        <Member Name="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
         <Member Name="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
         <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
         <Member Name="EmployeeListActualPositionName" Caption="Должность (фактическая / компания)" />
         <Member Name="EmployeeListDepartmentName" Caption="Отдел" />
         <Member Name="EmployeeListPositionName" Caption="Должность (отчёты по визе)" />
         <Member Name="EmployeeListResidenceAddress" Caption="Адрес проживания" />
+        <Member Name="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
+        <Member Name="EmployeeListEducationProfession" Caption="Профессия по образованию" />
         <Member Name="FamilyMembers" Caption="Родственники" />
         <Member Name="FamilyRelationDocuments" Caption="Копии доказательств родства" />
         <Member Name="FirstName" Caption="Имя" />
@@ -3110,6 +3113,9 @@
         <ColumnInfo Id="EmployeeListDepartmentName" Caption="Отдел" />
         <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
         <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
+        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
+        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
+        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Профессия по образованию" />
         <ColumnInfo Id="EmployeeListResidenceAddress" Caption="Адрес проживания" />
       </Columns>
     </ListView>
@@ -3143,6 +3149,11 @@
         <ColumnInfo Id="Relationship" Caption="Родство" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
+        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
+        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
+        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Профессия по образованию" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Временный посетитель">
@@ -3158,6 +3169,11 @@
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
+        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
+        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
+        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Профессия по образованию" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="История поездок">

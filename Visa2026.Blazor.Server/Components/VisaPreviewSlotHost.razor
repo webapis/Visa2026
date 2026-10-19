@@ -218,6 +218,29 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
     }
 
     [JSInvokable]
+    public Task OpenPersonDocumentCopyFromJsAsync(
+        string personIdText,
+        string recordKey,
+        string displayName,
+        string ownerViewId)
+    {
+        if (!Guid.TryParse(personIdText, out var personId) || personId == Guid.Empty)
+            return Task.CompletedTask;
+        if (string.IsNullOrWhiteSpace(recordKey))
+            return Task.CompletedTask;
+
+        return SlotService.OpenPersonDocumentCopiesAsync(
+            new PersonDocumentCopiesSlotRequest
+            {
+                PersonIds = new[] { personId },
+                FocusRecordKey = recordKey.Trim(),
+                FocusDisplayName = string.IsNullOrWhiteSpace(displayName) ? null : displayName.Trim(),
+                OpenPreviewOnly = true,
+            },
+            string.IsNullOrWhiteSpace(ownerViewId) ? null : ownerViewId.Trim());
+    }
+
+    [JSInvokable]
     public void MarkPersonDocumentCopiesLinkClickPending() => PersonDocumentCopiesLinkClickGate.MarkPending();
 
     [JSInvokable]

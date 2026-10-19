@@ -39,6 +39,12 @@ namespace Visa2026.Blazor.Server
         {
             return ModuleUpdater.EmptyModuleUpdaters;
         }
+        public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders)
+        {
+            base.ExtendModelInterfaces(extenders);
+            extenders.Add<IModelListView, IModelPersonRosterLayout>();
+        }
+
         public override void Setup(XafApplication application)
         {
             base.Setup(application);

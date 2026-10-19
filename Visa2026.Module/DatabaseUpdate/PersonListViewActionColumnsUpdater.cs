@@ -36,6 +36,12 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
                 HideColumn(listView, nameof(Person.MaritalStatus));
                 HideColumn(listView, nameof(Person.DocumentCopiesListLink));
             }
+            else
+            {
+                var temporary = viewId == "Person_ListView_TemporaryVisitors";
+                EnsureEducationColumns(listView, temporary ? 10 : 12);
+                EnsureActiveDocumentColumns(listView);
+            }
 
             if (viewId == "Person_ListView_FamilyMembers")
             {
@@ -50,12 +56,34 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
     /// </summary>
     private static void EnsureEmployeeSummaryColumns(IModelListView listView)
     {
-        EnsureColumn(listView, nameof(Person.EmployeeListPositionName), 11, 160, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActualPositionName), 12, 180, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListDepartmentName), 13, 120, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), 14, 140, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), 15, 160, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 16, 220, null);
+        EnsureEducationColumns(listView, 11);
+        EnsureColumn(listView, nameof(Person.EmployeeListPositionName), 13, 160, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActualPositionName), 14, 180, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListDepartmentName), 15, 120, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), 16, 140, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), 17, 160, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), 18, 150, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 19, 220, null);
+    }
+
+    /// <summary>Family members and temporary visitors: the same three document stacks, before Archived.</summary>
+    private static void EnsureActiveDocumentColumns(IModelListView listView)
+    {
+        var temporary = string.Equals(listView.Id, "Person_ListView_TemporaryVisitors", StringComparison.Ordinal);
+        var start = temporary ? 12 : 14;
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), start, 140, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), start + 1, 160, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), start + 2, 150, null);
+
+        var archived = listView.Columns[nameof(Person.IsArchived)];
+        if (archived != null)
+            archived.Index = start + 3;
+    }
+
+    private static void EnsureEducationColumns(IModelListView listView, int start)
+    {
+        EnsureColumn(listView, nameof(Person.EmployeeListEducationPlace), start, 160, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListEducationProfession), start + 1, 150, null);
     }
 
     private static void EnsureActionColumns(IModelListView listView, bool includeDocumentCopies)

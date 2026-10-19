@@ -263,6 +263,16 @@ namespace Visa2026.Module.BusinessObjects
         public string EmployeeListActiveWorkPermitNumbers =>
             PersonCurrentItems.FormatActiveWorkPermitNumbers(this);
 
+        /// <summary>Person lists: invitation numbers in force today, comma-separated.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Active invitations")]
+        public string EmployeeListActiveInvitationNumbers =>
+            PersonCurrentItems.FormatActiveInvitationNumbers(this);
+
         /// <summary>Employees list: current residence as region, city, and street.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]
@@ -272,6 +282,26 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Address of residence")]
         public string EmployeeListResidenceAddress =>
             PersonCurrentItems.FormatEmployeeListResidenceAddress(this);
+
+        /// <summary>Person lists: education level, school, and country, stacked per record.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Education and place of study")]
+        public string EmployeeListEducationPlace =>
+            PersonCurrentItems.FormatEmployeeListEducationPlace(this);
+
+        /// <summary>Person lists: specialty for each education record.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Profession by education")]
+        public string EmployeeListEducationProfession =>
+            PersonCurrentItems.FormatEmployeeListEducationProfession(this);
 
         /// <summary>ListView link column that opens the person dossier DetailView.</summary>
         [NotMapped]

@@ -38,5 +38,6 @@ public sealed class ListViewGridColumnFitController : ViewController<ListView>
 
     private bool ShouldSkipListView() =>
         View.Id.EndsWith("_LookupListView", StringComparison.Ordinal)
-        || PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id);
+        || PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id)
+        || PersonRosterListViews.IsRoster(View.Id);
 }

@@ -155,6 +155,45 @@ public class PersonEmployeeListColumnsTests
             person.EmployeeListResidenceAddress);
     }
 
+    [Fact]
+    public void Education_columns_stack_place_and_specialty_latest_graduation_first()
+    {
+        var person = new Person();
+        person.Educations.Add(new Education
+        {
+            ID = Guid.NewGuid(),
+            GraduationYear = "2010",
+            EducationLevel = new EducationLevel { Name = "Place level 2010", NameTm = "Place level 2010" },
+            EducationInstitution = new EducationInstitution { Name = "Iskenderun Demir Polat", NameTm = "Iskenderun Demir Polat" },
+            EducationCountry = new Country { Name = "Türkiýe", NameTm = "Türkiýe" },
+            Specialty = new Specialty { Name = "Jemgyýetçilik ylymlary", NameTm = "Jemgyýetçilik ylymlary" },
+        });
+        person.Educations.Add(new Education
+        {
+            ID = Guid.NewGuid(),
+            GraduationYear = "2013",
+            EducationLevel = new EducationLevel { Name = "Place level 2013", NameTm = "Place level 2013" },
+            EducationInstitution = new EducationInstitution { Name = "Aşgabat uniwersiteti", NameTm = "Aşgabat uniwersiteti" },
+            EducationCountry = new Country { Name = "Türkmenistan", NameTm = "Türkmenistan" },
+            Specialty = new Specialty { Name = "Montaj", NameTm = "Montaj" },
+        });
+        person.Educations.Add(new Education { ID = Guid.NewGuid(), GraduationYear = "2001" });
+
+        var places = PersonCurrentItems.ListEducationPlaces(person);
+        Assert.Equal(
+            new[] { "Place level 2013", "Aşgabat uniwersiteti", "Türkmenistan" },
+            places[0]);
+        Assert.Equal(
+            new[] { "Place level 2010", "Iskenderun Demir Polat", "Türkiýe" },
+            places[1]);
+
+        var professions = PersonCurrentItems.ListEducationProfessions(person);
+        Assert.Equal(new[] { "Montaj" }, professions[0]);
+        Assert.Equal(new[] { "Jemgyýetçilik ylymlary" }, professions[1]);
+        Assert.Equal("Montaj | Jemgyýetçilik ylymlary", person.EmployeeListEducationProfession);
+        Assert.DoesNotContain("2001", person.EmployeeListEducationPlace);
+    }
+
     private static Visa CancelledVisa(string number)
     {
         var visa = new Visa

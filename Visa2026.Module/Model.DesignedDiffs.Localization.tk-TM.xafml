@@ -1606,12 +1606,15 @@
         <Member Name="Educations" Caption="Bilimler" />
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="EmployeeContracts" Caption="Işgär şertnamalary" />
+        <Member Name="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
         <Member Name="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
         <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
         <Member Name="EmployeeListActualPositionName" Caption="Wezipesi (hakyky / kompaniýa)" />
         <Member Name="EmployeeListDepartmentName" Caption="Bölüm" />
         <Member Name="EmployeeListPositionName" Caption="Wezipesi (wiza hasabaty)" />
         <Member Name="EmployeeListResidenceAddress" Caption="Ýaşaýyş salgysy" />
+        <Member Name="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
+        <Member Name="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
         <Member Name="FamilyMembers" Caption="Maşgalalar" />
         <Member Name="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
         <Member Name="FirstName" Caption="Ady" />
@@ -3110,6 +3113,9 @@
         <ColumnInfo Id="EmployeeListDepartmentName" Caption="Bölüm" />
         <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
         <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
+        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
+        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
+        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
         <ColumnInfo Id="EmployeeListResidenceAddress" Caption="Ýaşaýyş salgysy" />
       </Columns>
     </ListView>
@@ -3143,6 +3149,11 @@
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Işgär" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
+        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
+        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
+        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Wagtlaýyn myhman">
@@ -3158,6 +3169,11 @@
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
+        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
+        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
+        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
+        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
+        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="Syýahat taryhy">
