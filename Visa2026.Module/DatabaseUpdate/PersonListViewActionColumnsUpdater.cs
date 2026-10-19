@@ -28,6 +28,8 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             var employees = viewId == "Person_ListView_Employees";
             EnsureActionColumns(listView, includeDocumentCopies: !employees);
 
+            HideColumn(listView, nameof(Person.Gender));
+
             if (employees)
             {
                 EnsureEmployeeSummaryColumns(listView);
@@ -35,6 +37,8 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
                 HideColumn(listView, nameof(Person.Age));
                 HideColumn(listView, nameof(Person.MaritalStatus));
                 HideColumn(listView, nameof(Person.DocumentCopiesListLink));
+                HideColumn(listView, nameof(Person.PersonalNumber));
+                HideColumn(listView, nameof(Person.ProjectContract));
             }
             else
             {
@@ -56,6 +60,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
     /// </summary>
     private static void EnsureEmployeeSummaryColumns(IModelListView listView)
     {
+        EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 3, 120, null);
         EnsureEducationColumns(listView, 11);
         EnsureColumn(listView, nameof(Person.EmployeeListPositionName), 13, 160, null);
         EnsureColumn(listView, nameof(Person.EmployeeListActualPositionName), 14, 180, null);

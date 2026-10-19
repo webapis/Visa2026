@@ -1615,6 +1615,7 @@
         <Member Name="EmployeeListResidenceAddress" Caption="Адрес проживания" />
         <Member Name="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
         <Member Name="EmployeeListEducationProfession" Caption="Профессия по образованию" />
+        <Member Name="EmployeeListActivePassport" Caption="Паспорт" />
         <Member Name="FamilyMembers" Caption="Родственники" />
         <Member Name="FamilyRelationDocuments" Caption="Копии доказательств родства" />
         <Member Name="FirstName" Caption="Имя" />
@@ -3105,6 +3106,7 @@
         <ColumnInfo Id="IsArchived" Caption="В архиве" />
         <ColumnInfo Id="MaritalStatus" Caption="Семейное положение" />
         <ColumnInfo Id="Nationality" Caption="Гражданство" />
+        <ColumnInfo Id="EmployeeListActivePassport" Caption="Паспорт" />
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />

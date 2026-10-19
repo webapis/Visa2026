@@ -1169,13 +1169,14 @@
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
         <ColumnInfo Id="DocumentCopiesListLink" Removed="True" />
-        <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
+        <ColumnInfo Id="EmployeeListActivePassport" Index="3" Width="120" />
+        <ColumnInfo Id="PersonalNumber" Removed="True" />
         <ColumnInfo Id="DateOfBirth" Removed="True" />
         <ColumnInfo Id="Age" Removed="True" />
-        <ColumnInfo Id="Gender" Index="6" Width="58" />
+        <ColumnInfo Id="Gender" Removed="True" />
         <ColumnInfo Id="MaritalStatus" Removed="True" />
         <ColumnInfo Id="Nationality" Index="8" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="9" Width="106" />
+        <ColumnInfo Id="ProjectContract" Removed="True" />
         <ColumnInfo Id="Subcontractor" Index="10" Width="158" />
         <ColumnInfo Id="EmployeeListEducationPlace" Index="11" Width="160" />
         <ColumnInfo Id="EmployeeListEducationProfession" Index="12" Width="150" />
@@ -1212,7 +1213,7 @@
         <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
         <ColumnInfo Id="DateOfBirth" Index="4" Width="88" />
         <ColumnInfo Id="Age" Index="5" Width="41" />
-        <ColumnInfo Id="Gender" Index="6" Width="58" />
+        <ColumnInfo Id="Gender" Removed="True" />
         <ColumnInfo Id="Nationality" Index="7" Width="78" />
         <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
         <ColumnInfo Id="Subcontractor" Index="9" Width="158" />
@@ -1247,7 +1248,7 @@
         <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
         <ColumnInfo Id="DateOfBirth" Index="4" Width="88" />
         <ColumnInfo Id="Age" Index="5" Width="41" />
-        <ColumnInfo Id="Gender" Index="6" Width="58" />
+        <ColumnInfo Id="Gender" Removed="True" />
         <ColumnInfo Id="Nationality" Index="7" Width="78" />
         <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
         <ColumnInfo Id="Subcontractor" Index="9" Width="158" />

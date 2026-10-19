@@ -1615,6 +1615,7 @@
         <Member Name="EmployeeListResidenceAddress" Caption="Ýaşaýyş salgysy" />
         <Member Name="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
         <Member Name="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
+        <Member Name="EmployeeListActivePassport" Caption="Pasport" />
         <Member Name="FamilyMembers" Caption="Maşgalalar" />
         <Member Name="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
         <Member Name="FirstName" Caption="Ady" />
@@ -3104,7 +3105,8 @@
         <ColumnInfo Id="Gender" Caption="Jynsy" />
         <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />
         <ColumnInfo Id="MaritalStatus" Caption="Maşgala ýagdaýy" />
-        <ColumnInfo Id="Nationality" Caption="Milleti" />
+        <ColumnInfo Id="Nationality" Caption="Raýatlygy" />
+        <ColumnInfo Id="EmployeeListActivePassport" Caption="Pasport" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
@@ -3143,7 +3145,7 @@
         <ColumnInfo Id="LastName" Caption="Familiýasy" />
         <ColumnInfo Id="MaritalStatus" Caption="Maşgala ýagdaýy" />
         <ColumnInfo Id="MiddleName" Caption="Atasynyň ady" />
-        <ColumnInfo Id="Nationality" Caption="Milleti" />
+        <ColumnInfo Id="Nationality" Caption="Raýatlygy" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
@@ -3165,7 +3167,7 @@
         <ColumnInfo Id="FullName" Caption="Doly ady" />
         <ColumnInfo Id="Gender" Caption="Jynsy" />
         <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />
-        <ColumnInfo Id="Nationality" Caption="Milleti" />
+        <ColumnInfo Id="Nationality" Caption="Raýatlygy" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />

@@ -21,6 +21,39 @@ namespace Visa2026.Module.BusinessObjects
                 .ThenByDescending(p => p.ID)
                 .FirstOrDefault();
 
+        /// <summary>
+        /// Latest passport still in force: not cancelled, issued on or before the day,
+        /// expiration empty or on or after that day. Newest issue date wins.
+        /// </summary>
+        public static Passport GetLastActivePassport(Person person, DateTime? asOf = null)
+        {
+            if (person?.Passports == null)
+                return null;
+
+            var asOfDate = (asOf ?? DateTime.Today).Date;
+            return person.Passports
+                .Where(passport => PassportIsInForceOn(passport, asOfDate))
+                .OrderByDescending(passport => passport.IssueDate ?? DateTime.MinValue)
+                .ThenByDescending(passport => passport.ID)
+                .FirstOrDefault();
+        }
+
+        /// <summary>Passport number, then expiration date, for the last in-force passport.</summary>
+        public static IReadOnlyList<string> ListActivePassportLines(Person person, DateTime? asOf = null)
+        {
+            var passport = GetLastActivePassport(person, asOf);
+            if (passport == null)
+                return Array.Empty<string>();
+
+            var expiration = passport.ExpirationDate is DateTime date && date != default
+                ? date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
+                : string.Empty;
+            return Lines(passport.PassportNumber, expiration);
+        }
+
+        public static string FormatEmployeeListActivePassport(Person person, DateTime? asOf = null) =>
+            string.Join(", ", ListActivePassportLines(person, asOf));
+
         public static Visa GetCurrentVisa(Person person, DateTime? asOf = null)
         {
             if (person?.Passports == null)
@@ -406,6 +439,12 @@ namespace Visa2026.Module.BusinessObjects
                 .ThenByDescending(x => ((BaseObject)(object)x).ID)
                 .FirstOrDefault();
         }
+
+        private static bool PassportIsInForceOn(Passport passport, DateTime asOfDate) =>
+            passport != null
+            && !passport.IsCancelled
+            && (!passport.IssueDate.HasValue || passport.IssueDate.Value.Date <= asOfDate)
+            && (!passport.ExpirationDate.HasValue || passport.ExpirationDate.Value.Date >= asOfDate);
 
         private static bool VisaIsSelectable(Visa v) =>
             v != null && !IssuedDocumentLifecycle.IsCancelled(v) && v.StartDate != default;

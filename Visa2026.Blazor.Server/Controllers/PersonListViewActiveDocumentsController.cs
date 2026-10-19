@@ -38,6 +38,7 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     [
         nameof(Person.EmployeeListEducationPlace),
         nameof(Person.EmployeeListEducationProfession),
+        nameof(Person.EmployeeListActivePassport),
     ];
 
     private static readonly string[] DocumentFields =
@@ -59,6 +60,7 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         [nameof(Person.DossierListLink)] = 8,
         [nameof(Person.DocumentCopiesListLink)] = 8,
         [nameof(Person.FullName)] = 170,
+        [nameof(Person.EmployeeListActivePassport)] = 120,
         [nameof(Person.PersonalNumber)] = 100,
         [nameof(Person.DateOfBirth)] = 92,
         [nameof(Person.Age)] = 36,
@@ -96,6 +98,20 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     {
         TargetObjectType = typeof(Person);
         TargetViewId = string.Join(';', PersonRosterListViews.Ids);
+    }
+
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        var changed = HideColumn(nameof(Person.Gender));
+        if (string.Equals(View.Id, "Person_ListView_Employees", StringComparison.Ordinal))
+        {
+            changed |= HideColumn(nameof(Person.PersonalNumber));
+            changed |= HideColumn(nameof(Person.ProjectContract));
+        }
+
+        if (changed)
+            PersistLayout();
     }
 
     protected override void OnViewControlsCreated()
@@ -805,6 +821,7 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
             {
                 nameof(Person.EmployeeListEducationPlace) => PersonCurrentItems.ListEducationPlaces(person),
                 nameof(Person.EmployeeListEducationProfession) => PersonCurrentItems.ListEducationProfessions(person),
+                nameof(Person.EmployeeListActivePassport) => PassportBlock(person),
                 _ => Array.Empty<IReadOnlyList<string>>(),
             };
 
@@ -912,6 +929,24 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         }
 
         builder.CloseElement();
+    }
+
+    private bool HideColumn(string propertyName)
+    {
+        var column = View?.Model?.Columns[propertyName];
+        if (column == null || column.Index < 0)
+            return false;
+
+        column.Index = -1;
+        return true;
+    }
+
+    private static IReadOnlyList<IReadOnlyList<string>> PassportBlock(Person person)
+    {
+        var lines = PersonCurrentItems.ListActivePassportLines(person);
+        return lines.Count == 0
+            ? Array.Empty<IReadOnlyList<string>>()
+            : new[] { lines };
     }
 
     private IJSRuntime? GetJs() => Application?.ServiceProvider?.GetService<IJSRuntime>();

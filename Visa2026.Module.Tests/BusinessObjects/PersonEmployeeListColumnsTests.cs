@@ -194,6 +194,46 @@ public class PersonEmployeeListColumnsTests
         Assert.DoesNotContain("2001", person.EmployeeListEducationPlace);
     }
 
+    [Fact]
+    public void Active_passport_column_uses_the_latest_passport_still_in_force()
+    {
+        var person = new Person();
+        person.Passports.Add(new Passport
+        {
+            ID = Guid.NewGuid(),
+            PassportNumber = "OLD-1",
+            IssueDate = Today.AddYears(-8),
+            ExpirationDate = Today.AddYears(2),
+        });
+        person.Passports.Add(new Passport
+        {
+            ID = Guid.NewGuid(),
+            PassportNumber = "EXPIRED",
+            IssueDate = Today.AddYears(-1),
+            ExpirationDate = Today.AddDays(-1),
+        });
+        person.Passports.Add(new Passport
+        {
+            ID = Guid.NewGuid(),
+            PassportNumber = "CANCELLED",
+            IssueDate = Today.AddMonths(-1),
+            ExpirationDate = Today.AddYears(5),
+            IsCancelled = true,
+        });
+        person.Passports.Add(new Passport
+        {
+            ID = Guid.NewGuid(),
+            PassportNumber = "ACTIVE-9",
+            IssueDate = Today.AddYears(-3),
+            ExpirationDate = new DateTime(2029, 4, 17),
+        });
+
+        Assert.Equal(
+            new[] { "ACTIVE-9", "17.04.2029" },
+            PersonCurrentItems.ListActivePassportLines(person, Today));
+        Assert.Equal("ACTIVE-9, 17.04.2029", PersonCurrentItems.FormatEmployeeListActivePassport(person, Today));
+    }
+
     private static Visa CancelledVisa(string number)
     {
         var visa = new Visa

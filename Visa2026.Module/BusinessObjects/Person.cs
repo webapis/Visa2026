@@ -303,6 +303,16 @@ namespace Visa2026.Module.BusinessObjects
         public string EmployeeListEducationProfession =>
             PersonCurrentItems.FormatEmployeeListEducationProfession(this);
 
+        /// <summary>Employees list: number and expiration of the last passport still in force.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Passport")]
+        public string EmployeeListActivePassport =>
+            PersonCurrentItems.FormatEmployeeListActivePassport(this);
+
         /// <summary>ListView link column that opens the person dossier DetailView.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]

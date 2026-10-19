@@ -1615,6 +1615,7 @@
         <Member Name="EmployeeListResidenceAddress" Caption="İkamet adresi" />
         <Member Name="EmployeeListEducationPlace" Caption="Eğitim ve öğrenim yeri" />
         <Member Name="EmployeeListEducationProfession" Caption="Eğitime göre meslek" />
+        <Member Name="EmployeeListActivePassport" Caption="Pasaport" />
         <Member Name="FamilyMembers" Caption="Aile Üyeleri" />
         <Member Name="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
         <Member Name="FirstName" Caption="Ad" />
@@ -3105,6 +3106,7 @@
         <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
         <ColumnInfo Id="MaritalStatus" Caption="Medeni Hal" />
         <ColumnInfo Id="Nationality" Caption="Uyruk" />
+        <ColumnInfo Id="EmployeeListActivePassport" Caption="Pasaport" />
         <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="Subcontractor" Caption="Şirket (Taşeron)" />
