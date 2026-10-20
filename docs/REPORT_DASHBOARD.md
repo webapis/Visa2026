@@ -101,13 +101,15 @@ There is one stored file per tab. It is not per officer.
 | `in-process` | `in-process-by-period-category-type` |
 | `used` | `used-by-period-category-type` |
 
-The officer tab for `cancelled-invitation` is **Cancelled Invitation**. Columns are the invitation (Full name, Bölümi, Invitation #, Issued date, Expires, Period) and the cancellation application (App #, Date, Migration). There are no approval columns. A row is one invitation line cancelled by a completed cancellation application. The nine-month dashboard window does not apply.
+The officer tab for `cancelled-invitation` is **Cancelled Invitation**. Columns are the invitation (Full name, Project, Invitation #, Issued date, Valid Until, Visa Period) and the cancellation application (App #, Date, Migration). There are no approval columns. A row is one invitation line cancelled by a completed cancellation application. The nine-month dashboard window does not apply.
 
 The officer tab for `expired-invitation` is **Expired Invitation**. Its columns match Active Invitation. The row is an issued invitation that expired before a visa was issued. A visa cancelled later stays on Used Invitations. The nine-month dashboard window does not apply.
 
-The officer tab for `used` is **Used Invitations**. Its columns are the Active Invitation columns, then Visa #, Issued date, Place, Start date, and End date. One invitation line has one visa. A visa cancelled later stays on the report.
+Active Invitation and Expired Invitation columns, in order: Record number (the row number on screen), Full name, Position, Project, Firm, Application number, Application date, Visa Period, Ministry approval, Migration, Invitation validity. Ministry approval is the last leg that has a date or a number: the date, then the letter number. The ministry name is not shown, and earlier legs are not columns. Migration is the date and the AS number. The validity-extended note is not a column. Invitation validity is the expiration date and the remaining-time pill. Invitation # is not a column. Open ListView omits Record number, because a stored row number would not follow the search box.
 
-**Bölümi** is the department column on these five Invitation tabs. On Active, Expired, Process, and Used it sits immediately after Project. Cancelled Invitation has no Project column, so Bölümi is the second column. The text is `Department.NameTm`, or `Name` when that is empty, from the last position history: an open period first, then the latest start date. A family member uses the sponsoring employee's department. Project and the chart stay as they are. An uploaded workbook whose header has the old column count is not used; export builds the starter until the file has the extra column.
+The officer tab for `used` is **Used Invitations**. It keeps the previous columns: Full name, Project, Position, Firm, App #, Approval 1, Approval 2, Approval 3, Migration, Invitation #, Valid Until, Visa Period, then Visa #, Issued date, Place, Start date, and End date. One invitation line has one visa. A visa cancelled later stays on the report. Invitation Process and Cancelled Invitation also keep their previous columns.
+
+The **Project** column on these five Invitation tabs is the department (`NameTm`, or `Name` when that is empty) from the last position history: an open period first, then the latest start date. A family member uses the sponsoring employee's department. The contract project is not a table column; the chart still groups by it. **Position** is Position (visa reports), `NameTm` or `Name`, from that same history row. **Firm** is the subcontractor. An uploaded workbook with the previous column count is not used until it matches.
 
 `issued-inv` is not mapped. Other Report Dashboard categories still use `UserReportTemplate` when `ExcelConfigured` is true. Add a future tab by extending `CanonicalKey` and the cell writer. The table already stores any `Category` + `SubReportKey`. The Blazor buttons stay on Invitation until that gate is widened (`IsInvitationTemplateReport`).
 
@@ -138,8 +140,8 @@ On export, rows below the sample are deleted, the sample row is copied for each 
 
 Cell text:
 
-- Active Invitation, Expired Invitation, and Invitation Process use `ReportDashboardInvitationTableExcel.Cells` (the same stacked cells as the preview). Expired Invitation uses the Active Invitation columns. Cancelled Invitation uses `CancelledCells`: invitation columns, then the cancellation application's App #, Date, and Migration.
-- Used Invitations uses the Active Invitation cells, then Visa #, Issued date, Place, Start date, and End date.
+- Active Invitation and Expired Invitation use `ReportDashboardInvitationTableExcel.ActiveCells`. The starter sheet matches the company workbook: headers S.No, Adı Soyadı, Görevi, Projesi, Firması, Davetiye için yazı No, İlgili Bakanlığın Başvuru tarihi, Başvurulan vize süresi, İlgili Bakanlıktan çıkan tarih ve numarası, Yabancı Şube CO verilen Tarihi ve No, Davetiyenin son geçerlilik tarihi. Dates are Excel dates shown as `dd.MM.yyyy`. Ministry approval is the date and the letter number. Migration is the date and the CO number. Invitation validity is the date only. The last Excel column is NOT: `geçerli gün sayı : 30`, counting from today (a past date is negative). Fewer days use a stronger background, from pale yellow to red. That column is not on the on-screen table. Text columns wrap inside the column width, and the header row has a filter. The on-screen table keeps its own captions. Invitation Process uses `Cells`. Cancelled Invitation uses `CancelledCells`: invitation columns, then the cancellation application's App #, Date, and Migration.
+- Used Invitations uses `UsedCells`: the previous Active Invitation cells, then Visa #, Issued date, Place, Start date, and End date.
 
 ### A. Maglumat
 

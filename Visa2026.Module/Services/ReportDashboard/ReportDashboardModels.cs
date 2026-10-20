@@ -93,14 +93,20 @@ public sealed class ReportDashboardPreviewRow
     public string ColumnH       { get; init; } = string.Empty;
     /// <summary>Optional 12th column (Active Invitation migration date and letter number).</summary>
     public string ColumnI       { get; init; } = string.Empty;
-    /// <summary>Active Invitation ministry cells, between Period and Migration, in catalog header order.</summary>
+    /// <summary>Invitation ministry cells, in catalog header order. Used and Process still show every leg.</summary>
     public IReadOnlyList<string> MinistryCells { get; init; } = Array.Empty<string>();
+    /// <summary>Active and Expired Invitation: date and number of the last approval leg that has either.</summary>
+    public string LastApproval { get; init; } = string.Empty;
     /// <summary>Optional pill under <see cref="ColumnI"/> (Active Invitation validity extended).</summary>
     public string ColumnBadge   { get; init; } = string.Empty;
     /// <summary>Active Invitation remaining-time pill under the expiry date (<see cref="ColumnF"/>).</summary>
     public string ExpiresBadge  { get; init; } = string.Empty;
     /// <summary>Css class for <see cref="ExpiresBadge"/> (same buckets as Invitation Validity).</summary>
     public string ExpiresCssClass { get; init; } = string.Empty;
+    /// <summary>Active and Expired Invitation NOT cell: geçerli gün sayı : N.</summary>
+    public string RemainingDaysNote { get; init; } = string.Empty;
+    /// <summary>Background intensity for <see cref="RemainingDaysNote"/>.</summary>
+    public string RemainingDaysCss { get; init; } = string.Empty;
     /// <summary>Person to open when the preview row opens the dossier.</summary>
     public Guid?  PersonId      { get; init; }
     /// <summary>Invitation whose scanned copies open from the invitation-number cell.</summary>

@@ -17,7 +17,7 @@ SELECT
     COALESCE(pc."NameTm", '')                                               AS "ProjectNameRaw",
     COALESCE(pc."NameTm", '')                                               AS "ProjectNameTm",
     COALESCE(p."PersonRole", 0)                                             AS "PersonRoleCode",
-    COALESCE(NULLIF(BTRIM(act."Name"), ''), '')                             AS "PositionLabel",
+    COALESCE(NULLIF(BTRIM(visa_pos."NameTm"), ''), NULLIF(BTRIM(visa_pos."Name"), ''), '') AS "PositionLabel",
     COALESCE(dept."Name", '')                                               AS "DepartmentLabel",
     COALESCE(
         NULLIF(BTRIM(sub."NameTm"), ''),
@@ -113,7 +113,7 @@ LEFT JOIN "VisaCategories" vc
 LEFT JOIN "VisaTypes" vt
     ON vt."ID" = a."VisaTypeID" AND COALESCE(vt."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
-    SELECT eph."ActualPositionID"
+    SELECT eph."PositionID"
     FROM "EmployeePositionHistories" eph
     WHERE eph."PersonID" = p."ID"
       AND COALESCE(eph."GCRecord", 0) = 0
@@ -126,8 +126,8 @@ LEFT JOIN LATERAL (
         eph."ID" DESC
     LIMIT 1
 ) cur_pos ON TRUE
-LEFT JOIN "ActualPositions" act
-    ON act."ID" = cur_pos."ActualPositionID" AND COALESCE(act."GCRecord", 0) = 0
+LEFT JOIN "Positions" visa_pos
+    ON visa_pos."ID" = cur_pos."PositionID" AND COALESCE(visa_pos."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT COALESCE(NULLIF(BTRIM(dep."NameTm"), ''), NULLIF(BTRIM(dep."Name"), ''), '') AS "Name"
     FROM "People" dept_person

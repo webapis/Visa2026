@@ -578,20 +578,22 @@
                             </button>
                         </div>
                         <div class="rd-listview-scroll @(IsOfficerFillTable ? "rd-listview-scroll--fill" : null)">
-                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
+                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + ((IsInvitationReadyTable || IsInvitationExpiredTable) ? " rd-invitation-active" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable) && i == 0;
+                                            var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsInvitationReadyTable || IsInvitationExpiredTable) && i == 0;
+                                            var projectColumn = (IsInvitationReadyTable || IsInvitationExpiredTable) && i == 3;
                                             var positionColumn = IsWorkPermitMaglumatTable && i == 6;
                                             var educationColumn = IsWorkPermitMaglumatTable && (i == 4 || i == 5);
                                             var locationColumn = (IsWorkPermitMaglumat2Table && i == 9) || (IsWorkPermitMaglumat3Table && i == 10);
                                             var stackColumn = (IsWorkPermitMaglumatTable && (i == 2 || i == 3 || i == 7 || i == 8 || i == 9 || (IsWorkPermitMaglumat2Table && i == 10) || (IsWorkPermitMaglumat3Table && i == 11)))
                                                 || (IsInvitationCancelledTable && (i == 4 || i == 8))
-                                                || ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationUsedTable) && i >= 5 && i <= 9)
-                                                || (IsInvitationProcessTable && i >= 5 && i <= 9);
-                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
+                                                || ((IsInvitationReadyTable || IsInvitationExpiredTable) && (i == 8 || i == 9 || i == 10))
+                                                || (IsInvitationUsedTable && i >= 4 && i <= 8)
+                                                || (IsInvitationProcessTable && i >= 4 && i <= 8);
+                                            <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(projectColumn ? " rd-col-project" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
                                 </thead>
@@ -794,6 +796,10 @@
                                                 }
                                                 else
                                                 {
+                                                @if (IsInvitationReadyTable || IsInvitationExpiredTable)
+                                                {
+                                                    <td class="rd-col-order">@DisplayIndex(row)</td>
+                                                }
                                                 <td class="rd-cell-name">@row.Name</td>
                                                 @if (IsInvitationCancelledTable)
                                                 {
@@ -838,15 +844,94 @@
                                                         </div>
                                                     </td>
                                                 }
+                                                else if (IsInvitationReadyTable || IsInvitationExpiredTable)
+                                                {
+                                                    <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                    <td class="@($"{ColumnClass(3)} rd-col-project")"><span class="rd-project-tag">@row.Department</span></td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnB</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnD</td>
+                                                    <td class="@ColumnClass(7)">@row.ColumnH</td>
+                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in (row.LastApproval ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(9)} rd-col-stack")" @onclick:stopPropagation="true">
+                                                        <div class="rd-cell-stack">
+                                                            @{
+                                                                var invitationNumber = row.ColumnE?.Trim() ?? string.Empty;
+                                                                var invitationShown = false;
+                                                            }
+                                                            @foreach (var line in (row.ColumnI ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                var lineIsInvitation = invitationNumber.Length > 0
+                                                                    && line.Contains(invitationNumber, StringComparison.Ordinal);
+                                                                if (lineIsInvitation)
+                                                                {
+                                                                    invitationShown = true;
+                                                                }
+                                                                @if (lineIsInvitation && row.InvitationId is { } lineInvitationId && lineInvitationId != Guid.Empty)
+                                                                {
+                                                                    <button type="button"
+                                                                            class="rd-invitation-link"
+                                                                            title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInvitationCopy")"
+                                                                            @onclick="() => OnInvitationCopies(row)">
+                                                                        @line
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span>@line</span>
+                                                                }
+                                                            }
+                                                            @if (!invitationShown && invitationNumber.Length > 0 && row.InvitationId is { } invitationId && invitationId != Guid.Empty)
+                                                            {
+                                                                <button type="button"
+                                                                        class="rd-invitation-link"
+                                                                        title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInvitationCopy")"
+                                                                        @onclick="() => OnInvitationCopies(row)">
+                                                                    @invitationNumber
+                                                                </button>
+                                                            }
+                                                            else if (!invitationShown && invitationNumber.Length > 0)
+                                                            {
+                                                                <span>@invitationNumber</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(10)} rd-col-stack")">
+                                                        <div class="rd-cell-stack rd-expires">
+                                                            @if (!string.IsNullOrEmpty(row.ColumnF))
+                                                            {
+                                                                <span>@row.ColumnF</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(row.ExpiresBadge))
+                                                            {
+                                                                @StateLabel(row.ExpiresBadge, row.ExpiresCssClass, true)
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    @if (ShowInvitationChartColumn)
+                                                    {
+                                                        <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
+                                                    }
+                                                }
                                                 else
                                                 {
-                                                <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
                                                 @if (IsInvitationOfficerTable)
                                                 {
-                                                    <td class="@ColumnClass(2)">@row.Department</td>
+                                                    <td><span class="rd-project-tag">@row.Department</span></td>
                                                 }
-                                                <td class="@ColumnClass(IsInvitationOfficerTable ? 3 : 2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
-                                                <td class="@ColumnClass(IsInvitationOfficerTable ? 4 : 3)">@row.ColumnB</td>
+                                                else
+                                                {
+                                                    <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
+                                                }
+                                                <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
+                                                <td class="@ColumnClass(3)">@row.ColumnB</td>
                                                 @if (IsInvitationOfficerTable)
                                                 {
                                                     <td class="rd-col-stack">
@@ -865,7 +950,7 @@
                                                     {
                                                         var approvalLines = row.MinistryCells[ministryIndex]
                                                             .Split('\n', StringSplitOptions.RemoveEmptyEntries);
-                                                        <td class="@($"{ColumnClass(6 + ministryIndex)} rd-col-stack")">
+                                                        <td class="@($"{ColumnClass(5 + ministryIndex)} rd-col-stack")">
                                                             @if (approvalLines.Length > 0)
                                                             {
                                                                 <div class="rd-cell-stack">
@@ -878,7 +963,7 @@
                                                             }
                                                         </td>
                                                     }
-                                                    var invitationStart = 6 + row.MinistryCells.Count;
+                                                    var invitationStart = 5 + row.MinistryCells.Count;
                                                     var migrationLines = (row.ColumnI ?? string.Empty)
                                                         .Split('\n', StringSplitOptions.RemoveEmptyEntries);
                                                     <td class="@($"{ColumnClass(invitationStart)} rd-col-stack")">
@@ -1187,7 +1272,7 @@
     private static readonly HashSet<string> DateHeaders =
         new(StringComparer.Ordinal)
         {
-            "Expiry", "Expires", "Written", "App Date", "Valid Until", "Travel Date", "Start", "Hire Date",
+            "Expiry", "Expires", "Written", "App Date", "Application date", "Valid Until", "Travel Date", "Start", "Hire Date",
             "Issue Date", "Current Expiry", "Requested Until", "Date", "Issued", "Entry", "Month"
         };
 
@@ -1641,6 +1726,7 @@
             || ContainsTerm(row.ColumnG, term)
             || ContainsTerm(row.ColumnH, term)
             || ContainsTerm(row.ColumnI, term)
+            || ContainsTerm(row.LastApproval, term)
             || ContainsTerm(row.ColumnBadge, term)
             || ContainsTerm(row.VisaNumber, term)
             || ContainsTerm(row.VisaIssuedDate, term)

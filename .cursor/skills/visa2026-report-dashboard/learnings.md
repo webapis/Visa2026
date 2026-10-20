@@ -4,6 +4,56 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-20 — NOT column shows days left
+
+**Ask:** Add a last column named NOT on the screen and in Excel. The cell is `geçerli gün sayı : 30`. Show it on Expired Invitation too. Use a stronger color when fewer days remain.
+
+**Now:** Excel for Active Invitation and Expired Invitation has NOT after the validity date. The number is the days from today until the expiration date, and it is negative after that date. Pale yellow is 90 days or more, then stronger yellow, orange, red, and dark red when the date has passed. The on-screen table and Open ListView do not show NOT.
+
+**Prevent:** Do not put NOT back on the on-screen table. Do not put the validity-extended sentence in this column. Do not drop the column from the Expired Invitation workbook.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardComponent.razor`, `report-dashboard.css`, `ReportDashboardInvitationTableExcel.cs`, `VwRdInvitationReady.cs`
+
+## 2026-10-20 — Invitation Excel matches the company sheet
+
+**Ask:** The Active Invitation export should use the company sheet's columns and format.
+
+**Now:** Active Invitation and Expired Invitation export a sheet with those Turkish headers, `dd.MM.yyyy` dates, wrapped text columns, and a filter on the header. Download template writes the same headers, including onto a saved workbook that still has the English captions. Ministry approval is the date and the letter number. Migration is the date and the CO number. Invitation validity is the date only. The on-screen table is unchanged.
+
+**Prevent:** Do not put the remaining-time pill or the invitation-number link into this workbook. Do not change the on-screen captions to the Turkish headers.
+
+**Files:** `ReportDashboardInvitationTableExcel.cs`, `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardExcelTemplateService.cs`
+
+## 2026-10-20 — Project wraps, and the invitation number opens the copy
+
+**Ask:** Keep the Project text inside that column. The invitation number must open the scanned copy, as it did before the column reorder.
+
+**Now:** On Active Invitation and Expired Invitation the project tag wraps inside a 10.5rem column. The invitation number is a link in the Migration cell and calls the same copy preview.
+
+**Prevent:** Do not set `white-space: nowrap` on this project tag. Do not drop the invitation-number link.
+
+**Files:** `ReportDashboardComponent.razor`, `report-dashboard.css`, `ReportDashboardInvitationTableExcel.cs`
+
+## 2026-10-20 — Active and Expired Invitation use eleven columns
+
+**Ask:** Reorder Active Invitation to match the company sheet: record number, full name, position, project, firm, application number, application date, visa period, only the last ministry approval (date and number), migration service date and AS number, invitation validity. Leave the yellow validity-extended note off the table.
+
+**Now:** Active Invitation and Expired Invitation use that order. Record number is the row on screen. Ministry approval is the last leg that has a date or a number, without the ministry name. Migration is the date and the AS number. Invitation validity keeps the date and the remaining-time pill. Invitation Process, Cancelled Invitation, and Used Invitations keep their previous columns. Open ListView omits the record number. An uploaded workbook with the old column count is ignored until it matches.
+
+**Prevent:** Do not put Approval 1 and Approval 2 back on Active or Expired. Do not show the validity-extended note there. Do not change the Work Permit tables.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardComponent.razor`, `ReportDashboardInvitationTableExcel.cs`, `VwRdInvitationReady.cs`, `VwRdInvitationExpired.cs`
+
+## 2026-10-20 — Invitation columns use department as Project
+
+**Ask:** Drop the contract Project column. Name the department column Project. Rename Subcontractor to Firm, Expires to Valid Until, and Period to Visa Period. Position must be Position (visa reports).
+
+**Now:** The five Invitation tabs show department in the Project column. Position is `Positions.NameTm`, or `Name`, from the same last history row. Firm, Valid Until, and Visa Period are the renamed headers. The chart still groups by the contract project. Heal recreates the four position views until the definition contains `eph."PositionID"`.
+
+**Prevent:** Do not put the contract name back in the Project column. Do not show ActualPosition in this column.
+
+**Files:** `vw_rd_invitation_ready.postgres.sql`, `vw_rd_invitation_expired.postgres.sql`, `vw_rd_invitation_used.postgres.sql`, `vw_rd_invitation_in_process.postgres.sql`, `ReportDashboardCatalog.cs`, `ReportDashboardComponent.razor`
+
 ## 2026-10-17 — Sanaw family lines include the full name
 
 **Ask:** Show each family member's full name on Sanaw, as on the sanaw sheet.

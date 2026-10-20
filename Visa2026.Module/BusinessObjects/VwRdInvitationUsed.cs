@@ -58,10 +58,10 @@ public class VwRdInvitationUsed
     [ModelDefault("Caption", "Position")]
     public virtual string PositionLabel { get; set; }
 
-    [ModelDefault("Caption", "Bölümi")]
+    [ModelDefault("Caption", "Project")]
     public virtual string DepartmentLabel { get; set; }
 
-    [ModelDefault("Caption", "Subcontractor")]
+    [ModelDefault("Caption", "Firm")]
     public virtual string SubcontractorLabel { get; set; }
 
     [Browsable(false)]
@@ -93,13 +93,13 @@ public class VwRdInvitationUsed
     public virtual DateTime? ExpirationDate { get; set; }
 
     [NotMapped]
-    [ModelDefault("Caption", "Expires")]
+    [ModelDefault("Caption", "Valid Until")]
     public string ExpiresLabel => FormatExpires(ExpirationDate);
 
     [Browsable(false)]
     public virtual DateTime? IssuedDate { get; set; }
 
-    [ModelDefault("Caption", "Period")]
+    [ModelDefault("Caption", "Visa Period")]
     public virtual string VisaPeriodLabel { get; set; }
 
     [Browsable(false)]

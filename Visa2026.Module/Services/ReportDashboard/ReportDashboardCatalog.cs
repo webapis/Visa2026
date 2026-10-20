@@ -714,33 +714,41 @@ public static class ReportDashboardCatalog
 
     private static string[] ActiveInvitationHeaders(string? chartHeader)
     {
-        var approvalCount = ActiveInvitationApprovalHeaders.Length;
         var includeChart = !string.IsNullOrEmpty(chartHeader);
-        var headers = new string[10 + approvalCount + (includeChart ? 1 : 0)];
-        headers[0] = "Full name";
-        headers[1] = "Project";
-        headers[2] = "Bölümi";
-        headers[3] = "Position";
-        headers[4] = "Subcontractor";
-        headers[5] = "App #";
-        for (var i = 0; i < approvalCount; i++)
-            headers[6 + i] = ActiveInvitationApprovalHeaders[i];
-        var migrationIndex = 6 + approvalCount;
-        headers[migrationIndex] = "Migration";
-        headers[migrationIndex + 1] = "Invitation #";
-        headers[migrationIndex + 2] = "Expires";
-        headers[migrationIndex + 3] = "Period";
+        var headers = new string[11 + (includeChart ? 1 : 0)];
+        headers[0] = "Record number";
+        headers[1] = "Full name";
+        headers[2] = "Position";
+        headers[3] = "Project";
+        headers[4] = "Firm";
+        headers[5] = "Application number";
+        headers[6] = "Application date";
+        headers[7] = "Visa Period";
+        headers[8] = "Ministry approval";
+        headers[9] = "Migration";
+        headers[10] = "Invitation validity";
         if (includeChart)
-            headers[migrationIndex + 4] = chartHeader!;
+            headers[11] = chartHeader!;
         return headers;
     }
 
     private static string[] UsedInvitationHeaders(bool includeChart)
     {
-        var core = ActiveInvitationHeaders(null);
-        var headers = new string[core.Length + 5 + (includeChart ? 1 : 0)];
-        core.CopyTo(headers, 0);
-        var visaIndex = core.Length;
+        var approvalCount = ActiveInvitationApprovalHeaders.Length;
+        var headers = new string[9 + approvalCount + 5 + (includeChart ? 1 : 0)];
+        headers[0] = "Full name";
+        headers[1] = "Project";
+        headers[2] = "Position";
+        headers[3] = "Firm";
+        headers[4] = "App #";
+        for (var i = 0; i < approvalCount; i++)
+            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
+        var migrationIndex = 5 + approvalCount;
+        headers[migrationIndex] = "Migration";
+        headers[migrationIndex + 1] = "Invitation #";
+        headers[migrationIndex + 2] = "Valid Until";
+        headers[migrationIndex + 3] = "Visa Period";
+        var visaIndex = migrationIndex + 4;
         headers[visaIndex] = "Visa #";
         headers[visaIndex + 1] = "Issued date";
         headers[visaIndex + 2] = "Place";
@@ -754,17 +762,16 @@ public static class ReportDashboardCatalog
     private static string[] InvitationProcessHeaders()
     {
         var approvalCount = ActiveInvitationApprovalHeaders.Length;
-        var headers = new string[8 + approvalCount];
+        var headers = new string[7 + approvalCount];
         headers[0] = "Full name";
         headers[1] = "Project";
-        headers[2] = "Bölümi";
-        headers[3] = "Position";
-        headers[4] = "Subcontractor";
-        headers[5] = "App #";
+        headers[2] = "Position";
+        headers[3] = "Firm";
+        headers[4] = "App #";
         for (var i = 0; i < approvalCount; i++)
-            headers[6 + i] = ActiveInvitationApprovalHeaders[i];
-        headers[6 + approvalCount] = "Migration";
-        headers[7 + approvalCount] = "Process state";
+            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
+        headers[5 + approvalCount] = "Migration";
+        headers[6 + approvalCount] = "Process state";
         return headers;
     }
 
@@ -1046,7 +1053,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Invitation, "expired-invitation") =>
                 ActiveInvitationHeaders(null),
             (ReportDashboardCategory.Invitation, "cancelled-invitation") =>
-                ["Full name", "Bölümi", "Invitation #", "Issued date", "Expires", "Period", "App #", "Date", "Migration"],
+                ["Full name", "Project", "Invitation #", "Issued date", "Valid Until", "Visa Period", "App #", "Date", "Migration"],
             (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 InvitationProcessHeaders(),

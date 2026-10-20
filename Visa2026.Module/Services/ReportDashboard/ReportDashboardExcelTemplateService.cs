@@ -83,6 +83,16 @@ public static class ReportDashboardExcelTemplateService
         IReadOnlyList<string> headers)
     {
         var template = LoadContent(objectSpace, category, subReport);
+        if (ReportDashboardExcelTemplateWorkbook.IsInvitationCompanySheet(category, subReport)
+            && !string.Equals(subReport, "ready-by-period-category", StringComparison.Ordinal))
+        {
+            return template != null
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(
+                    template, ReportDashboardInvitationTableExcel.CompanyHeaders.Length)
+                ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationCompanyHeaders(template)
+                : ReportDashboardExcelTemplateWorkbook.BuildInvitationCompanyStarter();
+        }
+
         if (template != null
             && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count))
         {
@@ -113,6 +123,12 @@ public static class ReportDashboardExcelTemplateService
             || !fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
         {
             return NotExcelKey;
+        }
+
+        if (ReportDashboardExcelTemplateWorkbook.IsInvitationCompanySheet(category, subReport)
+            && !string.Equals(subReport, "ready-by-period-category", StringComparison.Ordinal))
+        {
+            expectedColumns = ReportDashboardInvitationTableExcel.CompanyHeaders.Length;
         }
 
         if (!ReportDashboardExcelTemplateWorkbook.MatchesColumns(content, expectedColumns))

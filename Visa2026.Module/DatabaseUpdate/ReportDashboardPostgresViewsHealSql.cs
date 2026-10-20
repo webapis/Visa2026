@@ -256,6 +256,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && stacksMigration
                     && requiresLinkedInstance
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
+                    && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -283,6 +284,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
                     && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
+                    && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -299,6 +301,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
                     && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
+                    && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -319,6 +322,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "\"Description\"")
                     && ViewDefinitionContains(connection, viewName, "a.\"ProcessNumber\"")
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
+                    && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 

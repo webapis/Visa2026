@@ -53,10 +53,10 @@ public class VwRdInvitationInProcess
     [ModelDefault("Caption", "Position")]
     public virtual string PositionLabel { get; set; }
 
-    [ModelDefault("Caption", "Bölümi")]
+    [ModelDefault("Caption", "Project")]
     public virtual string DepartmentLabel { get; set; }
 
-    [ModelDefault("Caption", "Subcontractor")]
+    [ModelDefault("Caption", "Firm")]
     public virtual string SubcontractorLabel { get; set; }
 
     [Browsable(false)]

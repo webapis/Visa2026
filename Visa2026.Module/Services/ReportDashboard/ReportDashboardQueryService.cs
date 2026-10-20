@@ -1651,11 +1651,16 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         ColumnF = expires.Date,
                         ExpiresBadge = expires.Badge,
                         ExpiresCssClass = expires.Css,
+                        RemainingDaysNote = VwRdInvitationReady.FormatRemainingDaysNote(r.ExpirationDate),
+                        RemainingDaysCss = VwRdInvitationReady.RemainingDaysCssClass(r.ExpirationDate),
                         ColumnG = FormatDate(r.IssuedDate),
                         ColumnH = r.VisaPeriodLabel ?? string.Empty,
                         MinistryCells = InvitationMinistryCells(r),
+                        LastApproval = FormatLastApproval(
+                            r.Approval1Date, r.Approval1Number,
+                            r.Approval2Date, r.Approval2Number,
+                            r.Approval3Date, r.Approval3Number),
                         ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
-                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
                         Status = x.Status,
                         StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                     };
@@ -1744,11 +1749,16 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         ColumnF = expires.Date,
                         ExpiresBadge = expires.Badge,
                         ExpiresCssClass = expires.Css,
+                        RemainingDaysNote = VwRdInvitationReady.FormatRemainingDaysNote(r.ExpirationDate),
+                        RemainingDaysCss = VwRdInvitationReady.RemainingDaysCssClass(r.ExpirationDate),
                         ColumnG = FormatDate(r.IssuedDate),
                         ColumnH = r.VisaPeriodLabel ?? string.Empty,
                         MinistryCells = InvitationMinistryCells(r),
+                        LastApproval = FormatLastApproval(
+                            r.Approval1Date, r.Approval1Number,
+                            r.Approval2Date, r.Approval2Number,
+                            r.Approval3Date, r.Approval3Number),
                         ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
-                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
                         Status = x.Status,
                         StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                     };
@@ -6134,6 +6144,23 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
     private static string FormatOfficerDay(DateTime? value) =>
         value is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
+
+    private static string FormatLastApproval(
+        DateTime? approval1Date, string? approval1Number,
+        DateTime? approval2Date, string? approval2Number,
+        DateTime? approval3Date, string? approval3Number)
+    {
+        if (HasApprovalDecision(approval3Date, approval3Number))
+            return FormatMigration(approval3Date, approval3Number);
+        if (HasApprovalDecision(approval2Date, approval2Number))
+            return FormatMigration(approval2Date, approval2Number);
+        if (HasApprovalDecision(approval1Date, approval1Number))
+            return FormatMigration(approval1Date, approval1Number);
+        return string.Empty;
+    }
+
+    private static bool HasApprovalDecision(DateTime? date, string? number) =>
+        date is { Year: > 1900 } || !string.IsNullOrWhiteSpace(number);
 
     private static string FormatMigration(DateTime? date, string? resultNumber)
     {

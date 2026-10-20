@@ -51,12 +51,50 @@ public static class ReportDashboardInvitationTableExcel
         return stream.ToArray();
     }
 
+    /// <summary>Header row of the company invitation sheet. The on-screen table keeps its own captions.</summary>
+    public static readonly string[] CompanyHeaders =
+    [
+        "S.No",
+        "Adı Soyadı",
+        "Görevi",
+        "Projesi",
+        "Firması",
+        "Davetiye için yazı No",
+        "İlgili Bakanlığın Başvuru tarihi",
+        "Başvurulan vize süresi",
+        "İlgili Bakanlıktan çıkan tarih ve numarası",
+        "Yabancı Şube CO verilen Tarihi ve No",
+        "Davetiyenin son geçerlilik tarihi",
+        "NOT",
+    ];
+
+    public static List<string> ActiveCells(ReportDashboardPreviewRow row, int rowNumber, bool includeChartColumn)
+    {
+        var values = new List<string>
+        {
+            rowNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Name,
+            row.ColumnA,
+            row.Department,
+            row.ColumnB,
+            row.ColumnC,
+            OfficerDay(row.ColumnD),
+            row.ColumnH,
+            CompanyLines(row.LastApproval, stripNumberMark: false),
+            CompanyLines(row.ColumnI, stripNumberMark: true),
+            OfficerDay(row.ColumnF),
+            row.RemainingDaysNote,
+        };
+        if (includeChartColumn)
+            values.Add(row.Status);
+        return values;
+    }
+
     public static List<string> Cells(ReportDashboardPreviewRow row, bool includeChartColumn, bool processTable = false)
     {
         var values = new List<string>
         {
             row.Name,
-            row.Project,
             row.Department,
             row.ColumnA,
             row.ColumnB,
@@ -111,6 +149,56 @@ public static class ReportDashboardInvitationTableExcel
             row.ColumnD,
             row.ColumnI ?? string.Empty,
         ];
+    }
+
+    private static string OfficerDay(string? text)
+    {
+        var value = text?.Trim() ?? string.Empty;
+        if (value.Length == 0)
+            return string.Empty;
+        if (TryOfficerDate(value, out var date))
+            return date.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+        return value;
+    }
+
+    private static string CompanyLines(string? text, bool stripNumberMark)
+    {
+        var lines = new List<string>();
+        foreach (var raw in (text ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var value = raw.Trim();
+            if (value.Length == 0)
+                continue;
+            if (TryOfficerDate(value, out var date))
+            {
+                lines.Add(date.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture));
+                continue;
+            }
+
+            if (stripNumberMark)
+                value = value.TrimStart('№').Trim();
+            if (value.Length > 0)
+                lines.Add(value);
+        }
+
+        return string.Join("\n", lines);
+    }
+
+    private static bool TryOfficerDate(string text, out DateTime date)
+    {
+        var cultures = new[]
+        {
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+        };
+        foreach (var culture in cultures)
+        {
+            if (DateTime.TryParseExact(text, "MMM dd, yyyy", culture, System.Globalization.DateTimeStyles.None, out date))
+                return true;
+        }
+
+        date = default;
+        return false;
     }
 
     private static string MigrationCell(ReportDashboardPreviewRow row)

@@ -57,10 +57,10 @@ public class VwRdInvitationExpired
     [ModelDefault("Caption", "Position")]
     public virtual string PositionLabel { get; set; }
 
-    [ModelDefault("Caption", "Bölümi")]
+    [ModelDefault("Caption", "Project")]
     public virtual string DepartmentLabel { get; set; }
 
-    [ModelDefault("Caption", "Subcontractor")]
+    [ModelDefault("Caption", "Firm")]
     public virtual string SubcontractorLabel { get; set; }
 
     [Browsable(false)]
@@ -68,6 +68,15 @@ public class VwRdInvitationExpired
 
     [Browsable(false)]
     public virtual DateTime? ApplicationDate { get; set; }
+
+    [NotMapped]
+    [ModelDefault("Caption", "Application number")]
+    public string ApplicationNumberLabel => ApplicationNumber?.Trim() ?? string.Empty;
+
+    [NotMapped]
+    [ModelDefault("Caption", "Application date")]
+    public string ApplicationDateLabel =>
+        ApplicationDate is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
 
     [NotMapped]
     [ModelDefault("Caption", "App #")]
@@ -92,15 +101,19 @@ public class VwRdInvitationExpired
     public virtual DateTime? ExpirationDate { get; set; }
 
     [NotMapped]
-    [ModelDefault("Caption", "Expires")]
+    [ModelDefault("Caption", "Invitation validity")]
     public string ExpiresLabel => FormatExpires(ExpirationDate);
+
+    [NotMapped]
+    [ModelDefault("Caption", "NOT")]
+    public string RemainingDaysNote => VwRdInvitationReady.FormatRemainingDaysNote(ExpirationDate);
 
     [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
     [ModelDefault("EditMask", "dd.MM.yyyy")]
     [ModelDefault("Caption", "Written")]
     public virtual DateTime? IssuedDate { get; set; }
 
-    [ModelDefault("Caption", "Period")]
+    [ModelDefault("Caption", "Visa Period")]
     public virtual string VisaPeriodLabel { get; set; }
 
     [Browsable(false)]
@@ -163,6 +176,14 @@ public class VwRdInvitationExpired
     [ModelDefault("Caption", "Approval 3")]
     public string Approval3Label => FormatApproval(Approval3Date, Approval3Number, Approval3Ministry);
 
+    [NotMapped]
+    [ModelDefault("Caption", "Ministry approval")]
+    public string LastApprovalLabel =>
+        FormatLastApproval(
+            Approval1Date, Approval1Number,
+            Approval2Date, Approval2Number,
+            Approval3Date, Approval3Number);
+
     [ModelDefault("Caption", "Project")]
     public virtual string StatusLabel { get; set; }
 
@@ -196,6 +217,34 @@ public class VwRdInvitationExpired
         return value.ToString("MMM dd, yyyy")
             + "\n"
             + ReportDashboardLocalization.Status(bucket.Label);
+    }
+
+    private static string FormatLastApproval(
+        DateTime? approval1Date, string? approval1Number,
+        DateTime? approval2Date, string? approval2Number,
+        DateTime? approval3Date, string? approval3Number)
+    {
+        if (HasDecision(approval3Date, approval3Number))
+            return FormatDecision(approval3Date, approval3Number);
+        if (HasDecision(approval2Date, approval2Number))
+            return FormatDecision(approval2Date, approval2Number);
+        if (HasDecision(approval1Date, approval1Number))
+            return FormatDecision(approval1Date, approval1Number);
+        return string.Empty;
+    }
+
+    private static bool HasDecision(DateTime? date, string? number) =>
+        date is { Year: > 1900 } || !string.IsNullOrWhiteSpace(number);
+
+    private static string FormatDecision(DateTime? date, string? number)
+    {
+        var lines = new List<string>();
+        if (date is { Year: > 1900 } value)
+            lines.Add(value.ToString("dd.MM.yyyy"));
+        var letter = number?.Trim() ?? string.Empty;
+        if (letter.Length > 0)
+            lines.Add("№ " + letter);
+        return string.Join("\n", lines);
     }
 
     private static string FormatApproval(DateTime? date, string? number, string? ministry)
