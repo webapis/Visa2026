@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Xunit;
 
@@ -21,7 +23,7 @@ public class ApplicationWorkspaceListProgressStepsTests
 
         var steps = ApplicationWorkspaceListProgressSteps.Build(application, []);
 
-        Assert.Equal(4, steps.Count);
+        Assert.Equal(5, steps.Count);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.OfficeKey, steps[0].Key);
         Assert.Equal("current", steps[0].State);
         Assert.Equal("current", ApplicationWorkspaceListProgressSteps.Tone(steps[0]));
@@ -29,8 +31,10 @@ public class ApplicationWorkspaceListProgressStepsTests
         Assert.Equal("pending", steps[1].State);
         Assert.Equal("Turkmenenergo", steps[1].Label);
         Assert.Equal("pending", steps[2].State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[3].Key);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[3].Key);
         Assert.Equal("pending", steps[3].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[4].Key);
+        Assert.Equal("pending", steps[4].State);
         Assert.Contains(" \u00b7 ", ApplicationWorkspaceListProgressSteps.FormatDisplay(steps));
     }
 
@@ -90,7 +94,10 @@ public class ApplicationWorkspaceListProgressStepsTests
         Assert.Equal("18 May 2026", steps[1].Date);
         Assert.False(string.IsNullOrWhiteSpace(steps[1].StatusLabel));
         Assert.Equal("pending", steps[2].State);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[3].Key);
         Assert.Equal("pending", steps[3].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[4].Key);
+        Assert.Equal("pending", steps[4].State);
     }
 
     [Fact]
@@ -144,7 +151,55 @@ public class ApplicationWorkspaceListProgressStepsTests
         Assert.Equal("rej", ApplicationWorkspaceListProgressSteps.Tone(steps[2]));
         Assert.Equal("\u2715", ApplicationWorkspaceListProgressSteps.Glyph(steps[2], 3));
         Assert.False(string.IsNullOrWhiteSpace(steps[2].StatusLabel));
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[3].Key);
         Assert.Equal("pending", steps[3].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[4].Key);
+        Assert.Equal("pending", steps[4].State);
+    }
+
+    [Fact]
+    public void Build_process_started_status_includes_co_number()
+    {
+        var profile = ViaProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = new DateTime(2026, 6, 1),
+        };
+        var history = new ApplicationProfileInstanceProgress[]
+        {
+            Row(application, 1, new DateTime(2026, 6, 1), ApplicationProfileInstanceProgressStateCodes.Review1Started),
+            Row(application, 2, new DateTime(2026, 6, 2), ApplicationProfileInstanceProgressLegCodes.ReviewApproved(1)),
+            Row(application, 3, new DateTime(2026, 6, 3), ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2)),
+            new()
+            {
+                ID = Guid.NewGuid(),
+                ApplicationProfileInstance = application,
+                Order = 4,
+                Date = new DateTime(2026, 6, 4),
+                State = new ApplicationState
+                {
+                    Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+                    NameTm = "Processing",
+                },
+                ProcessNumber = "CO000004",
+            },
+        };
+
+        var steps = ApplicationWorkspaceListProgressSteps.Build(application, history);
+        var migration = Assert.Single(steps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("current", migration.State);
+        Assert.Equal(
+            ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
+                ApplicationProfileLocalization.ProgressStepLabel("Processing"),
+                "CO000004"),
+            migration.StatusLabel);
+
+        var timelineMigration = ApplicationWorkspaceProgressTimeline.BuildDisplay(application, profile, history)
+            .Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+        Assert.Equal("CO000004", timelineMigration.ProcessNumber);
+        Assert.Equal(migration.StatusLabel, ApplicationWorkspaceListProgressSteps.Badge(timelineMigration));
     }
 
     [Fact]
