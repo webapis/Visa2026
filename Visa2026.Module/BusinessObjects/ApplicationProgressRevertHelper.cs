@@ -34,6 +34,9 @@ public static class ApplicationProfileInstanceProgressRevertHelper
         if (ApplicationProfileInstanceProgressLegCodes.TryParseMinistryLegFromStateCode(stateCode, out var leg))
             return "leg-" + Math.Clamp(leg, 1, ApplicationProfileInstanceProgressLegCodes.MaxLegCount);
 
+        if (ApplicationMigrationSubmission.IsState(stateCode))
+            return ApplicationMigrationSubmission.TimelineKey;
+
         return "migration";
     }
 

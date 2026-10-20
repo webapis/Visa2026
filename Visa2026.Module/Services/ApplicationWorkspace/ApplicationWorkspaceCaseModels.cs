@@ -257,6 +257,16 @@ public sealed class ApplicationWorkspaceCaseProgressStep
     /// <summary>Ministry decision number stored on the Approved or Unapproved row for this leg.</summary>
     public string ResultNumber { get; init; } = string.Empty;
 
+    /// <summary>CO (AS) process number once migration processing has started.</summary>
+    public string ProcessNumber { get; init; } = string.Empty;
+
+    /// <summary>Date, document copy, and document number for the migration hand-in step.</summary>
+    public bool ShowMigrationSubmission { get; init; }
+
+    public string SubmissionDocumentNumber { get; init; } = string.Empty;
+
+    public string SubmissionDocumentFileName { get; init; } = string.Empty;
+
     public string MinistryLetterFileName { get; init; } = string.Empty;
 
     public bool ShowMinistryLetterUpload { get; init; }

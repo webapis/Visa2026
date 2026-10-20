@@ -108,6 +108,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressResultNumberSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileInstanceProgressSubmissionDocumentSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaIssuingApplicationProfileInstanceSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaIssuingInvitationItemSchemaUpdater(objectSpace, versionFromDB),

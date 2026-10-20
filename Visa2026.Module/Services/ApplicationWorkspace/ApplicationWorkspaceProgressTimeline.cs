@@ -18,7 +18,8 @@ internal static class ApplicationWorkspaceProgressTimeline
     public const string OfficeKey = "office";
     public const string OfficeLabel = "Office preparation";
     public const string MigrationKey = "migration";
-    public const string MigrationLabel = "Migration service";
+    public const string MigrationLabel = "At the migration service";
+    public const string AwaitingAsCoNumberLabel = "Awaiting AS (CO) number";
 
     public static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> Build(
         ApplicationProfileInstance application,
@@ -80,7 +81,10 @@ internal static class ApplicationWorkspaceProgressTimeline
         var latestOnMigration = IsCurrentMigration(slotCode, history);
         var legs = ResolveApprovalLegs(application, profile);
         var latestLeg = ResolveCurrentMinistrySlot(slotCode, legs.Count, latestOnMigration);
-        var awaitingMigration = !latestOnMigration
+        var submissionRecorded = ApplicationMigrationSubmission.IsState(slotCode);
+        var awaitingSubmission = !latestOnMigration
+            && !submissionRecorded
+            && legs.Count > 0
             && IsLastMinistryApproved(slotCode, legs.Count);
         var atOffice = slotAnchor == null;
         var cancelledOnCurrent = IsProcessCancelled(latestCode);
@@ -120,8 +124,41 @@ internal static class ApplicationWorkspaceProgressTimeline
                 latest));
         }
 
+        if (legs.Count > 0)
+        {
+            var submissionRow = LatestSubmissionRow(history);
+            var submissionState = ResolveSubmissionSlotState(
+                atOffice,
+                latestOnMigration,
+                awaitingSubmission,
+                submissionRecorded,
+                cancelledOnCurrent);
+            var submissionMissing = !ApplicationMigrationSubmission.IsComplete(submissionRow);
+            var submissionCurrent = submissionState == "current";
+            steps.Add(BuildFilledStep(
+                ApplicationMigrationSubmission.TimelineKey,
+                ApplicationMigrationSubmission.TimelineLabel,
+                submissionRow,
+                submissionState,
+                submissionCurrent ? currentSla : default,
+                submissionCurrent && canAdvance,
+                submissionCurrent ? advanceBlockedReason : string.Empty,
+                submissionCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+                letterRow: null,
+                history,
+                latest,
+                showMigrationSubmission: submissionCurrent || (submissionState == "done" && submissionMissing),
+                submissionDocumentNumber: submissionRow?.SubmissionDocumentNumber?.Trim() ?? string.Empty,
+                submissionDocumentFileName: submissionRow?.SubmissionDocumentFileName ?? string.Empty));
+        }
+
         var migrationRow = LatestMigrationRow(history);
-        var migrationState = ResolveMigrationSlotState(atOffice, latestOnMigration, slotCode, awaitingMigration);
+        var migrationState = ResolveMigrationSlotState(
+            atOffice,
+            latestOnMigration,
+            slotCode,
+            submissionRecorded,
+            cancelledOnCurrent);
         var migrationCurrent = migrationState == "current";
         if (cancelledOnCurrent && migrationCurrent)
             migrationRow = latest;
@@ -136,7 +173,9 @@ internal static class ApplicationWorkspaceProgressTimeline
             migrationCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             letterRow: null,
             history,
-            latest));
+            latest,
+            stateLabelOverride: ResolveMigrationStatusLabel(migrationRow, migrationState),
+            processNumber: ResolveMigrationProcessNumber(application, history, migrationRow, migrationState)));
 
         return steps;
     }
@@ -376,12 +415,18 @@ internal static class ApplicationWorkspaceProgressTimeline
         IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> advanceOptions,
         ApplicationProfileInstanceProgress? letterRow,
         IReadOnlyList<ApplicationProfileInstanceProgress> history,
-        ApplicationProfileInstanceProgress? latest)
+        ApplicationProfileInstanceProgress? latest,
+        bool showMigrationSubmission = false,
+        string submissionDocumentNumber = "",
+        string submissionDocumentFileName = "",
+        string? stateLabelOverride = null,
+        string? processNumber = null)
     {
         var isCurrent = slotState == "current";
-        var stateLabel = row == null
-            ? string.Empty
-            : FormatProfileStateLabel(row.State?.Code);
+        var stateLabel = stateLabelOverride
+            ?? (row == null
+                ? string.Empty
+                : FormatProfileStateLabel(row.State?.Code));
         var letter = letterRow
             ?? (row?.IsMinistryDecisionStep == true && !string.IsNullOrWhiteSpace(row.MinistryLetterFileName)
                 ? row
@@ -431,6 +476,10 @@ internal static class ApplicationWorkspaceProgressTimeline
             ResultOptions = resultOptions,
             OutcomeKind = ResolveOutcomeKind(slotState, row?.State?.Code),
             ResultNumber = ResolveResultNumber(key, history),
+            ProcessNumber = processNumber?.Trim() ?? string.Empty,
+            ShowMigrationSubmission = showMigrationSubmission,
+            SubmissionDocumentNumber = submissionDocumentNumber ?? string.Empty,
+            SubmissionDocumentFileName = submissionDocumentFileName ?? string.Empty,
         };
     }
 
@@ -513,15 +562,34 @@ internal static class ApplicationWorkspaceProgressTimeline
         return row == null ? "pending" : "done";
     }
 
+    private static string ResolveSubmissionSlotState(
+        bool atOffice,
+        bool latestOnMigration,
+        bool awaitingSubmission,
+        bool submissionRecorded,
+        bool cancelled)
+    {
+        if (atOffice)
+            return "pending";
+        if (cancelled && (awaitingSubmission || submissionRecorded))
+            return "current";
+        if (latestOnMigration || submissionRecorded)
+            return "done";
+        if (awaitingSubmission)
+            return "current";
+        return "pending";
+    }
+
     private static string ResolveMigrationSlotState(
         bool atOffice,
         bool latestOnMigration,
         string? latestCode,
-        bool awaitingMigration)
+        bool submissionRecorded,
+        bool cancelled)
     {
         if (atOffice)
             return "pending";
-        if (awaitingMigration)
+        if (submissionRecorded && !cancelled)
             return "current";
         if (!latestOnMigration)
             return "pending";
@@ -532,6 +600,49 @@ internal static class ApplicationWorkspaceProgressTimeline
             return "done";
 
         return "current";
+    }
+
+    private static string ResolveMigrationStatusLabel(
+        ApplicationProfileInstanceProgress? row,
+        string slotState)
+    {
+        var code = row?.State?.Code?.Trim();
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
+            return "Processing";
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
+            return "Process issued";
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
+            return "Process rejected";
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
+            return FormatProfileStateLabel(code);
+
+        return string.Equals(slotState, "current", StringComparison.OrdinalIgnoreCase)
+            ? AwaitingAsCoNumberLabel
+            : string.Empty;
+    }
+
+    private static string ResolveMigrationProcessNumber(
+        ApplicationProfileInstance application,
+        IReadOnlyList<ApplicationProfileInstanceProgress> history,
+        ApplicationProfileInstanceProgress? migrationRow,
+        string slotState)
+    {
+        var status = ResolveMigrationStatusLabel(migrationRow, slotState);
+        if (status is not ("Processing" or "Process issued" or "Process rejected"))
+            return string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(migrationRow?.ProcessNumber))
+            return migrationRow.ProcessNumber.Trim();
+
+        for (var i = history.Count - 1; i >= 0; i--)
+        {
+            var row = history[i];
+            if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(row.State?.Code)
+                && !string.IsNullOrWhiteSpace(row.ProcessNumber))
+                return row.ProcessNumber.Trim();
+        }
+
+        return application.ProcessNumber?.Trim() ?? string.Empty;
     }
 
     private static bool IsLastMinistryApproved(string? latestCode, int legCount)
@@ -584,6 +695,10 @@ internal static class ApplicationWorkspaceProgressTimeline
 
         return Math.Clamp(leg, 1, ApplicationProfileInstanceProgressLegCodes.MaxLegCount) == sequence;
     }
+
+    private static ApplicationProfileInstanceProgress? LatestSubmissionRow(
+        IReadOnlyList<ApplicationProfileInstanceProgress> history) =>
+        history.LastOrDefault(p => ApplicationMigrationSubmission.IsState(p.State?.Code));
 
     private static ApplicationProfileInstanceProgress? LatestMigrationRow(
         IReadOnlyList<ApplicationProfileInstanceProgress> history) =>

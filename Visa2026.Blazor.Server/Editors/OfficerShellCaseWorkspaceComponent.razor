@@ -338,6 +338,7 @@
                                                          SaveNotesRequested="@SaveProgressNotesRequested"
                                                          UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
                                                          AdvanceProgressRequested="@AdvanceProgressRequested"
+                                                         SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
                                                          RevertProgressRequested="@RevertProgressRequested"
                                                          ShowRevertToHere="@ShowRevertToHere"
                                                          PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
@@ -460,6 +461,7 @@
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
     [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
@@ -1666,13 +1668,15 @@
                 {
                     var step = view.ProgressSteps[i];
                     var currentIdx = view.ProgressSteps.ToList().FindIndex(s => s.State == "current");
-                    var badge = !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
-                        ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
-                        : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
-                            ? Msg("ApplicationProfileInstance.Workspace.Completed")
-                            : step.State == "current" ? Msg("ApplicationProfileInstance.Workspace.InProgress")
-                            : step.State == "pending" ? Msg("ApplicationProfileInstance.Workspace.Pending")
-                            : string.Empty;
+                    var badge = ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
+                        !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
+                            ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
+                            : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
+                                ? Msg("ApplicationProfileInstance.Workspace.Completed")
+                                : step.State == "current" ? Msg("ApplicationProfileInstance.Workspace.InProgress")
+                                : step.State == "pending" ? Msg("ApplicationProfileInstance.Workspace.Pending")
+                                : string.Empty,
+                        step.ProcessNumber);
                     var badgeCls = step.OutcomeKind switch
                     {
                         "issued" => "issued",
@@ -2723,6 +2727,7 @@
             LetterFileName = _progressTab?.PendingLetterFileName,
             LetterContent = _progressTab?.PendingLetterContent,
             ProcessNumber = _progressTab?.ProcessNumberOnAdvance,
+            SubmissionDocumentNumber = _progressTab?.SubmissionDocumentNumberOnAdvance,
         });
     }
 

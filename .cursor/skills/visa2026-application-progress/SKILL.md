@@ -74,6 +74,7 @@ disable-model-invocation: false
 | Symptom | First step | Likely fix area |
 |---------|------------|-----------------|
 | `Invalid column name 'MinistryLetterFileID'` | [learnings.md](./learnings.md); confirm `ApplicationProgressMinistryLetterFileSchemaUpdater` in `Module.cs` | Pre-schema SQL updater |
+| Postgres `42703` column does not exist on progress | Host-start `ApplyIfMissing` in `Startup` (both sites), not ModuleUpdater alone | `*SchemaSql.ApplyIfMissing` |
 | Illegal next state on save | Trace `ApplicationProgressTransitionHelper.TryValidateProgressStep` | Leg count vs transition graph (leg1 STARTED only) |
 | Contract required / legs required message | `ApplicationProgressProfileResolver.TryValidate*` | `ProjectContract` + `MinistryLegs` |
 | Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |

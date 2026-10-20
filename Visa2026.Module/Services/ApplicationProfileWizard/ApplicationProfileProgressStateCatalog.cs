@@ -23,6 +23,7 @@ public static class ApplicationProfileProgressStateCatalog
         new(ApplicationProfileProgressStateTrack.Ministry, "MINISTRY_POSTPONED", "Postponed", true, false),
 
         // Migration — prototype step 3
+        new(ApplicationProfileProgressStateTrack.Migration, ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration, "Submitted", true, false),
         new(ApplicationProfileProgressStateTrack.Migration, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, "Submitted", true, true),
         new(ApplicationProfileProgressStateTrack.Migration, "MIGRATION_ON_PROCESS", "On process", true, true),
         new(ApplicationProfileProgressStateTrack.Migration, "MIGRATION_PROCESS_COMPLETE", "Process complete", true, false),

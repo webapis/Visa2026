@@ -104,6 +104,12 @@
       "tk-TM": "Ministrlikden gelmedi",
       "ru-RU": "Не получено из министерства"
     },
+    "SUBMITTED_TO_MIGRATION": {
+      "en-US": "Submitted to migration service",
+      "tr-TR": "Göç dairesine teslim edildi",
+      "tk-TM": "Migrasiýa gullugyna tabşyryldy",
+      "ru-RU": "Сдано в миграционную службу"
+    },
     "PROCESS_STARTED": {
       "en-US": "Processing",
       "tr-TR": "İşleniyor",

@@ -16,6 +16,9 @@ namespace Visa2026.Module.BusinessObjects
         public const string Review2Approved = "2_REVIEW_APPROVED";
         public const string Review2Rejected = "2_REVIEW_REJECTED";
 
+        /// <summary>Documents handed to the migration service; the CO (AS) number is not in yet.</summary>
+        public const string SubmittedToMigration = "SUBMITTED_MIGRATION";
+
         public const string ProcessStarted = "PROCESS_STARTED";
         public const string ProcessIssued = "PROCESS_ISSUED";
         public const string ProcessRejected = "PROCESS_REJECTED";

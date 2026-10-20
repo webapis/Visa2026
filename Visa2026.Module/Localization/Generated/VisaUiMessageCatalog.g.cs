@@ -4450,6 +4450,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Migrasiýa gullugy",
             ["ru-RU"] = "Миграционная служба",
         },
+        ["ApplicationProfileInstance.Workspace.AtMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "At the migration service",
+            ["tr-TR"] = "Göç dairesinde",
+            ["tk-TM"] = "Migrasiýa gullugynda",
+            ["ru-RU"] = "В миграционной службе",
+        },
+        ["ApplicationProfileInstance.Workspace.AwaitingAsCoNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Awaiting AS (CO) number",
+            ["tr-TR"] = "AS (CO) numarası bekleniyor",
+            ["tk-TM"] = "AS (CO) belgisine garaşylýar",
+            ["ru-RU"] = "Ожидается номер AS (CO)",
+        },
+        ["ApplicationProfileInstance.Workspace.Processing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Processing",
+            ["tr-TR"] = "İşleniyor",
+            ["tk-TM"] = "Işlenilýär",
+            ["ru-RU"] = "В обработке",
+        },
+        ["ApplicationProfileInstance.Workspace.ProcessIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued",
+            ["tr-TR"] = "Resmileştirildi",
+            ["tk-TM"] = "Resmileşdirildi",
+            ["ru-RU"] = "Оформлено",
+        },
+        ["ApplicationProfileInstance.Workspace.ProcessRejected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejected",
+            ["tr-TR"] = "Reddedildi",
+            ["tk-TM"] = "Garşylyk berildi",
+            ["ru-RU"] = "Отказ",
+        },
         ["ApplicationProfileInstance.Workspace.MigrationSlaDays"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Migration SLA {0} days",
@@ -4834,6 +4869,62 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Onay veya ret yazısındaki numara",
             ["tk-TM"] = "Ylalaşyk ýa-da ret hatyndaky belgi",
             ["ru-RU"] = "Номер в письме согласования или отказа",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmittedToMigration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Submitted to migration service",
+            ["tr-TR"] = "Göç dairesine teslim edildi",
+            ["tk-TM"] = "Migrasiýa gullugyna tabşyryldy",
+            ["ru-RU"] = "Сдано в миграционную службу",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmissionDocumentNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document number",
+            ["tr-TR"] = "Belge numarası",
+            ["tk-TM"] = "Resminama belgisi",
+            ["ru-RU"] = "Номер документа",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document number is required.",
+            ["tr-TR"] = "Belge numarası zorunlu.",
+            ["tk-TM"] = "Resminama belgisi hökmany.",
+            ["ru-RU"] = "Нужен номер документа.",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmissionDocumentNumberTooLong"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document number cannot exceed 100 characters.",
+            ["tr-TR"] = "Belge numarası 100 karakteri aşamaz.",
+            ["tk-TM"] = "Resminama belgisi 100 belgiden köp bolup bilmez.",
+            ["ru-RU"] = "Номер документа не может быть длиннее 100 символов.",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmissionDocumentCopy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document copy",
+            ["tr-TR"] = "Belge kopyası",
+            ["tk-TM"] = "Resminamanyň nusgasy",
+            ["ru-RU"] = "Копия документа",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document copy is required.",
+            ["tr-TR"] = "Belge kopyası zorunlu.",
+            ["tk-TM"] = "Resminamanyň nusgasy hökmany.",
+            ["ru-RU"] = "Нужна копия документа.",
+        },
+        ["ApplicationProfileInstance.Workspace.SubmissionRequiredBeforeMigration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Enter the submission date, document copy, and document number before advancing to Migration service.",
+            ["tr-TR"] = "Göç dairesine ilerlemeden önce teslim tarihi, belge kopyası ve belge numarası girilmelidir.",
+            ["tk-TM"] = "Migrasiýa gullugyna geçmezden ozal tabşyrylan senesi, resminamanyň nusgasy we resminama belgisi girizilmeli.",
+            ["ru-RU"] = "Перед переходом в миграционную службу укажите дату сдачи, копию документа и номер документа.",
+        },
+        ["ApplicationProfileInstance.Workspace.SaveSubmission"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save",
+            ["tr-TR"] = "Kaydet",
+            ["tk-TM"] = "Ýatda sakla",
+            ["ru-RU"] = "Сохранить",
         },
         ["ApplicationProfileInstance.Workspace.ResultNumberRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

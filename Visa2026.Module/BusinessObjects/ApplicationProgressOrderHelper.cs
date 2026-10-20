@@ -33,6 +33,8 @@ public static class ApplicationProfileInstanceProgressOrderHelper
                 return 11 + leg * 2;
         }
 
+        if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration, StringComparison.OrdinalIgnoreCase))
+            return 800;
         if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
             return 999;
         if (string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))

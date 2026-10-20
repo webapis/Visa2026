@@ -59,6 +59,7 @@ namespace Visa2026.Module.BusinessObjects
             // leg 1: started+approved+rejected (3); legs 2+: approved+rejected (2 each)
             var list = new List<string>(SharedStateCodes.Length + 3 + Math.Max(0, legCount - 1) * 2);
             list.AddRange(SharedStateCodes);
+            list.Add(ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
             list.AddRange(ApplicationProfileInstanceProgressLegCodes.GetReviewStateCodesUpToLegCount(legCount));
             return list;
         }
@@ -147,6 +148,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private static IReadOnlyList<string> GetAllStateCodes() =>
             SharedStateCodes
+                .Append(ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration)
                 .Concat(ApplicationProfileInstanceProgressLegCodes.GetReviewStateCodesUpToLegCount(ApplicationProfileInstanceProgressLegCodes.MaxLegCount))
                 .ToArray();
 

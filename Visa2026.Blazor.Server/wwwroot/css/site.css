@@ -4085,27 +4085,36 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     border-color: var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #98a2b3)) !important;
 }
 
-/* Instance ListView — compact workspace progress stepper. */
+/* Instance ListView — compact workspace progress stepper.
+   The grid keeps TextWrapEnabled off. This column still wraps each step's
+   title and status inside the cell so a long state (Işlenilýär /CO…) stays visible. */
+.dxbl-grid.dxbl-grid-nowrap td.lv-plain-cell:has(.lv-progress-stepper),
+.dxbl-grid.dxbl-grid-nowrap td.lv-plain-cell:has(.lv-progress-stepper) .dxbl-grid-cell-content {
+    white-space: normal !important;
+    text-overflow: unset;
+    vertical-align: top;
+    height: auto;
+}
+
 .dxbl-grid td .lv-progress-stepper,
 .lv-progress-stepper {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start;
-    width: max-content;
-    max-width: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     line-height: 1.2;
+    white-space: normal !important;
 }
 
-.lv-progress-step {
+.lv-progress-step,
+.lv-progress-step:last-child {
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    min-width: 88px;
-}
-
-.lv-progress-step:last-child {
-    flex: 0 0 92px;
-    min-width: 80px;
+    min-width: 0;
+    max-width: none;
 }
 
 .lv-progress-step__track {
@@ -4172,6 +4181,7 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .lv-progress-step__meta {
     padding: 6px 8px 0 0;
+    min-width: 0;
 }
 
 .lv-progress-step__label,
@@ -4183,6 +4193,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     font-weight: 600;
     color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
     line-height: 1.25;
+    white-space: normal !important;
+    overflow-wrap: break-word;
 }
 
 .lv-progress-step__date,
@@ -4195,6 +4207,12 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     font-size: 10px;
     font-weight: 500;
     color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+
+.lv-progress-step__status-no {
+    display: block;
 }
 
 /* Progress + result columns follow the row tint and the Fluent theme. */

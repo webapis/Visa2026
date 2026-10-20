@@ -495,6 +495,12 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseMigrationSubmissionRequest>>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested
     {
         get => GetPropertyValue<EventCallback<OfficerShellCaseProgressRevertRequest>>();

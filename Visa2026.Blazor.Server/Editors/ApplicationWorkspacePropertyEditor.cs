@@ -75,6 +75,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         SaveProgressNotesRequested = EventCallback.Factory.Create<string>(this, SaveProgressNotesAsync),
         UploadMinistryLetterRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileUpload>(this, UploadMinistryLetterAsync),
         AdvanceProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressAdvanceRequest>(this, AdvanceCaseProgressAsync),
+        SaveMigrationSubmissionRequested = EventCallback.Factory.Create<OfficerShellCaseMigrationSubmissionRequest>(this, SaveMigrationSubmissionAsync),
         RevertProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressRevertRequest>(this, RevertCaseProgressAsync),
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
@@ -683,7 +684,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 request.LetterFileName,
                 request.LetterContent,
                 request.ProcessNumber,
-                request.ResultNumber);
+                request.ResultNumber,
+                request.SubmissionDocumentNumber);
 
             if (!result.Success)
             {
@@ -705,6 +707,47 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             model.ProgressStatusMessage = ex.Message;
             model.ProgressStatusIsError = true;
             await LoadAsync();
+        }
+    }
+
+    private async Task SaveMigrationSubmissionAsync(OfficerShellCaseMigrationSubmissionRequest request)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+
+            var result = service.SaveMigrationSubmission(
+                objectSpace,
+                applicationId,
+                request.Date,
+                request.DocumentNumber,
+                request.FileName,
+                request.FileContent);
+
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save the migration submission.";
+                model.ProgressStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ProgressStatusMessage = "Submission saved.";
+            model.ProgressStatusIsError = false;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
         }
     }
 

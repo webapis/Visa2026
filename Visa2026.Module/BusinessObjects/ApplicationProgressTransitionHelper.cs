@@ -391,10 +391,12 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         }
 
         var lastApproved = approvedSteps[^1];
-        edges.Add(new ProgressTransition(lastApproved, processStarted));
+        var submitted = Step(ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+        edges.Add(new ProgressTransition(lastApproved, submitted));
+        edges.Add(new ProgressTransition(submitted, processStarted));
 
         AddProcessOutcomes(edges, processStarted);
-        var cancellationFrom = new List<ProgressStep> { started1, processStarted };
+        var cancellationFrom = new List<ProgressStep> { started1, submitted, processStarted };
         cancellationFrom.AddRange(approvedSteps);
         AddCancellationFromActiveSteps(edges, cancellationFrom.ToArray());
 

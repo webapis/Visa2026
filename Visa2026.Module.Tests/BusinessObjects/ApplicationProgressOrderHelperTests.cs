@@ -16,6 +16,7 @@ public class ApplicationProfileInstanceProgressOrderHelperTests
     [InlineData("2_REVIEW_APPROVED", 14)]
     [InlineData("3_REVIEW_STARTED", 15)]
     [InlineData("3_REVIEW_APPROVED", 16)]
+    [InlineData("SUBMITTED_MIGRATION", 800)]
     [InlineData("PROCESS_STARTED", 999)]
     [InlineData("PROCESS_ISSUED", 1000)]
     public void GetWorkflowSortKey_MatchesCanonicalTimeline(string stateCode, int expected)

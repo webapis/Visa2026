@@ -58,15 +58,16 @@ public static class ApplicationWorkspaceListProgressSteps
         foreach (var step in steps)
         {
             var showStatus = ShouldShowStatus(step);
+            var status = showStatus
+                ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
+                : string.Empty;
             result.Add(new Step(
                 step.Key,
                 ApplicationProfileLocalization.ProgressStepLabel(step.Label),
                 step.State,
                 step.OutcomeKind,
                 step.Date ?? string.Empty,
-                showStatus
-                    ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
-                    : string.Empty));
+                ApplicationProfileLocalization.ProgressStatusWithProcessNumber(status, step.ProcessNumber)));
         }
 
         return result;
@@ -140,7 +141,9 @@ public static class ApplicationWorkspaceListProgressSteps
     public static string Badge(ApplicationWorkspaceCaseProgressStep step)
     {
         if (!string.IsNullOrWhiteSpace(step.CurrentStateLabel))
-            return ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel);
+            return ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
+                ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel),
+                step.ProcessNumber);
 
         var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
         if (string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase)

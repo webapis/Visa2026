@@ -23,7 +23,16 @@ public interface IOfficerShellCaseProgressService
         string? letterFileName = null,
         byte[]? letterContent = null,
         string? processNumber = null,
-        string? resultNumber = null);
+        string? resultNumber = null,
+        string? submissionDocumentNumber = null);
+
+    OfficerShellCaseProgressResult SaveMigrationSubmission(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        DateTime? submittedOn,
+        string? documentNumber,
+        string? fileName,
+        byte[]? fileContent);
 
     OfficerShellCaseProgressResult Revert(
         IObjectSpace objectSpace,

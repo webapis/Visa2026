@@ -47,7 +47,7 @@
                     "issued" or "ok" => "✓",
                     _ => "○",
                 };
-            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone">
+            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone @(IsMigrationStep(step) ? "ct-prog-v--migration" : null)">
                 <div class="ct-prog-v__rail">
                     <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
                     <span class="ct-prog-v__dot">@icon</span>
@@ -87,6 +87,40 @@
                                                                OwnerViewId="@PreviewSlotOwnerViewId" />
                         </p>
                     }
+                    else if (step.State != "current" && step.ShowMigrationSubmission)
+                    {
+                        <div class="ct-prog-v__letter-missing">
+                            <label class="ct-label" for="submission-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
+                            <OfficerDateEdit @ref="_backfillDateEdit"
+                                             InputId="@($"submission-date-{ApplicationProfileInstanceId}")"
+                                             @bind-Date="_backfillDate"
+                                             Enabled="@(!_busy)" />
+                            <label class="ct-label" for="submission-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumber")</label>
+                            <input id="submission-number-@ApplicationProfileInstanceId"
+                                   type="text"
+                                   class="os-input"
+                                   maxlength="@ApplicationMigrationSubmission.MaxDocumentNumberLength"
+                                   @bind="_backfillNumber"
+                                   @bind:event="oninput"
+                                   disabled="@_busy" />
+                            <label class="ct-label" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopy")</label>
+                            @if (!string.IsNullOrWhiteSpace(_backfillFileName))
+                            {
+                                <p class="ct-muted" style="margin:0 0 8px">@_backfillFileName</p>
+                            }
+                            <label class="ct-upload ct-upload--action ct-upload--missing">
+                                <InputFile OnChange="OnSubmissionCopySelected" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
+                            </label>
+                            <button type="button"
+                                    class="os-btn os-btn--primary"
+                                    style="margin-top:10px"
+                                    disabled="@_busy"
+                                    @onclick="SaveSubmissionAsync">
+                                @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SaveSubmission")
+                            </button>
+                        </div>
+                    }
                     else if (step.State != "current" && step.MissingMinistryLetter)
                     {
                         <div class="ct-prog-v__letter-missing">
@@ -102,7 +136,7 @@
                     {
                         <div class="ct-prog-detail">
                             <dl class="ct-meta">
-                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt><dd><span class="os-status os-status--process">@StepText(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel)</span></dd></div>
+                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt><dd><span class="os-status os-status--process">@ApplicationProfileLocalization.ProgressStatusWithProcessNumber(StepText(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel), step.ProcessNumber)</span></dd></div>
                                 <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
                                 <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
                             </dl>
@@ -134,6 +168,28 @@
                                                 <option value="@option.StateCode">@StepText(option.Label)</option>
                                             }
                                         </select>
+                                    }
+                                    @if (step.ShowMigrationSubmission)
+                                    {
+                                        <label class="ct-label @(IsSubmissionNumberInvalid ? "ct-label--error" : null)" for="advance-submission-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumber")</label>
+                                        <input id="advance-submission-number-@ApplicationProfileInstanceId"
+                                               @ref="_advanceSubmissionNumberInput"
+                                               type="text"
+                                               class="os-input @(IsSubmissionNumberInvalid ? "is-invalid" : null)"
+                                               aria-invalid="@IsSubmissionNumberInvalid"
+                                               maxlength="@ApplicationMigrationSubmission.MaxDocumentNumberLength"
+                                               @bind="_submissionDocumentNumber"
+                                               @bind:event="oninput"
+                                               disabled="@_busy" />
+                                        <label class="ct-label @(IsSubmissionCopyInvalid ? "ct-label--error" : null)" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopy")</label>
+                                        @if (!string.IsNullOrWhiteSpace(_pendingLetterName))
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.LetterStoredOnAdvance", _pendingLetterName)</p>
+                                        }
+                                        <label class="ct-upload ct-upload--action @(IsSubmissionCopyInvalid ? "ct-upload--missing" : null)">
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
+                                        </label>
                                     }
                                     @if (ShowResultNumberOnAdvance)
                                     {
@@ -281,6 +337,7 @@
     [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
     [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
@@ -301,6 +358,13 @@
     private OfficerDateEdit? _advanceDateEdit;
     private ElementReference _advanceResultInput;
     private ElementReference _advanceResultNumberInput;
+    private ElementReference _advanceSubmissionNumberInput;
+    private string _submissionDocumentNumber = string.Empty;
+    private OfficerDateEdit? _backfillDateEdit;
+    private DateTime? _backfillDate;
+    private string _backfillNumber = string.Empty;
+    private string? _backfillFileName;
+    private byte[]? _backfillFileContent;
     private ElementReference _advanceProcessNumberInput;
 
     internal DateTime AdvanceDate =>
@@ -314,6 +378,9 @@
     internal string SelectedAdvanceStateCode => _selectedAdvanceStateCode;
 
     internal string ProcessNumberOnAdvance => _processNumber;
+
+    internal string? SubmissionDocumentNumberOnAdvance =>
+        ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode) ? _submissionDocumentNumber : null;
 
     private bool ShowProcessNumberOnAdvance =>
         view.Chrome.ShowProcessNumber
@@ -373,6 +440,16 @@
         }
     }
 
+    private bool IsSubmissionNumberInvalid =>
+        IsAdvanceFieldErrorMode
+        && ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode)
+        && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_submissionDocumentNumber, out _, out _);
+
+    private bool IsSubmissionCopyInvalid =>
+        IsAdvanceFieldErrorMode
+        && ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode)
+        && (_pendingLetterContent == null || _pendingLetterContent.Length == 0);
+
     internal string? PendingLetterFileName =>
         string.IsNullOrWhiteSpace(_pendingLetterName) ? null : _pendingLetterName;
 
@@ -425,9 +502,21 @@
         }
     }
 
-    private string LocalizedCurrentStepHeading => StepText(CurrentStepHeading);
+    private string LocalizedCurrentStepHeading
+    {
+        get
+        {
+            var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            return ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
+                StepText(CurrentStepHeading),
+                current?.ProcessNumber);
+        }
+    }
 
     private static string StepText(string? label) => ApplicationProfileLocalization.ProgressStepLabel(label);
+
+    private static bool IsMigrationStep(ApplicationWorkspaceCaseProgressStep step) =>
+        string.Equals(step.Key, "migration", StringComparison.OrdinalIgnoreCase);
 
     private static string FileUploadLabel(ApplicationWorkspaceCaseProgressStep step) =>
         string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
@@ -436,15 +525,19 @@
 
     private static string StepBadge(ApplicationWorkspaceCaseProgressStep step, bool isCurrent)
     {
+        string text;
         if (!string.IsNullOrWhiteSpace(step.CurrentStateLabel))
-            return ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel);
-        if (step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase))
-            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Completed");
-        if (isCurrent)
-            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProgress");
-        if (step.State == "pending")
-            return VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Pending");
-        return string.Empty;
+            text = ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel);
+        else if (step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase))
+            text = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Completed");
+        else if (isCurrent)
+            text = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProgress");
+        else if (step.State == "pending")
+            text = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Pending");
+        else
+            text = string.Empty;
+
+        return ApplicationProfileLocalization.ProgressStatusWithProcessNumber(text, step.ProcessNumber);
     }
 
     private string CurrentStepHeading
@@ -536,6 +629,7 @@
                 LetterContent = _pendingLetterContent,
                 ProcessNumber = _processNumber,
                 ResultNumber = ApplicationProgressResultNumberHelper.AppliesTo(code) ? _resultNumber : null,
+                SubmissionDocumentNumber = ApplicationMigrationSubmission.IsState(code) ? _submissionDocumentNumber : null,
             });
         }
         finally
@@ -568,6 +662,20 @@
             return false;
         }
 
+        if (ApplicationMigrationSubmission.IsState(code)
+            && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_submissionDocumentNumber, out _, out var submissionNumberError))
+        {
+            error = submissionNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired");
+            return false;
+        }
+
+        if (ApplicationMigrationSubmission.IsState(code)
+            && (_pendingLetterContent == null || _pendingLetterContent.Length == 0))
+        {
+            error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired");
+            return false;
+        }
+
         var requireProcessNumber = view.Chrome.ShowProcessNumber
             && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
         if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
@@ -590,6 +698,8 @@
                 await _advanceResultInput.FocusAsync();
             else if (IsResultNumberInvalid)
                 await _advanceResultNumberInput.FocusAsync();
+            else if (IsSubmissionNumberInvalid)
+                await _advanceSubmissionNumberInput.FocusAsync();
             else if (IsProcessNumberInvalid)
                 await _advanceProcessNumberInput.FocusAsync();
         }
@@ -605,6 +715,60 @@
 
         _focusInvalidAdvanceField = false;
         await FocusFirstInvalidAdvanceFieldAsync();
+    }
+
+    private async Task OnSubmissionCopySelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null)
+            return;
+
+        await using var stream = file.OpenReadStream(MaxUploadMb * 1024L * 1024L);
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+        _backfillFileName = file.Name;
+        _backfillFileContent = buffer.ToArray();
+    }
+
+    private async Task SaveSubmissionAsync()
+    {
+        if (_busy)
+            return;
+
+        if (IsMissingAdvanceDate(_backfillDate))
+        {
+            _localAdvanceError = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired");
+            return;
+        }
+
+        if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_backfillNumber, out _, out var numberError))
+        {
+            _localAdvanceError = numberError;
+            return;
+        }
+
+        if (_backfillFileContent == null || _backfillFileContent.Length == 0)
+        {
+            _localAdvanceError = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired");
+            return;
+        }
+
+        _busy = true;
+        _localAdvanceError = null;
+        try
+        {
+            await SaveMigrationSubmissionRequested.InvokeAsync(new OfficerShellCaseMigrationSubmissionRequest
+            {
+                Date = _backfillDate!.Value.Date,
+                DocumentNumber = _backfillNumber,
+                FileName = _backfillFileName,
+                FileContent = _backfillFileContent,
+            });
+        }
+        finally
+        {
+            _busy = false;
+        }
     }
 
     private async Task RevertAsync(ApplicationWorkspaceCaseProgressStep step)

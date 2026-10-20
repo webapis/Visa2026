@@ -6,6 +6,30 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-20 — Migration step title while waiting for the process number
+
+- **Need**: After documents are submitted, the current migration step was **Migrasiýa gullugy** / **Dowam edýär**. Officers need **Migrasiýa gullugynda** with **AS (CO) belgisine garaşylýar** under it until the process number is saved, then the outcome (**Işlenilýär**, **Resmileşdirildi**, **Garşylyk berildi**).
+- **Fix**: Timeline label `At the migration service`. Status `Awaiting AS (CO) number` while that slot is current and no process row exists. After `PROCESS_STARTED` / issued / rejected, the status is the outcome. Overview, Progress tab, and the current-step title use those labels. The date stays under them.
+- **Test**: `Build_SubmissionRecorded_MigrationWaitsForProcessNumber` and the process-started label assertion. Timeline tests: 19 passed.
+- **Prevent**: Do not reuse the workspace word **Issued** / **Rejected** for this line. Those Turkmen strings differ from the lookup titles **Resmileşdirildi** and **Garşylyk berildi**.
+- **Cross-skill**: —
+
+### 2026-10-20 — Advance to migration submission shows InvalidForRoute
+
+- **Symptom**: Progress advance with document number and copy filled still shows `ApplicationProfileInstanceProgress.InvalidForRoute`.
+- **Root cause**: `ApplicationState.Code` is `varchar(20)`. `SUBMITTED_TO_MIGRATION` is 22 characters, so the lookup row was never inserted and Advance could not resolve the state.
+- **Fix**: State code is `SUBMITTED_MIGRATION` (19). Localization key stays `SUBMITTED_TO_MIGRATION`. Host-start `ApplyIfMissing` inserts the row. Local `visa2026` already has it. The error text uses `ApplicationProgress.InvalidForRoute`.
+- **Prevent**: New `ApplicationState.Code` values must be at most 20 characters. Do not prefix this step with `MIGRATION_` — that prefix is already treated as the migration-service slot.
+- **Cross-skill**: —
+
+### 2026-10-20 — SubmissionDocumentFileID missing (42703)
+
+- **Symptom**: Application list `42703: column a0.SubmissionDocumentFileID does not exist` after the migration-submission step. `SubmissionDocumentNumber` was missing too.
+- **Root cause**: ModuleUpdater did not run because ModuleInfo was already current. The columns were only in the updater, not in host-start `ApplyIfMissing`.
+- **Fix**: `ApplicationProfileInstanceProgressSubmissionDocumentSchemaSql.ApplyIfMissing` from both `Startup` heal sites. Applied both columns on local `visa2026`.
+- **Prevent**: New Postgres columns on an existing table need host-start `ApplyIfMissing`. ModuleUpdater alone does not run when the database is already current.
+- **Cross-skill**: visa2026-lifecycle-docker
+
 ### 2026-10-09 — Progress Date and Application date use dd.MM.yyyy
 
 - **Need**: Case workspace Progress **Date** and Overview **Application date** used the browser date box, so Windows showed month/day/year (`10/09/2026`). Officers type day.month.year.

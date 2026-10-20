@@ -172,7 +172,21 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     {
                         builder.OpenElement(seq++, "span");
                         builder.AddAttribute(seq++, "class", "lv-progress-step__status");
-                        builder.AddContent(seq++, step.StatusLabel);
+                        var statusText = step.StatusLabel;
+                        var split = statusText.IndexOf(" /", StringComparison.Ordinal);
+                        if (split > 0)
+                        {
+                            builder.AddContent(seq++, statusText[..split]);
+                            builder.OpenElement(seq++, "span");
+                            builder.AddAttribute(seq++, "class", "lv-progress-step__status-no");
+                            builder.AddContent(seq++, statusText[(split + 1)..]);
+                            builder.CloseElement();
+                        }
+                        else
+                        {
+                            builder.AddContent(seq++, statusText);
+                        }
+
                         builder.CloseElement();
                     }
 

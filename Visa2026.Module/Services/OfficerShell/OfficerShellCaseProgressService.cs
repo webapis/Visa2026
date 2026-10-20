@@ -65,7 +65,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         string? letterFileName = null,
         byte[]? letterContent = null,
         string? processNumber = null,
-        string? resultNumber = null)
+        string? resultNumber = null,
+        string? submissionDocumentNumber = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -93,12 +94,12 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             : stateCode.Trim();
 
         if (!allowedCodes.Contains(chosenCode, StringComparer.OrdinalIgnoreCase))
-            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
 
         var state = objectSpace.GetObjectsQuery<ApplicationState>()
             .FirstOrDefault(s => s.Code == chosenCode);
         if (state == null)
-            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
 
         var date = stepDate is { } chosen && chosen != default
             ? chosen.Date
@@ -112,6 +113,33 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         {
             return OfficerShellCaseProgressResult.Failed(
                 resultNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberRequired"));
+        }
+
+        var viaMinistries = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application)
+            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            && ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application) > 0;
+        if (viaMinistries
+            && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
+            && !ApplicationMigrationSubmission.IsComplete(latest))
+        {
+            return OfficerShellCaseProgressResult.Failed(
+                VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionRequiredBeforeMigration"));
+        }
+
+        string? normalizedSubmissionNumber = null;
+        if (ApplicationMigrationSubmission.IsState(chosenCode)
+            && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(
+                submissionDocumentNumber, out normalizedSubmissionNumber, out var submissionNumberError))
+        {
+            return OfficerShellCaseProgressResult.Failed(
+                submissionNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
+        }
+
+        if (ApplicationMigrationSubmission.IsState(chosenCode)
+            && (letterContent == null || letterContent.Length == 0))
+        {
+            return OfficerShellCaseProgressResult.Failed(
+                VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired"));
         }
 
         var requireProcessNumber = ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
@@ -151,13 +179,22 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (normalizedResultNumber != null)
             progress.ResultNumber = normalizedResultNumber;
 
+        if (normalizedSubmissionNumber != null)
+            progress.SubmissionDocumentNumber = normalizedSubmissionNumber;
+
         if (!ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
-            return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProfileInstanceProgress.InvalidForRoute"));
+            return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
 
         if (latest == null)
             ApplicationProfileInstanceOfficeNotesHelper.CopyOntoNewRow(application, progress, notesOnLatestStep);
 
-        if (letterContent is { Length: > 0 }
+        if (letterContent is { Length: > 0 } && ApplicationMigrationSubmission.IsState(chosenCode))
+        {
+            var copyResult = AttachSubmissionDocument(objectSpace, progress, letterFileName ?? "submission.pdf", letterContent);
+            if (!copyResult.Success)
+                return copyResult;
+        }
+        else if (letterContent is { Length: > 0 }
             && (progress.IsMinistryDecisionStep || latest == null))
         {
             var letterResult = AttachMinistryLetter(objectSpace, progress, letterFileName ?? "progress-file.pdf", letterContent);
@@ -198,6 +235,89 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         }
 
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    public OfficerShellCaseProgressResult SaveMigrationSubmission(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        DateTime? submittedOn,
+        string? documentNumber,
+        string? fileName,
+        byte[]? fileContent)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+
+        var application = LoadApplicationForAdvance(objectSpace, applicationId);
+        if (application == null)
+            return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
+
+        var date = submittedOn is { } chosen && chosen != default ? chosen.Date : default;
+        if (date == default)
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
+
+        if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(documentNumber, out var number, out var numberError))
+            return OfficerShellCaseProgressResult.Failed(numberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
+
+        var row = application.ProgressHistory?
+            .LastOrDefault(p => ApplicationMigrationSubmission.IsState(p.State?.Code));
+        var created = false;
+        if (row == null)
+        {
+            var state = objectSpace.GetObjectsQuery<ApplicationState>()
+                .FirstOrDefault(s => s.Code == ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+            if (state == null)
+                return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+
+            row = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
+            row.ApplicationProfileInstance = application;
+            row.State = state;
+            row.Order = 1;
+            application.ProgressHistory ??= new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceProgress>();
+            application.ProgressHistory.Add(row);
+            created = true;
+        }
+
+        row.Date = date;
+        row.SubmissionDocumentNumber = number;
+        if (fileContent is { Length: > 0 })
+        {
+            var copyResult = AttachSubmissionDocument(objectSpace, row, fileName ?? "submission.pdf", fileContent);
+            if (!copyResult.Success)
+                return copyResult;
+        }
+        else if (!ApplicationMigrationSubmission.HasDocumentCopy(row))
+        {
+            return OfficerShellCaseProgressResult.Failed(
+                VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired"));
+        }
+
+        if (created)
+            ApplicationProfileInstanceProgressOrderHelper.AssignTimelineOrders(application.ProgressHistory.ToList());
+
+        ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    private static OfficerShellCaseProgressResult AttachSubmissionDocument(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstanceProgress row,
+        string fileName,
+        byte[] content)
+    {
+        var maxBytes = row.MaxDocumentSizeInMB * 1024L * 1024L;
+        if (content.LongLength > maxBytes)
+            return OfficerShellCaseProgressResult.Failed($"The document copy exceeds the maximum allowed size of {row.MaxDocumentSizeInMB} MB.");
+
+        var file = row.SubmissionDocumentFile ?? objectSpace.CreateObject<FileData>();
+        file.FileName = string.IsNullOrWhiteSpace(fileName) ? "submission.pdf" : fileName.Trim();
+        file.Content = content;
+        file.Size = content.Length;
+        if (!DocumentFileUploadConstraints.TryValidate(file, out var validationError))
+            return OfficerShellCaseProgressResult.Failed(validationError ?? "The document copy is not valid.");
+
+        row.SubmissionDocumentFile = file;
         return OfficerShellCaseProgressResult.Succeeded();
     }
 
@@ -255,6 +375,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                     .ThenInclude(p => p.State)
                 .Include(a => a.ProgressHistory)
                     .ThenInclude(p => p.MinistryLetterFile)
+                .Include(a => a.ProgressHistory)
+                    .ThenInclude(p => p.SubmissionDocumentFile)
                 .Include(a => a.ApplicationType)
                 .FirstOrDefault(a => a.ID == applicationId);
         }

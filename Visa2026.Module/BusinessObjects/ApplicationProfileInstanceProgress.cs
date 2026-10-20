@@ -89,6 +89,36 @@ namespace Visa2026.Module.BusinessObjects
             Context = "DetailView")]
         public virtual string? ResultNumber { get; set; }
 
+        /// <summary>
+        /// Number on the papers handed to the migration service
+        /// (<c>SUBMITTED_MIGRATION</c>). Not the later CO (AS) process number.
+        /// </summary>
+        [XafDisplayName("Submission document number")]
+        [MaxLength(ApplicationMigrationSubmission.MaxDocumentNumberLength)]
+        [Appearance(
+            "ApplicationProfileInstanceProgress_HideSubmissionUnlessSubmitted",
+            AppearanceItemType = "ViewItem",
+            TargetItems = nameof(SubmissionDocumentNumber) + ";" + nameof(SubmissionDocumentFile),
+            Criteria = "Not IsMigrationSubmissionStep",
+            Visibility = ViewItemVisibility.Hide,
+            Context = "DetailView")]
+        public virtual string? SubmissionDocumentNumber { get; set; }
+
+        [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual FileData SubmissionDocumentFile { get; set; }
+
+        [NotMapped]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        public string SubmissionDocumentFileName => SubmissionDocumentFile?.FileName ?? string.Empty;
+
+        [Browsable(false)]
+        [NotMapped]
+        public bool IsMigrationSubmissionStep =>
+            ApplicationMigrationSubmission.IsState(State?.Code);
+
         [XafDisplayName("Ministrlik")]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]

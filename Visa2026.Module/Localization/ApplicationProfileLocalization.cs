@@ -76,12 +76,29 @@ public static class ApplicationProfileLocalization
         {
             "Office preparation" => Msg("ApplicationProfileInstance.Workspace.OfficePreparation"),
             "Migration service" => Msg("ApplicationProfileInstance.Workspace.MigrationService"),
+            "At the migration service" => Msg("ApplicationProfileInstance.Workspace.AtMigrationService"),
+            "Awaiting AS (CO) number" => Msg("ApplicationProfileInstance.Workspace.AwaitingAsCoNumber"),
+            "Processing" => Msg("ApplicationProfileInstance.Workspace.Processing"),
+            "Process issued" => Msg("ApplicationProfileInstance.Workspace.ProcessIssued"),
+            "Process rejected" => Msg("ApplicationProfileInstance.Workspace.ProcessRejected"),
+            "Submitted to migration service" => Msg("ApplicationProfileInstance.Workspace.SubmittedToMigration"),
             "Completed" => Msg("ApplicationProfileInstance.Workspace.Completed"),
             "Pending" => Msg("ApplicationProfileInstance.Workspace.Pending"),
             "In progress" => Msg("ApplicationProfileInstance.Workspace.InProgress"),
             "Selected" => Msg("ApplicationProfileInstance.Picker.Selected"),
             _ => ProgressOutcome(trimmed),
         };
+    }
+
+    /// <summary>Status line plus the CO number, for example Işlenilýär /CO000004.</summary>
+    public static string ProgressStatusWithProcessNumber(string? status, string? processNumber)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+            return status ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(processNumber))
+            return status;
+
+        return status.Trim() + " /" + processNumber.Trim();
     }
 
     public static string ProgressReason(string? text)

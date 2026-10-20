@@ -15,6 +15,19 @@ public sealed class OfficerShellCaseProgressAdvanceRequest
     public string? ProcessNumber { get; init; }
 
     public string? ResultNumber { get; init; }
+
+    public string? SubmissionDocumentNumber { get; init; }
+}
+
+public sealed class OfficerShellCaseMigrationSubmissionRequest
+{
+    public DateTime Date { get; init; }
+
+    public string? DocumentNumber { get; init; }
+
+    public string? FileName { get; init; }
+
+    public byte[]? FileContent { get; init; }
 }
 
 public sealed class OfficerShellCaseProgressRevertRequest

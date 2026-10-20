@@ -22,7 +22,7 @@ public class ApplicationWorkspaceProgressTimelineTests
 
         var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
 
-        Assert.Equal(5, steps.Count);
+        Assert.Equal(6, steps.Count);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.OfficeKey, steps[0].Key);
         Assert.Equal("current", steps[0].State);
         Assert.Equal("Turkmenenergo", steps[1].Label);
@@ -31,8 +31,10 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[2].State);
         Assert.Equal("Turkmengurlusyk", steps[3].Label);
         Assert.Equal("pending", steps[3].State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[4].Key);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[4].Key);
         Assert.Equal("pending", steps[4].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[5].Key);
+        Assert.Equal("pending", steps[5].State);
         Assert.True(string.IsNullOrEmpty(steps[1].Date));
         Assert.True(string.IsNullOrEmpty(steps[1].CurrentStateLabel));
         Assert.Contains(steps[0].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.Review1Started);
@@ -91,6 +93,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[4].State);
         Assert.NotEqual("Cancelled", steps[4].CurrentStateLabel);
         Assert.False(steps[4].CanRevert);
+        Assert.Equal("pending", steps[5].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[5].Key);
         Assert.Equal(
             "Office preparation · Cancelled",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
@@ -136,6 +140,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[2].State);
         Assert.Equal("pending", steps[3].State);
         Assert.Equal("pending", steps[4].State);
+        Assert.Equal("pending", steps[5].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[5].Key);
         Assert.True(steps[1].CanAdvance);
         Assert.True(steps[1].CanRevert);
         Assert.True(steps[0].CanRevertToHere);
@@ -235,6 +241,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("pending", steps[4].State);
         Assert.NotEqual("Cancelled", steps[4].CurrentStateLabel);
         Assert.False(steps[4].CanRevert);
+        Assert.Equal("pending", steps[5].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[5].Key);
         Assert.True(steps[1].CanRevert);
         Assert.Equal(
             "Turkmenenergo · Cancelled",
@@ -275,6 +283,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(steps[2].CanRevert);
         Assert.Equal("pending", steps[4].State);
         Assert.False(steps[4].CanRevert);
+        Assert.Equal("pending", steps[5].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[5].Key);
         Assert.Equal(
             "Turkmenenergetika · Cancelled",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
@@ -336,6 +346,7 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(string.Empty, steps[0].ResultNumber);
         Assert.Equal(string.Empty, steps[2].ResultNumber);
         Assert.Equal(string.Empty, steps[4].ResultNumber);
+        Assert.Equal(string.Empty, steps[5].ResultNumber);
     }
 
     [Fact]
@@ -360,6 +371,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(string.IsNullOrEmpty(steps[2].CurrentStateLabel));
         Assert.Equal("pending", steps[3].State);
         Assert.Equal("pending", steps[4].State);
+        Assert.Equal("pending", steps[5].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[5].Key);
         Assert.Contains(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewApproved(2));
         Assert.Contains(steps[2].ResultOptions, o => o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewRejected(2));
         Assert.Equal(
@@ -395,15 +408,19 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("done", steps[2].State);
         Assert.Equal("done", steps[3].State);
         Assert.Equal("current", steps[4].State);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[4].Key);
+        Assert.Equal("pending", steps[5].State);
         Assert.Equal(
             ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
             steps[4].ResultOptions[^1].StateCode);
         Assert.False(steps[4].ShowMinistryLetterUpload);
+        Assert.True(steps[4].ShowMigrationSubmission);
         Assert.True(steps[3].MissingMinistryLetter);
         Assert.True(steps[3].ShowMinistryLetterUpload);
         Assert.True(steps[3].DecisionProgressId.HasValue);
         Assert.True(steps[4].CanAdvance);
-        Assert.Contains(steps[4].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
+        Assert.Contains(steps[4].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+        Assert.DoesNotContain(steps[4].AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
     }
 
     [Fact]
@@ -567,13 +584,16 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("gurlusyk.pdf", steps[3].MinistryLetterFileName);
         Assert.Equal(thirdLetterId, steps[3].ProgressId);
         Assert.Equal("ok", steps[1].OutcomeKind);
-        Assert.Equal("issued", steps[4].OutcomeKind);
+        Assert.Equal("done", steps[4].State);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[4].Key);
+        Assert.True(steps[4].ShowMigrationSubmission);
+        Assert.Equal("issued", steps[5].OutcomeKind);
         Assert.True(steps[0].CanRevertToHere);
         Assert.True(steps[1].CanRevertToHere);
-        Assert.True(steps[4].CanRevert);
-        Assert.False(steps[4].CanRevertToHere);
+        Assert.True(steps[5].CanRevert);
+        Assert.False(steps[5].CanRevertToHere);
         Assert.Equal(
-            "Migration service · Issued",
+            "At the migration service · Process issued",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
     }
 
@@ -599,7 +619,8 @@ public class ApplicationWorkspaceProgressTimelineTests
 
         var rejected = ApplicationWorkspaceProgressTimeline.Build(rejectedApp, profile, default, objectSpace: null);
         Assert.Equal("ok", rejected[1].OutcomeKind);
-        Assert.Equal("rejected", rejected[4].OutcomeKind);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, rejected[4].Key);
+        Assert.Equal("rejected", rejected[5].OutcomeKind);
 
         var cancelledApp = new ApplicationProfileInstance
         {
@@ -625,6 +646,74 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(
             "issued",
             ApplicationWorkspaceProgressTimeline.ResolveOutcomeKind("done", ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+    }
+
+    [Fact]
+    public void Build_ProcessAlreadyStarted_SubmissionIsPassedAndMigrationStaysCurrent()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(ApprovedLeg(application, 3, null, Guid.NewGuid()));
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 4,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
+            ProcessNumber = "7/4047",
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        var submission = steps.Single(s => s.Key == ApplicationMigrationSubmission.TimelineKey);
+        var migration = steps.Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("done", submission.State);
+        Assert.True(submission.ShowMigrationSubmission);
+        Assert.Equal(string.Empty, submission.SubmissionDocumentNumber);
+        Assert.Equal("current", migration.State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationLabel, migration.Label);
+        Assert.Equal("Processing", migration.CurrentStateLabel);
+        Assert.Equal("7/4047", migration.ProcessNumber);
+        Assert.Contains(migration.AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued
+            || o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessRejected
+            || o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+    }
+
+    [Fact]
+    public void Build_SubmissionRecorded_MigrationWaitsForProcessNumber()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(ApprovedLeg(application, 3, null, Guid.NewGuid()));
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 4,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        var migration = steps.Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("current", migration.State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationLabel, migration.Label);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AwaitingAsCoNumberLabel, migration.CurrentStateLabel);
+        Assert.Equal(
+            "At the migration service · Awaiting AS (CO) number",
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
     }
 
     private static ApplicationProfileInstanceProgress ApprovedLeg(

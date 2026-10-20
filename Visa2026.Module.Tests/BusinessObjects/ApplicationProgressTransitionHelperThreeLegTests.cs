@@ -28,6 +28,14 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
 
         Assert.True(IsAllowed(app,
             ApplicationProfileInstanceProgressLegCodes.ReviewApproved(3),
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
+
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressLegCodes.ReviewApproved(3),
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
             ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
     }
 

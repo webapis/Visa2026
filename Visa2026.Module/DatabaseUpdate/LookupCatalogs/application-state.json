@@ -73,6 +73,12 @@
             "IsDefault": false
         },
         {
+            "NameTm": "Migrasiýa gullugyna tabşyryldy",
+            "Code": "SUBMITTED_MIGRATION",
+            "LocalizationKey": "SUBMITTED_TO_MIGRATION",
+            "IsDefault": false
+        },
+        {
             "NameTm": "Işlenilýär",
             "Code": "PROCESS_STARTED",
             "LocalizationKey": "PROCESS_STARTED",

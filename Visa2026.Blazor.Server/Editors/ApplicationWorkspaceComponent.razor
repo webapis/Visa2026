@@ -36,6 +36,7 @@
                                         SaveProgressNotesRequested="@SaveProgressNotesRequested"
                                         UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
                                         AdvanceProgressRequested="@AdvanceProgressRequested"
+                                        SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
                                         RevertProgressRequested="@RevertProgressRequested"
                                         ShowPersonLinkPicker="@ShowPersonLinkPicker"
                                         PersonLinkCandidates="@PersonLinkCandidates"
@@ -92,6 +93,7 @@
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
     [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
