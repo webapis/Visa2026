@@ -59,6 +59,10 @@ public class ApplicationProgressRevertHelperTests
         Assert.Equal(
             ApplicationWorkspaceProgressTimeline.OfficeKey,
             ApplicationProfileInstanceProgressRevertHelper.SlotKeyFor(Row(1, ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared)));
+        Assert.Equal(
+            ApplicationMigrationSubmission.TimelineKey,
+            ApplicationProfileInstanceProgressRevertHelper.SlotKeyFor(
+                Row(4, ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration)));
     }
 
     private static List<ApplicationProfileInstanceProgress> ThreeStepHistory() =>
