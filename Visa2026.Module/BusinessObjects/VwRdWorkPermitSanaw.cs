@@ -92,17 +92,41 @@ public class VwRdWorkPermitSanaw
     public virtual string PositionLabel { get; set; }
 
     [Browsable(false)]
-    public virtual DateTime? SalaryStart { get; set; }
+    public virtual DateTime? VisaStartDate { get; set; }
 
     [Browsable(false)]
-    public virtual DateTime? SalaryEnd { get; set; }
+    public virtual DateTime? VisaEndDate { get; set; }
 
     [Browsable(false)]
-    public virtual string SalaryAmount { get; set; }
+    public virtual string VisaNumber { get; set; }
+
+    [Browsable(false)]
+    public virtual string VisaCategoryLabel { get; set; }
 
     [NotMapped]
-    [ModelDefault("Caption", "Möhleti we gazanji")]
-    public string SalaryLabel => JoinLines(FormatDay(SalaryStart), FormatDay(SalaryEnd), SalaryAmount);
+    [ModelDefault("Caption", "Möhleti we gezekligi")]
+    public string VisaDurationLabel
+    {
+        get
+        {
+            var lines = new System.Collections.Generic.List<string>();
+            var start = FormatDay(VisaStartDate);
+            var end = FormatDay(VisaEndDate);
+            if (start.Length > 0)
+                lines.Add(start);
+            if (end.Length > 0)
+                lines.Add(end);
+
+            var number = VisaNumber?.Trim() ?? string.Empty;
+            var category = VisaCategoryLabel?.Trim() ?? string.Empty;
+            var frequency = number.Length > 0 ? "(" + number + ")" : string.Empty;
+            if (category.Length > 0)
+                frequency = frequency.Length == 0 ? category : frequency + " " + category;
+            if (frequency.Length > 0)
+                lines.Add(frequency);
+            return string.Join("\n", lines);
+        }
+    }
 
     [Browsable(false)]
     public virtual string AddressRegionTm { get; set; }
@@ -139,7 +163,7 @@ public class VwRdWorkPermitSanaw
     [NotMapped]
     [ModelDefault("Caption", "Adam sany")]
     public string PersonCountLabel =>
-        FamilyMemberCount > 0 ? (FamilyMemberCount + 1).ToString() : string.Empty;
+        FamilyMemberCount > 0 ? FamilyMemberCount.ToString() : string.Empty;
 
     [Browsable(false)]
     public virtual int PersonRoleCode { get; set; }

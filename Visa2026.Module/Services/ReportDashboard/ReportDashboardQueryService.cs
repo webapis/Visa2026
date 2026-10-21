@@ -3964,7 +3964,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         row.EducationLabel ?? string.Empty,
                         row.SpecialtyLabel ?? string.Empty,
                         row.PositionLabel ?? string.Empty,
-                        row.SalaryLabel ?? string.Empty,
+                        row.VisaDurationLabel ?? string.Empty,
                         row.AddressLabel ?? string.Empty,
                         row.ForeignAddressLabel ?? string.Empty,
                         row.ProjectName ?? string.Empty,

@@ -4,6 +4,66 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-21 — Maglumat column widths match the company sheet
+
+**Ask:** Generated Excel for A. Maglumat, A. Maglumat 2, and Goşmaça barjak ýerleri should use the company sheet's column widths.
+
+**Now:** Download template and Open in Excel set № 15.7, F.A.A 29.1, birth 16.1, passport 15.7, education 15.7, specialty 10.3, position 10.8, address 15.6, permit 15.7, visa 15.7, Bellik 15.7. The two location columns use the address width, 15.6. A stored template cannot keep a different width. Invitation and Sanaw widths stay as they were.
+
+**Prevent:** Do not put the width-18 starter back on these three sheets. Do not change Invitation or Sanaw widths from this table.
+
+**Files:** `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardExcelTemplateService.cs`
+
+## 2026-10-21 — Maglumat Wezipesi is the visa-report position
+
+**Ask:** Wezipesi on A. Maglumat, A. Maglumat 2, and Goşmaça barjak ýerleri should be Position (visa reports), not Position (actual / company).
+
+**Now:** Those three sheets use `Positions.NameTm`, or `Name` when that is empty, from the same latest position-history row. Sanaw already used that position.
+
+**Prevent:** Do not put `ActualPosition` back into Wezipesi on these three sheets.
+
+**Files:** `vw_rd_work_permit_active.postgres.sql`
+
+## 2026-10-21 — Invitation and Work Permit grid and gray header
+
+**Ask:** Match the Sanaw workbook: a gray header row and a thin border on every table cell, for every Invitation and Work Permit Excel report.
+
+**Now:** Open in Excel and Download template paint the header `#D9D9D9` and a black thin grid from the header through the last data row. The title row stays unshaded. The NOT color on Active and Expired Invitation stays on that cell.
+
+**Prevent:** Do not paint the title row gray. Do not clear the NOT background when adding the grid.
+
+**Files:** `ReportDashboardExcelTemplateWorkbook.cs`
+
+## 2026-10-21 — Invitation and Work Permit rows grow with the text
+
+**Ask:** Every Invitation and Work Permit Excel report should expand the row height to fit the cell text.
+
+**Now:** Open in Excel sets each title, header, and data row from the wrapped lines in that row. Sanaw no longer uses a fixed height of 60. There is no maximum height.
+
+**Prevent:** Do not put the 60-point Sanaw height back. Do not cap the row at 90 points.
+
+**Files:** `ReportDashboardExcelTemplateWorkbook.cs`
+
+## 2026-10-21 — Sanaw visa column and family total
+
+**Ask:** Sanaw should follow the manual sheet. Möhleti we gezekligi is the current visa, not salary. Adam sany counts family members only. The workbook totals that column, headers match the manual sheet, and data rows are height 60.
+
+**Now:** The cell is the current visa start date, end date, and `(number) entry type`. Adam sany is the linked family count, blank when there are none. Open in Excel sums that column on the last row and sets each data row to height 60.
+
+**Prevent:** Do not add the employee back into Adam sany. Do not put salary dates or the amount in Möhleti we gezekligi.
+
+**Files:** `vw_rd_work_permit_sanaw.postgres.sql`, `VwRdWorkPermitSanaw.cs`, `ReportDashboardExcelTemplateWorkbook.cs`
+
+## 2026-10-21 — Invitation and Work Permit Excel use Times New Roman
+
+**Ask:** Every Excel template that generates an Invitation or Work Permit subreport should use Times New Roman.
+
+**Now:** Starters, downloaded templates, and Open in Excel set that font on the used cells. Other dashboard categories are unchanged. Bold, size, and the NOT colors stay as they were.
+
+**Prevent:** Do not set this font on Visa, Registration, or the other categories. Do not clear bold or the NOT font color when applying the name.
+
+**Files:** `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardExcelTemplateService.cs`
+
 ## 2026-10-21 — Process Excel status is Turkish
 
 **Ask:** Şu anki Durumu should say Yabancıların şubesinde, not MIGRASIÝA GULLUGYNDA.

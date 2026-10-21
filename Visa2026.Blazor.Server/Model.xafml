@@ -1793,7 +1793,7 @@
         <ColumnInfo Id="EducationLabel" Index="6" Width="180" Caption="Bilimi we okan ýeri" IsNewNode="True" />
         <ColumnInfo Id="SpecialtyLabel" Index="7" Width="160" Caption="Bilimine görä hünäri" IsNewNode="True" />
         <ColumnInfo Id="PositionLabel" Index="8" Width="140" Caption="Wezipesi" IsNewNode="True" />
-        <ColumnInfo Id="SalaryLabel" Index="9" Width="140" Caption="Möhleti we gazanji" IsNewNode="True" />
+        <ColumnInfo Id="VisaDurationLabel" Index="9" Width="160" Caption="Möhleti we gezekligi" IsNewNode="True" />
         <ColumnInfo Id="AddressLabel" Index="10" Width="220" Caption="Türkmenistandaky salgysy" IsNewNode="True" />
         <ColumnInfo Id="ForeignAddressLabel" Index="11" Width="200" Caption="Daşary ýurtdaky salgysy" IsNewNode="True" />
         <ColumnInfo Id="ProjectName" Index="12" Width="160" Caption="Taslamasy" IsNewNode="True" />

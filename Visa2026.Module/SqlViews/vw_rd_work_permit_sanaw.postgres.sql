@@ -17,9 +17,14 @@ SELECT
     a."EducationInstitutionLabel"                                           AS "EducationInstitutionLabel",
     COALESCE(edu."SpecialtyName", '')                                       AS "SpecialtyLabel",
     COALESCE(visa_pos."Name", '')                                          AS "PositionLabel",
-    CASE WHEN (sal."StartDate")::date > DATE '1900-01-01' THEN sal."StartDate" ELSE NULL END AS "SalaryStart",
-    CASE WHEN (sal."EndDate")::date > DATE '1900-01-01' THEN sal."EndDate" ELSE NULL END AS "SalaryEnd",
-    COALESCE(NULLIF(BTRIM(sal."Amount"), ''), '')                           AS "SalaryAmount",
+    a."VisaStartDate"                                                       AS "VisaStartDate",
+    a."VisaEndDate"                                                         AS "VisaEndDate",
+    COALESCE(NULLIF(BTRIM(a."VisaNumber"), ''), '')                         AS "VisaNumber",
+    COALESCE(
+        NULLIF(BTRIM(vc."NameTm"), ''),
+        NULLIF(BTRIM(vc."Name"), ''),
+        ''
+    )                                                                       AS "VisaCategoryLabel",
     a."AddressRegionTm"                                                     AS "AddressRegionTm",
     a."AddressCityTm"                                                       AS "AddressCityTm",
     a."AddressStreet"                                                       AS "AddressStreet",
@@ -64,6 +69,10 @@ LEFT JOIN "Genders" g
     ON g."ID" = p."GenderID" AND COALESCE(g."GCRecord", 0) = 0
 LEFT JOIN "Countries" fc
     ON fc."ID" = p."ForeignAddressCountryID" AND COALESCE(fc."GCRecord", 0) = 0
+LEFT JOIN "Visas" vis
+    ON vis."ID" = a."VisaOid" AND COALESCE(vis."GCRecord", 0) = 0
+LEFT JOIN "VisaCategories" vc
+    ON vc."ID" = vis."VisaCategoryID" AND COALESCE(vc."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT COALESCE(NULLIF(BTRIM(sp."NameTm"), ''), NULLIF(BTRIM(sp."Name"), ''), '') AS "SpecialtyName"
     FROM "Educations" ed
@@ -74,20 +83,6 @@ LEFT JOIN LATERAL (
     ORDER BY ed."GraduationYear" DESC NULLS LAST, ed."ID" DESC
     LIMIT 1
 ) edu ON TRUE
-LEFT JOIN LATERAL (
-    SELECT s."StartDate", s."EndDate", s."Amount"
-    FROM "EmployeeSalaries" s
-    WHERE s."PersonID" = p."ID"
-      AND COALESCE(s."GCRecord", 0) = 0
-    ORDER BY
-        CASE
-            WHEN s."EndDate" IS NULL OR (s."EndDate")::date >= CURRENT_DATE THEN 0
-            ELSE 1
-        END,
-        s."StartDate" DESC NULLS LAST,
-        s."ID" DESC
-    LIMIT 1
-) sal ON TRUE
 LEFT JOIN LATERAL (
     SELECT
         string_agg(

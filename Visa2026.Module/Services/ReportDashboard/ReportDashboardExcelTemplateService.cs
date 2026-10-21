@@ -86,29 +86,56 @@ public static class ReportDashboardExcelTemplateService
         if (ReportDashboardExcelTemplateWorkbook.IsInvitationCompanySheet(category, subReport)
             && !string.Equals(subReport, "ready-by-period-category", StringComparison.Ordinal))
         {
-            return template != null
+            return FinishDownload(category, template != null
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(
                     template, ReportDashboardInvitationTableExcel.CompanyHeaders.Length)
                 ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationCompanyHeaders(template)
-                : ReportDashboardExcelTemplateWorkbook.BuildInvitationCompanyStarter();
+                : ReportDashboardExcelTemplateWorkbook.BuildInvitationCompanyStarter());
         }
 
         if (ReportDashboardExcelTemplateWorkbook.IsInvitationProcessCompanySheet(category, subReport))
         {
-            return template != null
+            return FinishDownload(category, template != null
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(
                     template, ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length)
                 ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationProcessCompanyHeaders(template)
-                : ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessCompanyStarter();
+                : ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessCompanyStarter());
         }
 
         if (template != null
             && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count))
         {
-            return template;
+            return FinishDownload(category, template, headers);
         }
 
-        return ReportDashboardExcelTemplateWorkbook.BuildStarter(title, headers, SheetName(category, subReport));
+        return FinishDownload(
+            category,
+            ReportDashboardExcelTemplateWorkbook.BuildStarter(
+                title, headers, SheetName(category, subReport),
+                category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit),
+            headers);
+    }
+
+    private static byte[] FinishDownload(
+        ReportDashboardCategory category,
+        byte[] content,
+        IReadOnlyList<string>? headerLabels = null)
+    {
+        if (category == ReportDashboardCategory.WorkPermit
+            && headerLabels != null
+            && string.Equals(
+                headerLabels.Count > 10 ? headerLabels[10] : null,
+                "Möhleti we gezekligi",
+                StringComparison.Ordinal))
+        {
+            content = ReportDashboardExcelTemplateWorkbook.ApplyHeaderLabels(content, headerLabels);
+        }
+
+        return category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit
+            ? ReportDashboardExcelTemplateWorkbook.WithCompanyFont(
+                content,
+                ReportDashboardExcelTemplateWorkbook.MaglumatColumnWidths(headerLabels))
+            : content;
     }
 
     /// <summary>Returns a localization key. <see cref="SavedKey"/> means the file was stored.</summary>

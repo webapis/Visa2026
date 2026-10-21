@@ -1045,7 +1045,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat3Key)  =>
                 ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Goşmaça barjak ýerleri", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitSanawKey) =>
-                ["№", "Familiýasy", "Ady", "Doglan senesi we ýeri", "Jynsy", "Raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Möhleti we gazanji", "Türkmenistandaky salgysy", "Daşary ýurtdaky salgysy", "Taslamasy", "Maşgala agzalary", "Adam sany"],
+                ["№", "Familiýasy", "Ady", "Doglan senesi we ýeri", "Jynsy", "Raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Möhleti we gezekligi", "Türkmenistandaky salgysy", "Daşary ýurtdaky salgysy", "Taslamasy", "Maşgala agzalary", "Adam sany"],
             (ReportDashboardCategory.WorkPermit, "on-extension") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "extension-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "by-status")         => ["Name", "Project", "WP Number",   "Expiry", "Status"],

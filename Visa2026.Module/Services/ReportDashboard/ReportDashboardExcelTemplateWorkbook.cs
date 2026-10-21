@@ -16,6 +16,8 @@ public static class ReportDashboardExcelTemplateWorkbook
 {
     public const string HeaderName = "DashboardHeader";
     public const string SampleName = "DashboardSample";
+    public const string CompanyFontName = "Times New Roman";
+    private const string HeaderBackground = "#D9D9D9";
 
     public static byte[] Export(
         byte[]? template,
@@ -39,7 +41,7 @@ public static class ReportDashboardExcelTemplateWorkbook
                 ? BuildInvitationCompanyStarter()
                 : companyProcess
                     ? BuildInvitationProcessCompanyStarter()
-                    : BuildStarter(title, headers, SheetName(category, subReport));
+                    : BuildStarter(title, headers, SheetName(category, subReport), CompanyFont(category));
 
         var values = new List<IReadOnlyList<string>>(rows.Count);
         for (var index = 0; index < rows.Count; index++)
@@ -51,7 +53,17 @@ public static class ReportDashboardExcelTemplateWorkbook
             : companyProcess
                 ? ReportDashboardInvitationTableExcel.ProcessCompanyHeaders
                 : null;
-        return Fill(source, values, titleDate, companyHeaders != null, colorLastColumn: companyInvitation, companyHeaders);
+        return Fill(
+            source,
+            values,
+            titleDate,
+            companyHeaders != null,
+            colorLastColumn: companyInvitation,
+            companyHeaders,
+            CompanyFont(category),
+            totalLastColumn: IsWorkPermitSanaw(category, subReport),
+            headerLabels: IsWorkPermitSanaw(category, subReport) ? headers : null,
+            columnWidths: MaglumatColumnWidths(category, subReport));
     }
 
     public static bool IsInvitationCompanySheet(ReportDashboardCategory category, string? subReport) =>
@@ -120,24 +132,28 @@ public static class ReportDashboardExcelTemplateWorkbook
             sheet.Cell(1, column + 1).Value = headers[column];
 
         var header = sheet.Range(1, 1, 1, columnCount);
-        header.Style.Font.FontName = "Calibri";
+        header.Style.Font.FontName = CompanyFontName;
         header.Style.Font.FontSize = 11;
         header.Style.Font.Bold = true;
         header.Style.Alignment.WrapText = true;
         header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-        header.Style.Fill.BackgroundColor = XLColor.FromHtml("#F2F2F2");
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
         header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.OutsideBorderColor = XLColor.Black;
+        header.Style.Border.InsideBorderColor = XLColor.Black;
         sheet.Row(1).Height = 48;
 
         var sample = sheet.Range(2, 1, 2, columnCount);
-        sample.Style.Font.FontName = "Calibri";
+        sample.Style.Font.FontName = CompanyFontName;
         sample.Style.Font.FontSize = 11;
         sample.Style.Alignment.WrapText = true;
         sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
         sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.OutsideBorderColor = XLColor.Black;
+        sample.Style.Border.InsideBorderColor = XLColor.Black;
         for (var column = 1; column <= columnCount; column++)
         {
             var horizontal = column is 2 or 3 or 4 or 5
@@ -156,6 +172,7 @@ public static class ReportDashboardExcelTemplateWorkbook
 
         workbook.DefinedNames.Add(HeaderName, header);
         workbook.DefinedNames.Add(SampleName, sample);
+        ApplyCompanyFont(sheet);
         return Save(workbook);
     }
 
@@ -170,24 +187,28 @@ public static class ReportDashboardExcelTemplateWorkbook
             sheet.Cell(1, column + 1).Value = headers[column];
 
         var header = sheet.Range(1, 1, 1, columnCount);
-        header.Style.Font.FontName = "Calibri";
+        header.Style.Font.FontName = CompanyFontName;
         header.Style.Font.FontSize = 11;
         header.Style.Font.Bold = true;
         header.Style.Alignment.WrapText = true;
         header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-        header.Style.Fill.BackgroundColor = XLColor.FromHtml("#F2F2F2");
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
         header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.OutsideBorderColor = XLColor.Black;
+        header.Style.Border.InsideBorderColor = XLColor.Black;
         sheet.Row(1).Height = 48;
 
         var sample = sheet.Range(2, 1, 2, columnCount);
-        sample.Style.Font.FontName = "Calibri";
+        sample.Style.Font.FontName = CompanyFontName;
         sample.Style.Font.FontSize = 11;
         sample.Style.Alignment.WrapText = true;
         sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
         sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.OutsideBorderColor = XLColor.Black;
+        sample.Style.Border.InsideBorderColor = XLColor.Black;
         for (var column = 1; column <= columnCount; column++)
         {
             var horizontal = column is 2 or 3 or 4 or 5 or 12 or 13
@@ -206,10 +227,11 @@ public static class ReportDashboardExcelTemplateWorkbook
 
         workbook.DefinedNames.Add(HeaderName, header);
         workbook.DefinedNames.Add(SampleName, sample);
+        ApplyCompanyFont(sheet);
         return Save(workbook);
     }
 
-    public static byte[] BuildStarter(string title, IReadOnlyList<string> headers, string? sheetName = null)
+    public static byte[] BuildStarter(string title, IReadOnlyList<string> headers, string? sheetName = null, bool companyFont = false)
     {
         using var workbook = new XLWorkbook();
         var sheet = workbook.Worksheets.Add(string.IsNullOrWhiteSpace(sheetName) ? "Report" : sheetName);
@@ -239,11 +261,16 @@ public static class ReportDashboardExcelTemplateWorkbook
 
         sheet.SheetView.FreezeRows(2);
         sheet.Columns(1, columnCount).Width = 18;
+        var maglumatWidths = MaglumatColumnWidths(sheet.Name);
+        if (maglumatWidths != null)
+            ApplyColumnWidths(sheet, maglumatWidths);
         sheet.Row(2).Height = 30;
         sheet.Row(3).Height = 36;
 
         workbook.DefinedNames.Add(HeaderName, header);
         workbook.DefinedNames.Add(SampleName, sample);
+        if (companyFont)
+            ApplyCompanyFont(sheet);
 
         return Save(workbook);
     }
@@ -303,7 +330,11 @@ public static class ReportDashboardExcelTemplateWorkbook
         DateTime? titleDate,
         bool companySheet = false,
         bool colorLastColumn = false,
-        string[]? companyHeaders = null)
+        string[]? companyHeaders = null,
+        bool companyFont = false,
+        bool totalLastColumn = false,
+        IReadOnlyList<string>? headerLabels = null,
+        double[]? columnWidths = null)
     {
         using var workbook = new XLWorkbook(new MemoryStream(template));
         if (!TryRanges(workbook, out var header, out var sample) || header == null || sample == null)
@@ -318,9 +349,17 @@ public static class ReportDashboardExcelTemplateWorkbook
         if (last > sampleRow)
             sheet.Rows(sampleRow + 1, last).Delete();
 
+        if (columnWidths != null)
+            ApplyColumnWidths(sheet, columnWidths);
+
         if (rows.Count == 0)
         {
             ClearRow(sheet, sampleRow, columnCount);
+            if (companyFont)
+            {
+                ApplyCompanyFont(sheet);
+                ApplySheetGrid(sheet, header.RangeAddress.FirstAddress.RowNumber, sampleRow, columnCount);
+            }
             return Save(workbook);
         }
 
@@ -331,11 +370,12 @@ public static class ReportDashboardExcelTemplateWorkbook
         {
             var rowNumber = sampleRow + index;
             WriteRow(sheet, rowNumber, columnCount, rows[index]);
+            if (totalLastColumn)
+                WriteCountCell(sheet.Cell(rowNumber, columnCount), rows[index]);
             if (companySheet)
             {
                 if (colorLastColumn)
                     ColorRemainingDays(sheet.Cell(rowNumber, columnCount));
-                FitWrappedRow(sheet, rowNumber, columnCount);
             }
         }
 
@@ -344,6 +384,25 @@ public static class ReportDashboardExcelTemplateWorkbook
             WriteCompanyHeaders(sheet, header, companyHeaders ?? ReportDashboardInvitationTableExcel.CompanyHeaders);
             var lastRow = sampleRow + Math.Max(0, rows.Count - 1);
             sheet.Range(header.RangeAddress.FirstAddress.RowNumber, 1, lastRow, columnCount).SetAutoFilter();
+        }
+
+        if (totalLastColumn && rows.Count > 0)
+            WriteLastColumnTotal(sheet, sampleRow, sampleRow + rows.Count - 1, columnCount);
+
+        if (headerLabels != null)
+            WriteCompanyHeaders(sheet, header, headerLabels.ToArray());
+
+        if (companyFont)
+            ApplyCompanyFont(sheet);
+
+        if (companyFont)
+        {
+            var headerRow = header.RangeAddress.FirstAddress.RowNumber;
+            var lastDataRow = sampleRow + rows.Count - 1;
+            if (totalLastColumn)
+                lastDataRow++;
+            FitSheetRows(sheet, headerRow, sampleRow, lastDataRow, columnCount);
+            ApplySheetGrid(sheet, headerRow, lastDataRow, columnCount);
         }
 
         return Save(workbook);
@@ -373,6 +432,51 @@ public static class ReportDashboardExcelTemplateWorkbook
         while (values.Count < headerCount)
             values.Add(string.Empty);
         return values;
+    }
+
+    // Measured from the company A. Maglumat sheet at 100% zoom.
+    // Shared columns stay aligned. Location columns use the address width.
+    private static readonly double[] MaglumatWidths = [15.7, 29.1, 16.1, 15.7, 15.7, 10.3, 10.8, 15.6, 15.7, 15.7, 15.7];
+    private static readonly double[] Maglumat2Widths = [15.7, 29.1, 16.1, 15.7, 15.7, 10.3, 10.8, 15.6, 15.7, 15.6, 15.7, 15.7];
+    private static readonly double[] Maglumat3Widths = [15.7, 29.1, 16.1, 15.7, 15.7, 10.3, 10.8, 15.6, 15.7, 15.6, 15.6, 15.7, 15.7];
+
+    public static double[]? MaglumatColumnWidths(IReadOnlyList<string>? headers)
+    {
+        if (headers == null || headers.Count < 11
+            || !string.Equals(headers[1], "F.A.A", StringComparison.Ordinal))
+            return null;
+
+        if (headers.Count >= 13)
+            return Maglumat3Widths;
+        return headers.Count == 12 ? Maglumat2Widths : MaglumatWidths;
+    }
+
+    private static double[]? MaglumatColumnWidths(string? sheetName)
+    {
+        if (string.Equals(sheetName, "Goşmaça barjak ýerleri", StringComparison.Ordinal))
+            return Maglumat3Widths;
+        if (string.Equals(sheetName, "A.Maglumat 2", StringComparison.Ordinal))
+            return Maglumat2Widths;
+        return string.Equals(sheetName, "A.Maglumat", StringComparison.Ordinal) ? MaglumatWidths : null;
+    }
+
+    private static double[]? MaglumatColumnWidths(ReportDashboardCategory category, string? subReport)
+    {
+        if (category != ReportDashboardCategory.WorkPermit)
+            return null;
+        if (IsWorkPermitMaglumat3(category, subReport))
+            return Maglumat3Widths;
+        if (IsWorkPermitMaglumat2(category, subReport))
+            return Maglumat2Widths;
+        return string.Equals(subReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
+            ? MaglumatWidths
+            : null;
+    }
+
+    private static void ApplyColumnWidths(IXLWorksheet sheet, double[] widths)
+    {
+        for (var column = 0; column < widths.Length; column++)
+            sheet.Column(column + 1).Width = widths[column];
     }
 
     private static bool IsWorkPermitSanaw(ReportDashboardCategory category, string? subReport) =>
@@ -421,6 +525,24 @@ public static class ReportDashboardExcelTemplateWorkbook
         var updated = new Regex(@"\d{2}\.\d{2}\.\d{4}").Replace(text, date.ToString("dd.MM.yyyy"), 1);
         if (!string.Equals(updated, text, StringComparison.Ordinal))
             cell.Value = updated;
+    }
+
+    private static void WriteCountCell(IXLCell cell, IReadOnlyList<string> values)
+    {
+        var text = values.Count == 0 ? string.Empty : values[^1]?.Trim() ?? string.Empty;
+        if (int.TryParse(text, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var count))
+            cell.Value = count;
+    }
+
+    private static void WriteLastColumnTotal(IXLWorksheet sheet, int firstDataRow, int lastDataRow, int column)
+    {
+        var totalRow = lastDataRow + 1;
+        var first = sheet.Cell(firstDataRow, column).Address.ToStringRelative();
+        var last = sheet.Cell(lastDataRow, column).Address.ToStringRelative();
+        var cell = sheet.Cell(totalRow, column);
+        cell.FormulaA1 = $"SUM({first}:{last})";
+        cell.Style.Font.Bold = true;
+        cell.Style.Font.FontName = CompanyFontName;
     }
 
     private static void WriteRow(IXLWorksheet sheet, int rowNumber, int columnCount, IReadOnlyList<string> values)
@@ -473,33 +595,121 @@ public static class ReportDashboardExcelTemplateWorkbook
         cell.Style.Font.Bold = days < 30;
     }
 
-    private static void FitWrappedRow(IXLWorksheet sheet, int rowNumber, int columnCount)
+    private static void FitSheetRows(IXLWorksheet sheet, int headerRow, int firstDataRow, int lastDataRow, int columnCount)
+    {
+        if (headerRow > 1)
+            FitContentRow(sheet, headerRow - 1, columnCount, title: true);
+        FitContentRow(sheet, headerRow, columnCount, title: false);
+        for (var rowNumber = firstDataRow; rowNumber <= lastDataRow; rowNumber++)
+            FitContentRow(sheet, rowNumber, columnCount, title: false);
+    }
+
+    private static void FitContentRow(IXLWorksheet sheet, int rowNumber, int columnCount, bool title)
     {
         var lines = 1;
+        var mergedWidth = 0d;
+        for (var column = 1; column <= columnCount; column++)
+            mergedWidth += Math.Max(4, sheet.Column(column).Width);
+
         for (var column = 1; column <= columnCount; column++)
         {
-            var text = sheet.Cell(rowNumber, column).GetString();
+            var cell = sheet.Cell(rowNumber, column);
+            var text = cell.GetString().Replace("\r\n", "\n", StringComparison.Ordinal);
             if (string.IsNullOrEmpty(text))
                 continue;
 
-            var width = Math.Max(4, sheet.Column(column).Width);
+            cell.Style.Alignment.WrapText = true;
+            var width = title ? mergedWidth : Math.Max(4, sheet.Column(column).Width);
+            var perLine = Math.Max(1, (int)Math.Floor(width * 0.95));
             var count = 0;
             foreach (var chunk in text.Split('\n'))
-            {
-                var perLine = Math.Max(1, (int)Math.Floor(width * 1.05));
-                count += Math.Max(1, (int)Math.Ceiling(chunk.Length / (double)perLine));
-            }
-
+                count += Math.Max(1, (int)Math.Ceiling(Math.Max(1, chunk.Length) / (double)perLine));
             lines = Math.Max(lines, count);
         }
 
-        sheet.Row(rowNumber).Height = Math.Min(90, Math.Max(18, lines * 15));
+        var lineHeight = title ? 18 : 15;
+        sheet.Row(rowNumber).Height = Math.Max(18, lines * lineHeight);
+    }
+
+    private static void ApplySheetGrid(IXLWorksheet sheet, int headerRow, int lastRow, int columnCount)
+    {
+        var bottom = Math.Max(headerRow, lastRow);
+        var table = sheet.Range(headerRow, 1, bottom, columnCount);
+        table.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        table.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        table.Style.Border.OutsideBorderColor = XLColor.Black;
+        table.Style.Border.InsideBorderColor = XLColor.Black;
+
+        var header = sheet.Range(headerRow, 1, headerRow, columnCount);
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
+        header.Style.Font.Bold = true;
+        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Alignment.WrapText = true;
     }
 
     private static void ClearRow(IXLWorksheet sheet, int rowNumber, int columnCount)
     {
         for (var column = 1; column <= columnCount; column++)
             sheet.Cell(rowNumber, column).Value = string.Empty;
+    }
+
+    public static byte[] ApplyHeaderLabels(byte[] content, IReadOnlyList<string> headers)
+    {
+        try
+        {
+            using var workbook = new XLWorkbook(new MemoryStream(content));
+            if (!TryRanges(workbook, out var header, out _) || header == null)
+                return content;
+
+            WriteCompanyHeaders(header.Worksheet, header, headers.ToArray());
+            return Save(workbook);
+        }
+        catch (Exception)
+        {
+            return content;
+        }
+    }
+
+    public static byte[] WithCompanyFont(byte[] content, double[]? columnWidths = null)
+    {
+        try
+        {
+            using var workbook = new XLWorkbook(new MemoryStream(content));
+            workbook.Style.Font.FontName = CompanyFontName;
+            foreach (var worksheet in workbook.Worksheets)
+                ApplyCompanyFont(worksheet);
+            if (TryRanges(workbook, out var header, out var sample) && header != null && sample != null)
+            {
+                var gridSheet = header.Worksheet;
+                if (columnWidths != null)
+                    ApplyColumnWidths(gridSheet, columnWidths);
+                var lastRow = Math.Max(
+                    sample.RangeAddress.LastAddress.RowNumber,
+                    gridSheet.LastRowUsed()?.RowNumber() ?? sample.RangeAddress.LastAddress.RowNumber);
+                ApplySheetGrid(
+                    gridSheet,
+                    header.RangeAddress.FirstAddress.RowNumber,
+                    lastRow,
+                    header.ColumnCount());
+            }
+            return Save(workbook);
+        }
+        catch (Exception)
+        {
+            return content;
+        }
+    }
+
+    private static bool CompanyFont(ReportDashboardCategory category) =>
+        category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit;
+
+    private static void ApplyCompanyFont(IXLWorksheet sheet)
+    {
+        sheet.Style.Font.FontName = CompanyFontName;
+        var used = sheet.RangeUsed();
+        if (used != null)
+            used.Style.Font.FontName = CompanyFontName;
     }
 
     private static bool TryRanges(XLWorkbook workbook, out IXLRange? header, out IXLRange? sample)

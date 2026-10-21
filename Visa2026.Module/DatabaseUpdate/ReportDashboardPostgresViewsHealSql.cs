@@ -347,6 +347,7 @@ public static class ReportDashboardPostgresViewsHealSql
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_work_permit_active"
                     || (ViewDefinitionContains(connection, viewName, "chr(29)")
+                        && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                         && (ColumnExists(connection, viewName, "SpecialtyLabel")
                             || ColumnExists(connection, viewName, "specialtylabel"))))
                 && (viewName != "vw_rd_work_permit_a_maglumat_3"
@@ -354,7 +355,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     || ColumnExists(connection, viewName, "workpermitadditionallocationslabel"))
                 && (viewName != "vw_rd_work_permit_sanaw"
                     || (ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
-                        && ViewDefinitionContains(connection, viewName, "fm.\"FirstName\""))))
+                        && ViewDefinitionContains(connection, viewName, "fm.\"FirstName\"")
+                        && ViewDefinitionContains(connection, viewName, "VisaCategoryLabel"))))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);

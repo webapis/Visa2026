@@ -29,7 +29,11 @@ SELECT
     COALESCE(edu."LevelName", '')                                              AS "EducationLevelLabel",
     COALESCE(edu."InstitutionName", '')                                         AS "EducationInstitutionLabel",
     COALESCE(edu."SpecialtyName", '')                                           AS "SpecialtyLabel",
-    COALESCE(NULLIF(BTRIM(act."Name"), ''), '')                             AS "PositionLabel",
+    COALESCE(
+        NULLIF(BTRIM(visa_pos."NameTm"), ''),
+        NULLIF(BTRIM(visa_pos."Name"), ''),
+        ''
+    )                                                                       AS "PositionLabel",
     COALESCE(NULLIF(BTRIM(reg."NameTm"), ''), '')                           AS "AddressRegionTm",
     COALESCE(NULLIF(BTRIM(city."NameTm"), ''), '')                          AS "AddressCityTm",
     COALESCE(NULLIF(BTRIM(addr."FullAddress"), ''), '')                     AS "AddressStreet",
@@ -204,7 +208,7 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) edu ON TRUE
 LEFT JOIN LATERAL (
-    SELECT eph."ActualPositionID"
+    SELECT eph."PositionID"
     FROM "EmployeePositionHistories" eph
     WHERE eph."PersonID" = p."ID"
       AND COALESCE(eph."GCRecord", 0) = 0
@@ -217,8 +221,8 @@ LEFT JOIN LATERAL (
         eph."ID" DESC
     LIMIT 1
 ) cur_pos ON TRUE
-LEFT JOIN "ActualPositions" act
-    ON act."ID" = cur_pos."ActualPositionID" AND COALESCE(act."GCRecord", 0) = 0
+LEFT JOIN "Positions" visa_pos
+    ON visa_pos."ID" = cur_pos."PositionID" AND COALESCE(visa_pos."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT a."FullAddress", a."RegionID", a."CityID"
     FROM "AddressesOfResidence" a
