@@ -39,6 +39,15 @@ SELECT
         NULLIF(BTRIM(vp."Name"), ''),
         ''
     )                                                                       AS "VisaPeriodLabel",
+    CASE
+        WHEN UPPER(BTRIM(COALESCE(vp."PdfForm__Code", ''))) = 'GUN'
+             AND COALESCE(vp."PdfForm_Count", 0) BETWEEN 1 AND 30
+            THEN TRUE
+        WHEN UPPER(BTRIM(COALESCE(vp."PdfForm__Code", ''))) = 'AY'
+             AND COALESCE(vp."PdfForm_Count", 0) = 1
+            THEN TRUE
+        ELSE FALSE
+    END                                                                     AS "IsShortVisaPeriod",
     ministries."Approval1Date"                                              AS "Approval1Date",
     ministries."Approval1Number"                                            AS "Approval1Number",
     ministries."Approval1Ministry"                                          AS "Approval1Ministry",

@@ -329,6 +329,7 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && ViewDefinitionContains(connection, viewName, "MigrationSubmittedDate")
+                    && ViewDefinitionContains(connection, viewName, "IsShortVisaPeriod")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 

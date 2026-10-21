@@ -98,7 +98,7 @@ There is one stored file per tab. It is not per officer.
 | `ready-by-project` | `ready-by-period-category` |
 | `expired-invitation` | — |
 | `cancelled-invitation` | — |
-| `in-process` | `in-process-by-period-category-type` |
+| `in-process` | `in-process-by-period-category-type`, `in-process-long` |
 | `used` | `used-by-period-category-type` |
 
 The officer tab for `cancelled-invitation` is **Cancelled Invitation**. Columns are the invitation (Full name, Project, Invitation #, Issued date, Valid Until, Visa Period) and the cancellation application (App #, Date, Migration). There are no approval columns. A row is one invitation line cancelled by a completed cancellation application. The nine-month dashboard window does not apply.
@@ -108,6 +108,8 @@ The officer tab for `expired-invitation` is **Expired Invitation**. Its columns 
 Active Invitation and Expired Invitation columns, in order: Record number (the row number on screen), Full name, Position, Project, Firm, Application number, Application date, Visa Period, Ministry approval, Migration, Invitation validity. Ministry approval is the last leg that has a date or a number: the date, then the letter number. The ministry name is not shown, and earlier legs are not columns. Migration is the date and the AS number. The validity-extended note is not a column. Invitation validity is the expiration date and the remaining-time pill. Invitation # is not a column. Open ListView omits Record number, because a stored row number would not follow the search box.
 
 The officer tab for `used` is **Used Invitations**. It keeps the previous columns: Full name, Project, Position, Firm, App #, Approval 1, Approval 2, Approval 3, Migration, Invitation #, Valid Until, Visa Period, then Visa #, Issued date, Place, Start date, and End date. One invitation line has one visa. A visa cancelled later stays on the report. Cancelled Invitation keeps its previous columns.
+
+The officer tabs are **işlemde olanlar kısa dönem** (`in-process`) and **işlemde olanlar uzun dönem** (`in-process-long`). Both use the Invitation Process columns and the same company workbook. Kısa lists visa periods of 1–30 days and exactly one month. Uzun lists every other in-process row, including more than one month, one year, a period with no length, and a blank visa period. The hidden (V) key stays the full in-process list.
 
 Invitation Process uses the Active Invitation columns, then two of its own. **Submitted to migration** is the date the file was handed to the migration service (`SUBMITTED_MIGRATION`, or the first `PROCESS_STARTED` when that handover step was not recorded). The cell stays empty until then. **Process state** is where the file is held: the office, the ministry of a review that has started, or the migration service. It is the location name, not the process step. Invitation validity stays in the column list and is empty because no invitation is issued yet. Open ListView omits Record number.
 

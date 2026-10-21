@@ -6858,10 +6858,16 @@
     "ru-RU": "Активное приглашение (V)"
   },
   "ReportDashboard.SubReport.in-process": {
-    "en": "Invitation Process (P)",
-    "tr-TR": "Davetiye Süreci (P)",
-    "tk-TM": "Işlenýän Çakylyklar",
-    "ru-RU": "Процесс приглашения (P)"
+    "en": "işlemde olanlar kısa dönem",
+    "tr-TR": "işlemde olanlar kısa dönem",
+    "tk-TM": "işlemde olanlar kısa dönem",
+    "ru-RU": "işlemde olanlar kısa dönem"
+  },
+  "ReportDashboard.SubReport.in-process-long": {
+    "en": "işlemde olanlar uzun dönem",
+    "tr-TR": "işlemde olanlar uzun dönem",
+    "tk-TM": "işlemde olanlar uzun dönem",
+    "ru-RU": "işlemde olanlar uzun dönem"
   },
   "ReportDashboard.SubReport.in-process-by-period-category-type": {
     "en": "Invitation Process (V)",

@@ -470,7 +470,8 @@ public static class ReportDashboardCatalog
             new() { Key = "ready-by-project", Label = "hazır kullanılabilecek davetiye" },
             new() { Key = "expired-invitation", Label = "Expired Invitation" },
             new() { Key = "cancelled-invitation", Label = "Cancelled Invitation" },
-            new() { Key = "in-process", Label = "Invitation Process (P)" },
+            new() { Key = "in-process", Label = "işlemde olanlar kısa dönem" },
+            new() { Key = InvitationInProcessLongKey, Label = "işlemde olanlar uzun dönem" },
             new() { Key = "used", Label = "Used Invitations" },
             // Process Result and Invitation Validity stay loadable by key. Officers do not see them.
         ],
@@ -547,6 +548,7 @@ public static class ReportDashboardCatalog
         (ReportDashboardCategory.Invitation, "expired-invitation"),
         (ReportDashboardCategory.Invitation, "cancelled-invitation"),
         (ReportDashboardCategory.Invitation, "in-process"),
+        (ReportDashboardCategory.Invitation, InvitationInProcessLongKey),
         (ReportDashboardCategory.Invitation, "used"),
         (ReportDashboardCategory.WorkPermit, "active-by-project"),
         (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat2Key),
@@ -716,9 +718,23 @@ public static class ReportDashboardCatalog
     public static bool IsInvitationReadySubReport(string? subReport) =>
         subReport is "ready-by-project" or "ready-by-period-category";
 
+    public const string InvitationInProcessLongKey = "in-process-long";
+
     /// <summary>Invitation Process: applications that produce an invitation and do not have one yet.</summary>
     public static bool IsInvitationProcessSubReport(string? subReport) =>
-        subReport is "in-process" or "in-process-by-period-category-type";
+        subReport is "in-process" or "in-process-by-period-category-type"
+            || IsInvitationProcessLongSubReport(subReport);
+
+    /// <summary>işlemde olanlar uzun dönem: Invitation Process rows whose visa period is longer than one month.</summary>
+    public static bool IsInvitationProcessLongSubReport(string? subReport) =>
+        string.Equals(subReport, InvitationInProcessLongKey, StringComparison.OrdinalIgnoreCase);
+
+    public static string? InvitationProcessSheetName(string? subReport) =>
+        string.Equals(subReport, "in-process", StringComparison.OrdinalIgnoreCase)
+            ? "işlemde olanlar kısa dönem"
+            : IsInvitationProcessLongSubReport(subReport)
+                ? "işlemde olanlar uzun dönem"
+                : null;
 
     /// <summary>Expired Invitation: issued, unused, expiration date already passed.</summary>
     public static bool IsInvitationExpiredSubReport(string? subReport) =>
@@ -835,6 +851,9 @@ public static class ReportDashboardCatalog
 
         if (category == ReportDashboardCategory.Invitation && IsInvitationCancelledSubReport(subReport))
             return ("VwRdInvitationCancelled_ListView", typeof(VwRdInvitationCancelled));
+
+        if (category == ReportDashboardCategory.Invitation && IsInvitationProcessLongSubReport(subReport))
+            return ("VwRdInvitationInProcessLong_ListView", typeof(VwRdInvitationInProcess));
 
         if (category == ReportDashboardCategory.Invitation && IsInvitationProcessSubReport(subReport))
             return ("VwRdInvitationInProcess_ListView", typeof(VwRdInvitationInProcess));
@@ -1104,6 +1123,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Invitation, "cancelled-invitation") =>
                 ["Full name", "Project", "Invitation #", "Issued date", "Valid Until", "Visa Period", "App #", "Date", "Migration"],
             (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
+            (ReportDashboardCategory.Invitation, InvitationInProcessLongKey) => InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "process-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
@@ -1249,6 +1269,14 @@ public static class ReportDashboardCatalog
             roleCriteria = IsAllPersonTypes(personType)
                 ? "[IsArchived] = False"
                 : $"[IsArchived] = False And [PersonRoleCode] = {(int)ToPersonRole(personType)}";
+            if (usesInvitationProcess
+                && !string.Equals(subReport, "in-process-by-period-category-type", StringComparison.OrdinalIgnoreCase))
+            {
+                var period = IsInvitationProcessLongSubReport(subReport)
+                    ? "[IsShortVisaPeriod] = False"
+                    : "[IsShortVisaPeriod] = True";
+                roleCriteria = $"({roleCriteria}) And ({period})";
+            }
         }
         else if (IsAllPersonTypes(personType))
         {

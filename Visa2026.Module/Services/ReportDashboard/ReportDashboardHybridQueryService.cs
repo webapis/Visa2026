@@ -57,6 +57,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.Invitation, "expired-invitation"),
         (ReportDashboardCategory.Invitation, "cancelled-invitation"),
         (ReportDashboardCategory.Invitation, "in-process"),
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationInProcessLongKey),
         (ReportDashboardCategory.Invitation, "in-process-by-period-category-type"),
         (ReportDashboardCategory.Invitation, "process-result"),
         (ReportDashboardCategory.Invitation, "process-result-by-period-category-type"),

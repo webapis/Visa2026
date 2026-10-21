@@ -164,7 +164,8 @@ public static class ReportDashboardExcelTemplateWorkbook
             columnWidths: MaglumatColumnWidths(category, subReport),
             integerColumn: IsWorkPermitCalisma(category, subReport) || IsVisaAktivPersoneller(category, subReport)
                 ? 12
-                : null);
+                : null,
+            sheetName: companyProcess ? ReportDashboardCatalog.InvitationProcessSheetName(subReport) : null);
     }
 
     public static bool IsInvitationCompanySheet(ReportDashboardCategory category, string? subReport) =>
@@ -488,13 +489,16 @@ public static class ReportDashboardExcelTemplateWorkbook
         bool totalLastColumn = false,
         IReadOnlyList<string>? headerLabels = null,
         double[]? columnWidths = null,
-        int? integerColumn = null)
+        int? integerColumn = null,
+        string? sheetName = null)
     {
         using var workbook = new XLWorkbook(new MemoryStream(template));
         if (!TryRanges(workbook, out var header, out var sample) || header == null || sample == null)
             return template;
 
         var sheet = sample.Worksheet;
+        if (!string.IsNullOrWhiteSpace(sheetName))
+            sheet.Name = UniqueSheetName(sheetName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         if (titleDate is { } date)
             RefreshTitleDate(sheet, header, date);
         var sampleRow = sample.RangeAddress.FirstAddress.RowNumber;

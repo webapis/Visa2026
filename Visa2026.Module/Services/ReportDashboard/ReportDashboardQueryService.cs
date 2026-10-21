@@ -1741,7 +1741,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         return subReport switch
         {
-            "in-process" or "in-process-by-period-category-type" => LoadInvitationInProcessFromView(
+            "in-process" or "in-process-by-period-category-type" or ReportDashboardCatalog.InvitationInProcessLongKey => LoadInvitationInProcessFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "process-result" or "process-result-by-period-category-type" => LoadInvitationProcessResult(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
@@ -2840,7 +2840,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     {
         var byPeriodCategoryType = string.Equals(
             subReport, "in-process-by-period-category-type", StringComparison.OrdinalIgnoreCase);
-        if (!byPeriodCategoryType)
+        var longTerm = ReportDashboardCatalog.IsInvitationProcessLongSubReport(subReport);
+        if (!byPeriodCategoryType && !longTerm)
             subReport = "in-process";
 
         if (objectSpace is not EFCoreObjectSpace efOs
@@ -2857,6 +2858,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 query = query.Where(r => r.PersonRoleCode == (int)role.Value);
 
             query = query.Where(r => !r.IsArchived);
+            if (!byPeriodCategoryType)
+                query = query.Where(r => r.IsShortVisaPeriod != longTerm);
 
             if (cutoff > DateTime.MinValue)
                 query = query.Where(r => r.ApplicationDate == null || r.ApplicationDate >= cutoff);

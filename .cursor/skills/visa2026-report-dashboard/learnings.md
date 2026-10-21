@@ -4,6 +4,16 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-21 — Invitation Process split by visa period
+
+**Ask:** Rename Invitation Process (P) to işlemde olanlar kısa dönem, and add işlemde olanlar uzun dönem with the same columns.
+
+**Now:** Kısa is visa periods of 1–30 days or exactly one month. Uzun is every other in-process row, including a period with no length and a blank visa period. The hidden (V) key stays the full list. Both tabs share the Invitation Process Excel workbook.
+
+**Prevent:** Do not put Invitation Process (P) back on the short tab. Do not send 1 (bir) aý to the long tab. Do not send rugsatnama möhletine çenli, wiza möhletine çenli, or a blank period to the short tab.
+
+**Files:** `vw_rd_invitation_in_process.postgres.sql`, `ReportDashboardCatalog.cs`, `ReportDashboardQueryService.cs`
+
 ## 2026-10-21 — one Excel file for selected reports
 
 **Ask:** Put the Excel reports in one file, and let the officer choose which reports are included.

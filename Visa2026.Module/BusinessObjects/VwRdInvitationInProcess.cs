@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects;
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(PersonName))]
-[ModelDefault("Caption", "Invitation Process")]
+[ModelDefault("Caption", "işlemde olanlar kısa dönem")]
 [ModelDefault("AllowEdit", "False")]
 [ModelDefault("AllowNew", "False")]
 [ModelDefault("AllowDelete", "False")]
@@ -131,6 +131,10 @@ public class VwRdInvitationInProcess
 
     [ModelDefault("Caption", "Visa Period")]
     public virtual string VisaPeriodLabel { get; set; }
+
+    /// <summary>Days up to 30, or exactly one month. Longer, open-ended, and blank periods are false.</summary>
+    [Browsable(false)]
+    public virtual bool IsShortVisaPeriod { get; set; }
 
     [Browsable(false)]
     public virtual DateTime? MigrationSubmittedDate { get; set; }

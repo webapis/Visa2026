@@ -11564,10 +11564,17 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.SubReport.in-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Invitation Process (P)",
-            ["tr-TR"] = "Davetiye Süreci (P)",
-            ["tk-TM"] = "Işlenýän Çakylyklar",
-            ["ru-RU"] = "Процесс приглашения (P)",
+            ["en-US"] = "işlemde olanlar kısa dönem",
+            ["tr-TR"] = "işlemde olanlar kısa dönem",
+            ["tk-TM"] = "işlemde olanlar kısa dönem",
+            ["ru-RU"] = "işlemde olanlar kısa dönem",
+        },
+        ["ReportDashboard.SubReport.in-process-long"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "işlemde olanlar uzun dönem",
+            ["tr-TR"] = "işlemde olanlar uzun dönem",
+            ["tk-TM"] = "işlemde olanlar uzun dönem",
+            ["ru-RU"] = "işlemde olanlar uzun dönem",
         },
         ["ReportDashboard.SubReport.in-process-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
