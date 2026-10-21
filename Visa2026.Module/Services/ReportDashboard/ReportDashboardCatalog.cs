@@ -761,18 +761,22 @@ public static class ReportDashboardCatalog
 
     private static string[] InvitationProcessHeaders()
     {
-        var approvalCount = ActiveInvitationApprovalHeaders.Length;
-        var headers = new string[7 + approvalCount];
-        headers[0] = "Full name";
-        headers[1] = "Project";
-        headers[2] = "Position";
-        headers[3] = "Firm";
-        headers[4] = "App #";
-        for (var i = 0; i < approvalCount; i++)
-            headers[5 + i] = ActiveInvitationApprovalHeaders[i];
-        headers[5 + approvalCount] = "Migration";
-        headers[6 + approvalCount] = "Process state";
-        return headers;
+        return
+        [
+            "Record number",
+            "Full name",
+            "Position",
+            "Project",
+            "Firm",
+            "Application number",
+            "Application date",
+            "Visa Period",
+            "Ministry approval",
+            "Submitted to migration",
+            "Migration",
+            "Invitation validity",
+            "Process state",
+        ];
     }
 
     /// <summary>Resolve ListView id + type for the active category / sub-report.</summary>

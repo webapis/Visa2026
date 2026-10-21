@@ -66,6 +66,15 @@ public class VwRdInvitationInProcess
     public virtual DateTime? ApplicationDate { get; set; }
 
     [NotMapped]
+    [ModelDefault("Caption", "Application number")]
+    public string ApplicationNumberLabel => ApplicationNumber?.Trim() ?? string.Empty;
+
+    [NotMapped]
+    [ModelDefault("Caption", "Application date")]
+    public string ApplicationDateLabel =>
+        ApplicationDate is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
+
+    [NotMapped]
     [ModelDefault("Caption", "App #")]
     public string ApplicationLabel
     {
@@ -120,6 +129,30 @@ public class VwRdInvitationInProcess
     [ModelDefault("Caption", "Approval 3")]
     public string Approval3Label => FormatApproval(Approval3Date, Approval3Number, Approval3Ministry);
 
+    [ModelDefault("Caption", "Visa Period")]
+    public virtual string VisaPeriodLabel { get; set; }
+
+    [Browsable(false)]
+    public virtual DateTime? MigrationSubmittedDate { get; set; }
+
+    [NotMapped]
+    [ModelDefault("Caption", "Submitted to migration")]
+    public string MigrationSubmittedLabel =>
+        MigrationSubmittedDate is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
+
+    [NotMapped]
+    [ModelDefault("Caption", "Ministry approval")]
+    public string LastApprovalLabel =>
+        FormatLastDecision(
+            Approval3Date, Approval3Number,
+            Approval2Date, Approval2Number,
+            Approval1Date, Approval1Number);
+
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [ModelDefault("Caption", "Invitation validity")]
+    public string InvitationValidityLabel => string.Empty;
+
     [Browsable(false)]
     public virtual DateTime? MigrationDate { get; set; }
 
@@ -165,6 +198,34 @@ public class VwRdInvitationInProcess
         if (lines.Count == 0)
             return name;
         lines.Add(name);
+        return string.Join("\n", lines);
+    }
+
+    private static string FormatLastDecision(
+        DateTime? laterDate, string? laterNumber,
+        DateTime? middleDate, string? middleNumber,
+        DateTime? earlierDate, string? earlierNumber)
+    {
+        if (HasDecision(laterDate, laterNumber))
+            return FormatDecision(laterDate, laterNumber);
+        if (HasDecision(middleDate, middleNumber))
+            return FormatDecision(middleDate, middleNumber);
+        if (HasDecision(earlierDate, earlierNumber))
+            return FormatDecision(earlierDate, earlierNumber);
+        return string.Empty;
+    }
+
+    private static bool HasDecision(DateTime? date, string? number) =>
+        date is { Year: > 1900 } || !string.IsNullOrWhiteSpace(number);
+
+    private static string FormatDecision(DateTime? date, string? number)
+    {
+        var lines = new List<string>();
+        if (date is { Year: > 1900 } value)
+            lines.Add(value.ToString("dd.MM.yyyy"));
+        var letter = number?.Trim() ?? string.Empty;
+        if (letter.Length > 0)
+            lines.Add("№ " + letter);
         return string.Join("\n", lines);
     }
 }

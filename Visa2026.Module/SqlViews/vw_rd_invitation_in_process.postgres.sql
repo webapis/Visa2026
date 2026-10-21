@@ -34,6 +34,11 @@ SELECT
             THEN a."ApplicationDate"
         ELSE NULL
     END                                                                     AS "ApplicationDate",
+    COALESCE(
+        NULLIF(BTRIM(vp."NameTm"), ''),
+        NULLIF(BTRIM(vp."Name"), ''),
+        ''
+    )                                                                       AS "VisaPeriodLabel",
     ministries."Approval1Date"                                              AS "Approval1Date",
     ministries."Approval1Number"                                            AS "Approval1Number",
     ministries."Approval1Ministry"                                          AS "Approval1Ministry",
@@ -66,11 +71,16 @@ SELECT
                     || '№ ' || COALESCE(mig_issued."ProcessNumber", mig_started."ProcessNumber", NULLIF(BTRIM(a."ProcessNumber"), ''))
             END
     END                                                                     AS "MigrationLabel",
+    CASE
+        WHEN mig_submit."Date" IS NOT NULL AND (mig_submit."Date")::date > DATE '1900-01-01'
+            THEN mig_submit."Date"
+        ELSE NULL
+    END                                                                     AS "MigrationSubmittedDate",
     COALESCE(apf."ChangeInvitations", FALSE)                                AS "ValidityExtended",
     COALESCE(
-        NULLIF(BTRIM(ast."NameTm"), ''),
-        NULLIF(BTRIM(ast."Name"), ''),
-        'Being Prepared'
+        NULLIF(BTRIM(held."NameTm"), ''),
+        NULLIF(BTRIM(held."Name"), ''),
+        'OFISDE'
     )                                                                       AS "StatusLabel",
     CASE
         WHEN ast."Code" IN ('1_REVIEW_APPROVED', '2_REVIEW_APPROVED', '3_REVIEW_APPROVED')
@@ -164,6 +174,15 @@ LEFT JOIN LATERAL (
 LEFT JOIN "ApplicationStates" ast
     ON ast."ID" = latest_ap."StateID"
    AND COALESCE(ast."GCRecord", 0) = 0
+LEFT JOIN "ApplicationLocations" held
+    ON COALESCE(held."GCRecord", 0) = 0
+   AND held."Code" = CASE
+        WHEN BTRIM(COALESCE(ast."Code", '')) IN ('SUBMITTED_MIGRATION', 'PROCESS_STARTED')
+            THEN 'AT_MIGRATION_SERVICE'
+        WHEN BTRIM(COALESCE(ast."Code", '')) ~ '^[1-5]_REVIEW_STARTED$'
+            THEN 'AT_THE_MINISTERY_' || left(BTRIM(ast."Code"), 1)
+        ELSE 'AT_OFFICE'
+    END
 LEFT JOIN LATERAL (
     SELECT
         MAX(dec.d) FILTER (WHERE legs.seq = 1) AS "Approval1Date",
@@ -241,6 +260,20 @@ LEFT JOIN LATERAL (
     ORDER BY pr."Date" DESC NULLS LAST, pr."ID" DESC
     LIMIT 1
 ) mig_started ON TRUE
+LEFT JOIN LATERAL (
+    SELECT pr."Date" AS "Date"
+    FROM "ApplicationProfileInstanceProgresses" pr
+    INNER JOIN "ApplicationStates" st
+        ON st."ID" = pr."StateID" AND COALESCE(st."GCRecord", 0) = 0
+    WHERE pr."ApplicationProfileInstanceID" = a."ID"
+      AND COALESCE(pr."GCRecord", 0) = 0
+      AND BTRIM(COALESCE(st."Code", '')) IN ('SUBMITTED_MIGRATION', 'PROCESS_STARTED')
+    ORDER BY
+        CASE WHEN BTRIM(COALESCE(st."Code", '')) = 'SUBMITTED_MIGRATION' THEN 0 ELSE 1 END,
+        pr."Date" ASC NULLS LAST,
+        pr."ID" ASC
+    LIMIT 1
+) mig_submit ON TRUE
 WHERE COALESCE(a."GCRecord", 0) = 0
   AND NOT EXISTS (
         SELECT 1

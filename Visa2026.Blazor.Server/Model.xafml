@@ -1825,15 +1825,17 @@
     <ListView Id="VwRdInvitationInProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationInProcess" Caption="Invitation Process (P)" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="240" Caption="Full name" IsNewNode="True" />
-        <ColumnInfo Id="DepartmentLabel" Index="1" Width="160" Caption="Project" IsNewNode="True" />
-        <ColumnInfo Id="PositionLabel" Index="2" Width="140" Caption="Position" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="1" Width="140" Caption="Position" IsNewNode="True" />
+        <ColumnInfo Id="DepartmentLabel" Index="2" Width="160" Caption="Project" IsNewNode="True" />
         <ColumnInfo Id="SubcontractorLabel" Index="3" Width="140" Caption="Firm" IsNewNode="True" />
-        <ColumnInfo Id="ApplicationLabel" Index="4" Width="110" Caption="App #" IsNewNode="True" />
-        <ColumnInfo Id="Approval1Label" Index="5" Width="120" Caption="Approval 1" IsNewNode="True" />
-        <ColumnInfo Id="Approval2Label" Index="6" Width="120" Caption="Approval 2" IsNewNode="True" />
-        <ColumnInfo Id="Approval3Label" Index="7" Width="120" Caption="Approval 3" IsNewNode="True" />
-        <ColumnInfo Id="MigrationLabel" Index="8" Width="130" Caption="Migration" IsNewNode="True" />
-        <ColumnInfo Id="StatusLabel" Index="9" Width="140" Caption="Process state" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationNumberLabel" Index="4" Width="110" Caption="Application number" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDateLabel" Index="5" Width="110" Caption="Application date" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="6" Width="100" Caption="Visa Period" IsNewNode="True" />
+        <ColumnInfo Id="LastApprovalLabel" Index="7" Width="140" Caption="Ministry approval" IsNewNode="True" />
+        <ColumnInfo Id="MigrationSubmittedLabel" Index="8" Width="130" Caption="Submitted to migration" IsNewNode="True" />
+        <ColumnInfo Id="MigrationLabel" Index="9" Width="130" Caption="Migration" IsNewNode="True" />
+        <ColumnInfo Id="InvitationValidityLabel" Index="10" Width="120" Caption="Invitation validity" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="11" Width="160" Caption="Process state" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdInvitationReadyByPeriodCategory_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationReady" Caption="Active Invitation (V)" IsNewNode="True">

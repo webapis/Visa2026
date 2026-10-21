@@ -2683,10 +2683,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     : (string.IsNullOrWhiteSpace(r.ChartStatusLabel)
                         ? "(No project)"
                         : r.ChartStatusLabel.Trim());
-                var processState = string.IsNullOrWhiteSpace(r.StatusLabel)
-                    ? "Being Prepared"
-                    : r.StatusLabel.Trim();
-                return (Row: r, Status: status, ProcessState: processState);
+                return (Row: r, Status: status);
             }).ToList();
 
             var groups = labeled
@@ -2713,15 +2710,14 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         ColumnB = r.SubcontractorLabel ?? string.Empty,
                         ColumnC = r.ApplicationNumber ?? string.Empty,
                         ColumnD = FormatDate(r.ApplicationDate),
-                        ColumnE = x.ProcessState,
+                        ColumnE = string.IsNullOrWhiteSpace(r.StatusLabel) ? "OFISDE" : r.StatusLabel.Trim(),
+                        ColumnG = FormatDate(r.MigrationSubmittedDate),
+                        ColumnH = r.VisaPeriodLabel ?? string.Empty,
                         ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),
-                        ColumnBadge = r.ValidityExtended ? "Validity extended" : string.Empty,
-                        MinistryCells =
-                        [
-                            FormatApproval(r.Approval1Date, r.Approval1Number, r.Approval1Ministry),
-                            FormatApproval(r.Approval2Date, r.Approval2Number, r.Approval2Ministry),
-                            FormatApproval(r.Approval3Date, r.Approval3Number, r.Approval3Ministry),
-                        ],
+                        LastApproval = FormatLastApproval(
+                            r.Approval1Date, r.Approval1Number,
+                            r.Approval2Date, r.Approval2Number,
+                            r.Approval3Date, r.Approval3Number),
                         Status = x.Status,
                         StatusCssClass = string.IsNullOrWhiteSpace(r.StatusCssClass) ? "st-pending" : r.StatusCssClass
                     };

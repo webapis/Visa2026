@@ -68,6 +68,47 @@ public static class ReportDashboardInvitationTableExcel
         "NOT",
     ];
 
+    /// <summary>
+    /// Company Invitation Process sheet. Submitted-to-migration date is filled only after that step.
+    /// Açıklama stays empty. Invitation validity and NOT are not on this sheet.
+    /// </summary>
+    public static readonly string[] ProcessCompanyHeaders =
+    [
+        "S.No",
+        "Adı Soyadı",
+        "Görevi",
+        "Projesi",
+        "Firması",
+        "Davetiye için yazı No",
+        "İlgili Bakanlığın Başvuru tarihi",
+        "Başvurulan vize süresi",
+        "İlgili Bakanlıktan çıkan tarih ve numarası",
+        "Yabancı Şubeye veriliş tarihi",
+        "Yabancı Şube CO No ve tarihi",
+        "Şu anki Durumu",
+        "Açıklama",
+    ];
+
+    public static List<string> ProcessCells(ReportDashboardPreviewRow row, int rowNumber)
+    {
+        return
+        [
+            rowNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Name,
+            row.ColumnA,
+            row.Department,
+            row.ColumnB,
+            row.ColumnC,
+            OfficerDay(row.ColumnD),
+            row.ColumnH,
+            CompanyLines(row.LastApproval, stripNumberMark: false),
+            OfficerDay(row.ColumnG),
+            CompanyLines(row.ColumnI, stripNumberMark: true),
+            CurrentStatus(row.ColumnE),
+            string.Empty,
+        ];
+    }
+
     public static List<string> ActiveCells(ReportDashboardPreviewRow row, int rowNumber, bool includeChartColumn)
     {
         var values = new List<string>
@@ -149,6 +190,16 @@ public static class ReportDashboardInvitationTableExcel
             row.ColumnD,
             row.ColumnI ?? string.Empty,
         ];
+    }
+
+    /// <summary>Company sheet writes the migration-service location in Turkish. The on-screen cell keeps the catalog name.</summary>
+    private static string CurrentStatus(string? label)
+    {
+        var value = label?.Trim() ?? string.Empty;
+        if (value.Equals("MIGRASIÝA GULLUGYNDA", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("MIGRASIYA GULLUGYNDA", StringComparison.OrdinalIgnoreCase))
+            return "Yabancıların şubesinde";
+        return value;
     }
 
     private static string OfficerDay(string? text)

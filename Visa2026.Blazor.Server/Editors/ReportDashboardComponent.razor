@@ -578,13 +578,13 @@
                             </button>
                         </div>
                         <div class="rd-listview-scroll @(IsOfficerFillTable ? "rd-listview-scroll--fill" : null)">
-                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + ((IsInvitationReadyTable || IsInvitationExpiredTable) ? " rd-invitation-active" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
+                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) ? " rd-invitation-active" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsInvitationReadyTable || IsInvitationExpiredTable) && i == 0;
-                                            var projectColumn = (IsInvitationReadyTable || IsInvitationExpiredTable) && i == 3;
+                                            var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) && i == 0;
+                                            var projectColumn = (IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) && i == 3;
                                             var positionColumn = IsWorkPermitMaglumatTable && i == 6;
                                             var educationColumn = IsWorkPermitMaglumatTable && (i == 4 || i == 5);
                                             var locationColumn = (IsWorkPermitMaglumat2Table && i == 9) || (IsWorkPermitMaglumat3Table && i == 10);
@@ -592,7 +592,7 @@
                                                 || (IsInvitationCancelledTable && (i == 4 || i == 8))
                                                 || ((IsInvitationReadyTable || IsInvitationExpiredTable) && (i == 8 || i == 9 || i == 10))
                                                 || (IsInvitationUsedTable && i >= 4 && i <= 8)
-                                                || (IsInvitationProcessTable && i >= 4 && i <= 8);
+                                                || (IsInvitationProcessTable && (i == 8 || i == 10 || i == 11));
                                             <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(projectColumn ? " rd-col-project" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
@@ -796,7 +796,7 @@
                                                 }
                                                 else
                                                 {
-                                                @if (IsInvitationReadyTable || IsInvitationExpiredTable)
+                                                @if (IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable)
                                                 {
                                                     <td class="rd-col-order">@DisplayIndex(row)</td>
                                                 }
@@ -919,6 +919,34 @@
                                                     {
                                                         <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                                     }
+                                                }
+                                                else if (IsInvitationProcessTable)
+                                                {
+                                                    <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                    <td class="@($"{ColumnClass(3)} rd-col-project")"><span class="rd-project-tag">@row.Department</span></td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnB</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnD</td>
+                                                    <td class="@ColumnClass(7)">@row.ColumnH</td>
+                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in (row.LastApproval ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@ColumnClass(9)">@row.ColumnG</td>
+                                                    <td class="@($"{ColumnClass(10)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in (row.ColumnI ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(11)} rd-col-stack")"></td>
+                                                    <td class="rd-cell-state">@StateLabel(row.ColumnE, row.StatusCssClass, true)</td>
                                                 }
                                                 else
                                                 {

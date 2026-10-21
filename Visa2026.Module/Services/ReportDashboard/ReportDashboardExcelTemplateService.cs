@@ -93,6 +93,15 @@ public static class ReportDashboardExcelTemplateService
                 : ReportDashboardExcelTemplateWorkbook.BuildInvitationCompanyStarter();
         }
 
+        if (ReportDashboardExcelTemplateWorkbook.IsInvitationProcessCompanySheet(category, subReport))
+        {
+            return template != null
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(
+                    template, ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length)
+                ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationProcessCompanyHeaders(template)
+                : ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessCompanyStarter();
+        }
+
         if (template != null
             && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count))
         {
@@ -130,6 +139,9 @@ public static class ReportDashboardExcelTemplateService
         {
             expectedColumns = ReportDashboardInvitationTableExcel.CompanyHeaders.Length;
         }
+
+        if (ReportDashboardExcelTemplateWorkbook.IsInvitationProcessCompanySheet(category, subReport))
+            expectedColumns = ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length;
 
         if (!ReportDashboardExcelTemplateWorkbook.MatchesColumns(content, expectedColumns))
             return ColumnsKey;

@@ -4,6 +4,26 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-21 — Process Excel status is Turkish
+
+**Ask:** Şu anki Durumu should say Yabancıların şubesinde, not MIGRASIÝA GULLUGYNDA.
+
+**Now:** The Invitation Process workbook writes that Turkish phrase when the file is at the migration service. The on-screen Process state cell still shows the catalog name.
+
+**Prevent:** Do not put the Turkmen location name back into Şu anki Durumu. Do not change the on-screen caption to the Turkish phrase.
+
+**Files:** `ReportDashboardInvitationTableExcel.cs`
+
+## 2026-10-20 — Invitation Process matches Active, plus location and handover date
+
+**Ask:** Match Invitation Process columns to Active Invitation. Process state shows where the file is held. Add Yabancı Şubeye veriliş tarihi when the application is submitted to the migration service.
+
+**Now:** The on-screen table is Active Invitation's columns, then Submitted to migration, with Process state last. Process state is the location name: office, the ministry while a review has started, or the migration service. The handover date is the `SUBMITTED_MIGRATION` progress date, or the first `PROCESS_STARTED` date when that step was not recorded. Excel uses the process company sheet, including a blank Açıklama. NOT stays off this report.
+
+**Prevent:** Do not put Being Prepared back in Process state. Do not fill the handover date before the file is submitted. Do not add NOT to this sheet.
+
+**Files:** `vw_rd_invitation_in_process.postgres.sql`, `ReportDashboardCatalog.cs`, `ReportDashboardComponent.razor`, `ReportDashboardInvitationTableExcel.cs`, `VwRdInvitationInProcess.cs`
+
 ## 2026-10-20 — NOT column shows days left
 
 **Ask:** Add a last column named NOT on the screen and in Excel. The cell is `geçerli gün sayı : 30`. Show it on Expired Invitation too. Use a stronger color when fewer days remain.

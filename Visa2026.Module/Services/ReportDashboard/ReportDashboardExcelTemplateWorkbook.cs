@@ -27,27 +27,41 @@ public static class ReportDashboardExcelTemplateWorkbook
         bool includeChartColumn)
     {
         var companyInvitation = IsInvitationCompanySheet(category, subReport) && !includeChartColumn;
+        var companyProcess = IsInvitationProcessCompanySheet(category, subReport);
         var columnCount = companyInvitation
             ? ReportDashboardInvitationTableExcel.CompanyHeaders.Length
-            : headers.Count;
+            : companyProcess
+                ? ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length
+                : headers.Count;
         var source = template != null && MatchesColumns(template, columnCount)
             ? template
             : companyInvitation
                 ? BuildInvitationCompanyStarter()
-                : BuildStarter(title, headers, SheetName(category, subReport));
+                : companyProcess
+                    ? BuildInvitationProcessCompanyStarter()
+                    : BuildStarter(title, headers, SheetName(category, subReport));
 
         var values = new List<IReadOnlyList<string>>(rows.Count);
         for (var index = 0; index < rows.Count; index++)
             values.Add(ValuesFor(category, subReport, rows[index], index + 1, headers.Count, includeChartColumn));
 
         var titleDate = IsWorkPermitMaglumat(category, subReport) ? DateTime.Today : (DateTime?)null;
-        return Fill(source, values, titleDate, companyInvitation);
+        var companyHeaders = companyInvitation
+            ? ReportDashboardInvitationTableExcel.CompanyHeaders
+            : companyProcess
+                ? ReportDashboardInvitationTableExcel.ProcessCompanyHeaders
+                : null;
+        return Fill(source, values, titleDate, companyHeaders != null, colorLastColumn: companyInvitation, companyHeaders);
     }
 
     public static bool IsInvitationCompanySheet(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.Invitation
         && (ReportDashboardCatalog.IsInvitationReadySubReport(subReport)
             || ReportDashboardCatalog.IsInvitationExpiredSubReport(subReport));
+
+    public static bool IsInvitationProcessCompanySheet(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationProcessSubReport(subReport);
 
     public static byte[] ApplyInvitationCompanyHeaders(byte[] template)
     {
@@ -66,9 +80,28 @@ public static class ReportDashboardExcelTemplateWorkbook
         }
     }
 
-    private static void WriteInvitationCompanyHeaders(IXLWorksheet sheet, IXLRange header)
+    public static byte[] ApplyInvitationProcessCompanyHeaders(byte[] template)
     {
-        var headers = ReportDashboardInvitationTableExcel.CompanyHeaders;
+        try
+        {
+            using var workbook = new XLWorkbook(new MemoryStream(template));
+            if (!TryRanges(workbook, out var header, out _) || header == null)
+                return BuildInvitationProcessCompanyStarter();
+
+            WriteCompanyHeaders(header.Worksheet, header, ReportDashboardInvitationTableExcel.ProcessCompanyHeaders);
+            return Save(workbook);
+        }
+        catch (Exception)
+        {
+            return BuildInvitationProcessCompanyStarter();
+        }
+    }
+
+    private static void WriteInvitationCompanyHeaders(IXLWorksheet sheet, IXLRange header) =>
+        WriteCompanyHeaders(sheet, header, ReportDashboardInvitationTableExcel.CompanyHeaders);
+
+    private static void WriteCompanyHeaders(IXLWorksheet sheet, IXLRange header, string[] headers)
+    {
         var row = header.RangeAddress.FirstAddress.RowNumber;
         var startColumn = header.RangeAddress.FirstAddress.ColumnNumber;
         var count = Math.Min(headers.Length, header.ColumnCount());
@@ -114,6 +147,56 @@ public static class ReportDashboardExcelTemplateWorkbook
         }
 
         double[] widths = [8, 22, 38, 22, 18, 16, 16, 14, 24, 20, 18, 26];
+        for (var column = 0; column < columnCount; column++)
+            sheet.Column(column + 1).Width = widths[column];
+
+        sheet.SheetView.FreezeRows(1);
+        sheet.Range(1, 1, 2, columnCount).SetAutoFilter();
+        sheet.SheetView.ZoomScale = 100;
+
+        workbook.DefinedNames.Add(HeaderName, header);
+        workbook.DefinedNames.Add(SampleName, sample);
+        return Save(workbook);
+    }
+
+    public static byte[] BuildInvitationProcessCompanyStarter()
+    {
+        var headers = ReportDashboardInvitationTableExcel.ProcessCompanyHeaders;
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add("Invitation Process");
+        var columnCount = headers.Length;
+
+        for (var column = 0; column < columnCount; column++)
+            sheet.Cell(1, column + 1).Value = headers[column];
+
+        var header = sheet.Range(1, 1, 1, columnCount);
+        header.Style.Font.FontName = "Calibri";
+        header.Style.Font.FontSize = 11;
+        header.Style.Font.Bold = true;
+        header.Style.Alignment.WrapText = true;
+        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml("#F2F2F2");
+        header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        sheet.Row(1).Height = 48;
+
+        var sample = sheet.Range(2, 1, 2, columnCount);
+        sample.Style.Font.FontName = "Calibri";
+        sample.Style.Font.FontSize = 11;
+        sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        for (var column = 1; column <= columnCount; column++)
+        {
+            var horizontal = column is 2 or 3 or 4 or 5 or 12 or 13
+                ? XLAlignmentHorizontalValues.Left
+                : XLAlignmentHorizontalValues.Center;
+            sample.Cell(1, column).Style.Alignment.Horizontal = horizontal;
+        }
+
+        double[] widths = [8, 22, 38, 22, 18, 16, 16, 14, 24, 18, 20, 22, 16];
         for (var column = 0; column < columnCount; column++)
             sheet.Column(column + 1).Width = widths[column];
 
@@ -209,12 +292,18 @@ public static class ReportDashboardExcelTemplateWorkbook
             return ReportDashboardInvitationTableExcel.UsedCells(row, includeChartColumn);
 
         if (ReportDashboardCatalog.IsInvitationProcessSubReport(subReport))
-            return ReportDashboardInvitationTableExcel.Cells(row, includeChartColumn: false, processTable: true);
+            return ReportDashboardInvitationTableExcel.ProcessCells(row, rowNumber);
 
         return GenericCells(row, headerCount);
     }
 
-    private static byte[] Fill(byte[] template, IReadOnlyList<IReadOnlyList<string>> rows, DateTime? titleDate, bool companySheet = false)
+    private static byte[] Fill(
+        byte[] template,
+        IReadOnlyList<IReadOnlyList<string>> rows,
+        DateTime? titleDate,
+        bool companySheet = false,
+        bool colorLastColumn = false,
+        string[]? companyHeaders = null)
     {
         using var workbook = new XLWorkbook(new MemoryStream(template));
         if (!TryRanges(workbook, out var header, out var sample) || header == null || sample == null)
@@ -244,14 +333,15 @@ public static class ReportDashboardExcelTemplateWorkbook
             WriteRow(sheet, rowNumber, columnCount, rows[index]);
             if (companySheet)
             {
-                ColorRemainingDays(sheet.Cell(rowNumber, columnCount));
+                if (colorLastColumn)
+                    ColorRemainingDays(sheet.Cell(rowNumber, columnCount));
                 FitWrappedRow(sheet, rowNumber, columnCount);
             }
         }
 
         if (companySheet)
         {
-            WriteInvitationCompanyHeaders(sheet, header);
+            WriteCompanyHeaders(sheet, header, companyHeaders ?? ReportDashboardInvitationTableExcel.CompanyHeaders);
             var lastRow = sampleRow + Math.Max(0, rows.Count - 1);
             sheet.Range(header.RangeAddress.FirstAddress.RowNumber, 1, lastRow, columnCount).SetAutoFilter();
         }
