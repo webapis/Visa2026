@@ -59,6 +59,12 @@
             <button type="button"
                     class="rd-refresh-btn"
                     disabled="@ShowLoading"
+                    @onclick="OpenExcelBundle">
+                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenSelectedInExcel")
+            </button>
+            <button type="button"
+                    class="rd-refresh-btn"
+                    disabled="@ShowLoading"
                     title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RefreshTitle")"
                     @onclick="OnRefresh">
                 <span class="rd-refresh-icon" aria-hidden="true">&#8635;</span>
@@ -578,13 +584,14 @@
                             </button>
                         </div>
                         <div class="rd-listview-scroll @(IsOfficerFillTable ? "rd-listview-scroll--fill" : null)">
-                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) ? " rd-invitation-active" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
+                            <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable || IsVisaUzatilanlarTable) ? " rd-invitation-active" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
                                 <thead>
                                     <tr>
                                         @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) && i == 0;
-                                            var projectColumn = (IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) && i == 3;
+                                            var orderColumn = (IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsCalismaSheetTable || IsVisaUzatilanlarTable || IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable) && i == 0;
+                                            var projectColumn = ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable || IsVisaUzatilanlarTable) && i == 3)
+                                                || (IsCalismaSheetTable && i == 1);
                                             var positionColumn = IsWorkPermitMaglumatTable && i == 6;
                                             var educationColumn = IsWorkPermitMaglumatTable && (i == 4 || i == 5);
                                             var locationColumn = (IsWorkPermitMaglumat2Table && i == 9) || (IsWorkPermitMaglumat3Table && i == 10);
@@ -592,7 +599,8 @@
                                                 || (IsInvitationCancelledTable && (i == 4 || i == 8))
                                                 || ((IsInvitationReadyTable || IsInvitationExpiredTable) && (i == 8 || i == 9 || i == 10))
                                                 || (IsInvitationUsedTable && i >= 4 && i <= 8)
-                                                || (IsInvitationProcessTable && (i == 8 || i == 10 || i == 11));
+                                                || (IsInvitationProcessTable && (i == 8 || i == 10 || i == 11))
+                                                || (IsVisaUzatilanlarTable && (i == 9 || i == 11));
                                             <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(projectColumn ? " rd-col-project" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
@@ -777,6 +785,61 @@
                                                         </div>
                                                     </td>
                                                     <td class="@ColumnClass(IsWorkPermitMaglumat3Table ? 12 : IsWorkPermitMaglumat2Table ? 11 : 10)"></td>
+                                                }
+                                                else if (IsVisaUzatilanlarTable)
+                                                {
+                                                    <td class="rd-col-order">@DisplayIndex(row)</td>
+                                                    @for (var cellIndex = 0; cellIndex < row.UzatilanlarCells.Count; cellIndex++)
+                                                    {
+                                                        var text = row.UzatilanlarCells[cellIndex];
+                                                        var css = $"{ColumnClass(cellIndex + 1)} rd-col-stack" + (cellIndex == 2 ? " rd-col-project" : "");
+                                                        <td class="@css">
+                                                            <div class="rd-cell-stack">
+                                                                @foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                                {
+                                                                    <span>@line</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    }
+                                                }
+                                                else if (IsCalismaSheetTable)
+                                                {
+                                                    <td class="rd-col-order">@DisplayIndex(row)</td>
+                                                    @for (var cellIndex = 0; cellIndex < row.CalismaCells.Count; cellIndex++)
+                                                    {
+                                                        var text = row.CalismaCells[cellIndex];
+                                                        var css = $"{ColumnClass(cellIndex + 1)} rd-col-stack" + (cellIndex == 0 ? " rd-col-project" : "");
+                                                        if (cellIndex == 8)
+                                                        {
+                                                            <td class="@css" @onclick:stopPropagation="true">
+                                                                @if (row.VisaId is { } calismaVisaId && calismaVisaId != Guid.Empty && !string.IsNullOrEmpty(row.VisaNumber))
+                                                                {
+                                                                    <button type="button"
+                                                                            class="rd-invitation-link"
+                                                                            title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenVisaCopy")"
+                                                                            @onclick="() => OnVisaCopies(row)">
+                                                                        @row.VisaNumber
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span>@text</span>
+                                                                }
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="@css">
+                                                                <div class="rd-cell-stack">
+                                                                    @foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                                    {
+                                                                        <span>@line</span>
+                                                                    }
+                                                                </div>
+                                                            </td>
+                                                        }
+                                                    }
                                                 }
                                                 else if (IsWorkPermitSanawTable)
                                                 {
@@ -1143,6 +1206,41 @@
             </div>
         </div>
     </div>
+    @if (_excelBundleOpen)
+    {
+        <div class="rd-bundle-backdrop" @onclick="CloseExcelBundle"></div>
+        <div class="rd-bundle-dialog" role="dialog" aria-modal="true">
+            <div class="rd-bundle-title">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleTitle")</div>
+            <div class="rd-bundle-list">
+                @{
+                    ReportDashboardCategory? bundleCategory = null;
+                }
+                @foreach (var item in _excelBundle)
+                {
+                    if (bundleCategory != item.Category)
+                    {
+                        bundleCategory = item.Category;
+                        <div class="rd-bundle-group">@ReportDashboardCatalog.CategoryLabel(item.Category)</div>
+                    }
+                    <label class="rd-bundle-row">
+                        <input type="checkbox" @bind="item.Selected" />
+                        <span>@item.Label</span>
+                    </label>
+                }
+            </div>
+            <div class="rd-bundle-actions">
+                <button type="button" class="rd-refresh-btn" @onclick="CloseExcelBundle">
+                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleCancel")
+                </button>
+                <button type="button"
+                        class="rd-refresh-btn"
+                        disabled="@(!_excelBundle.Any(item => item.Selected))"
+                        @onclick="DownloadExcelBundleAsync">
+                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleCreate")
+                </button>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -1652,6 +1750,95 @@
     }
 
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
+    private bool _excelBundleOpen;
+    private readonly List<ExcelBundleChoice> _excelBundle = [];
+
+    private void OpenExcelBundle()
+    {
+        if (ShowLoading)
+            return;
+
+        _excelBundle.Clear();
+        foreach (var (category, key) in ReportDashboardCatalog.ExcelBundleReports())
+        {
+            _excelBundle.Add(new ExcelBundleChoice
+            {
+                Category = category,
+                Key = key,
+                Label = ReportDashboardCatalog.ExcelBundleLabel(category, key),
+                Selected = true
+            });
+        }
+
+        _excelBundleOpen = true;
+    }
+
+    private void CloseExcelBundle() => _excelBundleOpen = false;
+
+    private async Task DownloadExcelBundleAsync()
+    {
+        var selected = _excelBundle.Where(item => item.Selected).ToList();
+        if (selected.Count == 0 || FileDownloader == null)
+            return;
+
+        _excelBundleOpen = false;
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenSelectedInExcel"));
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
+            var parts = new List<(string SheetName, byte[] Workbook)>(selected.Count);
+            foreach (var item in selected)
+            {
+                var panel = ReportQuery.LoadPanel(
+                    objectSpace,
+                    PersonType,
+                    item.Category,
+                    ProjectKey,
+                    ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+                    item.Key,
+                    IncludeArchivedPersons,
+                    OneLastValidVisaPerPerson,
+                    OneLastValidWorkPermitPerPerson,
+                    IncludeCompletedApplicationProcesses,
+                    IncludeCancelledApplicationProcesses,
+                    ValidVisaPersonsOnly,
+                    searchTerm: null);
+                var bytes = ReportDashboardExcelTemplateService.Export(
+                    objectSpace,
+                    item.Category,
+                    item.Key,
+                    item.Label,
+                    panel.TableHeaders,
+                    panel.PreviewRows,
+                    includeChartColumn: false);
+                parts.Add((item.Label, bytes));
+            }
+
+            var combined = ReportDashboardExcelTemplateWorkbook.Combine(parts);
+            await using var stream = new MemoryStream(combined);
+            await FileDownloader.DownloadAsync(
+                "reports.xlsx",
+                stream,
+                ReportDashboardInvitationTableExcel.ContentType);
+        }
+        catch (Exception ex)
+        {
+            _templateNotice = ex.Message;
+        }
+        finally
+        {
+            _localLoading = false;
+        }
+    }
+
+    private sealed class ExcelBundleChoice
+    {
+        public ReportDashboardCategory Category { get; init; }
+        public string Key { get; init; } = string.Empty;
+        public string Label { get; init; } = string.Empty;
+        public bool Selected { get; set; }
+    }
+
     private async Task OnExcel()
     {
         if (IsExcelTemplateReport)
@@ -1703,6 +1890,7 @@
     [Inject] private IVisaPreviewSlotService PreviewSlot { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+    [Inject] private IReportDashboardQueryService ReportQuery { get; set; } = null!;
 
     private bool _invitationChartOpen;
     private string _invitationChartSubReport = string.Empty;
@@ -1765,6 +1953,8 @@
             || ContainsTerm(row.WorkPermitEnd, term)
             || WorkPermitMatches(row, term)
             || SanawMatches(row, term)
+            || CalismaMatches(row, term)
+            || UzatilanlarMatches(row, term)
             || ContainsTerm(row.Status, term))
             return true;
 
@@ -1790,7 +1980,13 @@
 
         var headers = Panel.TableHeaders;
         var subReport = Panel.SubReport ?? SubReport;
-        var label = IsWorkPermitSanawTable
+        var label = IsVisaUzatilanlarTable
+            ? "uzatılanlar"
+            : IsVisaAktivTable
+            ? "aktiv personeller"
+            : IsWorkPermitCalismaTable
+            ? "çalışma izni listesi"
+            : IsWorkPermitSanawTable
             ? ReportDashboardWorkPermitSanawExcel.TitleText
             : IsWorkPermitMaglumatTable
             ? ReportDashboardWorkPermitMaglumatExcel.Title(DateTime.Today)
@@ -1803,7 +1999,13 @@
             : ReportDashboardExcelTemplateService.Export(
                 objectSpace, Category, subReport, label, headers, DisplayedRows, ShowInvitationChartColumn);
 
-        var fileName = IsWorkPermitSanawTable
+        var fileName = IsVisaUzatilanlarTable
+            ? (templateOnly ? "uzatılanlar template" : "uzatılanlar")
+            : IsVisaAktivTable
+            ? (templateOnly ? "aktiv personeller template" : "aktiv personeller")
+            : IsWorkPermitCalismaTable
+            ? (templateOnly ? "çalışma izni listesi template" : "çalışma izni listesi")
+            : IsWorkPermitSanawTable
             ? (templateOnly ? "Sanaw template" : "Sanaw")
             : IsWorkPermitMaglumat3Table
             ? (templateOnly ? "Goşmaça barjak ýerleri template" : "Goşmaça barjak ýerleri")
@@ -1900,6 +2102,20 @@
     private bool IsInvitationOfficerTable =>
         IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationCancelledTable || IsInvitationProcessTable || IsInvitationUsedTable;
 
+    private bool IsVisaUzatilanlarTable =>
+        Category == ReportDashboardCategory.VisaExtension
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsVisaAktivTable =>
+        Category == ReportDashboardCategory.VisaExtension
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsCalismaSheetTable => IsWorkPermitCalismaTable || IsVisaAktivTable;
+
+    private bool IsWorkPermitCalismaTable =>
+        Category == ReportDashboardCategory.WorkPermit
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase);
+
     private bool IsWorkPermitSanawTable =>
         Category == ReportDashboardCategory.WorkPermit
         && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
@@ -1918,7 +2134,7 @@
         && (string.Equals(Panel?.SubReport ?? SubReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
             || IsWorkPermitMaglumat2Table);
 
-    private bool IsOfficerFillTable => IsInvitationOfficerTable || IsWorkPermitMaglumatTable || IsWorkPermitSanawTable;
+    private bool IsOfficerFillTable => IsInvitationOfficerTable || IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsWorkPermitCalismaTable || IsVisaAktivTable || IsVisaUzatilanlarTable;
 
     private bool ShowInvitationChartColumn =>
         IsInvitationReadyTable
@@ -1991,6 +2207,20 @@
             if (text.Length > 0)
                 yield return text;
         }
+    }
+
+    private static bool UzatilanlarMatches(ReportDashboardPreviewRow row, string term) =>
+        row.UzatilanlarCells.Any(cell => ContainsTerm(cell, term));
+
+    private static bool CalismaMatches(ReportDashboardPreviewRow row, string term)
+    {
+        foreach (var cell in row.CalismaCells)
+        {
+            if (ContainsTerm(cell, term))
+                return true;
+        }
+
+        return false;
     }
 
     private static bool SanawMatches(ReportDashboardPreviewRow row, string term)

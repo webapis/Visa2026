@@ -1,4 +1,5 @@
 -- Visa On Extension (P): unfinished extension apps; StatusLabel = Project · State.
+DROP VIEW IF EXISTS vw_rd_visa_uzatilanlar;
 DROP VIEW IF EXISTS vw_rd_visa_on_extension;
 CREATE VIEW vw_rd_visa_on_extension AS
 SELECT

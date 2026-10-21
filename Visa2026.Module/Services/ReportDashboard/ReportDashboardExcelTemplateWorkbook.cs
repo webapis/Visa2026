@@ -19,6 +19,93 @@ public static class ReportDashboardExcelTemplateWorkbook
     public const string CompanyFontName = "Times New Roman";
     private const string HeaderBackground = "#D9D9D9";
 
+    /// <summary>One workbook. Each part is already a filled report; its first sheet is copied.</summary>
+    public static byte[] Combine(IReadOnlyList<(string SheetName, byte[] Workbook)> sheets)
+    {
+        using var target = new XLWorkbook();
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (sheetName, workbook) in sheets)
+        {
+            using var source = new XLWorkbook(new MemoryStream(workbook));
+            CopySheet(source.Worksheets.First(), target.Worksheets.Add(UniqueSheetName(sheetName, used)));
+        }
+
+        if (target.Worksheets.Count == 0)
+            target.Worksheets.Add("Report");
+        return Save(target);
+    }
+
+    private static void CopySheet(IXLWorksheet source, IXLWorksheet dest)
+    {
+        dest.Style.Font.FontName = source.Style.Font.FontName;
+        dest.Style.Font.FontSize = source.Style.Font.FontSize;
+        var used = source.RangeUsed();
+        if (used == null)
+            return;
+
+        var firstColumn = used.RangeAddress.FirstAddress.ColumnNumber;
+        var lastColumn = used.RangeAddress.LastAddress.ColumnNumber;
+        var firstRow = used.RangeAddress.FirstAddress.RowNumber;
+        var lastRow = used.RangeAddress.LastAddress.RowNumber;
+        for (var column = firstColumn; column <= lastColumn; column++)
+            dest.Column(column).Width = source.Column(column).Width;
+        for (var row = firstRow; row <= lastRow; row++)
+        {
+            dest.Row(row).Height = source.Row(row).Height;
+            for (var column = firstColumn; column <= lastColumn; column++)
+                CopyCell(source.Cell(row, column), dest.Cell(row, column));
+        }
+
+        foreach (var merged in source.MergedRanges)
+        {
+            var address = merged.RangeAddress;
+            dest.Range(
+                address.FirstAddress.RowNumber,
+                address.FirstAddress.ColumnNumber,
+                address.LastAddress.RowNumber,
+                address.LastAddress.ColumnNumber).Merge();
+        }
+
+        if (source.AutoFilter.IsEnabled && source.AutoFilter.Range != null)
+        {
+            var filter = source.AutoFilter.Range.RangeAddress;
+            dest.Range(
+                filter.FirstAddress.RowNumber,
+                filter.FirstAddress.ColumnNumber,
+                filter.LastAddress.RowNumber,
+                filter.LastAddress.ColumnNumber).SetAutoFilter();
+        }
+
+        if (source.SheetView.SplitRow > 0)
+            dest.SheetView.FreezeRows(source.SheetView.SplitRow);
+    }
+
+    private static void CopyCell(IXLCell source, IXLCell dest)
+    {
+        dest.Value = source.Value;
+        var from = source.Style;
+        var to = dest.Style;
+        to.Font.FontName = from.Font.FontName;
+        to.Font.FontSize = from.Font.FontSize;
+        to.Font.Bold = from.Font.Bold;
+        to.Font.Italic = from.Font.Italic;
+        to.Font.FontColor = from.Font.FontColor;
+        to.Fill.PatternType = from.Fill.PatternType;
+        to.Fill.BackgroundColor = from.Fill.BackgroundColor;
+        to.Alignment.Horizontal = from.Alignment.Horizontal;
+        to.Alignment.Vertical = from.Alignment.Vertical;
+        to.Alignment.WrapText = from.Alignment.WrapText;
+        to.NumberFormat.Format = from.NumberFormat.Format;
+        to.Border.TopBorder = from.Border.TopBorder;
+        to.Border.BottomBorder = from.Border.BottomBorder;
+        to.Border.LeftBorder = from.Border.LeftBorder;
+        to.Border.RightBorder = from.Border.RightBorder;
+        to.Border.TopBorderColor = from.Border.TopBorderColor;
+        to.Border.BottomBorderColor = from.Border.BottomBorderColor;
+        to.Border.LeftBorderColor = from.Border.LeftBorderColor;
+        to.Border.RightBorderColor = from.Border.RightBorderColor;
+    }
+
     public static byte[] Export(
         byte[]? template,
         string title,
@@ -41,7 +128,13 @@ public static class ReportDashboardExcelTemplateWorkbook
                 ? BuildInvitationCompanyStarter()
                 : companyProcess
                     ? BuildInvitationProcessCompanyStarter()
-                    : BuildStarter(title, headers, SheetName(category, subReport), CompanyFont(category));
+                    : IsWorkPermitCalisma(category, subReport)
+                        ? BuildCalismaListesiStarter()
+                        : IsVisaAktivPersoneller(category, subReport)
+                            ? BuildCalismaListesiStarter("aktiv personeller")
+                            : IsVisaUzatilanlar(category, subReport)
+                                ? BuildUzatilanlarStarter()
+                                : BuildStarter(title, headers, SheetName(category, subReport), CompanyFont(category));
 
         var values = new List<IReadOnlyList<string>>(rows.Count);
         for (var index = 0; index < rows.Count; index++)
@@ -60,10 +153,18 @@ public static class ReportDashboardExcelTemplateWorkbook
             companyHeaders != null,
             colorLastColumn: companyInvitation,
             companyHeaders,
-            CompanyFont(category),
+            CompanyFont(category) || IsVisaAktivPersoneller(category, subReport) || IsVisaUzatilanlar(category, subReport),
             totalLastColumn: IsWorkPermitSanaw(category, subReport),
-            headerLabels: IsWorkPermitSanaw(category, subReport) ? headers : null,
-            columnWidths: MaglumatColumnWidths(category, subReport));
+            headerLabels: IsWorkPermitSanaw(category, subReport)
+                || IsWorkPermitCalisma(category, subReport)
+                || IsVisaAktivPersoneller(category, subReport)
+                || IsVisaUzatilanlar(category, subReport)
+                ? headers
+                : null,
+            columnWidths: MaglumatColumnWidths(category, subReport),
+            integerColumn: IsWorkPermitCalisma(category, subReport) || IsVisaAktivPersoneller(category, subReport)
+                ? 12
+                : null);
     }
 
     public static bool IsInvitationCompanySheet(ReportDashboardCategory category, string? subReport) =>
@@ -231,6 +332,54 @@ public static class ReportDashboardExcelTemplateWorkbook
         return Save(workbook);
     }
 
+    public static byte[] BuildCalismaListesiStarter(string? sheetName = null)
+    {
+        var headers = ReportDashboardWorkPermitCalismaExcel.Headers;
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add(string.IsNullOrWhiteSpace(sheetName) ? "çalışma izni listesi" : sheetName);
+        var columnCount = headers.Length;
+
+        for (var column = 0; column < columnCount; column++)
+            sheet.Cell(1, column + 1).Value = headers[column];
+
+        var header = sheet.Range(1, 1, 1, columnCount);
+        header.Style.Font.FontName = CompanyFontName;
+        header.Style.Font.FontSize = 11;
+        header.Style.Font.Bold = true;
+        header.Style.Alignment.WrapText = true;
+        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
+        header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.OutsideBorderColor = XLColor.Black;
+        header.Style.Border.InsideBorderColor = XLColor.Black;
+        sheet.Row(1).Height = 32;
+
+        var sample = sheet.Range(2, 1, 2, columnCount);
+        sample.Style.Font.FontName = CompanyFontName;
+        sample.Style.Font.FontSize = 11;
+        sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.OutsideBorderColor = XLColor.Black;
+        sample.Style.Border.InsideBorderColor = XLColor.Black;
+
+        double[] widths = [8, 16, 18, 22, 14, 16, 16, 28, 16, 14, 16, 12, 36, 12];
+        for (var column = 0; column < columnCount; column++)
+            sheet.Column(column + 1).Width = widths[column];
+
+        sheet.SheetView.FreezeRows(1);
+        sheet.Range(1, 1, 2, columnCount).SetAutoFilter();
+        sheet.SheetView.ZoomScale = 100;
+
+        workbook.DefinedNames.Add(HeaderName, header);
+        workbook.DefinedNames.Add(SampleName, sample);
+        ApplyCompanyFont(sheet);
+        return Save(workbook);
+    }
+
     public static byte[] BuildStarter(string title, IReadOnlyList<string> headers, string? sheetName = null, bool companyFont = false)
     {
         using var workbook = new XLWorkbook();
@@ -299,6 +448,10 @@ public static class ReportDashboardExcelTemplateWorkbook
         int headerCount,
         bool includeChartColumn)
     {
+        if (IsVisaUzatilanlar(category, subReport))
+            return ReportDashboardVisaUzatilanlarExcel.Cells(row, rowNumber);
+        if (IsWorkPermitCalisma(category, subReport) || IsVisaAktivPersoneller(category, subReport))
+            return ReportDashboardWorkPermitCalismaExcel.Cells(row, rowNumber);
         if (IsWorkPermitSanaw(category, subReport))
             return ReportDashboardWorkPermitSanawExcel.Cells(row, rowNumber);
         if (IsWorkPermitMaglumat3(category, subReport))
@@ -334,7 +487,8 @@ public static class ReportDashboardExcelTemplateWorkbook
         bool companyFont = false,
         bool totalLastColumn = false,
         IReadOnlyList<string>? headerLabels = null,
-        double[]? columnWidths = null)
+        double[]? columnWidths = null,
+        int? integerColumn = null)
     {
         using var workbook = new XLWorkbook(new MemoryStream(template));
         if (!TryRanges(workbook, out var header, out var sample) || header == null || sample == null)
@@ -369,7 +523,7 @@ public static class ReportDashboardExcelTemplateWorkbook
         for (var index = 0; index < rows.Count; index++)
         {
             var rowNumber = sampleRow + index;
-            WriteRow(sheet, rowNumber, columnCount, rows[index]);
+            WriteRow(sheet, rowNumber, columnCount, rows[index], integerColumn);
             if (totalLastColumn)
                 WriteCountCell(sheet.Cell(rowNumber, columnCount), rows[index]);
             if (companySheet)
@@ -479,6 +633,66 @@ public static class ReportDashboardExcelTemplateWorkbook
             sheet.Column(column + 1).Width = widths[column];
     }
 
+    public static byte[] BuildUzatilanlarStarter()
+    {
+        var headers = ReportDashboardVisaUzatilanlarExcel.Headers;
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add("uzatılanlar");
+        var columnCount = headers.Length;
+
+        for (var column = 0; column < columnCount; column++)
+            sheet.Cell(1, column + 1).Value = headers[column];
+
+        var header = sheet.Range(1, 1, 1, columnCount);
+        header.Style.Font.FontName = CompanyFontName;
+        header.Style.Font.FontSize = 11;
+        header.Style.Font.Bold = true;
+        header.Style.Alignment.WrapText = true;
+        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
+        header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.OutsideBorderColor = XLColor.Black;
+        header.Style.Border.InsideBorderColor = XLColor.Black;
+        sheet.Row(1).Height = 32;
+
+        var sample = sheet.Range(2, 1, 2, columnCount);
+        sample.Style.Font.FontName = CompanyFontName;
+        sample.Style.Font.FontSize = 11;
+        sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.OutsideBorderColor = XLColor.Black;
+        sample.Style.Border.InsideBorderColor = XLColor.Black;
+
+        var widths = ReportDashboardVisaUzatilanlarExcel.Widths;
+        for (var column = 0; column < columnCount; column++)
+            sheet.Column(column + 1).Width = widths[column];
+
+        sheet.SheetView.FreezeRows(1);
+        sheet.Range(1, 1, 2, columnCount).SetAutoFilter();
+        sheet.SheetView.ZoomScale = 100;
+
+        workbook.DefinedNames.Add(HeaderName, header);
+        workbook.DefinedNames.Add(SampleName, sample);
+        ApplyCompanyFont(sheet);
+        return Save(workbook);
+    }
+
+    private static bool IsVisaUzatilanlar(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.VisaExtension
+        && string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsVisaAktivPersoneller(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.VisaExtension
+        && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsWorkPermitCalisma(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.WorkPermit
+        && string.Equals(subReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase);
+
     private static bool IsWorkPermitSanaw(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.WorkPermit
         && string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
@@ -497,8 +711,39 @@ public static class ReportDashboardExcelTemplateWorkbook
             || IsWorkPermitMaglumat2(category, subReport)
             || IsWorkPermitMaglumat3(category, subReport));
 
+    private static string UniqueSheetName(string name, HashSet<string> used)
+    {
+        var cleaned = new string((name ?? string.Empty)
+            .Where(c => c is not ('\\' or '/' or '*' or '?' or ':' or '[' or ']'))
+            .ToArray()).Trim();
+        if (cleaned.Length == 0)
+            cleaned = "Report";
+        if (cleaned.Length > 31)
+            cleaned = cleaned.Substring(0, 31);
+
+        var candidate = cleaned;
+        var suffix = 2;
+        while (!used.Add(candidate))
+        {
+            var tail = " " + suffix.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var stem = cleaned.Length + tail.Length > 31
+                ? cleaned.Substring(0, 31 - tail.Length)
+                : cleaned;
+            candidate = stem + tail;
+            suffix++;
+        }
+
+        return candidate;
+    }
+
     private static string SheetName(ReportDashboardCategory category, string? subReport)
     {
+        if (IsVisaUzatilanlar(category, subReport))
+            return "uzatılanlar";
+        if (IsVisaAktivPersoneller(category, subReport))
+            return "aktiv personeller";
+        if (IsWorkPermitCalisma(category, subReport))
+            return "çalışma izni listesi";
         if (IsWorkPermitSanaw(category, subReport))
             return "Sanaw";
         if (IsWorkPermitMaglumat3(category, subReport))
@@ -545,11 +790,22 @@ public static class ReportDashboardExcelTemplateWorkbook
         cell.Style.Font.FontName = CompanyFontName;
     }
 
-    private static void WriteRow(IXLWorksheet sheet, int rowNumber, int columnCount, IReadOnlyList<string> values)
+    private static void WriteRow(
+        IXLWorksheet sheet, int rowNumber, int columnCount, IReadOnlyList<string> values, int? integerColumn = null)
     {
         var count = Math.Min(columnCount, values.Count);
         for (var column = 0; column < count; column++)
-            WriteCell(sheet.Cell(rowNumber, column + 1), values[column]);
+        {
+            var cell = sheet.Cell(rowNumber, column + 1);
+            if (integerColumn == column + 1
+                && int.TryParse(values[column], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var number))
+            {
+                cell.Value = number;
+                continue;
+            }
+
+            WriteCell(cell, values[column]);
+        }
         for (var column = count; column < columnCount; column++)
             sheet.Cell(rowNumber, column + 1).Value = string.Empty;
     }

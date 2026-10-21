@@ -126,6 +126,10 @@ public sealed class ReportDashboardPreviewRow
     public IReadOnlyList<WorkPermitBundleSlot> WorkPermits { get; init; } = Array.Empty<WorkPermitBundleSlot>();
     /// <summary>Sanaw sheet cells, without the screen row number.</summary>
     public IReadOnlyList<string> SanawCells { get; init; } = Array.Empty<string>();
+    /// <summary>Çalışma izni listesi cells, without the screen row number.</summary>
+    public IReadOnlyList<string> CalismaCells { get; init; } = Array.Empty<string>();
+    /// <summary>uzatılanlar cells, without the screen row number.</summary>
+    public IReadOnlyList<string> UzatilanlarCells { get; init; } = Array.Empty<string>();
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

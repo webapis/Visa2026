@@ -28,8 +28,10 @@ public static class ReportDashboardPostgresViewsHealSql
     private static readonly (string ViewName, string ResourceLeaf)[] WrapperViews =
     {
         ("vw_rd_visa_active_by_project", "vw_rd_visa_active_by_project.postgres.sql"),
+        ("vw_rd_visa_aktiv_personeller", "vw_rd_visa_aktiv_personeller.postgres.sql"),
         ("vw_rd_visa_active_by_period_category_type", "vw_rd_visa_active_by_period_category_type.postgres.sql"),
         ("vw_rd_visa_on_extension", "vw_rd_visa_on_extension.postgres.sql"),
+        ("vw_rd_visa_uzatilanlar", "vw_rd_visa_uzatilanlar.postgres.sql"),
         ("vw_rd_visa_on_extension_by_period_category_type", "vw_rd_visa_on_extension_by_period_category_type.postgres.sql"),
         ("vw_rd_visa_extension_result", "vw_rd_visa_extension_result.postgres.sql"),
         ("vw_rd_visa_extension_result_by_period_category_type", "vw_rd_visa_extension_result_by_period_category_type.postgres.sql"),
@@ -98,6 +100,7 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_work_permit_active_locations", "vw_rd_work_permit_active.postgres.sql"),
         ("vw_rd_work_permit_a_maglumat_3", "vw_rd_work_permit_active.postgres.sql"),
         ("vw_rd_work_permit_sanaw", "vw_rd_work_permit_sanaw.postgres.sql"),
+        ("vw_rd_work_permit_calisma_izni_listesi", "vw_rd_work_permit_calisma_izni_listesi.postgres.sql"),
         ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
     };
 
@@ -132,6 +135,7 @@ public static class ReportDashboardPostgresViewsHealSql
     {
         "vw_rd_visa_app_progress.postgres.sql",
         "vw_rd_visa_on_extension.postgres.sql",
+        "vw_rd_visa_uzatilanlar.postgres.sql",
         "vw_rd_visa_on_extension_by_period_category_type.postgres.sql",
         "vw_rd_visa_extension_result.postgres.sql",
         "vw_rd_visa_extension_result_by_period_category_type.postgres.sql",
@@ -142,6 +146,7 @@ public static class ReportDashboardPostgresViewsHealSql
     {
         "vw_rd_visa_by_period.postgres.sql",
         "vw_rd_visa_active_by_project.postgres.sql",
+        "vw_rd_visa_aktiv_personeller.postgres.sql",
         "vw_rd_visa_active_by_period_category_type.postgres.sql",
     };
 
@@ -356,7 +361,10 @@ public static class ReportDashboardPostgresViewsHealSql
                 && (viewName != "vw_rd_work_permit_sanaw"
                     || (ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                         && ViewDefinitionContains(connection, viewName, "fm.\"FirstName\"")
-                        && ViewDefinitionContains(connection, viewName, "VisaCategoryLabel"))))
+                        && ViewDefinitionContains(connection, viewName, "VisaCategoryLabel")))
+                && (viewName != "vw_rd_work_permit_calisma_izni_listesi"
+                    || (ColumnExists(connection, viewName, "DepartmentLabel")
+                        || ColumnExists(connection, viewName, "departmentlabel"))))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);

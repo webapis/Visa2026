@@ -25,6 +25,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdWorkPermit();
         CreateViewRdWorkPermitActive();
         CreateViewRdWorkPermitSanaw();
+        CreateViewRdWorkPermitCalismaIzniListesi();
         CreateViewRdWorkPermitAppProgress();
         CreateViewRdInvitationReady();
         CreateViewRdInvitationExpired();
@@ -52,6 +53,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdInvitationValidUntil();
         CreateViewRdVisaAppProgress();
         CreateViewRdVisaOnExtension();
+        CreateViewRdVisaUzatilanlar();
         CreateViewRdVisaOnExtensionByPeriodCategoryType();
         CreateViewRdVisaExtensionResult();
         CreateViewRdVisaExtensionResultByPeriodCategoryType();
@@ -62,6 +64,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdVisaByType();
         CreateViewRdVisaByPeriod();
         CreateViewRdVisaActiveByProject();
+        CreateViewRdVisaAktivPersoneller();
         CreateViewRdVisaActiveByPeriodCategoryType();
         CreateViewRdVisaByDaysRemaining();
         CreateViewRdVisaExtensionRequired();
@@ -249,6 +252,9 @@ WHERE COALESCE(wpi.""GCRecord"", 0) = 0
 
     private void CreateViewRdWorkPermitSanaw() =>
         ExecuteEmbeddedPostgresView("vw_rd_work_permit_sanaw.postgres.sql");
+
+    private void CreateViewRdWorkPermitCalismaIzniListesi() =>
+        ExecuteEmbeddedPostgresView("vw_rd_work_permit_calisma_izni_listesi.postgres.sql");
 
 
     private void CreateViewRdWorkPermitAppProgress()
@@ -1058,6 +1064,7 @@ WHERE v.rn = 1
 
     private void CreateViewRdVisaActiveByProject()
     {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_aktiv_personeller;", true);
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_active_by_project;", true);
         ExecuteNonQueryCommand(@"
 -- Active Visa (P): population from vw_rd_visa_by_period; StatusLabel = Project.
@@ -1084,6 +1091,9 @@ SELECT
 FROM vw_rd_visa_by_period b;
 ", true);
     }
+
+    private void CreateViewRdVisaAktivPersoneller() =>
+        ExecuteEmbeddedPostgresView("vw_rd_visa_aktiv_personeller.postgres.sql");
 
     private void CreateViewRdVisaActiveByPeriodCategoryType()
     {
@@ -1122,6 +1132,7 @@ LEFT JOIN vw_rd_visa_by_type t ON t.""ID"" = b.""ID"";
 
     private void CreateViewRdVisaOnExtension()
     {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_uzatilanlar;", true);
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_on_extension;", true);
         ExecuteNonQueryCommand(@"
 -- Visa On Extension (P): in-flight extension apps; StatusLabel = Project · State.
@@ -1161,6 +1172,9 @@ WHERE b.""ProgressStateCode"" IS NULL
       );
 ", true);
     }
+
+    private void CreateViewRdVisaUzatilanlar() =>
+        ExecuteEmbeddedPostgresView("vw_rd_visa_uzatilanlar.postgres.sql");
 
     private void CreateViewRdVisaOnExtensionByPeriodCategoryType()
     {

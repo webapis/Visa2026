@@ -2,6 +2,7 @@
 -- One person row. Every valid work permit (not cancelled, not yet expired) is listed
 -- in WorkPermitBundle, newest start date first. Passport and the scalar permit
 -- columns stay on the newest permit.
+DROP VIEW IF EXISTS vw_rd_work_permit_calisma_izni_listesi;
 DROP VIEW IF EXISTS vw_rd_work_permit_sanaw;
 DROP VIEW IF EXISTS vw_rd_work_permit_a_maglumat_3;
 DROP VIEW IF EXISTS vw_rd_work_permit_active_locations;

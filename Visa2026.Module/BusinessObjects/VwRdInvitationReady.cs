@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects;
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(InvitationNumber))]
-[ModelDefault("Caption", "Active Invitation")]
+[ModelDefault("Caption", "hazır kullanılabilecek davetiye")]
 [ModelDefault("AllowEdit", "False")]
 [ModelDefault("AllowNew", "False")]
 [ModelDefault("AllowDelete", "False")]

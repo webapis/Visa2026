@@ -1560,3 +1560,60 @@ button.rd-overview-card {
   border-color: var(--rd-accent-edge);
   font-weight: 600;
 }
+
+.rd-bundle-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 40;
+}
+
+.rd-bundle-dialog {
+  position: fixed;
+  z-index: 41;
+  top: 72px;
+  right: 24px;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--rd-border);
+  border-radius: 12px;
+  background: var(--rd-surface);
+  color: var(--rd-text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+.rd-bundle-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.rd-bundle-list {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rd-bundle-group {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rd-muted-2);
+}
+
+.rd-bundle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.rd-bundle-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

@@ -4,6 +4,66 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-21 — one Excel file for selected reports
+
+**Ask:** Put the Excel reports in one file, and let the officer choose which reports are included.
+
+**Now:** Open selected in Excel lists Invitation, Work Permit, and Visa reports that already have a template. Each checked report is one sheet. Person type and project apply. The search box does not. An empty report still gets its header sheet. Each tab’s own Open in Excel stays.
+
+**Prevent:** Do not apply the table search box to this file. Do not drop a checked report that has no rows.
+
+**Files:** `ReportDashboardComponent.razor`, `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardCatalog.cs`
+
+## 2026-10-21 — Active Invitation tab name
+
+**Ask:** Rename the Active Invitation subreport to hazır kullanılabilecek davetiye.
+
+**Now:** The officer tab and its list view use that name. The key stays `ready-by-project`.
+
+**Prevent:** Do not put Active Invitation (P) back on that tab.
+
+**Files:** `ReportDashboardCatalog.cs`, `UiStrings.messages.json`, `VisaUiMessageCatalog.g.cs`, `Model.xafml`
+
+## 2026-10-21 — Visa tabs officers see
+
+**Ask:** Remove Active Visa (P), Extension Required, Visa On Extension, Visa Validity, and Extension Result (P) from the Visa report.
+
+**Now:** Officers see uzatılanlar and aktiv personeller. The five removed keys stay loadable. Opening Visa lands on uzatılanlar.
+
+**Prevent:** Do not put those five tabs back on the Visa report.
+
+**Files:** `ReportDashboardCatalog.cs`
+
+## 2026-10-21 — uzatılanlar
+
+**Ask:** Add a Visa tab named uzatılanlar for visa extensions still in process. Columns match Invitation Process, plus the current visa end after Firması.
+
+**Now:** The people are Visa On Extension. Projesi is the department. Firması is the subcontractor. Görevi is the visa-report position. Mevcut Vize bitiş tarihi stays blank when there is no visa. Şu anki Durumu names the ministry (Enerji Bakanlığında), writes Yabancıların şubesinde at the migration service, and OFISDE at the office. Açıklama stays empty. The chart still groups by the contract project.
+
+**Prevent:** Do not drop a Visa On Extension row that has no visa end date. Do not put the contract project name in Projesi. Do not write N-NJI MINISTRLIKDE when the file is at a ministry. Do not fill Açıklama.
+
+**Files:** `vw_rd_visa_uzatilanlar.postgres.sql`, `VwRdVisaUzatilanlar.cs`, `ReportDashboardVisaUzatilanlarExcel.cs`
+
+## 2026-10-21 — aktiv personeller
+
+**Ask:** Add a Visa tab named aktiv personeller for the same sheet as çalışma izni listesi. One row per person on Active Visa. A person with no current work permit still appears.
+
+**Now:** The visa is that person's latest current visa. PROJECT is the department. Firması is the subcontractor. Mesleki Görevleri is the visa-report position. The permit-end cell stays blank when there is no current permit. Dates are Excel dates dd.MM.yyyy. The day count is a plain number. NOT stays empty. The chart still groups by the contract project.
+
+**Prevent:** Do not drop a person who has a current visa and no work permit. Do not put the contract project name in PROJECT. Do not color the day count.
+
+**Files:** `vw_rd_visa_aktiv_personeller.postgres.sql`, `VwRdVisaAktivPersoneller.cs`
+
+## 2026-10-21 — çalışma izni listesi
+
+**Ask:** Add a Work Permit tab named çalışma izni listesi, with the Turkish sheet columns and A. Maglumat dates.
+
+**Now:** Same people as A. Maglumat. PROJECT is the department, the same history row as Invitation. Firması is the subcontractor. Mesleki Görevleri is the visa-report position. The permit cell is the current permit's end date. The visa columns are the current visa. Vize bitmesine kalan süre is visa end minus today, a plain number, negative after expiry, with no color. NOT stays empty. Dates are Excel dates dd.MM.yyyy. The header is row 1. The chart still groups by the contract project.
+
+**Prevent:** Do not put the contract project name in PROJECT. Do not color the day count. Do not fill NOT.
+
+**Files:** `vw_rd_work_permit_calisma_izni_listesi.postgres.sql`, `VwRdWorkPermitCalismaIzniListesi.cs`, `ReportDashboardWorkPermitCalismaExcel.cs`
+
 ## 2026-10-21 — Maglumat column widths match the company sheet
 
 **Ask:** Generated Excel for A. Maglumat, A. Maglumat 2, and Goşmaça barjak ýerleri should use the company sheet's column widths.

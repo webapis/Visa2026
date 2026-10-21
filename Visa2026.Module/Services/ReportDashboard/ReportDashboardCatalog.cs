@@ -202,6 +202,12 @@ public static class ReportDashboardCatalog
 
     public const string WorkPermitSanawKey = "sanaw";
 
+    public const string WorkPermitCalismaIzniListesiKey = "calisma-izni-listesi";
+
+    public const string VisaAktivPersonellerKey = "aktiv-personeller";
+
+    public const string VisaUzatilanlarKey = "uzatilanlar";
+
     public static bool IsWorkPermitMaglumatSubReport(string? subReport) =>
         subReport is "active-by-project" or WorkPermitMaglumat2Key or WorkPermitMaglumat3Key;
 
@@ -213,6 +219,7 @@ public static class ReportDashboardCatalog
             or WorkPermitMaglumat2Key
             or WorkPermitMaglumat3Key
             or WorkPermitSanawKey
+            or WorkPermitCalismaIzniListesiKey
             or "by-days-remaining"
             or "by-validity"; // legacy alias for WorkPermit Validity
 
@@ -454,14 +461,13 @@ public static class ReportDashboardCatalog
             new() { Key = AppDirectProcessCompleteKey, Label = "Process Complete" },
         ],
         ReportDashboardCategory.VisaExtension => [
-            new() { Key = "active-by-project", Label = "Active Visa (P)" },
-            new() { Key = "extension-required", Label = "Extension Required" },
-            new() { Key = "on-extension", Label = "Visa On Extension (P)" },
-            new() { Key = "by-days-remaining", Label = "Visa Validity" },
-            new() { Key = "extension-result", Label = "Extension Result (P)" },
+            new() { Key = VisaUzatilanlarKey, Label = "uzatılanlar" },
+            new() { Key = VisaAktivPersonellerKey, Label = "aktiv personeller" },
+            // Active Visa, Extension Required, Visa On Extension, Visa Validity, and Extension Result
+            // stay loadable by key. Officers do not see them.
         ],
         ReportDashboardCategory.Invitation => [
-            new() { Key = "ready-by-project", Label = "Active Invitation (P)" },
+            new() { Key = "ready-by-project", Label = "hazır kullanılabilecek davetiye" },
             new() { Key = "expired-invitation", Label = "Expired Invitation" },
             new() { Key = "cancelled-invitation", Label = "Cancelled Invitation" },
             new() { Key = "in-process", Label = "Invitation Process (P)" },
@@ -482,6 +488,7 @@ public static class ReportDashboardCatalog
             new() { Key = WorkPermitMaglumat2Key, Label = "A. Maglumat 2" },
             new() { Key = WorkPermitMaglumat3Key, Label = "Goşmaça barjak ýerleri" },
             new() { Key = WorkPermitSanawKey, Label = "Sanaw" },
+            new() { Key = WorkPermitCalismaIzniListesiKey, Label = "çalışma izni listesi" },
         ],
         ReportDashboardCategory.Travel => [
             new() { Key = "by-month",  Label = "By Month"  },
@@ -529,6 +536,30 @@ public static class ReportDashboardCatalog
 
     public static string DefaultSubReport(ReportDashboardCategory category) =>
         SubReports(category).Count > 0 ? SubReports(category)[0].Key : "default";
+
+    /// <summary>
+    /// Reports an officer can place together in one Excel file. One sheet per report.
+    /// Hidden tabs stay out of this list.
+    /// </summary>
+    public static IReadOnlyList<(ReportDashboardCategory Category, string Key)> ExcelBundleReports() =>
+    [
+        (ReportDashboardCategory.Invitation, "ready-by-project"),
+        (ReportDashboardCategory.Invitation, "expired-invitation"),
+        (ReportDashboardCategory.Invitation, "cancelled-invitation"),
+        (ReportDashboardCategory.Invitation, "in-process"),
+        (ReportDashboardCategory.Invitation, "used"),
+        (ReportDashboardCategory.WorkPermit, "active-by-project"),
+        (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat2Key),
+        (ReportDashboardCategory.WorkPermit, WorkPermitMaglumat3Key),
+        (ReportDashboardCategory.WorkPermit, WorkPermitSanawKey),
+        (ReportDashboardCategory.WorkPermit, WorkPermitCalismaIzniListesiKey),
+        (ReportDashboardCategory.VisaExtension, VisaUzatilanlarKey),
+        (ReportDashboardCategory.VisaExtension, VisaAktivPersonellerKey),
+    ];
+
+    public static string ExcelBundleLabel(ReportDashboardCategory category, string key) =>
+        SubReports(category).FirstOrDefault(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase))?.Label
+        ?? key;
 
     // ---- Labels ----------------------------------------------------------
 
@@ -812,6 +843,10 @@ public static class ReportDashboardCatalog
             return ("VwRdInvitationUsed_ListView", typeof(VwRdInvitationUsed));
 
         if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase))
+            return ("VwRdWorkPermitCalismaIzniListesi_ListView", typeof(VwRdWorkPermitCalismaIzniListesi));
+
+        if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
             return ("VwRdWorkPermitSanaw_ListView", typeof(VwRdWorkPermitSanaw));
 
@@ -883,6 +918,10 @@ public static class ReportDashboardCatalog
 
         if (category == ReportDashboardCategory.VisaExtension)
         {
+            if (string.Equals(subReport, VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+                return ("VwRdVisaUzatilanlar_ListView", typeof(VwRdVisaUzatilanlar));
+            if (string.Equals(subReport, VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+                return ("VwRdVisaAktivPersoneller_ListView", typeof(VwRdVisaAktivPersoneller));
             if (UsesVisaActiveByProjectListView(subReport))
                 return ("VwRdVisaActiveByProject_ListView", typeof(VwRdVisaActiveByProject));
             if (UsesVisaActiveByPeriodCategoryTypeListView(subReport))
@@ -1018,6 +1057,10 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.BorderZone, "by-zone")        => ["Name", "Project", "BZ Number",   "Valid Until", "Zone"],
             (ReportDashboardCategory.VisaExtension, "active-by-project") =>
                 ["Name", "Project", "Passport #", "Visa #", "Expiry", "Days Remaining", "Project"],
+            (ReportDashboardCategory.VisaExtension, VisaAktivPersonellerKey) =>
+                ReportDashboardWorkPermitCalismaExcel.Headers,
+            (ReportDashboardCategory.VisaExtension, VisaUzatilanlarKey) =>
+                ReportDashboardVisaUzatilanlarExcel.Headers,
             (ReportDashboardCategory.VisaExtension, "by-period-category-type") =>
                 ["Name", "Project", "Passport #", "Visa #", "Expiry", "Days Remaining", "Period · Category · Type"],
             (ReportDashboardCategory.VisaExtension, "extension-required") =>
@@ -1046,6 +1089,8 @@ public static class ReportDashboardCatalog
                 ["№", "F.A.A", "Doglan ýyly we raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Türkmenistandaky anyk ýaşaýan salgysy", "Rugsatnama belgesi we möhleti", "Rugsat berlen ýerler", "Goşmaça barjak ýerleri", "Wiza belgesi we möhleti", "Bellik"],
             (ReportDashboardCategory.WorkPermit, WorkPermitSanawKey) =>
                 ["№", "Familiýasy", "Ady", "Doglan senesi we ýeri", "Jynsy", "Raýatlygy", "Pasport belgesi we möhleti", "Bilimi we okan ýeri", "Bilimine görä hünäri", "Wezipesi", "Möhleti we gezekligi", "Türkmenistandaky salgysy", "Daşary ýurtdaky salgysy", "Taslamasy", "Maşgala agzalary", "Adam sany"],
+            (ReportDashboardCategory.WorkPermit, WorkPermitCalismaIzniListesiKey) =>
+                ReportDashboardWorkPermitCalismaExcel.Headers,
             (ReportDashboardCategory.WorkPermit, "on-extension") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "extension-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "by-status")         => ["Name", "Project", "WP Number",   "Expiry", "Status"],
@@ -1124,6 +1169,10 @@ public static class ReportDashboardCatalog
         bool oneLastValidVisaPerPerson = false,
         string? searchTerm = null)
     {
+        var usesVisaUzatilanlar = category == ReportDashboardCategory.VisaExtension
+            && string.Equals(subReport, VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
+        var usesVisaAktiv = category == ReportDashboardCategory.VisaExtension
+            && string.Equals(subReport, VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase);
         var usesVisaActive = category == ReportDashboardCategory.VisaExtension
             && UsesVisaActiveListView(subReport);
         var usesExtRequired = category == ReportDashboardCategory.VisaExtension
@@ -1160,6 +1209,8 @@ public static class ReportDashboardCatalog
             && IsWorkPermitMaglumatSubReport(subReport);
         var usesWorkPermitSanaw = category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
+        var usesWorkPermitCalisma = category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase);
 
         string roleCriteria;
         if (usesPersonSearchRd)
@@ -1185,7 +1236,7 @@ public static class ReportDashboardCatalog
                 ? "[IsArchived] = False"
                 : $"[IsArchived] = False And [PersonRoleCode] = {(int)ToPersonRole(personType)}";
         }
-        else if (usesRdVisaRow)
+        else if (usesRdVisaRow || usesVisaAktiv || usesVisaUzatilanlar)
         {
             roleCriteria = IsAllPersonTypes(personType)
                 ? "[IsArchived] = False"
@@ -1259,6 +1310,9 @@ public static class ReportDashboardCatalog
                     || usesInvitationReady || usesInvitationExpired || usesInvitationCancelled || usesInvitationProcess || usesInvitationUsed
                     || usesWorkPermitMaglumat
                     || usesWorkPermitSanaw
+                    || usesWorkPermitCalisma
+                    || usesVisaAktiv
+                    || usesVisaUzatilanlar
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -1354,7 +1408,7 @@ public static class ReportDashboardCatalog
                     roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
                 }
             }
-            else if (usesAppProgressDedicated || usesVisaActive)
+            else if (usesAppProgressDedicated || usesVisaActive || usesVisaAktiv || usesVisaUzatilanlar)
             {
                 // Dedicated Active / OnExtension / ExtensionResult views expose StatusLabel.
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
@@ -1380,7 +1434,7 @@ public static class ReportDashboardCatalog
             {
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
             }
-            else if (usesWorkPermitMaglumat || usesWorkPermitSanaw)
+            else if (usesWorkPermitMaglumat || usesWorkPermitSanaw || usesWorkPermitCalisma)
             {
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
             }

@@ -1676,6 +1676,40 @@
         <ColumnInfo Id="StatusLabel" Index="5" Width="180" Caption="State" IsNewNode="True" />
       </Columns>
     </ListView>
+    <ListView Id="VwRdVisaUzatilanlar_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaUzatilanlar" Caption="uzatılanlar" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="PersonName" Index="0" Width="180" Caption="Adı Soyadı" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="1" Width="180" Caption="Görevi" IsNewNode="True" />
+        <ColumnInfo Id="DepartmentLabel" Index="2" Width="140" Caption="Projesi" IsNewNode="True" />
+        <ColumnInfo Id="SubcontractorLabel" Index="3" Width="140" Caption="Firması" IsNewNode="True" />
+        <ColumnInfo Id="CurrentVisaEndLabel" Index="4" Width="120" Caption="Mevcut Vize bitiş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationNumber" Index="5" Width="120" Caption="Davetiye için yazı No" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDateLabel" Index="6" Width="120" Caption="İlgili Bakanlığın Başvuru tarihi" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="7" Width="120" Caption="Başvurulan vize süresi" IsNewNode="True" />
+        <ColumnInfo Id="LastApprovalLabel" Index="8" Width="160" Caption="İlgili Bakanlıktan çıkan tarih ve numarası" IsNewNode="True" />
+        <ColumnInfo Id="MigrationSubmittedLabel" Index="9" Width="120" Caption="Yabancı Şubeye veriliş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="MigrationLabel" Index="10" Width="140" Caption="Yabancı Şube CO No ve tarihi" IsNewNode="True" />
+        <ColumnInfo Id="CurrentStatusLabel" Index="11" Width="160" Caption="Şu anki Durumu" IsNewNode="True" />
+        <ColumnInfo Id="NotesLabel" Index="12" Width="80" Caption="Açıklama" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaAktivPersoneller_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaAktivPersoneller" Caption="aktiv personeller" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="DepartmentLabel" Index="0" Width="140" Caption="PROJECT" IsNewNode="True" />
+        <ColumnInfo Id="SubcontractorLabel" Index="1" Width="140" Caption="Firması" IsNewNode="True" />
+        <ColumnInfo Id="PersonName" Index="2" Width="180" Caption="Adı Soyadı" IsNewNode="True" />
+        <ColumnInfo Id="BirthDateLabel" Index="3" Width="110" Caption="Doğum Tarihi" IsNewNode="True" />
+        <ColumnInfo Id="PassportNumber" Index="4" Width="130" Caption="Mevcut Pasaport No" IsNewNode="True" />
+        <ColumnInfo Id="PassportEndLabel" Index="5" Width="130" Caption="Pasaport döneminin bitiş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="6" Width="180" Caption="Mesleki Görevleri" IsNewNode="True" />
+        <ColumnInfo Id="WorkPermitEndLabel" Index="7" Width="130" Caption="Çalışma İzni bittiği tarih" IsNewNode="True" />
+        <ColumnInfo Id="VisaNumber" Index="8" Width="120" Caption="Vize Numarası" IsNewNode="True" />
+        <ColumnInfo Id="VisaEndLabel" Index="9" Width="120" Caption="Vizenin bitiş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="VisaDaysRemainingLabel" Index="10" Width="90" Caption="Vize bitmesine kalan süre" IsNewNode="True" />
+        <ColumnInfo Id="AddressLabel" Index="11" Width="220" Caption="Mevcut Adresi" IsNewNode="True" />
+        <ColumnInfo Id="NotesLabel" Index="12" Width="80" Caption="NOT" IsNewNode="True" />
+      </Columns>
+    </ListView>
     <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
@@ -1696,7 +1730,7 @@
         <ColumnInfo Id="MarkedLabel" Index="4" Width="160" Caption="Marked" IsNewNode="True" />
       </Columns>
     </ListView>
-    <ListView Id="VwRdInvitationReady_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationReady" Caption="Active Invitation (P)" IsNewNode="True">
+    <ListView Id="VwRdInvitationReady_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationReady" Caption="hazır kullanılabilecek davetiye" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="240" Caption="Full name" IsNewNode="True" />
         <ColumnInfo Id="PositionLabel" Index="1" Width="140" Caption="Position" IsNewNode="True" />
@@ -1780,6 +1814,23 @@
         <ColumnInfo Id="WorkPermitAdditionalLocationsLabel" Index="9" Width="180" Caption="Goşmaça barjak ýerleri" IsNewNode="True" />
         <ColumnInfo Id="VisaLabel" Index="10" Width="150" Caption="Wiza belgesi we möhleti" IsNewNode="True" />
         <ColumnInfo Id="Notes" Index="11" Width="80" Caption="Bellik" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdWorkPermitCalismaIzniListesi_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdWorkPermitCalismaIzniListesi" Caption="çalışma izni listesi" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="DepartmentLabel" Index="0" Width="140" Caption="PROJECT" IsNewNode="True" />
+        <ColumnInfo Id="SubcontractorLabel" Index="1" Width="140" Caption="Firması" IsNewNode="True" />
+        <ColumnInfo Id="PersonName" Index="2" Width="180" Caption="Adı Soyadı" IsNewNode="True" />
+        <ColumnInfo Id="BirthDateLabel" Index="3" Width="110" Caption="Doğum Tarihi" IsNewNode="True" />
+        <ColumnInfo Id="PassportNumber" Index="4" Width="130" Caption="Mevcut Pasaport No" IsNewNode="True" />
+        <ColumnInfo Id="PassportEndLabel" Index="5" Width="130" Caption="Pasaport döneminin bitiş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="6" Width="180" Caption="Mesleki Görevleri" IsNewNode="True" />
+        <ColumnInfo Id="WorkPermitEndLabel" Index="7" Width="130" Caption="Çalışma İzni bittiği tarih" IsNewNode="True" />
+        <ColumnInfo Id="VisaNumber" Index="8" Width="120" Caption="Vize Numarası" IsNewNode="True" />
+        <ColumnInfo Id="VisaEndLabel" Index="9" Width="120" Caption="Vizenin bitiş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="VisaDaysRemainingLabel" Index="10" Width="90" Caption="Vize bitmesine kalan süre" IsNewNode="True" />
+        <ColumnInfo Id="AddressLabel" Index="11" Width="220" Caption="Mevcut Adresi" IsNewNode="True" />
+        <ColumnInfo Id="NotesLabel" Index="12" Width="80" Caption="NOT" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdWorkPermitSanaw_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdWorkPermitSanaw" Caption="Sanaw" IsNewNode="True">

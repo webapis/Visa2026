@@ -501,6 +501,18 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff,
         bool oneLastValidVisaPerPerson = false)
     {
+        if (string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadVisaUzatilanlarFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured);
+        }
+
+        if (string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadVisaAktivPersonellerFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured);
+        }
+
         if (subReport is "active-by-project" or "visa-state"
             || string.IsNullOrWhiteSpace(subReport) || subReport is "default")
         {
@@ -808,6 +820,190 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnD = x.ExactDays.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.VisaExtension, subReport, rows,
+                excelHint, excelConfigured, buckets, totalCount);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.VisaExtension, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    /// <summary>uzatılanlar: Visa On Extension rows, Invitation Process columns, plus the current visa end.</summary>
+    private static ReportDashboardPanelData LoadVisaUzatilanlarFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.VisaExtension, subReport, excelHint, excelConfigured);
+        }
+
+        try
+        {
+            IQueryable<VwRdVisaUzatilanlar> query = db.VwRdVisaUzatilanlar
+                .AsNoTracking()
+                .Where(r => !r.IsArchived);
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            var labeled = list.Select(row =>
+            {
+                var status = string.IsNullOrWhiteSpace(row.StatusLabel)
+                    ? "(No project)"
+                    : row.StatusLabel.Trim();
+                return (Row: row, Status: status);
+            }).ToList();
+            var groups = labeled
+                .GroupBy(x => x.Status, StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+            var totalCount = buckets.Sum(b => b.Count);
+            var rows = labeled
+                .OrderByDescending(x => x.Row.ApplicationDate)
+                .ThenBy(x => x.Row.PersonName)
+                .Take(PreviewLimit)
+                .Select(x =>
+                {
+                    var row = x.Row;
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = row.ID,
+                        PersonId = row.PersonOid,
+                        Name = row.PersonName ?? string.Empty,
+                        Project = row.ProjectName ?? string.Empty,
+                        Department = row.DepartmentLabel ?? string.Empty,
+                        VisaId = row.VisaOid,
+                        UzatilanlarCells =
+                        [
+                            row.PersonName ?? string.Empty,
+                            row.PositionLabel ?? string.Empty,
+                            row.DepartmentLabel ?? string.Empty,
+                            row.SubcontractorLabel ?? string.Empty,
+                            row.CurrentVisaEndLabel ?? string.Empty,
+                            row.ApplicationNumber ?? string.Empty,
+                            row.ApplicationDateLabel ?? string.Empty,
+                            row.VisaPeriodLabel ?? string.Empty,
+                            row.LastApprovalLabel ?? string.Empty,
+                            row.MigrationSubmittedLabel ?? string.Empty,
+                            row.MigrationLabel ?? string.Empty,
+                            row.CurrentStatusLabel ?? string.Empty,
+                            string.Empty
+                        ],
+                        Status = x.Status,
+                        StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.VisaExtension, subReport, rows,
+                excelHint, excelConfigured, buckets, totalCount);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.VisaExtension, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    /// <summary>aktiv personeller: one person from Active Visa. PROJECT is the department.</summary>
+    private static ReportDashboardPanelData LoadVisaAktivPersonellerFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.VisaExtension, subReport, excelHint, excelConfigured);
+        }
+
+        try
+        {
+            IQueryable<VwRdVisaAktivPersoneller> query = db.VwRdVisaAktivPersoneller
+                .AsNoTracking()
+                .Where(r => !r.IsArchived);
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            var labeled = list.Select(row =>
+            {
+                var status = string.IsNullOrWhiteSpace(row.StatusLabel)
+                    ? "(No project)"
+                    : row.StatusLabel.Trim();
+                return (Row: row, Status: status);
+            }).ToList();
+            var groups = labeled
+                .GroupBy(x => x.Status, StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+            var totalCount = buckets.Sum(b => b.Count);
+            var rows = labeled
+                .OrderBy(x => x.Row.PersonName)
+                .Take(PreviewLimit)
+                .Select(x =>
+                {
+                    var row = x.Row;
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = row.ID,
+                        PersonId = row.PersonOid,
+                        Name = row.PersonName ?? string.Empty,
+                        Project = row.ProjectName ?? string.Empty,
+                        Department = row.DepartmentLabel ?? string.Empty,
+                        VisaId = row.VisaOid,
+                        VisaNumber = row.VisaNumber ?? string.Empty,
+                        CalismaCells =
+                        [
+                            row.DepartmentLabel ?? string.Empty,
+                            row.SubcontractorLabel ?? string.Empty,
+                            row.PersonName ?? string.Empty,
+                            row.BirthDateLabel ?? string.Empty,
+                            row.PassportNumber ?? string.Empty,
+                            row.PassportEndLabel ?? string.Empty,
+                            row.PositionLabel ?? string.Empty,
+                            row.WorkPermitEndLabel ?? string.Empty,
+                            row.VisaNumber ?? string.Empty,
+                            row.VisaEndLabel ?? string.Empty,
+                            row.VisaDaysRemainingLabel ?? string.Empty,
+                            row.AddressLabel ?? string.Empty,
+                            string.Empty
+                        ],
+                        Status = x.Status,
+                        StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
+                    };
                 })
                 .ToList();
 
@@ -3525,6 +3721,13 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
 
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadWorkPermitCalismaFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
+        }
+
         if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
         {
             return LoadWorkPermitSanawFromView(
@@ -3867,6 +4070,119 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured,
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
+    }
+
+    /// <summary>Çalışma izni listesi: same people as A. Maglumat. PROJECT is the department.</summary>
+    private static ReportDashboardPanelData LoadWorkPermitCalismaFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        bool includeArchivedPersons,
+        bool oneLastValidWorkPermitPerPerson = false,
+        HashSet<Guid>? validVisaPersonIds = null)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+
+        _ = cutoff;
+        try
+        {
+            IQueryable<VwRdWorkPermitCalismaIzniListesi> query = db.VwRdWorkPermitCalismaIzniListesi.AsNoTracking();
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            if (!includeArchivedPersons)
+                query = query.Where(r => !r.IsArchived);
+
+            if (validVisaPersonIds != null)
+                query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            if (oneLastValidWorkPermitPerPerson)
+                list = TakeOneLastValidVisaPerPerson(list, r => r.PersonOid, r => r.WorkPermitEndDate, r => r.ID);
+
+            return BuildWorkPermitCalismaPanel(personType, subReport, excelHint, excelConfigured, list);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    private static ReportDashboardPanelData BuildWorkPermitCalismaPanel(
+        ReportDashboardPersonType personType,
+        string subReport,
+        string? excelHint,
+        bool excelConfigured,
+        List<VwRdWorkPermitCalismaIzniListesi> list)
+    {
+        var labeled = list.Select(row =>
+        {
+            var status = string.IsNullOrWhiteSpace(row.StatusLabel)
+                ? "(No project)"
+                : row.StatusLabel.Trim();
+            return (Row: row, Status: status);
+        }).ToList();
+        var groups = labeled
+            .GroupBy(x => x.Status, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+        var totalCount = buckets.Sum(b => b.Count);
+        var rows = labeled
+            .OrderBy(x => x.Row.PersonName)
+            .Take(PreviewLimit)
+            .Select(x =>
+            {
+                var row = x.Row;
+                return new ReportDashboardPreviewRow
+                {
+                    RecordId = row.ID,
+                    PersonId = row.PersonOid,
+                    Name = row.PersonName ?? string.Empty,
+                    Project = row.ProjectName ?? string.Empty,
+                    Department = row.DepartmentLabel ?? string.Empty,
+                    VisaId = row.VisaOid,
+                    VisaNumber = row.VisaNumber ?? string.Empty,
+                    CalismaCells =
+                    [
+                        row.DepartmentLabel ?? string.Empty,
+                        row.SubcontractorLabel ?? string.Empty,
+                        row.PersonName ?? string.Empty,
+                        row.BirthDateLabel ?? string.Empty,
+                        row.PassportNumber ?? string.Empty,
+                        row.PassportEndLabel ?? string.Empty,
+                        row.PositionLabel ?? string.Empty,
+                        row.WorkPermitEndLabel ?? string.Empty,
+                        row.VisaNumber ?? string.Empty,
+                        row.VisaEndLabel ?? string.Empty,
+                        row.VisaDaysRemainingLabel ?? string.Empty,
+                        row.AddressLabel ?? string.Empty,
+                        string.Empty
+                    ],
+                    Status = x.Status,
+                    StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
+                };
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.WorkPermit, subReport, rows,
+            excelHint, excelConfigured, buckets, totalCount);
     }
 
     /// <summary>Sanaw: same people as A. Maglumat, columns from the sanaw sheet.</summary>

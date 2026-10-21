@@ -9917,6 +9917,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Excel-de aç",
             ["ru-RU"] = "Открыть в Excel",
         },
+        ["ReportDashboard.Chrome.OpenSelectedInExcel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open selected in Excel",
+            ["tr-TR"] = "Seçilenleri Excel'e aktar",
+            ["tk-TM"] = "Saýlananlary Excel-de aç",
+            ["ru-RU"] = "Открыть выбранные в Excel",
+        },
+        ["ReportDashboard.Chrome.ExcelBundleTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reports in this file",
+            ["tr-TR"] = "Bu dosyadaki raporlar",
+            ["tk-TM"] = "Bu faýldaky hasabatlar",
+            ["ru-RU"] = "Отчёты в этом файле",
+        },
+        ["ReportDashboard.Chrome.ExcelBundleCreate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create file",
+            ["tr-TR"] = "Dosyayı oluştur",
+            ["tk-TM"] = "Faýly döret",
+            ["ru-RU"] = "Создать файл",
+        },
+        ["ReportDashboard.Chrome.ExcelBundleCancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "Vazgeç",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
         ["ReportDashboard.Chrome.OpeningDetail"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Opening…",
@@ -11669,10 +11697,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.SubReport.ready-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Active Invitation (P)",
-            ["tr-TR"] = "Aktif Davetiye (P)",
-            ["tk-TM"] = "Ulanmaga Taýýar Çakylyklar",
-            ["ru-RU"] = "Активное приглашение (P)",
+            ["en-US"] = "hazır kullanılabilecek davetiye",
+            ["tr-TR"] = "hazır kullanılabilecek davetiye",
+            ["tk-TM"] = "hazır kullanılabilecek davetiye",
+            ["ru-RU"] = "hazır kullanılabilecek davetiye",
         },
         ["ReportDashboard.SubReport.rejected-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

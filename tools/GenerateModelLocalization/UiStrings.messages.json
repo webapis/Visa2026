@@ -6071,6 +6071,30 @@
     "tk-TM": "Excel-de aç",
     "ru-RU": "Открыть в Excel"
   },
+  "ReportDashboard.Chrome.OpenSelectedInExcel": {
+    "en": "Open selected in Excel",
+    "tr-TR": "Seçilenleri Excel'e aktar",
+    "tk-TM": "Saýlananlary Excel-de aç",
+    "ru-RU": "Открыть выбранные в Excel"
+  },
+  "ReportDashboard.Chrome.ExcelBundleTitle": {
+    "en": "Reports in this file",
+    "tr-TR": "Bu dosyadaki raporlar",
+    "tk-TM": "Bu faýldaky hasabatlar",
+    "ru-RU": "Отчёты в этом файле"
+  },
+  "ReportDashboard.Chrome.ExcelBundleCreate": {
+    "en": "Create file",
+    "tr-TR": "Dosyayı oluştur",
+    "tk-TM": "Faýly döret",
+    "ru-RU": "Создать файл"
+  },
+  "ReportDashboard.Chrome.ExcelBundleCancel": {
+    "en": "Cancel",
+    "tr-TR": "Vazgeç",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
   "ReportDashboard.Chrome.DownloadTemplate": {
     "en": "Download template",
     "tr-TR": "Şablonu indir",
@@ -6822,10 +6846,10 @@
     "ru-RU": "Срок действия РНТ"
   },
   "ReportDashboard.SubReport.ready-by-project": {
-    "en": "Active Invitation (P)",
-    "tr-TR": "Aktif Davetiye (P)",
-    "tk-TM": "Ulanmaga Taýýar Çakylyklar",
-    "ru-RU": "Активное приглашение (P)"
+    "en": "hazır kullanılabilecek davetiye",
+    "tr-TR": "hazır kullanılabilecek davetiye",
+    "tk-TM": "hazır kullanılabilecek davetiye",
+    "ru-RU": "hazır kullanılabilecek davetiye"
   },
   "ReportDashboard.SubReport.ready-by-period-category": {
     "en": "Active Invitation (V)",

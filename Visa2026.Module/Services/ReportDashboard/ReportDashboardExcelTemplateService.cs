@@ -28,6 +28,18 @@ public static class ReportDashboardExcelTemplateService
     /// <summary>Stored key for this tab. Invitation (V) twins share the (P) key. A Maglumat is Work Permit only.</summary>
     public static string? CanonicalKey(ReportDashboardCategory category, string? subReport)
     {
+        if (category == ReportDashboardCategory.VisaExtension
+            && string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.VisaUzatilanlarKey;
+
+        if (category == ReportDashboardCategory.VisaExtension
+            && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.VisaAktivPersonellerKey;
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey;
+
         if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
             return ReportDashboardCatalog.WorkPermitSanawKey;
@@ -102,6 +114,36 @@ public static class ReportDashboardExcelTemplateService
                 : ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessCompanyStarter());
         }
 
+        if (category == ReportDashboardCategory.VisaExtension
+            && string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var uzatilanlar = template != null
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
+                ? template
+                : ReportDashboardExcelTemplateWorkbook.BuildUzatilanlarStarter();
+            return FinishDownload(category, uzatilanlar, headers);
+        }
+
+        if (category == ReportDashboardCategory.VisaExtension
+            && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var aktiv = template != null
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
+                ? template
+                : ReportDashboardExcelTemplateWorkbook.BuildCalismaListesiStarter("aktiv personeller");
+            return FinishDownload(category, aktiv, headers);
+        }
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var calisma = template != null
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
+                ? template
+                : ReportDashboardExcelTemplateWorkbook.BuildCalismaListesiStarter();
+            return FinishDownload(category, calisma, headers);
+        }
+
         if (template != null
             && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count))
         {
@@ -121,17 +163,27 @@ public static class ReportDashboardExcelTemplateService
         byte[] content,
         IReadOnlyList<string>? headerLabels = null)
     {
-        if (category == ReportDashboardCategory.WorkPermit
-            && headerLabels != null
-            && string.Equals(
-                headerLabels.Count > 10 ? headerLabels[10] : null,
-                "Möhleti we gezekligi",
-                StringComparison.Ordinal))
+        var projectSheet = headerLabels != null
+            && headerLabels.Count == ReportDashboardWorkPermitCalismaExcel.Headers.Length
+            && string.Equals(headerLabels[1], "PROJECT", StringComparison.Ordinal);
+        var uzatilanlarSheet = headerLabels != null
+            && headerLabels.Count == ReportDashboardVisaUzatilanlarExcel.Headers.Length
+            && string.Equals(headerLabels[5], "Mevcut Vize bitiş tarihi", StringComparison.Ordinal);
+        if (projectSheet
+            || uzatilanlarSheet
+            || (category == ReportDashboardCategory.WorkPermit
+                && headerLabels != null
+                && string.Equals(
+                    headerLabels.Count > 10 ? headerLabels[10] : null,
+                    "Möhleti we gezekligi",
+                    StringComparison.Ordinal)))
         {
             content = ReportDashboardExcelTemplateWorkbook.ApplyHeaderLabels(content, headerLabels);
         }
 
         return category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit
+            || projectSheet
+            || uzatilanlarSheet
             ? ReportDashboardExcelTemplateWorkbook.WithCompanyFont(
                 content,
                 ReportDashboardExcelTemplateWorkbook.MaglumatColumnWidths(headerLabels))
@@ -225,6 +277,8 @@ public static class ReportDashboardExcelTemplateService
     {
         if (category != ReportDashboardCategory.WorkPermit)
             return "Report";
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase))
+            return "çalışma izni listesi";
         if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
             return "Sanaw";
         if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitMaglumat3Key, StringComparison.OrdinalIgnoreCase))

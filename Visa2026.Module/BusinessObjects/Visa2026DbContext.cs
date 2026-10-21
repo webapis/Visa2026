@@ -161,6 +161,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdWorkPermitActiveLocations> VwRdWorkPermitActiveLocations { get; set; }
         public DbSet<VwRdWorkPermitMaglumat3> VwRdWorkPermitMaglumat3 { get; set; }
         public DbSet<VwRdWorkPermitSanaw> VwRdWorkPermitSanaw { get; set; }
+        public DbSet<VwRdWorkPermitCalismaIzniListesi> VwRdWorkPermitCalismaIzniListesi { get; set; }
         public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
         public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
         public DbSet<VwRdInvitationExpired> VwRdInvitationExpired { get; set; }
@@ -189,8 +190,10 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdVisaByType> VwRdVisaByType { get; set; }
         public DbSet<VwRdVisaByPeriod> VwRdVisaByPeriod { get; set; }
         public DbSet<VwRdVisaActiveByProject> VwRdVisaActiveByProject { get; set; }
+        public DbSet<VwRdVisaAktivPersoneller> VwRdVisaAktivPersoneller { get; set; }
         public DbSet<VwRdVisaActiveByPeriodCategoryType> VwRdVisaActiveByPeriodCategoryType { get; set; }
         public DbSet<VwRdVisaOnExtension> VwRdVisaOnExtension { get; set; }
+        public DbSet<VwRdVisaUzatilanlar> VwRdVisaUzatilanlar { get; set; }
         public DbSet<VwRdVisaOnExtensionByPeriodCategoryType> VwRdVisaOnExtensionByPeriodCategoryType { get; set; }
         public DbSet<VwRdVisaExtensionResult> VwRdVisaExtensionResult { get; set; }
         public DbSet<VwRdVisaExtensionResultByPeriodCategoryType> VwRdVisaExtensionResultByPeriodCategoryType { get; set; }
@@ -351,6 +354,12 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<VwRdWorkPermitCalismaIzniListesi>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit_calisma_izni_listesi");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<VwRdWorkPermitAppProgress>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_work_permit_app_progress");
@@ -500,6 +509,12 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.ID).OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<VwRdVisaAktivPersoneller>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_aktiv_personeller");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<VwRdVisaActiveByPeriodCategoryType>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_visa_active_by_period_category_type");
@@ -516,6 +531,13 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(t => t.CurrentState).WithMany().HasForeignKey(t => t.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaUzatilanlar>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_uzatilanlar");
+                b.HasOne(t => t.ApplicationProfileInstance).WithMany().HasForeignKey(t => t.ApplicationProfileInstanceOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdVisaOnExtensionByPeriodCategoryType>(b => {

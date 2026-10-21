@@ -45,8 +45,10 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdVisaByType>(role);
         EnsureViewReadPermission<VwRdVisaState>(role);
         EnsureViewReadPermission<VwRdVisaActiveByProject>(role);
+        EnsureViewReadPermission<VwRdVisaAktivPersoneller>(role);
         EnsureViewReadPermission<VwRdVisaActiveByPeriodCategoryType>(role);
         EnsureViewReadPermission<VwRdVisaOnExtension>(role);
+        EnsureViewReadPermission<VwRdVisaUzatilanlar>(role);
         EnsureViewReadPermission<VwRdVisaOnExtensionByPeriodCategoryType>(role);
         EnsureViewReadPermission<VwRdVisaExtensionResult>(role);
         EnsureViewReadPermission<VwRdVisaExtensionResultByPeriodCategoryType>(role);
@@ -70,6 +72,7 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdWorkPermitActiveLocations>(role);
         EnsureViewReadPermission<VwRdWorkPermitMaglumat3>(role);
         EnsureViewReadPermission<VwRdWorkPermitSanaw>(role);
+        EnsureViewReadPermission<VwRdWorkPermitCalismaIzniListesi>(role);
         EnsureViewReadPermission<VwRdWorkPermitAppProgress>(role);
 
         EnsureViewReadPermission<VwRdPassport>(role);
