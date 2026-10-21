@@ -66,7 +66,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         byte[]? letterContent = null,
         string? processNumber = null,
         string? resultNumber = null,
-        string? submissionDocumentNumber = null)
+        string? submissionDocumentNumber = null,
+        IReadOnlyList<(string Name, byte[] Content)>? additionalFiles = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -202,6 +203,21 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                 return letterResult;
         }
 
+        if (additionalFiles != null)
+        {
+            var slot = ApplicationMigrationSubmission.IsState(chosenCode)
+                ? ApplicationProfileInstanceProgressFiles.SubmissionDocument
+                : ApplicationProfileInstanceProgressFiles.MinistryLetter;
+            foreach (var extra in additionalFiles)
+            {
+                if (extra.Content == null || extra.Content.Length == 0)
+                    continue;
+                var extraResult = AddFileToRow(objectSpace, progress, slot, extra.Name, extra.Content);
+                if (!extraResult.Success)
+                    return extraResult;
+            }
+        }
+
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
         return OfficerShellCaseProgressResult.Succeeded(chosenCode);
     }
@@ -228,8 +244,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                      .OrderByDescending(p => p, Comparer<ApplicationProfileInstanceProgress>.Create(
                          ApplicationProfileInstanceProgressOrderHelper.CompareSiblingOrder)))
         {
-            if (row.MinistryLetterFile != null)
-                objectSpace.Delete(row.MinistryLetterFile);
+            DeleteStoredFiles(objectSpace, row);
             objectSpace.Delete(row);
             application.ProgressHistory?.Remove(row);
         }
@@ -297,6 +312,302 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             ApplicationProfileInstanceProgressOrderHelper.AssignTimelineOrders(application.ProgressHistory.ToList());
 
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    public OfficerShellCaseProgressResult CorrectStep(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        DateTime stepDate,
+        string? submissionDocumentNumber)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+        if (progressId == Guid.Empty)
+            return OfficerShellCaseProgressResult.Failed("Progress step was not found.");
+
+        var application = LoadApplicationForAdvance(objectSpace, applicationId);
+        if (application == null)
+            return OfficerShellCaseProgressResult.Failed("ApplicationProfileInstance not found.");
+
+        var row = application.ProgressHistory?.FirstOrDefault(p => p.ID == progressId);
+        if (row == null)
+            return OfficerShellCaseProgressResult.Failed("Progress step was not found.");
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(
+            application,
+            application.ApplicationProfile,
+            default,
+            objectSpace);
+        var step = steps.FirstOrDefault(s => s.CanCorrectDate && s.DateProgressId == progressId);
+        if (step == null)
+            return OfficerShellCaseProgressResult.Failed("This step cannot be corrected.");
+
+        if (!ApplicationProfileInstanceProgressStepDates.TryValidate(stepDate, step.EarliestDate, step.LatestDate, out var dateError))
+            return OfficerShellCaseProgressResult.Failed(dateError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
+
+        row.Date = stepDate.Date;
+        if (step.CanEditSubmissionNumber)
+        {
+            if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(submissionDocumentNumber, out var number, out var numberError))
+                return OfficerShellCaseProgressResult.Failed(numberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
+            row.SubmissionDocumentNumber = number;
+        }
+
+        ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    public OfficerShellCaseProgressResult AddProgressFile(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        int slot,
+        string fileName,
+        byte[] content)
+    {
+        var row = FindProgressRow(objectSpace, applicationId, progressId, out var error);
+        if (row == null)
+            return OfficerShellCaseProgressResult.Failed(error ?? "Progress step was not found.");
+        return AddFileToRow(objectSpace, row, slot, fileName, content);
+    }
+
+    public OfficerShellCaseProgressResult ReplaceProgressFile(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        Guid fileId,
+        string fileName,
+        byte[] content)
+    {
+        var row = FindProgressRow(objectSpace, applicationId, progressId, out var error);
+        if (row == null)
+            return OfficerShellCaseProgressResult.Failed(error ?? "Progress step was not found.");
+        if (fileId == Guid.Empty)
+            return OfficerShellCaseProgressResult.Failed("File was not found.");
+
+        var target = FindStoredFile(row, fileId);
+        if (target == null)
+            return OfficerShellCaseProgressResult.Failed("File was not found.");
+
+        var check = ValidateUpload(row, fileName, content, out var prepared);
+        if (!check.Success || prepared == null)
+            return check;
+
+        target.FileName = prepared.FileName;
+        target.Content = prepared.Content;
+        target.Size = prepared.Size;
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    public OfficerShellCaseProgressResult RemoveProgressFile(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        Guid fileId)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+
+        var row = FindProgressRow(objectSpace, applicationId, progressId, out var error);
+        if (row == null)
+            return OfficerShellCaseProgressResult.Failed(error ?? "Progress step was not found.");
+        if (fileId == Guid.Empty)
+            return OfficerShellCaseProgressResult.Failed("File was not found.");
+
+        if (row.MinistryLetterFile?.ID == fileId)
+            return RemovePrimary(objectSpace, row, ApplicationProfileInstanceProgressFiles.MinistryLetter);
+        if (row.SubmissionDocumentFile?.ID == fileId)
+            return RemovePrimary(objectSpace, row, ApplicationProfileInstanceProgressFiles.SubmissionDocument);
+
+        var extra = row.Files?.FirstOrDefault(item => item.File != null && item.File.ID == fileId);
+        if (extra == null)
+            return OfficerShellCaseProgressResult.Failed("File was not found.");
+
+        if (extra.File != null)
+            objectSpace.Delete(extra.File);
+        objectSpace.Delete(extra);
+        row.Files?.Remove(extra);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    private ApplicationProfileInstanceProgress? FindProgressRow(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        out string? error)
+    {
+        error = null;
+        if (objectSpace == null)
+        {
+            error = "ObjectSpace is required.";
+            return null;
+        }
+
+        var application = LoadApplicationForAdvance(objectSpace, applicationId);
+        if (application == null)
+        {
+            error = "ApplicationProfileInstance not found.";
+            return null;
+        }
+
+        var row = application.ProgressHistory?.FirstOrDefault(p => p.ID == progressId);
+        if (row == null)
+            error = "Progress step was not found.";
+        return row;
+    }
+
+    private static OfficerShellCaseProgressResult AddFileToRow(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstanceProgress row,
+        int slot,
+        string fileName,
+        byte[] content)
+    {
+        if (!CanStoreSlot(row, slot))
+            return OfficerShellCaseProgressResult.Failed("Files cannot be stored on this step.");
+
+        var check = ValidateUpload(row, fileName, content, out var prepared);
+        if (!check.Success || prepared == null)
+            return check;
+
+        var file = objectSpace.CreateObject<FileData>();
+        file.FileName = prepared.FileName;
+        file.Content = prepared.Content;
+        file.Size = prepared.Size;
+
+        var primary = ApplicationProfileInstanceProgressFiles.PrimaryFile(row, slot);
+        var hasPrimary = primary != null && primary.Size > 0;
+        var hasExtra = row.Files?.Any(item => item != null && item.Slot == slot && item.File != null && item.File.Size > 0) == true;
+        if (!hasPrimary && !hasExtra)
+        {
+            ApplicationProfileInstanceProgressFiles.AssignPrimary(row, slot, file);
+            return OfficerShellCaseProgressResult.Succeeded();
+        }
+
+        var item = objectSpace.CreateObject<ApplicationProfileInstanceProgressFile>();
+        item.Progress = row;
+        item.ProgressId = row.ID;
+        item.File = file;
+        item.Slot = slot;
+        item.SortOrder = NextSortOrder(row, slot);
+        row.Files ??= new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceProgressFile>();
+        if (!row.Files.Contains(item))
+            row.Files.Add(item);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    private static OfficerShellCaseProgressResult RemovePrimary(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstanceProgress row,
+        int slot)
+    {
+        var primary = ApplicationProfileInstanceProgressFiles.PrimaryFile(row, slot);
+        if (primary != null)
+            objectSpace.Delete(primary);
+        ApplicationProfileInstanceProgressFiles.AssignPrimary(row, slot, null);
+
+        var extra = row.Files?
+            .Where(item => item != null && item.Slot == slot && item.File != null && item.File.Size > 0)
+            .OrderBy(item => item.SortOrder)
+            .ThenBy(item => item.ID)
+            .FirstOrDefault();
+        if (extra?.File == null)
+            return OfficerShellCaseProgressResult.Succeeded();
+
+        var content = extra.File.Content;
+        if (content == null || content.Length == 0)
+            return OfficerShellCaseProgressResult.Failed("The remaining file could not be read.");
+
+        var promoted = objectSpace.CreateObject<FileData>();
+        promoted.FileName = string.IsNullOrWhiteSpace(extra.File.FileName) ? "file" : extra.File.FileName;
+        promoted.Content = content;
+        promoted.Size = content.Length;
+        ApplicationProfileInstanceProgressFiles.AssignPrimary(row, slot, promoted);
+        objectSpace.Delete(extra.File);
+        objectSpace.Delete(extra);
+        row.Files?.Remove(extra);
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    private static void DeleteStoredFiles(IObjectSpace objectSpace, ApplicationProfileInstanceProgress row)
+    {
+        if (row.Files != null)
+        {
+            foreach (var item in row.Files.ToList())
+            {
+                if (item.File != null)
+                    objectSpace.Delete(item.File);
+                objectSpace.Delete(item);
+            }
+
+            row.Files.Clear();
+        }
+
+        if (row.MinistryLetterFile != null)
+            objectSpace.Delete(row.MinistryLetterFile);
+        if (row.SubmissionDocumentFile != null)
+            objectSpace.Delete(row.SubmissionDocumentFile);
+    }
+
+    private static FileData? FindStoredFile(ApplicationProfileInstanceProgress row, Guid fileId)
+    {
+        if (row.MinistryLetterFile?.ID == fileId)
+            return row.MinistryLetterFile;
+        if (row.SubmissionDocumentFile?.ID == fileId)
+            return row.SubmissionDocumentFile;
+        return row.Files?.FirstOrDefault(item => item.File != null && item.File.ID == fileId)?.File;
+    }
+
+    private static int NextSortOrder(ApplicationProfileInstanceProgress row, int slot)
+    {
+        var max = 0;
+        if (row.Files == null)
+            return 1;
+        foreach (var item in row.Files)
+        {
+            if (item != null && item.Slot == slot && item.SortOrder > max)
+                max = item.SortOrder;
+        }
+
+        return max + 1;
+    }
+
+    private static bool CanStoreSlot(ApplicationProfileInstanceProgress row, int slot)
+    {
+        if (slot == ApplicationProfileInstanceProgressFiles.SubmissionDocument)
+            return row.IsMigrationSubmissionStep;
+        return CanStoreProgressFile(row);
+    }
+
+    private static OfficerShellCaseProgressResult ValidateUpload(
+        ApplicationProfileInstanceProgress row,
+        string fileName,
+        byte[] content,
+        out FileData? prepared)
+    {
+        prepared = null;
+        if (content == null || content.Length == 0)
+            return OfficerShellCaseProgressResult.Failed("The uploaded file is empty.");
+
+        var maxBytes = row.MaxDocumentSizeInMB * 1024L * 1024L;
+        if (content.LongLength > maxBytes)
+            return OfficerShellCaseProgressResult.Failed($"The file exceeds the maximum allowed size of {row.MaxDocumentSizeInMB} MB.");
+
+        var name = string.IsNullOrWhiteSpace(fileName) ? "file" : fileName.Trim();
+        prepared = new FileData
+        {
+            FileName = name,
+            Content = content,
+            Size = content.Length,
+        };
+        if (!DocumentFileUploadConstraints.TryValidate(prepared, out var validationError))
+        {
+            prepared = null;
+            return OfficerShellCaseProgressResult.Failed(validationError ?? "The file is not valid.");
+        }
+
         return OfficerShellCaseProgressResult.Succeeded();
     }
 
@@ -377,6 +688,9 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                     .ThenInclude(p => p.MinistryLetterFile)
                 .Include(a => a.ProgressHistory)
                     .ThenInclude(p => p.SubmissionDocumentFile)
+                .Include(a => a.ProgressHistory)
+                    .ThenInclude(p => p.Files)
+                        .ThenInclude(f => f.File)
                 .Include(a => a.ApplicationType)
                 .FirstOrDefault(a => a.ID == applicationId);
         }

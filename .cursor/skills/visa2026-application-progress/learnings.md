@@ -6,6 +6,21 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-21 — Progress file collection must be ObservableCollection
+
+- **Symptom**: Opening the application list throws `InvalidOperationException`: `ApplicationProfileInstanceProgress.Files` is a `List<>` and the EF change tracker is `ChangingAndChangedNotificationsWithOriginalValues`.
+- **Fix**: `Files` is `ObservableCollection<ApplicationProfileInstanceProgressFile>`, created in the property initializer. `IList<>` is materialized as `List<>`.
+- **Prevent**: New collection navigations on XAF EF objects must be `ObservableCollection<T>`.
+- **Cross-skill**: —
+
+### 2026-10-21 — Correct a finished progress step without reverting later rows
+
+- **Need**: Officers must fix a wrong date or a wrong file on a finished step, including after Issued, Rejected, or Cancelled, without deleting later progress rows. Ministry and migration-submission steps must accept several files (images or PDFs), with add, replace, and remove of one file at a time.
+- **Fix**: Date and submission number are saved on the existing row. The date must stay on or between the previous step and the next step. The first file stays on the existing `FileData` column. Further files are `ApplicationProfileInstanceProgressFile` rows. The new table is created at host start (`ApplicationProfileInstanceProgressFilesSchemaSql.ApplyIfMissing`) because ModuleUpdater does not run when ModuleInfo is already current. Preview of one file stays that file. Preview all merges the step’s files into one PDF. Unsaved files on the advance form preview from their bytes.
+- **Test**: Blazor Debug build, 0 errors. `ApplicationProfileInstanceProgressStepCorrectionTests` plus the two timeline facts: 8 passed. Progress tab was not clicked through in a running browser.
+- **Prevent**: Do not insert a new progress row or call Revert to correct a date or a file. Revert still deletes later rows. A current step that can still Advance keeps a single date, the date of the new row. Empty `FileData.ID` is not listed.
+- **Cross-skill**: visa2026-application-profile, visa2026-preview-slot
+
 ### 2026-10-20 — Migration step title while waiting for the process number
 
 - **Need**: After documents are submitted, the current migration step was **Migrasiýa gullugy** / **Dowam edýär**. Officers need **Migrasiýa gullugynda** with **AS (CO) belgisine garaşylýar** under it until the process number is saved, then the outcome (**Işlenilýär**, **Resmileşdirildi**, **Garşylyk berildi**).

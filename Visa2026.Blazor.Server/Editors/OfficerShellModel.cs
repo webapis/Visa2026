@@ -501,6 +501,18 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<OfficerShellCaseProgressStepCorrection> SaveStepRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseProgressStepCorrection>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<OfficerShellCaseProgressFileChange> ChangeFileRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseProgressFileChange>>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested
     {
         get => GetPropertyValue<EventCallback<OfficerShellCaseProgressRevertRequest>>();
@@ -516,6 +528,12 @@ public sealed class OfficerShellModel : ComponentModelBase
     public bool ProgressStatusIsError
     {
         get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public int ProgressCorrectionRevision
+    {
+        get => GetPropertyValue<int>();
         set => SetPropertyValue(value);
     }
 

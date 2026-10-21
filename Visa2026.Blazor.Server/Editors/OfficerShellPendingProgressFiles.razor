@@ -1,0 +1,44 @@
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PreviewSlot
+
+@if (Files.Count > 0)
+{
+    <div class="ct-step-files">
+        @for (var i = 0; i < Files.Count; i++)
+        {
+            var index = i;
+            var pending = Files[index];
+            <div class="ct-step-file">
+                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                   FileName="@pending.FileName"
+                                                   LinkText="@pending.FileName"
+                                                   CssClass="ct-step-file__name"
+                                                   OwnerViewId="@OwnerViewId"
+                                                   InlineFiles="@(new[] { pending })" />
+                <button type="button"
+                        class="ct-step-file__btn"
+                        disabled="@Busy"
+                        @onclick="() => RemoveRequested.InvokeAsync(index)">
+                    @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RemoveFile")
+                </button>
+            </div>
+        }
+        @if (Files.Count > 1)
+        {
+            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                               FileName="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
+                                               LinkText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
+                                               CssClass="ct-step-file__btn"
+                                               OwnerViewId="@OwnerViewId"
+                                               InlineFiles="@Files" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<ProgressLetterInlineFile> Files { get; set; } = Array.Empty<ProgressLetterInlineFile>();
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public string OwnerViewId { get; set; } = string.Empty;
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public EventCallback<int> RemoveRequested { get; set; }
+}

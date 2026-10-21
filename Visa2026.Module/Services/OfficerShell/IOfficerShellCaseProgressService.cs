@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.Services.OfficerShell;
@@ -24,7 +25,37 @@ public interface IOfficerShellCaseProgressService
         byte[]? letterContent = null,
         string? processNumber = null,
         string? resultNumber = null,
-        string? submissionDocumentNumber = null);
+        string? submissionDocumentNumber = null,
+        IReadOnlyList<(string Name, byte[] Content)>? additionalFiles = null);
+
+    OfficerShellCaseProgressResult CorrectStep(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        DateTime stepDate,
+        string? submissionDocumentNumber);
+
+    OfficerShellCaseProgressResult AddProgressFile(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        int slot,
+        string fileName,
+        byte[] content);
+
+    OfficerShellCaseProgressResult ReplaceProgressFile(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        Guid fileId,
+        string fileName,
+        byte[] content);
+
+    OfficerShellCaseProgressResult RemoveProgressFile(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        Guid progressId,
+        Guid fileId);
 
     OfficerShellCaseProgressResult SaveMigrationSubmission(
         IObjectSpace objectSpace,

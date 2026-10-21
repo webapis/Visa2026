@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -152,6 +153,13 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInDetailView(false)]
         public string MinistryLetterFileName => MinistryLetterFile?.FileName ?? string.Empty;
+
+        /// <summary>Files after the first ministry letter or submission copy on this step.</summary>
+        [Aggregated]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual ObservableCollection<ApplicationProfileInstanceProgressFile> Files { get; set; }
+            = new ObservableCollection<ApplicationProfileInstanceProgressFile>();
 
         [NotMapped]
         [Browsable(false)]

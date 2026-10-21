@@ -1,0 +1,197 @@
+@using System.Collections.Generic
+@using System.IO
+@using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Blazor.Server.Components
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="ct-step-correct">
+    @if (Step.CanCorrectDate && Step.DateProgressId is Guid)
+    {
+        <label class="ct-label" for="step-date-@Step.Key">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
+        <OfficerDateEdit InputId="@($"step-date-{Step.Key}")"
+                         @bind-Date="_date"
+                         Enabled="@(!Busy)" />
+    }
+    @if (Step.CanEditSubmissionNumber)
+    {
+        <label class="ct-label" for="step-number-@Step.Key" style="margin-top:8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumber")</label>
+        <input id="step-number-@Step.Key"
+               type="text"
+               class="os-input"
+               maxlength="@ApplicationMigrationSubmission.MaxDocumentNumberLength"
+               @bind="_number"
+               @bind:event="oninput"
+               disabled="@Busy" />
+    }
+    @if (Step.CanCorrectDate || Step.CanEditSubmissionNumber)
+    {
+        <button type="button"
+                class="os-btn os-btn--primary"
+                style="margin-top:8px"
+                disabled="@Busy"
+                @onclick="SaveAsync">
+            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SaveSubmission")
+        </button>
+    }
+    @if (Step.Files.Count > 0 || Step.CanEditFiles)
+    {
+        <div class="ct-step-files">
+            @foreach (var file in Step.Files)
+            {
+                <div class="ct-step-file" title="@file.FileName">
+                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                       ProgressId="Step.ProgressId"
+                                                       FileId="file.FileId"
+                                                       FileName="@file.FileName"
+                                                       LinkText="@file.FileName"
+                                                       CssClass="ct-step-file__name"
+                                                       OwnerViewId="@OwnerViewId" />
+                    @if (Step.CanEditFiles)
+                    {
+                        <label class="ct-step-file__btn">
+                            <InputFile OnChange="e => ReplaceAsync(e, file.FileId)" accept="@Accept" disabled="@Busy" />
+                            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ReplaceFile")
+                        </label>
+                        <button type="button"
+                                class="ct-step-file__btn"
+                                disabled="@Busy"
+                                @onclick="() => RemoveAsync(file.FileId)">
+                            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RemoveFile")
+                        </button>
+                    }
+                </div>
+            }
+            <div class="ct-step-file ct-step-file--actions">
+                @if (Step.CanEditFiles)
+                {
+                    <label class="ct-step-file__btn">
+                        <InputFile OnChange="AddAsync" accept="@Accept" multiple disabled="@Busy" />
+                        + @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AddFile")
+                    </label>
+                }
+                @if (Step.Files.Count > 0 && Step.ProgressId is Guid)
+                {
+                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                       ProgressId="Step.ProgressId"
+                                                       FileName="@PreviewAllText"
+                                                       LinkText="@PreviewAllText"
+                                                       PreviewAll="true"
+                                                       CssClass="ct-step-file__btn"
+                                                       OwnerViewId="@OwnerViewId" />
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private const string Accept = ".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp";
+
+    [Parameter] public ApplicationWorkspaceCaseProgressStep Step { get; set; } = new();
+    [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
+    [Parameter] public string OwnerViewId { get; set; } = string.Empty;
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public int MaxUploadMb { get; set; } = 10;
+    [Parameter] public EventCallback<OfficerShellCaseProgressStepCorrection> SaveRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileChange> FileChangeRequested { get; set; }
+
+    private DateTime? _date;
+    private string _number = string.Empty;
+    private string _stamp = string.Empty;
+
+    private string PreviewAllText =>
+        Step.Files.Count > 1
+            ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")
+            : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewFile");
+
+    protected override void OnParametersSet()
+    {
+        var stamp = $"{Step.DateProgressId:N}:{Step.DateValue:yyyyMMdd}:{Step.SubmissionDocumentNumber}";
+        if (stamp == _stamp)
+            return;
+
+        _stamp = stamp;
+        _date = Step.DateValue;
+        _number = Step.SubmissionDocumentNumber ?? string.Empty;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (Busy || Step.DateProgressId is not Guid progressId || _date is not DateTime date)
+            return;
+
+        await SaveRequested.InvokeAsync(new OfficerShellCaseProgressStepCorrection
+        {
+            ProgressId = progressId,
+            Date = date.Date,
+            SubmissionDocumentNumber = Step.CanEditSubmissionNumber ? _number : null,
+        });
+    }
+
+    private async Task AddAsync(InputFileChangeEventArgs e)
+    {
+        if (Busy || Step.ProgressId is not Guid progressId)
+            return;
+
+        foreach (var file in e.GetMultipleFiles(100))
+        {
+            var content = await ReadAsync(file);
+            if (content == null)
+                continue;
+
+            await FileChangeRequested.InvokeAsync(new OfficerShellCaseProgressFileChange
+            {
+                ProgressId = progressId,
+                Slot = Step.FileSlot,
+                FileName = file.Name,
+                Content = content,
+            });
+        }
+    }
+
+    private async Task ReplaceAsync(InputFileChangeEventArgs e, Guid fileId)
+    {
+        var file = e.File;
+        if (Busy || file == null || Step.ProgressId is not Guid progressId)
+            return;
+
+        var content = await ReadAsync(file);
+        if (content == null)
+            return;
+
+        await FileChangeRequested.InvokeAsync(new OfficerShellCaseProgressFileChange
+        {
+            ProgressId = progressId,
+            FileId = fileId,
+            Slot = Step.FileSlot,
+            FileName = file.Name,
+            Content = content,
+        });
+    }
+
+    private Task RemoveAsync(Guid fileId)
+    {
+        if (Busy || Step.ProgressId is not Guid progressId)
+            return Task.CompletedTask;
+
+        return FileChangeRequested.InvokeAsync(new OfficerShellCaseProgressFileChange
+        {
+            ProgressId = progressId,
+            FileId = fileId,
+            Remove = true,
+            Slot = Step.FileSlot,
+        });
+    }
+
+    private async Task<byte[]?> ReadAsync(IBrowserFile file)
+    {
+        await using var stream = file.OpenReadStream(MaxUploadMb * 1024L * 1024L);
+        using var memory = new MemoryStream();
+        await stream.CopyToAsync(memory);
+        var content = memory.ToArray();
+        return content.Length == 0 ? null : content;
+    }
+}

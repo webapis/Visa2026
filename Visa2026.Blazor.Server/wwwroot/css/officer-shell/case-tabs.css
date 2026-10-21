@@ -79,7 +79,18 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-prog-v--current .ct-prog-v__line { background: var(--os-accent); }
 .ct-prog-v:last-child .ct-prog-v__line { display: none; }
 .ct-prog-v__body { padding-bottom: 18px; }
-.ct-prog-v__head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ct-prog-v__head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; position: relative; padding-right: 36px; }
+.ct-step-pen {
+  position: absolute; top: 0; right: 0;
+  width: 28px; height: 28px; padding: 0;
+  display: grid; place-items: center;
+  border: 1px solid var(--os-line); border-radius: 6px;
+  background: var(--os-panel); color: var(--os-muted); cursor: pointer;
+}
+.ct-step-pen svg { width: 14px; height: 14px; display: block; }
+.ct-step-pen.is-open,
+.ct-step-pen:hover { color: var(--os-accent); border-color: var(--os-accent); }
+.ct-step-pen:disabled { opacity: 0.5; cursor: default; }
 .ct-prog-v--migration .ct-prog-v__head { flex-direction: column; align-items: flex-start; gap: 2px; }
 .ct-prog-v__result-number { margin: 0 0 8px; font-size: 0.82rem; font-weight: 600; color: var(--os-ink); }
 .ct-prog-v__letter { margin: 0 0 8px; font-size: 0.82rem; }
@@ -106,6 +117,24 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   background: var(--os-warn-soft);
 }
 .ct-prog-v__letter-missing .ct-label { margin-top: 8px; }
+.ct-step-correct { margin: 8px 0 0; }
+.ct-step-files { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.ct-step-file {
+  display: flex; align-items: center; gap: 6px; min-height: 28px; font-size: 0.8rem;
+}
+.ct-step-file__name {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-align: left; background: none; border: 0; padding: 0; color: var(--os-ink);
+}
+.ct-step-file__btn {
+  position: relative; flex: 0 0 auto; border: 1px solid var(--os-line); border-radius: 6px;
+  background: var(--os-panel); color: var(--os-ink); font-size: 0.75rem; line-height: 1;
+  padding: 4px 8px; cursor: pointer;
+}
+.ct-step-file__btn input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.ct-step-file--actions { flex-wrap: wrap; }
 .ct-upload--missing {
   border-color: #ea580c;
   background: var(--os-warn-soft);

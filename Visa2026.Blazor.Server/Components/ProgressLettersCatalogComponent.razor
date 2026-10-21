@@ -151,6 +151,7 @@
             {
                 ApplicationProfileInstanceId = ApplicationProfileInstanceId,
                 ProgressId = entry.ProgressId,
+                FileId = entry.FileId == Guid.Empty ? null : entry.FileId,
                 DisplayName = displayName,
             });
             previewSucceeded = true;

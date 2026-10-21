@@ -9,4 +9,6 @@ public sealed class ApplicationProfileInstanceProgressLetterCatalogEntry
     public DateTime Date { get; init; }
 
     public string FileName { get; init; } = string.Empty;
+
+    public Guid FileId { get; init; }
 }

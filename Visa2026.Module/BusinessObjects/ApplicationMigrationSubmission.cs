@@ -40,7 +40,7 @@ public static class ApplicationMigrationSubmission
     }
 
     public static bool HasDocumentCopy(ApplicationProfileInstanceProgress? row) =>
-        row?.SubmissionDocumentFile != null && row.SubmissionDocumentFile.Size > 0;
+        ApplicationProfileInstanceProgressFiles.List(row, ApplicationProfileInstanceProgressFiles.SubmissionDocument).Count > 0;
 
     public static bool IsComplete(ApplicationProfileInstanceProgress? row) =>
         IsState(row?.State?.Code)

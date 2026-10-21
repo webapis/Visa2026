@@ -737,6 +737,94 @@ public class ApplicationWorkspaceProgressTimelineTests
                 : new FileData { FileName = fileName },
         };
 
+    [Fact]
+    public void Finished_step_dates_stay_between_neighbors_and_the_open_step_stays_fixed()
+    {
+        var instance = new ApplicationProfileInstance { ApplicationProfile = ThreeLegProfile() };
+        var started = new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            Date = new DateTime(2026, 9, 1),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Started },
+        };
+        var approved = new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            Date = new DateTime(2026, 9, 10),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Approved },
+            MinistryLetterFile = new FileData { ID = Guid.NewGuid(), FileName = "turkmenenergo.pdf", Size = 10 },
+            Files = new ObservableCollection<ApplicationProfileInstanceProgressFile>(),
+        };
+        approved.Files.Add(new ApplicationProfileInstanceProgressFile
+        {
+            Slot = ApplicationProfileInstanceProgressFiles.MinistryLetter,
+            SortOrder = 1,
+                    File = new FileData { ID = Guid.NewGuid(), FileName = "scan.jpg", Size = 11 },
+        });
+        var second = new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            Date = new DateTime(2026, 9, 20),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review2Started },
+        };
+        instance.ProgressHistory.Add(started);
+        instance.ProgressHistory.Add(approved);
+        instance.ProgressHistory.Add(second);
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(instance, instance.ApplicationProfile, default, objectSpace: null);
+        var office = Assert.Single(steps, step => step.Key == "office");
+        var firstLeg = Assert.Single(steps, step => step.Key == "leg-1");
+        var openLeg = Assert.Single(steps, step => step.Key == "leg-2");
+
+        Assert.True(office.CanCorrectDate);
+        Assert.Equal(new DateTime(2026, 9, 10), office.LatestDate);
+        Assert.True(firstLeg.CanCorrectDate);
+        Assert.True(firstLeg.CanEditFiles);
+        Assert.Equal(new DateTime(2026, 9, 1), firstLeg.EarliestDate);
+        Assert.Equal(new DateTime(2026, 9, 20), firstLeg.LatestDate);
+        Assert.Equal(2, firstLeg.Files.Count);
+        Assert.Equal(!openLeg.CanAdvance, openLeg.CanCorrectDate);
+        Assert.False(openLeg.CanEditFiles);
+    }
+
+    [Fact]
+    public void Issued_date_can_be_corrected_without_opening_its_files()
+    {
+        var instance = new ApplicationProfileInstance { ApplicationProfile = ThreeLegProfile() };
+        instance.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            Date = new DateTime(2026, 9, 1),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Started },
+        });
+        instance.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            Date = new DateTime(2026, 10, 1),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+            SubmissionDocumentNumber = "MS-1",
+            SubmissionDocumentFile = new FileData { ID = Guid.NewGuid(), FileName = "copy.pdf", Size = 12 },
+        });
+        instance.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            Date = new DateTime(2026, 10, 8),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessIssued },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(instance, instance.ApplicationProfile, default, objectSpace: null);
+        var submission = Assert.Single(steps, step => step.Key == ApplicationMigrationSubmission.TimelineKey);
+        var issued = Assert.Single(steps, step => step.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.True(submission.CanCorrectDate);
+        Assert.True(submission.CanEditFiles);
+        Assert.True(submission.CanEditSubmissionNumber);
+        Assert.Equal(new DateTime(2026, 10, 8), submission.LatestDate);
+        Assert.True(issued.CanCorrectDate);
+        Assert.False(issued.CanEditFiles);
+        Assert.Equal(new DateTime(2026, 10, 1), issued.EarliestDate);
+    }
+
     private static ApplicationProfile ThreeLegProfile()
     {
         var profile = new ApplicationProfile

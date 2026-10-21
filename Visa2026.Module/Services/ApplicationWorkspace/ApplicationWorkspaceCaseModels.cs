@@ -269,6 +269,28 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public string MinistryLetterFileName { get; init; } = string.Empty;
 
+    /// <summary>Every stored file on this step, primary first.</summary>
+    public IReadOnlyList<ApplicationProfileInstanceProgressStoredFile> Files { get; init; }
+        = Array.Empty<ApplicationProfileInstanceProgressStoredFile>();
+
+    /// <summary>Progress row whose <see cref="DateValue"/> can be corrected without reverting later steps.</summary>
+    public Guid? DateProgressId { get; init; }
+
+    public DateTime? DateValue { get; init; }
+
+    public bool CanCorrectDate { get; set; }
+
+    public DateTime? EarliestDate { get; set; }
+
+    public DateTime? LatestDate { get; set; }
+
+    /// <summary>Add, replace, and remove files on this finished step.</summary>
+    public bool CanEditFiles { get; init; }
+
+    public bool CanEditSubmissionNumber { get; init; }
+
+    public int FileSlot { get; init; }
+
     public bool ShowMinistryLetterUpload { get; init; }
 
     /// <summary>

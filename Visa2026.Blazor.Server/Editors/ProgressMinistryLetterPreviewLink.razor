@@ -18,6 +18,10 @@
     [Parameter] public string OwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
     [Parameter] public string? CssClass { get; set; }
     [Parameter] public string? LinkText { get; set; }
+    [Parameter] public Guid? FileId { get; set; }
+    [Parameter] public bool PreviewAll { get; set; }
+    [Parameter] public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; set; }
+        = Array.Empty<ProgressLetterInlineFile>();
 
     [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
@@ -26,13 +30,14 @@
 
     private bool CanPreview =>
         ApplicationProfileInstanceId != Guid.Empty
-        && ProgressId is Guid id
-        && id != Guid.Empty
-        && !string.IsNullOrWhiteSpace(FileName);
+        && (InlineFiles is { Count: > 0 }
+            || (ProgressId is Guid id
+                && id != Guid.Empty
+                && (PreviewAll || !string.IsNullOrWhiteSpace(FileName))));
 
     private Task OpenAsync()
     {
-        if (!CanPreview || ProgressId is not Guid progressId)
+        if (!CanPreview)
             return Task.CompletedTask;
 
         var ownerViewId = string.IsNullOrWhiteSpace(OwnerViewId)
@@ -42,8 +47,11 @@
         return PreviewSlotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
         {
             ApplicationProfileInstanceId = ApplicationProfileInstanceId,
-            FocusProgressId = progressId,
-            FocusDisplayName = FileName,
+            FocusProgressId = ProgressId,
+            FocusDisplayName = string.IsNullOrWhiteSpace(FileName) ? LinkText : FileName,
+            FocusFileId = FileId,
+            PreviewAllFiles = PreviewAll,
+            InlineFiles = InlineFiles,
             OpenPreviewOnly = true,
         }, ownerViewId);
     }

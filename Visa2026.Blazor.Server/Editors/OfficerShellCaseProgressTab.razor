@@ -8,6 +8,7 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Blazor.Server.Components
 @using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PreviewSlot
 
 <div class="ct-page">
     @if (!string.IsNullOrWhiteSpace(DisplayStatusMessage))
@@ -60,10 +61,72 @@
                         {
                             <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
                         }
+                        @if (CanOfferPen(step))
+                        {
+                            <button type="button"
+                                    class="ct-step-pen @(IsEditing(step) ? "is-open" : null)"
+                                    title="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.EditStep")"
+                                    aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.EditStep")"
+                                    aria-pressed="@IsEditing(step)"
+                                    disabled="@_busy"
+                                    @onclick="() => ToggleStepEdit(step)">
+                                <svg viewBox="0 0 16 16" aria-hidden="true">
+                                    <path fill="currentColor" d="M12.1 1.3a1.5 1.5 0 0 1 2.1 2.1l-8.4 8.4-2.8.7.7-2.8 8.4-8.4zM2 13.2h12v1.3H2z" />
+                                </svg>
+                            </button>
+                        }
                     </div>
                     @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
                     {
                         <p class="ct-prog-v__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</p>
+                    }
+                    @if (IsEditing(step))
+                    {
+                        <OfficerShellProgressStepCorrection Step="step"
+                                                            ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                            OwnerViewId="@PreviewSlotOwnerViewId"
+                                                            Busy="_busy"
+                                                            MaxUploadMb="MaxUploadMb"
+                                                            SaveRequested="SaveStepAsync"
+                                                            FileChangeRequested="ChangeFileAsync" />
+                    }
+                    else if (CanOfferPen(step))
+                    {
+                        @if (!string.IsNullOrWhiteSpace(step.SubmissionDocumentNumber))
+                        {
+                            <p class="ct-prog-v__result-number">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumber"): @step.SubmissionDocumentNumber</p>
+                        }
+                        @if (step.MissingMinistryLetter)
+                        {
+                            <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
+                        }
+                        @if (step.Files.Count > 0 && step.ProgressId is Guid)
+                        {
+                            <div class="ct-step-files">
+                                @foreach (var file in step.Files)
+                                {
+                                    <div class="ct-step-file" title="@file.FileName">
+                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                           ProgressId="step.ProgressId"
+                                                                           FileId="file.FileId"
+                                                                           FileName="@file.FileName"
+                                                                           LinkText="@file.FileName"
+                                                                           CssClass="ct-step-file__name"
+                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
+                                    </div>
+                                }
+                                @if (step.Files.Count > 1)
+                                {
+                                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                       ProgressId="step.ProgressId"
+                                                                       FileName="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
+                                                                       LinkText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
+                                                                       PreviewAll="true"
+                                                                       CssClass="ct-step-file__btn"
+                                                                       OwnerViewId="@PreviewSlotOwnerViewId" />
+                                }
+                            </div>
+                        }
                     }
                     @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
                     {
@@ -76,7 +139,9 @@
                             </button>
                         </p>
                     }
-                    @if (step.State != "current"
+                    @if (!CanOfferPen(step)
+                        && !IsEditing(step)
+                        && step.State != "current"
                         && !string.IsNullOrWhiteSpace(letterName)
                         && letterProgressId is Guid)
                     {
@@ -87,7 +152,7 @@
                                                                OwnerViewId="@PreviewSlotOwnerViewId" />
                         </p>
                     }
-                    else if (step.State != "current" && step.ShowMigrationSubmission)
+                    else if (!CanOfferPen(step) && !IsEditing(step) && step.State != "current" && step.ShowMigrationSubmission)
                     {
                         <div class="ct-prog-v__letter-missing">
                             <label class="ct-label" for="submission-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
@@ -121,7 +186,7 @@
                             </button>
                         </div>
                     }
-                    else if (step.State != "current" && step.MissingMinistryLetter)
+                    else if (!CanOfferPen(step) && !IsEditing(step) && step.State != "current" && step.MissingMinistryLetter)
                     {
                         <div class="ct-prog-v__letter-missing">
                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
@@ -182,12 +247,13 @@
                                                @bind:event="oninput"
                                                disabled="@_busy" />
                                         <label class="ct-label @(IsSubmissionCopyInvalid ? "ct-label--error" : null)" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopy")</label>
-                                        @if (!string.IsNullOrWhiteSpace(_pendingLetterName))
-                                        {
-                                            <p class="ct-muted" style="margin:0 0 8px">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.LetterStoredOnAdvance", _pendingLetterName)</p>
-                                        }
+                                        <OfficerShellPendingProgressFiles Files="_pendingFiles"
+                                                                          ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                          OwnerViewId="@PreviewSlotOwnerViewId"
+                                                                          Busy="_busy"
+                                                                          RemoveRequested="RemovePending" />
                                         <label class="ct-upload ct-upload--action @(IsSubmissionCopyInvalid ? "ct-upload--missing" : null)">
-                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple disabled="@_busy" />
                                             <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                                         </label>
                                     }
@@ -235,12 +301,13 @@
                                                                                    OwnerViewId="@PreviewSlotOwnerViewId" />
                                             </p>
                                         }
-                                        else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
-                                        {
-                                            <p class="ct-muted" style="margin:0 0 8px">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.LetterStoredOnAdvance", _pendingLetterName)</p>
-                                        }
+                                        <OfficerShellPendingProgressFiles Files="_pendingFiles"
+                                                                          ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                          OwnerViewId="@PreviewSlotOwnerViewId"
+                                                                          Busy="_busy"
+                                                                          RemoveRequested="RemovePending" />
                                         <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)">
-                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple disabled="@_busy" />
                                             <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                                         </label>
                                     }
@@ -263,7 +330,7 @@
                                     }
                                 </div>
                             }
-                            else if (step.ShowMinistryLetterUpload
+                            else if ((step.ShowMinistryLetterUpload && !IsEditing(step))
                                 || step.CanRevert
                                 || !string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
                             {
@@ -272,7 +339,7 @@
                                     {
                                         <p class="ct-muted" style="margin:0 0 10px">@ApplicationProfileLocalization.ProgressReason(step.AdvanceBlockedReason)</p>
                                     }
-                                    @if (step.ShowMinistryLetterUpload)
+                                    @if (step.ShowMinistryLetterUpload && !IsEditing(step))
                                     {
                                         <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">@FileUploadLabel(step)</label>
                                         @if (step.MissingMinistryLetter)
@@ -288,12 +355,13 @@
                                                                                    OwnerViewId="@PreviewSlotOwnerViewId" />
                                             </p>
                                         }
-                                        else if (!string.IsNullOrWhiteSpace(_pendingLetterName))
-                                        {
-                                            <p class="ct-muted" style="margin:0 0 8px">@_pendingLetterName</p>
-                                        }
+                                        <OfficerShellPendingProgressFiles Files="_pendingFiles"
+                                                                          ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                          OwnerViewId="@PreviewSlotOwnerViewId"
+                                                                          Busy="_busy"
+                                                                          RemoveRequested="RemovePending" />
                                         <label class="ct-upload ct-upload--action @(step.MissingMinistryLetter ? "ct-upload--missing" : null)" style="margin-bottom:10px">
-                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple disabled="@_busy" />
                                             <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                                         </label>
                                     }
@@ -334,11 +402,14 @@
         = Array.Empty<ApplicationWorkspaceProgressRow>();
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public int CorrectionSavedRevision { get; set; }
     [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressStepCorrection> SaveStepRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileChange> ChangeFileRequested { get; set; }
     [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
@@ -347,9 +418,10 @@
     private string _resultNumber = string.Empty;
     private DateTime? _advanceDate = DateTime.Today;
     private bool _busy;
+    private string? _editingStepKey;
+    private int _seenCorrectionRevision;
     private string _pendingLetterStepKey = string.Empty;
-    private string _pendingLetterName = string.Empty;
-    private byte[]? _pendingLetterContent;
+    private readonly List<ProgressLetterInlineFile> _pendingFiles = new();
     private string? _localAdvanceError;
     private bool _advanceFieldErrors;
     private bool _wasStatusError;
@@ -448,18 +520,26 @@
     private bool IsSubmissionCopyInvalid =>
         IsAdvanceFieldErrorMode
         && ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode)
-        && (_pendingLetterContent == null || _pendingLetterContent.Length == 0);
+        && _pendingFiles.Count == 0;
 
     internal string? PendingLetterFileName =>
-        string.IsNullOrWhiteSpace(_pendingLetterName) ? null : _pendingLetterName;
+        _pendingFiles.Count == 0 ? null : _pendingFiles[0].FileName;
 
-    internal byte[]? PendingLetterContent => _pendingLetterContent;
+    internal byte[]? PendingLetterContent =>
+        _pendingFiles.Count == 0 ? null : _pendingFiles[0].Content;
 
     private ApplicationWorkspaceCaseView view => View;
     private int MaxUploadMb => 10;
 
     protected override void OnParametersSet()
     {
+        if (CorrectionSavedRevision != _seenCorrectionRevision)
+        {
+            _seenCorrectionRevision = CorrectionSavedRevision;
+            if (!IsStatusError)
+                _editingStepKey = null;
+        }
+
         if (IsStatusError)
         {
             if (!_wasStatusError)
@@ -485,8 +565,7 @@
         if (!string.Equals(_pendingLetterStepKey, current.Key, StringComparison.OrdinalIgnoreCase))
         {
             _pendingLetterStepKey = string.Empty;
-            _pendingLetterName = string.Empty;
-            _pendingLetterContent = null;
+            _pendingFiles.Clear();
         }
 
         if (string.IsNullOrWhiteSpace(_processNumber) && !string.IsNullOrWhiteSpace(view.Chrome.ProcessNumber))
@@ -557,36 +636,105 @@
         }
     }
 
+    private static bool IsOpenAdvanceStep(ApplicationWorkspaceCaseProgressStep step) =>
+        step.State == "current"
+        && step.OutcomeKind is not ("issued" or "rejected" or "cancelled");
+
+    private static bool CanOfferPen(ApplicationWorkspaceCaseProgressStep step) =>
+        !IsOpenAdvanceStep(step)
+        && (step.CanCorrectDate || step.CanEditFiles || step.Files.Count > 0);
+
+    private bool IsEditing(ApplicationWorkspaceCaseProgressStep step) =>
+        CanOfferPen(step)
+        && string.Equals(_editingStepKey, step.Key, StringComparison.OrdinalIgnoreCase);
+
+    private void ToggleStepEdit(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (_busy || !CanOfferPen(step))
+            return;
+
+        _editingStepKey = IsEditing(step) ? null : step.Key;
+    }
+
+    private void RemovePending(int index)
+    {
+        if (index < 0 || index >= _pendingFiles.Count)
+            return;
+        _pendingFiles.RemoveAt(index);
+    }
+
     private async Task OnMinistryLetterSelected(InputFileChangeEventArgs e, ApplicationWorkspaceCaseProgressStep step)
     {
-        var file = e.File;
-        if (file == null || _busy)
+        if (_busy)
+            return;
+
+        var files = e.GetMultipleFiles(100);
+        if (files.Count == 0)
             return;
 
         _busy = true;
         try
         {
-            await using var stream = file.OpenReadStream(MaxUploadMb * 1024 * 1024);
-            using var memory = new MemoryStream();
-            await stream.CopyToAsync(memory);
-            var content = memory.ToArray();
-
             var attachTo = step.DecisionProgressId
                 ?? (step.MissingMinistryLetter ? step.ProgressId : null);
-            if (attachTo is Guid progressId && progressId != Guid.Empty)
+            foreach (var file in files)
             {
-                await UploadMinistryLetterRequested.InvokeAsync(new OfficerShellCaseProgressFileUpload
-                {
-                    FileName = file.Name,
-                    Content = content,
-                    ProgressId = progressId,
-                });
-                return;
-            }
+                await using var stream = file.OpenReadStream(MaxUploadMb * 1024L * 1024L);
+                using var memory = new MemoryStream();
+                await stream.CopyToAsync(memory);
+                var content = memory.ToArray();
+                if (content.Length == 0)
+                    continue;
 
-            _pendingLetterStepKey = step.Key;
-            _pendingLetterName = file.Name;
-            _pendingLetterContent = content;
+                if (attachTo is Guid progressId && progressId != Guid.Empty)
+                {
+                    await ChangeFileRequested.InvokeAsync(new OfficerShellCaseProgressFileChange
+                    {
+                        ProgressId = progressId,
+                        Slot = step.ShowMigrationSubmission
+                            ? ApplicationProfileInstanceProgressFiles.SubmissionDocument
+                            : ApplicationProfileInstanceProgressFiles.MinistryLetter,
+                        FileName = file.Name,
+                        Content = content,
+                    });
+                    continue;
+                }
+
+                _pendingLetterStepKey = step.Key;
+                _pendingFiles.Add(new ProgressLetterInlineFile { FileName = file.Name, Content = content });
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task SaveStepAsync(OfficerShellCaseProgressStepCorrection request)
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await SaveStepRequested.InvokeAsync(request);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ChangeFileAsync(OfficerShellCaseProgressFileChange request)
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await ChangeFileRequested.InvokeAsync(request);
         }
         finally
         {
@@ -625,8 +773,9 @@
             {
                 StateCode = code,
                 Date = AdvanceDate,
-                LetterFileName = _pendingLetterName,
-                LetterContent = _pendingLetterContent,
+                LetterFileName = _pendingFiles.Count == 0 ? null : _pendingFiles[0].FileName,
+                LetterContent = _pendingFiles.Count == 0 ? null : _pendingFiles[0].Content,
+                AdditionalFiles = _pendingFiles.Skip(1).ToList(),
                 ProcessNumber = _processNumber,
                 ResultNumber = ApplicationProgressResultNumberHelper.AppliesTo(code) ? _resultNumber : null,
                 SubmissionDocumentNumber = ApplicationMigrationSubmission.IsState(code) ? _submissionDocumentNumber : null,
@@ -670,7 +819,7 @@
         }
 
         if (ApplicationMigrationSubmission.IsState(code)
-            && (_pendingLetterContent == null || _pendingLetterContent.Length == 0))
+            && _pendingFiles.Count == 0)
         {
             error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired");
             return false;

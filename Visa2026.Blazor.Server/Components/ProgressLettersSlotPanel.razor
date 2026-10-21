@@ -187,6 +187,20 @@
 
     private static ProgressLettersInlinePreviewRequest? BuildPreviewRequest(ProgressLettersSlotRequest request)
     {
+        var displayName = string.IsNullOrWhiteSpace(request.FocusDisplayName)
+            ? "Ministry letter"
+            : request.FocusDisplayName.Trim();
+        if (request.InlineFiles is { Count: > 0 })
+        {
+            return new ProgressLettersInlinePreviewRequest
+            {
+                ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
+                ProgressId = request.FocusProgressId ?? Guid.Empty,
+                DisplayName = displayName,
+                InlineFiles = request.InlineFiles,
+            };
+        }
+
         if (request.FocusProgressId is not Guid progressId || progressId == Guid.Empty)
             return null;
 
@@ -194,9 +208,9 @@
         {
             ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
             ProgressId = progressId,
-            DisplayName = string.IsNullOrWhiteSpace(request.FocusDisplayName)
-                ? "Ministry letter"
-                : request.FocusDisplayName.Trim(),
+            DisplayName = displayName,
+            FileId = request.FocusFileId,
+            PreviewAllFiles = request.PreviewAllFiles,
         };
     }
 }

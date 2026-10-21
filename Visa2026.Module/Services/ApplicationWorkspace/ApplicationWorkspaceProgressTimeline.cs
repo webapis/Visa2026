@@ -177,6 +177,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             stateLabelOverride: ResolveMigrationStatusLabel(migrationRow, migrationState),
             processNumber: ResolveMigrationProcessNumber(application, history, migrationRow, migrationState)));
 
+        ApplyDateBounds(steps);
         return steps;
     }
 
@@ -361,18 +362,36 @@ internal static class ApplicationWorkspaceProgressTimeline
                 ? FormatProfileStateLabel(submitted.State?.Code)
                 : isCurrent ? OfficeLabel : string.Empty;
         var fileRow = cancelled ? latest : submitted;
-        var officeFileName = string.IsNullOrWhiteSpace(fileRow?.MinistryLetterFileName)
-            ? string.Empty
-            : fileRow.MinistryLetterFileName;
+        var officeFiles = ApplicationProfileInstanceProgressFiles.List(
+            fileRow,
+            ApplicationProfileInstanceProgressFiles.MinistryLetter);
+        var officeFileName = officeFiles.Count > 0
+            ? officeFiles[0].FileName
+            : string.IsNullOrWhiteSpace(fileRow?.MinistryLetterFileName)
+                ? string.Empty
+                : fileRow.MinistryLetterFileName;
         var officeFileId = !string.IsNullOrEmpty(officeFileName) && fileRow!.ID != Guid.Empty
             ? fileRow.ID
             : (Guid?)null;
+        var officeDateRow = cancelled ? latest : submitted;
+        var officeDateId = officeDateRow != null && officeDateRow.ID != Guid.Empty
+            ? officeDateRow.ID
+            : (Guid?)null;
+        var officeCanCorrect = CanCorrectStoredDate(
+            isCurrent ? "current" : "done",
+            isCurrent && canAdvance,
+            officeDateId);
 
         return new ApplicationWorkspaceCaseProgressStep
         {
             Key = OfficeKey,
             Label = OfficeLabel,
             Date = date,
+            DateValue = officeDateRow?.Date is { } officeDate && officeDate != default ? officeDate : null,
+            DateProgressId = officeDateId,
+            CanCorrectDate = officeCanCorrect,
+            Files = officeFiles,
+            FileSlot = ApplicationProfileInstanceProgressFiles.MinistryLetter,
             State = isCurrent ? "current" : "done",
             CurrentStateLabel = stateLabel,
             SlaTargetDate = isCurrent ? FormatSlaTarget(application.ApplicationDate, currentSla) : string.Empty,
@@ -394,6 +413,52 @@ internal static class ApplicationWorkspaceProgressTimeline
                 : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             OutcomeKind = cancelled ? "cancelled" : (isCurrent ? "current" : "ok"),
         };
+    }
+
+    private static bool CanCorrectStoredDate(string slotState, bool canAdvance, Guid? progressId)
+    {
+        if (progressId is not Guid id || id == Guid.Empty)
+            return false;
+        if (string.Equals(slotState, "pending", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (string.Equals(slotState, "current", StringComparison.OrdinalIgnoreCase) && canAdvance)
+            return false;
+        return true;
+    }
+
+    private static void ApplyDateBounds(List<ApplicationWorkspaceCaseProgressStep> steps)
+    {
+        var seen = new HashSet<Guid>();
+        for (var i = 0; i < steps.Count; i++)
+        {
+            if (steps[i].DateProgressId is Guid progressId && !seen.Add(progressId))
+                steps[i].CanCorrectDate = false;
+            if (!steps[i].CanCorrectDate)
+                continue;
+
+            DateTime? previous = null;
+            for (var j = i - 1; j >= 0; j--)
+            {
+                if (steps[j].DateValue is DateTime earlier)
+                {
+                    previous = earlier;
+                    break;
+                }
+            }
+
+            DateTime? next = null;
+            for (var j = i + 1; j < steps.Count; j++)
+            {
+                if (steps[j].DateValue is DateTime later)
+                {
+                    next = later;
+                    break;
+                }
+            }
+
+            steps[i].EarliestDate = previous;
+            steps[i].LatestDate = next;
+        }
     }
 
     private static ApplicationProfileInstanceProgress? FindSubmittedRow(
@@ -439,11 +504,21 @@ internal static class ApplicationWorkspaceProgressTimeline
             ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(key, advanceOptions)
             : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
         var decisionRow = row?.IsMinistryDecisionStep == true ? row : null;
-        var hasLetter = !string.IsNullOrWhiteSpace(letter?.MinistryLetterFileName);
+        var fileOwner = decisionRow ?? letter;
+        var submissionStep = ApplicationMigrationSubmission.IsState(row?.State?.Code);
+        var storedFiles = submissionStep
+            ? ApplicationProfileInstanceProgressFiles.List(row, ApplicationProfileInstanceProgressFiles.SubmissionDocument)
+            : ApplicationProfileInstanceProgressFiles.List(fileOwner, ApplicationProfileInstanceProgressFiles.MinistryLetter);
+        var hasLetter = storedFiles.Count > 0 || !string.IsNullOrWhiteSpace(letter?.MinistryLetterFileName);
         var missingLetter = ApplicationWorkspaceProgressLetterCompleteness.ResolveMissing(
             key,
             row?.IsMinistryDecisionStep == true,
             hasLetter);
+        var dateProgressId = row != null && row.ID != Guid.Empty ? row.ID : (Guid?)null;
+        var canCorrect = CanCorrectStoredDate(slotState, isCurrent && canAdvance, dateProgressId);
+        var fileName = storedFiles.Count > 0
+            ? storedFiles[0].FileName
+            : letter?.MinistryLetterFileName ?? string.Empty;
 
         return new ApplicationWorkspaceCaseProgressStep
         {
@@ -452,13 +527,22 @@ internal static class ApplicationWorkspaceProgressTimeline
             Date = row?.Date is { } date && date != default
                 ? date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
                 : string.Empty,
+            DateValue = row?.Date is { } storedDate && storedDate != default ? storedDate : null,
+            DateProgressId = dateProgressId,
+            CanCorrectDate = canCorrect,
+            CanEditFiles = canCorrect && (decisionRow != null || submissionStep),
+            CanEditSubmissionNumber = canCorrect && submissionStep,
+            Files = storedFiles,
+            FileSlot = submissionStep
+                ? ApplicationProfileInstanceProgressFiles.SubmissionDocument
+                : ApplicationProfileInstanceProgressFiles.MinistryLetter,
             State = slotState,
             CurrentStateLabel = stateLabel,
             SlaTargetDate = isCurrent && row != null ? FormatSlaTarget(row.Date, currentSla) : string.Empty,
             SlaDaysRemaining = isCurrent ? DaysLeft(currentSla) : null,
             ProgressId = letterId,
             OfficerNotes = isCurrent ? row?.Description ?? string.Empty : string.Empty,
-            MinistryLetterFileName = letter?.MinistryLetterFileName ?? string.Empty,
+            MinistryLetterFileName = fileName,
             ShowMinistryLetterUpload = (isCurrent
                 && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
                 && resultOptions.Count > 0)

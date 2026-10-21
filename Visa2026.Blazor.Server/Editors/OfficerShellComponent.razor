@@ -98,12 +98,15 @@
                                                                 RelinkPersonRequested="@RelinkPersonRequested"
                                                                 ProgressStatusMessage="@ProgressStatusMessage"
                                                                 ProgressStatusIsError="@ProgressStatusIsError"
+                                                                ProgressCorrectionRevision="@ProgressCorrectionRevision"
                                                                 ShowRevertToHere="@ShowProgressRevertToHere"
                                                                 SaveProgressNotesRequested="@SaveProgressNotesRequested"
                                                                 UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
                                                                 AdvanceProgressRequested="@AdvanceProgressRequested"
                                                                 SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
                                                                 RevertProgressRequested="@RevertProgressRequested"
+                                                                SaveStepRequested="@SaveStepRequested"
+                                                                ChangeFileRequested="@ChangeFileRequested"
                                                                 ShowPersonLinkPicker="@ShowPersonLinkPicker"
                                                                 PersonLinkCandidates="@PersonLinkCandidates"
                                                                 PersonLinkIsSearching="@PersonLinkIsSearching"
@@ -212,12 +215,15 @@
     [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
     [Parameter] public string? ProgressStatusMessage { get; set; }
     [Parameter] public bool ProgressStatusIsError { get; set; }
+    [Parameter] public int ProgressCorrectionRevision { get; set; }
     [Parameter] public bool ShowProgressRevertToHere { get; set; }
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressStepCorrection> SaveStepRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileChange> ChangeFileRequested { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
     [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
     [Parameter] public bool PersonLinkIsSearching { get; set; }

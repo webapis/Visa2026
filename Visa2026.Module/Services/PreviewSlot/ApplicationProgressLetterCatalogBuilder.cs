@@ -13,22 +13,43 @@ public static class ApplicationProfileInstanceProgressLetterCatalogBuilder
         if (objectSpace == null || applicationId == Guid.Empty)
             return Array.Empty<ApplicationProfileInstanceProgressLetterCatalogEntry>();
 
-        return objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
+        var rows = objectSpace.GetObjectsQuery<ApplicationProfileInstanceProgress>()
             .Include(p => p.ApplicationProfileInstance)
             .Include(p => p.State)
             .Include(p => p.MinistryLetterFile)
+            .Include(p => p.SubmissionDocumentFile)
+            .Include(p => p.Files)
+                .ThenInclude(f => f.File)
             .Where(p => p.ApplicationProfileInstance != null && p.ApplicationProfileInstance.ID == applicationId)
-            .Where(p => p.MinistryLetterFile != null && p.MinistryLetterFile.Size > 0)
             .OrderByDescending(p => p.Date)
             .ThenByDescending(p => p.ID)
-            .ToList()
-            .Select(p => new ApplicationProfileInstanceProgressLetterCatalogEntry
-            {
-                ProgressId = p.ID,
-                StatusLabel = p.StatusListLabel,
-                Date = p.Date,
-                FileName = p.MinistryLetterFileName,
-            })
             .ToList();
+
+        var entries = new List<ApplicationProfileInstanceProgressLetterCatalogEntry>();
+        foreach (var row in rows)
+        {
+            AddEntries(entries, row, ApplicationProfileInstanceProgressFiles.MinistryLetter);
+            AddEntries(entries, row, ApplicationProfileInstanceProgressFiles.SubmissionDocument);
+        }
+
+        return entries;
+    }
+
+    private static void AddEntries(
+        List<ApplicationProfileInstanceProgressLetterCatalogEntry> entries,
+        ApplicationProfileInstanceProgress row,
+        int slot)
+    {
+        foreach (var file in ApplicationProfileInstanceProgressFiles.List(row, slot))
+        {
+            entries.Add(new ApplicationProfileInstanceProgressLetterCatalogEntry
+            {
+                ProgressId = row.ID,
+                StatusLabel = row.StatusListLabel,
+                Date = row.Date,
+                FileName = file.FileName,
+                FileId = file.FileId,
+            });
+        }
     }
 }

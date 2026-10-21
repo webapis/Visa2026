@@ -53,11 +53,19 @@ public static class VisaPreviewSlotOccupantKeys
     public static string ForProgressLetters(ProgressLettersSlotRequest request)
     {
         var baseKey = ForProgressLetters(request?.ApplicationProfileInstanceId ?? Guid.Empty);
+        if (request?.InlineFiles is { Count: > 0 })
+            return $"{baseKey}|inline:{request.InlineFiles.Count}:{request.FocusDisplayName}";
+
         if (request?.OpenPreviewOnly == true
             && request.FocusProgressId is Guid focus
             && focus != Guid.Empty)
         {
-            return $"{baseKey}|preview:{focus:N}";
+            var file = request.PreviewAllFiles
+                ? "all"
+                : request.FocusFileId is Guid fileId && fileId != Guid.Empty
+                    ? fileId.ToString("N")
+                    : "one";
+            return $"{baseKey}|preview:{focus:N}:{file}";
         }
 
         return baseKey;

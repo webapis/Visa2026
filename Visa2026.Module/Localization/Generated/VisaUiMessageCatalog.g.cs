@@ -4912,6 +4912,97 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamanyň nusgasy hökmany.",
             ["ru-RU"] = "Нужна копия документа.",
         },
+        ["ApplicationProfileInstance.Workspace.EditStep"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit step",
+            ["tr-TR"] = "Adımı düzenle",
+            ["tk-TM"] = "Ädimi üýtget",
+            ["ru-RU"] = "Изменить шаг",
+        },
+        ["ApplicationProfileInstance.Workspace.AddFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add file",
+            ["tr-TR"] = "Dosya ekle",
+            ["tk-TM"] = "Faýl goş",
+            ["ru-RU"] = "Добавить файл",
+        },
+        ["ApplicationProfileInstance.Workspace.ReplaceFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Replace",
+            ["tr-TR"] = "Değiştir",
+            ["tk-TM"] = "Çalşyr",
+            ["ru-RU"] = "Заменить",
+        },
+        ["ApplicationProfileInstance.Workspace.RemoveFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove",
+            ["tr-TR"] = "Kaldır",
+            ["tk-TM"] = "Aýyr",
+            ["ru-RU"] = "Удалить",
+        },
+        ["ApplicationProfileInstance.Workspace.PreviewFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview",
+            ["tr-TR"] = "Önizle",
+            ["tk-TM"] = "Görkez",
+            ["ru-RU"] = "Просмотр",
+        },
+        ["ApplicationProfileInstance.Workspace.PreviewAllFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview all",
+            ["tr-TR"] = "Tümünü önizle",
+            ["tk-TM"] = "Hemmesini görkez",
+            ["ru-RU"] = "Просмотреть все",
+        },
+        ["ApplicationProfileInstance.Workspace.DateBetween"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date must be from {0} to {1}.",
+            ["tr-TR"] = "Tarih {0} ile {1} arasında olmalıdır.",
+            ["tk-TM"] = "Sene {0} bilen {1} aralygynda bolmaly.",
+            ["ru-RU"] = "Дата должна быть с {0} по {1}.",
+        },
+        ["ApplicationProfileInstance.Workspace.DateOnOrAfter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date must be on or after {0}.",
+            ["tr-TR"] = "Tarih {0} veya sonrası olmalıdır.",
+            ["tk-TM"] = "Sene {0} ýa-da ondan soň bolmaly.",
+            ["ru-RU"] = "Дата должна быть не раньше {0}.",
+        },
+        ["ApplicationProfileInstance.Workspace.DateOnOrBefore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date must be on or before {0}.",
+            ["tr-TR"] = "Tarih {0} veya öncesi olmalıdır.",
+            ["tk-TM"] = "Sene {0} ýa-da ondan öň bolmaly.",
+            ["ru-RU"] = "Дата должна быть не позже {0}.",
+        },
+        ["ApplicationProfileInstance.Workspace.StepSaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Step updated.",
+            ["tr-TR"] = "Adım güncellendi.",
+            ["tk-TM"] = "Ädim täzelendi.",
+            ["ru-RU"] = "Шаг обновлён.",
+        },
+        ["ApplicationProfileInstance.Workspace.FileAdded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File added.",
+            ["tr-TR"] = "Dosya eklendi.",
+            ["tk-TM"] = "Faýl goşuldy.",
+            ["ru-RU"] = "Файл добавлен.",
+        },
+        ["ApplicationProfileInstance.Workspace.FileRemoved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File removed.",
+            ["tr-TR"] = "Dosya kaldırıldı.",
+            ["tk-TM"] = "Faýl aýryldy.",
+            ["ru-RU"] = "Файл удалён.",
+        },
+        ["ApplicationProfileInstance.Workspace.FileReplaced"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File replaced.",
+            ["tr-TR"] = "Dosya değiştirildi.",
+            ["tk-TM"] = "Faýl çalşyryldy.",
+            ["ru-RU"] = "Файл заменён.",
+        },
         ["ApplicationProfileInstance.Workspace.SubmissionRequiredBeforeMigration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Enter the submission date, document copy, and document number before advancing to Migration service.",

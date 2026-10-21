@@ -124,11 +124,28 @@ public sealed class ProgressLettersSlotRequest
     /// <summary>Display name for <see cref="FocusProgressId"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
     public string? FocusDisplayName { get; init; }
 
+    /// <summary>One stored file on <see cref="FocusProgressId"/>. Empty previews the step's first file.</summary>
+    public Guid? FocusFileId { get; init; }
+
+    /// <summary>Merge every stored file on <see cref="FocusProgressId"/> into one preview.</summary>
+    public bool PreviewAllFiles { get; init; }
+
+    /// <summary>Files chosen on screen and not saved yet. When set, the preview does not read the database.</summary>
+    public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; init; }
+        = Array.Empty<ProgressLetterInlineFile>();
+
     /// <summary>
     /// When true, the slot shows only the letter preview viewer (no catalog).
     /// Used when the officer clicks a filename already shown in the case workspace Progress tab.
     /// </summary>
     public bool OpenPreviewOnly { get; init; }
+}
+
+public sealed class ProgressLetterInlineFile
+{
+    public string FileName { get; init; } = string.Empty;
+
+    public byte[] Content { get; init; } = Array.Empty<byte>();
 }
 
 public sealed class PersonDocumentCopiesSlotRequest
@@ -245,6 +262,13 @@ public sealed class ProgressLettersInlinePreviewRequest
     public Guid ApplicationProfileInstanceId { get; init; }
 
     public Guid ProgressId { get; init; }
+
+    public Guid? FileId { get; init; }
+
+    public bool PreviewAllFiles { get; init; }
+
+    public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; init; }
+        = Array.Empty<ProgressLetterInlineFile>();
 
     public required string DisplayName { get; init; }
 }

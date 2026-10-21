@@ -125,7 +125,10 @@
 
     public async Task OpenAsync(ProgressLettersInlinePreviewRequest request)
     {
-        if (request == null || request.ApplicationProfileInstanceId == Guid.Empty || request.ProgressId == Guid.Empty)
+        if (request == null)
+            return;
+        var hasInline = request.InlineFiles is { Count: > 0 };
+        if (!hasInline && (request.ApplicationProfileInstanceId == Guid.Empty || request.ProgressId == Guid.Empty))
             return;
 
         _fileName = request.DisplayName;
@@ -142,7 +145,39 @@
 
         try
         {
-            if (!FileAccess.TryGetFile(request.ApplicationProfileInstanceId, request.ProgressId, out var result) || result == null)
+            ApplicationProfileInstanceProgressMinistryLetterFileResult? result = null;
+            var loaded = false;
+            if (hasInline)
+            {
+                var pairs = request.InlineFiles
+                    .Select(file => (file.FileName, file.Content))
+                    .ToList();
+                if (ApplicationProfileInstanceProgressFilePreview.TryBuild(pairs, out var built, out _) && built != null)
+                {
+                    result = new ApplicationProfileInstanceProgressMinistryLetterFileResult
+                    {
+                        Content = built.Content,
+                        FileName = built.FileName,
+                        ContentType = built.ContentType,
+                    };
+                    loaded = true;
+                }
+            }
+            else if (request.PreviewAllFiles || request.FileId is Guid)
+            {
+                loaded = FileAccess.TryGetPreview(
+                    request.ApplicationProfileInstanceId,
+                    request.ProgressId,
+                    request.FileId,
+                    request.PreviewAllFiles,
+                    out result);
+            }
+            else
+            {
+                loaded = FileAccess.TryGetFile(request.ApplicationProfileInstanceId, request.ProgressId, out result);
+            }
+
+            if (!loaded || result == null)
             {
                 SetPreviewError(PreviewError);
                 return;

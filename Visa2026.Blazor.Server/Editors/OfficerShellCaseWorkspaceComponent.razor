@@ -335,11 +335,14 @@
                                                          ProgressHistory="Snapshot.ProgressHistory"
                                                          StatusMessage="@ProgressStatusMessage"
                                                          IsStatusError="@ProgressStatusIsError"
+                                                         CorrectionSavedRevision="@ProgressCorrectionRevision"
                                                          SaveNotesRequested="@SaveProgressNotesRequested"
                                                          UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
                                                          AdvanceProgressRequested="@AdvanceProgressRequested"
                                                          SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
                                                          RevertProgressRequested="@RevertProgressRequested"
+                                                         SaveStepRequested="@SaveStepRequested"
+                                                         ChangeFileRequested="@ChangeFileRequested"
                                                          ShowRevertToHere="@ShowRevertToHere"
                                                          PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
                             break;
@@ -382,6 +385,13 @@
 </div>
 
 @code {
+    private static string ProgressLetterText(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (step.Files.Count <= 1)
+            return step.Files.Count == 1 ? step.Files[0].FileName : string.Empty;
+        return step.Files[0].FileName + " (+" + (step.Files.Count - 1) + ")";
+    }
+
     private static (string Key, string Label, string Glyph)[] CaseTabs =>
     [
         ("overview", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Overview"), "⌂"),
@@ -458,11 +468,14 @@
     [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
     [Parameter] public string? ProgressStatusMessage { get; set; }
     [Parameter] public bool ProgressStatusIsError { get; set; }
+    [Parameter] public int ProgressCorrectionRevision { get; set; }
     [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseMigrationSubmissionRequest> SaveMigrationSubmissionRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressRevertRequest> RevertProgressRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressStepCorrection> SaveStepRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileChange> ChangeFileRequested { get; set; }
     [Parameter] public bool ShowRevertToHere { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
     [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
@@ -1718,7 +1731,19 @@
                                 {
                                     <span class="cw-prog-step__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
                                 }
-                                @if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid)
+                                @if (step.Files.Count > 0 && step.ProgressId is Guid)
+                                {
+                                    <span class="cw-prog-step__letter">
+                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                                           ProgressId="step.ProgressId"
+                                                                           FileName="@ProgressLetterText(step)"
+                                                                           LinkText="@ProgressLetterText(step)"
+                                                                           PreviewAll="@(step.Files.Count > 1)"
+                                                                           FileId="@(step.Files.Count == 1 ? (Guid?)step.Files[0].FileId : null)"
+                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
+                                    </span>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid)
                                 {
                                     <span class="cw-prog-step__letter">
                                         <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"

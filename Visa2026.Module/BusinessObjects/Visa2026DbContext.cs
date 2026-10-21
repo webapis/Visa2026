@@ -145,6 +145,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
         public DbSet<ApplicationProfileInstanceProgress> ApplicationProfileInstanceProgresses { get; set; }
+        public DbSet<ApplicationProfileInstanceProgressFile> ApplicationProfileInstanceProgressFiles { get; set; }
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }
         public DbSet<ValidityDuration> ValidityDurations { get; set; }
         public DbSet<VisaExtensionTracking> VisaExtensionTracking { get; set; }
@@ -1093,6 +1094,20 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<ApplicationProfileInstanceProgress>(b => {
                 b.HasIndex("ApplicationProfileInstanceID", nameof(ApplicationProfileInstanceProgress.Order))
                  .HasDatabaseName("IX_ApplicationProfileInstanceProgresses_ApplicationProfileInstanceID_ProgressOrder");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstanceProgressFile>(b =>
+            {
+                b.HasOne(f => f.Progress)
+                    .WithMany(p => p.Files)
+                    .HasForeignKey(f => f.ProgressId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(f => f.File)
+                    .WithMany()
+                    .HasForeignKey("FileID")
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(f => f.ProgressId)
+                    .HasDatabaseName("IX_ApplicationProfileInstanceProgressFiles_ProgressId");
             });
 
             modelBuilder.Entity<ApplicationProfileInstanceApprovalLegSnapshot>(b => {

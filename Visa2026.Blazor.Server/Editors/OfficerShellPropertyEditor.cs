@@ -115,6 +115,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         AdvanceProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressAdvanceRequest>(this, AdvanceCaseProgressAsync),
         SaveMigrationSubmissionRequested = EventCallback.Factory.Create<OfficerShellCaseMigrationSubmissionRequest>(this, SaveMigrationSubmissionAsync),
         RevertProgressRequested = EventCallback.Factory.Create<OfficerShellCaseProgressRevertRequest>(this, RevertCaseProgressAsync),
+        SaveStepRequested = EventCallback.Factory.Create<OfficerShellCaseProgressStepCorrection>(this, SaveStepAsync),
+        ChangeFileRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileChange>(this, ChangeFileAsync),
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
@@ -810,6 +812,94 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         }
     }
 
+    private async Task SaveStepAsync(OfficerShellCaseProgressStepCorrection request)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+            var result = service.CorrectStep(
+                objectSpace,
+                model.CaseApplicationProfileInstanceId,
+                request.ProgressId,
+                request.Date,
+                request.SubmissionDocumentNumber);
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save this step.";
+                model.ProgressStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ProgressStatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StepSaved");
+            model.ProgressStatusIsError = false;
+            model.ProgressCorrectionRevision++;
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
+        }
+    }
+
+    private async Task ChangeFileAsync(OfficerShellCaseProgressFileChange change)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var service = _caseProgressService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
+                ?? new OfficerShellCaseProgressService();
+            var applicationId = model.CaseApplicationProfileInstanceId;
+            OfficerShellCaseProgressResult result;
+            if (change.Remove)
+            {
+                result = service.RemoveProgressFile(objectSpace, applicationId, change.ProgressId, change.FileId ?? Guid.Empty);
+            }
+            else if (change.FileId is Guid fileId && fileId != Guid.Empty)
+            {
+                result = service.ReplaceProgressFile(objectSpace, applicationId, change.ProgressId, fileId, change.FileName, change.Content);
+            }
+            else
+            {
+                result = service.AddProgressFile(objectSpace, applicationId, change.ProgressId, change.Slot, change.FileName, change.Content);
+            }
+
+            if (!result.Success)
+            {
+                model.ProgressStatusMessage = result.ErrorMessage ?? "Could not update the file.";
+                model.ProgressStatusIsError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            model.ProgressStatusMessage = change.Remove
+                ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.FileRemoved")
+                : change.FileId is Guid
+                    ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.FileReplaced")
+                    : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.FileAdded");
+            model.ProgressStatusIsError = false;
+            await LoadWorkspaceAsync(model, applicationId);
+        }
+        catch (Exception ex)
+        {
+            model.ProgressStatusMessage = ex.Message;
+            model.ProgressStatusIsError = true;
+        }
+    }
+
     private async Task AdvanceCaseProgressAsync(OfficerShellCaseProgressAdvanceRequest request)
     {
         var model = ComponentModel;
@@ -833,7 +923,10 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 request.LetterContent,
                 request.ProcessNumber,
                 request.ResultNumber,
-                request.SubmissionDocumentNumber);
+                request.SubmissionDocumentNumber,
+                request.AdditionalFiles.Count == 0
+                    ? null
+                    : request.AdditionalFiles.Select(file => (file.FileName, file.Content)).ToList());
 
             if (!result.Success)
             {
