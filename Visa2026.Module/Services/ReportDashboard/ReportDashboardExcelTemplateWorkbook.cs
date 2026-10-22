@@ -162,9 +162,11 @@ public static class ReportDashboardExcelTemplateWorkbook
                 ? headers
                 : null,
             columnWidths: MaglumatColumnWidths(category, subReport),
-            integerColumn: IsWorkPermitCalisma(category, subReport) || IsVisaAktivPersoneller(category, subReport)
-                ? 12
-                : null,
+            integerColumn: IsVisaAktivPersoneller(category, subReport)
+                ? 13
+                : IsWorkPermitCalisma(category, subReport)
+                    ? 12
+                    : null,
             sheetName: companyProcess ? ReportDashboardCatalog.InvitationProcessSheetName(subReport) : null);
     }
 
@@ -251,18 +253,12 @@ public static class ReportDashboardExcelTemplateWorkbook
         sample.Style.Font.FontName = CompanyFontName;
         sample.Style.Font.FontSize = 11;
         sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
         sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.OutsideBorderColor = XLColor.Black;
         sample.Style.Border.InsideBorderColor = XLColor.Black;
-        for (var column = 1; column <= columnCount; column++)
-        {
-            var horizontal = column is 2 or 3 or 4 or 5
-                ? XLAlignmentHorizontalValues.Left
-                : XLAlignmentHorizontalValues.Center;
-            sample.Cell(1, column).Style.Alignment.Horizontal = horizontal;
-        }
 
         double[] widths = [8, 22, 38, 22, 18, 16, 16, 14, 24, 20, 18, 26];
         for (var column = 0; column < columnCount; column++)
@@ -306,18 +302,12 @@ public static class ReportDashboardExcelTemplateWorkbook
         sample.Style.Font.FontName = CompanyFontName;
         sample.Style.Font.FontSize = 11;
         sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
         sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.OutsideBorderColor = XLColor.Black;
         sample.Style.Border.InsideBorderColor = XLColor.Black;
-        for (var column = 1; column <= columnCount; column++)
-        {
-            var horizontal = column is 2 or 3 or 4 or 5 or 12 or 13
-                ? XLAlignmentHorizontalValues.Left
-                : XLAlignmentHorizontalValues.Center;
-            sample.Cell(1, column).Style.Alignment.Horizontal = horizontal;
-        }
 
         double[] widths = [8, 22, 38, 22, 18, 16, 16, 14, 24, 18, 20, 22, 16];
         for (var column = 0; column < columnCount; column++)
@@ -335,7 +325,10 @@ public static class ReportDashboardExcelTemplateWorkbook
 
     public static byte[] BuildCalismaListesiStarter(string? sheetName = null)
     {
-        var headers = ReportDashboardWorkPermitCalismaExcel.Headers;
+        var isAktiv = string.Equals(sheetName, "aktiv personeller", StringComparison.OrdinalIgnoreCase);
+        var headers = isAktiv
+            ? ReportDashboardWorkPermitCalismaExcel.AktivPersonellerHeaders
+            : ReportDashboardWorkPermitCalismaExcel.Headers;
         using var workbook = new XLWorkbook();
         var sheet = workbook.Worksheets.Add(string.IsNullOrWhiteSpace(sheetName) ? "çalışma izni listesi" : sheetName);
         var columnCount = headers.Length;
@@ -361,13 +354,16 @@ public static class ReportDashboardExcelTemplateWorkbook
         sample.Style.Font.FontName = CompanyFontName;
         sample.Style.Font.FontSize = 11;
         sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
         sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.OutsideBorderColor = XLColor.Black;
         sample.Style.Border.InsideBorderColor = XLColor.Black;
 
-        double[] widths = [8, 16, 18, 22, 14, 16, 16, 28, 16, 14, 16, 12, 36, 12];
+        double[] widths = isAktiv
+            ? [8, 16, 18, 22, 14, 16, 16, 28, 12, 16, 14, 16, 12, 36, 12]
+            : [8, 16, 18, 22, 14, 16, 16, 28, 16, 14, 16, 12, 36, 12];
         for (var column = 0; column < columnCount; column++)
             sheet.Column(column + 1).Width = widths[column];
 
@@ -407,7 +403,17 @@ public static class ReportDashboardExcelTemplateWorkbook
 
         var sample = sheet.Range(3, 1, 3, columnCount);
         sample.Style.Alignment.WrapText = true;
-        sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+        sample.Style.Alignment.Horizontal = companyFont
+            ? XLAlignmentHorizontalValues.Center
+            : XLAlignmentHorizontalValues.General;
+        sample.Style.Alignment.Vertical = companyFont
+            ? XLAlignmentVerticalValues.Center
+            : XLAlignmentVerticalValues.Top;
+        if (companyFont)
+        {
+            header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        }
 
         sheet.SheetView.FreezeRows(2);
         sheet.Columns(1, columnCount).Width = 18;
@@ -641,7 +647,7 @@ public static class ReportDashboardExcelTemplateWorkbook
     {
         var headers = ReportDashboardVisaUzatilanlarExcel.Headers;
         using var workbook = new XLWorkbook();
-        var sheet = workbook.Worksheets.Add("uzatılanlar");
+        var sheet = workbook.Worksheets.Add("uzatımlar");
         var columnCount = headers.Length;
 
         for (var column = 0; column < columnCount; column++)
@@ -665,6 +671,7 @@ public static class ReportDashboardExcelTemplateWorkbook
         sample.Style.Font.FontName = CompanyFontName;
         sample.Style.Font.FontSize = 11;
         sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
         sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
         sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
@@ -743,7 +750,7 @@ public static class ReportDashboardExcelTemplateWorkbook
     private static string SheetName(ReportDashboardCategory category, string? subReport)
     {
         if (IsVisaUzatilanlar(category, subReport))
-            return "uzatılanlar";
+            return "uzatımlar";
         if (IsVisaAktivPersoneller(category, subReport))
             return "aktiv personeller";
         if (IsWorkPermitCalisma(category, subReport))
@@ -900,12 +907,13 @@ public static class ReportDashboardExcelTemplateWorkbook
         table.Style.Border.OutsideBorderColor = XLColor.Black;
         table.Style.Border.InsideBorderColor = XLColor.Black;
 
+        table.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        table.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        table.Style.Alignment.WrapText = true;
+
         var header = sheet.Range(headerRow, 1, headerRow, columnCount);
         header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
         header.Style.Font.Bold = true;
-        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-        header.Style.Alignment.WrapText = true;
     }
 
     private static void ClearRow(IXLWorksheet sheet, int rowNumber, int columnCount)

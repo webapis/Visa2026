@@ -35,8 +35,29 @@ namespace Visa2026.Module.DatabaseUpdate
             }
 
             EnsureMinistryReviewSlaSettings();
+            EnsureWorkPermitQuotaSettings();
 
             ObjectSpace.CommitChanges();
+        }
+
+        private void EnsureWorkPermitQuotaSettings()
+        {
+            var settings = WorkPermitQuotaSettings.GetOrCreateInstance(ObjectSpace);
+            if (settings.ForeignRatio <= 0)
+                settings.ForeignRatio = WorkPermitQuotaSettings.DefaultForeignRatio;
+            if (settings.LocalRatio <= 0)
+                settings.LocalRatio = WorkPermitQuotaSettings.DefaultLocalRatio;
+            if (settings.LocalPersonnelCount < 0)
+                settings.LocalPersonnelCount = WorkPermitQuotaSettings.DefaultLocalPersonnelCount;
+
+            var removed = OrganizationSingletonHelper.CollapseToSingleRow(
+                ObjectSpace, (WorkPermitQuotaSettings _) => "Work permit quota");
+            if (removed > 0)
+            {
+                var line = $"OrganizationSingletonSeedUpdater: removed {removed} duplicate WorkPermitQuotaSettings row(s).";
+                Tracing.Tracer.LogText(line);
+                System.Diagnostics.Trace.WriteLine(line);
+            }
         }
 
         private void EnsureMinistryReviewSlaSettings()

@@ -994,6 +994,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                             row.PassportNumber ?? string.Empty,
                             row.PassportEndLabel ?? string.Empty,
                             row.PositionLabel ?? string.Empty,
+                            row.VisaDurationLabel ?? string.Empty,
                             row.WorkPermitEndLabel ?? string.Empty,
                             row.VisaNumber ?? string.Empty,
                             row.VisaEndLabel ?? string.Empty,
@@ -3145,6 +3146,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, validVisaPersonIds);
         }
 
+        if (string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadRegistrationOturumSayisiFromView(
+                objectSpace, projectKey, personType, excelHint, excelConfigured);
+        }
+
         if (string.IsNullOrWhiteSpace(subReport)
             || subReport == "default"
             || ReportDashboardCatalog.IsRegistrationExpiringStateSubReport(subReport)
@@ -3731,6 +3738,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
         }
 
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase))
+            return LoadWorkPermitKotaOranimizFromView(objectSpace, personType, excelHint, excelConfigured);
+
+        if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
+            return LoadWorkPermitPersonelSayiFromView(objectSpace, projectKey, personType, excelHint, excelConfigured);
+
         if (string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
         {
             return LoadWorkPermitSanawFromView(
@@ -4072,6 +4085,215 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             return LoadWorkPermitActiveByProjectLegacy(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured,
                 includeArchivedPersons, oneLastValidWorkPermitPerPerson, validVisaPersonIds);
+        }
+    }
+
+    /// <summary>
+    /// Personel sayi: one row per department. Employees with an active work permit,
+    /// split by whether they also have an active valid visa.
+    /// </summary>
+    private static ReportDashboardPanelData LoadRegistrationOturumSayisiFromView(
+        IObjectSpace objectSpace,
+        string projectKey,
+        ReportDashboardPersonType personType,
+        string? excelHint,
+        bool excelConfigured)
+    {
+        const string subReport = ReportDashboardCatalog.RegistrationOturumSayisiKey;
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+
+        if (personType is not ReportDashboardPersonType.All and not ReportDashboardPersonType.Employees)
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+
+        try
+        {
+            IQueryable<VwRdRegistrationOturumSayisi> query = db.VwRdRegistrationOturumSayisi.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.DepartmentLabel == projectKey);
+            }
+
+            var list = query
+                .OrderBy(r => r.DepartmentLabel)
+                .ToList();
+            var rows = list
+                .Select(r =>
+                {
+                    var excelRow = new ReportDashboardRegistrationOturumSayisiExcel.Row(
+                        r.DepartmentLabel ?? string.Empty,
+                        r.BalkanKampCount,
+                        r.BalkanAdresCount,
+                        r.AsgabatCount,
+                        r.AsgabatKampCount,
+                        r.AsgabatAdresCount,
+                        r.AhalCount,
+                        r.AhalKampCount,
+                        r.AhalAdresCount,
+                        r.LebapCount,
+                        r.LebapKampCount,
+                        r.LebapAdresCount,
+                        r.MaryAdresCount,
+                        r.MaryKampCount);
+                    var notes = ReportDashboardRegistrationOturumSayisiExcel.BuildNotes(excelRow);
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.DepartmentLabel ?? string.Empty,
+                        ColumnA = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.BalkanKampCount),
+                        ColumnB = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.BalkanAdresCount),
+                        ColumnC = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.AsgabatCount),
+                        ColumnD = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.AhalCount),
+                        ColumnE = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.LebapCount),
+                        ColumnF = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.MaryAdresCount),
+                        ColumnG = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.MaryKampCount),
+                        ColumnH = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.TotalCount),
+                        ColumnI = notes,
+                        Status = r.StatusLabel ?? r.DepartmentLabel ?? string.Empty,
+                        StatusCssClass = string.IsNullOrWhiteSpace(r.StatusCssClass) ? "st-cat-1" : r.StatusCssClass,
+                    };
+                })
+                .ToList();
+
+            var buckets = list
+                .Select(r => (Label: r.DepartmentLabel ?? "(No department)", Count: r.TotalCount))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            return BuildPanel(
+                personType, ReportDashboardCategory.Registration, subReport, rows,
+                excelHint, excelConfigured, AssignCategoricalCss(buckets), list.Sum(r => r.TotalCount),
+                subReportLabel: "Oturum sayısı");
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadWorkPermitPersonelSayiFromView(
+        IObjectSpace objectSpace,
+        string projectKey,
+        ReportDashboardPersonType personType,
+        string? excelHint,
+        bool excelConfigured)
+    {
+        const string subReport = ReportDashboardCatalog.WorkPermitPersonelSayiKey;
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+
+        if (personType is not ReportDashboardPersonType.All and not ReportDashboardPersonType.Employees)
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+
+        try
+        {
+            IQueryable<VwRdWorkPermitPersonelSayi> query = db.VwRdWorkPermitPersonelSayi.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.DepartmentLabel == projectKey);
+            }
+
+            var list = query
+                .OrderBy(r => r.DepartmentLabel)
+                .ToList();
+            var rows = list
+                .Select(r => new ReportDashboardPreviewRow
+                {
+                    RecordId = r.ID,
+                    Name = r.DepartmentLabel ?? string.Empty,
+                    ColumnA = r.ActiveCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnB = r.InactiveCount == 0
+                        ? string.Empty
+                        : r.InactiveCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnC = (r.ActiveCount + r.InactiveCount).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    Status = r.StatusLabel ?? r.DepartmentLabel ?? string.Empty,
+                    StatusCssClass = string.IsNullOrWhiteSpace(r.StatusCssClass) ? "st-cat-1" : r.StatusCssClass,
+                })
+                .ToList();
+
+            var buckets = list
+                .Select(r => (Label: r.DepartmentLabel ?? "(No department)", Count: r.ActiveCount + r.InactiveCount))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            return BuildPanel(
+                personType, ReportDashboardCategory.WorkPermit, subReport, rows,
+                excelHint, excelConfigured, AssignCategoricalCss(buckets), list.Sum(r => r.ActiveCount + r.InactiveCount),
+                subReportLabel: "Personel sayi");
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    /// <summary>
+    /// kota oranımız: one summary row. Lokal and ORAN come from WorkPermitQuotaSettings.
+    /// Yabancı and İşlemde come from vw_rd_work_permit_kota_oranimiz (Employees only).
+    /// </summary>
+    private static ReportDashboardPanelData LoadWorkPermitKotaOranimizFromView(
+        IObjectSpace objectSpace,
+        ReportDashboardPersonType personType,
+        string? excelHint,
+        bool excelConfigured)
+    {
+        const string subReport = ReportDashboardCatalog.WorkPermitKotaOranimizKey;
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
+        }
+
+        try
+        {
+            var summary = db.VwRdWorkPermitKotaOranimiz.AsNoTracking().FirstOrDefault();
+            var settings = WorkPermitQuotaSettings.GetOrCreateInstance(objectSpace);
+            var reportDate = summary?.ReportDate?.Date ?? DateTime.Today;
+            var foreign = summary?.ForeignPersonnelCount ?? 0;
+            var inProcess = summary?.InProcessCount ?? 0;
+            var local = Math.Max(0, settings.LocalPersonnelCount);
+            var foreignRatio = settings.ForeignRatio > 0
+                ? settings.ForeignRatio
+                : WorkPermitQuotaSettings.DefaultForeignRatio;
+            var localRatio = settings.LocalRatio > 0
+                ? settings.LocalRatio
+                : WorkPermitQuotaSettings.DefaultLocalRatio;
+
+            var rows = new List<ReportDashboardPreviewRow>
+            {
+                new()
+                {
+                    RecordId = summary?.ID ?? Guid.Empty,
+                    Name = local.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnA = foreign.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnB = inProcess.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnC = foreignRatio.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnD = reportDate.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture),
+                    ColumnE = localRatio.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    Status = "kota oranımız",
+                    StatusCssClass = "st-cat-1",
+                }
+            };
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.WorkPermit, subReport, rows,
+                excelHint, excelConfigured, totalCount: 1, subReportLabel: "kota oranımız");
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.WorkPermit, subReport, excelHint, excelConfigured);
         }
     }
 

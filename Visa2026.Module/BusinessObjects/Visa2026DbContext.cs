@@ -163,6 +163,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdWorkPermitMaglumat3> VwRdWorkPermitMaglumat3 { get; set; }
         public DbSet<VwRdWorkPermitSanaw> VwRdWorkPermitSanaw { get; set; }
         public DbSet<VwRdWorkPermitCalismaIzniListesi> VwRdWorkPermitCalismaIzniListesi { get; set; }
+        public DbSet<VwRdWorkPermitKotaOranimiz> VwRdWorkPermitKotaOranimiz { get; set; }
+        public DbSet<VwRdWorkPermitPersonelSayi> VwRdWorkPermitPersonelSayi { get; set; }
+        public DbSet<VwRdRegistrationOturumSayisi> VwRdRegistrationOturumSayisi { get; set; }
         public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
         public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
         public DbSet<VwRdInvitationExpired> VwRdInvitationExpired { get; set; }
@@ -216,6 +219,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<InternalDeparture> InternalDepartures { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<MinistryReviewSlaSettings> MinistryReviewSlaSettings { get; set; }
+        public DbSet<WorkPermitQuotaSettings> WorkPermitQuotaSettings { get; set; }
         public DbSet<ExpirationAlertRule> ExpirationAlertRules { get; set; }
         public DbSet<CompanyProfile> CompanyProfiles { get; set; }
         public DbSet<ApplicationNumberingProfile> ApplicationNumberingProfiles { get; set; }
@@ -355,6 +359,18 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<VwRdWorkPermitKotaOranimiz>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit_kota_oranimiz");
+            });
+            modelBuilder.Entity<VwRdWorkPermitPersonelSayi>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit_personel_sayi");
+            });
+            modelBuilder.Entity<VwRdRegistrationOturumSayisi>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_registration_oturum_sayisi");
+            });
             modelBuilder.Entity<VwRdWorkPermitCalismaIzniListesi>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_work_permit_calisma_izni_listesi");

@@ -6,7 +6,7 @@ using System.Linq;
 namespace Visa2026.Module.Services.ReportDashboard;
 
 /// <summary>
-/// uzatılanlar company sheet. Açıklama stays empty. The day-count color is not used.
+/// uzatımlar company sheet. Açıklama stays empty. The day-count color is not used.
 /// </summary>
 public static class ReportDashboardVisaUzatilanlarExcel
 {

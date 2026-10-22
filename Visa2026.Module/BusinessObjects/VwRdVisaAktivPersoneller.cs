@@ -64,6 +64,16 @@ public class VwRdVisaAktivPersoneller
     public virtual string PositionLabel { get; set; }
 
     [Browsable(false)]
+    public virtual DateTime? VisaStartDate { get; set; }
+
+    [Browsable(false)]
+    public virtual DateTime? VisaEndDate { get; set; }
+
+    [NotMapped]
+    [ModelDefault("Caption", "Vize Süresi")]
+    public string VisaDurationLabel => FormatVisaDurationMonths(VisaStartDate, VisaEndDate);
+
+    [Browsable(false)]
     public virtual DateTime? WorkPermitEndDate { get; set; }
 
     [NotMapped]
@@ -72,9 +82,6 @@ public class VwRdVisaAktivPersoneller
 
     [ModelDefault("Caption", "Vize Numarası")]
     public virtual string VisaNumber { get; set; }
-
-    [Browsable(false)]
-    public virtual DateTime? VisaEndDate { get; set; }
 
     [NotMapped]
     [ModelDefault("Caption", "Vizenin bitiş tarihi")]
@@ -129,5 +136,17 @@ public class VwRdVisaAktivPersoneller
         if (date is not { } value || value.Year <= 1900)
             return string.Empty;
         return value.ToString("dd.MM.yyyy");
+    }
+
+    /// <summary>Whole months from visa start→end as <c>N-ay</c>; blank when either date is missing.</summary>
+    public static string FormatVisaDurationMonths(DateTime? start, DateTime? end)
+    {
+        if (start is not { } startDate || startDate.Year <= 1900)
+            return string.Empty;
+        if (end is not { } endDate || endDate.Year <= 1900)
+            return string.Empty;
+        var days = Math.Max(0, (endDate.Date - startDate.Date).Days);
+        var months = (int)Math.Round(days / 30.0, MidpointRounding.AwayFromZero);
+        return months.ToString(System.Globalization.CultureInfo.InvariantCulture) + "-ay";
     }
 }

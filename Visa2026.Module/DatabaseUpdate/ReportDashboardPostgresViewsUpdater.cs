@@ -26,6 +26,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdWorkPermitActive();
         CreateViewRdWorkPermitSanaw();
         CreateViewRdWorkPermitCalismaIzniListesi();
+        CreateViewRdWorkPermitKotaOranimiz();
         CreateViewRdWorkPermitAppProgress();
         CreateViewRdInvitationReady();
         CreateViewRdInvitationExpired();
@@ -65,6 +66,8 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdVisaByPeriod();
         CreateViewRdVisaActiveByProject();
         CreateViewRdVisaAktivPersoneller();
+        CreateViewRdWorkPermitPersonelSayi();
+        CreateViewRdRegistrationOturumSayisi();
         CreateViewRdVisaActiveByPeriodCategoryType();
         CreateViewRdVisaByDaysRemaining();
         CreateViewRdVisaExtensionRequired();
@@ -256,6 +259,14 @@ WHERE COALESCE(wpi.""GCRecord"", 0) = 0
     private void CreateViewRdWorkPermitCalismaIzniListesi() =>
         ExecuteEmbeddedPostgresView("vw_rd_work_permit_calisma_izni_listesi.postgres.sql");
 
+    private void CreateViewRdWorkPermitKotaOranimiz() =>
+        ExecuteEmbeddedPostgresView("vw_rd_work_permit_kota_oranimiz.postgres.sql");
+
+    private void CreateViewRdWorkPermitPersonelSayi() =>
+        ExecuteEmbeddedPostgresView("vw_rd_work_permit_personel_sayi.postgres.sql");
+
+    private void CreateViewRdRegistrationOturumSayisi() =>
+        ExecuteEmbeddedPostgresView("vw_rd_registration_oturum_sayisi.postgres.sql");
 
     private void CreateViewRdWorkPermitAppProgress()
     {
@@ -1064,6 +1075,8 @@ WHERE v.rn = 1
 
     private void CreateViewRdVisaActiveByProject()
     {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_registration_oturum_sayisi;", true);
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_work_permit_personel_sayi;", true);
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_aktiv_personeller;", true);
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_active_by_project;", true);
         ExecuteNonQueryCommand(@"

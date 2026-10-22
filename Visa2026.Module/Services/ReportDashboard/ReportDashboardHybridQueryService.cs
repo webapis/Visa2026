@@ -50,6 +50,8 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitMaglumat3Key),
         (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitSanawKey),
         (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey),
+        (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitKotaOranimizKey),
+        (ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitPersonelSayiKey),
         (ReportDashboardCategory.WorkPermit, "by-days-remaining"),
         (ReportDashboardCategory.WorkPermit, "extension-result"),
         (ReportDashboardCategory.Invitation, "ready-by-project"),

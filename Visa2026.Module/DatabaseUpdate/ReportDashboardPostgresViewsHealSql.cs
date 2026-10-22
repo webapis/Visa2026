@@ -101,6 +101,9 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_work_permit_a_maglumat_3", "vw_rd_work_permit_active.postgres.sql"),
         ("vw_rd_work_permit_sanaw", "vw_rd_work_permit_sanaw.postgres.sql"),
         ("vw_rd_work_permit_calisma_izni_listesi", "vw_rd_work_permit_calisma_izni_listesi.postgres.sql"),
+        ("vw_rd_work_permit_kota_oranimiz", "vw_rd_work_permit_kota_oranimiz.postgres.sql"),
+        ("vw_rd_work_permit_personel_sayi", "vw_rd_work_permit_personel_sayi.postgres.sql"),
+        ("vw_rd_registration_oturum_sayisi", "vw_rd_registration_oturum_sayisi.postgres.sql"),
         ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
     };
 
@@ -196,7 +199,9 @@ public static class ReportDashboardPostgresViewsHealSql
         {
             if (ViewExists(connection, viewName)
                 && ColumnExists(connection, viewName, "PassportNumber")
-                && !ViewHasLegacyApplicationOid(connection, viewName))
+                && !ViewHasLegacyApplicationOid(connection, viewName)
+                && (viewName != "vw_rd_visa_aktiv_personeller"
+                    || ColumnExists(connection, viewName, "VisaStartDate")))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);

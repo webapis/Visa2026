@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -39,6 +40,18 @@ public static class ReportDashboardExcelTemplateService
         if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase))
             return ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey;
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.WorkPermitKotaOranimizKey;
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.WorkPermitPersonelSayiKey;
+
+        if (category == ReportDashboardCategory.Registration
+            && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+            return ReportDashboardCatalog.RegistrationOturumSayisiKey;
 
         if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase))
@@ -82,9 +95,97 @@ public static class ReportDashboardExcelTemplateService
         IReadOnlyList<ReportDashboardPreviewRow> rows,
         bool includeChartColumn)
     {
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase))
+            return ExportKotaOranimiz(objectSpace, rows);
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
+            return ExportPersonelSayi(objectSpace, rows);
+
+        if (category == ReportDashboardCategory.Registration
+            && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+            return ExportOturumSayisi(objectSpace, rows);
+
         var template = LoadContent(objectSpace, category, subReport);
         return ReportDashboardExcelTemplateWorkbook.Export(
             template, title, headers, category, subReport, rows, includeChartColumn);
+    }
+
+    private static byte[] ExportPersonelSayi(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ReportDashboardPreviewRow> rows)
+    {
+        var template = LoadContent(objectSpace, ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitPersonelSayiKey);
+        var data = rows
+            .Select(row =>
+            {
+                _ = int.TryParse(row.ColumnA, out var active);
+                _ = int.TryParse(row.ColumnB, out var inactive);
+                return (Department: row.Name ?? string.Empty, Active: active, Inactive: inactive);
+            })
+            .ToList();
+        return ReportDashboardWorkPermitPersonelSayiExcel.Fill(template, data);
+    }
+
+    private static byte[] ExportOturumSayisi(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ReportDashboardPreviewRow> rows)
+    {
+        var template = LoadContent(objectSpace, ReportDashboardCategory.Registration, ReportDashboardCatalog.RegistrationOturumSayisiKey);
+        static int ParseCount(string? text) =>
+            int.TryParse(text, out var value) ? value : 0;
+
+        var data = rows
+            .Select(row => new ReportDashboardRegistrationOturumSayisiExcel.Row(
+                row.Name ?? string.Empty,
+                ParseCount(row.ColumnA),
+                ParseCount(row.ColumnB),
+                ParseCount(row.ColumnC),
+                0,
+                0,
+                ParseCount(row.ColumnD),
+                0,
+                0,
+                ParseCount(row.ColumnE),
+                0,
+                0,
+                ParseCount(row.ColumnF),
+                ParseCount(row.ColumnG),
+                row.ColumnI ?? string.Empty))
+            .ToList();
+        return ReportDashboardRegistrationOturumSayisiExcel.Fill(template, data);
+    }
+
+    private static byte[] ExportKotaOranimiz(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ReportDashboardPreviewRow> rows)
+    {
+        var template = LoadContent(objectSpace, ReportDashboardCategory.WorkPermit, ReportDashboardCatalog.WorkPermitKotaOranimizKey)
+            ?? ReportDashboardWorkPermitKotaExcel.BuildStarter();
+        var settings = WorkPermitQuotaSettings.GetOrCreateInstance(objectSpace);
+        var row = rows.FirstOrDefault();
+        var reportDate = DateTime.Today;
+        if (row?.ColumnD is { Length: > 0 } dateText
+            && DateTime.TryParseExact(dateText, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var parsed))
+            reportDate = parsed.Date;
+        var foreign = 0;
+        var inProcess = 0;
+        if (row != null)
+        {
+            _ = int.TryParse(row.ColumnA, out foreign);
+            _ = int.TryParse(row.ColumnB, out inProcess);
+        }
+
+        return ReportDashboardWorkPermitKotaExcel.Fill(
+            template,
+            reportDate,
+            settings.LocalPersonnelCount,
+            foreign,
+            inProcess,
+            settings.ForeignRatio > 0 ? settings.ForeignRatio : WorkPermitQuotaSettings.DefaultForeignRatio,
+            settings.LocalRatio > 0 ? settings.LocalRatio : WorkPermitQuotaSettings.DefaultLocalRatio);
     }
 
     public static byte[] DownloadTemplate(
@@ -142,6 +243,24 @@ public static class ReportDashboardExcelTemplateService
                 ? template
                 : ReportDashboardExcelTemplateWorkbook.BuildCalismaListesiStarter();
             return FinishDownload(category, calisma, headers);
+        }
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return FinishDownload(category, ReportDashboardWorkPermitKotaExcel.BuildStarter(), headers);
+        }
+
+        if (category == ReportDashboardCategory.WorkPermit
+            && string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return FinishDownload(category, ReportDashboardWorkPermitPersonelSayiExcel.BuildStarter(), headers);
+        }
+
+        if (category == ReportDashboardCategory.Registration
+            && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return FinishDownload(category, ReportDashboardRegistrationOturumSayisiExcel.BuildStarter(), headers);
         }
 
         if (template != null

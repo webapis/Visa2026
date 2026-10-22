@@ -35,6 +35,10 @@ SELECT
         ELSE NULL
     END                                                                     AS "WorkPermitEndDate",
     a."VisaNumber"                                                          AS "VisaNumber",
+    CASE
+        WHEN (vsrc."StartDate")::date > DATE '1900-01-01' THEN vsrc."StartDate"
+        ELSE NULL
+    END                                                                     AS "VisaStartDate",
     a."ExpirationDate"                                                      AS "VisaEndDate",
     COALESCE(NULLIF(BTRIM(reg."NameTm"), ''), '')                           AS "AddressRegionTm",
     COALESCE(NULLIF(BTRIM(city."NameTm"), ''), '')                          AS "AddressCityTm",
@@ -49,6 +53,8 @@ SELECT
 FROM vw_rd_visa_active_by_project a
 INNER JOIN "People" p
     ON p."ID" = a."PersonOid" AND COALESCE(p."GCRecord", 0) = 0
+LEFT JOIN "Visas" vsrc
+    ON vsrc."ID" = a."ID" AND COALESCE(vsrc."GCRecord", 0) = 0
 LEFT JOIN "Subcontractors" sub
     ON sub."ID" = p."SubcontractorID" AND COALESCE(sub."GCRecord", 0) = 0
 LEFT JOIN LATERAL (

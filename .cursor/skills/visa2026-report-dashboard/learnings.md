@@ -4,6 +4,66 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-22 — aktiv personeller Vize Süresi
+
+**Ask:** aktiv personeller missing Vize Süresi. Calculate from visa start→end, round to whole months, show as `6-ay`.
+
+**Now:** Column after Mesleki Görevleri. `ROUND(days/30)` → `N-ay`. Blank when start or end missing. çalışma izni listesi headers unchanged.
+
+**Prevent:** Do not add Vize Süresi to çalışma izni listesi. Heal recreates `vw_rd_visa_aktiv_personeller` when `VisaStartDate` is missing.
+
+**Files:** `vw_rd_visa_aktiv_personeller.postgres.sql`, `VwRdVisaAktivPersoneller.cs`, `ReportDashboardWorkPermitCalismaExcel.cs`
+
+## 2026-10-22 — kota oranımız original layout
+
+**Ask:** Match kota oranımız Excel to `kuota orani.xlsx`. Remove “Siyah renkli alana bilgi girişi yapılabilir.” Values come from Configuration.
+
+**Now:** Grey headers with white text, original merges (ORAN, Mevcut Lokal/Türk, LOKAL/YABANCI ORANI), black input look on C2/D2/E2 and ORAN, green Vize box, all % / I2 / J2 use `ROUND(...,0)` (no trailing decimals), Times New Roman. Note text cleared on build/fill.
+
+**Prevent:** Do not leave the black-area instruction on the sheet. Do not use `C2/9-1` when ORAN cells exist.
+
+**Files:** `ReportDashboardWorkPermitKotaExcel.cs`
+
+## 2026-10-22 — Oturum sayısı
+
+**Ask:** Add Registration (Hasaba Alyş) tab Oturum sayısı for Employees with active visa and work permit, by department and region/kamp vs adres.
+
+**Now:** One row per department. Columns: Balkan kamp, Balkan adres, Aşgabat, Ahal, Lebap, Mary adres, Mary kamp. Kamp = Lodging. NOT = Region-AddressType-count. Toplam and grand total are Excel formulas. Zero stays blank. Title row (Lebap - 1) not filled yet.
+
+**Prevent:** Do not use contract project. Do not include family. Do not count two permits as two people. Heal `vw_rd_registration_oturum_sayisi` after active WP / active visa views (WorkPermitViews list).
+
+**Files:** `vw_rd_registration_oturum_sayisi.postgres.sql`, `ReportDashboardRegistrationOturumSayisiExcel.cs`
+
+## 2026-10-22 — Personel sayi
+
+**Ask:** Add Work Permit tab Personel sayi by department. Aktiv = active work permit and active visa. Aktiv olmayan = active work permit without active visa.
+
+**Now:** One row per department (same department rule as PROJECT). Employees only, one person per count. Excel Toplam is a formula; grand total is SUM. Zero inactive stays blank.
+
+**Prevent:** Do not use the contract project. Do not include family members. Do not count two permits as two people. Keep `vw_rd_work_permit_personel_sayi` in WorkPermitViews heal only (not WrapperViews — no PassportNumber).
+
+**Files:** `vw_rd_work_permit_personel_sayi.postgres.sql`, `ReportDashboardWorkPermitPersonelSayiExcel.cs`
+
+## 2026-10-22 — kota oranımız
+
+**Ask:** Add Work Permit tab kota oranımız. Lokal and ORAN are edited in the app. Yabancı and İşlemde come from the database. Other cells are Excel formulas.
+
+**Now:** Configuration → Work permit quota holds Mevcut Lokal personel, ORAN YABANCI, and ORAN YEREL. Export writes those into the sheet with today’s date, foreign Employees with a valid work permit, and Employees still in a Work Permit process. I2 is `C2*YABANCI/YEREL-1`. J2 is `I2-D2-E2`.
+
+**Prevent:** Do not take Lokal or ORAN from Excel edits. Do not count family members. Do not count two permits for one person as two.
+
+**Files:** `WorkPermitQuotaSettings.cs`, `vw_rd_work_permit_kota_oranimiz.postgres.sql`, `ReportDashboardWorkPermitKotaExcel.cs`
+
+## 2026-10-22 — uzatımlar name and centered Excel cells
+
+**Ask:** Rename uzatılanlar to uzatımlar. Center every column in the Excel templates, as in the company sheet.
+
+**Now:** The Visa tab, list caption, and Excel sheet are uzatımlar. The key stays `uzatilanlar`. Invitation, Work Permit, and Visa company workbooks center header and data cells horizontally and vertically. Wrap stays on.
+
+**Prevent:** Do not put uzatılanlar back on the tab. Do not left-align name or duty columns on those company sheets.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardExcelTemplateWorkbook.cs`, `ReportDashboardComponent.razor`
+
 ## 2026-10-21 — Invitation Process split by visa period
 
 **Ask:** Rename Invitation Process (P) to işlemde olanlar kısa dönem, and add işlemde olanlar uzun dönem with the same columns.

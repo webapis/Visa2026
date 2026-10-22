@@ -786,6 +786,35 @@
                                                     </td>
                                                     <td class="@ColumnClass(IsWorkPermitMaglumat3Table ? 12 : IsWorkPermitMaglumat2Table ? 11 : 10)"></td>
                                                 }
+                                                else if (IsRegistrationOturumSayisiTable)
+                                                {
+                                                    <td class="@ColumnClass(0)">@row.Name</td>
+                                                    <td class="@ColumnClass(1)">@row.ColumnA</td>
+                                                    <td class="@ColumnClass(2)">@row.ColumnB</td>
+                                                    <td class="@ColumnClass(3)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnD</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnE</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnF</td>
+                                                    <td class="@ColumnClass(7)">@row.ColumnG</td>
+                                                    <td class="@ColumnClass(8)">@row.ColumnH</td>
+                                                    <td class="@ColumnClass(9)">@row.ColumnI</td>
+                                                }
+                                                else if (IsWorkPermitPersonelSayiTable)
+                                                {
+                                                    <td class="@ColumnClass(0)">@row.Name</td>
+                                                    <td class="@ColumnClass(1)">@row.ColumnA</td>
+                                                    <td class="@ColumnClass(2)">@row.ColumnB</td>
+                                                    <td class="@ColumnClass(3)">@row.ColumnC</td>
+                                                }
+                                                else if (IsWorkPermitKotaTable)
+                                                {
+                                                    <td class="@ColumnClass(0)">@row.ColumnD</td>
+                                                    <td class="@ColumnClass(1)">@row.Name</td>
+                                                    <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                    <td class="@ColumnClass(3)">@row.ColumnB</td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnE</td>
+                                                }
                                                 else if (IsVisaUzatilanlarTable)
                                                 {
                                                     <td class="rd-col-order">@DisplayIndex(row)</td>
@@ -1981,9 +2010,15 @@
         var headers = Panel.TableHeaders;
         var subReport = Panel.SubReport ?? SubReport;
         var label = IsVisaUzatilanlarTable
-            ? "uzatılanlar"
+            ? "uzatımlar"
             : IsVisaAktivTable
             ? "aktiv personeller"
+            : IsRegistrationOturumSayisiTable
+            ? "Oturum sayısı"
+            : IsWorkPermitPersonelSayiTable
+            ? "Personel sayi"
+            : IsWorkPermitKotaTable
+            ? "kota oranımız"
             : IsWorkPermitCalismaTable
             ? "çalışma izni listesi"
             : IsWorkPermitSanawTable
@@ -2000,9 +2035,15 @@
                 objectSpace, Category, subReport, label, headers, DisplayedRows, ShowInvitationChartColumn);
 
         var fileName = IsVisaUzatilanlarTable
-            ? (templateOnly ? "uzatılanlar template" : "uzatılanlar")
+            ? (templateOnly ? "uzatımlar template" : "uzatımlar")
             : IsVisaAktivTable
             ? (templateOnly ? "aktiv personeller template" : "aktiv personeller")
+            : IsRegistrationOturumSayisiTable
+            ? (templateOnly ? "Oturum sayısı template" : "Oturum sayısı")
+            : IsWorkPermitPersonelSayiTable
+            ? (templateOnly ? "Personel sayi template" : "Personel sayi")
+            : IsWorkPermitKotaTable
+            ? (templateOnly ? "kota oranımız template" : "kota oranımız")
             : IsWorkPermitCalismaTable
             ? (templateOnly ? "çalışma izni listesi template" : "çalışma izni listesi")
             : IsWorkPermitSanawTable
@@ -2116,6 +2157,18 @@
         Category == ReportDashboardCategory.WorkPermit
         && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase);
 
+    private bool IsWorkPermitKotaTable =>
+        Category == ReportDashboardCategory.WorkPermit
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsWorkPermitPersonelSayiTable =>
+        Category == ReportDashboardCategory.WorkPermit
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsRegistrationOturumSayisiTable =>
+        Category == ReportDashboardCategory.Registration
+        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase);
+
     private bool IsWorkPermitSanawTable =>
         Category == ReportDashboardCategory.WorkPermit
         && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase);
@@ -2134,7 +2187,7 @@
         && (string.Equals(Panel?.SubReport ?? SubReport, "active-by-project", StringComparison.OrdinalIgnoreCase)
             || IsWorkPermitMaglumat2Table);
 
-    private bool IsOfficerFillTable => IsInvitationOfficerTable || IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsWorkPermitCalismaTable || IsVisaAktivTable || IsVisaUzatilanlarTable;
+    private bool IsOfficerFillTable => IsInvitationOfficerTable || IsWorkPermitMaglumatTable || IsWorkPermitSanawTable || IsWorkPermitCalismaTable || IsWorkPermitKotaTable || IsWorkPermitPersonelSayiTable || IsRegistrationOturumSayisiTable || IsVisaAktivTable || IsVisaUzatilanlarTable;
 
     private bool ShowInvitationChartColumn =>
         IsInvitationReadyTable

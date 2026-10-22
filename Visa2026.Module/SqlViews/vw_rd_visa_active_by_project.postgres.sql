@@ -1,4 +1,6 @@
 -- Active Visa (P): population from vw_rd_visa_by_period; StatusLabel = Project.
+DROP VIEW IF EXISTS vw_rd_registration_oturum_sayisi;
+DROP VIEW IF EXISTS vw_rd_work_permit_personel_sayi;
 DROP VIEW IF EXISTS vw_rd_visa_active_by_project;
 CREATE VIEW vw_rd_visa_active_by_project AS
 SELECT

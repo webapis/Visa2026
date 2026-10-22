@@ -1165,6 +1165,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<PdfFormMapping>(role);
             EnsureFullAccessRecursivePermission<SystemSettings>(role);
             EnsureFullAccessRecursivePermission<MinistryReviewSlaSettings>(role);
+            EnsureFullAccessRecursivePermission<WorkPermitQuotaSettings>(role);
             EnsureReadWriteOnlyPermission<ExpirationAlertRule>(role);
             // Link types on Configuration screens that still need ApplicationType read.
             EnsureTypePermission<ApplicationType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -1182,6 +1183,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/AuthorizedRepresentative", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/MinistryReviewSlaSettings", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/WorkPermitQuotaSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/SystemSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ProjectContract", SecurityPermissionState.Allow);

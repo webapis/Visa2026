@@ -64,6 +64,7 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdInvitationRejected>(role);
 
         EnsureViewReadPermission<VwRdRegistration>(role);
+        EnsureViewReadPermission<VwRdRegistrationOturumSayisi>(role);
         EnsureViewReadPermission<VwRdToBeCheckedIn>(role);
         EnsureViewReadPermission<VwRdToBeCheckedOut>(role);
 
@@ -73,6 +74,9 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdWorkPermitMaglumat3>(role);
         EnsureViewReadPermission<VwRdWorkPermitSanaw>(role);
         EnsureViewReadPermission<VwRdWorkPermitCalismaIzniListesi>(role);
+        EnsureViewReadPermission<VwRdWorkPermitKotaOranimiz>(role);
+        EnsureViewReadPermission<VwRdWorkPermitPersonelSayi>(role);
+        EnsureViewReadPermission<WorkPermitQuotaSettings>(role);
         EnsureViewReadPermission<VwRdWorkPermitAppProgress>(role);
 
         EnsureViewReadPermission<VwRdPassport>(role);
