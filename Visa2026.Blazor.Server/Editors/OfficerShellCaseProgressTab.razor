@@ -76,7 +76,7 @@
                             </button>
                         }
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+                    @if (!IsEditing(step) && !string.IsNullOrWhiteSpace(step.ResultNumber))
                     {
                         <p class="ct-prog-v__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</p>
                     }
@@ -100,14 +100,14 @@
                         {
                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
                         }
-                        @if (step.Files.Count > 0 && step.ProgressId is Guid)
+                        @if (step.Files.Count > 0 && (step.ProgressId ?? step.DateProgressId) is Guid fileProgressId)
                         {
                             <div class="ct-step-files">
                                 @foreach (var file in step.Files)
                                 {
                                     <div class="ct-step-file" title="@file.FileName">
                                         <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                           ProgressId="step.ProgressId"
+                                                                           ProgressId="fileProgressId"
                                                                            FileId="file.FileId"
                                                                            FileName="@file.FileName"
                                                                            LinkText="@file.FileName"
@@ -118,7 +118,7 @@
                                 @if (step.Files.Count > 1)
                                 {
                                     <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                       ProgressId="step.ProgressId"
+                                                                       ProgressId="fileProgressId"
                                                                        FileName="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
                                                                        LinkText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
                                                                        PreviewAll="true"
@@ -642,7 +642,7 @@
 
     private static bool CanOfferPen(ApplicationWorkspaceCaseProgressStep step) =>
         !IsOpenAdvanceStep(step)
-        && (step.CanCorrectDate || step.CanEditFiles || step.Files.Count > 0);
+        && (step.CanCorrectDate || step.CanEditFiles);
 
     private bool IsEditing(ApplicationWorkspaceCaseProgressStep step) =>
         CanOfferPen(step)

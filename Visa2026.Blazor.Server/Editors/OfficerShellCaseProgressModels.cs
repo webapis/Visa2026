@@ -31,6 +31,8 @@ public sealed class OfficerShellCaseProgressStepCorrection
     public DateTime Date { get; init; }
 
     public string? SubmissionDocumentNumber { get; init; }
+
+    public string? ResultNumber { get; init; }
 }
 
 public sealed class OfficerShellCaseProgressFileChange

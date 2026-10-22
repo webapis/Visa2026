@@ -8,9 +8,7 @@ namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
 /// DxGrid SearchBox only matches visible columns (passport number is not one of them).
-/// Route Person ListView grid search text through XAF FullTextSearch so
-/// <see cref="Visa2026.Module.Controllers.PersonListViewPassportFullTextSearchController"/>
-/// passport Exists criteria apply. Disable per-column grid search to avoid double-filtering.
+/// Route Person ListView grid search through XAF FullTextSearch so name/passport criteria apply.
 /// </summary>
 public sealed class PersonListViewSearchBridgeController : ObjectViewController<ListView, Person>
 {

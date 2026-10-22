@@ -6,6 +6,14 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-22 — Office preparation pen must edit files too
+
+- **Symptom**: Pen on **Ofisde taýýarlyk** opened the date only. Ministry steps showed Replace / Remove / Add.
+- **Root cause**: Office never set `CanEditFiles`. A pen could open from `Files.Count > 0` while file editing stayed off.
+- **Fix**: Every date-correctable step sets `CanEditFiles` in `ApplyDateBounds` (office included). Pen requires `CanCorrectDate` or `CanEditFiles`. File actions use `ProgressId` or `DateProgressId`. Rows that already hold letter files may store more.
+- **Prevent**: Do not leave office as date-only when the product allows file correction on every pen step.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-10-21 — Progress file collection must be ObservableCollection
 
 - **Symptom**: Opening the application list throws `InvalidOperationException`: `ApplicationProfileInstanceProgress.Files` is a `List<>` and the EF change tracker is `ChangingAndChangedNotificationsWithOriginalValues`.

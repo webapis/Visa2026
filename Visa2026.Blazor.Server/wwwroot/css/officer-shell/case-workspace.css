@@ -1761,7 +1761,8 @@ select.cw-summary-field__input option {
   font-family: inherit;
 }
 .officer-case-workspace .ct-btn-sm,
-.officer-case-workspace .ct-prog-advance .os-input {
+.officer-case-workspace .ct-prog-advance .os-input,
+.officer-case-workspace .ct-step-correct .os-input {
   font-size: var(--cw-type) !important;
   font-family: inherit;
 }

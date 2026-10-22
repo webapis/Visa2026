@@ -3609,3 +3609,11 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Excel:** `ExcelReportGenerator` is tied to `UserReportTemplate` + `ApplicationRosterMergeLine`; Seretmezlik has its own small ClosedXML merger (loop row = row containing `{{#ds.People}}`, `InsertRowsBelow` keeps style).
 - **Validation before save:** unknown tokens block the upload (DocxTemplater would fail at download time otherwise); roster requires the people loop; trial merge with catalog sample data.
 - **Gotcha:** `BorderValues` (OpenXML SDK 3) is a struct, not an enum — cannot be `const`.
+### 2026-10-22 — ListView search by Result Number (Netije belgisi) returned 0
+
+- Symptom: Progress shows Result number 5678; Applications via ministry ListView search for 5678 → Total: 0 / no records.
+- Cause: FullTextSearch only covered visible columns + linked People names. ResultNumber lives on ProgressHistory (not a ListView column). Nested FoldedLowerContains Replace chains on ProgressHistory also failed EF translation.
+- Fix: `BuildProgressResultNumberCriteria` uses passport-style free-join `[ProgressHistory][Contains(Lower([ResultNumber]), ?)]`; wired into `ApplicationProfileInstanceListViewFullTextSearchController` CombineOr; officer-shell haystack includes progress ResultNumber.
+- Verify: stop F5, rebuild Module + Blazor host, F5 → Applications via ministry → search `5678` → Andy Pramasta case appears. Unit: `ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilderTests`.
+- Prevent: Do not rely on DxGrid column search for nested progress fields; keep SearchBridge → FullTextFilterAction. Prefer association free-join Contains over deep Replace fold chains for EF.
+- Cross-skill: -

@@ -370,9 +370,6 @@ internal static class ApplicationWorkspaceProgressTimeline
             : string.IsNullOrWhiteSpace(fileRow?.MinistryLetterFileName)
                 ? string.Empty
                 : fileRow.MinistryLetterFileName;
-        var officeFileId = !string.IsNullOrEmpty(officeFileName) && fileRow!.ID != Guid.Empty
-            ? fileRow.ID
-            : (Guid?)null;
         var officeDateRow = cancelled ? latest : submitted;
         var officeDateId = officeDateRow != null && officeDateRow.ID != Guid.Empty
             ? officeDateRow.ID
@@ -390,13 +387,14 @@ internal static class ApplicationWorkspaceProgressTimeline
             DateValue = officeDateRow?.Date is { } officeDate && officeDate != default ? officeDate : null,
             DateProgressId = officeDateId,
             CanCorrectDate = officeCanCorrect,
+            CanEditFiles = officeCanCorrect,
             Files = officeFiles,
             FileSlot = ApplicationProfileInstanceProgressFiles.MinistryLetter,
             State = isCurrent ? "current" : "done",
             CurrentStateLabel = stateLabel,
             SlaTargetDate = isCurrent ? FormatSlaTarget(application.ApplicationDate, currentSla) : string.Empty,
             SlaDaysRemaining = isCurrent ? DaysLeft(currentSla) : null,
-            ProgressId = officeFileId,
+            ProgressId = officeDateId,
             OfficerNotes = isCurrent ? application.OfficePreparationNotes ?? string.Empty : string.Empty,
             MinistryLetterFileName = officeFileName,
             ShowMinistryLetterUpload = isCurrent && (canAdvance || cancelled),
@@ -432,9 +430,23 @@ internal static class ApplicationWorkspaceProgressTimeline
         for (var i = 0; i < steps.Count; i++)
         {
             if (steps[i].DateProgressId is Guid progressId && !seen.Add(progressId))
+            {
                 steps[i].CanCorrectDate = false;
+                steps[i].CanEditFiles = false;
+                steps[i].CanEditSubmissionNumber = false;
+                steps[i].CanEditResultNumber = false;
+            }
+
             if (!steps[i].CanCorrectDate)
+            {
+                steps[i].CanEditFiles = false;
+                steps[i].CanEditSubmissionNumber = false;
+                steps[i].CanEditResultNumber = false;
                 continue;
+            }
+
+            // Every date-correctable step (office, ministry, submission, issued, …) can edit its files.
+            steps[i].CanEditFiles = true;
 
             DateTime? previous = null;
             for (var j = i - 1; j >= 0; j--)
@@ -530,8 +542,9 @@ internal static class ApplicationWorkspaceProgressTimeline
             DateValue = row?.Date is { } storedDate && storedDate != default ? storedDate : null,
             DateProgressId = dateProgressId,
             CanCorrectDate = canCorrect,
-            CanEditFiles = canCorrect && (decisionRow != null || submissionStep),
+            CanEditFiles = canCorrect,
             CanEditSubmissionNumber = canCorrect && submissionStep,
+            CanEditResultNumber = canCorrect && decisionRow != null,
             Files = storedFiles,
             FileSlot = submissionStep
                 ? ApplicationProfileInstanceProgressFiles.SubmissionDocument

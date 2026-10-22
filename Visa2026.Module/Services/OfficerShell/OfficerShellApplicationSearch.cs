@@ -43,6 +43,12 @@ public static class OfficerShellApplicationSearch
                 Add(parts, passport.PassportNumber);
         }
 
+        if (application.ProgressHistory != null)
+        {
+            foreach (var progress in application.ProgressHistory)
+                Add(parts, progress.ResultNumber);
+        }
+
         return string.Join('\n', parts);
     }
 

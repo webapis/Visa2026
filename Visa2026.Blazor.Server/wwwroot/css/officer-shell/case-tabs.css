@@ -118,6 +118,43 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 }
 .ct-prog-v__letter-missing .ct-label { margin-top: 8px; }
 .ct-step-correct { margin: 8px 0 0; }
+.ct-step-correct .os-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--os-line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  background: var(--os-panel);
+  color: var(--os-ink);
+}
+.ct-step-correct .os-input::placeholder {
+  color: var(--os-muted);
+  opacity: 0.85;
+}
+.ct-step-correct .os-input:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.ct-step-correct .officer-date-edit,
+.ct-step-correct .officer-date-edit .dxbl-text-edit {
+  width: 100%;
+  max-width: 100%;
+}
+.ct-step-correct .officer-date-edit .dxbl-text-edit {
+  border-radius: 8px;
+  background: var(--os-panel);
+  color: var(--os-ink);
+  border: 1px solid var(--os-line);
+}
+.ct-step-correct .officer-date-edit .dxbl-text-edit-input {
+  color: var(--os-ink);
+  -webkit-text-fill-color: var(--os-ink);
+  background: transparent;
+  font: inherit;
+}
 .ct-step-files { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
 .ct-step-file {
   display: flex; align-items: center; gap: 6px; min-height: 28px; font-size: 0.8rem;

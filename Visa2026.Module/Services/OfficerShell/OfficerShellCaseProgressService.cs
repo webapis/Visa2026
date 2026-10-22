@@ -320,7 +320,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         Guid applicationId,
         Guid progressId,
         DateTime stepDate,
-        string? submissionDocumentNumber)
+        string? submissionDocumentNumber,
+        string? resultNumber = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -348,6 +349,21 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             return OfficerShellCaseProgressResult.Failed(dateError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
 
         row.Date = stepDate.Date;
+        if (step.CanEditResultNumber)
+        {
+            if (!ApplicationProgressResultNumberHelper.TryNormalize(
+                    resultNumber,
+                    required: true,
+                    out var normalizedResultNumber,
+                    out var resultNumberError))
+            {
+                return OfficerShellCaseProgressResult.Failed(
+                    resultNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberRequired"));
+            }
+
+            row.ResultNumber = normalizedResultNumber;
+        }
+
         if (step.CanEditSubmissionNumber)
         {
             if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(submissionDocumentNumber, out var number, out var numberError))
@@ -657,15 +673,31 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         return OfficerShellCaseProgressResult.Succeeded();
     }
 
-    private static bool CanStoreProgressFile(ApplicationProfileInstanceProgress row) =>
-        row.IsMinistryDecisionStep
-        || ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(
-            ApplicationWorkspaceProgressTimeline.OfficeKey,
-            row.State?.Code)
-        || string.Equals(
-            row.State?.Code,
-            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
-            StringComparison.OrdinalIgnoreCase);
+    private static bool CanStoreProgressFile(ApplicationProfileInstanceProgress row)
+    {
+        if (row.IsMinistryDecisionStep)
+            return true;
+
+        var code = row.State?.Code;
+        if (ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(
+                ApplicationWorkspaceProgressTimeline.OfficeKey,
+                code)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Office (and similar) rows that already hold letter files stay editable even if the state code is unexpected.
+        if (row.MinistryLetterFile != null && row.MinistryLetterFile.Size > 0)
+            return true;
+
+        return row.Files?.Any(item =>
+                   item != null
+                   && item.Slot == ApplicationProfileInstanceProgressFiles.MinistryLetter
+                   && item.File != null
+                   && item.File.Size > 0)
+               == true;
+    }
 
     private static ApplicationProfileInstance? LoadApplicationForAdvance(IObjectSpace objectSpace, Guid applicationId)
     {

@@ -777,9 +777,11 @@ public class ApplicationWorkspaceProgressTimelineTests
         var openLeg = Assert.Single(steps, step => step.Key == "leg-2");
 
         Assert.True(office.CanCorrectDate);
+        Assert.True(office.CanEditFiles);
         Assert.Equal(new DateTime(2026, 9, 10), office.LatestDate);
         Assert.True(firstLeg.CanCorrectDate);
         Assert.True(firstLeg.CanEditFiles);
+        Assert.True(firstLeg.CanEditResultNumber);
         Assert.Equal(new DateTime(2026, 9, 1), firstLeg.EarliestDate);
         Assert.Equal(new DateTime(2026, 9, 20), firstLeg.LatestDate);
         Assert.Equal(2, firstLeg.Files.Count);
@@ -788,7 +790,7 @@ public class ApplicationWorkspaceProgressTimelineTests
     }
 
     [Fact]
-    public void Issued_date_can_be_corrected_without_opening_its_files()
+    public void Issued_step_can_correct_its_date_and_files()
     {
         var instance = new ApplicationProfileInstance { ApplicationProfile = ThreeLegProfile() };
         instance.ProgressHistory.Add(new ApplicationProfileInstanceProgress
@@ -821,7 +823,7 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(submission.CanEditSubmissionNumber);
         Assert.Equal(new DateTime(2026, 10, 8), submission.LatestDate);
         Assert.True(issued.CanCorrectDate);
-        Assert.False(issued.CanEditFiles);
+        Assert.True(issued.CanEditFiles);
         Assert.Equal(new DateTime(2026, 10, 1), issued.EarliestDate);
     }
 

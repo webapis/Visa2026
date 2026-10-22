@@ -23,6 +23,27 @@ public sealed class ApplicationProfileInstanceListViewFullTextSearchCriteriaBuil
     }
 
     [Fact]
+    public void BuildProgressResultNumberCriteria_MatchesAnyProgressResultNumber()
+    {
+        var criteria = ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilder
+            .BuildProgressResultNumberCriteria("4/4114");
+
+        Assert.NotNull(criteria);
+        var text = criteria.ToString();
+        Assert.Contains("ProgressHistory", text, StringComparison.Ordinal);
+        Assert.Contains("ResultNumber", text, StringComparison.Ordinal);
+        Assert.Contains("4/4114", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CompactResultNumberSearchKey_DropsSpacesAroundSlash()
+    {
+        Assert.Equal(
+            "4/4114",
+            ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilder.CompactResultNumberSearchKey("4 / 4114"));
+    }
+
+    [Fact]
     public void OfficerShellApplicationSearch_MatchesFirstLastAndPassportTokens()
     {
         const string haystack = "John\nSmith\nA12345678\nVisa extension";

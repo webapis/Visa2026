@@ -8,9 +8,21 @@
 @using Visa2026.Module.Services.PreviewSlot
 
 <div class="ct-step-correct">
+    @if (Step.CanEditResultNumber)
+    {
+        <label class="ct-label" for="step-result-@Step.Key">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")</label>
+        <input id="step-result-@Step.Key"
+               type="text"
+               class="os-input"
+               maxlength="@ApplicationProgressResultNumberHelper.MaxLength"
+               @bind="_resultNumber"
+               @bind:event="oninput"
+               disabled="@Busy"
+               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberPlaceholder")" />
+    }
     @if (Step.CanCorrectDate && Step.DateProgressId is Guid)
     {
-        <label class="ct-label" for="step-date-@Step.Key">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
+        <label class="ct-label" for="step-date-@Step.Key" style="@(Step.CanEditResultNumber ? "margin-top:8px" : null)">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
         <OfficerDateEdit InputId="@($"step-date-{Step.Key}")"
                          @bind-Date="_date"
                          Enabled="@(!Busy)" />
@@ -26,7 +38,7 @@
                @bind:event="oninput"
                disabled="@Busy" />
     }
-    @if (Step.CanCorrectDate || Step.CanEditSubmissionNumber)
+    @if (Step.CanCorrectDate || Step.CanEditSubmissionNumber || Step.CanEditResultNumber)
     {
         <button type="button"
                 class="os-btn os-btn--primary"
@@ -43,7 +55,7 @@
             {
                 <div class="ct-step-file" title="@file.FileName">
                     <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                       ProgressId="Step.ProgressId"
+                                                       ProgressId="FileProgressId"
                                                        FileId="file.FileId"
                                                        FileName="@file.FileName"
                                                        LinkText="@file.FileName"
@@ -72,10 +84,10 @@
                         + @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AddFile")
                     </label>
                 }
-                @if (Step.Files.Count > 0 && Step.ProgressId is Guid)
+                @if (Step.Files.Count > 0 && FileProgressId is Guid)
                 {
                     <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                       ProgressId="Step.ProgressId"
+                                                       ProgressId="FileProgressId"
                                                        FileName="@PreviewAllText"
                                                        LinkText="@PreviewAllText"
                                                        PreviewAll="true"
@@ -100,6 +112,7 @@
 
     private DateTime? _date;
     private string _number = string.Empty;
+    private string _resultNumber = string.Empty;
     private string _stamp = string.Empty;
 
     private string PreviewAllText =>
@@ -109,13 +122,14 @@
 
     protected override void OnParametersSet()
     {
-        var stamp = $"{Step.DateProgressId:N}:{Step.DateValue:yyyyMMdd}:{Step.SubmissionDocumentNumber}";
+        var stamp = $"{Step.DateProgressId:N}:{Step.DateValue:yyyyMMdd}:{Step.SubmissionDocumentNumber}:{Step.ResultNumber}";
         if (stamp == _stamp)
             return;
 
         _stamp = stamp;
         _date = Step.DateValue;
         _number = Step.SubmissionDocumentNumber ?? string.Empty;
+        _resultNumber = Step.ResultNumber ?? string.Empty;
     }
 
     private async Task SaveAsync()
@@ -128,12 +142,20 @@
             ProgressId = progressId,
             Date = date.Date,
             SubmissionDocumentNumber = Step.CanEditSubmissionNumber ? _number : null,
+            ResultNumber = Step.CanEditResultNumber ? _resultNumber : null,
         });
     }
 
+    private Guid? FileProgressId =>
+        Step.ProgressId is Guid progressId && progressId != Guid.Empty
+            ? progressId
+            : Step.DateProgressId is Guid dateId && dateId != Guid.Empty
+                ? dateId
+                : null;
+
     private async Task AddAsync(InputFileChangeEventArgs e)
     {
-        if (Busy || Step.ProgressId is not Guid progressId)
+        if (Busy || FileProgressId is not Guid progressId)
             return;
 
         foreach (var file in e.GetMultipleFiles(100))
@@ -155,7 +177,7 @@
     private async Task ReplaceAsync(InputFileChangeEventArgs e, Guid fileId)
     {
         var file = e.File;
-        if (Busy || file == null || Step.ProgressId is not Guid progressId)
+        if (Busy || file == null || FileProgressId is not Guid progressId)
             return;
 
         var content = await ReadAsync(file);
@@ -174,7 +196,7 @@
 
     private Task RemoveAsync(Guid fileId)
     {
-        if (Busy || Step.ProgressId is not Guid progressId)
+        if (Busy || FileProgressId is not Guid progressId)
             return Task.CompletedTask;
 
         return FileChangeRequested.InvokeAsync(new OfficerShellCaseProgressFileChange

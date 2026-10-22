@@ -829,7 +829,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 model.CaseApplicationProfileInstanceId,
                 request.ProgressId,
                 request.Date,
-                request.SubmissionDocumentNumber);
+                request.SubmissionDocumentNumber,
+                request.ResultNumber);
             if (!result.Success)
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save this step.";

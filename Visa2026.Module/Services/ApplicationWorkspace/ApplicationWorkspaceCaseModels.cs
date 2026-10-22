@@ -285,9 +285,12 @@ public sealed class ApplicationWorkspaceCaseProgressStep
     public DateTime? LatestDate { get; set; }
 
     /// <summary>Add, replace, and remove files on this finished step.</summary>
-    public bool CanEditFiles { get; init; }
+    public bool CanEditFiles { get; set; }
 
-    public bool CanEditSubmissionNumber { get; init; }
+    public bool CanEditSubmissionNumber { get; set; }
+
+    /// <summary>Edit ministry approval result number (Netije belgisi) on this finished step.</summary>
+    public bool CanEditResultNumber { get; set; }
 
     public int FileSlot { get; init; }
 
