@@ -2,6 +2,14 @@
 
 **Do not edit `approval-leg-profile.json` by hand** for Çalik Energi / VISA2015 migrations. Regenerate from legacy SQL via the scripts below, then commit the JSON. `ApprovalLegProfileSeedUpdater` embeds this file on deploy; it does **not** read `dbo.Applications` or VISA2015 at runtime.
 
+## Hand-maintained operational profiles
+
+These rows are **not** produced by VISA2015 contract dedupe. After regenerating from legacy, **re-merge** them into `approval-leg-profile.json` before commit:
+
+| Code | NameTm | Legs |
+|------|--------|------|
+| `TE-EN-GU-EN` | Türkmenenergo-Energetika-Gurluşyk-Energetika | TE → EN → GU → EN (4th leg repeats Energetika) |
+
 ## Pipeline (VISA2015 → tenant JSON → SQL seed)
 
 ```text

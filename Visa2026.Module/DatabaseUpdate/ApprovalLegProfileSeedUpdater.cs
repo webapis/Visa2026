@@ -1,6 +1,5 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
-using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
@@ -19,10 +18,6 @@ public sealed class ApprovalLegProfileSeedUpdater : ModuleUpdater
     public override void UpdateDatabaseAfterUpdateSchema()
     {
         base.UpdateDatabaseAfterUpdateSchema();
-        // Profiles must be committed before nested legs — EF can MERGE legs first in one batch and hit FK_ApprovalLegProfileMinistryLegs_ApprovalLegProfileId.
-        ApprovalLegProfileMinistryLegCatalogSync.EnsureProfiles(ObjectSpace);
-        ObjectSpace.CommitChanges();
-        ApprovalLegProfileMinistryLegCatalogSync.SyncMinistryLegs(ObjectSpace);
-        ObjectSpace.CommitChanges();
+        ApprovalLegProfileCatalogSeed.EnsureSynced(ObjectSpace);
     }
 }

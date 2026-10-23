@@ -8,6 +8,7 @@ public sealed class ApprovalLegProfileCodeHelperTests
     [Theory]
     [InlineData(new[] { "Türkmenenergo", "Energetika" }, "TE-EN")]
     [InlineData(new[] { "Türkmenenergo", "Energetika", "Gurluşyk" }, "TE-EN-GU")]
+    [InlineData(new[] { "Türkmenenergo", "Energetika", "Gurluşyk", "Energetika" }, "TE-EN-GU-EN")]
     [InlineData(new[] { "TNGIZ" }, "NG")]
     [InlineData(new[] { "TNGIZ", "Gurluşyk" }, "NG-GU")]
     [InlineData(new[] { "Aşgabat häkimlik" }, "AH")]

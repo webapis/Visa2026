@@ -1,3 +1,12 @@
+### 2026-10-23 — New approval-leg JSON row missing until SeedGate sync
+
+- **Need**: Add shared chain `TE-EN-GU-EN` (Türkmenenergo → Energetika → Gurluşyk → Energetika) to Choose Approval legs; it did not appear after editing `approval-leg-profile.json` alone.
+- **Cause**: Wizard reads `ApprovalLegProfile` from the DB. Seed ran only in `ApprovalLegProfileSeedUpdater` (ModuleUpdater), which XAF skips when the module version is already current. Startup `ApplicationProfileSeedGate` did not sync that catalog.
+- **Fix**: `ApprovalLegProfileCatalogSeed.EnsureSynced` from SeedGate (and ModuleUpdater). Local DB row inserted for immediate F5. Hand-maintained note in `approval-leg-profile.GENERATION.md`.
+- **Officer**: Restart (or refresh the Choose Approval legs step). Card **Türkmenenergo-Energetika-Gurluşyk-Energetika** should appear. Prod: deploy + restart so SeedGate upserts from embedded JSON.
+- **Prevent**: Do not assume a JSON-only change appears without host start SeedGate or `--forceUpdate`.
+- **Cross-skill**: visa2026-lookup-data
+
 ### 2026-10-16 — Instance list Refresh still cleared progress
 
 - **Need**: After the first fix, Refresh on Applications via ministry still replaced the progress stepper and result chips with `—`.

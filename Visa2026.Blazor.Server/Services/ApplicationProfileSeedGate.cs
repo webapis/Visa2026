@@ -68,6 +68,16 @@ internal static class ApplicationProfileSeedGate
                 logger?.LogWarning(orgEx, "Organization catalog seed failed. Demo Company/Signatory/Representative rows may be missing.");
             }
 
+            try
+            {
+                ApprovalLegProfileCatalogSeed.EnsureSynced(objectSpace);
+                logger?.LogInformation("ApprovalLegProfile catalog seed synced from tenant JSON.");
+            }
+            catch (Exception legEx)
+            {
+                logger?.LogWarning(legEx, "ApprovalLegProfile catalog seed failed. Shared approval-leg chains may be incomplete.");
+            }
+
             if (result.TypesWithoutProfile.Count > 0)
             {
                 logger?.LogWarning(

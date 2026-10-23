@@ -8,7 +8,7 @@
 
 | Layer | Source | Notes |
 |-------|--------|-------|
-| **Shared profiles (~10 codes)** | Generated JSON | `TE-EN`, `TE-EN-GU`, `NG`, `NG-GU`, `TG`, `TG-GU`, `TH`, `TH-GU`, `TN`, `AH` |
+| **Shared profiles** | Generated JSON + hand-maintained | `TE-EN`, `TE-EN-GU`, `TE-EN-GU-EN` (operational 4-leg), `NG`, `NG-GU`, `TG`, `TG-GU`, `TH`, `TH-GU`, `TN`, `AH` |
 | **Per-application FK** | VISA2014 import / PATCH | `Application.ApprovalLegProfile` from legacy ministry routing inference |
 | **Not imported** | — | Profile rows from VISA2015 lookup tables; contract-level `ProjectContractMinistryLegs` on target |
 
