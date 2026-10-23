@@ -43,11 +43,19 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         bool includeCancelledApplicationProcesses = false)
     {
         _ = objectSpace;
-        _ = personType;
         _ = projectKey;
         _ = dateRangeMonths;
         _ = includeCompletedApplicationProcesses;
         _ = includeCancelledApplicationProcesses;
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+        {
+            return new ReportDashboardSubReportListing
+            {
+                SubReports = Array.Empty<ReportDashboardSubReport>(),
+                Counts = new Dictionary<string, int>(StringComparer.Ordinal)
+            };
+        }
+
         return new ReportDashboardSubReportListing
         {
             SubReports = ReportDashboardCatalog.SubReports(category),
@@ -205,14 +213,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         var cutoff = dateRangeMonths > 0
             ? DateTime.Today.AddMonths(-dateRangeMonths)
             : DateTime.MinValue;
-        var role = ReportDashboardCatalog.TryGetPersonRole(personType);
-        var validVisaPersonIds = ResolveValidVisaPersonIds(objectSpace, category, validVisaPersonsOnly);
         var excelHint = ReportDashboardCatalog.ExcelTemplateNameHint(category, subReport);
         var excelConfigured = !string.IsNullOrEmpty(excelHint)
             && objectSpace.GetObjectsQuery<UserReportTemplate>()
                 .Any(t => t.TemplateName != null
                     && t.TemplateName.Contains(excelHint)
                     && t.TemplateOutputFormat == TemplateOutputFormat.Excel);
+
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+            return EmptyPanel(personType, category, subReport, excelHint, excelConfigured);
+
+        // Invitation / Work Permit / Registration / Visa Extension: All → Employees.
+        personType = ReportDashboardCatalog.ResolveEffectivePersonType(category, personType);
+        var role = ReportDashboardCatalog.TryGetPersonRole(personType);
+        var validVisaPersonIds = ResolveValidVisaPersonIds(objectSpace, category, validVisaPersonsOnly);
 
         return category switch
         {
@@ -903,6 +917,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                             row.ApplicationNumber ?? string.Empty,
                             row.ApplicationDateLabel ?? string.Empty,
                             row.VisaPeriodLabel ?? string.Empty,
+                            row.ThirdLastApprovalLabel ?? string.Empty,
+                            row.SecondLastApprovalLabel ?? string.Empty,
                             row.LastApprovalLabel ?? string.Empty,
                             row.MigrationSubmittedLabel ?? string.Empty,
                             row.MigrationLabel ?? string.Empty,
@@ -2917,7 +2933,17 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         LastApproval = FormatLastApproval(
                             r.Approval1Date, r.Approval1Number,
                             r.Approval2Date, r.Approval2Number,
-                            r.Approval3Date, r.Approval3Number),
+                            r.Approval3Date, r.Approval3Number,
+                            r.Approval4Date, r.Approval4Number,
+                            r.Approval5Date, r.Approval5Number),
+                        MinistryCells = longTerm
+                            ? FormatTrailingApprovalDecisions(
+                                r.Approval1Date, r.Approval1Number,
+                                r.Approval2Date, r.Approval2Number,
+                                r.Approval3Date, r.Approval3Number,
+                                r.Approval4Date, r.Approval4Number,
+                                r.Approval5Date, r.Approval5Number)
+                            : Array.Empty<string>(),
                         Status = x.Status,
                         StatusCssClass = string.IsNullOrWhiteSpace(r.StatusCssClass) ? "st-pending" : r.StatusCssClass
                     };
@@ -6685,15 +6711,50 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     private static string FormatLastApproval(
         DateTime? approval1Date, string? approval1Number,
         DateTime? approval2Date, string? approval2Number,
-        DateTime? approval3Date, string? approval3Number)
+        DateTime? approval3Date, string? approval3Number,
+        DateTime? approval4Date = null, string? approval4Number = null,
+        DateTime? approval5Date = null, string? approval5Number = null)
     {
-        if (HasApprovalDecision(approval3Date, approval3Number))
-            return FormatMigration(approval3Date, approval3Number);
-        if (HasApprovalDecision(approval2Date, approval2Number))
-            return FormatMigration(approval2Date, approval2Number);
-        if (HasApprovalDecision(approval1Date, approval1Number))
-            return FormatMigration(approval1Date, approval1Number);
-        return string.Empty;
+        var trailing = FormatTrailingApprovalDecisions(
+            approval1Date, approval1Number,
+            approval2Date, approval2Number,
+            approval3Date, approval3Number,
+            approval4Date, approval4Number,
+            approval5Date, approval5Number);
+        return trailing.Count > 2 ? trailing[2] : string.Empty;
+    }
+
+    /// <summary>
+    /// Last three approval decisions by leg sequence: [third-from-end, second-from-end, last].
+    /// Unused slots stay empty when fewer than three decisions exist.
+    /// </summary>
+    private static IReadOnlyList<string> FormatTrailingApprovalDecisions(
+        DateTime? approval1Date, string? approval1Number,
+        DateTime? approval2Date, string? approval2Number,
+        DateTime? approval3Date, string? approval3Number,
+        DateTime? approval4Date = null, string? approval4Number = null,
+        DateTime? approval5Date = null, string? approval5Number = null)
+    {
+        var filled = new List<string>(5);
+        void Add(DateTime? date, string? number)
+        {
+            if (!HasApprovalDecision(date, number))
+                return;
+            filled.Add(FormatMigration(date, number));
+        }
+
+        Add(approval1Date, approval1Number);
+        Add(approval2Date, approval2Number);
+        Add(approval3Date, approval3Number);
+        Add(approval4Date, approval4Number);
+        Add(approval5Date, approval5Number);
+
+        return
+        [
+            filled.Count >= 3 ? filled[^3] : string.Empty,
+            filled.Count >= 2 ? filled[^2] : string.Empty,
+            filled.Count >= 1 ? filled[^1] : string.Empty,
+        ];
     }
 
     private static bool HasApprovalDecision(DateTime? date, string? number) =>

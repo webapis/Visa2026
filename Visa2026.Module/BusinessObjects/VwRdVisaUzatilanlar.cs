@@ -83,8 +83,28 @@ public class VwRdVisaUzatilanlar
     [Browsable(false)]
     public virtual string LastApprovalNumber { get; set; }
 
+    [Browsable(false)]
+    public virtual DateTime? SecondLastApprovalDate { get; set; }
+
+    [Browsable(false)]
+    public virtual string SecondLastApprovalNumber { get; set; }
+
+    [Browsable(false)]
+    public virtual DateTime? ThirdLastApprovalDate { get; set; }
+
+    [Browsable(false)]
+    public virtual string ThirdLastApprovalNumber { get; set; }
+
     [NotMapped]
-    [ModelDefault("Caption", "İlgili Bakanlıktan çıkan tarih ve numarası")]
+    [ModelDefault("Caption", "İnşaat Bakanlığına (Başvuru tarihi ve numarası)")]
+    public string ThirdLastApprovalLabel => FormatDecision(ThirdLastApprovalDate, ThirdLastApprovalNumber);
+
+    [NotMapped]
+    [ModelDefault("Caption", "İnşaat Bakanlığından çıkış tarihi (Bakanlıktan çıktığı tarih ve numarası)")]
+    public string SecondLastApprovalLabel => FormatDecision(SecondLastApprovalDate, SecondLastApprovalNumber);
+
+    [NotMapped]
+    [ModelDefault("Caption", "İlgili Bakanlıktan çıkış tarihi ve numarası")]
     public string LastApprovalLabel => FormatDecision(LastApprovalDate, LastApprovalNumber);
 
     [Browsable(false)]

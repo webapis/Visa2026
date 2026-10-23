@@ -130,6 +130,11 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false)
     {
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+            return _real.ListSubReports(
+                objectSpace, personType, category, projectKey, dateRangeMonths,
+                includeCompletedApplicationProcesses, includeCancelledApplicationProcesses);
+
         if (category == ReportDashboardCategory.Registration)
         {
             return _real.ListSubReports(
@@ -157,6 +162,15 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool validVisaPersonsOnly = true,
         string? searchTerm = null)
     {
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+        {
+            return _real.LoadPanel(
+                objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
+                includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
+                includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
+                validVisaPersonsOnly, searchTerm);
+        }
+
         if (category == ReportDashboardCategory.Registration)
         {
             return _real.LoadPanel(

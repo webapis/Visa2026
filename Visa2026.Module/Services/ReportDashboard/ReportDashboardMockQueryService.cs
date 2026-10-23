@@ -117,11 +117,19 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         bool includeCancelledApplicationProcesses = false)
     {
         _ = objectSpace;
-        _ = personType;
         _ = projectKey;
         _ = dateRangeMonths;
         _ = includeCompletedApplicationProcesses;
         _ = includeCancelledApplicationProcesses;
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+        {
+            return new ReportDashboardSubReportListing
+            {
+                SubReports = Array.Empty<ReportDashboardSubReport>(),
+                Counts = new Dictionary<string, int>(StringComparer.Ordinal)
+            };
+        }
+
         return new ReportDashboardSubReportListing
         {
             SubReports = ReportDashboardCatalog.SubReports(category),
@@ -144,6 +152,11 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         bool validVisaPersonsOnly = true,
         string? searchTerm = null)
     {
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+            return Build(personType, category, subReport, [], projectKey);
+
+        personType = ReportDashboardCatalog.ResolveEffectivePersonType(category, personType);
+
         // Person search has no mock rows — it is real-view only (Hybrid).
         if (searchTerm != null) { /* no-op */ }
         // Include-archived toggle is for WP/Education/etc.

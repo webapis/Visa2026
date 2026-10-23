@@ -128,6 +128,23 @@ public class VwRdInvitationInProcess
     [NotMapped]
     [ModelDefault("Caption", "Approval 3")]
     public string Approval3Label => FormatApproval(Approval3Date, Approval3Number, Approval3Ministry);
+    [Browsable(false)]
+    public virtual DateTime? Approval4Date { get; set; }
+
+    [Browsable(false)]
+    public virtual string Approval4Number { get; set; }
+
+    [Browsable(false)]
+    public virtual string Approval4Ministry { get; set; }
+
+    [Browsable(false)]
+    public virtual DateTime? Approval5Date { get; set; }
+
+    [Browsable(false)]
+    public virtual string Approval5Number { get; set; }
+
+    [Browsable(false)]
+    public virtual string Approval5Ministry { get; set; }
 
     [ModelDefault("Caption", "Visa Period")]
     public virtual string VisaPeriodLabel { get; set; }
@@ -145,12 +162,20 @@ public class VwRdInvitationInProcess
         MigrationSubmittedDate is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
 
     [NotMapped]
+    [ModelDefault("Caption", "İnşaat Bakanlığına (Başvuru tarihi ve numarası)")]
+    public string ThirdLastApprovalLabel => TrailingDecision(2);
+
+    [NotMapped]
+    [ModelDefault("Caption", "İnşaat Bakanlığından çıkış tarihi (Bakanlıktan çıktığı tarih ve numarası)")]
+    public string SecondLastApprovalLabel => TrailingDecision(1);
+
+    [NotMapped]
     [ModelDefault("Caption", "Ministry approval")]
-    public string LastApprovalLabel =>
-        FormatLastDecision(
-            Approval3Date, Approval3Number,
-            Approval2Date, Approval2Number,
-            Approval1Date, Approval1Number);
+    public string LastApprovalLabel => TrailingDecision(0);
+
+    [NotMapped]
+    [ModelDefault("Caption", "İlgili Bakanlıktan çıkış tarihi ve numarası")]
+    public string LastApprovalCompanyLabel => TrailingDecision(0);
 
     [NotMapped]
     [ModelDefault("AllowEdit", "False")]
@@ -205,18 +230,26 @@ public class VwRdInvitationInProcess
         return string.Join("\n", lines);
     }
 
-    private static string FormatLastDecision(
-        DateTime? laterDate, string? laterNumber,
-        DateTime? middleDate, string? middleNumber,
-        DateTime? earlierDate, string? earlierNumber)
+    private string TrailingDecision(int fromEnd)
     {
-        if (HasDecision(laterDate, laterNumber))
-            return FormatDecision(laterDate, laterNumber);
-        if (HasDecision(middleDate, middleNumber))
-            return FormatDecision(middleDate, middleNumber);
-        if (HasDecision(earlierDate, earlierNumber))
-            return FormatDecision(earlierDate, earlierNumber);
-        return string.Empty;
+        var filled = new List<(DateTime? Date, string Number)>(5);
+        AddDecision(filled, Approval1Date, Approval1Number);
+        AddDecision(filled, Approval2Date, Approval2Number);
+        AddDecision(filled, Approval3Date, Approval3Number);
+        AddDecision(filled, Approval4Date, Approval4Number);
+        AddDecision(filled, Approval5Date, Approval5Number);
+        var index = filled.Count - 1 - fromEnd;
+        if (index < 0 || index >= filled.Count)
+            return string.Empty;
+        return FormatDecision(filled[index].Date, filled[index].Number);
+    }
+
+    private static void AddDecision(
+        List<(DateTime? Date, string Number)> filled, DateTime? date, string? number)
+    {
+        if (!HasDecision(date, number))
+            return;
+        filled.Add((date, number?.Trim() ?? string.Empty));
     }
 
     private static bool HasDecision(DateTime? date, string? number) =>

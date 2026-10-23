@@ -599,8 +599,9 @@
                                                 || (IsInvitationCancelledTable && (i == 4 || i == 8))
                                                 || ((IsInvitationReadyTable || IsInvitationExpiredTable) && (i == 8 || i == 9 || i == 10))
                                                 || (IsInvitationUsedTable && i >= 4 && i <= 8)
-                                                || (IsInvitationProcessTable && (i == 8 || i == 10 || i == 11))
-                                                || (IsVisaUzatilanlarTable && (i == 9 || i == 11));
+                                                || (IsInvitationProcessLongTable && (i == 8 || i == 9 || i == 10 || i == 12 || i == 13))
+                                                || (IsInvitationProcessTable && !IsInvitationProcessLongTable && (i == 8 || i == 10 || i == 11))
+                                                || (IsVisaUzatilanlarTable && (i == 9 || i == 10 || i == 11 || i == 13 || i == 14));
                                             <th class="@($"{ColumnClass(i)}{(stackColumn ? " rd-col-stack" : "")}{(orderColumn ? " rd-col-order" : "")}{(projectColumn ? " rd-col-project" : "")}{(positionColumn ? " rd-col-position" : "")}{(educationColumn ? " rd-col-education" : "")}{(locationColumn ? " rd-col-locations" : "")}")">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
@@ -1012,6 +1013,53 @@
                                                         <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                                     }
                                                 }
+                                                else if (IsInvitationProcessLongTable)
+                                                {
+                                                    var thirdApproval = row.MinistryCells.Count > 0 ? row.MinistryCells[0] : string.Empty;
+                                                    var secondApproval = row.MinistryCells.Count > 1 ? row.MinistryCells[1] : string.Empty;
+                                                    var lastApproval = row.MinistryCells.Count > 2 ? row.MinistryCells[2] : row.LastApproval;
+                                                    <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                    <td class="@($"{ColumnClass(3)} rd-col-project")"><span class="rd-project-tag">@row.Department</span></td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnB</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnC</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnD</td>
+                                                    <td class="@ColumnClass(7)">@row.ColumnH</td>
+                                                    <td class="@($"{ColumnClass(8)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in thirdApproval.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(9)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in secondApproval.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(10)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in (lastApproval ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@ColumnClass(11)">@row.ColumnG</td>
+                                                    <td class="@($"{ColumnClass(12)} rd-col-stack")">
+                                                        <div class="rd-cell-stack">
+                                                            @foreach (var line in (row.ColumnI ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                                            {
+                                                                <span>@line</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td class="@($"{ColumnClass(13)} rd-col-stack")"></td>
+                                                    <td class="rd-cell-state">@StateLabel(row.ColumnE, row.StatusCssClass, true)</td>
+                                                }
                                                 else if (IsInvitationProcessTable)
                                                 {
                                                     <td class="@ColumnClass(2)">@row.ColumnA</td>
@@ -1241,20 +1289,27 @@
         <div class="rd-bundle-dialog" role="dialog" aria-modal="true">
             <div class="rd-bundle-title">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleTitle")</div>
             <div class="rd-bundle-list">
-                @{
-                    ReportDashboardCategory? bundleCategory = null;
-                }
-                @foreach (var item in _excelBundle)
+                @for (var bundleIndex = 0; bundleIndex < _excelBundle.Count; bundleIndex++)
                 {
-                    if (bundleCategory != item.Category)
-                    {
-                        bundleCategory = item.Category;
-                        <div class="rd-bundle-group">@ReportDashboardCatalog.CategoryLabel(item.Category)</div>
-                    }
-                    <label class="rd-bundle-row">
-                        <input type="checkbox" @bind="item.Selected" />
-                        <span>@item.Label</span>
-                    </label>
+                    var item = _excelBundle[bundleIndex];
+                    var index = bundleIndex;
+                    <div @key="item.Category.ToString() + '|' + item.Key"
+                         class="rd-bundle-row @(_bundleDragFromIndex == index ? "rd-bundle-row--dragging" : null) @(_bundleDragOverIndex == index ? "rd-bundle-row--drag-over" : null)"
+                         draggable="true"
+                         @ondragstart="() => OnBundleDragStart(index)"
+                         @ondragenter="() => OnBundleDragEnter(index)"
+                         @ondragover="OnBundleDragOver"
+                         @ondragover:preventDefault
+                         @ondrop="() => OnBundleDrop(index)"
+                         @ondrop:preventDefault
+                         @ondragend="OnBundleDragEnd">
+                        <span class="rd-bundle-handle" title="Drag to reorder" aria-hidden="true">::</span>
+                        <label class="rd-bundle-check">
+                            <input type="checkbox" @bind="item.Selected" @onclick:stopPropagation="true" />
+                            <span class="rd-bundle-label">@item.Label</span>
+                            <span class="rd-bundle-category">@ReportDashboardCatalog.CategoryLabel(item.Category)</span>
+                        </label>
+                    </div>
                 }
             </div>
             <div class="rd-bundle-actions">
@@ -1781,6 +1836,9 @@
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private bool _excelBundleOpen;
     private readonly List<ExcelBundleChoice> _excelBundle = [];
+    /// <summary>Source index for the active drag. Kept until drop finishes — dragend must not clear it first (Blazor Server).</summary>
+    private int _bundleDragFromIndex = -1;
+    private int _bundleDragOverIndex = -1;
 
     private void OpenExcelBundle()
     {
@@ -1788,21 +1846,93 @@
             return;
 
         _excelBundle.Clear();
-        foreach (var (category, key) in ReportDashboardCatalog.ExcelBundleReports())
+        _bundleDragFromIndex = -1;
+        _bundleDragOverIndex = -1;
+        using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelBundleSettings>())
         {
-            _excelBundle.Add(new ExcelBundleChoice
+            foreach (var (category, key) in ReportDashboardExcelBundleOrder.ResolveOrderedReports(objectSpace))
             {
-                Category = category,
-                Key = key,
-                Label = ReportDashboardCatalog.ExcelBundleLabel(category, key),
-                Selected = true
-            });
+                _excelBundle.Add(new ExcelBundleChoice
+                {
+                    Category = category,
+                    Key = key,
+                    Label = ReportDashboardCatalog.ExcelBundleLabel(category, key),
+                    Selected = true
+                });
+            }
         }
 
         _excelBundleOpen = true;
     }
 
-    private void CloseExcelBundle() => _excelBundleOpen = false;
+    private void CloseExcelBundle()
+    {
+        _excelBundleOpen = false;
+        _bundleDragFromIndex = -1;
+        _bundleDragOverIndex = -1;
+    }
+
+    private void OnBundleDragStart(int index)
+    {
+        _bundleDragFromIndex = index;
+        _bundleDragOverIndex = -1;
+    }
+
+    private void OnBundleDragEnter(int index)
+    {
+        if (_bundleDragFromIndex >= 0 && _bundleDragFromIndex != index)
+            _bundleDragOverIndex = index;
+    }
+
+    private void OnBundleDragOver(DragEventArgs _)
+    {
+        // preventDefault is on the markup attribute; handler keeps the drop target active.
+    }
+
+    private void OnBundleDragEnd()
+    {
+        // Drop runs in the same UI turn on some hosts and after dragend on Blazor Server.
+        // Clear chrome only; leave _bundleDragFromIndex for OnBundleDrop, then clear shortly after.
+        _bundleDragOverIndex = -1;
+        var from = _bundleDragFromIndex;
+        _ = InvokeAsync(async () =>
+        {
+            await Task.Delay(100);
+            if (_bundleDragFromIndex == from)
+                _bundleDragFromIndex = -1;
+            StateHasChanged();
+        });
+    }
+
+    private void OnBundleDrop(int toIndex)
+    {
+        var fromIndex = _bundleDragFromIndex;
+        _bundleDragFromIndex = -1;
+        _bundleDragOverIndex = -1;
+
+        if (fromIndex < 0 || fromIndex == toIndex
+            || fromIndex >= _excelBundle.Count
+            || toIndex < 0 || toIndex >= _excelBundle.Count)
+            return;
+
+        var item = _excelBundle[fromIndex];
+        _excelBundle.RemoveAt(fromIndex);
+        if (fromIndex < toIndex)
+            toIndex--;
+        _excelBundle.Insert(toIndex, item);
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelBundleSettings>();
+            ReportDashboardExcelBundleOrder.SaveOrder(
+                objectSpace,
+                _excelBundle.Select(x => (x.Category, x.Key)).ToList());
+        }
+        catch (Exception ex)
+        {
+            _templateNotice = ex.Message;
+        }
+    }
 
     private async Task DownloadExcelBundleAsync()
     {
@@ -2143,6 +2273,9 @@
     private bool IsInvitationOfficerTable =>
         IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationCancelledTable || IsInvitationProcessTable || IsInvitationUsedTable;
 
+    private bool IsInvitationProcessLongTable =>
+        Category == ReportDashboardCategory.Invitation
+        && ReportDashboardCatalog.IsInvitationProcessLongSubReport(Panel?.SubReport ?? SubReport);
     private bool IsVisaUzatilanlarTable =>
         Category == ReportDashboardCategory.VisaExtension
         && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);

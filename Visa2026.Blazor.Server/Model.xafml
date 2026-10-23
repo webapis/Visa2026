@@ -1686,11 +1686,13 @@
         <ColumnInfo Id="ApplicationNumber" Index="5" Width="120" Caption="Davetiye için yazı No" IsNewNode="True" />
         <ColumnInfo Id="ApplicationDateLabel" Index="6" Width="120" Caption="İlgili Bakanlığın Başvuru tarihi" IsNewNode="True" />
         <ColumnInfo Id="VisaPeriodLabel" Index="7" Width="120" Caption="Başvurulan vize süresi" IsNewNode="True" />
-        <ColumnInfo Id="LastApprovalLabel" Index="8" Width="160" Caption="İlgili Bakanlıktan çıkan tarih ve numarası" IsNewNode="True" />
-        <ColumnInfo Id="MigrationSubmittedLabel" Index="9" Width="120" Caption="Yabancı Şubeye veriliş tarihi" IsNewNode="True" />
-        <ColumnInfo Id="MigrationLabel" Index="10" Width="140" Caption="Yabancı Şube CO No ve tarihi" IsNewNode="True" />
-        <ColumnInfo Id="CurrentStatusLabel" Index="11" Width="160" Caption="Şu anki Durumu" IsNewNode="True" />
-        <ColumnInfo Id="NotesLabel" Index="12" Width="80" Caption="Açıklama" IsNewNode="True" />
+        <ColumnInfo Id="ThirdLastApprovalLabel" Index="8" Width="180" Caption="İnşaat Bakanlığına (Başvuru tarihi ve numarası)" IsNewNode="True" />
+        <ColumnInfo Id="SecondLastApprovalLabel" Index="9" Width="200" Caption="İnşaat Bakanlığından çıkış tarihi (Bakanlıktan çıktığı tarih ve numarası)" IsNewNode="True" />
+        <ColumnInfo Id="LastApprovalLabel" Index="10" Width="180" Caption="İlgili Bakanlıktan çıkış tarihi ve numarası" IsNewNode="True" />
+        <ColumnInfo Id="MigrationSubmittedLabel" Index="11" Width="120" Caption="Yabancı Şubeye veriliş tarihi" IsNewNode="True" />
+        <ColumnInfo Id="MigrationLabel" Index="12" Width="140" Caption="Yabancı Şube CO No ve tarihi" IsNewNode="True" />
+        <ColumnInfo Id="CurrentStatusLabel" Index="13" Width="160" Caption="Şu anki Durumu" IsNewNode="True" />
+        <ColumnInfo Id="NotesLabel" Index="14" Width="80" Caption="Açıklama" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdVisaAktivPersoneller_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaAktivPersoneller" Caption="aktiv personeller" IsNewNode="True">
@@ -1925,11 +1927,13 @@
         <ColumnInfo Id="ApplicationNumberLabel" Index="4" Width="110" Caption="Application number" IsNewNode="True" />
         <ColumnInfo Id="ApplicationDateLabel" Index="5" Width="110" Caption="Application date" IsNewNode="True" />
         <ColumnInfo Id="VisaPeriodLabel" Index="6" Width="100" Caption="Visa Period" IsNewNode="True" />
-        <ColumnInfo Id="LastApprovalLabel" Index="7" Width="140" Caption="Ministry approval" IsNewNode="True" />
-        <ColumnInfo Id="MigrationSubmittedLabel" Index="8" Width="130" Caption="Submitted to migration" IsNewNode="True" />
-        <ColumnInfo Id="MigrationLabel" Index="9" Width="130" Caption="Migration" IsNewNode="True" />
-        <ColumnInfo Id="InvitationValidityLabel" Index="10" Width="120" Caption="Invitation validity" IsNewNode="True" />
-        <ColumnInfo Id="StatusLabel" Index="11" Width="160" Caption="Process state" IsNewNode="True" />
+        <ColumnInfo Id="ThirdLastApprovalLabel" Index="7" Width="180" Caption="İnşaat Bakanlığına (Başvuru tarihi ve numarası)" IsNewNode="True" />
+        <ColumnInfo Id="SecondLastApprovalLabel" Index="8" Width="200" Caption="İnşaat Bakanlığından çıkış tarihi (Bakanlıktan çıktığı tarih ve numarası)" IsNewNode="True" />
+        <ColumnInfo Id="LastApprovalCompanyLabel" Index="9" Width="180" Caption="İlgili Bakanlıktan çıkış tarihi ve numarası" IsNewNode="True" />
+        <ColumnInfo Id="MigrationSubmittedLabel" Index="10" Width="130" Caption="Submitted to migration" IsNewNode="True" />
+        <ColumnInfo Id="MigrationLabel" Index="11" Width="130" Caption="Migration" IsNewNode="True" />
+        <ColumnInfo Id="InvitationValidityLabel" Index="12" Width="120" Caption="Invitation validity" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="13" Width="160" Caption="Process state" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdInvitationReadyByPeriodCategory_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdInvitationReady" Caption="Active Invitation (V)" IsNewNode="True">

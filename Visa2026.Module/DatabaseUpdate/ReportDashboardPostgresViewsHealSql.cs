@@ -201,7 +201,9 @@ public static class ReportDashboardPostgresViewsHealSql
                 && ColumnExists(connection, viewName, "PassportNumber")
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_visa_aktiv_personeller"
-                    || ColumnExists(connection, viewName, "VisaStartDate")))
+                    || ColumnExists(connection, viewName, "VisaStartDate"))
+                && (viewName != "vw_rd_visa_uzatilanlar"
+                    || ColumnExists(connection, viewName, "SecondLastApprovalDate")))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
@@ -335,6 +337,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && ViewDefinitionContains(connection, viewName, "MigrationSubmittedDate")
                     && ViewDefinitionContains(connection, viewName, "IsShortVisaPeriod")
+                    && (ColumnExists(connection, viewName, "Approval5Date")
+                        || ColumnExists(connection, viewName, "approval5date"))
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 

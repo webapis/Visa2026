@@ -21,14 +21,17 @@ public static class ReportDashboardVisaUzatilanlarExcel
         "Davetiye için yazı No",
         "İlgili Bakanlığın Başvuru tarihi",
         "Başvurulan vize süresi",
-        "İlgili Bakanlıktan çıkan tarih ve numarası",
+        ReportDashboardInvitationTableExcel.ApprovalThirdLastHeader,
+        ReportDashboardInvitationTableExcel.ApprovalSecondLastHeader,
+        ReportDashboardInvitationTableExcel.ApprovalLastHeader,
         "Yabancı Şubeye veriliş tarihi",
         "Yabancı Şube CO No ve tarihi",
         "Şu anki Durumu",
         "Açıklama",
     ];
 
-    public static readonly double[] Widths = [8, 22, 38, 22, 18, 16, 16, 16, 14, 24, 18, 20, 22, 16];
+    public static readonly double[] Widths =
+        [8, 22, 38, 22, 18, 16, 16, 16, 14, 22, 24, 24, 18, 20, 22, 16];
 
     public static List<string> Cells(ReportDashboardPreviewRow row, int rowNumber)
     {
@@ -37,8 +40,9 @@ public static class ReportDashboardVisaUzatilanlarExcel
             cells.Add(string.Empty);
         if (cells.Count > Headers.Length - 1)
             cells = cells.Take(Headers.Length - 1).ToList();
-        if (cells.Count > 10)
-            cells[10] = StripNumberMark(cells[10]);
+        // Yabancı Şube CO No (index after the three trailing approval cells).
+        if (cells.Count > 12)
+            cells[12] = StripNumberMark(cells[12]);
         cells.Insert(0, rowNumber.ToString(CultureInfo.InvariantCulture));
         return cells;
     }

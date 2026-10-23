@@ -38,6 +38,10 @@ SELECT
     )                                                                       AS "VisaPeriodLabel",
     last_approval."Date"                                                    AS "LastApprovalDate",
     COALESCE(last_approval."Number", '')                                    AS "LastApprovalNumber",
+    last_approval."SecondLastDate"                                           AS "SecondLastApprovalDate",
+    COALESCE(last_approval."SecondLastNumber", '')                          AS "SecondLastApprovalNumber",
+    last_approval."ThirdLastDate"                                            AS "ThirdLastApprovalDate",
+    COALESCE(last_approval."ThirdLastNumber", '')                           AS "ThirdLastApprovalNumber",
     CASE
         WHEN mig_submit."Date" IS NOT NULL AND (mig_submit."Date")::date > DATE '1900-01-01'
             THEN mig_submit."Date"
@@ -144,51 +148,62 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) held_ministry ON TRUE
 LEFT JOIN LATERAL (
-    SELECT dec.d AS "Date", dec.n AS "Number"
+    SELECT
+        MAX(ranked.d) FILTER (WHERE ranked.rn = 1) AS "Date",
+        COALESCE(MAX(ranked.n) FILTER (WHERE ranked.rn = 1), '') AS "Number",
+        MAX(ranked.d) FILTER (WHERE ranked.rn = 2) AS "SecondLastDate",
+        COALESCE(MAX(ranked.n) FILTER (WHERE ranked.rn = 2), '') AS "SecondLastNumber",
+        MAX(ranked.d) FILTER (WHERE ranked.rn = 3) AS "ThirdLastDate",
+        COALESCE(MAX(ranked.n) FILTER (WHERE ranked.rn = 3), '') AS "ThirdLastNumber"
     FROM (
-        SELECT snap."Sequence" AS seq
-        FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap
-        WHERE snap."ApplicationProfileInstanceId" = a."ID"
-          AND COALESCE(snap."GCRecord", 0) = 0
-        UNION ALL
-        SELECT leg."Sequence"
-        FROM "ApprovalLegProfileMinistryLegs" leg
-        WHERE a."ApprovalLegProfileID" IS NOT NULL
-          AND leg."ApprovalLegProfileId" = a."ApprovalLegProfileID"
-          AND COALESCE(leg."GCRecord", 0) = 0
-          AND NOT EXISTS (
-              SELECT 1
-              FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap2
-              WHERE snap2."ApplicationProfileInstanceId" = a."ID"
-                AND COALESCE(snap2."GCRecord", 0) = 0)
-    ) legs
-    LEFT JOIN LATERAL (
-        SELECT pr."Date" AS d,
-               COALESCE(
-                   NULLIF(BTRIM(pr."ResultNumber"), ''),
-                   CASE
-                       WHEN position(':' IN COALESCE(pr."Description", '')) > 0
-                            AND BTRIM(substring(pr."Description" FROM position(':' IN pr."Description") + 1)) ~ '[0-9]'
-                       THEN BTRIM(substring(pr."Description" FROM position(':' IN pr."Description") + 1))
-                       ELSE NULL
-                   END
-               ) AS n
-        FROM "ApplicationProfileInstanceProgresses" pr
-        INNER JOIN "ApplicationStates" st
-            ON st."ID" = pr."StateID"
-           AND COALESCE(st."GCRecord", 0) = 0
-        WHERE pr."ApplicationProfileInstanceID" = a."ID"
-          AND COALESCE(pr."GCRecord", 0) = 0
-          AND legs.seq BETWEEN 1 AND 5
-          AND BTRIM(COALESCE(st."Code", '')) IN (
-              legs.seq::text || '_REVIEW_APPROVED',
-              legs.seq::text || '_REVIEW_REJECTED')
-        ORDER BY pr."Date" DESC NULLS LAST, pr."ID" DESC
-        LIMIT 1
-    ) dec ON TRUE
-    WHERE dec.d IS NOT NULL OR NULLIF(BTRIM(dec.n), '') IS NOT NULL
-    ORDER BY legs.seq DESC
-    LIMIT 1
+        SELECT
+            dec.d,
+            dec.n,
+            ROW_NUMBER() OVER (ORDER BY legs.seq DESC) AS rn
+        FROM (
+            SELECT snap."Sequence" AS seq
+            FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap
+            WHERE snap."ApplicationProfileInstanceId" = a."ID"
+              AND COALESCE(snap."GCRecord", 0) = 0
+            UNION ALL
+            SELECT leg."Sequence"
+            FROM "ApprovalLegProfileMinistryLegs" leg
+            WHERE a."ApprovalLegProfileID" IS NOT NULL
+              AND leg."ApprovalLegProfileId" = a."ApprovalLegProfileID"
+              AND COALESCE(leg."GCRecord", 0) = 0
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap2
+                  WHERE snap2."ApplicationProfileInstanceId" = a."ID"
+                    AND COALESCE(snap2."GCRecord", 0) = 0)
+        ) legs
+        LEFT JOIN LATERAL (
+            SELECT pr."Date" AS d,
+                   COALESCE(
+                       NULLIF(BTRIM(pr."ResultNumber"), ''),
+                       CASE
+                           WHEN position(':' IN COALESCE(pr."Description", '')) > 0
+                                AND BTRIM(substring(pr."Description" FROM position(':' IN pr."Description") + 1)) ~ '[0-9]'
+                           THEN BTRIM(substring(pr."Description" FROM position(':' IN pr."Description") + 1))
+                           ELSE NULL
+                       END
+                   ) AS n
+            FROM "ApplicationProfileInstanceProgresses" pr
+            INNER JOIN "ApplicationStates" st
+                ON st."ID" = pr."StateID"
+               AND COALESCE(st."GCRecord", 0) = 0
+            WHERE pr."ApplicationProfileInstanceID" = a."ID"
+              AND COALESCE(pr."GCRecord", 0) = 0
+              AND legs.seq BETWEEN 1 AND 5
+              AND BTRIM(COALESCE(st."Code", '')) IN (
+                  legs.seq::text || '_REVIEW_APPROVED',
+                  legs.seq::text || '_REVIEW_REJECTED')
+            ORDER BY pr."Date" DESC NULLS LAST, pr."ID" DESC
+            LIMIT 1
+        ) dec ON TRUE
+        WHERE dec.d IS NOT NULL OR NULLIF(BTRIM(dec.n), '') IS NOT NULL
+    ) ranked
+    WHERE ranked.rn <= 3
 ) last_approval ON TRUE
 LEFT JOIN LATERAL (
     SELECT pr."Date" AS "Date", NULLIF(BTRIM(pr."ProcessNumber"), '') AS "ProcessNumber"

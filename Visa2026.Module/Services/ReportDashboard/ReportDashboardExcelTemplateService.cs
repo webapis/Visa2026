@@ -77,7 +77,8 @@ public static class ReportDashboardExcelTemplateService
             "ready-by-project" or "ready-by-period-category" => "ready-by-project",
             "expired-invitation" => "expired-invitation",
             "cancelled-invitation" => "cancelled-invitation",
-            "in-process" or "in-process-by-period-category-type" or ReportDashboardCatalog.InvitationInProcessLongKey => "in-process",
+            "in-process" or "in-process-by-period-category-type" => "in-process",
+            ReportDashboardCatalog.InvitationInProcessLongKey => ReportDashboardCatalog.InvitationInProcessLongKey,
             "process-result" or "process-result-by-period-category-type"
                 or "rejected-by-project" or "rejected-by-period-category-type" => "process-result",
             "used" or "used-by-period-category-type" => "used",
@@ -208,11 +209,16 @@ public static class ReportDashboardExcelTemplateService
 
         if (ReportDashboardExcelTemplateWorkbook.IsInvitationProcessCompanySheet(category, subReport))
         {
+            var longTerm = ReportDashboardCatalog.IsInvitationProcessLongSubReport(subReport);
+            var processHeaders = longTerm
+                ? ReportDashboardInvitationTableExcel.ProcessCompanyLongHeaders
+                : ReportDashboardInvitationTableExcel.ProcessCompanyHeaders;
             return FinishDownload(category, template != null
-                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(
-                    template, ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length)
-                ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationProcessCompanyHeaders(template)
-                : ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessCompanyStarter());
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, processHeaders.Length)
+                ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationProcessCompanyHeaders(template, longTerm)
+                : (longTerm
+                    ? ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessLongCompanyStarter()
+                    : ReportDashboardExcelTemplateWorkbook.BuildInvitationProcessCompanyStarter()));
         }
 
         if (category == ReportDashboardCategory.VisaExtension
@@ -339,7 +345,9 @@ public static class ReportDashboardExcelTemplateService
         }
 
         if (ReportDashboardExcelTemplateWorkbook.IsInvitationProcessCompanySheet(category, subReport))
-            expectedColumns = ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length;
+            expectedColumns = ReportDashboardCatalog.IsInvitationProcessLongSubReport(subReport)
+                ? ReportDashboardInvitationTableExcel.ProcessCompanyLongHeaders.Length
+                : ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length;
 
         if (!ReportDashboardExcelTemplateWorkbook.MatchesColumns(content, expectedColumns))
             return ColumnsKey;

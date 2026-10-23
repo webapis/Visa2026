@@ -117,17 +117,24 @@ public static class ReportDashboardExcelTemplateWorkbook
     {
         var companyInvitation = IsInvitationCompanySheet(category, subReport) && !includeChartColumn;
         var companyProcess = IsInvitationProcessCompanySheet(category, subReport);
+        var companyProcessLong = companyProcess
+            && ReportDashboardCatalog.IsInvitationProcessLongSubReport(subReport);
+        var processHeaders = companyProcessLong
+            ? ReportDashboardInvitationTableExcel.ProcessCompanyLongHeaders
+            : ReportDashboardInvitationTableExcel.ProcessCompanyHeaders;
         var columnCount = companyInvitation
             ? ReportDashboardInvitationTableExcel.CompanyHeaders.Length
             : companyProcess
-                ? ReportDashboardInvitationTableExcel.ProcessCompanyHeaders.Length
+                ? processHeaders.Length
                 : headers.Count;
         var source = template != null && MatchesColumns(template, columnCount)
             ? template
             : companyInvitation
                 ? BuildInvitationCompanyStarter()
                 : companyProcess
-                    ? BuildInvitationProcessCompanyStarter()
+                    ? (companyProcessLong
+                        ? BuildInvitationProcessLongCompanyStarter()
+                        : BuildInvitationProcessCompanyStarter())
                     : IsWorkPermitCalisma(category, subReport)
                         ? BuildCalismaListesiStarter()
                         : IsVisaAktivPersoneller(category, subReport)
@@ -144,7 +151,7 @@ public static class ReportDashboardExcelTemplateWorkbook
         var companyHeaders = companyInvitation
             ? ReportDashboardInvitationTableExcel.CompanyHeaders
             : companyProcess
-                ? ReportDashboardInvitationTableExcel.ProcessCompanyHeaders
+                ? processHeaders
                 : null;
         return Fill(
             source,
@@ -196,20 +203,23 @@ public static class ReportDashboardExcelTemplateWorkbook
         }
     }
 
-    public static byte[] ApplyInvitationProcessCompanyHeaders(byte[] template)
+    public static byte[] ApplyInvitationProcessCompanyHeaders(byte[] template, bool longTerm = false)
     {
+        var headers = longTerm
+            ? ReportDashboardInvitationTableExcel.ProcessCompanyLongHeaders
+            : ReportDashboardInvitationTableExcel.ProcessCompanyHeaders;
         try
         {
             using var workbook = new XLWorkbook(new MemoryStream(template));
             if (!TryRanges(workbook, out var header, out _) || header == null)
-                return BuildInvitationProcessCompanyStarter();
+                return longTerm ? BuildInvitationProcessLongCompanyStarter() : BuildInvitationProcessCompanyStarter();
 
-            WriteCompanyHeaders(header.Worksheet, header, ReportDashboardInvitationTableExcel.ProcessCompanyHeaders);
+            WriteCompanyHeaders(header.Worksheet, header, headers);
             return Save(workbook);
         }
         catch (Exception)
         {
-            return BuildInvitationProcessCompanyStarter();
+            return longTerm ? BuildInvitationProcessLongCompanyStarter() : BuildInvitationProcessCompanyStarter();
         }
     }
 
@@ -323,6 +333,54 @@ public static class ReportDashboardExcelTemplateWorkbook
         return Save(workbook);
     }
 
+    public static byte[] BuildInvitationProcessLongCompanyStarter()
+    {
+        var headers = ReportDashboardInvitationTableExcel.ProcessCompanyLongHeaders;
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.Worksheets.Add("işlemde olanlar uzun dönem");
+        var columnCount = headers.Length;
+
+        for (var column = 0; column < columnCount; column++)
+            sheet.Cell(1, column + 1).Value = headers[column];
+
+        var header = sheet.Range(1, 1, 1, columnCount);
+        header.Style.Font.FontName = CompanyFontName;
+        header.Style.Font.FontSize = 11;
+        header.Style.Font.Bold = true;
+        header.Style.Alignment.WrapText = true;
+        header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        header.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        header.Style.Fill.BackgroundColor = XLColor.FromHtml(HeaderBackground);
+        header.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        header.Style.Border.OutsideBorderColor = XLColor.Black;
+        header.Style.Border.InsideBorderColor = XLColor.Black;
+        sheet.Row(1).Height = 48;
+
+        var sample = sheet.Range(2, 1, 2, columnCount);
+        sample.Style.Font.FontName = CompanyFontName;
+        sample.Style.Font.FontSize = 11;
+        sample.Style.Alignment.WrapText = true;
+        sample.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+        sample.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+        sample.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        sample.Style.Border.OutsideBorderColor = XLColor.Black;
+        sample.Style.Border.InsideBorderColor = XLColor.Black;
+
+        double[] widths = [8, 22, 38, 22, 18, 16, 16, 14, 22, 24, 24, 18, 20, 22, 16];
+        for (var column = 0; column < columnCount; column++)
+            sheet.Column(column + 1).Width = widths[column];
+
+        sheet.SheetView.FreezeRows(1);
+        sheet.Range(1, 1, 2, columnCount).SetAutoFilter();
+        sheet.SheetView.ZoomScale = 100;
+
+        workbook.DefinedNames.Add(HeaderName, header);
+        workbook.DefinedNames.Add(SampleName, sample);
+        ApplyCompanyFont(sheet);
+        return Save(workbook);
+    }
     public static byte[] BuildCalismaListesiStarter(string? sheetName = null)
     {
         var isAktiv = string.Equals(sheetName, "aktiv personeller", StringComparison.OrdinalIgnoreCase);
@@ -477,6 +535,9 @@ public static class ReportDashboardExcelTemplateWorkbook
 
         if (ReportDashboardCatalog.IsInvitationUsedSubReport(subReport))
             return ReportDashboardInvitationTableExcel.UsedCells(row, includeChartColumn);
+
+        if (ReportDashboardCatalog.IsInvitationProcessLongSubReport(subReport))
+            return ReportDashboardInvitationTableExcel.ProcessLongCells(row, rowNumber);
 
         if (ReportDashboardCatalog.IsInvitationProcessSubReport(subReport))
             return ReportDashboardInvitationTableExcel.ProcessCells(row, rowNumber);

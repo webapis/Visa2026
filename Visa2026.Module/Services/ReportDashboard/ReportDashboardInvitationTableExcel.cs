@@ -72,6 +72,13 @@ public static class ReportDashboardInvitationTableExcel
     /// Company Invitation Process sheet. Submitted-to-migration date is filled only after that step.
     /// Açıklama stays empty. Invitation validity and NOT are not on this sheet.
     /// </summary>
+    public const string ApprovalThirdLastHeader =
+        "İnşaat Bakanlığına (Başvuru tarihi ve numarası)";
+    public const string ApprovalSecondLastHeader =
+        "İnşaat Bakanlığından çıkış tarihi (Bakanlıktan çıktığı tarih ve numarası)";
+    public const string ApprovalLastHeader =
+        "İlgili Bakanlıktan çıkış tarihi ve numarası";
+
     public static readonly string[] ProcessCompanyHeaders =
     [
         "S.No",
@@ -82,7 +89,27 @@ public static class ReportDashboardInvitationTableExcel
         "Davetiye için yazı No",
         "İlgili Bakanlığın Başvuru tarihi",
         "Başvurulan vize süresi",
-        "İlgili Bakanlıktan çıkan tarih ve numarası",
+        ApprovalLastHeader,
+        "Yabancı Şubeye veriliş tarihi",
+        "Yabancı Şube CO No ve tarihi",
+        "Şu anki Durumu",
+        "Açıklama",
+    ];
+
+    /// <summary>işlemde olanlar uzun dönem — last three approval decisions (Excel order).</summary>
+    public static readonly string[] ProcessCompanyLongHeaders =
+    [
+        "S.No",
+        "Adı Soyadı",
+        "Görevi",
+        "Projesi",
+        "Firması",
+        "Davetiye için yazı No",
+        "İlgili Bakanlığın Başvuru tarihi",
+        "Başvurulan vize süresi",
+        ApprovalThirdLastHeader,
+        ApprovalSecondLastHeader,
+        ApprovalLastHeader,
         "Yabancı Şubeye veriliş tarihi",
         "Yabancı Şube CO No ve tarihi",
         "Şu anki Durumu",
@@ -102,6 +129,31 @@ public static class ReportDashboardInvitationTableExcel
             OfficerDay(row.ColumnD),
             row.ColumnH,
             CompanyLines(row.LastApproval, stripNumberMark: false),
+            OfficerDay(row.ColumnG),
+            CompanyLines(row.ColumnI, stripNumberMark: true),
+            CurrentStatus(row.ColumnE),
+            string.Empty,
+        ];
+    }
+
+    public static List<string> ProcessLongCells(ReportDashboardPreviewRow row, int rowNumber)
+    {
+        var third = row.MinistryCells.Count > 0 ? row.MinistryCells[0] : string.Empty;
+        var second = row.MinistryCells.Count > 1 ? row.MinistryCells[1] : string.Empty;
+        var last = row.MinistryCells.Count > 2 ? row.MinistryCells[2] : row.LastApproval;
+        return
+        [
+            rowNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            row.Name,
+            row.ColumnA,
+            row.Department,
+            row.ColumnB,
+            row.ColumnC,
+            OfficerDay(row.ColumnD),
+            row.ColumnH,
+            CompanyLines(third, stripNumberMark: false),
+            CompanyLines(second, stripNumberMark: false),
+            CompanyLines(last, stripNumberMark: false),
             OfficerDay(row.ColumnG),
             CompanyLines(row.ColumnI, stripNumberMark: true),
             CurrentStatus(row.ColumnE),

@@ -10,6 +10,7 @@ After login, officers land on this dashboard to grasp process state (invitation,
 
 - **Charts** (list / pie / bar) of status buckets
 - **Open in Excel** — invitation tabs use a company workbook (`ReportDashboardExcelTemplate`); other categories use a mapped `UserReportTemplate` when one is configured
+
 - **Open ListView** — filtered XAF ListView matching the current selection (and chart segment when clicked)
 
 ## Information architecture
@@ -17,7 +18,7 @@ After login, officers land on this dashboard to grasp process state (invitation,
 | Layer | Values |
 |-------|--------|
 | Project filter | **Deprecated (hidden):** `All` + `ProjectContract` chips. Locked to `All` while `ReportDashboardCatalog.ShowProjectAndPersonTypeFilters` is `false`. |
-| Person type | **Deprecated (hidden):** All / Employees / Family Members / Temporary Visitors. Locked to `All` while the same flag is `false`. |
+| Person type | **Deprecated (hidden):** All / Employees / Family Members / Temporary Visitors. Locked to `All` while the same flag is `false`. For **Invitation**, **Work Permit**, **Registration**, and **Visa Extension**, `All` is treated as **Employees** only; Family / Temporary Visitor tabs suppress those categories’ sub-reports until dedicated reports exist. |
 | Overview period pickers | **Removed** from Overview (Education / Passport / Position / Address / Medical · Last). Defaults remain for queries; per-category **Last** pickers on Education/Passport/etc. detail views are unchanged. |
 | Refresh | Top-right **Refresh** on the dashboard card — always visible for **Overview and every category**; reloads snapshot / panels from the database. |
 | Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records / Incomplete persons / Person search |
@@ -80,11 +81,13 @@ The only category that takes free text. It answers "find this person, then show 
 
 Invitation **Open in Excel** fills a company workbook. An administrator downloads that workbook, changes its look, and uploads it. Every officer then exports into that file. This store is only for the Report Dashboard. It is not `UserReportTemplate` and it is not the Application Profile Resminamalar package.
 
+
 ### Who may change it
 
 | Action | Who |
 |--------|-----|
 | **Open in Excel** | Any officer who can open the tab. The button is disabled when the loaded preview has no rows. |
+
 | **Download template** / **Upload template** | An administrator only (`ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator`). The buttons are hidden for other users. |
 
 There is one stored file per tab. It is not per officer.
@@ -109,7 +112,7 @@ Active Invitation and Expired Invitation columns, in order: Record number (the r
 
 The officer tab for `used` is **Used Invitations**. It keeps the previous columns: Full name, Project, Position, Firm, App #, Approval 1, Approval 2, Approval 3, Migration, Invitation #, Valid Until, Visa Period, then Visa #, Issued date, Place, Start date, and End date. One invitation line has one visa. A visa cancelled later stays on the report. Cancelled Invitation keeps its previous columns.
 
-The officer tabs are **işlemde olanlar kısa dönem** (`in-process`) and **işlemde olanlar uzun dönem** (`in-process-long`). Both use the Invitation Process columns and the same company workbook. Kısa lists visa periods of 1–30 days and exactly one month. Uzun lists every other in-process row, including more than one month, one year, a period with no length, and a blank visa period. The hidden (V) key stays the full in-process list.
+The officer tabs are **işlemde olanlar kısa dönem** (`in-process`) and **işlemde olanlar uzun dönem** (`in-process-long`). Kısa keeps one ministry-decision column. Uzun shows the last three approval decisions (third-from-end, second-from-end, last) under the company Turkish headers İnşaat Bakanlığına / İnşaat Bakanlığından çıkış / İlgili Bakanlıktan çıkış — Preview, ListView, and Excel. Kısa lists visa periods of 1–30 days and exactly one month. Uzun lists every other in-process row, including more than one month, one year, a period with no length, and a blank visa period. The hidden (V) key stays the full in-process list.
 
 Invitation Process uses the Active Invitation columns, then two of its own. **Submitted to migration** is the date the file was handed to the migration service (`SUBMITTED_MIGRATION`, or the first `PROCESS_STARTED` when that handover step was not recorded). The cell stays empty until then. **Process state** is where the file is held: the office, the ministry of a review that has started, or the migration service. It is the location name, not the process step. Invitation validity stays in the column list and is empty because no invitation is issued yet. Open ListView omits Record number.
 
@@ -142,7 +145,11 @@ On export, rows below the sample are deleted, the sample row is copied for each 
 
 **Open selected in Excel**, next to Refresh, builds one workbook. The officer checks the Invitation, Work Permit, and Visa reports to include. Each checked report is its own sheet, filled from that report’s template. Person type and project apply to every sheet. The table search box does not. A checked report with no rows still gets its header. The tab’s own **Open in Excel** button is unchanged.
 
+The overview **Reports in this file** dialog is a flat list. Officers drag rows to set workbook sheet order. That order is shared for all officers and saved on every drop (`ReportDashboardExcelBundleSettings`). Unchecked reports stay in the saved order but are skipped when creating the file. New catalog reports append at the end.
+
+
 **Open in Excel** writes the rows the table is showing. Invitation and Work Permit workbooks use Times New Roman. The header row is gray and every table cell has a thin black border. Each title, header, and data row grows to fit the wrapped text. On Active Invitation, Expired Invitation, Cancelled Invitation, Invitation Process, and Used Invitations that is the search-box result: an empty box exports the loaded preview, and a typed search exports only the matching rows (the same `n / total` count on screen). The list is still capped by `PreviewLimit` (10_000). **Download template** stays the blank format file. A chart click does not filter this download.
+
 
 Cell text:
 
@@ -153,9 +160,11 @@ Cell text:
 
 The Work Permit tab `active-by-project` is **A. Maglumat**. It uses the same company workbook as the Invitation tabs (`ReportDashboardExcelTemplate`, key `active-by-project` on category Work Permit). An administrator downloads the starter, changes formatting, and uploads it. Officers only export. **Open in Excel** keeps that formatting and writes `ReportDashboardWorkPermitMaglumatExcel.Cells` by column index. The first `dd.MM.yyyy` in the title row above the header becomes the day the file is created. The search box limits this file the same way it limits the table. Until an 11-column workbook is uploaded, export builds the starter.
 
+
 One row is one person. Every valid work permit stays in the work-permit cell: not cancelled, and the expiration date is today or later. Newest start date is first. Each number opens that permit's scanned copies. The chart is by project and starts collapsed. Project is not a table column.
 
 Columns: № (screen order of the rows on display), F.A.A, birth date and citizenship code, passport number and expiry (text), education level and institution, specialty (**Bilimine görä hünäri**, `NameTm` or `Name`, from that same latest education), **Wezipesi** (Position (visa reports), `NameTm` or `Name`, from the latest position history), current Turkmenistan address, work-permit number with start and end (the number opens that permit's scanned copies), current valid visa number with start and end (the number opens visa copies), Bellik (empty). Passport text does not open copies. Open in Excel and Download template set the company column widths (№ 15.7, F.A.A 29.1, birth 16.1, passport 15.7, education 15.7, specialty 10.3, position 10.8, address 15.6, permit 15.7, visa 15.7, Bellik 15.7). A saved workbook does not keep a different width. A. Maglumat 2 and Goşmaça barjak ýerleri keep those widths and use 15.6 for each location column.
+
 
 **A. Maglumat 2** (`a-maglumat-2`) is the same report. It adds **Rugsat berlen ýerler** immediately after the work-permit dates. A person with several valid permits gets one location block per permit, in that same order, with a blank line between blocks. The text is `WorkPermitItem.WorkPermittedLocations`. Its list is `VwRdWorkPermitActiveLocations_ListView` on `vw_rd_work_permit_active_locations`. Its company workbook is separate (`a-maglumat-2`, 12 columns, sheet `A.Maglumat 2`) and uses the same title, with the first `dd.MM.yyyy` replaced by the export day.
 
@@ -173,7 +182,7 @@ Work Permit **kota oranımız** (`kota-oranimiz`) is one summary sheet matched t
 
 The Visa report shows **uzatımlar** and **aktiv personeller**. Active Visa, Extension Required, Visa On Extension, Visa Validity, and Extension Result are not on the tab list.
 
-**uzatımlar** is a Visa tab (`uzatilanlar`). It lists the same people as Visa On Extension. The columns match Invitation Process, with **Mevcut Vize bitiş tarihi** after Firması. That date is the visa on the extension, and it stays blank when there is no visa. Projesi is the department. Firması is the subcontractor. Görevi is the visa-report position. Şu anki Durumu names the ministry when the file is there (Enerji Bakanlığında), writes Yabancıların şubesinde at the migration service, and OFISDE at the office. Açıklama stays empty. Dates are Excel dates `dd.MM.yyyy`. The header is row 1. The chart stays collapsed and groups by the contract project. The list is `VwRdVisaUzatilanlar_ListView` on `vw_rd_visa_uzatilanlar`. Invitation, Work Permit, and Visa company Excel sheets center every header and data cell.
+**uzatımlar** is a Visa tab (`uzatilanlar`). It lists the same people as Visa On Extension. The columns match Invitation Process uzun dönem (last three approval decisions), with **Mevcut Vize bitiş tarihi** after Firması. That date is the visa on the extension, and it stays blank when there is no visa. Projesi is the department. Firması is the subcontractor. Görevi is the visa-report position. Şu anki Durumu names the ministry when the file is there (Enerji Bakanlığında), writes Yabancıların şubesinde at the migration service, and OFISDE at the office. Açıklama stays empty. Dates are Excel dates `dd.MM.yyyy`. The header is row 1. The chart stays collapsed and groups by the contract project. The list is `VwRdVisaUzatilanlar_ListView` on `vw_rd_visa_uzatilanlar`. Invitation, Work Permit, and Visa company Excel sheets center every header and data cell.
 
 **aktiv personeller** is a Visa tab (`aktiv-personeller`). One row per person on Active Visa, using that person's latest current visa. Columns match çalışma izni listesi plus **Vize Süresi** after Mesleki Görevleri (`N-ay` from visa start→end, `ROUND(days/30)`; blank if either date is missing). PROJECT is the department. Firması is the subcontractor. Mesleki Görevleri is the visa-report position. Çalışma İzni bittiği tarih stays blank when the person has no current work permit. Dates are Excel dates `dd.MM.yyyy`. Vize bitmesine kalan süre is a plain day count. NOT stays empty. The chart stays collapsed and groups by the contract project. The list is `VwRdVisaAktivPersoneller_ListView` on `vw_rd_visa_aktiv_personeller`.
 

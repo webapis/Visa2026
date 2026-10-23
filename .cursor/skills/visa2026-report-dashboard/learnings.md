@@ -4,6 +4,40 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-23 — Excel bundle drag order (shared)
+
+**Ask:** Officers reorder reports in "Reports in this file" by drag. Flat list, sheet order = list order. Shared for everyone. Persist on every drag. Unchecked stay in order. New catalog reports append at end.
+
+**Now:** `ReportDashboardExcelBundleSettings` singleton stores `OrderJson`. Dialog is a flat draggable list. Drop saves via non-secured ObjectSpace. `ResolveOrderedReports` merges saved order with catalog (append new keys).
+
+**Prevent:** Do not keep category-grouped list order as sheet order. Do not store per-user order. Heal table via `ReportDashboardExcelBundleSettingsSchemaSql.ApplyIfMissing`.
+
+**Files:** `ReportDashboardExcelBundleSettings.cs`, `ReportDashboardExcelBundleOrder.cs`, `ReportDashboardComponent.razor`
+
+---
+
+## 2026-10-23 — Trailing three approval columns (uzun dönem + uzatımlar)
+
+**Ask:** işlemde olanlar uzun dönem and uzatımlar should show the last three approval decisions like the company Excel, not one LastApproval. Kısa dönem stays one column. Preview and ListView match Excel Turkish headers.
+
+**Now:** Columns by position from the end of filled decisions: İnşaat Bakanlığına (3rd), İnşaat Bakanlığından çıkış (2nd), İlgili Bakanlıktan çıkış (last). Each cell is decision date + letter/result number. Fewer than three leave blanks; more than three keep only the last three. `vw_rd_invitation_in_process` exposes Approval1–5; `vw_rd_visa_uzatilanlar` exposes Last/SecondLast/ThirdLast. Excel template key `in-process-long` is separate from `in-process`.
+
+**Prevent:** Do not change kısa dönem to three columns. Do not map by ministry name (İnşaat/İlgili labels are company headers only). Heal when `SecondLastApprovalDate` / `Approval5Date` is missing.
+
+**Files:** `vw_rd_invitation_in_process.postgres.sql`, `vw_rd_visa_uzatilanlar.postgres.sql`, `ReportDashboardInvitationTableExcel.cs`, `ReportDashboardVisaUzatilanlarExcel.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardComponent.razor`
+
+---
+
+## 2026-10-23 — Employees only for Invitation / WP / Registration / Visa
+
+**Ask:** Invitation, Work Permit, Registration (Hasaba Alyş), and Visa Extension sub-reports should show Employees only. Family and Temporary Visitors excluded until their own reports exist. All tab = Employees.
+
+**Now:** `RestrictsToEmployeesOnly` / `ResolveEffectivePersonType` map All → Employees. Family / Temporary suppress sub-report lists and return empty panels. Open ListView criteria matches. Visa scope is Visa Extension only (not other categories).
+
+**Prevent:** Do not include Family or Temporary Visitor rows on these four categories. Do not leave All unfiltered (that pulled all roles).
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardMockQueryService.cs`, `ReportDashboardHybridQueryService.cs`
+
 ## 2026-10-22 — aktiv personeller Vize Süresi
 
 **Ask:** aktiv personeller missing Vize Süresi. Calculate from visa start→end, round to whole months, show as `6-ay`.

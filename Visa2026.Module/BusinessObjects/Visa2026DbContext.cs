@@ -220,6 +220,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<MinistryReviewSlaSettings> MinistryReviewSlaSettings { get; set; }
         public DbSet<WorkPermitQuotaSettings> WorkPermitQuotaSettings { get; set; }
+        public DbSet<ReportDashboardExcelBundleSettings> ReportDashboardExcelBundleSettings { get; set; }
         public DbSet<ExpirationAlertRule> ExpirationAlertRules { get; set; }
         public DbSet<CompanyProfile> CompanyProfiles { get; set; }
         public DbSet<ApplicationNumberingProfile> ApplicationNumberingProfiles { get; set; }

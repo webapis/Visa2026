@@ -1598,18 +1598,59 @@ button.rd-overview-card {
   gap: 6px;
 }
 
-.rd-bundle-group {
-  margin-top: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--rd-muted-2);
-}
-
 .rd-bundle-row {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+}
+
+.rd-bundle-row:active {
+  cursor: grabbing;
+}
+
+.rd-bundle-row--dragging {
+  opacity: 0.45;
+}
+
+.rd-bundle-row--drag-over {
+  border-color: var(--rd-accent-edge);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.rd-bundle-handle {
+  flex: 0 0 auto;
+  width: 16px;
+  color: var(--rd-muted-2);
+  letter-spacing: -1px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.rd-bundle-check {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.rd-bundle-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rd-bundle-category {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--rd-muted-2);
 }
 
 .rd-bundle-actions {

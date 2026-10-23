@@ -57,6 +57,12 @@ SELECT
     ministries."Approval3Date"                                              AS "Approval3Date",
     ministries."Approval3Number"                                            AS "Approval3Number",
     ministries."Approval3Ministry"                                          AS "Approval3Ministry",
+    ministries."Approval4Date"                                              AS "Approval4Date",
+    ministries."Approval4Number"                                            AS "Approval4Number",
+    ministries."Approval4Ministry"                                          AS "Approval4Ministry",
+    ministries."Approval5Date"                                              AS "Approval5Date",
+    ministries."Approval5Number"                                            AS "Approval5Number",
+    ministries."Approval5Ministry"                                          AS "Approval5Ministry",
     COALESCE(mig_issued."Date", mig_started."Date")                         AS "MigrationDate",
     COALESCE(
         mig_issued."ProcessNumber",
@@ -202,7 +208,13 @@ LEFT JOIN LATERAL (
         MAX(legs.name) FILTER (WHERE legs.seq = 2) AS "Approval2Ministry",
         MAX(dec.d) FILTER (WHERE legs.seq = 3) AS "Approval3Date",
         MAX(dec.n) FILTER (WHERE legs.seq = 3) AS "Approval3Number",
-        MAX(legs.name) FILTER (WHERE legs.seq = 3) AS "Approval3Ministry"
+        MAX(legs.name) FILTER (WHERE legs.seq = 3) AS "Approval3Ministry",
+        MAX(dec.d) FILTER (WHERE legs.seq = 4) AS "Approval4Date",
+        MAX(dec.n) FILTER (WHERE legs.seq = 4) AS "Approval4Number",
+        MAX(legs.name) FILTER (WHERE legs.seq = 4) AS "Approval4Ministry",
+        MAX(dec.d) FILTER (WHERE legs.seq = 5) AS "Approval5Date",
+        MAX(dec.n) FILTER (WHERE legs.seq = 5) AS "Approval5Number",
+        MAX(legs.name) FILTER (WHERE legs.seq = 5) AS "Approval5Ministry"
     FROM (
         SELECT snap."Sequence" AS seq, BTRIM(snap."MinistryShortName") AS name
         FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap

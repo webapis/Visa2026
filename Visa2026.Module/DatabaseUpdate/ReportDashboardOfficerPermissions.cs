@@ -77,6 +77,7 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdWorkPermitKotaOranimiz>(role);
         EnsureViewReadPermission<VwRdWorkPermitPersonelSayi>(role);
         EnsureViewReadPermission<WorkPermitQuotaSettings>(role);
+        EnsureViewReadPermission<ReportDashboardExcelBundleSettings>(role);
         EnsureViewReadPermission<VwRdWorkPermitAppProgress>(role);
 
         EnsureViewReadPermission<VwRdPassport>(role);

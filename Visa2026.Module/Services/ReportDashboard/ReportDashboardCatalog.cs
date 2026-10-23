@@ -586,6 +586,42 @@ public static class ReportDashboardCatalog
     public static bool IsAllPersonTypes(ReportDashboardPersonType personType) =>
         personType == ReportDashboardPersonType.All;
 
+    /// <summary>
+    /// Invitation, Work Permit, Registration, and Visa Extension officer reports are Employees only
+    /// until Family / Temporary Visitor sub-reports are added.
+    /// </summary>
+    public static bool RestrictsToEmployeesOnly(ReportDashboardCategory category) =>
+        category is ReportDashboardCategory.Invitation
+            or ReportDashboardCategory.WorkPermit
+            or ReportDashboardCategory.Registration
+            or ReportDashboardCategory.VisaExtension;
+
+    /// <summary>
+    /// Family / Temporary Visitor tabs hide these categories' sub-reports for now.
+    /// </summary>
+    public static bool SuppressesSubReportsForPersonType(
+        ReportDashboardCategory category,
+        ReportDashboardPersonType personType) =>
+        RestrictsToEmployeesOnly(category)
+        && personType is ReportDashboardPersonType.FamilyMembers
+            or ReportDashboardPersonType.TemporaryVisitors;
+
+    /// <summary>
+    /// Maps All → Employees for employee-only categories. Family / Temporary stay as-is
+    /// (callers empty or suppress). Other categories unchanged.
+    /// </summary>
+    public static ReportDashboardPersonType ResolveEffectivePersonType(
+        ReportDashboardCategory category,
+        ReportDashboardPersonType personType)
+    {
+        if (!RestrictsToEmployeesOnly(category))
+            return personType;
+        if (personType is ReportDashboardPersonType.FamilyMembers
+            or ReportDashboardPersonType.TemporaryVisitors)
+            return personType;
+        return ReportDashboardPersonType.Employees;
+    }
+
     /// <summary>Single-role tabs only. Throws for <see cref="ReportDashboardPersonType.All"/>.</summary>
     public static PersonRecordRole ToPersonRole(ReportDashboardPersonType personType) => personType switch
     {
@@ -830,6 +866,29 @@ public static class ReportDashboardCatalog
             "Application date",
             "Visa Period",
             "Ministry approval",
+            "Submitted to migration",
+            "Migration",
+            "Invitation validity",
+            "Process state",
+        ];
+    }
+
+    /// <summary>işlemde olanlar uzun dönem Preview / ListView — Turkish company approval headers.</summary>
+    private static string[] InvitationProcessLongHeaders()
+    {
+        return
+        [
+            "Record number",
+            "Full name",
+            "Position",
+            "Project",
+            "Firm",
+            "Application number",
+            "Application date",
+            "Visa Period",
+            ReportDashboardInvitationTableExcel.ApprovalThirdLastHeader,
+            ReportDashboardInvitationTableExcel.ApprovalSecondLastHeader,
+            ReportDashboardInvitationTableExcel.ApprovalLastHeader,
             "Submitted to migration",
             "Migration",
             "Invitation validity",
@@ -1152,7 +1211,7 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Invitation, "cancelled-invitation") =>
                 ["Full name", "Project", "Invitation #", "Issued date", "Valid Until", "Visa Period", "App #", "Date", "Migration"],
             (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
-            (ReportDashboardCategory.Invitation, InvitationInProcessLongKey) => InvitationProcessHeaders(),
+            (ReportDashboardCategory.Invitation, InvitationInProcessLongKey) => InvitationProcessLongHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "process-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
@@ -1218,6 +1277,11 @@ public static class ReportDashboardCatalog
         bool oneLastValidVisaPerPerson = false,
         string? searchTerm = null)
     {
+        if (SuppressesSubReportsForPersonType(category, personType))
+            return "False";
+
+        personType = ResolveEffectivePersonType(category, personType);
+
         var usesVisaUzatilanlar = category == ReportDashboardCategory.VisaExtension
             && string.Equals(subReport, VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
         var usesVisaAktiv = category == ReportDashboardCategory.VisaExtension
