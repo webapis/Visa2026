@@ -5420,3 +5420,26 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Fix**: Guard + TargetMatcher load/match via Npgsql; wire `siteGuard.TryResolveFromPayload` before create (main + PIA). Soft-deleted 476 AOR + 3 Lodging + 1 Hotel + 1 OtherSite extras (`GCRecord=1`) on local and `.26`. Lookup sync adds `RemoveDuplicateSiteNullCityOrphans`.
 - **Prevent**: Do not re-import AddressOfResidence without target connection string (guard needs it). Prefer `--inprocess --target-connection` against Postgres.
 
+### 2026-10-23 — Prod catch-up insert-only (visa2026_prod on .26 via tunnel :15432)
+
+- **Profile**: `calik-energi-onprem-prod`; source **only** `10.100.128.15` / `VISA2015`; target `visa2026_prod` (`127.0.0.1:15432` SSH tunnel to Docker on `10.100.128.26`); `--inprocess`.
+- **Scope**: scalars + document files; **no** Application/ApplicationItem/roster/progress/`--correct-*`/Rejection/BorderZone/MedicalRecord; document id-maps kept; Application maps absent.
+- **Rebuild**: `--rebuild-visa2014-id-maps` exit 0; document map hashes unchanged (`REBUILD_DOCS_UNCHANGED`).
+- **Scalars (posted / already / notes)**:
+  - Person 1 / 3475; Passport 1 / 3843; Education 1 / 3347 (after lookup fix); EmployeePositionHistory 1 / 3232; AddressOfResidence 1 / 4298 (+ PIA inferred 1); EmployeeSalary 1 / 3118; Visa 2 / 6537 (25 no Passport map); WorkPermit 0 / 414; WorkPermitItem 0 / 3969 (2567 missing required id-map — expected without Application maps); Invitation 1 / 3053; InvitationItem 2 / 5520 (28 missing id-map).
+- **Education lookup gap**: legacy titles `Baoji Hünär tehnologiÿa yörite orta hünçrmen mekdebi` + `Mehaniki işleÝiş tehnologiÿasy` missing on prod; inserted via UTF-8 base64 to psql + catalog JSON; Education resume posted 1.
+- **Files**: Photo patched 1 (71 no blob); then PassportDocument / VisaDocument / EducationDocument / WorkPermitDocument / InvitationDocument / FamilyProofDocument all exit 0 after Debug **Module 1.0.0.890** + RichEdit restore.
+  - PassportDocument: posted 1 (37 oversize, 11 no map, 1 no blob); VisaDocument: posted 2 (154 oversize); EducationDocument: posted 1 (40 oversize); WorkPermitDocument: posted 0; InvitationDocument: posted 1 (207 no parent map); FamilyProofDocument: posted 0 (1 oversize, 449 duplicate).
+- **Assembly failures (avoid)**:
+  1. Missing `DevExpress.Blazor.RichEdit.v25.2` in DataImporter Debug causes host `ReflectionTypeLoadException`.
+  2. Release Module against prod causes `42703 column p.ApprovalLegProfileId does not exist` (Release schema ahead of prod).
+  3. Full Blazor rebuild with custom IntermediateOutputPath hung after restore. Working path: `dotnet build DataImporter -c Debug -p:BuildProjectReferences=false`, then copy `Visa2026.Module` / `Blazor.Server` / RichEdit / BaseImpl / Office deps from `Blazor.Server\bin\Debug\net8.0` (890) into DataImporter Debug; run file waves against **Debug** DLL only.
+- **Outcome**: `CATCHUP_OK` 2026-10-23 12:04:04. Log: `%TEMP%\visa2026-prod-catchup-20261023.log`.
+
+### 2026-10-23 — Prod catch-up excludes Visa / WorkPermit / Invitation (manual entry)
+
+- **Decision**: From this date, `visa2026_prod` insert-only catch-up must **not** import Visa, WorkPermit, Invitation (headers, items, or VisaDocument / WorkPermitDocument / InvitationDocument). Officers enter those on production by hand.
+- **Still in catch-up**: person-domain scalars (Person, Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary) and files Photo, PassportDocument, EducationDocument, FamilyProofDocument.
+- **Also still out**: ApplicationProfileInstance / roster / progress (except unimplemented check-in and additional-WP filters), Rejection, BorderZone, MedicalRecord, `--correct-*`, application id-map.
+- **Recorded**: production catch-up prompt in `user-prompts.md`, `import-strategy.yaml` `calikProductionScope` (`issuedDocumentsManualLockedAt`, `fileCatchUp.issuedDocumentsExcludedAt`), `IMPORT_PLAN_AND_STRATEGY.md`.
+- **Note**: Rows already imported earlier stay on prod; id-map rebuild may still map them for later filters. Do not run `--visa-remainder` / `--work-permit-remainder` / `--invitation-remainder` on catch-up.

@@ -337,6 +337,7 @@ onPremDeployment:
   # profile instances onto visa2026_prod. Full history waits for a later archive DB.
   calikProductionScope:
     lockedAt: 2026-10-09
+    issuedDocumentsManualLockedAt: 2026-10-23
     approvedBy: developer (chat)
     host: 10.100.128.26
     composeProject: visa2026-prod
@@ -344,8 +345,10 @@ onPremDeployment:
     include:
       - seeded lookup catalogs and ApplicationProfiles
       - person-domain (Person, Passport, Education, and other person children)
-      - Visa, WorkPermit, Invitation (headers, items, and their documents)
     exclude:
+      - Visa, VisaDocument (officers enter manually from 2026-10-23)
+      - WorkPermit, WorkPermitItem, WorkPermitDocument (officers enter manually from 2026-10-23)
+      - Invitation, InvitationItem, InvitationDocument (officers enter manually from 2026-10-23)
       - ApplicationProfileInstance except checkInInstances and additionalWorkPermitLocationInstances below
       - ApplicationProfileInstanceProgress
       - Rejection
@@ -391,33 +394,37 @@ onPremDeployment:
       importerStatus: not_implemented
       why: >
         Officers need every additional work-location case whose work permit is
-        still in force. The work permit itself is already imported and is not
-        replaced. Progress and other application types stay out.
+        still in force. The work permit is entered by officers (or already on
+        prod) and is not imported or replaced by catch-up. Progress and other
+        application types stay out.
     issuedDocumentsWithoutInstance: true
+    issuedDocumentsManualEntry: true
     why: >
       Full application history is too slow for the working production database.
-      Officers start new cases by hand. The exceptions are the latest
+      Officers start new cases by hand. From 2026-10-23, officers also enter
+      Visa, WorkPermit, and Invitation (and their items/scans) by hand; catch-up
+      must not import those entities. The exceptions are the latest
       arrival-from-abroad check-in whose visa is still in force
       (checkInInstances) and every additional work-location case whose
       work-permit item is still in force
       (additionalWorkPermitLocationInstances). Historical cases go to a
-      separate archive database later. Visa, work permit, and invitation rows
-      stay, with the issuing-instance foreign key left null.
+      separate archive database later. Rows already on visa2026_prod stay;
+      new issued-document rows come from officers, not Import.
     catchUp: >
-      Insert new legacy rows only. A legacy id already in the production
-      id-map is skipped and the Visa2026 row is left unchanged, including
-      edits later made on 10.100.128.15. Use id-maps/calik-energi-onprem-prod
-      rebuilt from visa2026_prod (--rebuild-visa2014-id-maps). Do not use the
-      staging id-map. Do not run application-type slices, --correct-*, or
-      pass an application id-map on Visa or WorkPermit (those paths rewrite
-      rows already imported).       Do not import check-in or additional work-location instances until
-      checkInInstances.importerStatus and
+      Insert new legacy person-domain rows only. A legacy id already in the
+      production id-map is skipped and the Visa2026 row is left unchanged,
+      including edits later made on 10.100.128.15. Use
+      id-maps/calik-energi-onprem-prod rebuilt from visa2026_prod
+      (--rebuild-visa2014-id-maps). Do not use the staging id-map. Do not run
+      application-type slices, --correct-*, or pass an application id-map.
+      Do not import Visa, WorkPermit, Invitation (headers, items, documents),
+      and do not run --visa-remainder, --work-permit-remainder, or
+      --invitation-remainder. Do not import check-in or additional work-location
+      instances until checkInInstances.importerStatus and
       additionalWorkPermitLocationInstances.importerStatus are implemented; a
-      full application-type slice is still forbidden. Photo and scan bytes are a separate fill-missing
-      pass (fileCatchUp), not part of the scalar catch-up. New Visa, WorkPermit, and
-      Invitation headers use --visa-remainder, --work-permit-remainder, and
-      --invitation-remainder so the instance link stays null. Remainder mode
-      does not patch rows already imported.
+      full application-type slice is still forbidden. Photo and person/passport/
+      education/family-proof scan bytes are a separate fill-missing pass
+      (fileCatchUp), not part of the scalar catch-up.
     insertOnly: true
     insertOnlyLockedAt: 2026-10-09
     duplicatePolicy:
@@ -428,18 +435,15 @@ onPremDeployment:
       never: [insert_second_row, update_existing_row]
       beforeCatchUp: rebuild production id-maps from visa2026_prod so every row already there is mapped
       notes: >
-        Same rule for the later archive database. Person, Passport, Visa,
-        Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence,
-        WorkPermit, WorkPermitItem, Invitation, and InvitationItem link an
-        existing natural key into the id-map and skip. The existing row is
-        not updated. Officers may type Visa, WorkPermit, WorkPermitItem,
-        Invitation, and InvitationItem on visa2026_prod while catch-up reads
-        VISA2015. When exactly one live row has that document number, link it
-        and skip even if the issued date differs. Do not insert a second row.
-        When that parent already stores a scan, do not insert VisaDocument,
-        WorkPermitDocument, or InvitationDocument.
+        Same rule for the later archive database. Person, Passport, Education,
+        EmployeePositionHistory, EmployeeSalary, and AddressOfResidence link an
+        existing natural key into the id-map and skip. The existing row is not
+        updated. Catch-up does not import Visa, WorkPermit, or Invitation
+        (officers enter those). Rebuild may still map issued-document rows
+        already on visa2026_prod for later check-in / additional-WP filters.
     fileCatchUp:
       lockedAt: 2026-10-09
+      issuedDocumentsExcludedAt: 2026-10-23
       fillMissingOnly: true
       doNotReplaceExistingBytes: true
       command: --import-visa2014-files --inprocess
@@ -448,22 +452,16 @@ onPremDeployment:
           property: Photo
         - entity: Passport
           property: PassportDocument
-        - entity: Visa
-          property: VisaDocument
         - entity: Education
           property: EducationDocument
-        - entity: WorkPermit
-          property: WorkPermitDocument
-        - entity: Invitation
-          property: InvitationDocument
         - entity: Person
           property: FamilyProofDocument
-      excluded: [MedicalRecord, Rejection, BorderZone]
+      excluded: [VisaDocument, WorkPermitDocument, InvitationDocument, MedicalRecord, Rejection, BorderZone]
       notes: >
         Fill a photo only when the person row has no photo bytes. Fill a
         document only when the parent does not already store the same bytes.
-        Visa, WorkPermit, and Invitation scans are also skipped when that
-        parent already stores any scan. The July document id-maps are not
+        Do not import VisaDocument, WorkPermitDocument, or InvitationDocument
+        (officers enter issued documents). The July document id-maps are not
         for visa2026_prod; those target ids are absent there. Do not replace
         bytes already on visa2026_prod.
     instanceCleanup: scripts/visa2014-migration/cleanup/ImportedApplications.postgres.sql

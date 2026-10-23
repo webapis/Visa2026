@@ -95,15 +95,15 @@ Before importing, rebuild id-maps/calik-energi-onprem-prod from live visa2026_pr
 
 Insert only. A legacy id already in the id-map is skipped and the Visa2026 row is not updated. If the natural key is already on production and the legacy id is missing from the map, link the id and skip. Never insert a second row. Never update an existing row.
 
-Officers may already have typed Visa, WorkPermit, WorkPermitItem, Invitation, or InvitationItem on production. If exactly one live row has that document number, link it and skip, even when the date differs. If that parent already has a scan, do not import VisaDocument, WorkPermitDocument, or InvitationDocument. Do not insert a second copy of a record the officer entered.
+From 2026-10-23 onward: do not import Visa, VisaDocument, WorkPermit, WorkPermitItem, WorkPermitDocument, Invitation, InvitationItem, or InvitationDocument. Officers enter those on production by hand. Do not run --visa-remainder, --work-permit-remainder, or --invitation-remainder. Id-map rebuild may still map rows already on prod; do not POST or file-import those entities.
 
 Do not import ApplicationProfileInstance, roster, or progress on this run. Two approved exceptions are not implemented yet. When they are: import only the latest App_Reg_Check_In per person and visa when that visa is still in force (Valid or Expiring: not cancelled, not changed, expiration empty or still today or later), with the instance, the person, and the current visa link, and do not set the visa issuing instance. Also import every App_Additional_WP_location (Iş Rugsatnama goşmaça barjak ýeri) whose work-permit item is still in force (Active, Expiring soon, or Extension required; skip Expired, Cancelled, and Archived), with the instance, the person, and the current work-permit item link. Do not update the work permit. Do not import progress. Do not import any other application type. Do not run application-type slices or --correct-*. Do not import Rejection, BorderZone, or MedicalRecord.
 
 Scalar order, stop on the first non-zero exit:
-Person, Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary, Visa --visa-remainder, WorkPermit --work-permit-remainder, WorkPermitItem, Invitation --invitation-remainder, InvitationItem.
+Person, Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary.
 
 Then fill missing files only, in this order. Do not replace photo or scan bytes already stored:
-Person Photo, Passport PassportDocument, Visa VisaDocument, Education EducationDocument, WorkPermit WorkPermitDocument, Invitation InvitationDocument, Person FamilyProofDocument.
+Person Photo, Passport PassportDocument, Education EducationDocument, Person FamilyProofDocument.
 
 If Education fails because an institution or specialty NameTm is missing, insert that exact legacy title into visa2026_prod and the Calik catalog JSON, then re-run Education only. Do not invent labels. If an address fails on a missing lodging, hotel, or hospital, add that site from the legacy row and its city, then re-run AddressOfResidence only.
 ```
