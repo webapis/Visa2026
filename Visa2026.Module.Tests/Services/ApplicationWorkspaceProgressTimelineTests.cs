@@ -825,6 +825,7 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(issued.CanCorrectDate);
         Assert.True(issued.CanEditFiles);
         Assert.Equal(new DateTime(2026, 10, 1), issued.EarliestDate);
+        Assert.All(steps, step => Assert.False(step.CanAdvance));
     }
 
     private static ApplicationProfile ThreeLegProfile()

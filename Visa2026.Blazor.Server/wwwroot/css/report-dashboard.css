@@ -1568,6 +1568,11 @@ button.rd-overview-card {
   z-index: 40;
 }
 
+/* Keep Reports-in-this-file usable while #visa-preview-slot is open on the right. */
+#visa-app-shell.visa-app-shell--preview-open .rd-bundle-backdrop {
+  right: var(--visa-preview-slot-width, 50vw);
+}
+
 .rd-bundle-dialog {
   position: fixed;
   z-index: 41;
@@ -1584,6 +1589,11 @@ button.rd-overview-card {
   background: var(--rd-surface);
   color: var(--rd-text);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+#visa-app-shell.visa-app-shell--preview-open .rd-bundle-dialog {
+  right: calc(var(--visa-preview-slot-width, 50vw) + 16px);
+  width: min(420px, calc(100vw - var(--visa-preview-slot-width, 50vw) - 40px));
 }
 
 .rd-bundle-title {
@@ -1651,6 +1661,25 @@ button.rd-overview-card {
   flex: 0 0 auto;
   font-size: 11px;
   color: var(--rd-muted-2);
+}
+
+.rd-bundle-preview {
+  flex: 0 0 auto;
+  margin-left: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--rd-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--rd-text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rd-bundle-preview:hover {
+  border-color: var(--rd-accent-edge);
+  color: var(--rd-accent, #60a5fa);
 }
 
 .rd-bundle-actions {

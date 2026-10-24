@@ -23,6 +23,15 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-10-24 — Report Dashboard Excel bundle Preview in slot
+
+- **Symptom**: Officers needed to preview one subreport Excel (print layout) without Create file.
+- **Fix**: Each **Reports in this file** row has **Preview** (checkbox-independent). Exports like Create file (no search), opens File occupant via `report-dashboard-excel` cache → PDF in slot; Download is `.xlsx`. Dialog stays open; CSS shifts dialog/backdrop left of `#visa-preview-slot`.
+- **Test**: Restart, Open selected in Excel dialog → Preview on a row. Slot shows PDF; Download saves xlsx; dialog remains.
+- **Prevent**: Do not close the bundle dialog on Preview. Do not require the checkbox for Preview.
+- **Cross-skill**: preview-slot | visa2026-report-dashboard
+
+
 ### 2026-10-16 — Work permit number opens every scan as pages (DocumentCopies)
 
 - **Symptom**: A Maglumat work-permit number with more than one scan opened the Resminamalar catalog. Each copy needed its own click.

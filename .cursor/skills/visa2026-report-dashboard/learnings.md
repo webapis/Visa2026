@@ -2605,3 +2605,31 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 - Docs: `REPORT_DASHBOARD.md`, `reference.md`, baseline note
 
 **Files:** `ReportDashboardModelUpdater.cs`, `Updater.cs`, `UiStrings.json`, `Model.DesignedDiffs.Localization.*.xafml`, `docs/REPORT_DASHBOARD.md`, `reference.md`
+
+## 2026-10-24 — Excel print layout (A4 + Page Break Preview)
+
+**Ask:** Open in Excel / Download template for listed subreports should print Landscape (or Portrait for A Maglumat / A Maglumat 2), A4, fit columns to 1 page wide, and open already in Page Break Preview. Force even when an admin uploaded a company workbook. Goşmaça barjak ýerleri is Landscape (not Portrait).
+
+**Now:** `ReportDashboardExcelPrintLayout` stamps orientation, A4, `FitToPages(1,0)`, and `SheetView.View = PageBreakPreview` on Export and Download. Bundle Combine copies PageSetup between sheets.
+
+**Prevent:** Do not leave Maglumat 3 in Portrait. Do not rely on admins setting Page Setup by hand — export always overwrites for these keys.
+
+**Files:** `ReportDashboardExcelPrintLayout.cs`, `ReportDashboardExcelTemplateService.cs`, `ReportDashboardExcelTemplateWorkbook.cs`
+
+## 2026-10-24 — Excel print titles (header on every page)
+
+**Ask:** Header row must print on every page, not only the first.
+
+**Now:** `SetRowsToRepeatAtTop(1, headerRow)` from DashboardHeader (Maglumat title+header = rows 1–2).
+
+**Prevent:** Do not rely on Freeze Panes alone — that only affects the screen, not print.
+
+**Files:** `ReportDashboardExcelPrintLayout.cs`
+
+### 2026-10-24 — Report Dashboard Excel bundle Preview in slot
+
+- **Symptom**: Officers needed to preview one subreport Excel (print layout) without Create file.
+- **Fix**: Each **Reports in this file** row has **Preview** (checkbox-independent). Exports like Create file (no search), opens File occupant via `report-dashboard-excel` cache → PDF in slot; Download is `.xlsx`. Dialog stays open; CSS shifts dialog/backdrop left of `#visa-preview-slot`.
+- **Test**: Restart, Open selected in Excel dialog → Preview on a row. Slot shows PDF; Download saves xlsx; dialog remains.
+- **Prevent**: Do not close the bundle dialog on Preview. Do not require the checkbox for Preview.
+- **Cross-skill**: preview-slot | visa2026-report-dashboard

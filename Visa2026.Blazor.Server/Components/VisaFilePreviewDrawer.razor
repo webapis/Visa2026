@@ -92,6 +92,7 @@
     private string? _blobUrl;
     private byte[]? _downloadContent;
     private string _downloadFileName = string.Empty;
+    private string _downloadContentType = "application/octet-stream";
     private DocumentCopyPreviewKind _previewKind = DocumentCopyPreviewKind.None;
     private DotNetObjectReference<VisaFilePreviewDrawer>? _dotNetRef;
 
@@ -144,6 +145,7 @@
         _fileName = string.Empty;
         _downloadContent = null;
         _downloadFileName = string.Empty;
+        _downloadContentType = "application/octet-stream";
         await RevokeBlobUrlAsync();
         if (!HostManaged)
             await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", true);
@@ -166,8 +168,15 @@
                 return;
             }
 
-            _downloadContent = result.Content;
-            _downloadFileName = result.FileName;
+            _downloadContent = result.DownloadContent is { Length: > 0 }
+                ? result.DownloadContent
+                : result.Content;
+            _downloadFileName = !string.IsNullOrWhiteSpace(result.DownloadFileName)
+                ? result.DownloadFileName
+                : result.FileName;
+            _downloadContentType = !string.IsNullOrWhiteSpace(result.DownloadContentType)
+                ? result.DownloadContentType
+                : result.ContentType;
             _previewKind = kind;
             _blobUrl = kind switch
             {
@@ -224,7 +233,8 @@
         using var stream = new MemoryStream(_downloadContent, writable: false);
         await FileDownloader.DownloadAsync(
             string.IsNullOrWhiteSpace(_downloadFileName) ? "preview.pdf" : _downloadFileName,
-            stream);
+            stream,
+            string.IsNullOrWhiteSpace(_downloadContentType) ? "application/octet-stream" : _downloadContentType);
     }
 
     private async Task RevokeBlobUrlAsync()

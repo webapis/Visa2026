@@ -18,7 +18,15 @@ public interface IFilePreviewSource
 
 public sealed class FilePreviewResult
 {
+    /// <summary>Bytes shown in the slot (often PDF after Office conversion).</summary>
     public required byte[] Content { get; init; }
     public required string FileName { get; init; }
     public required string ContentType { get; init; }
+
+    /// <summary>When set, the Download button uses these bytes instead of <see cref="Content"/> (e.g. .xlsx).</summary>
+    public byte[]? DownloadContent { get; init; }
+
+    public string? DownloadFileName { get; init; }
+
+    public string? DownloadContentType { get; init; }
 }

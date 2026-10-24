@@ -6,6 +6,15 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-24 — Advance progress stays enabled after the last step
+
+- **Symptom**: Case workspace **Advance progress** stayed the primary button after Issued (SLA ring Done / complete). Clicking it only stayed on Progress.
+- **Root cause**: Overview, Progress, and Application result always rendered the button as enabled. A finished case already has no `CanAdvance` step.
+- **Fix**: Those three buttons are disabled when no step can advance. The tooltip uses the blocked reason (terminal state, or no further steps). Revert stays available. Date and file correction on finished steps is unchanged.
+- **Test**: `Issued_step_can_correct_its_date_and_files` asserts every step has `CanAdvance` false. Timeline tests: 20 passed. One existing failure in the same class (`Finished_step_dates_stay_between_neighbors_and_the_open_step_stays_fixed`, `CanEditFiles` on an open `2_REVIEW_STARTED` step) is unchanged by this fix. Blazor compile succeeded; copy into `bin` failed because Visual Studio had the host open.
+- **Prevent**: Do not leave the rail Advance button enabled when `CanAdvance` is false. The in-timeline form already hides itself; the rail must match.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-10-22 — Office preparation pen must edit files too
 
 - **Symptom**: Pen on **Ofisde taýýarlyk** opened the date only. Ministry steps showed Replace / Remove / Add.

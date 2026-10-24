@@ -96,21 +96,24 @@ public static class ReportDashboardExcelTemplateService
         IReadOnlyList<ReportDashboardPreviewRow> rows,
         bool includeChartColumn)
     {
+        byte[] content;
         if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase))
-            return ExportKotaOranimiz(objectSpace, rows);
-
-        if (category == ReportDashboardCategory.WorkPermit
+            content = ExportKotaOranimiz(objectSpace, rows);
+        else if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
-            return ExportPersonelSayi(objectSpace, rows);
-
-        if (category == ReportDashboardCategory.Registration
+            content = ExportPersonelSayi(objectSpace, rows);
+        else if (category == ReportDashboardCategory.Registration
             && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
-            return ExportOturumSayisi(objectSpace, rows);
+            content = ExportOturumSayisi(objectSpace, rows);
+        else
+        {
+            var template = LoadContent(objectSpace, category, subReport);
+            content = ReportDashboardExcelTemplateWorkbook.Export(
+                template, title, headers, category, subReport, rows, includeChartColumn);
+        }
 
-        var template = LoadContent(objectSpace, category, subReport);
-        return ReportDashboardExcelTemplateWorkbook.Export(
-            template, title, headers, category, subReport, rows, includeChartColumn);
+        return ReportDashboardExcelPrintLayout.Apply(content, category, subReport);
     }
 
     private static byte[] ExportPersonelSayi(
@@ -200,7 +203,7 @@ public static class ReportDashboardExcelTemplateService
         if (ReportDashboardExcelTemplateWorkbook.IsInvitationCompanySheet(category, subReport)
             && !string.Equals(subReport, "ready-by-period-category", StringComparison.Ordinal))
         {
-            return FinishDownload(category, template != null
+            return FinishDownload(category, subReport, template != null
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(
                     template, ReportDashboardInvitationTableExcel.CompanyHeaders.Length)
                 ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationCompanyHeaders(template)
@@ -213,7 +216,7 @@ public static class ReportDashboardExcelTemplateService
             var processHeaders = longTerm
                 ? ReportDashboardInvitationTableExcel.ProcessCompanyLongHeaders
                 : ReportDashboardInvitationTableExcel.ProcessCompanyHeaders;
-            return FinishDownload(category, template != null
+            return FinishDownload(category, subReport, template != null
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, processHeaders.Length)
                 ? ReportDashboardExcelTemplateWorkbook.ApplyInvitationProcessCompanyHeaders(template, longTerm)
                 : (longTerm
@@ -228,7 +231,7 @@ public static class ReportDashboardExcelTemplateService
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
                 ? template
                 : ReportDashboardExcelTemplateWorkbook.BuildUzatilanlarStarter();
-            return FinishDownload(category, uzatilanlar, headers);
+            return FinishDownload(category, subReport, uzatilanlar, headers);
         }
 
         if (category == ReportDashboardCategory.VisaExtension
@@ -238,7 +241,7 @@ public static class ReportDashboardExcelTemplateService
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
                 ? template
                 : ReportDashboardExcelTemplateWorkbook.BuildCalismaListesiStarter("aktiv personeller");
-            return FinishDownload(category, aktiv, headers);
+            return FinishDownload(category, subReport, aktiv, headers);
         }
 
         if (category == ReportDashboardCategory.WorkPermit
@@ -248,35 +251,36 @@ public static class ReportDashboardExcelTemplateService
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
                 ? template
                 : ReportDashboardExcelTemplateWorkbook.BuildCalismaListesiStarter();
-            return FinishDownload(category, calisma, headers);
+            return FinishDownload(category, subReport, calisma, headers);
         }
 
         if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitKotaOranimizKey, StringComparison.OrdinalIgnoreCase))
         {
-            return FinishDownload(category, ReportDashboardWorkPermitKotaExcel.BuildStarter(), headers);
+            return FinishDownload(category, subReport, ReportDashboardWorkPermitKotaExcel.BuildStarter(), headers);
         }
 
         if (category == ReportDashboardCategory.WorkPermit
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
         {
-            return FinishDownload(category, ReportDashboardWorkPermitPersonelSayiExcel.BuildStarter(), headers);
+            return FinishDownload(category, subReport, ReportDashboardWorkPermitPersonelSayiExcel.BuildStarter(), headers);
         }
 
         if (category == ReportDashboardCategory.Registration
             && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
         {
-            return FinishDownload(category, ReportDashboardRegistrationOturumSayisiExcel.BuildStarter(), headers);
+            return FinishDownload(category, subReport, ReportDashboardRegistrationOturumSayisiExcel.BuildStarter(), headers);
         }
 
         if (template != null
             && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count))
         {
-            return FinishDownload(category, template, headers);
+            return FinishDownload(category, subReport, template, headers);
         }
 
         return FinishDownload(
             category,
+            subReport,
             ReportDashboardExcelTemplateWorkbook.BuildStarter(
                 title, headers, SheetName(category, subReport),
                 category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit),
@@ -285,6 +289,7 @@ public static class ReportDashboardExcelTemplateService
 
     private static byte[] FinishDownload(
         ReportDashboardCategory category,
+        string? subReport,
         byte[] content,
         IReadOnlyList<string>? headerLabels = null)
     {
@@ -306,13 +311,16 @@ public static class ReportDashboardExcelTemplateService
             content = ReportDashboardExcelTemplateWorkbook.ApplyHeaderLabels(content, headerLabels);
         }
 
-        return category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit
+        if (category is ReportDashboardCategory.Invitation or ReportDashboardCategory.WorkPermit
             || projectSheet
-            || uzatilanlarSheet
-            ? ReportDashboardExcelTemplateWorkbook.WithCompanyFont(
+            || uzatilanlarSheet)
+        {
+            content = ReportDashboardExcelTemplateWorkbook.WithCompanyFont(
                 content,
-                ReportDashboardExcelTemplateWorkbook.MaglumatColumnWidths(headerLabels))
-            : content;
+                ReportDashboardExcelTemplateWorkbook.MaglumatColumnWidths(headerLabels));
+        }
+
+        return ReportDashboardExcelPrintLayout.Apply(content, category, subReport);
     }
 
     /// <summary>Returns a localization key. <see cref="SavedKey"/> means the file was stored.</summary>

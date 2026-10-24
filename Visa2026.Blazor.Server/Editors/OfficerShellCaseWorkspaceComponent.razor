@@ -2427,7 +2427,11 @@
                 </section>
                 <section class="cw-rail-block">
                     <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
-                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    <button type="button"
+                            class="cw-rail-btn cw-rail-btn--primary"
+                            disabled="@(!CanAdvanceFromRail)"
+                            title="@AdvanceBlockedTitle"
+                            @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
                     @if (CanRevertFromRail)
                     {
                         <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
@@ -2487,7 +2491,12 @@
                     }
                 </section>
                 <section class="cw-rail-block">
-                    <button type="button" class="os-btn os-btn--primary" style="width:100%;margin-bottom:8px" @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    <button type="button"
+                            class="os-btn os-btn--primary"
+                            style="width:100%;margin-bottom:8px"
+                            disabled="@(!CanAdvanceFromRail)"
+                            title="@AdvanceBlockedTitle"
+                            @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
                     @if (CanRevertFromRail)
                     {
                         <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
@@ -2506,7 +2515,11 @@
             case "result":
                 <section class="cw-rail-block">
                     <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
-                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    <button type="button"
+                            class="cw-rail-btn cw-rail-btn--primary"
+                            disabled="@(!CanAdvanceFromRail)"
+                            title="@AdvanceBlockedTitle"
+                            @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
                     @if (CanRevertFromRail)
                     {
                         <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
@@ -2725,8 +2738,33 @@
 
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
+    private bool CanAdvanceFromRail =>
+        Snapshot?.CaseView.ProgressSteps.Any(s => s.CanAdvance && s.AdvanceOptions.Count > 0) == true;
+
+    private string? AdvanceBlockedTitle
+    {
+        get
+        {
+            if (CanAdvanceFromRail || Snapshot == null)
+                return null;
+
+            var reason = Snapshot.CaseView.ProgressSteps
+                .Select(s => s.AdvanceBlockedReason)
+                .FirstOrDefault(text => !string.IsNullOrWhiteSpace(text));
+            if (!string.IsNullOrWhiteSpace(reason))
+                return ApplicationProfileLocalization.ProgressReason(reason);
+
+            return Snapshot.CaseView.Sla.IsTerminal
+                ? Msg("ApplicationProfileInstance.Workspace.TerminalBlocked")
+                : Msg("ApplicationProfileInstance.Workspace.NoFurtherSteps");
+        }
+    }
+
     private Task AdvanceProgressAsync()
     {
+        if (!CanAdvanceFromRail)
+            return Task.CompletedTask;
+
         if (TryBlockIncompleteProcessWork())
             return Task.CompletedTask;
 

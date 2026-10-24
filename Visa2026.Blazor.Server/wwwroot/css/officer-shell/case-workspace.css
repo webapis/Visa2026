@@ -848,9 +848,10 @@ select.cw-summary-field__input option {
   font-size: 0.84rem; font-weight: 600; color: var(--os-ink); text-align: left;
 }
 .cw-rail-btn:last-child { margin-bottom: 0; }
-.cw-rail-btn:hover { background: #f8fafc; border-color: #93c5fd; }
+.cw-rail-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.cw-rail-btn:hover:not(:disabled) { background: #f8fafc; border-color: #93c5fd; }
 .cw-rail-btn--primary { background: var(--os-accent); border-color: var(--os-accent); color: #fff; }
-.cw-rail-btn--primary:hover { background: #1a5fd4; }
+.cw-rail-btn--primary:hover:not(:disabled) { background: #1a5fd4; }
 
 .cw-timeline { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid #e2e8f0; }
 .cw-timeline li { position: relative; padding: 0 0 12px 12px; font-size: 0.82rem; }

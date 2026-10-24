@@ -78,6 +78,8 @@ public static class ReportDashboardExcelTemplateWorkbook
 
         if (source.SheetView.SplitRow > 0)
             dest.SheetView.FreezeRows(source.SheetView.SplitRow);
+
+        ReportDashboardExcelPrintLayout.CopyPageSetup(source, dest);
     }
 
     private static void CopyCell(IXLCell source, IXLCell dest)

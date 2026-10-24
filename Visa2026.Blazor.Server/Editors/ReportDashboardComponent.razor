@@ -8,6 +8,7 @@
 @using Visa2026.Module.Services.ReportDashboard
 @using Visa2026.Module.Services.RuntimeLogging
 @using Visa2026.Module.Localization
+@using Visa2026.Blazor.Server.Services
 
 <div class="report-dashboard">
     <div class="rd-card">
@@ -1309,6 +1310,13 @@
                             <span class="rd-bundle-label">@item.Label</span>
                             <span class="rd-bundle-category">@ReportDashboardCatalog.CategoryLabel(item.Category)</span>
                         </label>
+                        <button type="button"
+                                class="rd-bundle-preview"
+                                title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundlePreview")"
+                                @onclick="() => PreviewExcelBundleItemAsync(item)"
+                                @onclick:stopPropagation="true">
+                            @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundlePreview")
+                        </button>
                     </div>
                 }
             </div>
@@ -1934,6 +1942,30 @@
         }
     }
 
+    private async Task PreviewExcelBundleItemAsync(ExcelBundleChoice item)
+    {
+        if (item == null || ShowLoading)
+            return;
+
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundlePreviewing"));
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
+            var bytes = ExportExcelBundleItem(objectSpace, item);
+            var fileName = SanitizeExcelFileName(item.Label) + ".xlsx";
+            var previewId = ExcelPreviewStore.Put(bytes, fileName, item.Label);
+            await PreviewSlot.OpenFileAsync(ReportDashboardExcelFilePreviewSource.Key, previewId);
+        }
+        catch (Exception ex)
+        {
+            _templateNotice = ex.Message;
+        }
+        finally
+        {
+            _localLoading = false;
+        }
+    }
+
     private async Task DownloadExcelBundleAsync()
     {
         var selected = _excelBundle.Where(item => item.Selected).ToList();
@@ -1947,31 +1979,7 @@
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
             var parts = new List<(string SheetName, byte[] Workbook)>(selected.Count);
             foreach (var item in selected)
-            {
-                var panel = ReportQuery.LoadPanel(
-                    objectSpace,
-                    PersonType,
-                    item.Category,
-                    ProjectKey,
-                    ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
-                    item.Key,
-                    IncludeArchivedPersons,
-                    OneLastValidVisaPerPerson,
-                    OneLastValidWorkPermitPerPerson,
-                    IncludeCompletedApplicationProcesses,
-                    IncludeCancelledApplicationProcesses,
-                    ValidVisaPersonsOnly,
-                    searchTerm: null);
-                var bytes = ReportDashboardExcelTemplateService.Export(
-                    objectSpace,
-                    item.Category,
-                    item.Key,
-                    item.Label,
-                    panel.TableHeaders,
-                    panel.PreviewRows,
-                    includeChartColumn: false);
-                parts.Add((item.Label, bytes));
-            }
+                parts.Add((item.Label, ExportExcelBundleItem(objectSpace, item)));
 
             var combined = ReportDashboardExcelTemplateWorkbook.Combine(parts);
             await using var stream = new MemoryStream(combined);
@@ -1988,6 +1996,41 @@
         {
             _localLoading = false;
         }
+    }
+
+    private byte[] ExportExcelBundleItem(IObjectSpace objectSpace, ExcelBundleChoice item)
+    {
+        var panel = ReportQuery.LoadPanel(
+            objectSpace,
+            PersonType,
+            item.Category,
+            ProjectKey,
+            ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            item.Key,
+            IncludeArchivedPersons,
+            OneLastValidVisaPerPerson,
+            OneLastValidWorkPermitPerPerson,
+            IncludeCompletedApplicationProcesses,
+            IncludeCancelledApplicationProcesses,
+            ValidVisaPersonsOnly,
+            searchTerm: null);
+        return ReportDashboardExcelTemplateService.Export(
+            objectSpace,
+            item.Category,
+            item.Key,
+            item.Label,
+            panel.TableHeaders,
+            panel.PreviewRows,
+            includeChartColumn: false);
+    }
+
+    private static string SanitizeExcelFileName(string? label)
+    {
+        var cleaned = new string((label ?? string.Empty)
+            .Where(c => c is not ('\\' or '/' or '*' or '?' or ':' or '[' or ']' or '"' or '<' or '>' or '|'))
+            .ToArray())
+            .Trim();
+        return cleaned.Length == 0 ? "report" : cleaned;
     }
 
     private sealed class ExcelBundleChoice
@@ -2047,6 +2090,7 @@
     }
 
     [Inject] private IVisaPreviewSlotService PreviewSlot { get; set; } = null!;
+    [Inject] private IReportDashboardExcelPreviewStore ExcelPreviewStore { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IReportDashboardQueryService ReportQuery { get; set; } = null!;

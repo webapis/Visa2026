@@ -6089,7 +6089,18 @@
     "tk-TM": "Faýly döret",
     "ru-RU": "Создать файл"
   },
-  "ReportDashboard.Chrome.ExcelBundleCancel": {
+  "ReportDashboard.Chrome.ExcelBundlePreview": {
+    "en": "Preview",
+    "tr-TR": "Önizle",
+    "tk-TM": "Gözden geçir",
+    "ru-RU": "Просмотр"
+  },
+  "ReportDashboard.Chrome.ExcelBundlePreviewing": {
+    "en": "Preparing Excel preview…",
+    "tr-TR": "Excel önizlemesi hazırlanıyor…",
+    "tk-TM": "Excel gözden geçiriş taýýarlanýar…",
+    "ru-RU": "Подготовка просмотра Excel…"
+  },  "ReportDashboard.Chrome.ExcelBundleCancel": {
     "en": "Cancel",
     "tr-TR": "Vazgeç",
     "tk-TM": "Ýatyr",
