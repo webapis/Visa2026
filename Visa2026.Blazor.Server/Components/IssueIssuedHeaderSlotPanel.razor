@@ -131,7 +131,7 @@
                         @if (_draft.Kind == IssueIssuedHeaderKind.Invitation)
                         {
                             <label class="issue-issued-header-slot__field @(HeaderCueClass("header:expiration", true, IssueComposeFieldCue.HasDate(_expirationDate)))">
-                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfile.Field.EndDate")</span>
+                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ExpirationDate")</span>
                                 <OfficerDateEdit @bind-Date="_expirationDate"
                                                  @bind-Date:after='() => ReviewField("header:expiration")' />
                             </label>

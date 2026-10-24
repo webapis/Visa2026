@@ -3341,6 +3341,12 @@
     "tk-TM": "Gutarýan senesi *",
     "ru-RU": "Срок *"
   },
+  "ApplicationProfileInstance.Issued.ExpirationDate": {
+    "en-US": "Expiration Date",
+    "tr-TR": "Bitiş Tarihi",
+    "tk-TM": "Gutarýan senesi",
+    "ru-RU": "Срок действия"
+  },
   "ApplicationProfileInstance.Issued.Save": {
     "en-US": "Save",
     "tr-TR": "Kaydet",

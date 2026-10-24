@@ -497,7 +497,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         "ApplicationProfile.Field.VisaCategory",
         "ApplicationProfile.Field.VisaPeriod",
         "ApplicationProfileInstance.Issued.IssuedDate",
-        "ApplicationProfileInstance.Issued.Expiration",
+        "ApplicationProfileInstance.Issued.ExpirationDate",
     ];
 
     private static readonly string[] IssuedWorkPermitColumnKeys =

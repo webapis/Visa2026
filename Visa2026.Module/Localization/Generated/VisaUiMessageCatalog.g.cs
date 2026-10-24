@@ -2875,6 +2875,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Gutarýan senesi *",
             ["ru-RU"] = "Срок *",
         },
+        ["ApplicationProfileInstance.Issued.ExpirationDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiration Date",
+            ["tr-TR"] = "Bitiş Tarihi",
+            ["tk-TM"] = "Gutarýan senesi",
+            ["ru-RU"] = "Срок действия",
+        },
         ["ApplicationProfileInstance.Issued.File"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "File",

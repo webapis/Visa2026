@@ -1,3 +1,19 @@
+### 2026-10-24 — Invitation expiry is issued date plus 91 days
+
+- **Need**: New invitation on Application result set End date to issued date + 90 days. The field was labeled End date.
+- **Fix**: `Invitation.ExpirationOffsetDays` is 91. The New invitation field and the produced-invitations column say Expiration Date. Invitations already saved keep their stored date.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. New invitation: issued 24.10.2026 → Expiration Date 23.01.2027. Changing Issued date recalculates the same way.
+- **Prevent**: Keep the offset on `Invitation.ExpirationOffsetDays`. Do not hard-code 90 in the compose draft or the null-date backfill.
+- **Cross-skill**: —
+
+### 2026-10-24 — Advance progress disabled when the case is finished
+
+- **Need**: On a finished case (Issued, SLA Done), **Advance progress** on the Progress rail stayed purple and clickable.
+- **Fix**: Overview, Progress, and Application result disable that button when no step has a next state. Revert stays available. Detail is in visa2026-application-progress learnings.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open an issued case. Advance progress is faded and does not click. A case still in process keeps the button.
+- **Prevent**: Do not render the rail Advance button as an enabled primary action when `CanAdvance` is false.
+- **Cross-skill**: visa2026-application-progress
+
 ### 2026-10-23 — New approval-leg JSON row missing until SeedGate sync
 
 - **Need**: Add shared chain `TE-EN-GU-EN` (Türkmenenergo → Energetika → Gurluşyk → Energetika) to Choose Approval legs; it did not appear after editing `approval-leg-profile.json` alone.

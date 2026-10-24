@@ -6,16 +6,16 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class InvitationExpirationTests
 {
     [Fact]
-    public void ExpirationFromIssued_AddsNinetyCalendarDays()
+    public void ExpirationFromIssued_AddsNinetyOneCalendarDays()
     {
         var issued = new DateTime(2026, 10, 17);
 
-        Assert.Equal(new DateTime(2027, 1, 15), Invitation.ExpirationFromIssued(issued));
-        Assert.Equal(90, Invitation.ExpirationOffsetDays);
+        Assert.Equal(new DateTime(2027, 1, 16), Invitation.ExpirationFromIssued(issued));
+        Assert.Equal(91, Invitation.ExpirationOffsetDays);
     }
 
     [Fact]
-    public void OnCreated_SetsIssuedTodayAndExpirationNinetyDaysLater()
+    public void OnCreated_SetsIssuedTodayAndExpirationNinetyOneDaysLater()
     {
         var invitation = new Invitation();
 

@@ -65,7 +65,7 @@ public sealed class InvitationLegacyShapeSchemaUpdater : ModuleUpdater
 
                 if (invitation.ExpirationDate == null && invitation.IssuedDate != default)
                 {
-                    invitation.ExpirationDate = invitation.IssuedDate.AddDays(90);
+                    invitation.ExpirationDate = BusinessObjects.Invitation.ExpirationFromIssued(invitation.IssuedDate);
                     changed = true;
                 }
 

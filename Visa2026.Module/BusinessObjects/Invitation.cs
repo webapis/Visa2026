@@ -101,7 +101,7 @@ namespace Visa2026.Module.BusinessObjects
         /// Calendar days from <see cref="IssuedDate"/> to the invitation letter expiry.
         /// Visa period on the case is a separate lookup and does not change this offset.
         /// </summary>
-        public const int ExpirationOffsetDays = 90;
+        public const int ExpirationOffsetDays = 91;
 
         /// <summary>Invitation letter expiry for an issued date (<see cref="ExpirationOffsetDays"/> calendar days later).</summary>
         public static DateTime ExpirationFromIssued(DateTime issuedDate) =>
