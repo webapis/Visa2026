@@ -281,6 +281,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IApplicationProfileOverviewQueryService, ApplicationProfileOverviewQueryService>();
             services.AddScoped<IApplicationProfileCatalogQueryService, ApplicationProfileCatalogQueryService>();
             services.AddScoped<IApplicationProfileCatalogReload, ApplicationProfileCatalogReload>();
+            services.AddScoped<IApplicationProfileInstanceDeletedNotifier, ApplicationProfileInstanceDeletedNotifier>();
             services.AddScoped<IOfficerShellPendingOpen, OfficerShellPendingOpen>();
             services.AddScoped<IOfficerShellStagedQueryService, OfficerShellStagedQueryService>();
             services.AddScoped<IOfficerShellInProcessQueryService, OfficerShellInProcessQueryService>();
