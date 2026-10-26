@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services;
@@ -81,6 +82,10 @@ public sealed class PersonLinkReviewCreateForm
 /// </summary>
 public static class PersonLinkReview
 {
+    private static string T(string key) => VisaUiMessages.Get("ApplicationProfileInstance.LinkReview." + key);
+
+    private static string U(string key) => VisaUiMessages.Get(key);
+
     public static IReadOnlyList<PersonLinkReviewLine> Build(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
@@ -503,55 +508,55 @@ public static class PersonLinkReview
 
     private static IReadOnlyList<PersonLinkReviewField> PassportFields(Passport passport) => new[]
     {
-        Field("Passport number", passport.PassportNumber, true, false),
-        Field("Passport type", passport.PassportType?.NameTm, true, true),
-        Field("Issued country", passport.IssuedCountry?.NameTm, true, true),
-        Field("Authority", passport.Authority, true, false),
-        Field("Issue date", DateText(passport.IssueDate), true, false),
-        Field("Expiration date", DateText(passport.ExpirationDate), true, false),
+        Field(U("ApplicationProfileInstance.Org.PassportNumber"), passport.PassportNumber, true, false),
+        Field(T("PassportType"), passport.PassportType?.NameTm, true, true),
+        Field(T("IssuedCountry"), passport.IssuedCountry?.NameTm, true, true),
+        Field(T("Authority"), passport.Authority, true, false),
+        Field(T("IssueDate"), DateText(passport.IssueDate), true, false),
+        Field(U("ApplicationProfileInstance.Workspace.AddressExpiration"), DateText(passport.ExpirationDate), true, false),
     };
 
     private static IReadOnlyList<PersonLinkReviewField> EducationFields(Education education) => new[]
     {
-        Field("Education level", education.EducationLevel?.NameTm, true, true),
-        Field("Institution", education.EducationInstitution?.NameTm, true, true),
-        Field("Country", education.EducationCountry?.NameTm, true, true),
-        Field("Specialty", education.Specialty?.NameTm, true, true),
+        Field(T("EducationLevel"), education.EducationLevel?.NameTm, true, true),
+        Field(T("Institution"), education.EducationInstitution?.NameTm, true, true),
+        Field(T("Country"), education.EducationCountry?.NameTm, true, true),
+        Field(T("Specialty"), education.Specialty?.NameTm, true, true),
     };
 
     private static IReadOnlyList<PersonLinkReviewField> PositionFields(EmployeePositionHistory position) => new[]
     {
-        Field("Position (visa reports)", position.Position?.NameTm, true, true),
-        Field("Position (actual / company)", position.ActualPosition?.Name, true, true),
-        Field("Department", position.Department?.NameTm, false, true),
+        Field(T("PositionReports"), position.Position?.NameTm, true, true),
+        Field(T("PositionActual"), position.ActualPosition?.Name, true, true),
+        Field(T("Department"), position.Department?.NameTm, false, true),
     };
 
     private static IReadOnlyList<PersonLinkReviewField> VisaFields(Visa visa) => new[]
     {
-        Field("Visa number", visa.VisaNumber, true, false),
-        Field("Visa type", visa.VisaType?.NameTm, true, true),
-        Field("Visa category", visa.VisaCategory?.NameTm, true, true),
-        Field("Issued place", visa.VisaIssuedPlace?.NameTm, true, true),
-        Field("Issue date", DateText(visa.IssueDate), true, false),
-        Field("Start date", DateText(visa.StartDate), true, false),
-        Field("Expiration date", DateText(visa.ExpirationDate), true, false),
-        Field("Days remaining", visa.DaysRemaining.ToString(CultureInfo.InvariantCulture), false, false),
-        Field("Border zone", visa.BorderZoneLocation, true, false),
+        Field(T("VisaNumber"), visa.VisaNumber, true, false),
+        Field(T("VisaType"), visa.VisaType?.NameTm, true, true),
+        Field(T("VisaCategory"), visa.VisaCategory?.NameTm, true, true),
+        Field(T("IssuedPlace"), visa.VisaIssuedPlace?.NameTm, true, true),
+        Field(T("IssueDate"), DateText(visa.IssueDate), true, false),
+        Field(U("ApplicationProfile.Field.StartDate"), DateText(visa.StartDate), true, false),
+        Field(U("ApplicationProfileInstance.Workspace.AddressExpiration"), DateText(visa.ExpirationDate), true, false),
+        Field(T("DaysRemaining"), visa.DaysRemaining.ToString(CultureInfo.InvariantCulture), false, false),
+        Field(U("ApplicationProfile.Doc.BorderZone"), visa.BorderZoneLocation, true, false),
     };
 
     private static IReadOnlyList<PersonLinkReviewField> StayFields(InvitationAddress stay) => new[]
     {
-        Field("Region", stay.Region?.NameTm, true, true),
-        Field("City", stay.City?.NameTm, true, true),
-        Field("Type", TypeLabel(stay.Type), true, true),
+        Field(T("Region"), stay.Region?.NameTm, true, true),
+        Field(T("City"), stay.City?.NameTm, true, true),
+        Field(T("Type"), TypeLabel(stay.Type), true, true),
         Field(PlaceLabel(stay.Type), Place(stay), true, stay.Type != ResidenceType.PrivateHouse),
     };
 
     private static IReadOnlyList<PersonLinkReviewField> AddressFields(AddressOfResidence address) => new[]
     {
-        Field("Region", address.Region?.NameTm, true, true),
-        Field("City", address.City?.NameTm, true, true),
-        Field("Type", TypeLabel(address.Type), true, true),
+        Field(T("Region"), address.Region?.NameTm, true, true),
+        Field(T("City"), address.City?.NameTm, true, true),
+        Field(T("Type"), TypeLabel(address.Type), true, true),
         Field(PlaceLabel(address.Type), AddressPlace(address), true, address.Type != ResidenceType.PrivateHouse),
     };
 
@@ -567,11 +572,11 @@ public static class PersonLinkReview
 
     private static string PlaceLabel(ResidenceType? type) => type switch
     {
-        ResidenceType.Hotel => "Hotel",
-        ResidenceType.Hospital => "Hospital",
-        ResidenceType.Other => "Other",
-        ResidenceType.PrivateHouse => "Private house",
-        _ => "Lodging",
+        ResidenceType.Hotel => U("ApplicationProfile.Site.Hotel"),
+        ResidenceType.Hospital => U("ApplicationProfile.Site.Hospital"),
+        ResidenceType.Other => U("ApplicationProfile.Site.Other"),
+        ResidenceType.PrivateHouse => U("ApplicationProfile.Site.PrivateHouse"),
+        _ => U("ApplicationProfile.Site.Lodging"),
     };
 
     private static (string Summary, Guid? Id) PassportSummary(Passport? passport) =>
@@ -608,11 +613,11 @@ public static class PersonLinkReview
 
     private static string? TypeLabel(ResidenceType? type) => type switch
     {
-        ResidenceType.Lodging => "Lodging",
-        ResidenceType.Hotel => "Hotel",
-        ResidenceType.Hospital => "Hospital",
-        ResidenceType.Other => "Other",
-        ResidenceType.PrivateHouse => "Private house",
+        ResidenceType.Lodging => U("ApplicationProfile.Site.Lodging"),
+        ResidenceType.Hotel => U("ApplicationProfile.Site.Hotel"),
+        ResidenceType.Hospital => U("ApplicationProfile.Site.Hospital"),
+        ResidenceType.Other => U("ApplicationProfile.Site.Other"),
+        ResidenceType.PrivateHouse => U("ApplicationProfile.Site.PrivateHouse"),
         _ => null,
     };
 
@@ -635,7 +640,11 @@ public static class PersonLinkReview
         ApplicationProfileInstancePersonLinkKind kind,
         string title)
     {
-        var form = new PersonLinkReviewCreateForm { Kind = kind, Title = title };
+        var form = new PersonLinkReviewCreateForm
+        {
+            Kind = kind,
+            Title = ApplicationProfileLocalization.LinkedRecordLabel(title),
+        };
         form.Fields = kind switch
         {
             ApplicationProfileInstancePersonLinkKind.Passport => PassportCreateFields(objectSpace),
@@ -646,7 +655,7 @@ public static class PersonLinkReview
             _ => new List<PersonLinkReviewCreateField>(),
         };
         if (form.Fields.Count == 0)
-            form.Error = "This record cannot be added from this form.";
+            form.Error = T("CannotAdd");
         return form;
     }
 
@@ -674,7 +683,7 @@ public static class PersonLinkReview
         {
             form.ObjectId = Guid.Empty;
             form.Fields.Clear();
-            form.Error = "This record was not found.";
+            form.Error = T("NotFound");
             return form;
         }
 
@@ -692,14 +701,14 @@ public static class PersonLinkReview
         error = null;
         if (objectSpace == null || person == null || form == null)
         {
-            error = "Could not save the record.";
+            error = T("CouldNotSave");
             return Guid.Empty;
         }
 
         var missing = form.Fields.FirstOrDefault(field => field.Required && IsShown(form, field) && string.IsNullOrWhiteSpace(field.Value));
         if (missing != null)
         {
-            error = missing.Label + " is required.";
+            error = VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Required", missing.Label);
             return Guid.Empty;
         }
 
@@ -714,8 +723,8 @@ public static class PersonLinkReview
         };
         if (created == null && error == null)
             error = form.ObjectId == Guid.Empty
-                ? "This record cannot be added from this form."
-                : "This record cannot be edited from this form.";
+                ? T("CannotAdd")
+                : T("CannotEdit");
         return created?.ID ?? Guid.Empty;
     }
 
@@ -877,27 +886,27 @@ public static class PersonLinkReview
 
     private static List<PersonLinkReviewCreateField> PassportCreateFields(IObjectSpace objectSpace) => new()
     {
-        TextField("number", "Passport number", true),
-        LookupField("type", "Passport type", true, CatalogOptions<PassportType>(objectSpace)),
-        LookupField("country", "Issued country", true, CatalogOptions<Country>(objectSpace)),
-        TextField("authority", "Authority", true),
-        TextField("issue", "Issue date", true, date: true),
-        TextField("expiration", "Expiration date", true, date: true),
+        TextField("number", U("ApplicationProfileInstance.Org.PassportNumber"), true),
+        LookupField("type", T("PassportType"), true, CatalogOptions<PassportType>(objectSpace)),
+        LookupField("country", T("IssuedCountry"), true, CatalogOptions<Country>(objectSpace)),
+        TextField("authority", T("Authority"), true),
+        TextField("issue", T("IssueDate"), true, date: true),
+        TextField("expiration", U("ApplicationProfileInstance.Workspace.AddressExpiration"), true, date: true),
     };
 
     private static List<PersonLinkReviewCreateField> EducationCreateFields(IObjectSpace objectSpace) => new()
     {
-        LookupField("level", "Education level", true, CatalogOptions<EducationLevel>(objectSpace)),
-        LookupField("institution", "Institution", true, CatalogOptions<EducationInstitution>(objectSpace)),
-        LookupField("country", "Country", true, CatalogOptions<Country>(objectSpace)),
-        LookupField("specialty", "Specialty", true, CatalogOptions<Specialty>(objectSpace)),
+        LookupField("level", T("EducationLevel"), true, CatalogOptions<EducationLevel>(objectSpace)),
+        LookupField("institution", T("Institution"), true, CatalogOptions<EducationInstitution>(objectSpace)),
+        LookupField("country", T("Country"), true, CatalogOptions<Country>(objectSpace)),
+        LookupField("specialty", T("Specialty"), true, CatalogOptions<Specialty>(objectSpace)),
     };
 
     private static List<PersonLinkReviewCreateField> PositionCreateFields(IObjectSpace objectSpace) => new()
     {
-        LookupField("position", "Position (visa reports)", true, CatalogOptions<Position>(objectSpace)),
-        LookupField("actual", "Position (actual / company)", true, ActualPositionOptions(objectSpace)),
-        LookupField("department", "Department", false, CatalogOptions<Department>(objectSpace)),
+        LookupField("position", T("PositionReports"), true, CatalogOptions<Position>(objectSpace)),
+        LookupField("actual", T("PositionActual"), true, ActualPositionOptions(objectSpace)),
+        LookupField("department", T("Department"), false, CatalogOptions<Department>(objectSpace)),
     };
 
     private static List<PersonLinkReviewCreateOption> ActualPositionOptions(IObjectSpace objectSpace) =>
@@ -910,14 +919,14 @@ public static class PersonLinkReview
 
     private static List<PersonLinkReviewCreateField> VisaCreateFields(IObjectSpace objectSpace) => new()
     {
-        TextField("number", "Visa number", true),
-        LookupField("type", "Visa type", true, CatalogOptions<VisaType>(objectSpace)),
-        LookupField("category", "Visa category", true, CatalogOptions<VisaCategory>(objectSpace)),
-        LookupField("place", "Issued place", true, CatalogOptions<VisaIssuedPlace>(objectSpace)),
-        TextField("issue", "Issue date", true, date: true),
-        TextField("start", "Start date", true, date: true),
-        TextField("expiration", "Expiration date", true, date: true),
-        LookupField("border", "Border zone", true, CatalogOptions<BorderZoneName>(objectSpace)),
+        TextField("number", T("VisaNumber"), true),
+        LookupField("type", T("VisaType"), true, CatalogOptions<VisaType>(objectSpace)),
+        LookupField("category", T("VisaCategory"), true, CatalogOptions<VisaCategory>(objectSpace)),
+        LookupField("place", T("IssuedPlace"), true, CatalogOptions<VisaIssuedPlace>(objectSpace)),
+        TextField("issue", T("IssueDate"), true, date: true),
+        TextField("start", U("ApplicationProfile.Field.StartDate"), true, date: true),
+        TextField("expiration", U("ApplicationProfileInstance.Workspace.AddressExpiration"), true, date: true),
+        LookupField("border", U("ApplicationProfile.Doc.BorderZone"), true, CatalogOptions<BorderZoneName>(objectSpace)),
     };
 
     private static List<PersonLinkReviewCreateField> AddressCreateFields(IObjectSpace objectSpace)
@@ -931,18 +940,18 @@ public static class PersonLinkReview
         var types = Enum.GetValues<ResidenceType>()
             .Select(type => new PersonLinkReviewCreateOption { Id = type.ToString(), Label = TypeLabel(type) ?? type.ToString() })
             .ToList();
-        var privateHouse = TextField("private", "Private house", true);
+        var privateHouse = TextField("private", U("ApplicationProfile.Site.PrivateHouse"), true);
         privateHouse.ShowWhenKey = "type";
         privateHouse.ShowWhenValue = ResidenceType.PrivateHouse.ToString();
         return new List<PersonLinkReviewCreateField>
         {
-            LookupField("region", "Region", true, CatalogOptions<Region>(objectSpace)),
-            LookupField("city", "City", true, cities, filterByKey: "region"),
-            LookupField("type", "Type", true, types),
-            LookupField("lodging", "Lodging", true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<Lodging>(), row => row.FullAddress), "type", ResidenceType.Lodging.ToString(), "city"),
-            LookupField("hotel", "Hotel", true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<Hotel>(), row => row.Name), "type", ResidenceType.Hotel.ToString(), "city"),
-            LookupField("hospital", "Hospital", true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<Hospital>(), row => row.Name), "type", ResidenceType.Hospital.ToString(), "city"),
-            LookupField("other", "Other", true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<OtherSite>(), row => row.FullAddress), "type", ResidenceType.Other.ToString(), "city"),
+            LookupField("region", T("Region"), true, CatalogOptions<Region>(objectSpace)),
+            LookupField("city", T("City"), true, cities, filterByKey: "region"),
+            LookupField("type", T("Type"), true, types),
+            LookupField("lodging", U("ApplicationProfile.Site.Lodging"), true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<Lodging>(), row => row.FullAddress), "type", ResidenceType.Lodging.ToString(), "city"),
+            LookupField("hotel", U("ApplicationProfile.Site.Hotel"), true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<Hotel>(), row => row.Name), "type", ResidenceType.Hotel.ToString(), "city"),
+            LookupField("hospital", U("ApplicationProfile.Site.Hospital"), true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<Hospital>(), row => row.Name), "type", ResidenceType.Hospital.ToString(), "city"),
+            LookupField("other", U("ApplicationProfile.Site.Other"), true, PlaceOptions(row => row.City?.ID, objectSpace.GetObjectsQuery<OtherSite>(), row => row.FullAddress), "type", ResidenceType.Other.ToString(), "city"),
             privateHouse,
         };
     }
@@ -967,12 +976,12 @@ public static class PersonLinkReview
         error = null;
         if (!TryDate(Value(form, "issue"), out var issue) || !TryDate(Value(form, "expiration"), out var expiration))
         {
-            error = "Enter dates as dd.MM.yyyy.";
+            error = T("EnterDates");
             return null;
         }
         if (expiration <= issue)
         {
-            error = "Expiration date must be later than the issue date.";
+            error = T("ExpirationAfterIssue");
             return null;
         }
 
@@ -981,7 +990,7 @@ public static class PersonLinkReview
             : objectSpace.GetObjectByKey<Passport>(form.ObjectId);
         if (passport == null || (form.ObjectId != Guid.Empty && passport.Person?.ID != person.ID))
         {
-            error = "This record was not found.";
+            error = T("NotFound");
             return null;
         }
 
@@ -1004,7 +1013,7 @@ public static class PersonLinkReview
             : objectSpace.GetObjectByKey<Education>(form.ObjectId);
         if (education == null || (form.ObjectId != Guid.Empty && education.Person?.ID != person.ID))
         {
-            error = "This record was not found.";
+            error = T("NotFound");
             return null;
         }
 
@@ -1025,7 +1034,7 @@ public static class PersonLinkReview
             : objectSpace.GetObjectByKey<EmployeePositionHistory>(form.ObjectId);
         if (position == null || (form.ObjectId != Guid.Empty && position.Person?.ID != person.ID))
         {
-            error = "This record was not found.";
+            error = T("NotFound");
             return null;
         }
 
@@ -1042,7 +1051,7 @@ public static class PersonLinkReview
         error = null;
         if (!Enum.TryParse<ResidenceType>(Value(form, "type"), out var type))
         {
-            error = "Type is required.";
+            error = T("TypeRequired");
             return null;
         }
 
@@ -1051,7 +1060,7 @@ public static class PersonLinkReview
             : objectSpace.GetObjectByKey<AddressOfResidence>(form.ObjectId);
         if (address == null || (form.ObjectId != Guid.Empty && address.Person?.ID != person.ID))
         {
-            error = "This record was not found.";
+            error = T("NotFound");
             return null;
         }
 
@@ -1091,12 +1100,12 @@ public static class PersonLinkReview
         error = null;
         if (!TryDate(Value(form, "issue"), out var issue) || !TryDate(Value(form, "start"), out var start) || !TryDate(Value(form, "expiration"), out var expiration))
         {
-            error = "Enter dates as dd.MM.yyyy.";
+            error = T("EnterDates");
             return null;
         }
         if (expiration <= start)
         {
-            error = "Expiration date must be later than the start date.";
+            error = T("ExpirationAfterStart");
             return null;
         }
 
@@ -1106,7 +1115,7 @@ public static class PersonLinkReview
             var passport = passportId == Guid.Empty ? null : objectSpace.GetObjectByKey<Passport>(passportId);
             if (passport == null || passport.Person?.ID != person.ID)
             {
-                error = "Choose a passport on Overview before adding a visa.";
+                error = T("ChoosePassportFirst");
                 return null;
             }
 
@@ -1118,7 +1127,7 @@ public static class PersonLinkReview
             visa = objectSpace.GetObjectByKey<Visa>(form.ObjectId);
             if (visa == null || visa.Passport?.Person?.ID != person.ID)
             {
-                error = "This record was not found.";
+                error = T("NotFound");
                 return null;
             }
         }

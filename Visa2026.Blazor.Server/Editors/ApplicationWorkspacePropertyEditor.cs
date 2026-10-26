@@ -970,7 +970,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             var person = objectSpace.GetObjectByKey<Person>(personId);
             if (application == null || person == null)
             {
-                model.PersonLinkStatusMessage = "Person or application not found.";
+                model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.PersonOrApplicationNotFound");
                 model.PersonLinkStatusIsError = true;
                 return;
             }
@@ -1022,7 +1022,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             var person = objectSpace.GetObjectByKey<Person>(personId);
             if (application == null || person == null)
             {
-                model.PersonLinkStatusMessage = "Person or application not found.";
+                model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.PersonOrApplicationNotFound");
                 model.PersonLinkStatusIsError = true;
                 return;
             }
@@ -1072,7 +1072,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             var person = objectSpace.GetObjectByKey<Person>(personId);
             if (application == null || person == null)
             {
-                model.PersonLinkStatusMessage = "Person or application not found.";
+                model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.PersonOrApplicationNotFound");
                 model.PersonLinkStatusIsError = true;
                 return;
             }
@@ -1083,7 +1083,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 var linked = ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
                 if (linked == null)
                 {
-                    model.PersonLinkStatusMessage = "Could not link the selected person.";
+                    model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.CouldNotLink");
                     model.PersonLinkStatusIsError = true;
                     return;
                 }
@@ -1094,7 +1094,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             ClearPersonLinkReview(model);
             model.ShowPersonLinkPicker = false;
             model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
-            model.PersonLinkStatusMessage = existing ? $"{person.FullName} updated." : $"{person.FullName} linked.";
+            model.PersonLinkStatusMessage = existing
+                ? VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Updated", person.FullName)
+                : VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Linked", person.FullName);
             model.PersonLinkStatusIsError = false;
             await LoadAsync();
         }
@@ -1170,7 +1172,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             var person = objectSpace.GetObjectByKey<Person>(model.PersonLinkReviewPersonId);
             if (person == null)
             {
-                form.Error = "Person was not found.";
+                form.Error = VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.PersonNotFound");
                 model.PersonLinkReviewCreateForm = form;
                 return Task.CompletedTask;
             }
@@ -1180,7 +1182,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             var savedId = PersonLinkReview.TryCreate(objectSpace, person, form, passportId, out var error);
             if (savedId == Guid.Empty)
             {
-                form.Error = error ?? "Could not save the record.";
+                form.Error = error ?? VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.CouldNotSave");
                 model.PersonLinkReviewCreateForm = form;
                 return Task.CompletedTask;
             }

@@ -1727,6 +1727,24 @@
     "tk-TM": "{0} pozulsynmy? Yza alyp bolmaýar.",
     "ru-RU": "Удалить {0}? Это нельзя отменить."
   },
+  "ApplicationProfileInstance.Workspace.DeleteCase": {
+    "en-US": "Delete case",
+    "tr-TR": "Başvuruyu sil",
+    "tk-TM": "Ýüztutmany poz",
+    "ru-RU": "Удалить заявку"
+  },
+  "ApplicationProfileInstance.Workspace.DeleteCaseHasIssuedRecords": {
+    "en-US": "This case cannot be deleted because it has {0} issued record(s). Delete them under Application result first.",
+    "tr-TR": "Bu başvuru silinemez, çünkü {0} düzenlenmiş kaydı var. Önce bunları Başvuru sonucu altında silin.",
+    "tk-TM": "Bu ýüztutmany pozup bolmaýar, sebäbi onuň {0} sany berlen ýazgysy bar. Ilki olary Ýüztutmanyň netijesi bölüminde pozuň.",
+    "ru-RU": "Эту заявку нельзя удалить: у неё {0} выданных записей. Сначала удалите их в разделе «Результат заявки»."
+  },
+  "ApplicationProfileInstance.Workspace.DeleteCaseNotFound": {
+    "en-US": "This case was not found. It may already have been deleted.",
+    "tr-TR": "Bu başvuru bulunamadı. Zaten silinmiş olabilir.",
+    "tk-TM": "Bu ýüztutma tapylmady. Eýýäm pozulan bolmagy mümkin.",
+    "ru-RU": "Заявка не найдена. Возможно, она уже удалена."
+  },
   "ApplicationProfileInstance.Workspace.OfficeFile": {
     "en-US": "File",
     "tr-TR": "Dosya",
@@ -2825,6 +2843,36 @@
     "tk-TM": "Adam boýunça baglanan ýazgylar",
     "ru-RU": "Связанные записи по лицу"
   },
+  "ApplicationProfileInstance.Workspace.UseCaseAddress": {
+    "en-US": "Copy case summary address",
+    "tr-TR": "Dava özeti adresini kopyala",
+    "tk-TM": "Ýüztutmanyň salgysyny göçür",
+    "ru-RU": "Копировать адрес из сводки дела"
+  },
+  "ApplicationProfileInstance.Workspace.UseCaseAddressHint": {
+    "en-US": "This address differs from Case summary. Tick adds a new address of residence from Case summary and relinks this case. The previous address stays on the person.",
+    "tr-TR": "Bu adres dava özetinden farklı. Onay işareti dava özetinden yeni bir ikamet adresi ekler ve bu davayı ona bağlar. Önceki adres kişide kalır.",
+    "tk-TM": "Bu salgy ýüztutmanyň gysgaçasynyň salgysyndan tapawutly. Bellik täze ýaşaýyş salgysyny goşýar we bu ýüztutmany oňa baglaýar. Öňki salgy adamda galýar.",
+    "ru-RU": "Этот адрес отличается от сводки дела. Галочка добавляет новый адрес проживания из сводки и перепривязывает это дело. Прежний адрес остаётся у лица."
+  },
+  "ApplicationProfileInstance.Workspace.EditAddress": {
+    "en-US": "Edit address of residence",
+    "tr-TR": "İkamet adresini düzenle",
+    "tk-TM": "Ýaşaýyş salgysyny üýtget",
+    "ru-RU": "Изменить адрес проживания"
+  },
+  "ApplicationProfileInstance.Workspace.SaveAddress": {
+    "en-US": "Save",
+    "tr-TR": "Kaydet",
+    "tk-TM": "Ýatda sakla",
+    "ru-RU": "Сохранить"
+  },
+  "ApplicationProfileInstance.Workspace.AddressExpiration": {
+    "en-US": "Expiration date",
+    "tr-TR": "Son kullanma tarihi",
+    "tk-TM": "Möhleti gutarýan senesi",
+    "ru-RU": "Дата окончания"
+  },
   "ApplicationProfileInstance.Workspace.LinkedRecordsSummary": {
     "en-US": "Linked records summary",
     "tr-TR": "Bağlı kayıt özeti",
@@ -3586,5 +3634,227 @@
     "tr-TR": "Pasaport son kullanma tarihi",
     "tk-TM": "Pasport möhleti",
     "ru-RU": "Срок действия паспорта"
+  },
+  "ApplicationProfileInstance.LinkReview.ChooseAnother": {
+    "en-US": "Choose another record",
+    "tr-TR": "Başka bir kayıt seç",
+    "tk-TM": "Başga ýazgy saýla",
+    "ru-RU": "Выбрать другую запись"
+  },
+  "ApplicationProfileInstance.LinkReview.Join": {
+    "en-US": "Join",
+    "tr-TR": "Bağla",
+    "tk-TM": "Bagla",
+    "ru-RU": "Привязать"
+  },
+  "ApplicationProfileInstance.LinkReview.Edit": {
+    "en-US": "Edit",
+    "tr-TR": "Düzenle",
+    "tk-TM": "Üýtget",
+    "ru-RU": "Изменить"
+  },
+  "ApplicationProfileInstance.LinkReview.Required": {
+    "en-US": "{0} is required.",
+    "tr-TR": "{0} zorunlu.",
+    "tk-TM": "{0} hökmany.",
+    "ru-RU": "Поле «{0}» обязательно."
+  },
+  "ApplicationProfileInstance.LinkReview.Linked": {
+    "en-US": "{0} linked.",
+    "tr-TR": "{0} bağlandı.",
+    "tk-TM": "{0} baglandy.",
+    "ru-RU": "{0} привязан."
+  },
+  "ApplicationProfileInstance.LinkReview.Updated": {
+    "en-US": "{0} updated.",
+    "tr-TR": "{0} güncellendi.",
+    "tk-TM": "{0} täzelendi.",
+    "ru-RU": "{0} обновлён."
+  },
+  "ApplicationProfileInstance.LinkReview.CouldNotLink": {
+    "en-US": "Could not link the selected person.",
+    "tr-TR": "Seçilen kişi bağlanamadı.",
+    "tk-TM": "Saýlanan kişi baglanyp bilinmedi.",
+    "ru-RU": "Не удалось привязать выбранного человека."
+  },
+  "ApplicationProfileInstance.LinkReview.PersonOrApplicationNotFound": {
+    "en-US": "Person or application not found.",
+    "tr-TR": "Kişi veya başvuru bulunamadı.",
+    "tk-TM": "Kişi ýa-da ýüztutma tapylmady.",
+    "ru-RU": "Человек или заявление не найдены."
+  },
+  "ApplicationProfileInstance.LinkReview.PersonNotFound": {
+    "en-US": "Person was not found.",
+    "tr-TR": "Kişi bulunamadı.",
+    "tk-TM": "Kişi tapylmady.",
+    "ru-RU": "Человек не найден."
+  },
+  "ApplicationProfileInstance.LinkReview.CannotAdd": {
+    "en-US": "This record cannot be added from this form.",
+    "tr-TR": "Bu kayıt bu formdan eklenemez.",
+    "tk-TM": "Bu ýazgy bu görnüşden goşulyp bilinmez.",
+    "ru-RU": "Эту запись нельзя добавить из этой формы."
+  },
+  "ApplicationProfileInstance.LinkReview.CannotEdit": {
+    "en-US": "This record cannot be edited from this form.",
+    "tr-TR": "Bu kayıt bu formdan düzenlenemez.",
+    "tk-TM": "Bu ýazgy bu görnüşden üýtgedilip bilinmez.",
+    "ru-RU": "Эту запись нельзя изменить из этой формы."
+  },
+  "ApplicationProfileInstance.LinkReview.NotFound": {
+    "en-US": "This record was not found.",
+    "tr-TR": "Bu kayıt bulunamadı.",
+    "tk-TM": "Bu ýazgy tapylmady.",
+    "ru-RU": "Запись не найдена."
+  },
+  "ApplicationProfileInstance.LinkReview.CouldNotSave": {
+    "en-US": "Could not save the record.",
+    "tr-TR": "Kayıt kaydedilemedi.",
+    "tk-TM": "Ýazgy ýatda saklanyp bilinmedi.",
+    "ru-RU": "Не удалось сохранить запись."
+  },
+  "ApplicationProfileInstance.LinkReview.EnterDates": {
+    "en-US": "Enter dates as dd.MM.yyyy.",
+    "tr-TR": "Tarihleri gg.aa.yyyy olarak girin.",
+    "tk-TM": "Seneleri gg.aa.yyyy görnüşinde giriziň.",
+    "ru-RU": "Введите даты в формате дд.мм.гггг."
+  },
+  "ApplicationProfileInstance.LinkReview.ExpirationAfterIssue": {
+    "en-US": "Expiration date must be later than the issue date.",
+    "tr-TR": "Bitiş tarihi veriliş tarihinden sonra olmalıdır.",
+    "tk-TM": "Möhlet berlen senesinden soň bolmaly.",
+    "ru-RU": "Срок действия должен быть позже даты выдачи."
+  },
+  "ApplicationProfileInstance.LinkReview.ExpirationAfterStart": {
+    "en-US": "Expiration date must be later than the start date.",
+    "tr-TR": "Bitiş tarihi başlangıç tarihinden sonra olmalıdır.",
+    "tk-TM": "Möhlet başlanýan senesinden soň bolmaly.",
+    "ru-RU": "Срок действия должен быть позже даты начала."
+  },
+  "ApplicationProfileInstance.LinkReview.TypeRequired": {
+    "en-US": "Type is required.",
+    "tr-TR": "Tür zorunlu.",
+    "tk-TM": "Görnüş hökmany.",
+    "ru-RU": "Тип обязателен."
+  },
+  "ApplicationProfileInstance.LinkReview.ChoosePassportFirst": {
+    "en-US": "Choose a passport on Overview before adding a visa.",
+    "tr-TR": "Vize eklemeden önce Özet sekmesinde bir pasaport seçin.",
+    "tk-TM": "Wiza goşmazdan ozal Ýüztutma sahypasynda pasport saýlaň.",
+    "ru-RU": "Перед добавлением визы выберите паспорт на вкладке «Обзор»."
+  },
+  "ApplicationProfileInstance.LinkReview.PassportType": {
+    "en-US": "Passport type",
+    "tr-TR": "Pasaport türü",
+    "tk-TM": "Pasport görnüşi",
+    "ru-RU": "Тип паспорта"
+  },
+  "ApplicationProfileInstance.LinkReview.IssuedCountry": {
+    "en-US": "Issued country",
+    "tr-TR": "Verildiği ülke",
+    "tk-TM": "Berlen ýurt",
+    "ru-RU": "Страна выдачи"
+  },
+  "ApplicationProfileInstance.LinkReview.Authority": {
+    "en-US": "Authority",
+    "tr-TR": "Veren makam",
+    "tk-TM": "Beren edara",
+    "ru-RU": "Кем выдан"
+  },
+  "ApplicationProfileInstance.LinkReview.IssueDate": {
+    "en-US": "Issue date",
+    "tr-TR": "Veriliş tarihi",
+    "tk-TM": "Berlen senesi",
+    "ru-RU": "Дата выдачи"
+  },
+  "ApplicationProfileInstance.LinkReview.EducationLevel": {
+    "en-US": "Education level",
+    "tr-TR": "Eğitim düzeyi",
+    "tk-TM": "Bilim derejesi",
+    "ru-RU": "Уровень образования"
+  },
+  "ApplicationProfileInstance.LinkReview.Institution": {
+    "en-US": "Institution",
+    "tr-TR": "Kurum",
+    "tk-TM": "Okuw jaýy",
+    "ru-RU": "Учебное заведение"
+  },
+  "ApplicationProfileInstance.LinkReview.Country": {
+    "en-US": "Country",
+    "tr-TR": "Ülke",
+    "tk-TM": "Ýurt",
+    "ru-RU": "Страна"
+  },
+  "ApplicationProfileInstance.LinkReview.Specialty": {
+    "en-US": "Specialty",
+    "tr-TR": "Uzmanlık",
+    "tk-TM": "Hünär",
+    "ru-RU": "Специальность"
+  },
+  "ApplicationProfileInstance.LinkReview.PositionReports": {
+    "en-US": "Position (visa reports)",
+    "tr-TR": "Pozisyon (vize raporları)",
+    "tk-TM": "Wezipe (wiza hasabatlar)",
+    "ru-RU": "Должность (визовые отчёты)"
+  },
+  "ApplicationProfileInstance.LinkReview.PositionActual": {
+    "en-US": "Position (actual / company)",
+    "tr-TR": "Pozisyon (fiili / şirket)",
+    "tk-TM": "Wezipe (hakyky / kompaniýa)",
+    "ru-RU": "Должность (фактическая / компания)"
+  },
+  "ApplicationProfileInstance.LinkReview.Department": {
+    "en-US": "Department",
+    "tr-TR": "Departman",
+    "tk-TM": "Bölüm",
+    "ru-RU": "Отдел"
+  },
+  "ApplicationProfileInstance.LinkReview.VisaNumber": {
+    "en-US": "Visa number",
+    "tr-TR": "Vize numarası",
+    "tk-TM": "Wiza belgisi",
+    "ru-RU": "Номер визы"
+  },
+  "ApplicationProfileInstance.LinkReview.VisaType": {
+    "en-US": "Visa type",
+    "tr-TR": "Vize türü",
+    "tk-TM": "Wiza görnüşi",
+    "ru-RU": "Тип визы"
+  },
+  "ApplicationProfileInstance.LinkReview.VisaCategory": {
+    "en-US": "Visa category",
+    "tr-TR": "Vize kategorisi",
+    "tk-TM": "Wiza kategoriýasy",
+    "ru-RU": "Категория визы"
+  },
+  "ApplicationProfileInstance.LinkReview.IssuedPlace": {
+    "en-US": "Issued place",
+    "tr-TR": "Verildiği yer",
+    "tk-TM": "Berlen ýeri",
+    "ru-RU": "Место выдачи"
+  },
+  "ApplicationProfileInstance.LinkReview.DaysRemaining": {
+    "en-US": "Days remaining",
+    "tr-TR": "Kalan gün",
+    "tk-TM": "Galan gün",
+    "ru-RU": "Осталось дней"
+  },
+  "ApplicationProfileInstance.LinkReview.Region": {
+    "en-US": "Region",
+    "tr-TR": "Bölge",
+    "tk-TM": "Welaýat",
+    "ru-RU": "Регион"
+  },
+  "ApplicationProfileInstance.LinkReview.City": {
+    "en-US": "City",
+    "tr-TR": "Şehir",
+    "tk-TM": "Şäher",
+    "ru-RU": "Город"
+  },
+  "ApplicationProfileInstance.LinkReview.Type": {
+    "en-US": "Type",
+    "tr-TR": "Tür",
+    "tk-TM": "Görnüş",
+    "ru-RU": "Тип"
   }
 }

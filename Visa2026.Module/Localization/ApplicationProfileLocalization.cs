@@ -166,6 +166,7 @@ public static class ApplicationProfileLocalization
             "Education" => Msg("ApplicationProfile.Person.Education"),
             "Position" => Msg("ApplicationProfile.Person.Position"),
             "Address" => Msg("ApplicationProfileInstance.Org.Address"),
+            "Address of residence" => Msg("ApplicationProfile.Person.AddressOfResidence"),
             "Visa" => Msg("ApplicationProfile.Person.Visa"),
             "Invitation" => Msg("ApplicationProfile.Doc.Invitation"),
             "Work permit" => Msg("ApplicationProfile.Doc.WorkPermit"),

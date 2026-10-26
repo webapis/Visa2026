@@ -138,6 +138,10 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `ApplicationItem` | Full |
 | `Passport` | Full |
 | `Visa` | Full |
+| `Education` | Full |
+| `AddressOfResidence` | Full |
+| `EmployeePositionHistory`, `EmployeeSalary`, `WorkDuty`, `TravelHistory` | Full (Linked records dialog; Employee left nav stays denied) |
+| `ApplicationProfileInstancePersonResolvedLink` | Full (Join / Save pins the case record). `UsersReadOnly` stays read-only |
 | `Registration` | Full |
 | `Invitation` | Read, Write, Create |
 | `InvitationItem` | Read, Write, Create |
@@ -168,7 +172,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `ApplicationProfileTemplate` | Read, Write, Create (Create template from yellow marks). No Delete |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
 | `MigrationService`, `PassportType`, `Position`, `PurposeOfTravel` |
-| `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
+| `Region`, `City`, `Relationship`, `Urgency`, `ValidityDuration` |
 | `VisaCategory`, `VisaIssuedPlace`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |
 | `Company` |
@@ -250,3 +254,4 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 | Jul 2026 | UsersReadOnly (reader) must see process-tracking columns | Shared **`EnsureApplicationProcessTrackingReadPermissions`** for Users + UsersReadOnly (migration/approval SLA, progress state/location, snapshots); Users keep write on progress/snapshots |
 | Aug 2026 | Users cannot Mark incomplete / Mark complete on Person | **`PersonIncompleteDataOfficerPermissions.Ensure`** — `PersonIncompleteMarkOptions` Read/Write/Create + member Write on `IsDataIncomplete` and `Incomplete*` fields |
 | Jun 2026 | Document expiration thresholds under System nav for all Users | **`ExpirationAlertRule`** moved to **Configuration**; VisaOffice read/write + nav; Users read-only without System nav ([`DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md`](DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md)) |
+| Oct 2026 | Officers cannot save Linked records (create passport/visa/position or change the pinned record) | **`EnsureFullAccessRecursivePermission`** on `Passport`, `Visa`, `EmployeePositionHistory`, `EmployeeSalary`, `WorkDuty`, `TravelHistory`, and `ApplicationProfileInstancePersonResolvedLink` for Users. `City`, `Department`, and `Region` stay read-only. `UsersReadOnly` stays read-only. Left nav for Employee lists stays denied |

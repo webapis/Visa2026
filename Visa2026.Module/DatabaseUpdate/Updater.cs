@@ -312,7 +312,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // =====================================================================
         userRole.AddTypePermissionsRecursively<Person>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileInstance>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ApplicationProfileInstancePersonResolvedLink>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Linked records dialog writes the case pin (Join / Save). Readers stay read-only via EnsureUsersReadOnly.
+        userRole.AddTypePermissionsRecursively<ApplicationProfileInstancePersonResolvedLink>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // ApplicationItem / ApplicationProfileInstancePerson BOs removed — roster is skip-navigation People
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
@@ -320,6 +321,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         ReportDashboardOfficerPermissions.Ensure(userRole);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        // Position / salary / duty / travel are person aggregates the dialog links. Left nav stays denied.
+        userRole.AddTypePermissionsRecursively<EmployeePositionHistory>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<EmployeeSalary>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<WorkDuty>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<TravelHistory>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
         userRole.AddTypePermissionsRecursively<MedicalRecord>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<MedicalRecordDocument>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
@@ -372,6 +378,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ActualPosition>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<PurposeOfTravel>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Region>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<City>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Relationship>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Subcontractor>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Urgency>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -570,6 +577,16 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     PersonIncompleteDataOfficerPermissions.Ensure(userRole);
     // Existing "Users" roles: allow diploma rows and aggregated documents (EducationDocument + File) like Passport.
     EnsureFullAccessRecursivePermission<Education>(userRole);
+    // Linked records dialog: create and edit the person record, then pin it on the case.
+    EnsureFullAccessRecursivePermission<Passport>(userRole);
+    EnsureFullAccessRecursivePermission<Visa>(userRole);
+    EnsureFullAccessRecursivePermission<EmployeePositionHistory>(userRole);
+    EnsureFullAccessRecursivePermission<EmployeeSalary>(userRole);
+    EnsureFullAccessRecursivePermission<WorkDuty>(userRole);
+    EnsureFullAccessRecursivePermission<TravelHistory>(userRole);
+    EnsureReadOnlyPermission<City>(userRole);
+    EnsureReadOnlyPermission<Department>(userRole);
+    EnsureReadOnlyPermission<Region>(userRole);
     // Same for medical records under Person (MedicalRecordDocument / FileData not always covered by Person recursive grants in EF security).
     EnsureFullAccessRecursivePermission<MedicalRecord>(userRole);
     EnsureFullAccessRecursivePermission<MedicalRecordDocument>(userRole);
@@ -779,6 +796,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<Subcontractor>(role);
             EnsureReadOnlyPermission<AddressOfResidence>(role);
             EnsureReadOnlyPermission<AddressOfResidenceDocument>(role);
+            EnsureReadOnlyPermission<EmployeePositionHistory>(role);
+            EnsureReadOnlyPermission<EmployeeSalary>(role);
+            EnsureReadOnlyPermission<WorkDuty>(role);
+            EnsureReadOnlyPermission<TravelHistory>(role);
+            EnsureReadOnlyPermission<City>(role);
             EnsureReadOnlyPermission<BorderZoneName>(role);
             EnsureReadOnlyPermission<WorkPermittedLocationName>(role);
             EnsureReadOnlyPermission<UserReportTemplate>(role);
@@ -859,11 +881,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationProfileApprovalLegVersion>(role);
             EnsureReadOnlyPermission<ApplicationProfileTemplate>(role);
             EnsureReadOnlyPermission<ApplicationProfileProgressStateSetting>(role);
-            EnsureReadOnlyPermission<ApplicationProfileInstancePersonResolvedLink>(role);
             EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
 
             if (officerCanWriteProgress)
             {
+                // Join / Save on Linked records rewrites the pinned record. Readers stay read-only.
+                EnsureFullAccessRecursivePermission<ApplicationProfileInstancePersonResolvedLink>(role);
                 // Process-tracking still needs Read; officers also edit contract title, note, and active flag.
                 EnsureOfficerCanAssignApplicationProfile(role);
                 // Create template (yellow marks) checks Write on ApplicationProfileTemplate.
@@ -877,6 +900,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             }
             else
             {
+                EnsureReadOnlyPermission<ApplicationProfileInstancePersonResolvedLink>(role);
                 EnsureReadOnlyPermission<ProjectContract>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceProgress>(role);
                 EnsureReadOnlyPermission<ApplicationProfileInstanceApprovalLegSnapshot>(role);

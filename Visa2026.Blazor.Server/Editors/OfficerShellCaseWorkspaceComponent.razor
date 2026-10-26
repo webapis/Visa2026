@@ -2164,7 +2164,7 @@
                                                    CloseRequested="@ClosePersonLinkPickerRequested" />
             <DxPopup Visible="@ShowPersonLinkReview"
                      VisibleChanged="OnPersonLinkReviewVisibleChanged"
-                     HeaderText="Linked records"
+                     HeaderText="@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")"
                      ShowFooter="@(_reviewTab == "overview" && !_reviewCreating)"
                      ShowCloseButton="true"
                      CloseOnOutsideClick="false"
@@ -2183,7 +2183,7 @@
                         <span class="os-link-review-person__name">@(string.IsNullOrWhiteSpace(PersonLinkReviewPersonName) ? "—" : PersonLinkReviewPersonName)</span>
                         <button type="button"
                                 class="os-link-review__gear @(_reviewGearOn ? "is-on" : null)"
-                                title="Choose another record"
+                                title="@Msg("ApplicationProfileInstance.LinkReview.ChooseAnother")"
                                 aria-pressed="@_reviewGearOn"
                                 @onclick="ToggleReviewGear">⚙</button>
                     </div>
@@ -2194,7 +2194,7 @@
                                     class="os-link-review-tabs__tab @(_reviewTab == "overview" ? "is-active" : null)"
                                     role="tab"
                                     aria-selected="@(_reviewTab == "overview")"
-                                    @onclick='() => SelectReviewTab("overview")'>Overview</button>
+                                    @onclick='() => SelectReviewTab("overview")'>@Msg("ApplicationProfileInstance.Workspace.Overview")</button>
                             @foreach (var tab in PersonLinkReviewLines)
                             {
                                 var tabKey = tab.Kind.ToString();
@@ -2202,17 +2202,17 @@
                                         class="os-link-review-tabs__tab @(_reviewTab == tabKey ? "is-active" : null)"
                                         role="tab"
                                         aria-selected="@(_reviewTab == tabKey)"
-                                        @onclick="() => SelectReviewTab(tabKey)">@tab.Label</button>
+                                        @onclick="() => SelectReviewTab(tabKey)">@ApplicationProfileLocalization.LinkedRecordLabel(tab.Label)</button>
                             }
                         </div>
                     }
                     @if (_reviewTab == "overview")
                     {
-                        <div class="os-link-review" role="tabpanel" aria-label="Overview">
+                        <div class="os-link-review" role="tabpanel" aria-label="@Msg("ApplicationProfileInstance.Workspace.Overview")">
                             @foreach (var line in PersonLinkReviewLines)
                             {
                                 <div class="os-link-review__row">
-                                    <span class="os-link-review__label">@line.Label</span>
+                                    <span class="os-link-review__label">@ApplicationProfileLocalization.LinkedRecordLabel(line.Label)</span>
                                     @if (_reviewGearOn && line.Choices.Count > 0)
                                     {
                                         <select class="os-link-review__select"
@@ -2233,13 +2233,13 @@
                                         <span class="os-link-review__icons">
                                             <button type="button"
                                                     class="cw-addr-icon cw-addr-icon--plus"
-                                                    title="Add"
+                                                    title="@Msg("ApplicationProfileInstance.Issued.AddPerson")"
                                                     @onclick="() => StartCreateAsync(line)">+</button>
                                             @if (line.ObjectId != Guid.Empty || line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
                                             {
                                                 <button type="button"
                                                         class="cw-addr-icon cw-addr-icon--pen"
-                                                        title="Edit"
+                                                        title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
                                                         @onclick="() => StartEditAsync(line)">✎</button>
                                             }
                                         </span>
@@ -2293,15 +2293,15 @@
                                 </div>
                             }
                             <div class="os-link-review__actions">
-                                <button type="button" class="os-btn os-btn--primary" disabled="@(_reviewCreateSaving || draft.Fields.Count == 0)" @onclick="SaveCreateAsync">Save</button>
-                                <button type="button" class="os-btn" disabled="@_reviewCreateSaving" @onclick="CancelCreate">Cancel</button>
+                                <button type="button" class="os-btn os-btn--primary" disabled="@(_reviewCreateSaving || draft.Fields.Count == 0)" @onclick="SaveCreateAsync">@Msg("ApplicationProfileInstance.Issued.Save")</button>
+                                <button type="button" class="os-btn" disabled="@_reviewCreateSaving" @onclick="CancelCreate">@Msg("ApplicationProfileInstance.Issued.Cancel")</button>
                             </div>
                         </div>
                     }
                     else if (ActiveReviewLine is { } active)
                     {
-                        <div class="os-link-review-form" role="tabpanel" aria-label="@active.Label">
-                            <h3 class="os-link-review-form__title">@active.Label</h3>
+                        <div class="os-link-review-form" role="tabpanel" aria-label="@ApplicationProfileLocalization.LinkedRecordLabel(active.Label)">
+                            <h3 class="os-link-review-form__title">@ApplicationProfileLocalization.LinkedRecordLabel(active.Label)</h3>
                             @foreach (var field in active.Fields)
                             {
                                 <div class="os-link-review-form__row">
@@ -2320,7 +2320,7 @@
                                                 <span class="os-link-review-form__tool" aria-hidden="true">×</span>
                                                 <button type="button"
                                                         class="os-link-review-form__tool os-link-review-form__tool--pen"
-                                                        title="Edit"
+                                                        title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
                                                         @onclick="() => StartEditAsync(active)">✎</button>
                                                 <span class="os-link-review-form__tool" aria-hidden="true">+</span>
                                                 <span class="os-link-review-form__tool" aria-hidden="true">▾</span>
@@ -2338,8 +2338,8 @@
                 </BodyContentTemplate>
                 <FooterContentTemplate>
                     <div class="os-link-review__actions">
-                        <button type="button" class="os-btn os-btn--primary" disabled="@PersonLinkIsLinking" @onclick="JoinPersonLinkReviewAsync">@(PersonLinkReviewExisting ? "Save" : "Join")</button>
-                        <button type="button" class="os-btn" disabled="@PersonLinkIsLinking" @onclick="CancelPersonLinkReviewAsync">Cancel</button>
+                        <button type="button" class="os-btn os-btn--primary" disabled="@PersonLinkIsLinking" @onclick="JoinPersonLinkReviewAsync">@(PersonLinkReviewExisting ? Msg("ApplicationProfileInstance.Issued.Save") : Msg("ApplicationProfileInstance.LinkReview.Join"))</button>
+                        <button type="button" class="os-btn" disabled="@PersonLinkIsLinking" @onclick="CancelPersonLinkReviewAsync">@Msg("ApplicationProfileInstance.Issued.Cancel")</button>
                     </div>
                 </FooterContentTemplate>
             </DxPopup>
