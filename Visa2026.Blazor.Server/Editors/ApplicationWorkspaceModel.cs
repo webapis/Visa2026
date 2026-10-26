@@ -314,6 +314,18 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public bool PersonLinkReviewExisting
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> OpenExistingPersonLinkReviewRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
     public Guid PersonLinkReviewPersonId
     {
         get => GetPropertyValue<Guid>();

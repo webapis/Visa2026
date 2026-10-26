@@ -121,6 +121,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         ChangeFileRequested = EventCallback.Factory.Create<OfficerShellCaseProgressFileChange>(this, ChangeFileAsync),
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
+        OpenExistingPersonLinkReviewRequested = EventCallback.Factory.Create<Guid>(this, OpenExistingPersonLinkReviewAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
         JoinPersonLinkReviewRequested = EventCallback.Factory.Create(this, JoinPersonLinkReviewAsync),
         CancelPersonLinkReviewRequested = EventCallback.Factory.Create(this, CancelPersonLinkReviewAsync),
@@ -517,10 +518,57 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 return;
             }
 
+            model.PersonLinkReviewExisting = false;
             model.PersonLinkReviewPersonId = personId;
             model.PersonLinkReviewPersonName = person.FullName;
             model.PersonLinkReviewPhotoDataUri = PdfPersonPhotoDataUri.FromBytes(person.Photo);
             model.PersonLinkReviewLines = PersonLinkReview.Build(objectSpace, application, person);
+            model.ShowPersonLinkPicker = false;
+            model.ShowPersonLinkReview = true;
+            model.PersonLinkStatusMessage = null;
+            model.PersonLinkStatusIsError = false;
+        }
+        catch (Exception ex)
+        {
+            model.PersonLinkStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+            model.PersonLinkStatusIsError = true;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task OpenExistingPersonLinkReviewAsync(Guid personId)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty || personId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (application == null || person == null)
+            {
+                model.PersonLinkStatusMessage = "Person or application not found.";
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            {
+                model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstancePerson.RosterLockedWhenWorkflowTerminal");
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            var lines = PersonLinkReview.Build(objectSpace, application, person).ToList();
+            PersonLinkReview.PreferCaseLinks(objectSpace, application, person, lines);
+            model.PersonLinkReviewExisting = true;
+            model.PersonLinkReviewPersonId = personId;
+            model.PersonLinkReviewPersonName = person.FullName;
+            model.PersonLinkReviewPhotoDataUri = PdfPersonPhotoDataUri.FromBytes(person.Photo);
+            model.PersonLinkReviewLines = lines;
             model.ShowPersonLinkPicker = false;
             model.ShowPersonLinkReview = true;
             model.PersonLinkStatusMessage = null;
@@ -556,12 +604,16 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 return;
             }
 
-            var linked = ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
-            if (linked == null)
+            var existing = model.PersonLinkReviewExisting;
+            if (!existing)
             {
-                model.PersonLinkStatusMessage = "Could not link the selected person.";
-                model.PersonLinkStatusIsError = true;
-                return;
+                var linked = ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
+                if (linked == null)
+                {
+                    model.PersonLinkStatusMessage = "Could not link the selected person.";
+                    model.PersonLinkStatusIsError = true;
+                    return;
+                }
             }
 
             PersonLinkReview.ApplyJoinLinks(objectSpace, application, person, model.PersonLinkReviewLines);
@@ -569,7 +621,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             ClearPersonLinkReview(model);
             model.ShowPersonLinkPicker = false;
             model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
-            model.PersonLinkStatusMessage = $"{person.FullName} linked.";
+            model.PersonLinkStatusMessage = existing ? $"{person.FullName} updated." : $"{person.FullName} linked.";
             model.PersonLinkStatusIsError = false;
             await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
@@ -590,8 +642,10 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (model == null)
             return Task.CompletedTask;
 
+        var existing = model.PersonLinkReviewExisting;
         ClearPersonLinkReview(model);
-        model.ShowPersonLinkPicker = true;
+        if (!existing)
+            model.ShowPersonLinkPicker = true;
         model.PersonLinkStatusMessage = null;
         model.PersonLinkStatusIsError = false;
         return Task.CompletedTask;
@@ -721,6 +775,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private static void ClearPersonLinkReview(OfficerShellModel model)
     {
         model.ShowPersonLinkReview = false;
+        model.PersonLinkReviewExisting = false;
         model.PersonLinkReviewPersonId = Guid.Empty;
         model.PersonLinkReviewPersonName = null;
         model.PersonLinkReviewPhotoDataUri = null;

@@ -502,6 +502,8 @@
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
     [Parameter] public bool ShowPersonLinkReview { get; set; }
+    [Parameter] public bool PersonLinkReviewExisting { get; set; }
+    [Parameter] public EventCallback<Guid> OpenExistingPersonLinkReviewRequested { get; set; }
     [Parameter] public string? PersonLinkReviewPersonName { get; set; }
     [Parameter] public string? PersonLinkReviewPhotoDataUri { get; set; }
     [Parameter] public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines { get; set; } = Array.Empty<PersonLinkReviewLine>();
@@ -2336,7 +2338,7 @@
                 </BodyContentTemplate>
                 <FooterContentTemplate>
                     <div class="os-link-review__actions">
-                        <button type="button" class="os-btn os-btn--primary" disabled="@PersonLinkIsLinking" @onclick="JoinPersonLinkReviewAsync">Join</button>
+                        <button type="button" class="os-btn os-btn--primary" disabled="@PersonLinkIsLinking" @onclick="JoinPersonLinkReviewAsync">@(PersonLinkReviewExisting ? "Save" : "Join")</button>
                         <button type="button" class="os-btn" disabled="@PersonLinkIsLinking" @onclick="CancelPersonLinkReviewAsync">Cancel</button>
                     </div>
                 </FooterContentTemplate>
@@ -2355,9 +2357,14 @@
                         <tbody>
                             @foreach (var person in view.People)
                             {
-                                <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.IsExcluded ? "is-excluded" : null)" @onclick="() => SelectPersonRow(person.Index)">
+                                <tr class="os-person-row @(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.IsExcluded ? "is-excluded" : null)"
+                                    @onclick="() => OpenPersonReviewFromRowAsync(person)">
                                     <td>
-                                        <span class="ct-link">@person.Name</span>
+                                        <button type="button"
+                                                class="ct-link"
+                                                disabled="@(person.PersonId == Guid.Empty || !CanLinkPerson)"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => OpenExistingPersonLinkReviewAsync(person.PersonId)">@person.Name</button>
                                         @if (person.IsExcluded)
                                         {
                                             <span class="cw-excluded-badge" title="@ExcludedTitle(person)">⊘ Excluded · № @person.ExcludedLetterNumber · @person.ExcludedLetterDate?.ToString("dd.MM.yyyy")</span>
@@ -2396,7 +2403,10 @@
                 {
                     <section class="ct-person-panel">
                         <header class="ct-person-panel__head">
-                            <span>👤 <strong>@person.Name</strong></span>
+                            <button type="button"
+                                    class="ct-link"
+                                    disabled="@(person.PersonId == Guid.Empty || !CanLinkPerson)"
+                                    @onclick="() => OpenExistingPersonLinkReviewAsync(person.PersonId)">@person.Name</button>
                             <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
                         </header>
                         <div class="cw-link-row ct-person-panel__tiles">
@@ -3086,6 +3096,20 @@
             await DeleteCaseRequested.InvokeAsync();
     }
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
+
+    private Task OpenExistingPersonLinkReviewAsync(Guid personId) =>
+        personId == Guid.Empty || !CanLinkPerson
+            ? Task.CompletedTask
+            : OpenExistingPersonLinkReviewRequested.InvokeAsync(personId);
+
+    private async Task OpenPersonReviewFromRowAsync(ApplicationWorkspaceCasePerson person)
+    {
+        if (person == null)
+            return;
+
+        await SelectPersonRow(person.Index);
+        await OpenExistingPersonLinkReviewAsync(person.PersonId);
+    }
 
     private Task JoinPersonLinkReviewAsync() => JoinPersonLinkReviewRequested.InvokeAsync();
 

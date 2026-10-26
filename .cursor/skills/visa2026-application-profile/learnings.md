@@ -1,3 +1,10 @@
+### 2026-10-26 — Open Linked records for a person already on the case
+
+- **Need**: Changing a linked person's records required Relink or opening the person. Officers click the person name.
+- **Fix**: The name in People on this case and under Linked records by person opens the same dialog. It shows the records this case already uses. Save writes the choices. Cancel closes the dialog. A new person from Link existing still uses Join.
+- **Officer**: Rebuild, hard-refresh. On People & links, click a person's name. The dialog opens with that person's photo and current records.
+- **Prevent**: Do not call `LinkPerson` again for someone already on the case. Do not return to person search when that dialog is cancelled.
+- **Cross-skill**: —
 ### 2026-10-26 — Link review shows the person
 
 - **Need**: Linked records did not say which person was being linked.

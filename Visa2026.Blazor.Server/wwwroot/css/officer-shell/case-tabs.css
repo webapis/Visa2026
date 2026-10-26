@@ -4,6 +4,8 @@
 .ct-page__title { margin: 0 0 6px; font-size: 1.05rem; color: var(--os-ink); }
 .ct-page__sub { margin: 0 0 14px; color: var(--os-muted); font-size: 0.86rem; }
 .ct-link { color: var(--os-accent); font-weight: 650; text-decoration: none; }
+button.ct-link { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left; }
+button.ct-link:disabled { cursor: default; opacity: 0.7; }
 button.ct-letter-preview {
   background: none;
   border: none;

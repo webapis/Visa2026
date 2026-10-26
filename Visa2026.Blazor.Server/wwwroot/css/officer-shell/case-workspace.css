@@ -1882,6 +1882,7 @@ select.cw-summary-field__input option {
   --os-accent: var(--DS-color-content-primary-default-rest, var(--bs-primary, #1d6ef2));
   color: var(--os-ink);
 }
+.os-person-row { cursor: pointer; }
 .os-link-review-person { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .os-link-review-person__photo,
 .os-link-review-person__photo-empty {

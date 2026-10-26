@@ -209,6 +209,37 @@ public static class PersonLinkReview
         ApplicationProfileInstanceChildMembership.Add(objectSpace, application, kind, objectId);
     }
 
+    /// <summary>
+    /// When the person is already on the case, show the records this case already uses.
+    /// </summary>
+    public static void PreferCaseLinks(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person,
+        IReadOnlyList<PersonLinkReviewLine> lines)
+    {
+        if (objectSpace == null || application == null || person == null || lines == null || application.ID == Guid.Empty)
+            return;
+
+        var pinned = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(link => link.ApplicationProfileInstanceId == application.ID && link.PersonId == person.ID)
+            .ToList();
+        foreach (var line in lines)
+        {
+            var linkedId = pinned.FirstOrDefault(link => link.LinkKind == line.Kind)?.LinkedObjectId;
+            if (linkedId is not Guid objectId || objectId == Guid.Empty)
+                continue;
+
+            var choices = line.Choices.ToList();
+            if (choices.All(choice => choice.ObjectId != objectId)
+                && ChoiceForObject(objectSpace, line.Kind, line.Label, objectId) is { } extra)
+                choices.Add(extra);
+
+            line.Choices = choices;
+            ApplyChoice(line, objectId);
+        }
+    }
+
     public static void ApplyJoinLinks(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,

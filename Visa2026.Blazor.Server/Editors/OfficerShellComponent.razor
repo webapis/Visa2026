@@ -120,6 +120,8 @@
                                                                 LinkPersonFromPickerRequested="@LinkPersonFromPickerRequested"
                                                                 ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested"
                                                                 ShowPersonLinkReview="@ShowPersonLinkReview"
+                                                                PersonLinkReviewExisting="@PersonLinkReviewExisting"
+                                                                OpenExistingPersonLinkReviewRequested="@OpenExistingPersonLinkReviewRequested"
                                                                 PersonLinkReviewPersonName="@PersonLinkReviewPersonName"
                                                                 PersonLinkReviewPhotoDataUri="@PersonLinkReviewPhotoDataUri"
                                                                 PersonLinkReviewLines="@PersonLinkReviewLines"
@@ -250,6 +252,8 @@
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
     [Parameter] public bool ShowPersonLinkReview { get; set; }
+    [Parameter] public bool PersonLinkReviewExisting { get; set; }
+    [Parameter] public EventCallback<Guid> OpenExistingPersonLinkReviewRequested { get; set; }
     [Parameter] public string? PersonLinkReviewPersonName { get; set; }
     [Parameter] public string? PersonLinkReviewPhotoDataUri { get; set; }
     [Parameter] public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines { get; set; } = Array.Empty<PersonLinkReviewLine>();
