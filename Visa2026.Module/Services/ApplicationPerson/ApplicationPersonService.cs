@@ -3,6 +3,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
@@ -74,6 +75,7 @@ public static class ApplicationProfileInstancePersonService
             return false;
 
         ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
+        InvitationStayAddressCopy.EnsureForPeopleWithoutAddress(objectSpace, trackedApplication);
 
         if (trackedPerson.ID != Guid.Empty && !objectSpace.IsNewObject(trackedPerson))
             objectSpace.ReloadObject(trackedPerson);

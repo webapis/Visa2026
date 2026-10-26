@@ -1,3 +1,110 @@
+### 2026-10-26 — Link review shows the person
+
+- **Need**: Linked records did not say which person was being linked.
+- **Fix**: The popup header shows `Person.FullName` and `Person.Photo` (passport ratio; empty frame when there is no photo). It stays above the tabs and the add/edit form.
+- **Officer**: Rebuild, hard-refresh. Link existing and pick a person. The name and photo stay visible after the gear, a tab, or the pen.
+- **Prevent**: Do not hide the person header while `_reviewCreating` is true.
+- **Cross-skill**: —
+### 2026-10-26 — Link review tabs and date control
+
+- **Need**: Record tabs were always visible. Date fields on the add/edit form were plain text.
+- **Fix**: Tabs (Overview and each record) appear only while the gear is on. Turning the gear off returns to the compact Overview. Date fields use `OfficerDateEdit` (`dd.MM.yyyy`, advancing caret, calendar). The saved value stays `dd.MM.yyyy`.
+- **Officer**: Rebuild, hard-refresh. Link existing. Tabs are hidden until the gear is clicked. Open a passport with the pen — issue and expiration are date controls.
+- **Prevent**: Do not render the tab strip while the gear is off. Do not use a plain text input for these dates.
+- **Cross-skill**: —
+### 2026-10-26 — Pen edits in the custom form
+
+- **Need**: The Overview pen and the record-tab pen were still opening the native XAF detail.
+- **Fix**: Both pens open the same popup form as plus, filled from the selected record. Save updates that record and keeps it selected for Join. Cancel discards the form. An address line that only shows the Case summary stay opens those values without inserting a row; Save creates the address, Cancel leaves Join to copy the stay. Join and Cancel stay hidden while the form is open.
+- **Officer**: Rebuild, hard-refresh. Link existing, turn the gear on, click the pen. The form should stay inside Linked records, with the current values, and no second XAF window.
+- **Prevent**: Do not open `LinkedRecordDetailOpenHelper.ShowEditor` from these pens. Do not insert an address when the pen is only opened.
+- **Cross-skill**: —
+### 2026-10-26 — Plus adds a new linked record
+
+- **Need**: While the Overview gear is on, the officer needs a plus beside the pen to add a new record of that kind.
+- **Fix**: Plus creates a blank record on that person, opens the native editor, and after save selects it for Join. A new address is empty, so Join links it and does not insert the Case summary copy.
+- **Officer**: Rebuild, hard-refresh. Turn the gear on. Plus is next to the pen. Save the new record, then Join.
+- **Prevent**: Do not show the plus while the gear is off. Do not prefill a new address from the Case summary.
+- **Cross-skill**: —
+### 2026-10-26 — Link review is a popup
+
+- **Need**: The linked-record overview was drawn inside People & links. It is a temporary step, not part of the case page.
+- **Fix**: The overview opens in a `DxPopup` (`os-link-review-popup`). Join still links the person. Cancel and the popup close button return to the person search. The address pen still declines the Case summary insert.
+- **Officer**: Stop F5, rebuild, hard-refresh. Link existing, pick a person. The review should cover the page, and People & links should stay as the people table underneath.
+- **Prevent**: Do not render this review inline in the case page.
+- **Cross-skill**: —
+### 2026-10-26 — Join copies the Case summary address
+
+- **Need**: Link existing should show the linked-record overview, and Join should insert the Case summary stay as a new address unless the person's newest address already matches.
+- **Fix**: Choosing a person opens the overview. Join calls `LinkPerson` then `InvitationStayAddressCopy.AcceptOnJoin`. A matching newest address is left unchanged. The pen opens the native detail when that record already exists.
+- **Officer**: Stop F5, rebuild, hard-refresh. Link existing, pick a person, then Join or Cancel. On an invitation case, Join adds the Case summary address when the newest address differs.
+- **Prevent**: Do not put a tick on this overview. Do not insert another address when the newest one already matches region, city, type, and place.
+- **Cross-skill**: —
+### 2026-10-26 — Join inserts the Case summary address
+
+- **Need**: The link overview should not use a tick to accept Case summary defaults.
+- **Decision**: Join accepts them. For address of residence, Join creates a new `AddressOfResidence` from the Case summary stay and links it, unless the person's newest address already matches that stay (region, city, type, and place). A match does not insert another row. Prototype: `docs/prototypes/application-profile-instance-linked-records-dialog-01-overview.jpg`. Not implemented.
+- **Officer**: No build. The link dialog is still a prototype.
+- **Prevent**: Do not put a tick on the Join overview for the Case summary address. Do not insert a duplicate when the last address already matches.
+- **Cross-skill**: —
+### 2026-10-26 — Case summary defaults use the address tick
+
+- **Need**: Every Case summary value used as the default for a linked person's business object must behave like Address of residence, not only the invitation stay.
+- **Decision**: Show that Case summary value as the default on the link overview, with the same green tick. The tick creates a new record from Case summary and relinks this case. The previous record stays on the person. Do not rewrite a copied record when Case summary changes later; show the tick again when they differ. Person-owned records that are not filled from Case summary get a pen and no tick. Reference: `AddressOfResidence`, `InvitationStayAddressCopy`. Prototype: `docs/prototypes/application-profile-instance-linked-records-dialog-README.md`. Not implemented.
+- **Officer**: No build. The link dialog is still a prototype.
+- **Prevent**: Do not special-case the tick to Address of residence when another Case summary field defaults a linked business object.
+- **Cross-skill**: —
+### 2026-10-24 — Whole row tint + progress sort by color
+
+- **Need**: Only Progress/Result cells showed green/red/blue; rest of the row stayed dark. Sort arrow did not group by color.
+- **Cause**: DxGrid ignores `--dxbl-grid-row-bg` on normal tds (only `lv-plain-cell` forced it). CustomSort read empty NotMapped values instead of `DataItem`.
+- **Fix**: CSS paints every `td` on `visa-progress-row`. CustomSort compares `DataItem1/2.ProgressListSortKey` (color priority then stage). Column `FieldName` stays `LatestPrimaryStateCode` for CollectionSource safety.
+- **Officer**: Rebuild Blazor host, hard-refresh (Ctrl+F5 for CSS). Whole row matches Progress tint. Sort Application progress — greens together, then other colors.
+- **Prevent**: Do not rely on `--dxbl-grid-row-bg` alone for left columns. Do not CustomSort from Value1 on NotMapped ints.
+- **Cross-skill**: visa2026-bo-state-colors
+
+### 2026-10-24 — Progress column sorts by color then workflow stage
+
+- **Need**: Sorting Application progress mixed green Issued rows with in-process rows; alphabetical `LatestPrimaryStateCode` does not match row color.
+- **Cause**: String sort on state codes; some denormalized codes empty while color uses live latest progress / SLA.
+- **Fix**: `ProgressListSortKey` = appearance `DisplayPriority` (color) × 1000 + workflow stage. Stepper column uses CustomSort on that key (same appearance rules as row tint).
+- **Officer**: Rebuild Blazor host (VS only). Hard-refresh. Sort Application progress — same colors group; Issued before in-process when ascending.
+- **Prevent**: Do not sort progress by raw state-code text. Keep CustomSort so NotMapped key is not sent to SQL.
+- **Cross-skill**: visa2026-bo-state-colors
+
+### 2026-10-24 — Instance ListView sorts by Application progress
+
+- **Need**: Applications via ministry (and other instance lists) could not sort the Application progress stepper column.
+- **Cause**: `ProgressStepsDisplay` is NotMapped and `AllowSort` was forced off.
+- **Fix**: Keep the stepper cell template; bind the column `FieldName` to persistent `LatestPrimaryStateCode` and set `AllowSort` true. Plain-cell CSS also keys off that field name.
+- **Officer**: Rebuild Blazor host only (VS Clean/Rebuild if locks). Hard-refresh. Click Application progress header to sort.
+- **Prevent**: Do not sort on NotMapped `ProgressStepsDisplay`. Do not leave `AllowSort = false` on that column.
+- **Cross-skill**: —
+
+### 2026-10-24 — Choose Application Profile advances on row click
+
+- **Need**: On Create case → Choose Application Profile, officers had to select a row and then click Continue.
+- **Fix**: Clicking (or Enter/Space on) a profile row selects it and moves to the next step. Continue was removed from that step only; Approval legs / Organization / Case summary keep their buttons.
+- **Officer**: Stop F5 if needed, rebuild Blazor host, hard-refresh. Open New application. Click a profile — next step opens without Continue.
+- **Prevent**: Do not auto-advance from the initial first-row highlight on load; only advance on an explicit row click.
+- **Cross-skill**: —
+
+### 2026-10-24 — Invitation stay copies onto the linked person's address
+
+- **Need**: Invitation-receiving templates other than Çakylyk Almak hid Invitation region, city, address type, and other invitation places. Çakylyk Almak hid the Address tile. Officers need the case stay on each linked person's address of residence, with a choice when the person already has one.
+- **Fix**: Those five templates collect the stay. Region, city, address type, and the place are required. Other invitation places stay optional. A person with no address gets one from the stay when it is complete. A tick creates a new address and relinks this case. The pen edits that person's address in the right-hand panel. A later case-summary change does not rewrite an address already copied.
+- **Officer**: Stop F5, rebuild, hard-refresh so catalog sync turns the flags on. Open Çakylyk Almak, Çakylyk we Iş Rugsatnamasyny Almak, Çakylyk Almak FM, Iş Rugsatnama görä Çakylyk Almak, or Çakylygy üýtgetmek. Case summary shows the address fields. People & links shows Address. Tick and pen are on that row.
+- **Prevent**: Do not turn Address of residence off for Çakylyk Almak. Do not limit invitation address to `get_invitation` only. Do not overwrite an existing address when the case summary changes.
+- **Cross-skill**: —
+
+### 2026-10-24 — Delete a case from its workspace
+
+- **Need**: Application profile instance detail had no Delete. Workspace chrome hides the native XAF Delete action.
+- **Fix**: **Delete case** in the case header (workspace and officer-shell case). Confirm, then delete. Refused while the case still has issued invitations, visas, work permits, border zones, or rejections. Open instance lists refresh and drop the row.
+- **Officer**: Stop the host, rebuild, hard-refresh. Open a case with no issued records. **Delete case** → confirm → the case closes and leaves the list. A case with issued records shows the reason and stays.
+- **Prevent**: Do not turn native XAF Delete back on for the workspace host. Do not `Clear()` an `ObservableCollection` navigation while deleting.
+- **Cross-skill**: —
+
 ### 2026-10-24 — Invitation expiry is issued date plus 91 days
 
 - **Need**: New invitation on Application result set End date to issued date + 90 days. The field was labeled End date.

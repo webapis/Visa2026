@@ -15,6 +15,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationWorkspace;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonLink;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationWorkspace;
@@ -69,6 +70,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         IssuedHeaderNewRequested = EventCallback.Factory.Create<string>(this, OnIssuedHeaderNewRequested),
         IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
         BackToListRequested = EventCallback.Factory.Create(this, BackToListAsync),
+        DeleteCaseRequested = EventCallback.Factory.Create(this, DeleteCaseAsync),
         OpenResminamalarRequested = EventCallback.Factory.Create(this, OpenResminamalarAsync),
         OpenPersonDetailByIndexRequested = EventCallback.Factory.Create<int>(this, OpenPersonDetailByIndexAsync),
         RelinkPersonRequested = EventCallback.Factory.Create<Guid>(this, RelinkPersonAsync),
@@ -82,6 +84,12 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         PersonLinkSearchRequested = EventCallback.Factory.Create<string>(this, SearchPersonLinkCandidatesAsync),
         LinkPersonFromPickerRequested = EventCallback.Factory.Create<Guid>(this, LinkPersonFromPickerAsync),
         ClosePersonLinkPickerRequested = EventCallback.Factory.Create(this, ClosePersonLinkPickerAsync),
+        JoinPersonLinkReviewRequested = EventCallback.Factory.Create(this, JoinPersonLinkReviewAsync),
+        CancelPersonLinkReviewRequested = EventCallback.Factory.Create(this, CancelPersonLinkReviewAsync),
+        EditPersonLinkReviewRequested = EventCallback.Factory.Create<PersonLinkReviewLine>(this, EditPersonLinkReviewAsync),
+        SelectPersonLinkReviewRequested = EventCallback.Factory.Create<PersonLinkReviewChoiceRequest>(this, SelectPersonLinkReviewAsync),
+        CreatePersonLinkReviewRequested = EventCallback.Factory.Create<PersonLinkReviewLine>(this, CreatePersonLinkReviewAsync),
+        SavePersonLinkReviewCreateRequested = EventCallback.Factory.Create<PersonLinkReviewCreateForm>(this, SavePersonLinkReviewCreateAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
@@ -543,6 +551,34 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         return Task.CompletedTask;
     }
 
+    private Task DeleteCaseAsync()
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        model.DeleteCaseErrorMessage = null;
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            if (!ApplicationProfileInstanceDeleteHelper.TryDelete(objectSpace, applicationId, out var error))
+            {
+                model.DeleteCaseErrorMessage = error;
+                return Task.CompletedTask;
+            }
+        }
+        catch (Exception ex)
+        {
+            model.DeleteCaseErrorMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+            return Task.CompletedTask;
+        }
+
+        _application.ServiceProvider?.GetService<IApplicationProfileInstanceDeletedNotifier>()?.NotifyDeleted(applicationId);
+        View?.Close();
+        return Task.CompletedTask;
+    }
+
     private Task OpenResminamalarAsync()
     {
         var applicationId = ResolveApplicationProfileInstanceId();
@@ -926,8 +962,6 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (model == null || _application == null || applicationId == Guid.Empty || personId == Guid.Empty)
             return;
 
-        model.PersonLinkIsLinking = true;
-        await Task.Delay(16);
         try
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -954,6 +988,46 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 return;
             }
 
+            model.PersonLinkReviewPersonId = personId;
+            model.PersonLinkReviewPersonName = person.FullName;
+            model.PersonLinkReviewPhotoDataUri = PdfPersonPhotoDataUri.FromBytes(person.Photo);
+            model.PersonLinkReviewLines = PersonLinkReview.Build(objectSpace, application, person);
+            model.ShowPersonLinkPicker = false;
+            model.ShowPersonLinkReview = true;
+            model.PersonLinkStatusMessage = null;
+            model.PersonLinkStatusIsError = false;
+        }
+        catch (Exception ex)
+        {
+            model.PersonLinkStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+            model.PersonLinkStatusIsError = true;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task JoinPersonLinkReviewAsync()
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        var personId = model?.PersonLinkReviewPersonId ?? Guid.Empty;
+        if (model == null || _application == null || applicationId == Guid.Empty || personId == Guid.Empty)
+            return;
+
+        model.PersonLinkIsLinking = true;
+        await Task.Delay(16);
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (application == null || person == null)
+            {
+                model.PersonLinkStatusMessage = "Person or application not found.";
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
             var linked = ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
             if (linked == null)
             {
@@ -962,7 +1036,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 return;
             }
 
+            PersonLinkReview.ApplyJoinLinks(objectSpace, application, person, model.PersonLinkReviewLines);
             objectSpace.CommitChanges();
+            ClearPersonLinkReview(model);
             model.ShowPersonLinkPicker = false;
             model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
             model.PersonLinkStatusMessage = $"{person.FullName} linked.";
@@ -980,6 +1056,155 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         }
     }
 
+    private Task CancelPersonLinkReviewAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        ClearPersonLinkReview(model);
+        model.ShowPersonLinkPicker = true;
+        model.PersonLinkStatusMessage = null;
+        model.PersonLinkStatusIsError = false;
+        return Task.CompletedTask;
+    }
+
+    private Task SelectPersonLinkReviewAsync(PersonLinkReviewChoiceRequest request)
+    {
+        var model = ComponentModel;
+        if (model == null || request == null)
+            return Task.CompletedTask;
+
+        var line = model.PersonLinkReviewLines.FirstOrDefault(item => item.Kind == request.Kind);
+        if (line == null)
+            return Task.CompletedTask;
+
+        PersonLinkReview.ApplyChoice(line, request.ObjectId);
+        if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+        {
+            model.PersonLinkReviewDeclineCaseSummaryAddress = line.ObjectId != Guid.Empty;
+            model.PersonLinkReviewEditedAddressId = line.ObjectId;
+        }
+
+        model.PersonLinkReviewLines = model.PersonLinkReviewLines.ToArray();
+        return Task.CompletedTask;
+    }
+
+    private Task CreatePersonLinkReviewAsync(PersonLinkReviewLine line)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.PersonLinkReviewPersonId == Guid.Empty)
+            return Task.CompletedTask;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(Person));
+        model.PersonLinkReviewCreateForm = PersonLinkReview.BuildCreateForm(objectSpace, line.Kind, line.Label);
+        return Task.CompletedTask;
+    }
+
+    private Task SavePersonLinkReviewCreateAsync(PersonLinkReviewCreateForm form)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || form == null || applicationId == Guid.Empty || model.PersonLinkReviewPersonId == Guid.Empty)
+            return Task.CompletedTask;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            var person = objectSpace.GetObjectByKey<Person>(model.PersonLinkReviewPersonId);
+            if (person == null)
+            {
+                form.Error = "Person was not found.";
+                model.PersonLinkReviewCreateForm = form;
+                return Task.CompletedTask;
+            }
+
+            var passportId = model.PersonLinkReviewLines
+                .FirstOrDefault(item => item.Kind == ApplicationProfileInstancePersonLinkKind.Passport)?.ObjectId ?? Guid.Empty;
+            var savedId = PersonLinkReview.TryCreate(objectSpace, person, form, passportId, out var error);
+            if (savedId == Guid.Empty)
+            {
+                form.Error = error ?? "Could not save the record.";
+                model.PersonLinkReviewCreateForm = form;
+                return Task.CompletedTask;
+            }
+
+            objectSpace.CommitChanges();
+            var line = model.PersonLinkReviewLines.FirstOrDefault(item => item.Kind == form.Kind);
+            if (line != null)
+                PersonLinkReview.SelectSaved(objectSpace, application, person, line, savedId);
+            if (form.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            {
+                model.PersonLinkReviewDeclineCaseSummaryAddress = true;
+                model.PersonLinkReviewEditedAddressId = savedId;
+            }
+
+            form.Saved = true;
+            form.Error = null;
+            model.PersonLinkReviewCreateForm = null;
+            model.PersonLinkReviewLines = model.PersonLinkReviewLines.ToArray();
+        }
+        catch (Exception ex)
+        {
+            form.Error = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+            model.PersonLinkReviewCreateForm = form;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task RememberCreatedReviewAsync(ApplicationProfileInstancePersonLinkKind kind, Guid savedId)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty || savedId == Guid.Empty)
+            return Task.CompletedTask;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var person = objectSpace.GetObjectByKey<Person>(model.PersonLinkReviewPersonId);
+        var line = model.PersonLinkReviewLines.FirstOrDefault(item => item.Kind == kind);
+        if (person == null || line == null)
+            return Task.CompletedTask;
+
+        PersonLinkReview.SelectSaved(objectSpace, application, person, line, savedId);
+        if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && line.ObjectId != Guid.Empty)
+        {
+            model.PersonLinkReviewDeclineCaseSummaryAddress = true;
+            model.PersonLinkReviewEditedAddressId = line.ObjectId;
+        }
+
+        model.PersonLinkReviewLines = model.PersonLinkReviewLines.ToArray();
+        return Task.CompletedTask;
+    }
+
+    private Task EditPersonLinkReviewAsync(PersonLinkReviewLine line)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || line == null || applicationId == Guid.Empty || model.PersonLinkReviewPersonId == Guid.Empty)
+            return Task.CompletedTask;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        var person = objectSpace.GetObjectByKey<Person>(model.PersonLinkReviewPersonId);
+        model.PersonLinkReviewCreateForm = PersonLinkReview.BuildEditForm(objectSpace, application, person, line);
+        return Task.CompletedTask;
+    }
+
+    private static void ClearPersonLinkReview(ApplicationWorkspaceModel model)
+    {
+        model.ShowPersonLinkReview = false;
+        model.PersonLinkReviewPersonId = Guid.Empty;
+        model.PersonLinkReviewPersonName = null;
+        model.PersonLinkReviewPhotoDataUri = null;
+        model.PersonLinkReviewLines = Array.Empty<PersonLinkReviewLine>();
+        model.PersonLinkReviewDeclineCaseSummaryAddress = false;
+        model.PersonLinkReviewEditedAddressId = Guid.Empty;
+        model.PersonLinkReviewCreateForm = null;
+    }
+
     private Task ClosePersonLinkPickerAsync()
     {
         var model = ComponentModel;
@@ -990,6 +1215,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
         model.PersonLinkStatusMessage = null;
         model.PersonLinkStatusIsError = false;
+        ClearPersonLinkReview(model);
         return Task.CompletedTask;
     }
 

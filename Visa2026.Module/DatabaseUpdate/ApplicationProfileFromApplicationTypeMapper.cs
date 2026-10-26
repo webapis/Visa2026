@@ -157,8 +157,8 @@ public static class ApplicationProfileFromApplicationTypeMapper
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
         var caklykAlmak = ApplicationProfileInvitationAddressPolicy.IsCaklykAlmakType(type);
-        profile.RequirePersonAddressOfResidence = !caklykAlmak;
-        if (caklykAlmak)
+        profile.RequirePersonAddressOfResidence = true;
+        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStayType(type))
         {
             profile.RequireInvitationAddress = true;
             profile.RequireInvitationPlace = true;

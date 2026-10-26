@@ -473,13 +473,23 @@ namespace Visa2026.Module.BusinessObjects
 
 
 
-        [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
+        [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse' And DeferPrivateHouseExpiration = False")]
 
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
 
         [ModelDefault("EditMask", "dd.MM.yyyy")]
 
         public virtual DateTime? ExpirationDate { get; set; }
+
+        /// <summary>
+        /// First save of a private-house copy from Case summary. Not stored.
+        /// The pen editor clears this so the expiration date is required on the next save.
+        /// </summary>
+        [NotMapped]
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public bool DeferPrivateHouseExpiration { get; set; }
 
 
 

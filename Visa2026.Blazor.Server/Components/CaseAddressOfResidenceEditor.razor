@@ -1,0 +1,270 @@
+@using System.Globalization
+@using DevExpress.ExpressApp
+@using Microsoft.EntityFrameworkCore
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
+
+<aside class="ct-address-editor" aria-label="@Title">
+    <header class="ct-address-editor__head">
+        <h3>@Title</h3>
+        <button type="button" class="cw-addr-icon" title="@CloseLabel" @onclick="Closed">×</button>
+    </header>
+    @if (_loading)
+    {
+        <p class="cw-issued-panel__hint">@Opening</p>
+    }
+    else
+    {
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <p class="ct-address-editor__error">@_error</p>
+        }
+        <label class="ct-address-editor__field">
+            <span>@TypeLabel</span>
+            <select @bind="_type" @bind:after="ClearSite">
+                @foreach (var type in _types)
+                {
+                    <option value="@type.Value">@type.Label</option>
+                }
+            </select>
+        </label>
+        <label class="ct-address-editor__field">
+            <span>@RegionLabel</span>
+            <select @bind="_regionId" @bind:after="RegionChanged">
+                <option value="">—</option>
+                @foreach (var region in _regions)
+                {
+                    <option value="@region.Id">@region.Label</option>
+                }
+            </select>
+        </label>
+        <label class="ct-address-editor__field">
+            <span>@CityLabel</span>
+            <select @bind="_cityId" @bind:after="ClearSite">
+                <option value="">—</option>
+                @foreach (var city in CitiesForRegion)
+                {
+                    <option value="@city.Id">@city.Label</option>
+                }
+            </select>
+        </label>
+        @if (_type == ResidenceType.PrivateHouse)
+        {
+            <label class="ct-address-editor__field">
+                <span>@HouseLabel</span>
+                <input @bind="_privateHouse" maxlength="255" />
+            </label>
+            <label class="ct-address-editor__field">
+                <span>@ExpirationLabel</span>
+                <input @bind="_expirationText" placeholder="dd.MM.yyyy" />
+            </label>
+        }
+        else
+        {
+            <label class="ct-address-editor__field">
+                <span>@SiteLabel</span>
+                <select @bind="_siteId">
+                    <option value="">—</option>
+                    @foreach (var site in SitesForCity)
+                    {
+                        <option value="@site.Id">@site.Label</option>
+                    }
+                </select>
+            </label>
+        }
+        <footer class="ct-address-editor__actions">
+            <button type="button" class="os-btn" @onclick="Closed" disabled="@_saving">@CloseLabel</button>
+            <button type="button" class="os-btn os-btn--primary" @onclick="SaveAsync" disabled="@_saving">@SaveLabel</button>
+        </footer>
+    }
+</aside>
+
+@code {
+    [Parameter] public Guid AddressId { get; set; }
+    [Parameter] public EventCallback Saved { get; set; }
+    [Parameter] public EventCallback Closed { get; set; }
+
+    private bool _loading = true;
+    private bool _saving;
+    private string? _error;
+    private Guid _loadedId;
+    private ResidenceType? _type = ResidenceType.Lodging;
+    private string? _regionId;
+    private string? _cityId;
+    private string? _siteId;
+    private string? _privateHouse;
+    private string? _expirationText;
+    private List<NamedOption> _regions = new();
+    private List<ChildOption> _cities = new();
+    private List<SiteOption> _sites = new();
+    private readonly List<TypeOption> _types =
+    [
+        new(ResidenceType.Lodging, "Lodging"),
+        new(ResidenceType.Hotel, "Hotel"),
+        new(ResidenceType.PrivateHouse, "Private house"),
+        new(ResidenceType.Hospital, "Hospital"),
+        new(ResidenceType.Other, "Other"),
+    ];
+
+    private string Title => Msg("ApplicationProfile.Person.AddressOfResidence");
+    private string TypeLabel => Msg("ApplicationProfile.Field.InvitationAddressType");
+    private string RegionLabel => Msg("ApplicationProfile.Field.InvitationRegion");
+    private string CityLabel => Msg("ApplicationProfile.Field.InvitationCity");
+    private string HouseLabel => Msg("ApplicationProfile.Field.InvitationPrivateHouse");
+    private string ExpirationLabel => Msg("ApplicationProfileInstance.Workspace.AddressExpiration");
+    private string CloseLabel => Msg("ApplicationProfile.Catalog.Cancel");
+    private string SaveLabel => Msg("ApplicationProfileInstance.Workspace.SaveAddress");
+    private string Opening => Msg("ApplicationProfileInstance.Workspace.Opening");
+
+    private string SiteLabel => _type switch
+    {
+        ResidenceType.Hotel => Msg("ApplicationProfile.Field.InvitationHotel"),
+        ResidenceType.Hospital => Msg("ApplicationProfile.Field.InvitationHospital"),
+        ResidenceType.Other => Msg("ApplicationProfile.Field.InvitationOtherSite"),
+        _ => Msg("ApplicationProfile.Field.InvitationLodging"),
+    };
+
+    private IEnumerable<ChildOption> CitiesForRegion =>
+        Guid.TryParse(_regionId, out var regionId)
+            ? _cities.Where(city => city.ParentId == regionId)
+            : Array.Empty<ChildOption>();
+
+    private IEnumerable<SiteOption> SitesForCity =>
+        Guid.TryParse(_cityId, out var cityId)
+            ? _sites.Where(site => site.CityId == cityId && site.Type == _type)
+            : Array.Empty<SiteOption>();
+
+    protected override void OnParametersSet()
+    {
+        if (AddressId == Guid.Empty || AddressId == _loadedId)
+            return;
+        Load();
+    }
+
+    private void Load()
+    {
+        _loading = true;
+        _error = null;
+        _loadedId = AddressId;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<AddressOfResidence>();
+        var address = objectSpace.GetObjectByKey<AddressOfResidence>(AddressId);
+        _regions = objectSpace.GetObjectsQuery<Region>()
+            .OrderBy(region => region.NameTm)
+            .ToList()
+            .Select(region => new NamedOption(region.ID, region.NameTm ?? "—"))
+            .ToList();
+        _cities = objectSpace.GetObjectsQuery<City>()
+            .Include(city => city.Region)
+            .OrderBy(city => city.NameTm)
+            .ToList()
+            .Select(city => new ChildOption(city.ID, city.Region != null ? city.Region.ID : Guid.Empty, city.NameTm ?? "—"))
+            .ToList();
+        _sites = LoadSites(objectSpace);
+        if (address == null)
+        {
+            _error = "Address was not found.";
+            _loading = false;
+            return;
+        }
+
+        _type = address.Type ?? ResidenceType.Lodging;
+        _regionId = address.Region?.ID.ToString("D");
+        _cityId = address.City?.ID.ToString("D");
+        _siteId = SiteId(address);
+        _privateHouse = address.Type == ResidenceType.PrivateHouse ? address.FullAddress : null;
+        _expirationText = address.ExpirationDate?.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+        _loading = false;
+    }
+
+    private static List<SiteOption> LoadSites(IObjectSpace objectSpace)
+    {
+        var sites = new List<SiteOption>();
+        sites.AddRange(objectSpace.GetObjectsQuery<Lodging>().Include(item => item.City).ToList()
+            .Select(item => new SiteOption(item.ID, item.City != null ? item.City.ID : Guid.Empty, ResidenceType.Lodging, item.FullAddress ?? "—")));
+        sites.AddRange(objectSpace.GetObjectsQuery<Hotel>().Include(item => item.City).ToList()
+            .Select(item => new SiteOption(item.ID, item.City != null ? item.City.ID : Guid.Empty, ResidenceType.Hotel, item.Name ?? "—")));
+        sites.AddRange(objectSpace.GetObjectsQuery<Hospital>().Include(item => item.City).ToList()
+            .Select(item => new SiteOption(item.ID, item.City != null ? item.City.ID : Guid.Empty, ResidenceType.Hospital, item.Name ?? "—")));
+        sites.AddRange(objectSpace.GetObjectsQuery<OtherSite>().Include(item => item.City).ToList()
+            .Select(item => new SiteOption(item.ID, item.City != null ? item.City.ID : Guid.Empty, ResidenceType.Other, item.FullAddress ?? "—")));
+        return sites.OrderBy(site => site.Label).ToList();
+    }
+
+    private static string? SiteId(AddressOfResidence address) => address.Type switch
+    {
+        ResidenceType.Lodging => address.Lodging?.ID.ToString("D"),
+        ResidenceType.Hotel => address.Hotel?.ID.ToString("D"),
+        ResidenceType.Hospital => address.Hospital?.ID.ToString("D"),
+        ResidenceType.Other => address.OtherSite?.ID.ToString("D"),
+        _ => null,
+    };
+
+    private void RegionChanged()
+    {
+        if (!CitiesForRegion.Any(city => string.Equals(city.Id.ToString("D"), _cityId, StringComparison.OrdinalIgnoreCase)))
+            _cityId = null;
+        ClearSite();
+    }
+
+    private void ClearSite() => _siteId = null;
+
+    private async Task SaveAsync()
+    {
+        if (_saving || AddressId == Guid.Empty)
+            return;
+
+        _saving = true;
+        _error = null;
+        DateTime? expiration = null;
+        if (_type == ResidenceType.PrivateHouse)
+        {
+            if (!DateTime.TryParseExact(_expirationText?.Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+            {
+                _error = "Enter the private house expiration date as dd.MM.yyyy.";
+                _saving = false;
+                return;
+            }
+            expiration = parsed;
+        }
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<AddressOfResidence>();
+            var edit = new AddressOfResidenceEdit
+            {
+                Type = _type,
+                RegionId = Guid.TryParse(_regionId, out var regionId) ? regionId : null,
+                CityId = Guid.TryParse(_cityId, out var cityId) ? cityId : null,
+                SiteId = Guid.TryParse(_siteId, out var siteId) ? siteId : null,
+                PrivateHouseAddress = _privateHouse,
+                ExpirationDate = expiration,
+            };
+            if (!InvitationStayAddressCopy.TryUpdate(objectSpace, AddressId, edit, out var error))
+            {
+                _error = error;
+                return;
+            }
+
+            if (objectSpace.IsModified)
+                objectSpace.CommitChanges();
+            await Saved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
+
+    private sealed record NamedOption(Guid Id, string Label);
+    private sealed record ChildOption(Guid Id, Guid ParentId, string Label);
+    private sealed record SiteOption(Guid Id, Guid CityId, ResidenceType Type, string Label);
+    private sealed record TypeOption(ResidenceType Value, string Label);
+}

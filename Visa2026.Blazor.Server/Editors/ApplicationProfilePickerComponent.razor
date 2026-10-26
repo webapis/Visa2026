@@ -242,7 +242,9 @@
                     <li class="ap-picker__item @(selected ? "is-selected" : null)"
                         role="option"
                         aria-selected="@selected"
-                        @onclick="() => SelectProfile(row.ProfileId)">
+                        tabindex="0"
+                        @onclick="() => SelectProfileAndContinueAsync(row.ProfileId)"
+                        @onkeydown="e => OnProfileKey(e, row.ProfileId)">
                         <div class="ap-picker__item-main">
                             <strong>@row.Name</strong>
                             <div class="ap-picker__meta">@row.MetaLine</div>
@@ -268,12 +270,6 @@
 
             <div class="ap-picker__actions">
                 @RenderAdvance()
-                <button type="button"
-                        class="ap-picker__btn ap-picker__btn--primary"
-                        disabled="@(IsAdvancing || SelectedProfileId == Guid.Empty)"
-                        @onclick="NextStepAsync">
-                    @Msg("ApplicationProfileInstance.Picker.Continue")
-                </button>
             </div>
         }
     }
@@ -429,10 +425,22 @@
         </div>
     };
 
-    private async Task SelectProfile(Guid profileId)
+    private async Task SelectProfileAndContinueAsync(Guid profileId)
     {
+        if (IsAdvancing || profileId == Guid.Empty)
+            return;
+
         if (SelectProfileRequested.HasDelegate)
             await SelectProfileRequested.InvokeAsync(profileId);
+
+        if (NextStepRequested.HasDelegate)
+            await NextStepRequested.InvokeAsync();
+    }
+
+    private async Task OnProfileKey(KeyboardEventArgs e, Guid profileId)
+    {
+        if (e.Key is "Enter" or " ")
+            await SelectProfileAndContinueAsync(profileId);
     }
 
     private async Task SelectVersion(Guid versionId)

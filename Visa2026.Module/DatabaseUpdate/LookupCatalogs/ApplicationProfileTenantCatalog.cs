@@ -576,10 +576,10 @@ internal static class ApplicationProfileTenantCatalogSync
             profile.DefaultToCity = profile.DefaultCity;
 #pragma warning restore CS0618
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
-        if (ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code)
+        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(row.ProfileCatalogKey, row.Code)
             || row.RequireInvitationAddress)
             profile.RequireInvitationAddress = true;
-        if (ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code)
+        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(row.ProfileCatalogKey, row.Code)
             || row.RequireInvitationPlace)
             profile.RequireInvitationPlace = true;
         profile.RequirePurpose = row.RequirePurpose;
@@ -599,8 +599,7 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonEducation = row.RequirePersonEducation
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
-        profile.RequirePersonAddressOfResidence =
-            !ApplicationProfileInvitationAddressPolicy.IsCaklykAlmak(row.ProfileCatalogKey, row.Code);
+        profile.RequirePersonAddressOfResidence = true;
         profile.RequirePersonVisa = row.RequirePersonVisa;
         profile.RequirePersonInvitationItem = row.RequirePersonInvitationItem;
         profile.RequirePersonWorkPermitItem = row.RequirePersonWorkPermitItem;

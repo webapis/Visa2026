@@ -1,3 +1,4 @@
+@using System.Globalization
 @using System.Collections.Generic
 @using System.Linq
 @using Microsoft.JSInterop
@@ -6,6 +7,7 @@
 @using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.OfficerShell
@@ -138,6 +140,13 @@
                     {
                         <span class="cw-head-badge cw-head-badge--locked" title="@Msg("ApplicationProfileInstance.Workspace.LinksLockedTitle")">🔒 @Msg("ApplicationProfileInstance.Workspace.LinksLocked")</span>
                     }
+                    @if (DeleteCaseRequested.HasDelegate)
+                    {
+                        <button type="button"
+                                class="cw-head__delete"
+                                title="@Msg("ApplicationProfileInstance.Workspace.DeleteCase")"
+                                @onclick="DeleteCaseAsync">@Msg("ApplicationProfileInstance.Workspace.DeleteCase")</button>
+                    }
                     <button type="button"
                             class="cw-head__close"
                             aria-label="@Msg("ApplicationProfileInstance.Workspace.CloseAria")"
@@ -145,6 +154,10 @@
                             @onclick="BackToListAsync">×</button>
                 </div>
             </div>
+            @if (!string.IsNullOrWhiteSpace(DeleteCaseErrorMessage))
+            {
+                <p class="cw-head__error" role="alert">@DeleteCaseErrorMessage</p>
+            }
             <div class="cw-head__people">
                 @if (view.People.Count > 0)
                 {
@@ -458,6 +471,8 @@
     [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToListRequested { get; set; }
+    [Parameter] public EventCallback DeleteCaseRequested { get; set; }
+    [Parameter] public string? DeleteCaseErrorMessage { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
     [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
     [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
@@ -486,6 +501,17 @@
     [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
+    [Parameter] public bool ShowPersonLinkReview { get; set; }
+    [Parameter] public string? PersonLinkReviewPersonName { get; set; }
+    [Parameter] public string? PersonLinkReviewPhotoDataUri { get; set; }
+    [Parameter] public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines { get; set; } = Array.Empty<PersonLinkReviewLine>();
+    [Parameter] public EventCallback JoinPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback CancelPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewLine> EditPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewChoiceRequest> SelectPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewLine> CreatePersonLinkReviewRequested { get; set; }
+    [Parameter] public PersonLinkReviewCreateForm? PersonLinkReviewCreateForm { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewCreateForm> SavePersonLinkReviewCreateRequested { get; set; }
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
@@ -627,6 +653,15 @@
 
     protected override void OnParametersSet()
     {
+        if (ShowPersonLinkReview && !_reviewWasOpen)
+        {
+            _reviewGearOn = false;
+            _reviewTab = "overview";
+            _reviewCreating = false;
+        }
+
+        _reviewWasOpen = ShowPersonLinkReview;
+
         var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
         if (instanceId != _caseSummaryInstanceId)
         {
@@ -2114,7 +2149,7 @@
                 <p class="cw-linked-lock" style="margin-bottom:12px">🔒 People and linked records are locked — this process is complete (issued, rejected, or cancelled).</p>
             }
             <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
-                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
+                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || ShowPersonLinkReview || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
             </div>
             <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
                                                    Candidates="@PersonLinkCandidates"
@@ -2125,6 +2160,187 @@
                                                    SearchRequested="@PersonLinkSearchRequested"
                                                    LinkRequested="@LinkPersonFromPickerRequested"
                                                    CloseRequested="@ClosePersonLinkPickerRequested" />
+            <DxPopup Visible="@ShowPersonLinkReview"
+                     VisibleChanged="OnPersonLinkReviewVisibleChanged"
+                     HeaderText="Linked records"
+                     ShowFooter="@(_reviewTab == "overview" && !_reviewCreating)"
+                     ShowCloseButton="true"
+                     CloseOnOutsideClick="false"
+                     Width="min(960px, 96vw)"
+                     CssClass="os-link-review-popup">
+                <BodyContentTemplate>
+                    <div class="os-link-review-person">
+                        @if (!string.IsNullOrEmpty(PersonLinkReviewPhotoDataUri))
+                        {
+                            <img class="os-link-review-person__photo" src="@PersonLinkReviewPhotoDataUri" alt="@PersonLinkReviewPersonName" />
+                        }
+                        else
+                        {
+                            <div class="os-link-review-person__photo-empty" aria-hidden="true"></div>
+                        }
+                        <span class="os-link-review-person__name">@(string.IsNullOrWhiteSpace(PersonLinkReviewPersonName) ? "—" : PersonLinkReviewPersonName)</span>
+                        <button type="button"
+                                class="os-link-review__gear @(_reviewGearOn ? "is-on" : null)"
+                                title="Choose another record"
+                                aria-pressed="@_reviewGearOn"
+                                @onclick="ToggleReviewGear">⚙</button>
+                    </div>
+                    @if (_reviewGearOn)
+                    {
+                        <div class="os-link-review-tabs" role="tablist">
+                            <button type="button"
+                                    class="os-link-review-tabs__tab @(_reviewTab == "overview" ? "is-active" : null)"
+                                    role="tab"
+                                    aria-selected="@(_reviewTab == "overview")"
+                                    @onclick='() => SelectReviewTab("overview")'>Overview</button>
+                            @foreach (var tab in PersonLinkReviewLines)
+                            {
+                                var tabKey = tab.Kind.ToString();
+                                <button type="button"
+                                        class="os-link-review-tabs__tab @(_reviewTab == tabKey ? "is-active" : null)"
+                                        role="tab"
+                                        aria-selected="@(_reviewTab == tabKey)"
+                                        @onclick="() => SelectReviewTab(tabKey)">@tab.Label</button>
+                            }
+                        </div>
+                    }
+                    @if (_reviewTab == "overview")
+                    {
+                        <div class="os-link-review" role="tabpanel" aria-label="Overview">
+                            @foreach (var line in PersonLinkReviewLines)
+                            {
+                                <div class="os-link-review__row">
+                                    <span class="os-link-review__label">@line.Label</span>
+                                    @if (_reviewGearOn && line.Choices.Count > 0)
+                                    {
+                                        <select class="os-link-review__select"
+                                                value="@line.ObjectId"
+                                                @onchange="e => OnReviewChoiceChanged(line, e)">
+                                            @foreach (var choice in line.Choices)
+                                            {
+                                                <option value="@choice.ObjectId">@choice.Label</option>
+                                            }
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <span class="os-link-review__value">@line.Summary</span>
+                                    }
+                                    @if (_reviewGearOn)
+                                    {
+                                        <span class="os-link-review__icons">
+                                            <button type="button"
+                                                    class="cw-addr-icon cw-addr-icon--plus"
+                                                    title="Add"
+                                                    @onclick="() => StartCreateAsync(line)">+</button>
+                                            @if (line.ObjectId != Guid.Empty || line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                                            {
+                                                <button type="button"
+                                                        class="cw-addr-icon cw-addr-icon--pen"
+                                                        title="Edit"
+                                                        @onclick="() => StartEditAsync(line)">✎</button>
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else if (_reviewCreating && PersonLinkReviewCreateForm is { } draft && draft.Kind.ToString() == _reviewTab)
+                    {
+                        <div class="os-link-review-form" role="tabpanel" aria-label="@draft.Title">
+                            <h3 class="os-link-review-form__title">@draft.Title</h3>
+                            @if (!string.IsNullOrWhiteSpace(draft.Error))
+                            {
+                                <div class="os-banner os-banner--warn">@draft.Error</div>
+                            }
+                            @foreach (var field in draft.Fields.Where(item => IsCreateFieldShown(draft, item)))
+                            {
+                                <div class="os-link-review-form__row">
+                                    <span class="os-link-review-form__label">
+                                        @field.Label
+                                        @if (field.Required)
+                                        {
+                                            <span class="os-link-review-form__req" aria-hidden="true">*</span>
+                                        }
+                                    </span>
+                                    @if (field.Editor == "lookup")
+                                    {
+                                        <select class="os-link-review__select"
+                                                value="@field.Value"
+                                                @onchange="e => OnCreateFieldChanged(draft, field, e)">
+                                            <option value=""></option>
+                                            @foreach (var option in CreateOptions(draft, field))
+                                            {
+                                                <option value="@option.Id">@option.Label</option>
+                                            }
+                                        </select>
+                                    }
+                                    else if (field.Editor == "date")
+                                    {
+                                        <OfficerDateEdit Date="@CreateFieldDate(field)"
+                                                         DateChanged="value => OnCreateDateChanged(field, value)"
+                                                         CssClass="os-link-review-form__date" />
+                                    }
+                                    else
+                                    {
+                                        <input class="os-link-review__select"
+                                               value="@field.Value"
+                                               @onchange="e => OnCreateFieldChanged(draft, field, e)" />
+                                    }
+                                </div>
+                            }
+                            <div class="os-link-review__actions">
+                                <button type="button" class="os-btn os-btn--primary" disabled="@(_reviewCreateSaving || draft.Fields.Count == 0)" @onclick="SaveCreateAsync">Save</button>
+                                <button type="button" class="os-btn" disabled="@_reviewCreateSaving" @onclick="CancelCreate">Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else if (ActiveReviewLine is { } active)
+                    {
+                        <div class="os-link-review-form" role="tabpanel" aria-label="@active.Label">
+                            <h3 class="os-link-review-form__title">@active.Label</h3>
+                            @foreach (var field in active.Fields)
+                            {
+                                <div class="os-link-review-form__row">
+                                    <span class="os-link-review-form__label">
+                                        @field.Label
+                                        @if (field.Required)
+                                        {
+                                            <span class="os-link-review-form__req" aria-hidden="true">*</span>
+                                        }
+                                    </span>
+                                    <div class="os-link-review-form__value @(field.Lookup ? "is-lookup" : null)">
+                                        <span class="os-link-review-form__text">@field.Value</span>
+                                        @if (field.Lookup)
+                                        {
+                                            <span class="os-link-review-form__tools">
+                                                <span class="os-link-review-form__tool" aria-hidden="true">×</span>
+                                                <button type="button"
+                                                        class="os-link-review-form__tool os-link-review-form__tool--pen"
+                                                        title="Edit"
+                                                        @onclick="() => StartEditAsync(active)">✎</button>
+                                                <span class="os-link-review-form__tool" aria-hidden="true">+</span>
+                                                <span class="os-link-review-form__tool" aria-hidden="true">▾</span>
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(PersonLinkStatusMessage))
+                    {
+                        <div class="os-banner @(PersonLinkStatusIsError ? "os-banner--warn" : "os-banner--ok")">@PersonLinkStatusMessage</div>
+                    }
+                </BodyContentTemplate>
+                <FooterContentTemplate>
+                    <div class="os-link-review__actions">
+                        <button type="button" class="os-btn os-btn--primary" disabled="@PersonLinkIsLinking" @onclick="JoinPersonLinkReviewAsync">Join</button>
+                        <button type="button" class="os-btn" disabled="@PersonLinkIsLinking" @onclick="CancelPersonLinkReviewAsync">Cancel</button>
+                    </div>
+                </FooterContentTemplate>
+            </DxPopup>
             @if (view.People.Count == 0)
             {
                 <p class="os-empty">No people linked.</p>
@@ -2216,11 +2432,22 @@
                             if (selected != null)
                             {
                                 var tab = FindLinkedTab(selected.Key);
-                                var rows = PersonRecordRows(person, selected.Key);
                                 var columns = LinkedRecordColumns(tab);
-                                <div class="cw-issued-panel ct-person-panel__records">
+                                var linkedRows = PersonLinkedRows(person, selected.Key);
+                                var isAddress = string.Equals(selected.Key, "address", StringComparison.OrdinalIgnoreCase);
+                                var offerCaseAddress = isAddress && linkedRows.Any(row => row.OfferCaseAddress);
+                                <div class="cw-issued-panel ct-person-panel__records @(isAddress && _addressEditorId != Guid.Empty ? "ct-person-panel__records--editor" : null)">
+                                    <div class="ct-person-panel__records-main">
                                     <h3 class="cw-issued-panel__title">@selected.Label</h3>
-                                    @if (rows.Count == 0)
+                                    @if (offerCaseAddress)
+                                    {
+                                        <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseAddressHint")</p>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(_addressActionError) && isAddress)
+                                    {
+                                        <p class="cw-issued-panel__hint ct-address-editor__error">@_addressActionError</p>
+                                    }
+                                    @if (linkedRows.Count == 0)
                                     {
                                         <p class="cw-issued-panel__hint">@(tab?.EmptyMessage ?? $"No {selected.Label.ToLowerInvariant()} linked for {person.Name}.")</p>
                                     }
@@ -2233,20 +2460,49 @@
                                                     {
                                                         <th>@column</th>
                                                     }
+                                                    @if (isAddress && !view.Chrome.ResolvedLinksLocked)
+                                                    {
+                                                        <th></th>
+                                                    }
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach (var row in rows)
+                                                @foreach (var entry in linkedRows)
                                                 {
-                                                    <tr>
-                                                        @foreach (var cell in LinkedRecordCells(tab, row))
+                                                    var entryId = entry.LinkedObjectId;
+                                                    var personId = person.PersonId;
+                                                    <tr class="@(isAddress && entryId == _addressEditorId ? "is-selected" : null)">
+                                                        @foreach (var cell in entry.Cells)
                                                         {
                                                             <td>@cell</td>
+                                                        }
+                                                        @if (isAddress && !view.Chrome.ResolvedLinksLocked)
+                                                        {
+                                                            <td class="cw-addr-actions">
+                                                                @if (entry.OfferCaseAddress)
+                                                                {
+                                                                    <button type="button"
+                                                                            class="cw-addr-icon cw-addr-icon--tick"
+                                                                            title="@Msg("ApplicationProfileInstance.Workspace.UseCaseAddress")"
+                                                                            @onclick="() => UseCaseAddressAsync(personId, entryId)">✓</button>
+                                                                }
+                                                                <button type="button"
+                                                                        class="cw-addr-icon cw-addr-icon--pen"
+                                                                        title="@Msg("ApplicationProfileInstance.Workspace.EditAddress")"
+                                                                        @onclick="() => OpenAddressEditor(entryId)">✎</button>
+                                                            </td>
                                                         }
                                                     </tr>
                                                 }
                                             </tbody>
                                         </table>
+                                    }
+                                    </div>
+                                    @if (isAddress && _addressEditorId != Guid.Empty && linkedRows.Any(row => row.LinkedObjectId == _addressEditorId))
+                                    {
+                                        <CaseAddressOfResidenceEditor AddressId="_addressEditorId"
+                                                                      Saved="OnAddressEditorSaved"
+                                                                      Closed="CloseAddressEditor" />
                                     }
                                     @if (view.Chrome.ResolvedLinksLocked)
                                     {
@@ -2698,26 +2954,89 @@
             string.Equals(tab.Key, key, StringComparison.OrdinalIgnoreCase));
     }
 
-    private IReadOnlyList<IReadOnlyList<string>> PersonRecordRows(
-        ApplicationWorkspaceCasePerson person,
-        string recordKey)
+    private Guid _addressEditorId;
+    private string? _addressActionError;
+
+    private sealed record PersonLinkedRow(IReadOnlyList<string> Cells, Guid LinkedObjectId, bool OfferCaseAddress);
+
+    private IReadOnlyList<PersonLinkedRow> PersonLinkedRows(ApplicationWorkspaceCasePerson person, string recordKey)
     {
         var tab = FindLinkedTab(recordKey);
         if (tab == null || tab.Rows.Count == 0)
-            return Array.Empty<IReadOnlyList<string>>();
+            return Array.Empty<PersonLinkedRow>();
 
-        if (person.PersonId != Guid.Empty
-            && tab.RowPersonIds.Count == tab.Rows.Count)
+        var rows = new List<PersonLinkedRow>();
+        if (person.PersonId != Guid.Empty && tab.RowPersonIds.Count == tab.Rows.Count)
         {
-            return tab.Rows
-                .Where((_, index) => tab.RowPersonIds[index] == person.PersonId)
-                .ToList();
+            for (var i = 0; i < tab.Rows.Count; i++)
+            {
+                if (tab.RowPersonIds[i] != person.PersonId)
+                    continue;
+                var linkedId = i < tab.RowLinkedObjectIds.Count ? tab.RowLinkedObjectIds[i] : Guid.Empty;
+                var offer = i < tab.RowOfferCaseAddress.Count && tab.RowOfferCaseAddress[i];
+                rows.Add(new PersonLinkedRow(LinkedRecordCells(tab, tab.Rows[i]), linkedId, offer));
+            }
+            return rows;
         }
 
-        return tab.Rows
-            .Where(row => row.Count > 0
-                && string.Equals(row[0], person.Name, StringComparison.Ordinal))
-            .ToList();
+        foreach (var row in tab.Rows.Where(row => row.Count > 0
+                     && string.Equals(row[0], person.Name, StringComparison.Ordinal)))
+        {
+            rows.Add(new PersonLinkedRow(LinkedRecordCells(tab, row), Guid.Empty, false));
+        }
+        return rows;
+    }
+
+    private void OpenAddressEditor(Guid addressId)
+    {
+        _addressActionError = null;
+        _addressEditorId = addressId;
+    }
+
+    private void CloseAddressEditor()
+    {
+        _addressEditorId = Guid.Empty;
+    }
+
+    private void OnAddressEditorSaved()
+    {
+        _addressActionError = null;
+        WorkspaceActions.NotifyWorkspaceChanged();
+    }
+
+    private async Task UseCaseAddressAsync(Guid personId, Guid addressId)
+    {
+        _addressActionError = null;
+        if (Snapshot == null || personId == Guid.Empty || addressId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!InvitationStayAddressCopy.TryRelinkFromStay(
+                objectSpace,
+                Snapshot.ApplicationProfileInstanceId,
+                personId,
+                addressId,
+                out var error))
+        {
+            _addressActionError = error;
+            return;
+        }
+
+        try
+        {
+            if (objectSpace.IsModified)
+                objectSpace.CommitChanges();
+        }
+        catch (Exception ex)
+        {
+            _addressActionError = ex.Message;
+            return;
+        }
+
+        if (_addressEditorId == addressId)
+            _addressEditorId = Guid.Empty;
+        WorkspaceActions.NotifyWorkspaceChanged();
+        await Task.CompletedTask;
     }
 
     private static IReadOnlyList<string> LinkedRecordColumns(ApplicationWorkspaceTab? tab)
@@ -2737,7 +3056,161 @@
     }
 
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();
+
+    private async Task DeleteCaseAsync()
+    {
+        if (Snapshot == null || !DeleteCaseRequested.HasDelegate)
+            return;
+
+        var number = Snapshot.CaseView?.Chrome.DisplayNumber;
+        var label = string.IsNullOrWhiteSpace(number)
+            ? Msg("ApplicationProfileInstance.Workspace.CaseWorkspace")
+            : $"№ {number}";
+        bool confirmed;
+        try
+        {
+            confirmed = await JS.InvokeAsync<bool>(
+                "confirm",
+                VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ConfirmDelete", label));
+        }
+        catch (JSException)
+        {
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (confirmed)
+            await DeleteCaseRequested.InvokeAsync();
+    }
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
+
+    private Task JoinPersonLinkReviewAsync() => JoinPersonLinkReviewRequested.InvokeAsync();
+
+    private bool _reviewWasOpen;
+    private bool _reviewGearOn;
+    private bool _reviewCreating;
+    private bool _reviewCreateSaving;
+    private string _reviewTab = "overview";
+    private PersonLinkReviewLine? ActiveReviewLine =>
+        PersonLinkReviewLines.FirstOrDefault(line => line.Kind.ToString() == _reviewTab);
+
+    private async Task StartCreateAsync(PersonLinkReviewLine line)
+    {
+        _reviewCreating = true;
+        _reviewTab = line.Kind.ToString();
+        await CreatePersonLinkReviewRequested.InvokeAsync(line);
+    }
+
+    private async Task StartEditAsync(PersonLinkReviewLine line)
+    {
+        _reviewCreating = true;
+        _reviewTab = line.Kind.ToString();
+        await EditPersonLinkReviewRequested.InvokeAsync(line);
+    }
+
+    private void SelectReviewTab(string tab)
+    {
+        if (!string.Equals(_reviewTab, tab, StringComparison.Ordinal))
+            _reviewCreating = false;
+        _reviewTab = tab;
+    }
+
+    private void ToggleReviewGear()
+    {
+        _reviewGearOn = !_reviewGearOn;
+        if (_reviewGearOn)
+            return;
+
+        _reviewCreating = false;
+        _reviewTab = "overview";
+    }
+
+    private static DateTime? CreateFieldDate(PersonLinkReviewCreateField field) =>
+        DateTime.TryParseExact(field.Value?.Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+            ? date
+            : null;
+
+    private void OnCreateDateChanged(PersonLinkReviewCreateField field, DateTime? value) =>
+        field.Value = value.HasValue
+            ? value.Value.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
+            : string.Empty;
+
+    private void CancelCreate()
+    {
+        _reviewCreating = false;
+        _reviewTab = "overview";
+    }
+
+    private async Task SaveCreateAsync()
+    {
+        var form = PersonLinkReviewCreateForm;
+        if (form == null || _reviewCreateSaving)
+            return;
+
+        _reviewCreateSaving = true;
+        try
+        {
+            await SavePersonLinkReviewCreateRequested.InvokeAsync(form);
+            if (form.Saved)
+            {
+                _reviewCreating = false;
+                _reviewTab = "overview";
+            }
+        }
+        finally
+        {
+            _reviewCreateSaving = false;
+        }
+    }
+
+    private static bool IsCreateFieldShown(PersonLinkReviewCreateForm form, PersonLinkReviewCreateField field)
+    {
+        if (string.IsNullOrEmpty(field.ShowWhenKey))
+            return true;
+        var other = form.Fields.FirstOrDefault(item => item.Key == field.ShowWhenKey);
+        return string.Equals(other?.Value, field.ShowWhenValue, StringComparison.Ordinal);
+    }
+
+    private static IEnumerable<PersonLinkReviewCreateOption> CreateOptions(PersonLinkReviewCreateForm form, PersonLinkReviewCreateField field)
+    {
+        if (string.IsNullOrEmpty(field.FilterByKey))
+            return field.Options;
+        var parent = form.Fields.FirstOrDefault(item => item.Key == field.FilterByKey)?.Value;
+        if (string.IsNullOrEmpty(parent))
+            return Array.Empty<PersonLinkReviewCreateOption>();
+        return field.Options.Where(option => string.Equals(option.ParentId, parent, StringComparison.Ordinal));
+    }
+
+    private void OnCreateFieldChanged(PersonLinkReviewCreateForm form, PersonLinkReviewCreateField field, ChangeEventArgs change)
+    {
+        field.Value = change.Value?.ToString() ?? string.Empty;
+        foreach (var dependent in form.Fields.Where(item => item.FilterByKey == field.Key))
+            dependent.Value = string.Empty;
+        if (field.Key == "type")
+        {
+            foreach (var place in form.Fields.Where(item => item.ShowWhenKey == "type"))
+                place.Value = string.Empty;
+        }
+    }
+
+    private Task OnReviewChoiceChanged(PersonLinkReviewLine line, ChangeEventArgs change)
+    {
+        var objectId = Guid.TryParse(change.Value?.ToString(), out var parsed) ? parsed : Guid.Empty;
+        return SelectPersonLinkReviewRequested.InvokeAsync(new PersonLinkReviewChoiceRequest(line.Kind, objectId));
+    }
+
+    private Task CancelPersonLinkReviewAsync() => CancelPersonLinkReviewRequested.InvokeAsync();
+
+    private Task OnPersonLinkReviewVisibleChanged(bool visible)
+    {
+        if (visible || !ShowPersonLinkReview)
+            return Task.CompletedTask;
+
+        return CancelPersonLinkReviewAsync();
+    }
     private bool CanAdvanceFromRail =>
         Snapshot?.CaseView.ProgressSteps.Any(s => s.CanAdvance && s.AdvanceOptions.Count > 0) == true;
 

@@ -118,6 +118,15 @@ public sealed class ApplicationWorkspaceTab
     /// <summary>Parallel to <see cref="Rows"/> when tab rows map to domain ids (Person tab).</summary>
     public IReadOnlyList<Guid> RowPersonIds { get; init; } = Array.Empty<Guid>();
 
+    /// <summary>Parallel to <see cref="Rows"/>. Linked business-object id for that row.</summary>
+    public IReadOnlyList<Guid> RowLinkedObjectIds { get; init; } = Array.Empty<Guid>();
+
+    /// <summary>
+    /// Parallel to <see cref="Rows"/>. True when the linked address differs from the case-summary stay
+    /// and the officer can copy that stay onto a new address.
+    /// </summary>
+    public IReadOnlyList<bool> RowOfferCaseAddress { get; init; } = Array.Empty<bool>();
+
     /// <summary>Parallel to <see cref="Rows"/> — Person ids on this instance (Person tab). Property name kept for callers.</summary>
     public IReadOnlyList<Guid> RowApplicationProfileInstancePersonIds { get; init; } = Array.Empty<Guid>();
 

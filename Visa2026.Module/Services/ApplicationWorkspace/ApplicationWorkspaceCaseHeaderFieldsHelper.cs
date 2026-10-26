@@ -364,6 +364,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         var value = update?.Value;
         var profile = application.ApplicationProfile;
 
+        bool Edited(bool applied)
+        {
+            if (applied)
+                InvitationStayAddressCopy.EnsureForPeopleWithoutAddress(objectSpace, application);
+            return applied;
+        }
+
         switch (key)
         {
             case InstanceNumber:
@@ -530,7 +537,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             case InvitationRegion:
                 if (!ShowInvitationAddress(profile, application))
                     return Hidden(out error);
-                return SetLookup<Region>(objectSpace, value, item =>
+                return Edited(SetLookup<Region>(objectSpace, value, item =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Region = item;
@@ -539,72 +546,72 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         stay.City = null;
                         ClearInvitationSitesIfCityMismatch(stay, null);
                     }
-                }, out error);
+                }, out error));
             case InvitationCity:
                 if (!ShowInvitationAddress(profile, application))
                     return Hidden(out error);
-                return SetLookup<City>(objectSpace, value, item =>
+                return Edited(SetLookup<City>(objectSpace, value, item =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.City = item;
                     if (item?.Region != null)
                         stay.Region = item.Region;
                     ClearInvitationSitesIfCityMismatch(stay, item);
-                }, out error);
+                }, out error));
             case InvitationAddressType:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
-                return SetInvitationAddressType(objectSpace, application, value, out error);
+                return Edited(SetInvitationAddressType(objectSpace, application, value, out error));
             case InvitationLodging:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
-                return SetLookup<Lodging>(objectSpace, value, item =>
+                return Edited(SetLookup<Lodging>(objectSpace, value, item =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Type = ResidenceType.Lodging;
                     stay.ClearSitesExcept(ResidenceType.Lodging);
                     stay.Lodging = item;
-                }, out error);
+                }, out error));
             case InvitationHotel:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
-                return SetLookup<Hotel>(objectSpace, value, item =>
+                return Edited(SetLookup<Hotel>(objectSpace, value, item =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Type = ResidenceType.Hotel;
                     stay.ClearSitesExcept(ResidenceType.Hotel);
                     stay.Hotel = item;
-                }, out error);
+                }, out error));
             case InvitationHospital:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
-                return SetLookup<Hospital>(objectSpace, value, item =>
+                return Edited(SetLookup<Hospital>(objectSpace, value, item =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Type = ResidenceType.Hospital;
                     stay.ClearSitesExcept(ResidenceType.Hospital);
                     stay.Hospital = item;
-                }, out error);
+                }, out error));
             case InvitationOtherSite:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
-                return SetLookup<OtherSite>(objectSpace, value, item =>
+                return Edited(SetLookup<OtherSite>(objectSpace, value, item =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Type = ResidenceType.Other;
                     stay.ClearSitesExcept(ResidenceType.Other);
                     stay.OtherSite = item;
-                }, out error);
+                }, out error));
             case InvitationPrivateHouse:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
-                return SetText(value, BusinessTripPrivateHouseAddressMaxLength, text =>
+                return Edited(SetText(value, BusinessTripPrivateHouseAddressMaxLength, text =>
                 {
                     var stay = EnsureInvitationAddress(objectSpace, application);
                     stay.Type = ResidenceType.PrivateHouse;
                     stay.ClearSitesExcept(ResidenceType.PrivateHouse);
                     stay.PrivateHouseAddress = text;
-                }, out error);
+                }, out error));
             case InvitationAlternativeAddress:
                 if (!ShowInvitationAddress(profile, application))
                     return Hidden(out error);

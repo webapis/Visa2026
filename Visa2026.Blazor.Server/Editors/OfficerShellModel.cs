@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using Microsoft.AspNetCore.Components;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.ApplicationProfileOverview;
 using Visa2026.Module.Services.ApplicationPersonLink;
@@ -441,6 +442,18 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback DeleteCaseRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public string? DeleteCaseErrorMessage
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback LinkPersonRequested
     {
         get => GetPropertyValue<EventCallback>();
@@ -607,6 +620,90 @@ public sealed class OfficerShellModel : ComponentModelBase
     public EventCallback ClosePersonLinkPickerRequested
     {
         get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool ShowPersonLinkReview
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public Guid PersonLinkReviewPersonId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
+    public string? PersonLinkReviewPersonName
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
+
+    public string? PersonLinkReviewPhotoDataUri
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines
+    {
+        get => GetPropertyValue<IReadOnlyList<PersonLinkReviewLine>>() ?? Array.Empty<PersonLinkReviewLine>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool PersonLinkReviewDeclineCaseSummaryAddress
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public Guid PersonLinkReviewEditedAddressId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback JoinPersonLinkReviewRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback CancelPersonLinkReviewRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<PersonLinkReviewLine> EditPersonLinkReviewRequested
+    {
+        get => GetPropertyValue<EventCallback<PersonLinkReviewLine>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<PersonLinkReviewChoiceRequest> SelectPersonLinkReviewRequested
+    {
+        get => GetPropertyValue<EventCallback<PersonLinkReviewChoiceRequest>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<PersonLinkReviewLine> CreatePersonLinkReviewRequested
+    {
+        get => GetPropertyValue<EventCallback<PersonLinkReviewLine>>();
+        set => SetPropertyValue(value);
+    }
+
+    public PersonLinkReviewCreateForm? PersonLinkReviewCreateForm
+    {
+        get => GetPropertyValue<PersonLinkReviewCreateForm?>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<PersonLinkReviewCreateForm> SavePersonLinkReviewCreateRequested
+    {
+        get => GetPropertyValue<EventCallback<PersonLinkReviewCreateForm>>();
         set => SetPropertyValue(value);
     }
 

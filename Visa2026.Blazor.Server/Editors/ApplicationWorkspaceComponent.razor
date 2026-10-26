@@ -1,6 +1,7 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 @using Visa2026.Module.BusinessObjects.ApplicationWorkspace
+@using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.OfficerShell
@@ -22,6 +23,8 @@
                                         IssuedHeaderNewRequested="@IssuedHeaderNewRequested"
                                         IssuedHeaderOpenRequested="@IssuedHeaderOpenRequested"
                                         BackToListRequested="@BackToListRequested"
+                                        DeleteCaseRequested="@DeleteCaseRequested"
+                                        DeleteCaseErrorMessage="@DeleteCaseErrorMessage"
                                         LinkPersonRequested="@LinkPersonRequested"
                                         UnlinkPersonRequested="@UnlinkPersonRequested"
                                         OpenPersonDetailRequested="@OpenPersonDetailRequested"
@@ -50,6 +53,17 @@
                                         PersonLinkSearchRequested="@PersonLinkSearchRequested"
                                         LinkPersonFromPickerRequested="@LinkPersonFromPickerRequested"
                                         ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested"
+                                        ShowPersonLinkReview="@ShowPersonLinkReview"
+                                        PersonLinkReviewPersonName="@PersonLinkReviewPersonName"
+                                        PersonLinkReviewPhotoDataUri="@PersonLinkReviewPhotoDataUri"
+                                        PersonLinkReviewLines="@PersonLinkReviewLines"
+                                        JoinPersonLinkReviewRequested="@JoinPersonLinkReviewRequested"
+                                        CancelPersonLinkReviewRequested="@CancelPersonLinkReviewRequested"
+                                        EditPersonLinkReviewRequested="@EditPersonLinkReviewRequested"
+                                        SelectPersonLinkReviewRequested="@SelectPersonLinkReviewRequested"
+                                        CreatePersonLinkReviewRequested="@CreatePersonLinkReviewRequested"
+                                        PersonLinkReviewCreateForm="@PersonLinkReviewCreateForm"
+                                        SavePersonLinkReviewCreateRequested="@SavePersonLinkReviewCreateRequested"
                                         HeaderFieldStatusMessage="@HeaderFieldStatusMessage"
                                         HeaderFieldStatusIsError="@HeaderFieldStatusIsError"
                                         HeaderFieldChanged="@HeaderFieldChanged"
@@ -87,6 +101,8 @@
     [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToListRequested { get; set; }
+    [Parameter] public EventCallback DeleteCaseRequested { get; set; }
+    [Parameter] public string? DeleteCaseErrorMessage { get; set; }
     [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
     [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
     [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }
@@ -110,6 +126,17 @@
     [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
+    [Parameter] public bool ShowPersonLinkReview { get; set; }
+    [Parameter] public string? PersonLinkReviewPersonName { get; set; }
+    [Parameter] public string? PersonLinkReviewPhotoDataUri { get; set; }
+    [Parameter] public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines { get; set; } = Array.Empty<PersonLinkReviewLine>();
+    [Parameter] public EventCallback JoinPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback CancelPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewLine> EditPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewChoiceRequest> SelectPersonLinkReviewRequested { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewLine> CreatePersonLinkReviewRequested { get; set; }
+    [Parameter] public PersonLinkReviewCreateForm? PersonLinkReviewCreateForm { get; set; }
+    [Parameter] public EventCallback<PersonLinkReviewCreateForm> SavePersonLinkReviewCreateRequested { get; set; }
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }

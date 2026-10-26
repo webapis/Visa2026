@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -115,7 +116,14 @@ internal static class ApplicationWorkspaceTabBuilder
                     .Where(e => educationIds.Contains(e.ID)).ToList());
         if (idsByKind.TryGetValue(ApplicationProfileInstancePersonLinkKind.AddressOfResidence, out var addressIds))
             AddRange(ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
-                objectSpace.GetObjectsQuery<AddressOfResidence>().Include(a => a.City).Where(a => addressIds.Contains(a.ID)).ToList());
+                objectSpace.GetObjectsQuery<AddressOfResidence>()
+                    .Include(a => a.City)
+                    .Include(a => a.Region)
+                    .Include(a => a.Lodging)
+                    .Include(a => a.Hotel)
+                    .Include(a => a.Hospital)
+                    .Include(a => a.OtherSite)
+                    .Where(a => addressIds.Contains(a.ID)).ToList());
         if (idsByKind.TryGetValue(ApplicationProfileInstancePersonLinkKind.WorkPermitItem, out var wpIds))
             AddRange(ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
                 objectSpace.GetObjectsQuery<WorkPermitItem>().Where(w => wpIds.Contains(w.ID)).ToList());
@@ -234,13 +242,16 @@ internal static class ApplicationWorkspaceTabBuilder
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
         Tab("address", "Address", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.AddressOfResidence),
-            ["Person", "City", "Address"],
+            ["Person", "Type", "Region", "City", "Address"],
             RowsForKind<AddressOfResidence>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.AddressOfResidence, (person, addr) =>
             [
                 PersonName(person),
+                AddressTypeLabel(addr.Type),
+                addr.Region?.NameTm ?? "—",
                 addr.City?.NameTm ?? "—",
                 addr.FullAddress ?? "—",
-            ]),
+            ],
+            addr => InvitationStayAddressCopy.OfferTick(application.InvitationAddress, addr)),
             emptyMessage: "No address linked.");
 
     private static ApplicationWorkspaceTab WorkPermitTab(
@@ -383,18 +394,23 @@ internal static class ApplicationWorkspaceTabBuilder
 
     private readonly record struct KindRows(
         IReadOnlyList<IReadOnlyList<string>> Rows,
-        IReadOnlyList<Guid> PersonIds);
+        IReadOnlyList<Guid> PersonIds,
+        IReadOnlyList<Guid> LinkedObjectIds,
+        IReadOnlyList<bool> OfferCaseAddress);
 
     private static KindRows RowsForKind<T>(
         IReadOnlyList<Person> people,
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities,
         ApplicationProfileInstancePersonLinkKind kind,
-        Func<Person, T, IReadOnlyList<string>> map)
+        Func<Person, T, IReadOnlyList<string>> map,
+        Func<T, bool>? offerCaseAddress = null)
         where T : class
     {
         var rows = new List<IReadOnlyList<string>>();
         var personIds = new List<Guid>();
+        var linkedObjectIds = new List<Guid>();
+        var offers = new List<bool>();
         foreach (var person in people)
         {
             if (person == null || !linksByPerson.TryGetValue(person.ID, out var links))
@@ -413,10 +429,12 @@ internal static class ApplicationWorkspaceTabBuilder
 
                 rows.Add(map(person, entity));
                 personIds.Add(person.ID);
+                linkedObjectIds.Add(linkedId);
+                offers.Add(offerCaseAddress?.Invoke(entity) == true);
             }
         }
 
-        return new KindRows(rows, personIds);
+        return new KindRows(rows, personIds, linkedObjectIds, offers);
     }
 
     private static ApplicationWorkspaceTab Tab(
@@ -436,10 +454,23 @@ internal static class ApplicationWorkspaceTabBuilder
             Columns = columns,
             Rows = rows.Rows,
             RowPersonIds = rows.PersonIds,
+            RowLinkedObjectIds = rows.LinkedObjectIds,
+            RowOfferCaseAddress = rows.OfferCaseAddress,
             EmptyMessage = rows.Rows.Count == 0 ? emptyMessage : null,
             SqlViewHint = sqlViewHint,
         };
     }
+
+    private static string AddressTypeLabel(ResidenceType? type) =>
+        type switch
+        {
+            ResidenceType.Lodging => "Lodging",
+            ResidenceType.Hotel => "Hotel",
+            ResidenceType.Hospital => "Hospital",
+            ResidenceType.Other => "Other",
+            ResidenceType.PrivateHouse => "Private house",
+            _ => "—",
+        };
 
     private static string PersonName(Person? person) => person?.FullName ?? "—";
 
