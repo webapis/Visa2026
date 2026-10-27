@@ -7,7 +7,7 @@ Officers can email the scanned copies of a person's documents (Passport, Visa, W
 | **Status** | Version 1 implemented (Person popup + split) |
 | **Entry points** | Toolbar action **Email copies** on Employee and Family member Person lists (multi-select) and the matching Person detail views; **Resend** on Sent emails |
 | **UI host** | Centered popup (`EmailDocumentCopiesDialogHost` in `_Host.cshtml`) |
-| **Transport** | **SMTP** (default, `OfficerMail:Provider = Smtp`): shared account, officer as Reply-To + Bcc. **Microsoft Graph** (secondary, `OfficerMail:Provider = MicrosoftGraph`): each officer's own mailbox; hidden unless switched on |
+| **Transport** | **SMTP** (default, `OfficerMail:Provider = Smtp`): shared account, officer as Reply-To + Bcc. Settings live on **Configuration → Mail server** (`EmailSmtpSettings`); appsettings / `SmtpMail__Password` are a fallback. **Microsoft Graph** (secondary, `OfficerMail:Provider = MicrosoftGraph`): each officer's own mailbox; hidden unless switched on |
 | **Attachments** | One merged PDF per person; a person over the limit is split by document type (`_part1`, `_part2`) |
 | **Prototypes** | See §10 |
 
@@ -159,31 +159,18 @@ The **Email copies** action is shown only when the user may create `SentEmail`.
 
 ### 6.1 SMTP (default)
 
-1. **Pick one mailbox** to send from, for example `visa2026@company.com`. A licensed user mailbox works; a shared mailbox also works if you log in with an account that has **Send As** on it.
+1. **Pick one mailbox** to send from, for example `cetrm.vize@calikenerji.com`. A licensed user mailbox works; a shared mailbox also works if you log in with an account that has **Send As** on it.
 2. **Enable Authenticated SMTP for that mailbox.** In Microsoft 365 admin center: **Users > Active users > (mailbox) > Mail > Manage email apps > Authenticated SMTP**. It is off by default in most tenants, and only an Exchange or Microsoft 365 admin can turn it on.
 3. **No MFA prompt for that account.** SMTP cannot answer an MFA challenge. Security defaults or a Conditional Access policy that forces MFA will reject the login (`535 5.7.139`).
-4. **Configure each slot:**
+4. **Enter the mailbox in the app** (preferred): sign in as **Admin** or **VisaOffice** → **Configuration → Mail server**. Defaults are `smtp.office365.com`, port **587**, STARTTLS. Fill:
+   - **From address** — the mailbox, e.g. `cetrm.vize@calikenerji.com`
+   - **User name** — Office 365 usually needs that **same full address**, not only a short account such as `G31207`. If the full address fails, try `G31207@calikenerji.com`, then the short name.
+   - **New password** — the mailbox password (saved encrypted; leave blank later to keep it)
+   - Click **Save**, then **Test connection**
+5. **Optional fallback** (empty Mail server row only): `SmtpMail` in appsettings and password in env `SmtpMail__Password`. Never commit a password.
 
-```json
-"OfficerMail": { "Provider": "Smtp" },
-"SmtpMail": {
-  "Host": "smtp.office365.com",
-  "Port": 587,
-  "Security": "StartTls",
-  "UserName": "visa2026@company.com",
-  "Password": "",
-  "FromAddress": "visa2026@company.com",
-  "FromName": "Visa2026",
-  "BccOfficer": true,
-  "MaxTotalAttachmentBytes": 20971520,
-  "TimeoutSeconds": 120
-}
-```
-
-- Password **only** in the environment: `SmtpMail__Password` (IIS slot env file / app pool environment, or `setx SmtpMail__Password "…"` for local F5). Never commit it.
-- `FromAddress` must be an address the `UserName` account may send as, otherwise Office 365 answers `554 5.2.252 SendAsDenied`.
-- `Security`: `StartTls` (587), `SslOnConnect` (465), `Auto`, or `None` (only for a LAN relay without TLS). Leave `UserName` empty for a relay that does not need a login.
-- While `Host` or `FromAddress` is empty the panel shows "Email sending is not set up on this server yet… SMTP mail account settings" and Send stays disabled.
+- `FromAddress` must be an address the login may send as, otherwise Office 365 answers `554 5.2.252 SendAsDenied`.
+- While Host or From address is empty the compose dialog tells the officer to ask an administrator to open **Configuration → Mail server**.
 - Outbound TCP **587** to `smtp.office365.com` must be open from the server.
 
 | Error shown to the officer | Usual cause |

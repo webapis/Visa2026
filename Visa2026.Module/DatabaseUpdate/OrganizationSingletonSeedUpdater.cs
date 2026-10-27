@@ -3,6 +3,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.BusinessObjects.Email;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -36,8 +37,22 @@ namespace Visa2026.Module.DatabaseUpdate
 
             EnsureMinistryReviewSlaSettings();
             EnsureWorkPermitQuotaSettings();
+            EnsureEmailSmtpSettings();
 
             ObjectSpace.CommitChanges();
+        }
+
+        private void EnsureEmailSmtpSettings()
+        {
+            _ = EmailSmtpSettings.GetOrCreateInstance(ObjectSpace);
+            var removed = OrganizationSingletonHelper.CollapseToSingleRow(
+                ObjectSpace, (EmailSmtpSettings _) => "Mail server");
+            if (removed > 0)
+            {
+                var line = $"OrganizationSingletonSeedUpdater: removed {removed} duplicate EmailSmtpSettings row(s).";
+                Tracing.Tracer.LogText(line);
+                System.Diagnostics.Trace.WriteLine(line);
+            }
         }
 
         private void EnsureWorkPermitQuotaSettings()

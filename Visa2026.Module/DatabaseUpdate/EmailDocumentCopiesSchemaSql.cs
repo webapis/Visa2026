@@ -4,8 +4,8 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Idempotent PostgreSQL DDL for the email document copies tables (<c>EmailContacts</c>,
-/// <c>EmailTemplates</c>, <c>SentEmails</c>, <c>SentEmailPersons</c>, <c>OfficerMailConnections</c>) and the
-/// officer <c>Email</c> column on <c>PermissionPolicyUser</c>.
+/// <c>EmailTemplates</c>, <c>SentEmails</c>, <c>SentEmailPersons</c>, <c>OfficerMailConnections</c>,
+/// <c>EmailSmtpSettings</c>) and the officer <c>Email</c> column on <c>PermissionPolicyUser</c>.
 /// </summary>
 /// <remarks>
 /// No EF migrations in this repository: when <c>ModuleInfo</c> is already current XAF skips the schema
@@ -110,6 +110,24 @@ public static class EmailDocumentCopiesSchemaSql
           ALTER TABLE "SentEmails" ADD COLUMN IF NOT EXISTS "PartNumber" integer NOT NULL DEFAULT 1;
           ALTER TABLE "SentEmails" ADD COLUMN IF NOT EXISTS "PartCount" integer NOT NULL DEFAULT 1;
           ALTER TABLE "EmailContacts" ADD COLUMN IF NOT EXISTS "MaxEmailSizeMb" integer NULL;
+
+          IF to_regclass('public."EmailSmtpSettings"') IS NULL THEN
+            CREATE TABLE "EmailSmtpSettings" (
+              "ID" uuid NOT NULL CONSTRAINT "PK_EmailSmtpSettings" PRIMARY KEY,
+              "Host" character varying(256) NULL,
+              "Port" integer NOT NULL DEFAULT 587,
+              "Security" integer NOT NULL DEFAULT 0,
+              "UserName" character varying(320) NULL,
+              "ProtectedPassword" text NULL,
+              "FromAddress" character varying(320) NULL,
+              "FromName" character varying(256) NULL,
+              "BccOfficer" boolean NOT NULL DEFAULT TRUE,
+              "MaxTotalAttachmentBytes" bigint NOT NULL DEFAULT 20971520,
+              "TimeoutSeconds" integer NOT NULL DEFAULT 120,
+              "GCRecord" integer NOT NULL DEFAULT 0,
+              "OptimisticLockField" integer NOT NULL DEFAULT 0
+            );
+          END IF;
 
           IF to_regclass('public."PermissionPolicyUser"') IS NOT NULL THEN
             ALTER TABLE "PermissionPolicyUser" ADD COLUMN IF NOT EXISTS "Email" character varying(320) NULL;

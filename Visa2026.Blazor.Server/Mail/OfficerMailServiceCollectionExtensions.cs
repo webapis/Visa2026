@@ -25,6 +25,7 @@ public static class OfficerMailServiceCollectionExtensions
         if (!string.IsNullOrWhiteSpace(keysPath))
             dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
 
+        services.AddScoped<IOfficerMailSecretProtector, OfficerMailSecretProtector>();
         services.AddScoped<OfficerMailTokenService>();
         if (string.Equals(configuration[ProviderKey]?.Trim(), "MicrosoftGraph", StringComparison.OrdinalIgnoreCase))
             services.AddScoped<IOfficerMailSender, GraphOfficerMailSender>();

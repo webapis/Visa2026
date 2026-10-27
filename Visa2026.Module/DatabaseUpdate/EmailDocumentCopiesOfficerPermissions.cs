@@ -26,6 +26,7 @@ public static class EmailDocumentCopiesOfficerPermissions
         EnsureReadCreate<SentEmail>(role);
         EnsureReadCreate<SentEmailPerson>(role);
         DenyAll<OfficerMailConnection>(role);
+        DenyAll<EmailSmtpSettings>(role);
 
         EnsureNavigation(role, EmailNavigationRoot);
         EnsureNavigation(role, $"{EmailNavigationRoot}/Items/{nameof(EmailContact)}");
@@ -105,6 +106,7 @@ public static class EmailDocumentCopiesOfficerPermissions
         perm.WriteState = SecurityPermissionState.Deny;
         perm.CreateState = SecurityPermissionState.Deny;
         perm.DeleteState = SecurityPermissionState.Deny;
+        perm.NavigateState = SecurityPermissionState.Deny;
     }
 
     private static void EnsureNavigation(PermissionPolicyRole role, string itemPath)

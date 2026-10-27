@@ -1,9 +1,9 @@
 namespace Visa2026.Blazor.Server.Mail;
 
 /// <summary>
-/// Shared SMTP account used to send document-copies email (default transport). Bound from
-/// <c>SmtpMail</c>; keep <see cref="Password"/> in environment variables (<c>SmtpMail__Password</c>),
-/// never in tracked appsettings.
+/// Fallback SMTP settings when Configuration → Mail server is empty. Bound from <c>SmtpMail</c>.
+/// Prefer the Mail server screen; keep <see cref="Password"/> out of tracked appsettings
+/// (<c>SmtpMail__Password</c> env only).
 /// </summary>
 public sealed class SmtpMailOptions
 {

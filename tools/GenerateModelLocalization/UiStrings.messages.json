@@ -8309,10 +8309,28 @@
     "ru-RU": "Панель отправки почты недоступна."
   },
   "EmailDocumentCopies.Smtp.NotConfigured": {
-    "en": "Email sending is not set up on this server yet. Ask the Visa2026 administrator to enter the SMTP mail account settings.",
-    "tr-TR": "Bu sunucuda e-posta gönderimi henüz ayarlanmadı. Visa2026 yöneticisinden SMTP posta hesabı ayarlarını girmesini isteyin.",
-    "tk-TM": "Bu serwerde hat ugratmak heniz sazlanmady. Visa2026 administratoryndan SMTP poçta hasabynyň sazlamalaryny girizmegini haýyş ediň.",
-    "ru-RU": "Отправка почты на этом сервере ещё не настроена. Попросите администратора Visa2026 указать настройки почтового аккаунта SMTP."
+    "en": "Email sending is not set up yet. Ask the Visa2026 administrator to open Configuration → Mail server and enter the mailbox settings.",
+    "tr-TR": "E-posta gönderimi henüz ayarlanmadı. Visa2026 yöneticisinden Yapılandırma → Posta sunucusu ekranında posta kutusu ayarlarını girmesini isteyin.",
+    "tk-TM": "Hat ugratmak heniz sazlanmady. Visa2026 administratoryndan Sazlama → Poçta serweri ekranynda poçta gutusynyň sazlamalaryny girizmegini haýyş ediň.",
+    "ru-RU": "Отправка почты ещё не настроена. Попросите администратора Visa2026 открыть Конфигурация → Почтовый сервер и указать ящик."
+  },
+  "EmailDocumentCopies.Smtp.Test": {
+    "en": "Test connection",
+    "tr-TR": "Bağlantıyı dene",
+    "tk-TM": "Birikmäni synag et",
+    "ru-RU": "Проверить соединение"
+  },
+  "EmailDocumentCopies.Smtp.Test.SaveFirst": {
+    "en": "Save the mail server settings first, then test the connection.",
+    "tr-TR": "Önce posta sunucusu ayarlarını kaydedin, sonra bağlantıyı deneyin.",
+    "tk-TM": "Ilki poçta serweriniň sazlamalaryny ýazdyryň, soň birikmäni synag ediň.",
+    "ru-RU": "Сначала сохраните настройки почтового сервера, затем проверьте соединение."
+  },
+  "EmailDocumentCopies.Smtp.Test.Ok": {
+    "en": "Connected to the mail server.",
+    "tr-TR": "Posta sunucusuna bağlanıldı.",
+    "tk-TM": "Poçta serwerine birikildi.",
+    "ru-RU": "Подключение к почтовому серверу установлено."
   },
   "EmailDocumentCopies.Field.OfficerEmail": {
     "en": "Your email (replies and copy)",

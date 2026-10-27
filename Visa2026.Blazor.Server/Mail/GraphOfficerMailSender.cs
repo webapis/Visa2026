@@ -59,6 +59,9 @@ public sealed class GraphOfficerMailSender : IOfficerMailSender
         return Task.CompletedTask;
     }
 
+    public Task<string?> TestConnectionAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<string?>("Microsoft Graph uses each officer's Outlook, not this mail server.");
+
     public async Task SendAsync(Guid userId, OfficerMailMessage message, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(message);

@@ -250,6 +250,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<BusinessObjects.Email.SentEmail> SentEmails { get; set; }
         public DbSet<BusinessObjects.Email.SentEmailPerson> SentEmailPersons { get; set; }
         public DbSet<BusinessObjects.Email.OfficerMailConnection> OfficerMailConnections { get; set; }
+        public DbSet<BusinessObjects.Email.EmailSmtpSettings> EmailSmtpSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -268,7 +269,6 @@ namespace Visa2026.Module.BusinessObjects
                     .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
                     .HasValue<InternalArrival>(nameof(InternalArrival))
                     .HasValue<InternalDeparture>(nameof(InternalDeparture));
-
             });
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {

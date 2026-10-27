@@ -1,5 +1,7 @@
 @namespace Visa2026.Blazor.Server.Components
 @using DevExpress.ExpressApp
+@using DevExpress.ExpressApp.Security
+@using Microsoft.Extensions.DependencyInjection
 @using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module
@@ -15,6 +17,7 @@
 @inject EmailDocumentCopiesSendService SendService
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject IServiceProvider Services
 
 @if (Dialog.Current != null)
 {
@@ -157,33 +160,42 @@
     protected override void OnInitialized()
     {
         _uiCultureName = VisaUiCultureResolver.Resolve();
-        _userId = SecuritySystem.CurrentUserId is Guid id ? id : Guid.Empty;
-        _officerName = SecuritySystem.CurrentUserName ?? string.Empty;
-        _configured = MailSender.IsConfigured;
-        _sizeChoices = EmailDocumentCopiesPlanner.AvailableSizesMb(MailSender.MaxTotalAttachmentBytes);
-        _maxMb = _sizeChoices.Count == 0 ? 20 : _sizeChoices[^1];
         Dialog.Changed += OnDialogChanged;
-        if (Dialog.Current != null)
-            LoadRequest(Dialog.Current);
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (_configured && _userId != Guid.Empty)
-            _connection = await MailSender.GetConnectionAsync(_userId);
-    }
-
-    private void OnDialogChanged() => InvokeAsync(() =>
+    private void OnDialogChanged() => InvokeAsync(async () =>
     {
         if (Dialog.Current == null)
         {
             ResetSession();
+            StateHasChanged();
             return;
         }
         ResetSession();
-        LoadRequest(Dialog.Current);
+        await LoadRequestAsync(Dialog.Current);
         StateHasChanged();
     });
+
+    /// <summary>
+    /// This host is a root <c>_Host.cshtml</c> component, so it also runs on the login page.
+    /// Never use <see cref="SecuritySystem"/> here (ValueManagerContext.Storage is null).
+    /// </summary>
+    private void EnsureOfficerContext()
+    {
+        if (_userId != Guid.Empty)
+            return;
+        try
+        {
+            var security = Services.GetService<ISecurityStrategyBase>();
+            if (security?.IsAuthenticated != true)
+                return;
+            _userId = security.UserId is Guid id ? id : Guid.Empty;
+            _officerName = security.UserName ?? string.Empty;
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
 
     private void ResetSession()
     {
@@ -209,8 +221,15 @@
         _toInvalid = false;
     }
 
-    private void LoadRequest(EmailDocumentCopiesDialogRequest request)
+    private async Task LoadRequestAsync(EmailDocumentCopiesDialogRequest request)
     {
+        EnsureOfficerContext();
+        _configured = MailSender.IsConfigured;
+        _sizeChoices = EmailDocumentCopiesPlanner.AvailableSizesMb(MailSender.MaxTotalAttachmentBytes);
+        if (_sizeChoices.Count > 0)
+            _maxMb = _sizeChoices[^1];
+        if (_configured && _userId != Guid.Empty)
+            _connection = await MailSender.GetConnectionAsync(_userId);
         LoadOfficerEmail();
         LoadTemplates();
         LoadPeople(request);

@@ -25,6 +25,8 @@ public sealed class EmailDocumentCopiesSchemaUpdater : ModuleUpdater
         base.UpdateDatabaseAfterUpdateSchema();
         ApplySchemaSql();
         EnsureDefaultTemplate();
+        _ = EmailSmtpSettings.GetOrCreateInstance(ObjectSpace);
+        ObjectSpace.CommitChanges();
     }
 
     private void EnsureDefaultTemplate()

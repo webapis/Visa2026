@@ -109,6 +109,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `UserReportPlaceholder` | Read, Write, Create, Delete (extract placeholders) |
 | `ApplicationProfile`, `ApplicationProfileApprovalLeg`, `ApplicationProfileTemplate`, `ApplicationProfileProgressStateSetting` | Full (Templates catalog: create, edit, **delete when unlinked**) |
 | `SystemSettings` | Full (singleton upload size limits) |
+| `EmailSmtpSettings` | Full (Configuration → Mail server; Users denied) |
 | `ExpirationAlertRule` | Read + Write (edit warn/extension day counts; rows seeded) |
 
 ### Read only

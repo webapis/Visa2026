@@ -90,4 +90,7 @@ public interface IOfficerMailSender
 
     /// <exception cref="OfficerMailException">The server rejected the message or the connection is gone.</exception>
     Task SendAsync(Guid userId, OfficerMailMessage message, CancellationToken cancellationToken = default);
+
+    /// <summary>Connects and logs in (SMTP) without sending. Null when the check succeeded.</summary>
+    Task<string?> TestConnectionAsync(CancellationToken cancellationToken = default);
 }
