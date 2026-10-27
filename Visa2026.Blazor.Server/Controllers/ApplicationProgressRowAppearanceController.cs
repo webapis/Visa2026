@@ -90,7 +90,10 @@ public sealed class ApplicationProfileInstanceProgressRowAppearanceController : 
         var fieldName = column is DxGridDataColumn dataColumn
             ? dataColumn.FieldName
             : column.Name;
+        // ProgressStepsDisplay is remapped to ProgressListSortKey for ListView sorting.
         return string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
+            || string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressListSortKey), StringComparison.Ordinal)
+            || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal)
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.ResultCoverageDisplay), StringComparison.Ordinal);
     }
 

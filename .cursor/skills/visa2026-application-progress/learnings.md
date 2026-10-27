@@ -14,6 +14,15 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Prevent**: Do not require a document copy before Advance. Do not hide the upload on the migration card once the status is no longer the waiting-for-number line. Do not drop the copies when a later issued or rejected row is added.
 - **Cross-skill**: visa2026-application-profile
 
+### 2026-10-24 — Revert progress threw ObservableCollection.Clear
+
+- **Symptom**: **Ýagdaýy yzyna öwürmek** showed a red banner: `'ObservableCollection<T>.Clear' is not supported` (`Reset`).
+- **Root cause**: Revert deleted the step’s extra files, then called `Files.Clear()`. `Files` is a tracked `ObservableCollection`, and EF rejects `Clear()`.
+- **Fix**: Remove each file from `Files`, then delete it. The step row is still deleted.
+- **Officer**: Stop the host, rebuild, hard-refresh. On the case that failed, click **Ýagdaýy yzyna öwürmek** again. The latest step should drop with no red banner.
+- **Prevent**: Do not call `Clear()` on `ApplicationProfileInstanceProgress.Files` or any other XAF `ObservableCollection` navigation. Use `Remove`.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-10-24 — Advance progress stays enabled after the last step
 
 - **Symptom**: Case workspace **Advance progress** stayed the primary button after Issued (SLA ring Done / complete). Clicking it only stayed on Progress.

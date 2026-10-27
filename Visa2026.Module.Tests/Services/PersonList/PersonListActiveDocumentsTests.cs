@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Xunit;
 
@@ -28,6 +29,49 @@ public class PersonListActiveDocumentsTests
         Assert.Equal("01.03.2026 – 01.09.2026", rows[0].Dates);
         Assert.Contains("/Visa:", rows[0].RecordKey);
         Assert.Equal("A-EARLY", rows[1].Number);
+    }
+
+    [Fact]
+    public void ShownPassportCopy_LinksThePassportOnTheRow_OnlyWhenItHasAScan()
+    {
+        var person = new Person();
+        var passport = new Passport
+        {
+            ID = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            PassportNumber = "P1",
+            IssueDate = new DateTime(2020, 1, 1),
+            ExpirationDate = new DateTime(2030, 1, 1),
+        };
+        person.Passports.Add(passport);
+
+        var withoutScan = PersonCurrentItems.ShownPassportCopy(person, AsOf);
+        Assert.Equal("P1", withoutScan.Lines[0]);
+        Assert.Equal(string.Empty, withoutScan.RecordKey);
+
+        passport.Documents.Add(new PassportDocument
+        {
+            File = new FileData { FileName = "passport.pdf", Size = 20 },
+        });
+
+        var withScan = PersonCurrentItems.ShownPassportCopy(person, AsOf);
+        Assert.Equal("Passport:11111111111111111111111111111111", withScan.RecordKey);
+    }
+
+    [Fact]
+    public void ListCvCopies_UsesEachPersonFile()
+    {
+        var person = new Person();
+        person.Documents.Add(new PersonDocument
+        {
+            ID = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+            File = new FileData { FileName = "cv.pdf", Size = 10 },
+        });
+
+        var rows = PersonCurrentItems.ListCvCopies(person);
+
+        Assert.Single(rows);
+        Assert.Equal("cv.pdf", rows[0].Lines[0]);
+        Assert.Equal("PersonDocument:22222222222222222222222222222222", rows[0].RecordKey);
     }
 
     [Fact]

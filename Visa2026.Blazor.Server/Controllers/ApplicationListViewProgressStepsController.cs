@@ -14,6 +14,8 @@ namespace Visa2026.Blazor.Server.Controllers;
 public sealed class ApplicationListViewProgressStepsController : ViewController<ListView>
 {
     private CancellationTokenSource? deferredApplyCts;
+    private Action<GridCustomSortEventArgs>? customSortHandler;
+    private Action<GridCustomSortEventArgs>? previousCustomSort;
 
     public ApplicationListViewProgressStepsController()
     {
@@ -24,6 +26,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
     {
         base.OnViewControlsCreated();
         ApplyStepperTemplate();
+        WireCustomSort();
         ScheduleDeferredApply();
     }
 
@@ -50,6 +53,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         if (View is { IsDisposed: false })
         {
             ApplyStepperTemplate();
+            WireCustomSort();
             AutoFitColumns();
         }
     }
@@ -68,7 +72,51 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         deferredApplyCts?.Cancel();
         deferredApplyCts?.Dispose();
         deferredApplyCts = null;
+        if (customSortHandler != null
+            && View?.Editor is DxGridListEditor { GridModel: { } gridModel })
+        {
+            gridModel.CustomSort = previousCustomSort;
+        }
+
+        customSortHandler = null;
+        previousCustomSort = null;
         base.OnDeactivated();
+    }
+
+    private void WireCustomSort()
+    {
+        if (View?.Editor is not DxGridListEditor { GridModel: { } gridModel })
+            return;
+
+        if (customSortHandler != null)
+        {
+            gridModel.CustomSort = previousCustomSort;
+            customSortHandler = null;
+            previousCustomSort = null;
+        }
+
+        previousCustomSort = gridModel.CustomSort;
+        customSortHandler = e =>
+        {
+            previousCustomSort?.Invoke(e);
+            if (e.Handled || !IsProgressStepsColumn(e.FieldName))
+                return;
+
+            // NotMapped ProgressListSortKey is often missing from Value1/Value2; use the BO.
+            var key1 = SortKeyFromDataItem(e.DataItem1);
+            var key2 = SortKeyFromDataItem(e.DataItem2);
+            e.Result = key1.CompareTo(key2);
+            e.Handled = true;
+        };
+        gridModel.CustomSort = customSortHandler;
+    }
+
+    private static int SortKeyFromDataItem(object? dataItem)
+    {
+        if (dataItem is ApplicationProfileInstance application)
+            return application.ProgressListSortKey;
+
+        return int.MaxValue;
     }
 
     internal void ApplyStepperTemplate()
@@ -87,13 +135,16 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                 continue;
             }
 
-            if (!string.Equals(
-                    columnModel.FieldName,
-                    nameof(ApplicationProfileInstance.ProgressStepsDisplay),
-                    StringComparison.Ordinal))
+            if (!IsProgressStepsColumn(columnModel.FieldName))
                 continue;
 
-            columnModel.AllowSort = false;
+            // Persistent FieldName so CollectionSource can sort; CustomSort uses ProgressListSortKey (color + stage).
+            var caption = columnModel.Caption;
+            columnModel.FieldName = nameof(ApplicationProfileInstance.LatestPrimaryStateCode);
+            columnModel.SortMode = GridColumnSortMode.Custom;
+            columnModel.AllowSort = true;
+            if (!string.IsNullOrWhiteSpace(caption))
+                columnModel.Caption = caption;
             columnModel.MinWidth = 420;
             columnModel.Width = "520px";
             var resultColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
@@ -198,4 +249,9 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             };
         }
     }
+
+    private static bool IsProgressStepsColumn(string? fieldName) =>
+        string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
+        || string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressListSortKey), StringComparison.Ordinal)
+        || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal);
 }

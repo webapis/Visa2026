@@ -343,6 +343,14 @@ namespace Visa2026.Module.BusinessObjects
         public string ListRowCssClass => listRowCssClass ?? ListViewDisplay.ListRowCssClass;
 
         /// <summary>
+        /// ListView sort key for Application progress: appearance color priority then workflow stage.
+        /// Bound by the progress stepper column (display stays the stepper template).
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public int ProgressListSortKey => ListViewDisplay.ProgressListSortKey;
+
+        /// <summary>
         /// Latest <see cref="ApplicationProfileInstanceProgress"/> state/location code for ListView row color (<see cref="IBoListRowState"/>).
         /// </summary>
         [Browsable(false)]

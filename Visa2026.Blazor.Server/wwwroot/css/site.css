@@ -595,13 +595,17 @@ dxd-license,
 .visa-progress-row[class*="visa-progress-row--state-"] {
     --visa-row-surface: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
     --visa-row-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #142033));
-    --dxbl-grid-row-bg: color-mix(in srgb, var(--visa-row-hue) 48%, var(--visa-row-surface));
+    --dxbl-grid-row-bg: color-mix(in srgb, var(--visa-row-hue) 55%, var(--visa-row-surface));
 }
 .dxbl-theme-fluent-mode-light .visa-progress-row[class*="visa-progress-row--state-"] {
     --dxbl-grid-row-bg: var(--visa-row-hue);
 }
-.visa-progress-row[class*="visa-progress-row--state-"] > td {
-    color: var(--visa-row-ink);
+/* Whole row (every cell) uses the progress tint — DxGrid leaves most tds on the theme surface otherwise. */
+.dxbl-grid tr.visa-progress-row[class*="visa-progress-row--state-"] > td {
+    background-color: var(--dxbl-grid-row-bg) !important;
+    background-image: none !important;
+    --dxbl-grid-data-cell-bg: var(--dxbl-grid-row-bg);
+    color: var(--visa-row-ink) !important;
 }
 
 .visa-family-lines-inline,
@@ -4215,7 +4219,7 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     display: block;
 }
 
-/* Progress + result columns follow the row tint and the Fluent theme. */
+/* Progress + result columns stay on the same row tint (no separate white plate). */
 .dxbl-grid tr.visa-progress-row > td.lv-plain-cell,
 .dxbl-grid tr.dxbl-grid-selected-row > td.lv-plain-cell,
 .dxbl-grid tr:hover > td.lv-plain-cell,
@@ -4223,5 +4227,5 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     background-color: var(--dxbl-grid-row-bg, var(--dxds-color-surface-neutral-default-rest, transparent)) !important;
     background-image: none !important;
     --dxbl-grid-data-cell-bg: var(--dxbl-grid-row-bg, var(--dxds-color-surface-neutral-default-rest, transparent));
-    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #1b2430)) !important;
+    color: var(--visa-row-ink, var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #1b2430))) !important;
 }

@@ -1,4 +1,19 @@
+using System.Collections.Generic;
+
 namespace Visa2026.Module.BusinessObjects;
+
+/// <summary>One passport, education, address, CV, or family-proof block on a Person list.</summary>
+public sealed class PersonListCopyCell
+{
+    public static PersonListCopyCell Empty { get; } = new();
+
+    public IReadOnlyList<string> Lines { get; init; } = System.Array.Empty<string>();
+
+    /// <summary>Person document-copies record key. Empty when that record has no file.</summary>
+    public string RecordKey { get; init; } = string.Empty;
+
+    public string DisplayName { get; init; } = string.Empty;
+}
 
 /// <summary>One in-force visa, work permit, or invitation line on a Person list.</summary>
 public sealed class PersonListActiveDocument

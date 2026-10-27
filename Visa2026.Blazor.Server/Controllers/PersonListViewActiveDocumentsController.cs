@@ -34,11 +34,14 @@ public static class PersonRosterListViews
 /// </summary>
 public sealed class PersonListViewActiveDocumentsController : ViewController<ListView>
 {
-    private static readonly string[] EducationFields =
+    private static readonly string[] CopyFields =
     [
+        nameof(Person.EmployeeListActivePassport),
         nameof(Person.EmployeeListEducationPlace),
         nameof(Person.EmployeeListEducationProfession),
-        nameof(Person.EmployeeListActivePassport),
+        nameof(Person.EmployeeListResidenceAddress),
+        nameof(Person.EmployeeListCvCopies),
+        nameof(Person.EmployeeListFamilyProofCopies),
     ];
 
     private static readonly string[] DocumentFields =
@@ -76,6 +79,8 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         [nameof(Person.EmployeeListActiveWorkPermitNumbers)] = 150,
         [nameof(Person.EmployeeListActiveInvitationNumbers)] = 160,
         [nameof(Person.EmployeeListResidenceAddress)] = 320,
+        [nameof(Person.EmployeeListCvCopies)] = 160,
+        [nameof(Person.EmployeeListFamilyProofCopies)] = 160,
         [nameof(Person.EmployeeListEducationPlace)] = 170,
         [nameof(Person.EmployeeListEducationProfession)] = 150,
         [nameof(Person.Relationship)] = 90,
@@ -273,11 +278,11 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         foreach (var column in editor.GridDataColumnModels)
         {
             var fieldName = column.FieldName ?? string.Empty;
-            if (EducationFields.Contains(fieldName, StringComparer.Ordinal))
+            if (CopyFields.Contains(fieldName, StringComparer.Ordinal))
             {
-                var educationField = fieldName;
+                var copyField = fieldName;
                 column.CellDisplayTemplate = context => builder =>
-                    RenderEducation(builder, context.DataItem as Person, educationField);
+                    RenderCopyCells(builder, context.DataItem as Person, copyField, ownerViewId);
                 continue;
             }
 
@@ -813,22 +818,26 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     private static string Percent(int pixels, int basis) =>
         (pixels * 100d / basis).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + "%";
 
-    private static void RenderEducation(RenderTreeBuilder builder, Person? person, string field)
+    private static void RenderCopyCells(RenderTreeBuilder builder, Person? person, string field, string ownerViewId)
     {
-        IReadOnlyList<IReadOnlyList<string>> blocks = person == null
-            ? Array.Empty<IReadOnlyList<string>>()
+        IReadOnlyList<PersonListCopyCell> cells = person == null
+            ? Array.Empty<PersonListCopyCell>()
             : field switch
             {
-                nameof(Person.EmployeeListEducationPlace) => PersonCurrentItems.ListEducationPlaces(person),
-                nameof(Person.EmployeeListEducationProfession) => PersonCurrentItems.ListEducationProfessions(person),
-                nameof(Person.EmployeeListActivePassport) => PassportBlock(person),
-                _ => Array.Empty<IReadOnlyList<string>>(),
+                nameof(Person.EmployeeListActivePassport) => new[] { PersonCurrentItems.ShownPassportCopy(person) },
+                nameof(Person.EmployeeListEducationPlace) => PersonCurrentItems.ListShownEducationPlaces(person),
+                nameof(Person.EmployeeListEducationProfession) => PersonCurrentItems.ListShownEducationProfessions(person),
+                nameof(Person.EmployeeListResidenceAddress) => new[] { PersonCurrentItems.ShownAddressCopy(person) },
+                nameof(Person.EmployeeListCvCopies) => PersonCurrentItems.ListCvCopies(person),
+                nameof(Person.EmployeeListFamilyProofCopies) => PersonCurrentItems.ListFamilyProofCopies(person),
+                _ => Array.Empty<PersonListCopyCell>(),
             };
 
+        cells = cells.Where(cell => cell.Lines.Count > 0).ToList();
         var seq = 0;
         builder.OpenElement(seq++, "div");
         builder.AddAttribute(seq++, "class", "person-doc-stack");
-        if (blocks.Count == 0)
+        if (cells.Count == 0)
         {
             builder.OpenElement(seq++, "span");
             builder.AddAttribute(seq++, "class", "person-doc-line");
@@ -838,16 +847,35 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
             return;
         }
 
-        foreach (var lines in blocks)
+        var personId = person!.ID;
+        foreach (var cell in cells)
         {
             builder.OpenElement(seq++, "div");
             builder.AddAttribute(seq++, "class", "person-doc-block");
-            foreach (var line in lines)
+            var link = personId != Guid.Empty && !string.IsNullOrEmpty(cell.RecordKey);
+            for (var i = 0; i < cell.Lines.Count; i++)
             {
-                builder.OpenElement(seq++, "span");
-                builder.AddAttribute(seq++, "class", "person-doc-line");
-                builder.AddContent(seq++, line);
-                builder.CloseElement();
+                if (i == 0 && link)
+                {
+                    builder.OpenElement(seq++, "button");
+                    builder.AddAttribute(seq++, "type", "button");
+                    builder.AddAttribute(seq++, "class", "person-doc-number");
+                    builder.AddAttribute(seq++, "data-person-id", personId.ToString("D"));
+                    builder.AddAttribute(seq++, "data-record-key", cell.RecordKey);
+                    builder.AddAttribute(seq++, "data-display-name", cell.DisplayName ?? string.Empty);
+                    builder.AddAttribute(seq++, "data-owner-view", ownerViewId);
+                    if (!string.IsNullOrWhiteSpace(cell.DisplayName))
+                        builder.AddAttribute(seq++, "title", cell.DisplayName);
+                    builder.AddContent(seq++, cell.Lines[i]);
+                    builder.CloseElement();
+                }
+                else
+                {
+                    builder.OpenElement(seq++, "span");
+                    builder.AddAttribute(seq++, "class", "person-doc-line");
+                    builder.AddContent(seq++, cell.Lines[i]);
+                    builder.CloseElement();
+                }
             }
 
             builder.CloseElement();
@@ -939,14 +967,6 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
 
         column.Index = -1;
         return true;
-    }
-
-    private static IReadOnlyList<IReadOnlyList<string>> PassportBlock(Person person)
-    {
-        var lines = PersonCurrentItems.ListActivePassportLines(person);
-        return lines.Count == 0
-            ? Array.Empty<IReadOnlyList<string>>()
-            : new[] { lines };
     }
 
     private IJSRuntime? GetJs() => Application?.ServiceProvider?.GetService<IJSRuntime>();

@@ -176,22 +176,22 @@
       <Item Id="RejectionItem" Caption="Ret Kalemleri" />
       <Item Id="ReportDashboard" Caption="Rapor Panosu">
         <Items>
-          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Başvuru (bakanlık süreci)" />
-          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Başvuru (doğrudan migrasyon)" />
-          <Item Id="ReportDashboard_VisaExtension" Caption="Vize" />
-          <Item Id="ReportDashboard_Invitation" Caption="Davet" />
-          <Item Id="ReportDashboard_Registration" Caption="Kayıt" />
-          <Item Id="ReportDashboard_WorkPermit" Caption="Çalışma İzni" />
-          <Item Id="ReportDashboard_Travel" Caption="Seyahat" />
           <Item Id="ReportDashboard_AddressOfResidence" Caption="İkamet Adresi" />
+          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Başvuru (doğrudan migrasyon)" />
+          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Başvuru (bakanlık süreci)" />
           <Item Id="ReportDashboard_BorderZone" Caption="Sınır Bölgesi" />
-          <Item Id="ReportDashboard_Passport" Caption="Pasaport" />
           <Item Id="ReportDashboard_Education" Caption="Eğitim" />
-          <Item Id="ReportDashboard_PositionHistory" Caption="Pozisyon Geçmişi" />
-          <Item Id="ReportDashboard_Subcontractor" Caption="Taşeron" />
-          <Item Id="ReportDashboard_MedicalRecord" Caption="Sağlık Kayıtları" />
           <Item Id="ReportDashboard_IncompletePersons" Caption="Verileri eksik kişiler" />
+          <Item Id="ReportDashboard_Invitation" Caption="Davet" />
+          <Item Id="ReportDashboard_MedicalRecord" Caption="Sağlık Kayıtları" />
+          <Item Id="ReportDashboard_Passport" Caption="Pasaport" />
           <Item Id="ReportDashboard_PersonSearch" Caption="Kişi arama" />
+          <Item Id="ReportDashboard_PositionHistory" Caption="Pozisyon Geçmişi" />
+          <Item Id="ReportDashboard_Registration" Caption="Kayıt" />
+          <Item Id="ReportDashboard_Subcontractor" Caption="Taşeron" />
+          <Item Id="ReportDashboard_Travel" Caption="Seyahat" />
+          <Item Id="ReportDashboard_VisaExtension" Caption="Vize" />
+          <Item Id="ReportDashboard_WorkPermit" Caption="Çalışma İzni" />
         </Items>
       </Item>
       <Item Id="Reports" Caption="Raporlar" />
@@ -1606,16 +1606,6 @@
         <Member Name="Educations" Caption="Eğitimler" />
         <Member Name="Email" Caption="E-posta" />
         <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
-        <Member Name="EmployeeListActiveInvitationNumbers" Caption="Aktif davetiyeler" />
-        <Member Name="EmployeeListActiveVisaNumbers" Caption="Aktif vizeler" />
-        <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Aktif çalışma izinleri" />
-        <Member Name="EmployeeListActualPositionName" Caption="Pozisyon (fiili / şirket)" />
-        <Member Name="EmployeeListDepartmentName" Caption="Departman" />
-        <Member Name="EmployeeListPositionName" Caption="Pozisyon (vize raporları)" />
-        <Member Name="EmployeeListResidenceAddress" Caption="İkamet adresi" />
-        <Member Name="EmployeeListEducationPlace" Caption="Eğitim ve öğrenim yeri" />
-        <Member Name="EmployeeListEducationProfession" Caption="Eğitime göre meslek" />
-        <Member Name="EmployeeListActivePassport" Caption="Pasaport" />
         <Member Name="FamilyMembers" Caption="Aile Üyeleri" />
         <Member Name="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
         <Member Name="FirstName" Caption="Ad" />
@@ -3106,19 +3096,9 @@
         <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
         <ColumnInfo Id="MaritalStatus" Caption="Medeni Hal" />
         <ColumnInfo Id="Nationality" Caption="Uyruk" />
-        <ColumnInfo Id="EmployeeListActivePassport" Caption="Pasaport" />
         <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="Subcontractor" Caption="Şirket (Taşeron)" />
-        <ColumnInfo Id="EmployeeListPositionName" Caption="Pozisyon (vize raporları)" />
-        <ColumnInfo Id="EmployeeListActualPositionName" Caption="Pozisyon (fiili / şirket)" />
-        <ColumnInfo Id="EmployeeListDepartmentName" Caption="Departman" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Aktif vizeler" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Aktif çalışma izinleri" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Aktif davetiyeler" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Eğitim ve öğrenim yeri" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Eğitime göre meslek" />
-        <ColumnInfo Id="EmployeeListResidenceAddress" Caption="İkamet adresi" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Aile Üyeleri">
@@ -3151,11 +3131,6 @@
         <ColumnInfo Id="Relationship" Caption="Yakınlık" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Sponsor Çalışan" />
         <ColumnInfo Id="Subcontractor" Caption="Şirket (Taşeron)" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Aktif vizeler" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Aktif çalışma izinleri" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Aktif davetiyeler" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Eğitim ve öğrenim yeri" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Eğitime göre meslek" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Geçici ziyaretçi">
@@ -3171,11 +3146,6 @@
         <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="Subcontractor" Caption="Şirket (Taşeron)" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Aktif vizeler" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Aktif çalışma izinleri" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Aktif davetiyeler" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Eğitim ve öğrenim yeri" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Eğitime göre meslek" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="Seyahat Geçmişi">

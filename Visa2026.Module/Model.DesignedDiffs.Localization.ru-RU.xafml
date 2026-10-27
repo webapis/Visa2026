@@ -176,22 +176,22 @@
       <Item Id="RejectionItem" Caption="Позиции отказа" />
       <Item Id="ReportDashboard" Caption="Панель отчётов">
         <Items>
-          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Заявка (через министерства)" />
-          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Заявка (напрямую в миграцию)" />
-          <Item Id="ReportDashboard_VisaExtension" Caption="Виза" />
-          <Item Id="ReportDashboard_Invitation" Caption="Приглашение" />
-          <Item Id="ReportDashboard_Registration" Caption="Регистрация" />
-          <Item Id="ReportDashboard_WorkPermit" Caption="Разрешение на работу" />
-          <Item Id="ReportDashboard_Travel" Caption="Поездка" />
           <Item Id="ReportDashboard_AddressOfResidence" Caption="Адрес проживания" />
+          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Заявка (напрямую в миграцию)" />
+          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Заявка (через министерства)" />
           <Item Id="ReportDashboard_BorderZone" Caption="Пограничная зона" />
-          <Item Id="ReportDashboard_Passport" Caption="Паспорт" />
           <Item Id="ReportDashboard_Education" Caption="Образование" />
-          <Item Id="ReportDashboard_PositionHistory" Caption="История должностей" />
-          <Item Id="ReportDashboard_Subcontractor" Caption="Субподрядчик" />
-          <Item Id="ReportDashboard_MedicalRecord" Caption="Медкарты" />
           <Item Id="ReportDashboard_IncompletePersons" Caption="Лица с неполными данными" />
+          <Item Id="ReportDashboard_Invitation" Caption="Приглашение" />
+          <Item Id="ReportDashboard_MedicalRecord" Caption="Медкарты" />
+          <Item Id="ReportDashboard_Passport" Caption="Паспорт" />
           <Item Id="ReportDashboard_PersonSearch" Caption="Поиск персон" />
+          <Item Id="ReportDashboard_PositionHistory" Caption="История должностей" />
+          <Item Id="ReportDashboard_Registration" Caption="Регистрация" />
+          <Item Id="ReportDashboard_Subcontractor" Caption="Субподрядчик" />
+          <Item Id="ReportDashboard_Travel" Caption="Поездка" />
+          <Item Id="ReportDashboard_VisaExtension" Caption="Виза" />
+          <Item Id="ReportDashboard_WorkPermit" Caption="Разрешение на работу" />
         </Items>
       </Item>
       <Item Id="Reports" Caption="Отчёты" />
@@ -1606,16 +1606,6 @@
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
-        <Member Name="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
-        <Member Name="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
-        <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
-        <Member Name="EmployeeListActualPositionName" Caption="Должность (фактическая / компания)" />
-        <Member Name="EmployeeListDepartmentName" Caption="Отдел" />
-        <Member Name="EmployeeListPositionName" Caption="Должность (отчёты по визе)" />
-        <Member Name="EmployeeListResidenceAddress" Caption="Адрес проживания" />
-        <Member Name="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
-        <Member Name="EmployeeListEducationProfession" Caption="Профессия по образованию" />
-        <Member Name="EmployeeListActivePassport" Caption="Паспорт" />
         <Member Name="FamilyMembers" Caption="Родственники" />
         <Member Name="FamilyRelationDocuments" Caption="Копии доказательств родства" />
         <Member Name="FirstName" Caption="Имя" />
@@ -3106,19 +3096,9 @@
         <ColumnInfo Id="IsArchived" Caption="В архиве" />
         <ColumnInfo Id="MaritalStatus" Caption="Семейное положение" />
         <ColumnInfo Id="Nationality" Caption="Гражданство" />
-        <ColumnInfo Id="EmployeeListActivePassport" Caption="Паспорт" />
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
-        <ColumnInfo Id="EmployeeListPositionName" Caption="Должность (отчёты по визе)" />
-        <ColumnInfo Id="EmployeeListActualPositionName" Caption="Должность (фактическая / компания)" />
-        <ColumnInfo Id="EmployeeListDepartmentName" Caption="Отдел" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Профессия по образованию" />
-        <ColumnInfo Id="EmployeeListResidenceAddress" Caption="Адрес проживания" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Родственники">
@@ -3151,11 +3131,6 @@
         <ColumnInfo Id="Relationship" Caption="Родство" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Профессия по образованию" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Временный посетитель">
@@ -3171,11 +3146,6 @@
         <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Subcontractor" Caption="Компания (Субподрядчик)" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Действующие визы" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Действующие разрешения на работу" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Действующие приглашения" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Образование и место учёбы" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Профессия по образованию" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="История поездок">

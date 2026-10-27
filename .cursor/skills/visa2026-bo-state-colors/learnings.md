@@ -36,6 +36,15 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **`SKILL.md`** or 
 
 ## Entries
 
+### 2026-10-24 — [+] Whole instance ListView row uses progress tint
+
+- **Outcome**: positive
+- **Context**: `Application_ListView_ViaMinistries` Fluent Dark — Progress/Result tinted, other columns stayed dark
+- **What we tried**: Set `background-color: var(--dxbl-grid-row-bg) !important` on every `tr.visa-progress-row > td`, not only `lv-plain-cell`.
+- **What worked / failed**: `--dxbl-grid-row-bg` on the `<tr>` alone does not paint DxGrid data cells; explicit `td` background is required.
+- **Reuse next time**: When officers ask for “whole row” progress color, paint all `td`s; keep Progress/Result on the same variable (no white plate).
+- **Promote**: pending
+
 ### 2026-09-25 — [+] Instance ListView row tint follows Fluent Dark
 
 - **Outcome**: positive

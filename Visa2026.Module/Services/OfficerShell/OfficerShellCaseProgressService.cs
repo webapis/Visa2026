@@ -541,12 +541,11 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         {
             foreach (var item in row.Files.ToList())
             {
+                row.Files.Remove(item);
                 if (item.File != null)
                     objectSpace.Delete(item.File);
                 objectSpace.Delete(item);
             }
-
-            row.Files.Clear();
         }
 
         if (row.MinistryLetterFile != null)

@@ -15,6 +15,7 @@ internal readonly struct ApplicationListViewDisplayState
     public string ProgressSlaAppearanceCode { get; init; }
     public string ListRowAppearanceStateCode { get; init; }
     public string ListRowCssClass { get; init; }
+    public int ProgressListSortKey { get; init; }
 
     public static ApplicationListViewDisplayState Resolve(ApplicationProfileInstance application)
     {
@@ -41,6 +42,7 @@ internal readonly struct ApplicationListViewDisplayState
             ProgressSlaAppearanceCode = slaAppearanceCode,
             ListRowAppearanceStateCode = listRowAppearance,
             ListRowCssClass = listRowCssClass,
+            ProgressListSortKey = ApplicationProfileInstanceProgressListSort.Compose(listRowAppearance, primaryStateCode),
         };
     }
 

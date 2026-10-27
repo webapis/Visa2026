@@ -176,22 +176,22 @@
       <Item Id="RejectionItem" Caption="Ret elementleri" />
       <Item Id="ReportDashboard" Caption="Hasabat paneli">
         <Items>
-          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Ýüztutma (ministrlik arkaly)" />
-          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Ýüztutma (gönümel migrasiýa)" />
-          <Item Id="ReportDashboard_VisaExtension" Caption="Wiza" />
-          <Item Id="ReportDashboard_Invitation" Caption="Çakylyk" />
-          <Item Id="ReportDashboard_Registration" Caption="Hasaba alyş" />
-          <Item Id="ReportDashboard_WorkPermit" Caption="Iş rugsady" />
-          <Item Id="ReportDashboard_Travel" Caption="Syýahat" />
           <Item Id="ReportDashboard_AddressOfResidence" Caption="Ýaşaýyş salgysy" />
+          <Item Id="ReportDashboard_ApplicationDirectMigration" Caption="Ýüztutma (gönümel migrasiýa)" />
+          <Item Id="ReportDashboard_ApplicationViaMinistry" Caption="Ýüztutma (ministrlik arkaly)" />
           <Item Id="ReportDashboard_BorderZone" Caption="Serhet sebiti" />
-          <Item Id="ReportDashboard_Passport" Caption="Pasport" />
           <Item Id="ReportDashboard_Education" Caption="Bilim" />
-          <Item Id="ReportDashboard_PositionHistory" Caption="Wezipe taryhy" />
-          <Item Id="ReportDashboard_Subcontractor" Caption="Subpodrýadçy" />
-          <Item Id="ReportDashboard_MedicalRecord" Caption="Saglyk ýazgylary" />
           <Item Id="ReportDashboard_IncompletePersons" Caption="Maglumary doly däl şahslar" />
+          <Item Id="ReportDashboard_Invitation" Caption="Çakylyk" />
+          <Item Id="ReportDashboard_MedicalRecord" Caption="Saglyk ýazgylary" />
+          <Item Id="ReportDashboard_Passport" Caption="Pasport" />
           <Item Id="ReportDashboard_PersonSearch" Caption="Şahs gözlegi" />
+          <Item Id="ReportDashboard_PositionHistory" Caption="Wezipe taryhy" />
+          <Item Id="ReportDashboard_Registration" Caption="Hasaba alyş" />
+          <Item Id="ReportDashboard_Subcontractor" Caption="Subpodrýadçy" />
+          <Item Id="ReportDashboard_Travel" Caption="Syýahat" />
+          <Item Id="ReportDashboard_VisaExtension" Caption="Wiza" />
+          <Item Id="ReportDashboard_WorkPermit" Caption="Iş rugsady" />
         </Items>
       </Item>
       <Item Id="Reports" Caption="Hasabatlar" />
@@ -1606,16 +1606,6 @@
         <Member Name="Educations" Caption="Bilimler" />
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="EmployeeContracts" Caption="Işgär şertnamalary" />
-        <Member Name="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
-        <Member Name="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
-        <Member Name="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
-        <Member Name="EmployeeListActualPositionName" Caption="Wezipesi (hakyky / kompaniýa)" />
-        <Member Name="EmployeeListDepartmentName" Caption="Bölüm" />
-        <Member Name="EmployeeListPositionName" Caption="Wezipesi (wiza hasabaty)" />
-        <Member Name="EmployeeListResidenceAddress" Caption="Ýaşaýyş salgysy" />
-        <Member Name="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
-        <Member Name="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
-        <Member Name="EmployeeListActivePassport" Caption="Pasport" />
         <Member Name="FamilyMembers" Caption="Maşgalalar" />
         <Member Name="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
         <Member Name="FirstName" Caption="Ady" />
@@ -3105,20 +3095,10 @@
         <ColumnInfo Id="Gender" Caption="Jynsy" />
         <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />
         <ColumnInfo Id="MaritalStatus" Caption="Maşgala ýagdaýy" />
-        <ColumnInfo Id="Nationality" Caption="Raýatlygy" />
-        <ColumnInfo Id="EmployeeListActivePassport" Caption="Pasport" />
+        <ColumnInfo Id="Nationality" Caption="Milleti" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
-        <ColumnInfo Id="EmployeeListPositionName" Caption="Wezipesi (wiza hasabaty)" />
-        <ColumnInfo Id="EmployeeListActualPositionName" Caption="Wezipesi (hakyky / kompaniýa)" />
-        <ColumnInfo Id="EmployeeListDepartmentName" Caption="Bölüm" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
-        <ColumnInfo Id="EmployeeListResidenceAddress" Caption="Ýaşaýyş salgysy" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_FamilyMembers" Caption="Maşgalalar">
@@ -3145,17 +3125,12 @@
         <ColumnInfo Id="LastName" Caption="Familiýasy" />
         <ColumnInfo Id="MaritalStatus" Caption="Maşgala ýagdaýy" />
         <ColumnInfo Id="MiddleName" Caption="Atasynyň ady" />
-        <ColumnInfo Id="Nationality" Caption="Raýatlygy" />
+        <ColumnInfo Id="Nationality" Caption="Milleti" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Işgär" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Wagtlaýyn myhman">
@@ -3167,15 +3142,10 @@
         <ColumnInfo Id="FullName" Caption="Doly ady" />
         <ColumnInfo Id="Gender" Caption="Jynsy" />
         <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />
-        <ColumnInfo Id="Nationality" Caption="Raýatlygy" />
+        <ColumnInfo Id="Nationality" Caption="Milleti" />
         <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="Subcontractor" Caption="Kompaniýa (Subpudarçy)" />
-        <ColumnInfo Id="EmployeeListActiveVisaNumbers" Caption="Häzirki wizalar" />
-        <ColumnInfo Id="EmployeeListActiveWorkPermitNumbers" Caption="Häzirki iş rugsatlary" />
-        <ColumnInfo Id="EmployeeListActiveInvitationNumbers" Caption="Häzirki çakylyklar" />
-        <ColumnInfo Id="EmployeeListEducationPlace" Caption="Bilimi we okan ýeri" />
-        <ColumnInfo Id="EmployeeListEducationProfession" Caption="Bilimine görä hünäri" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="Syýahat taryhy">

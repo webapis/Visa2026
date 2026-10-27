@@ -33,6 +33,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             if (employees)
             {
                 EnsureEmployeeSummaryColumns(listView);
+                EnsureColumn(listView, nameof(Person.EmployeeListCvCopies), 20, 160, null);
                 HideColumn(listView, nameof(Person.DateOfBirth));
                 HideColumn(listView, nameof(Person.Age));
                 HideColumn(listView, nameof(Person.MaritalStatus));
@@ -50,6 +51,20 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             if (viewId == "Person_ListView_FamilyMembers")
             {
                 EnsureColumn(listView, nameof(Person.PersonalNumber), 3, 120, "Personal Number");
+                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 11, 120, null);
+                EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 17, 220, null);
+                EnsureColumn(listView, nameof(Person.EmployeeListFamilyProofCopies), 18, 160, null);
+                var archived = listView.Columns[nameof(Person.IsArchived)];
+                if (archived != null)
+                    archived.Index = 19;
+            }
+            else if (viewId == "Person_ListView_TemporaryVisitors")
+            {
+                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 15, 120, null);
+                EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 16, 220, null);
+                var archived = listView.Columns[nameof(Person.IsArchived)];
+                if (archived != null)
+                    archived.Index = 17;
             }
         }
     }
