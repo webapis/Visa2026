@@ -311,4 +311,266 @@ internal static class SupportingDocumentsPdfSharpHelper
         page.Canvas.DrawTemplate(template, new System.Drawing.PointF(-drawW / 2f, -drawH / 2f), new System.Drawing.SizeF(drawW, drawH));
         page.Canvas.Restore(state);
     }
+
+    /// <summary>
+    /// One A4 page per visa page: the passport scan fills one half and the visa scan fills the other.
+    /// Landscape (the visa default) puts the passport on the left. Portrait stacks the passport above the visa.
+    /// </summary>
+    public static bool TryWriteVisaBesidePassport(
+        byte[] passportBytes,
+        byte[] visaBytes,
+        Stream output,
+        ILogger logger,
+        DocumentCopyPrintLayout layout)
+    {
+        ArgumentNullException.ThrowIfNull(passportBytes);
+        ArgumentNullException.ThrowIfNull(visaBytes);
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        if (passportBytes.Length == 0 || visaBytes.Length == 0)
+            return false;
+
+        ScanHandle? passport = null;
+        ScanHandle? visa = null;
+        try
+        {
+            if (!TryOpenScan(passportBytes, logger, out passport)
+                || !TryOpenScan(visaBytes, logger, out visa)
+                || passport.PageCount == 0
+                || visa.PageCount == 0)
+                return false;
+
+            bool portrait = layout.Orientation == DocumentCopyPageOrientation.Portrait;
+            float pageW = (float)(portrait ? DocumentCopyPrintLayout.A4WidthPt : DocumentCopyPrintLayout.A4HeightPt);
+            float pageH = (float)(portrait ? DocumentCopyPrintLayout.A4HeightPt : DocumentCopyPrintLayout.A4WidthPt);
+
+            using var dest = new Spire.Pdf.PdfDocument();
+            for (int i = 0; i < visa.PageCount; i++)
+            {
+                Spire.Pdf.PdfPageBase page = dest.Pages.Add(
+                    new System.Drawing.SizeF(pageW, pageH),
+                    new PdfMargins(0));
+                SplitHalves(
+                    pageW,
+                    pageH,
+                    portrait,
+                    out double leftX,
+                    out double leftY,
+                    out double leftW,
+                    out double leftH,
+                    out double rightX,
+                    out double rightY,
+                    out double rightW,
+                    out double rightH);
+
+                passport.NaturalSize(0, out double passportW, out double passportH);
+                visa.NaturalSize(i, out double visaW, out double visaH);
+                DocumentCopyDrawRect left = FitInBox(
+                    leftX, leftY, leftW, leftH, passportW, passportH, layout.RotationDegrees);
+                DocumentCopyDrawRect right = FitInBox(
+                    rightX, rightY, rightW, rightH, visaW, visaH, layout.RotationDegrees);
+                passport.Draw(page, 0, left);
+                visa.Draw(page, i, right);
+            }
+
+            dest.SaveToStream(output, Spire.Pdf.FileFormat.PDF);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Document copies: could not place the visa beside its passport.");
+            return false;
+        }
+        finally
+        {
+            passport?.Dispose();
+            visa?.Dispose();
+        }
+    }
+
+    internal static bool TryReadPdfPageSize(
+        byte[] pdf,
+        out double widthPt,
+        out double heightPt,
+        out int pageCount)
+    {
+        widthPt = 0;
+        heightPt = 0;
+        pageCount = 0;
+        if (pdf == null || pdf.Length == 0)
+            return false;
+
+        using var stream = new MemoryStream(pdf, writable: false);
+        using PdfDocument doc = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+        if (doc.PageCount == 0)
+            return false;
+
+        pageCount = doc.PageCount;
+        widthPt = doc.Pages[0].Width.Point;
+        heightPt = doc.Pages[0].Height.Point;
+        return true;
+    }
+
+    private static bool TryOpenScan(byte[] bytes, ILogger logger, out ScanHandle handle)
+    {
+        handle = null!;
+        try
+        {
+            if (DocumentFileUploadConstraints.IsLikelyPdf(bytes))
+            {
+                var pdf = new Spire.Pdf.PdfDocument();
+                try
+                {
+                    pdf.LoadFromBytes(bytes);
+                    if (pdf.Pages.Count == 0)
+                    {
+                        pdf.Dispose();
+                        return false;
+                    }
+
+                    handle = ScanHandle.FromPdf(pdf);
+                    return true;
+                }
+                catch
+                {
+                    pdf.Dispose();
+                    throw;
+                }
+            }
+
+            var stream = new MemoryStream(bytes, writable: false);
+            try
+            {
+                PdfImage image = PdfImage.FromStream(stream);
+                handle = ScanHandle.FromImage(image, stream);
+                return true;
+            }
+            catch
+            {
+                stream.Dispose();
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Document copies: could not open a scan for the visa-and-passport page.");
+            return false;
+        }
+    }
+
+    private static void SplitHalves(
+        double pageW,
+        double pageH,
+        bool portrait,
+        out double firstX,
+        out double firstY,
+        out double firstW,
+        out double firstH,
+        out double secondX,
+        out double secondY,
+        out double secondW,
+        out double secondH)
+    {
+        const double margin = 16;
+        const double gap = 12;
+        if (portrait)
+        {
+            firstW = secondW = pageW - 2 * margin;
+            firstH = secondH = (pageH - 2 * margin - gap) / 2.0;
+            firstX = secondX = margin;
+            firstY = margin;
+            secondY = margin + firstH + gap;
+            return;
+        }
+
+        firstH = secondH = pageH - 2 * margin;
+        firstW = secondW = (pageW - 2 * margin - gap) / 2.0;
+        firstY = secondY = margin;
+        firstX = margin;
+        secondX = margin + firstW + gap;
+    }
+
+    private static DocumentCopyDrawRect FitInBox(
+        double boxX,
+        double boxY,
+        double boxW,
+        double boxH,
+        double sourceWidth,
+        double sourceHeight,
+        int rotationDegrees)
+    {
+        int rotation = rotationDegrees % 360;
+        if (rotation < 0)
+            rotation += 360;
+        rotation = rotation / 90 * 90;
+
+        double srcW = sourceWidth <= 0 ? 1 : sourceWidth;
+        double srcH = sourceHeight <= 0 ? 1 : sourceHeight;
+        if (rotation % 180 != 0)
+            (srcW, srcH) = (srcH, srcW);
+
+        double scale = Math.Min(boxW / srcW, boxH / srcH);
+        double drawW = srcW * scale;
+        double drawH = srcH * scale;
+        return new DocumentCopyDrawRect(
+            0,
+            0,
+            boxX + (boxW - drawW) / 2.0,
+            boxY + (boxH - drawH) / 2.0,
+            drawW,
+            drawH,
+            rotation);
+    }
+
+    private sealed class ScanHandle : IDisposable
+    {
+        private readonly Spire.Pdf.PdfDocument? pdf;
+        private readonly PdfImage? image;
+        private readonly MemoryStream? imageStream;
+
+        private ScanHandle(Spire.Pdf.PdfDocument? pdf, PdfImage? image, MemoryStream? imageStream)
+        {
+            this.pdf = pdf;
+            this.image = image;
+            this.imageStream = imageStream;
+        }
+
+        public static ScanHandle FromPdf(Spire.Pdf.PdfDocument pdf) => new(pdf, null, null);
+
+        public static ScanHandle FromImage(PdfImage image, MemoryStream stream) => new(null, image, stream);
+
+        public int PageCount => pdf?.Pages.Count ?? (image == null ? 0 : 1);
+
+        public void NaturalSize(int pageIndex, out double width, out double height)
+        {
+            if (image != null)
+            {
+                width = image.Width;
+                height = image.Height;
+                return;
+            }
+
+            System.Drawing.SizeF size = pdf!.Pages[pageIndex].Size;
+            width = size.Width;
+            height = size.Height;
+        }
+
+        public void Draw(Spire.Pdf.PdfPageBase page, int pageIndex, DocumentCopyDrawRect rect)
+        {
+            if (image != null)
+            {
+                DrawSpireImage(page, image, rect);
+                return;
+            }
+
+            DrawSpireTemplate(page, pdf!.Pages[pageIndex].CreateTemplate(), rect);
+        }
+
+        public void Dispose()
+        {
+            pdf?.Dispose();
+            imageStream?.Dispose();
+        }
+    }
 }

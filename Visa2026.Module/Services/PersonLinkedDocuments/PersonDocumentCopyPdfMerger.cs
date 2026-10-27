@@ -75,6 +75,7 @@ public sealed class PersonDocumentCopyPdfMerger
             return false;
 
         var layout = printLayout ?? DocumentCopyPrintLayout.DefaultFor(recordKey);
+        byte[]? passportBytes = TryLoadLatestPassportScan(objectSpace, snapshot, recordKey);
         var pdfStreams = new List<MemoryStream>();
         try
         {
@@ -82,6 +83,13 @@ public sealed class PersonDocumentCopyPdfMerger
             {
                 if (!TryLoadFileContent(objectSpace, file.FileDataId, out var fileContent, out var fileNameForExt))
                     continue;
+
+                if (passportBytes != null
+                    && TryCreateVisaBesidePassportStream(passportBytes, fileContent, layout, out var paired))
+                {
+                    pdfStreams.Add(paired);
+                    continue;
+                }
 
                 if (!TryCreateMergeSlicePdfStream(
                         fileContent,
@@ -108,6 +116,78 @@ public sealed class PersonDocumentCopyPdfMerger
             foreach (var stream in pdfStreams)
                 stream.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Latest scan on the passport that owns this visa. PassportDocument has no created date;
+    /// the resolver lists files by id, and the last content file is the latest row.
+    /// </summary>
+    internal static PersonLinkedDocumentFile? LatestPassportScan(
+        PersonLinkedDocumentsSnapshot snapshot,
+        string visaRecordKey)
+    {
+        if (snapshot == null || !TryPassportRecordKey(visaRecordKey, out string passportKey))
+            return null;
+
+        PersonLinkedDocumentRecord? passport = snapshot.FindRecord(passportKey);
+        return passport?.Files.LastOrDefault(file => file.HasContent && file.FileDataId != Guid.Empty);
+    }
+
+    internal static bool TryPassportRecordKey(string visaRecordKey, out string passportKey)
+    {
+        passportKey = string.Empty;
+        if (string.IsNullOrWhiteSpace(visaRecordKey))
+            return false;
+
+        const string marker = "/Visa:";
+        int index = visaRecordKey.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (index <= 0)
+            return false;
+
+        passportKey = visaRecordKey.Substring(0, index);
+        return passportKey.StartsWith("Passport:", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private byte[]? TryLoadLatestPassportScan(
+        IObjectSpace objectSpace,
+        PersonLinkedDocumentsSnapshot snapshot,
+        string visaRecordKey)
+    {
+        if (!DocumentCopyPrintLayout.IsVisaKey(visaRecordKey))
+            return null;
+
+        PersonLinkedDocumentFile? latest = LatestPassportScan(snapshot, visaRecordKey);
+        if (latest == null)
+            return null;
+
+        return TryLoadFileContent(objectSpace, latest.FileDataId, out byte[] content, out _)
+            ? content
+            : null;
+    }
+
+    private bool TryCreateVisaBesidePassportStream(
+        byte[] passportBytes,
+        byte[] visaBytes,
+        DocumentCopyPrintLayout layout,
+        out MemoryStream pdfStream)
+    {
+        pdfStream = null!;
+        var outMs = new MemoryStream();
+        if (!SupportingDocumentsPdfSharpHelper.TryWriteVisaBesidePassport(
+                passportBytes,
+                visaBytes,
+                outMs,
+                logger,
+                layout)
+            || outMs.Length == 0)
+        {
+            outMs.Dispose();
+            return false;
+        }
+
+        outMs.Position = 0;
+        pdfStream = outMs;
+        return true;
     }
 
     private bool TryLoadFileContent(
