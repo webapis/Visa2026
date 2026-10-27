@@ -203,6 +203,85 @@ namespace Visa2026.Module.BusinessObjects
         private static IReadOnlyList<string> Lines(params string[] values) =>
             values.Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).ToList();
 
+        private static IReadOnlyList<PersonListCopyCell> ListShownEducations(Person person, bool places)
+        {
+            var cells = new List<PersonListCopyCell>();
+            foreach (var education in OrderedEducations(person))
+            {
+                var lines = places
+                    ? Lines(
+                        LookupLocalization.GetDisplayName(education.EducationLevel),
+                        LookupLocalization.GetDisplayName(education.EducationInstitution),
+                        LookupLocalization.GetDisplayName(education.EducationCountry))
+                    : Lines(LookupLocalization.GetDisplayName(education.Specialty));
+                if (lines.Count == 0)
+                    continue;
+
+                var key = HasAnyFile(education.Documents) ? $"Education:{education.ID:N}" : string.Empty;
+                var caption = string.Join(", ", Lines(
+                    LookupLocalization.GetDisplayName(education.EducationInstitution),
+                    LookupLocalization.GetDisplayName(education.Specialty)));
+                cells.Add(new PersonListCopyCell
+                {
+                    Lines = lines,
+                    RecordKey = key,
+                    DisplayName = key.Length == 0
+                        ? string.Empty
+                        : PersonDocumentCopiesLocalization.FormatEducationRecord(caption),
+                });
+            }
+
+            return cells;
+        }
+
+        private static string AddressCopyKey(AddressOfResidence address)
+        {
+            if (address == null)
+                return string.Empty;
+
+            if (HasAnyFile(address.Documents))
+                return $"AddressOfResidence:{address.ID:N}";
+
+            if (address.Type == ResidenceType.Lodging
+                && address.Lodging != null
+                && HasAnyFile(address.Lodging.Documents))
+            {
+                return $"AddressOfResidence:{address.ID:N}/Lodging:{address.Lodging.ID:N}";
+            }
+
+            return string.Empty;
+        }
+
+        private static IReadOnlyList<PersonListCopyCell> ListFileCopies<T>(
+            IEnumerable<T> documents,
+            Func<T, string> recordKey,
+            Func<string, string> displayName)
+            where T : DocumentBase
+        {
+            if (documents == null)
+                return Array.Empty<PersonListCopyCell>();
+
+            return documents
+                .Where(document => document?.File != null && document.File.Size > 0 && !string.IsNullOrWhiteSpace(document.File.FileName))
+                .OrderBy(document => document.File.FileName, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(document => document.ID)
+                .Select(document =>
+                {
+                    var name = document.File.FileName.Trim();
+                    return new PersonListCopyCell
+                    {
+                        Lines = new[] { name },
+                        RecordKey = recordKey(document),
+                        DisplayName = displayName(name),
+                    };
+                })
+                .ToList();
+        }
+
+        private static bool HasAnyFile<T>(IEnumerable<T> documents)
+            where T : DocumentBase =>
+            documents?.Any(document => document?.File != null && document.File.Size > 0) == true;
+
         /// <summary>
         /// Visas in force on <paramref name="asOf"/>: not cancelled, start on or before that day,
         /// expiration empty or on or after that day. Numbers, latest start first.
@@ -355,6 +434,67 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>Current residence as report text: region, city, and street.</summary>
         public static string FormatEmployeeListResidenceAddress(Person person) =>
             AddressOfResidenceReportText.CityAndStreet(GetCurrentAddressOfResidence(person));
+
+        /// <summary>The passport already shown on the person list. The key is set only when that passport has a scan.</summary>
+        public static PersonListCopyCell ShownPassportCopy(Person person, DateTime? asOf = null)
+        {
+            var passport = GetLastActivePassport(person, asOf);
+            var lines = ListActivePassportLines(person, asOf);
+            if (passport == null || lines.Count == 0)
+                return PersonListCopyCell.Empty;
+
+            var key = HasAnyFile(passport.Documents) ? $"Passport:{passport.ID:N}" : string.Empty;
+            return new PersonListCopyCell
+            {
+                Lines = lines,
+                RecordKey = key,
+                DisplayName = key.Length == 0
+                    ? string.Empty
+                    : PersonDocumentCopiesLocalization.FormatPassportRecord(passport.PassportNumber),
+            };
+        }
+
+        /// <summary>Education rows already shown, in the same order as the place column.</summary>
+        public static IReadOnlyList<PersonListCopyCell> ListShownEducationPlaces(Person person) =>
+            ListShownEducations(person, places: true);
+
+        /// <summary>Specialty rows for the same education records as <see cref="ListShownEducationPlaces"/>.</summary>
+        public static IReadOnlyList<PersonListCopyCell> ListShownEducationProfessions(Person person) =>
+            ListShownEducations(person, places: false);
+
+        /// <summary>The address already shown. The key is that address's scan, or the lodging scan when the stay is a lodging.</summary>
+        public static PersonListCopyCell ShownAddressCopy(Person person)
+        {
+            var text = FormatEmployeeListResidenceAddress(person);
+            if (string.IsNullOrWhiteSpace(text))
+                return PersonListCopyCell.Empty;
+
+            var address = GetCurrentAddressOfResidence(person);
+            var key = AddressCopyKey(address);
+            var display = key.Contains("/Lodging:", StringComparison.Ordinal)
+                ? PersonDocumentCopiesLocalization.FormatLodgingRecord(text)
+                : PersonDocumentCopiesLocalization.FormatAddressRecord(text);
+            return new PersonListCopyCell
+            {
+                Lines = new[] { text.Trim() },
+                RecordKey = key,
+                DisplayName = key.Length == 0 ? string.Empty : display,
+            };
+        }
+
+        /// <summary>Employee CV and other person files. Each line is one file.</summary>
+        public static IReadOnlyList<PersonListCopyCell> ListCvCopies(Person person) =>
+            ListFileCopies(person?.Documents, static document => $"PersonDocument:{document.ID:N}", PersonDocumentCopiesLocalization.FormatPersonDocumentRecord);
+
+        /// <summary>Family-member proof files. Each line is one file.</summary>
+        public static IReadOnlyList<PersonListCopyCell> ListFamilyProofCopies(Person person) =>
+            ListFileCopies(person?.FamilyRelationDocuments, static document => $"FamilyRelationDocument:{document.ID:N}", PersonDocumentCopiesLocalization.FormatFamilyRelationDocumentRecord);
+
+        public static string FormatCvCopies(Person person) =>
+            string.Join(" | ", ListCvCopies(person).Select(cell => cell.Lines[0]));
+
+        public static string FormatFamilyProofCopies(Person person) =>
+            string.Join(" | ", ListFamilyProofCopies(person).Select(cell => cell.Lines[0]));
 
         public static EmployeeSalary GetCurrentSalary(Person person) =>
             GetCurrentOpenPeriodItem(

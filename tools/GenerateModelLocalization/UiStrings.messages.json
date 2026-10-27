@@ -641,12 +641,6 @@
     "tk-TM": "Ýüztutma belgisi",
     "ru-RU": "№ заявления"
   },
-  "PersonDossier.Column.Issued": {
-    "en": "Issued",
-    "tr-TR": "Düzenlenen",
-    "tk-TM": "Berlen",
-    "ru-RU": "Выдано"
-  },
   "PersonDossier.Column.ApplicationType": {
     "en": "Application type",
     "tr-TR": "Başvuru türü",
@@ -4697,6 +4691,12 @@
     "tk-TM": "Maşgala agzalary (baglanan)",
     "ru-RU": "Члены семьи (связанные)"
   },
+  "Person.Tab.EmailedDocuments": {
+    "en": "Emailed documents",
+    "tr-TR": "E-postayla gönderilen belgeler",
+    "tk-TM": "E-poçta bilen ugradylan resminamalar",
+    "ru-RU": "Отправленные документы"
+  },
   "Passport.Tab.DocumentCopies": {
     "en": "Passport copies",
     "tr-TR": "Pasaport kopyaları",
@@ -7264,12 +7264,6 @@
     "tk-TM": "Girişden soňky gün",
     "ru-RU": "Дней с въезда"
   },
-  "ReportDashboard.Header.ProcessState": {
-    "en": "Process State",
-    "tr-TR": "Süreç durumu",
-    "tk-TM": "Proses ýagdaýy",
-    "ru-RU": "Статус процесса"
-  },
   "ReportDashboard.Header.BzNumber": {
     "en": "BZ Number",
     "tr-TR": "SB no",
@@ -7971,5 +7965,599 @@
     "tr-TR": "Excel şablonu '{0}' bulunamadı. Raporlar altında ekleyin veya yükleyin.",
     "tk-TM": "Excel şablony '{0}' tapylmady. Hasabatlar bölümünde goşuň ýa-da ýükläň.",
     "ru-RU": "Шаблон Excel '{0}' не найден. Добавьте или загрузите его в разделе Отчёты."
+  },
+  "EmailDocumentCopies.Action": {
+    "en": "Email copies",
+    "tr-TR": "Kopyaları e-postayla gönder",
+    "tk-TM": "Nusgalary e-poçta bilen ugrat",
+    "ru-RU": "Отправить копии по почте"
+  },
+  "EmailDocumentCopies.Action.Resend": {
+    "en": "Resend",
+    "tr-TR": "Yeniden gönder",
+    "tk-TM": "Gaýtadan ugrat",
+    "ru-RU": "Отправить повторно"
+  },
+  "EmailDocumentCopies.Title": {
+    "en": "Email document copies",
+    "tr-TR": "Belge kopyalarını e-postayla gönder",
+    "tk-TM": "Resminama nusgalaryny e-poçta bilen ugrat",
+    "ru-RU": "Отправка копий документов по почте"
+  },
+  "EmailDocumentCopies.Source": {
+    "en": "{0} ({1} records)",
+    "tr-TR": "{0} ({1} kayıt)",
+    "tk-TM": "{0} ({1} ýazgy)",
+    "ru-RU": "{0} (записей: {1})"
+  },
+  "EmailDocumentCopies.Step.Documents": {
+    "en": "Documents",
+    "tr-TR": "Belgeler",
+    "tk-TM": "Resminamalar",
+    "ru-RU": "Документы"
+  },
+  "EmailDocumentCopies.Step.Compose": {
+    "en": "Compose",
+    "tr-TR": "E-posta yaz",
+    "tk-TM": "Hat ýaz",
+    "ru-RU": "Письмо"
+  },
+  "EmailDocumentCopies.Person.Selected": {
+    "en": "{0} of {1} selected",
+    "tr-TR": "{1} belgeden {0} seçildi",
+    "tk-TM": "{1} resminamadan {0} saýlandy",
+    "ru-RU": "Выбрано {0} из {1}"
+  },
+  "EmailDocumentCopies.Person.AddOthers": {
+    "en": "+ Add other documents of this person",
+    "tr-TR": "+ Bu kişinin diğer belgelerini ekle",
+    "tk-TM": "+ Bu adamyň beýleki resminamalaryny goş",
+    "ru-RU": "+ Добавить другие документы этого лица"
+  },
+  "EmailDocumentCopies.Person.HideOthers": {
+    "en": "Hide other documents",
+    "tr-TR": "Diğer belgeleri gizle",
+    "tk-TM": "Beýleki resminamalary gizle",
+    "ru-RU": "Скрыть другие документы"
+  },
+  "EmailDocumentCopies.Person.NoDocuments": {
+    "en": "This person has no documents with scanned files.",
+    "tr-TR": "Bu kişinin taranmış dosyası olan belgesi yok.",
+    "tk-TM": "Bu adamyň skanirlenen faýly bolan resminamasy ýok.",
+    "ru-RU": "У этого лица нет документов со сканами."
+  },
+  "EmailDocumentCopies.Record.Current": {
+    "en": "Current",
+    "tr-TR": "Güncel",
+    "tk-TM": "Häzirki",
+    "ru-RU": "Текущий"
+  },
+  "EmailDocumentCopies.Record.NoFile": {
+    "en": "No file",
+    "tr-TR": "Dosya yok",
+    "tk-TM": "Faýl ýok",
+    "ru-RU": "Нет файла"
+  },
+  "EmailDocumentCopies.Record.Files": {
+    "en": "{0} file(s) · {1}",
+    "tr-TR": "{0} dosya · {1}",
+    "tk-TM": "{0} faýl · {1}",
+    "ru-RU": "Файлов: {0} · {1}"
+  },
+  "EmailDocumentCopies.Footer.Summary": {
+    "en": "{0} people · {1} PDFs (one per person) · about {2} of {3} MB",
+    "tr-TR": "{0} kişi · {1} PDF (kişi başına bir) · yaklaşık {2} / {3} MB",
+    "tk-TM": "{0} adam · {1} PDF (her adama bir) · takmynan {2} / {3} MB",
+    "ru-RU": "Лиц: {0} · PDF: {1} (по одному на лицо) · около {2} из {3} МБ"
+  },
+  "EmailDocumentCopies.Footer.OverLimit": {
+    "en": "The selected files are larger than the {0} MB email limit. Untick some documents.",
+    "tr-TR": "Seçilen dosyalar {0} MB e-posta sınırından büyük. Bazı belgelerin işaretini kaldırın.",
+    "tk-TM": "Saýlanan faýllar {0} MB e-poçta çäginden uly. Käbir resminamalaryň belligini aýyryň.",
+    "ru-RU": "Выбранные файлы превышают лимит письма {0} МБ. Снимите отметку с некоторых документов."
+  },
+  "EmailDocumentCopies.Button.Cancel": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "EmailDocumentCopies.Button.Next": {
+    "en": "Next: Compose",
+    "tr-TR": "İleri: E-posta yaz",
+    "tk-TM": "Indiki: Hat ýaz",
+    "ru-RU": "Далее: письмо"
+  },
+  "EmailDocumentCopies.Button.Back": {
+    "en": "Back",
+    "tr-TR": "Geri",
+    "tk-TM": "Yza",
+    "ru-RU": "Назад"
+  },
+  "EmailDocumentCopies.Button.Send": {
+    "en": "Send email",
+    "tr-TR": "E-postayı gönder",
+    "tk-TM": "Haty ugrat",
+    "ru-RU": "Отправить письмо"
+  },
+  "EmailDocumentCopies.Button.Sending": {
+    "en": "Sending…",
+    "tr-TR": "Gönderiliyor…",
+    "tk-TM": "Ugradylýar…",
+    "ru-RU": "Отправка…"
+  },
+  "EmailDocumentCopies.Button.Close": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "EmailDocumentCopies.Field.From": {
+    "en": "From",
+    "tr-TR": "Kimden",
+    "tk-TM": "Kimden",
+    "ru-RU": "От"
+  },
+  "EmailDocumentCopies.Field.To": {
+    "en": "To",
+    "tr-TR": "Kime",
+    "tk-TM": "Kime",
+    "ru-RU": "Кому"
+  },
+  "EmailDocumentCopies.Field.Cc": {
+    "en": "Cc",
+    "tr-TR": "Bilgi",
+    "tk-TM": "Nusga",
+    "ru-RU": "Копия"
+  },
+  "EmailDocumentCopies.Field.Template": {
+    "en": "Template",
+    "tr-TR": "Şablon",
+    "tk-TM": "Şablon",
+    "ru-RU": "Шаблон"
+  },
+  "EmailDocumentCopies.Field.Subject": {
+    "en": "Subject",
+    "tr-TR": "Konu",
+    "tk-TM": "Tema",
+    "ru-RU": "Тема"
+  },
+  "EmailDocumentCopies.Field.Body": {
+    "en": "Message",
+    "tr-TR": "Mesaj",
+    "tk-TM": "Hat",
+    "ru-RU": "Сообщение"
+  },
+  "EmailDocumentCopies.Field.Attachments": {
+    "en": "Attachments",
+    "tr-TR": "Ekler",
+    "tk-TM": "Goşundylar",
+    "ru-RU": "Вложения"
+  },
+  "EmailDocumentCopies.Field.RecipientPlaceholder": {
+    "en": "Type a name or email address",
+    "tr-TR": "Ad veya e-posta adresi yazın",
+    "tk-TM": "At ýa-da e-poçta salgysyny ýazyň",
+    "ru-RU": "Введите имя или адрес почты"
+  },
+  "EmailDocumentCopies.Contact.Personal": {
+    "en": "(personal)",
+    "tr-TR": "(kişisel)",
+    "tk-TM": "(şahsy)",
+    "ru-RU": "(личный)"
+  },
+  "EmailDocumentCopies.Template.None": {
+    "en": "(no template)",
+    "tr-TR": "(şablon yok)",
+    "tk-TM": "(şablon ýok)",
+    "ru-RU": "(без шаблона)"
+  },
+  "EmailDocumentCopies.Option.SaveNew": {
+    "en": "Save new addresses to my address book",
+    "tr-TR": "Yeni adresleri adres defterime kaydet",
+    "tk-TM": "Täze salgylary salgy kitabyma ýatda sakla",
+    "ru-RU": "Сохранить новые адреса в мою адресную книгу"
+  },
+  "EmailDocumentCopies.Connect.Connected": {
+    "en": "Connected as {0}",
+    "tr-TR": "{0} olarak bağlı",
+    "tk-TM": "{0} hökmünde birikdirildi",
+    "ru-RU": "Подключено как {0}"
+  },
+  "EmailDocumentCopies.Connect.Disconnect": {
+    "en": "Disconnect",
+    "tr-TR": "Bağlantıyı kes",
+    "tk-TM": "Aýyr",
+    "ru-RU": "Отключить"
+  },
+  "EmailDocumentCopies.Connect.Prompt": {
+    "en": "Connect your Office 365 mailbox once so Visa2026 can send email as you. A Microsoft sign-in opens in a new tab.",
+    "tr-TR": "Visa2026'nın sizin adınıza e-posta gönderebilmesi için Office 365 posta kutunuzu bir kez bağlayın. Microsoft oturum açma sayfası yeni sekmede açılır.",
+    "tk-TM": "Visa2026 siziň adyňyzdan hat ugradyp bilmegi üçin Office 365 poçta gutyňyzy bir gezek birikdiriň. Microsoft-a giriş täze goýmada açylar.",
+    "ru-RU": "Подключите почтовый ящик Office 365 один раз, чтобы Visa2026 могла отправлять письма от вашего имени. Вход Microsoft откроется в новой вкладке."
+  },
+  "EmailDocumentCopies.Connect.Button": {
+    "en": "Connect my Outlook",
+    "tr-TR": "Outlook'umu bağla",
+    "tk-TM": "Outlook-ymy birikdir",
+    "ru-RU": "Подключить мой Outlook"
+  },
+  "EmailDocumentCopies.Connect.Waiting": {
+    "en": "Waiting for the Microsoft sign-in to finish in the other tab…",
+    "tr-TR": "Diğer sekmede Microsoft oturum açmanın tamamlanması bekleniyor…",
+    "tk-TM": "Beýleki goýmada Microsoft-a girişiň tamamlanmagyna garaşylýar…",
+    "ru-RU": "Ожидание завершения входа Microsoft в другой вкладке…"
+  },
+  "EmailDocumentCopies.Connect.CheckAgain": {
+    "en": "Check again",
+    "tr-TR": "Tekrar kontrol et",
+    "tk-TM": "Gaýtadan barla",
+    "ru-RU": "Проверить снова"
+  },
+  "EmailDocumentCopies.Connect.NotConfigured": {
+    "en": "Email sending is not set up on this server yet. Ask the Visa2026 administrator to configure the Microsoft app registration.",
+    "tr-TR": "Bu sunucuda e-posta gönderimi henüz ayarlanmadı. Visa2026 yöneticisinden Microsoft uygulama kaydını yapılandırmasını isteyin.",
+    "tk-TM": "Bu serwerde hat ugratmak heniz sazlanmady. Visa2026 administratoryndan Microsoft programma hasaba alnyşyny sazlamagyny haýyş ediň.",
+    "ru-RU": "Отправка почты на этом сервере ещё не настроена. Попросите администратора Visa2026 настроить регистрацию приложения Microsoft."
+  },
+  "EmailDocumentCopies.Connect.LinkExpired": {
+    "en": "This connect link has expired. Go back to Visa2026 and click Connect my Outlook again.",
+    "tr-TR": "Bu bağlantı linkinin süresi doldu. Visa2026'ya dönüp tekrar Outlook'umu bağla düğmesine tıklayın.",
+    "tk-TM": "Bu birikdiriş salgysynyň möhleti geçdi. Visa2026-a gaýdyp, Outlook-ymy birikdir düwmesine täzeden basyň.",
+    "ru-RU": "Срок действия ссылки истёк. Вернитесь в Visa2026 и снова нажмите «Подключить мой Outlook»."
+  },
+  "EmailDocumentCopies.Connect.NeedsAdmin": {
+    "en": "Your company requires an administrator to approve Visa2026 before it can send email. Ask your Microsoft 365 administrator to approve the app once.",
+    "tr-TR": "Şirketiniz, Visa2026'nın e-posta gönderebilmesi için yönetici onayı istiyor. Microsoft 365 yöneticinizden uygulamayı bir kez onaylamasını isteyin.",
+    "tk-TM": "Kompaniýaňyz Visa2026-nyň hat ugradyp bilmegi üçin administratoryň tassyklamagyny talap edýär. Microsoft 365 administratoryňyzdan programmany bir gezek tassyklamagyny haýyş ediň.",
+    "ru-RU": "В вашей компании отправку почты из Visa2026 должен одобрить администратор. Попросите администратора Microsoft 365 один раз одобрить приложение."
+  },
+  "EmailDocumentCopies.Connect.Cancelled": {
+    "en": "The Microsoft sign-in was cancelled. Go back to Visa2026 and try again.",
+    "tr-TR": "Microsoft oturum açma iptal edildi. Visa2026'ya dönüp tekrar deneyin.",
+    "tk-TM": "Microsoft-a giriş ýatyryldy. Visa2026-a gaýdyp, täzeden synanyşyň.",
+    "ru-RU": "Вход Microsoft отменён. Вернитесь в Visa2026 и попробуйте снова."
+  },
+  "EmailDocumentCopies.Connect.Done": {
+    "en": "Visa2026 can now send email from {0}. Close this tab and go back to Visa2026.",
+    "tr-TR": "Visa2026 artık {0} adresinden e-posta gönderebilir. Bu sekmeyi kapatıp Visa2026'ya dönün.",
+    "tk-TM": "Visa2026 indi {0} salgysyndan hat ugradyp biler. Bu goýmany ýapyp, Visa2026-a gaýdyň.",
+    "ru-RU": "Теперь Visa2026 может отправлять письма с адреса {0}. Закройте вкладку и вернитесь в Visa2026."
+  },
+  "EmailDocumentCopies.Connect.Failed": {
+    "en": "Connecting Outlook failed: {0}",
+    "tr-TR": "Outlook bağlantısı başarısız oldu: {0}",
+    "tk-TM": "Outlook birikdirmek başa barmady: {0}",
+    "ru-RU": "Не удалось подключить Outlook: {0}"
+  },
+  "EmailDocumentCopies.Connect.TitleDone": {
+    "en": "Outlook connected",
+    "tr-TR": "Outlook bağlandı",
+    "tk-TM": "Outlook birikdirildi",
+    "ru-RU": "Outlook подключён"
+  },
+  "EmailDocumentCopies.Connect.TitleFailed": {
+    "en": "Outlook not connected",
+    "tr-TR": "Outlook bağlanmadı",
+    "tk-TM": "Outlook birikdirilmedi",
+    "ru-RU": "Outlook не подключён"
+  },
+  "EmailDocumentCopies.Connect.CloseTab": {
+    "en": "Close this tab",
+    "tr-TR": "Bu sekmeyi kapat",
+    "tk-TM": "Bu goýmany ýap",
+    "ru-RU": "Закрыть вкладку"
+  },
+  "EmailDocumentCopies.Sent": {
+    "en": "Email sent with {0} attachment(s) to {1} recipient(s). A copy is in your Outlook Sent Items.",
+    "tr-TR": "E-posta {0} ekle {1} alıcıya gönderildi. Bir kopyası Outlook Gönderilmiş Öğeler klasörünüzde.",
+    "tk-TM": "Hat {0} goşundy bilen {1} alyja ugradyldy. Nusgasy Outlook-yň Ugradylanlar bukjasynda.",
+    "ru-RU": "Письмо с вложениями ({0}) отправлено получателям ({1}). Копия есть в папке «Отправленные» Outlook."
+  },
+  "EmailDocumentCopies.Skipped": {
+    "en": "Skipped (no readable file): {0}",
+    "tr-TR": "Atlandı (okunabilir dosya yok): {0}",
+    "tk-TM": "Geçildi (okalýan faýl ýok): {0}",
+    "ru-RU": "Пропущено (нет читаемого файла): {0}"
+  },
+  "EmailDocumentCopies.Error.NoRecipients": {
+    "en": "Add at least one recipient.",
+    "tr-TR": "En az bir alıcı ekleyin.",
+    "tk-TM": "Iň bolmanda bir alyjy goşuň.",
+    "ru-RU": "Добавьте хотя бы одного получателя."
+  },
+  "EmailDocumentCopies.Error.InvalidRecipient": {
+    "en": "One of the email addresses is not valid.",
+    "tr-TR": "E-posta adreslerinden biri geçerli değil.",
+    "tk-TM": "E-poçta salgylarynyň biri dogry däl.",
+    "ru-RU": "Один из адресов почты указан неверно."
+  },
+  "EmailDocumentCopies.Error.NoSubject": {
+    "en": "Enter a subject.",
+    "tr-TR": "Bir konu girin.",
+    "tk-TM": "Temany ýazyň.",
+    "ru-RU": "Укажите тему."
+  },
+  "EmailDocumentCopies.Error.NoAttachments": {
+    "en": "None of the selected documents has a readable file to attach.",
+    "tr-TR": "Seçilen belgelerin hiçbirinde eklenebilecek okunabilir dosya yok.",
+    "tk-TM": "Saýlanan resminamalaryň hiç birinde goşup boljak okalýan faýl ýok.",
+    "ru-RU": "Ни у одного из выбранных документов нет читаемого файла для вложения."
+  },
+  "EmailDocumentCopies.Error.TooLarge": {
+    "en": "The attachments are {0} MB; the limit is {1} MB. Untick some documents.",
+    "tr-TR": "Ekler {0} MB; sınır {1} MB. Bazı belgelerin işaretini kaldırın.",
+    "tk-TM": "Goşundylar {0} MB; çäk {1} MB. Käbir resminamalaryň belligini aýyryň.",
+    "ru-RU": "Размер вложений {0} МБ, лимит {1} МБ. Снимите отметку с некоторых документов."
+  },
+  "EmailDocumentCopies.Error.SendFailed": {
+    "en": "The email was not sent: {0}",
+    "tr-TR": "E-posta gönderilmedi: {0}",
+    "tk-TM": "Hat ugradylmady: {0}",
+    "ru-RU": "Письмо не отправлено: {0}"
+  },
+  "EmailDocumentCopies.Error.NoPeople": {
+    "en": "The selected records are not linked to any person.",
+    "tr-TR": "Seçilen kayıtlar hiçbir kişiye bağlı değil.",
+    "tk-TM": "Saýlanan ýazgylar hiç bir adama baglanmadyk.",
+    "ru-RU": "Выбранные записи не связаны ни с одним лицом."
+  },
+  "EmailDocumentCopies.Error.Unavailable": {
+    "en": "The email panel is not available.",
+    "tr-TR": "E-posta paneli kullanılamıyor.",
+    "tk-TM": "E-poçta paneli elýeterli däl.",
+    "ru-RU": "Панель отправки почты недоступна."
+  },
+  "EmailDocumentCopies.Smtp.NotConfigured": {
+    "en": "Email sending is not set up on this server yet. Ask the Visa2026 administrator to enter the SMTP mail account settings.",
+    "tr-TR": "Bu sunucuda e-posta gönderimi henüz ayarlanmadı. Visa2026 yöneticisinden SMTP posta hesabı ayarlarını girmesini isteyin.",
+    "tk-TM": "Bu serwerde hat ugratmak heniz sazlanmady. Visa2026 administratoryndan SMTP poçta hasabynyň sazlamalaryny girizmegini haýyş ediň.",
+    "ru-RU": "Отправка почты на этом сервере ещё не настроена. Попросите администратора Visa2026 указать настройки почтового аккаунта SMTP."
+  },
+  "EmailDocumentCopies.Field.OfficerEmail": {
+    "en": "Your email (replies and copy)",
+    "tr-TR": "E-posta adresiniz (yanıtlar ve kopya)",
+    "tk-TM": "Siziň e-poçtaňyz (jogaplar we nusga)",
+    "ru-RU": "Ваш адрес (ответы и копия)"
+  },
+  "EmailDocumentCopies.Field.OfficerEmailHint": {
+    "en": "Replies come to this address and you receive a hidden copy. It is remembered for next time.",
+    "tr-TR": "Yanıtlar bu adrese gelir ve size gizli bir kopya gönderilir. Bir sonraki sefer için hatırlanır.",
+    "tk-TM": "Jogaplar şu salga geler we size gizlin nusga ugradylar. Indiki gezek üçin ýatda saklanýar.",
+    "ru-RU": "Ответы придут на этот адрес, а вы получите скрытую копию. Адрес запоминается."
+  },
+  "EmailDocumentCopies.Error.InvalidOfficerEmail": {
+    "en": "Your own email address is not valid.",
+    "tr-TR": "Kendi e-posta adresiniz geçerli değil.",
+    "tk-TM": "Öz e-poçta salgyňyz dogry däl.",
+    "ru-RU": "Ваш собственный адрес почты указан неверно."
+  },
+  "EmailDocumentCopies.Error.NotConnected": {
+    "en": "Connect your Outlook before sending.",
+    "tr-TR": "Göndermeden önce Outlook'unuzu bağlayın.",
+    "tk-TM": "Ugratmazdan öň Outlook-yňyzy birikdiriň.",
+    "ru-RU": "Перед отправкой подключите Outlook."
+  },
+  "EmailDocumentCopies.Source.People": {
+    "en": "{0} people selected",
+    "tr-TR": "{0} kişi seçildi",
+    "tk-TM": "{0} adam saýlandy",
+    "ru-RU": "Выбрано людей: {0}"
+  },
+  "EmailDocumentCopies.Type.Passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "EmailDocumentCopies.Type.Visa": {
+    "en": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "EmailDocumentCopies.Type.WorkPermit": {
+    "en": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsady",
+    "ru-RU": "Разрешение на работу"
+  },
+  "EmailDocumentCopies.Type.Invitation": {
+    "en": "Invitation",
+    "tr-TR": "Davetiye",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "EmailDocumentCopies.Type.Education": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "EmailDocumentCopies.Type.FamilyProof": {
+    "en": "Family proof",
+    "tr-TR": "Aile belgesi",
+    "tk-TM": "Maşgala subutnamasy",
+    "ru-RU": "Документ о родстве"
+  },
+  "EmailDocumentCopies.Type.MedicalRecord": {
+    "en": "Medical record",
+    "tr-TR": "Sağlık kaydı",
+    "tk-TM": "Lukmançylyk ýazgysy",
+    "ru-RU": "Медсправка"
+  },
+  "EmailDocumentCopies.Type.AddressOfResidence": {
+    "en": "Address of residence",
+    "tr-TR": "İkamet adresi",
+    "tk-TM": "Ýaşaýyş salgysy",
+    "ru-RU": "Адрес проживания"
+  },
+  "EmailDocumentCopies.Type.CurrentOnly": {
+    "en": "Current only",
+    "tr-TR": "Yalnız güncel",
+    "tk-TM": "Diňe häzirki",
+    "ru-RU": "Только текущий"
+  },
+  "EmailDocumentCopies.IncludeAll": {
+    "en": "Include all records, not only the current one",
+    "tr-TR": "Yalnız güncel olanı değil, tüm kayıtları ekle",
+    "tk-TM": "Diňe häzirki däl, ähli ýazgylary goş",
+    "ru-RU": "Включить все записи, не только текущую"
+  },
+  "EmailDocumentCopies.Preview.Documents": {
+    "en": "Documents to include",
+    "tr-TR": "Eklenecek belgeler",
+    "tk-TM": "Goşuljak resminamalar",
+    "ru-RU": "Документы для вложения"
+  },
+  "EmailDocumentCopies.Preview.OnePdf": {
+    "en": "One PDF per person",
+    "tr-TR": "Kişi başına bir PDF",
+    "tk-TM": "Her adam üçin bir PDF",
+    "ru-RU": "Один PDF на человека"
+  },
+  "EmailDocumentCopies.Preview.WillSend": {
+    "en": "Will be sent as {0} emails",
+    "tr-TR": "{0} e-posta olarak gönderilecek",
+    "tk-TM": "{0} e-poçta hökmünde ugradylar",
+    "ru-RU": "Будет отправлено как {0} писем"
+  },
+  "EmailDocumentCopies.Preview.MaxPerEmail": {
+    "en": "Max per email",
+    "tr-TR": "E-posta başına en fazla",
+    "tk-TM": "Her e-poçta üçin iň köp",
+    "ru-RU": "Максимум на письмо"
+  },
+  "EmailDocumentCopies.Preview.EmailN": {
+    "en": "Email {0} of {1} · {2} MB",
+    "tr-TR": "E-posta {0} / {1} · {2} MB",
+    "tk-TM": "E-poçta {0} / {1} · {2} MB",
+    "ru-RU": "Письмо {0} из {1} · {2} МБ"
+  },
+  "EmailDocumentCopies.Preview.PartOf": {
+    "en": "part {0} of {1}: {2}",
+    "tr-TR": "parça {0} / {1}: {2}",
+    "tk-TM": "bölek {0} / {1}: {2}",
+    "ru-RU": "часть {0} из {1}: {2}"
+  },
+  "EmailDocumentCopies.Preview.TooLargeSplit": {
+    "en": "Too large for one email — split by document.",
+    "tr-TR": "Tek e-posta için çok büyük — belgeye göre bölündü.",
+    "tk-TM": "Bir e-poçta üçin gaty uly — resminama boýunça bölündi.",
+    "ru-RU": "Слишком большой для одного письма — разделено по документам."
+  },
+  "EmailDocumentCopies.Preview.TotalSplit": {
+    "en": "Total {0} MB — too large for one email, it will be sent as {1} emails with the same recipients and message. Subjects get (1 of {1}), (2 of {1}).",
+    "tr-TR": "Toplam {0} MB — tek e-posta için çok büyük, aynı alıcılara {1} e-posta olarak gönderilecek. Konuya (1 / {1}), (2 / {1}) eklenir.",
+    "tk-TM": "Jemi {0} MB — bir e-poçta üçin gaty uly, şol bir alyjylara {1} e-poçta hökmünde ugradylar. Temada (1 / {1}), (2 / {1}) bolar.",
+    "ru-RU": "Всего {0} МБ — слишком много для одного письма, будет отправлено {1} письмами тем же получателям. В теме: (1 из {1}), (2 из {1})."
+  },
+  "EmailDocumentCopies.Preview.NoFilePerson": {
+    "en": "No scanned files for the selected documents — this person will not get a PDF.",
+    "tr-TR": "Seçilen belgeler için taranmış dosya yok — bu kişi için PDF oluşmayacak.",
+    "tk-TM": "Saýlanan resminamalar üçin skan ýok — bu adam üçin PDF ýasalmaz.",
+    "ru-RU": "Нет сканов выбранных документов — для этого человека PDF не будет."
+  },
+  "EmailDocumentCopies.Preview.OpenPerson": {
+    "en": "Open person",
+    "tr-TR": "Kişiyi aç",
+    "tk-TM": "Adamy aç",
+    "ru-RU": "Открыть карточку"
+  },
+  "EmailDocumentCopies.Preview.SkippedNoFile": {
+    "en": "{0} document(s) have no scanned file and will be skipped.",
+    "tr-TR": "{0} belgenin taranmış dosyası yok ve atlanacak.",
+    "tk-TM": "{0} resminamada skan ýok we geçiler.",
+    "ru-RU": "У {0} документов нет скана — они будут пропущены."
+  },
+  "EmailDocumentCopies.Button.SendN": {
+    "en": "Send {0} emails",
+    "tr-TR": "{0} e-posta gönder",
+    "tk-TM": "{0} e-poçta ugrat",
+    "ru-RU": "Отправить {0} писем"
+  },
+  "EmailDocumentCopies.Button.ViewSent": {
+    "en": "View in Sent emails",
+    "tr-TR": "Gönderilenlerde gör",
+    "tk-TM": "Ugradylanlarda gör",
+    "ru-RU": "Открыть отправленные"
+  },
+  "EmailDocumentCopies.Button.TryAgain": {
+    "en": "Try again",
+    "tr-TR": "Yeniden dene",
+    "tk-TM": "Täzeden synanyş",
+    "ru-RU": "Повторить"
+  },
+  "EmailDocumentCopies.Result.SentTitle": {
+    "en": "Email sent",
+    "tr-TR": "E-posta gönderildi",
+    "tk-TM": "E-poçta ugradyldy",
+    "ru-RU": "Письмо отправлено"
+  },
+  "EmailDocumentCopies.Result.FailedTitle": {
+    "en": "Email not sent",
+    "tr-TR": "E-posta gönderilmedi",
+    "tk-TM": "E-poçta ugradylmady",
+    "ru-RU": "Письмо не отправлено"
+  },
+  "EmailDocumentCopies.Result.PartialTitle": {
+    "en": "Some emails were not sent",
+    "tr-TR": "Bazı e-postalar gönderilmedi",
+    "tk-TM": "Käbir e-poçtalar ugradylmady",
+    "ru-RU": "Часть писем не отправлена"
+  },
+  "EmailDocumentCopies.Result.CopySent": {
+    "en": "A copy was sent to {0}.",
+    "tr-TR": "Bir kopya {0} adresine gönderildi.",
+    "tk-TM": "Nusga {0} salgysyna ugradyldy.",
+    "ru-RU": "Копия отправлена на {0}."
+  },
+  "EmailDocumentCopies.Result.Kept": {
+    "en": "Your recipients, message and attachments are kept. Try again, or contact the administrator if this repeats.",
+    "tr-TR": "Alıcılar, ileti ve ekler duruyor. Yeniden deneyin; tekrarlanırsa yöneticiye bildirin.",
+    "tk-TM": "Alyjylar, hat we goşundylar saklandy. Täzeden synanyşyň; gaýtalansa administratoryňyza ýüz tutuň.",
+    "ru-RU": "Получатели, текст и вложения сохранены. Повторите попытку или обратитесь к администратору."
+  },
+  "EmailDocumentCopies.Error.AllTooLarge": {
+    "en": "Every selected file is larger than the email size limit.",
+    "tr-TR": "Seçilen her dosya e-posta boyutu sınırından büyük.",
+    "tk-TM": "Saýlanan her faýl e-poçta ölçeg çäginden uly.",
+    "ru-RU": "Каждый выбранный файл больше ограничения на размер письма."
+  },
+  "EmailDocumentCopies.Error.ToRequired": {
+    "en": "Add at least one recipient.",
+    "tr-TR": "En az bir alıcı ekleyin.",
+    "tk-TM": "Azyndan bir alyjy goşuň.",
+    "ru-RU": "Добавьте хотя бы одного получателя."
+  },
+  "EmailDocumentCopies.Recipient.Lowered": {
+    "en": "Max per email lowered to {0} MB because a recipient remembers that limit.",
+    "tr-TR": "Bir alıcının hatırlanan sınırı nedeniyle e-posta başına en fazla {0} MB yapıldı.",
+    "tk-TM": "Alyjynyň ýatda saklanan çägi sebäpli her e-poçta iň köp {0} MB edildi.",
+    "ru-RU": "Лимит снижен до {0} МБ — так запомнено для получателя."
+  },
+  "EmailDocumentCopies.Sent.Split": {
+    "en": "Sent {0} emails to {1} recipients with {2} PDF attachments.",
+    "tr-TR": "{1} alıcıya {2} PDF ekiyle {0} e-posta gönderildi.",
+    "tk-TM": "{1} alyja {2} PDF goşundy bilen {0} e-poçta ugradyldy.",
+    "ru-RU": "Отправлено писем: {0}, получателей: {1}, вложений PDF: {2}."
+  },
+  "EmailDocumentCopies.Sent.Partial": {
+    "en": "{0} of {1} emails sent. {2}",
+    "tr-TR": "{1} e-postadan {0} tanesi gönderildi. {2}",
+    "tk-TM": "{1} e-poçtadan {0} sanysy ugradyldy. {2}",
+    "ru-RU": "Отправлено {0} из {1} писем. {2}"
+  },
+  "EmailDocumentCopies.Split.SubjectSuffix": {
+    "en": "({0} of {1})",
+    "tr-TR": "({0} / {1})",
+    "tk-TM": "({0} / {1})",
+    "ru-RU": "({0} из {1})"
+  },
+  "EmailDocumentCopies.Split.BodyPart": {
+    "en": "Part {0} of {1} – contains: {2}",
+    "tr-TR": "Parça {0} / {1} – içeriği: {2}",
+    "tk-TM": "Bölek {0} / {1} – içindäki: {2}",
+    "ru-RU": "Часть {0} из {1} – содержимое: {2}"
   }
 }

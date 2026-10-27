@@ -245,6 +245,11 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<BoStateSnapshot> BoStateSnapshots { get; set; }
         public DbSet<BusinessObjects.Feedback.UserFeedback> UserFeedbacks { get; set; }
         public DbSet<BusinessObjects.Operations.ApplicationRuntimeLog> ApplicationRuntimeLogs { get; set; }
+        public DbSet<BusinessObjects.Email.EmailContact> EmailContacts { get; set; }
+        public DbSet<BusinessObjects.Email.EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<BusinessObjects.Email.SentEmail> SentEmails { get; set; }
+        public DbSet<BusinessObjects.Email.SentEmailPerson> SentEmailPersons { get; set; }
+        public DbSet<BusinessObjects.Email.OfficerMailConnection> OfficerMailConnections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

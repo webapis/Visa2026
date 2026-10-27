@@ -23,6 +23,7 @@ public static class PersonNestedCollectionLayout
     public const string InvitationItemsListView = "Person_InvitationItems_ListView";
     public const string RejectionItemsListView = "Person_RejectionItems_ListView";
     public const string FamilyMembersListView = "Person_FamilyMembers_ListView";
+    public const string EmailedDocumentsListView = "Person_EmailedDocuments_ListView";
 
     public static readonly string[] ReadOnlyNestedListViewIds =
     [
@@ -31,6 +32,7 @@ public static class PersonNestedCollectionLayout
         InvitationItemsListView,
         RejectionItemsListView,
         FamilyMembersListView,
+        EmailedDocumentsListView,
     ];
 
     public static readonly string TypedDetailViewIds =

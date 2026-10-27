@@ -40,6 +40,7 @@ using Visa2026.Module.Services.ReportDashboard;
 using Visa2026.Module.Services.TemplateConvert;
 using Visa2026.Module.Services.TemplateScan;
 using Visa2026.Blazor.Server.Services.ImportHistory;
+using Visa2026.Blazor.Server.Mail;
 
 namespace Visa2026.Blazor.Server
 {
@@ -335,6 +336,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<UserReportTemplateStagingUiService>();
             services.AddScoped<UserReportTemplateEditLinkService>();
             services.AddScoped<ApplicationWordReportPackageEnqueueService>();
+            services.AddVisaOfficerMail(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -374,6 +376,7 @@ namespace Visa2026.Blazor.Server
                 PersonPreviousWorkplacesInTurkmenistanSchemaSql.ApplyIfMissing(connectionString);
                 InvitationLegacyShapeSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
+                EmailDocumentCopiesSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceListQueryIndexesSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardExcelTemplateSchemaSql.ApplyIfMissing(connectionString);
                 WorkPermitQuotaSettingsSchemaSql.ApplyIfMissing(connectionString);
@@ -465,6 +468,7 @@ namespace Visa2026.Blazor.Server
                 endpoints.MapXafEndpoints();
                 endpoints.MapBlazorHub();
                 endpoints.MapHub<ApplicationRuntimeLogHub>(ApplicationRuntimeLogHubPaths.Route);
+                endpoints.MapVisaOfficerMail();
                 endpoints.MapControllers();
                 endpoints.MapFallbackToPage("/_Host");
             });

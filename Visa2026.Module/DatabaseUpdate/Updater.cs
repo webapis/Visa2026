@@ -612,6 +612,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureApplicationProcessTrackingReadPermissions(userRole, officerCanWriteProgress: true);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
+    EmailDocumentCopiesOfficerPermissions.Ensure(userRole);
     EnsureAdminOnlyOperationsDeny(userRole);
 
     return userRole;

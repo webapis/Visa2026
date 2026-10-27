@@ -64,6 +64,7 @@ namespace Visa2026.Module.BusinessObjects
             Salaries = new ObservableCollection<EmployeeSalary>();
             InvitationItems = new ObservableCollection<InvitationItem>();
             RejectionItems = new ObservableCollection<RejectionItem>();
+            EmailedDocuments = new ObservableCollection<Visa2026.Module.BusinessObjects.Email.SentEmailPerson>();
             TravelHistories = new ObservableCollection<TravelHistory>();
             ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>();
             WorkDuties = new ObservableCollection<WorkDuty>();
@@ -282,6 +283,26 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Address of residence")]
         public string EmployeeListResidenceAddress =>
             PersonCurrentItems.FormatEmployeeListResidenceAddress(this);
+
+        /// <summary>Employees list: CV and other person files. Each name opens that file.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("CV")]
+        public string EmployeeListCvCopies =>
+            PersonCurrentItems.FormatCvCopies(this);
+
+        /// <summary>Family members list: family-relation proof files. Each name opens that file.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Family proof")]
+        public string EmployeeListFamilyProofCopies =>
+            PersonCurrentItems.FormatFamilyProofCopies(this);
 
         /// <summary>Person lists: education level, school, and country, stacked per record.</summary>
         [NotMapped]
@@ -680,6 +701,12 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
         public virtual IList<TravelHistory> TravelHistories { get; set; }
+
+        /// <summary>Emails that carried this person's document copies (read-only log).</summary>
+        [InverseProperty(nameof(Visa2026.Module.BusinessObjects.Email.SentEmailPerson.Person))]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        public virtual IList<Visa2026.Module.BusinessObjects.Email.SentEmailPerson> EmailedDocuments { get; set; }
 
         [InverseProperty(nameof(ApplicationProfileInstance.People))]
         [ModelDefault("AllowEdit", "False")]

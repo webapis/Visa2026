@@ -43,6 +43,7 @@ Legacy single `TabbedGroup Id="Tabs"` is **`Removed="True"`** on typed views.
 | Incomplete data (`IncompleteData`) | Person record (last tab; hidden when not incomplete) | Same | Same |
 | Application profiles (linked) (`ApplicationProfileInstances`), Work permit items, Invitations, Rejections | Issued | Issued | Application profiles + Invitations + Rejections |
 | Family members (linked) | Issued | Issued (tab hidden for non-employees) | — |
+| Emailed documents (`EmailedDocuments`) | Issued (read-only send log) | Issued | Issued |
 
 **Caption scope:** Parent-specific captions for layout id `Documents` / `Documents_Group` via `DocumentCollectionTabCaptionHelper` (e.g. Passport → **Passport copies**, Education → **Diploma copies**, Employee Person → **CV & personal files**). Property names stay `Documents`. Localized in `UiStrings.messages.json` + `UiStrings.document-copies.json`; English runtime via `VisaUiMessages` / `DocumentCollectionCaptionLayoutController`.
 
@@ -57,6 +58,7 @@ Issued tab **captions** use "(issued)" / "(linked)" suffix in English `Model.xaf
 - `Person_InvitationItems_ListView`
 - `Person_RejectionItems_ListView`
 - `Person_FamilyMembers_ListView`
+- `Person_EmailedDocuments_ListView`
 
 `AllowNew`, `AllowDelete`, `AllowEdit`, `AllowLink`, `AllowUnlink` = **false**.
 

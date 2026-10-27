@@ -915,6 +915,9 @@
               <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="4" Caption="Family members (linked)" IsNewNode="True">
                 <LayoutItem Id="FamilyMembers" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
+              <LayoutGroup Id="EmailedDocuments" RelativeSize="100" Index="5" Caption="Emailed documents" IsNewNode="True">
+                <LayoutItem Id="EmailedDocuments" RelativeSize="100" ViewItem="EmailedDocuments" IsNewNode="True" />
+              </LayoutGroup>
             </TabbedGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="24.794359576968272" Index="1" CustomCSSClassName="e2e-person-employee-tabs" Removed="True" />
@@ -1031,6 +1034,9 @@
               <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="4" Caption="Family members (linked)" IsNewNode="True">
                 <LayoutItem Id="FamilyMembers" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
+              <LayoutGroup Id="EmailedDocuments" RelativeSize="100" Index="5" Caption="Emailed documents" IsNewNode="True">
+                <LayoutItem Id="EmailedDocuments" RelativeSize="100" ViewItem="EmailedDocuments" IsNewNode="True" />
+              </LayoutGroup>
             </TabbedGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="58.4985835694051" Index="1" Removed="True" />
@@ -1128,6 +1134,9 @@
               </LayoutGroup>
               <LayoutGroup Id="WorkPermitItems" RelativeSize="100" Index="3" Removed="True">
                 <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
+              </LayoutGroup>
+              <LayoutGroup Id="EmailedDocuments" RelativeSize="100" Index="4" Caption="Emailed documents" IsNewNode="True">
+                <LayoutItem Id="EmailedDocuments" RelativeSize="100" ViewItem="EmailedDocuments" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
           </LayoutGroup>

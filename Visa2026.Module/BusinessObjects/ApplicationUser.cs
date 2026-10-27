@@ -38,6 +38,10 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(16)]
         public virtual string PreferredSizeMode { get; set; }
 
+        /// <summary>Officer's own address: Reply-To and Bcc copy when document copies are emailed from the shared SMTP account.</summary>
+        [MaxLength(320)]
+        public virtual string Email { get; set; }
+
         [Browsable(false)]
         [NonCloneable]
         [DevExpress.ExpressApp.DC.Aggregated]

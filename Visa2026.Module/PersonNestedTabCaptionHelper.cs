@@ -26,6 +26,7 @@ public static class PersonNestedTabCaptionHelper
             ["InvitationItems"] = "Person.Tab.InvitationsIssued",
             ["RejectionItems"] = "Person.Tab.RejectionsIssued",
             ["FamilyMembers"] = "Person.Tab.FamilyMembersLinked",
+            ["EmailedDocuments"] = "Person.Tab.EmailedDocuments",
         };
 
     public static string? TryGetBaseCaption(string detailViewId, string layoutTabId)

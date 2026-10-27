@@ -1,0 +1,908 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.BusinessObjects.Email
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.EmailDocumentCopies
+@using Visa2026.Module.Services.PersonLinkedDocuments
+@implements IDisposable
+@inject IEmailDocumentCopiesDialogService Dialog
+@inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
+@inject IOfficerMailSender MailSender
+@inject EmailDocumentCopiesSendService SendService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+@if (Dialog.Current != null)
+{
+    <div class="email-doc-copies-overlay" @onclick="OnOverlayClick">
+        <div class="email-doc-copies-dialog" role="dialog" aria-modal="true" aria-labelledby="email-doc-copies-title" @onclick:stopPropagation>
+            <header class="email-doc-copies-dialog__header">
+                <div>
+                    <h2 id="email-doc-copies-title">@Msg("EmailDocumentCopies.Title")</h2>
+                    <p>@MsgFormat("EmailDocumentCopies.Source.People", _people.Count)</p>
+                </div>
+                <button type="button" class="email-doc-copies__link email-doc-copies-dialog__close" title="@Msg("EmailDocumentCopies.Button.Close")" @onclick="Close">×</button>
+            </header>
+
+            @if (_result == null)
+            {
+                <div class="email-doc-copies__steps">
+                    <span class="email-doc-copies__step @(_step == 1 ? "is-active" : "is-done")"><b>1</b> @Msg("EmailDocumentCopies.Step.Documents")</span>
+                    <span class="email-doc-copies__step-line"></span>
+                    <span class="email-doc-copies__step @(_step == 2 ? "is-active" : string.Empty)"><b>2</b> @Msg("EmailDocumentCopies.Step.Compose")</span>
+                </div>
+            }
+
+            <div class="email-doc-copies-dialog__body">
+                @if (_result != null)
+                {
+                    @ResultBody()
+                }
+                else if (_step == 1)
+                {
+                    @DocumentsStep()
+                }
+                else
+                {
+                    @ComposeStep()
+                }
+            </div>
+
+            <footer class="email-doc-copies__footer">
+                @if (_result != null)
+                {
+                    @if (_result.Succeeded)
+                    {
+                        <button type="button" class="email-doc-copies__btn" @onclick="OpenSentEmails">@Msg("EmailDocumentCopies.Button.ViewSent")</button>
+                        <button type="button" class="email-doc-copies__btn is-primary" @onclick="Close">@Msg("EmailDocumentCopies.Button.Close")</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="email-doc-copies__btn" @onclick="BackToCompose">@Msg("EmailDocumentCopies.Button.Back")</button>
+                        <button type="button" class="email-doc-copies__btn is-primary" @onclick="SendAsync">@Msg("EmailDocumentCopies.Button.TryAgain")</button>
+                    }
+                }
+                else if (_step == 1)
+                {
+                    <div class="email-doc-copies__summary @(_plan.TooLarge.Count > 0 ? "is-over" : string.Empty)">
+                        @if (_plan.IsSplit)
+                        {
+                            <span>@MsgFormat("EmailDocumentCopies.Preview.TotalSplit", FormatMb(_plan.Bytes), _plan.Messages.Count)</span>
+                        }
+                        else
+                        {
+                            <span>@MsgFormat("EmailDocumentCopies.Footer.Summary", _people.Count(p => p.Plan.HasAttachment), AttachmentCount, FormatMb(_plan.Bytes), _maxMb)</span>
+                        }
+                        <span class="email-doc-copies__meter @(_plan.IsSplit ? "is-split" : string.Empty)"><span style="width:@MeterPercent%"></span></span>
+                        @if (SkippedNoFileCount > 0)
+                        {
+                            <span>@MsgFormat("EmailDocumentCopies.Preview.SkippedNoFile", SkippedNoFileCount)</span>
+                        }
+                    </div>
+                    <span class="email-doc-copies__footer-actions">
+                        <button type="button" class="email-doc-copies__btn" @onclick="Close">@Msg("EmailDocumentCopies.Button.Cancel")</button>
+                        <button type="button" class="email-doc-copies__btn is-primary" disabled="@(!CanCompose)" @onclick="GoToCompose">@Msg("EmailDocumentCopies.Button.Next")</button>
+                    </span>
+                }
+                else
+                {
+                    <button type="button" class="email-doc-copies__btn" disabled="@_sending" @onclick="() => _step = 1">@Msg("EmailDocumentCopies.Button.Back")</button>
+                    <button type="button" class="email-doc-copies__btn is-primary" disabled="@(_sending || !CanSend)" @onclick="SendAsync">
+                        @SendCaption
+                    </button>
+                }
+            </footer>
+        </div>
+    </div>
+}
+
+@code {
+    private sealed class PersonVm
+    {
+        public Guid PersonId { get; init; }
+        public string DisplayName { get; init; } = string.Empty;
+        public string DetailViewId { get; init; } = PersonDetailViewIds.Default;
+        public EmailPlanPerson Plan { get; set; } = new();
+    }
+
+    private sealed record TemplateVm(string Id, string Name, string? Subject, string? Body, bool IsDefault);
+
+    private string _uiCultureName = string.Empty;
+    private Guid _userId;
+    private string _officerName = string.Empty;
+    private string _officerEmail = string.Empty;
+    private int _step = 1;
+    private readonly HashSet<EmailDocumentType> _types = new(EmailDocumentTypeCatalog.DefaultSelection);
+    private bool _includeAll;
+    private int _maxMb = 20;
+    private IReadOnlyList<int> _sizeChoices = EmailDocumentCopiesPlanner.SizeChoicesMb;
+    private List<PersonVm> _people = new();
+    private EmailSendPlan _plan = new();
+    private string? _limitNote;
+    private List<TemplateVm> _templates = new();
+    private string _templateId = string.Empty;
+    private readonly List<EmailRecipient> _to = new();
+    private readonly List<EmailRecipient> _cc = new();
+    private string _toInput = string.Empty;
+    private string _ccInput = string.Empty;
+    private string? _suggestField;
+    private IReadOnlyList<EmailContactSuggestion> _suggestions = Array.Empty<EmailContactSuggestion>();
+    private string _subject = string.Empty;
+    private string _body = string.Empty;
+    private bool _saveNewAddresses = true;
+    private bool _composeInitialized;
+    private bool _configured;
+    private OfficerMailConnectionInfo? _connection;
+    private bool _waitingForConnect;
+    private CancellationTokenSource? _pollCts;
+    private bool _sending;
+    private EmailDocumentCopiesSendResult? _result;
+    private bool _toInvalid;
+
+    private long LimitBytes => _maxMb * EmailDocumentCopiesPlanner.MegaByte;
+    private int AttachmentCount => _plan.Messages.Sum(m => m.Attachments.Count);
+    private int SkippedNoFileCount => _people.SelectMany(p => p.Plan.Lines).Count(l => l.NoFile);
+    private bool CanCompose => AttachmentCount > 0;
+    private bool CanSend => _connection != null && _to.Count > 0 && !string.IsNullOrWhiteSpace(_subject);
+    private int MeterPercent => LimitBytes <= 0 ? 0 : (int)Math.Min(100, _plan.Bytes * 100 / LimitBytes);
+    private string SendCaption =>
+        _sending ? Msg("EmailDocumentCopies.Button.Sending")
+        : _plan.IsSplit ? MsgFormat("EmailDocumentCopies.Button.SendN", _plan.Messages.Count)
+        : Msg("EmailDocumentCopies.Button.Send");
+
+    protected override void OnInitialized()
+    {
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+        _userId = SecuritySystem.CurrentUserId is Guid id ? id : Guid.Empty;
+        _officerName = SecuritySystem.CurrentUserName ?? string.Empty;
+        _configured = MailSender.IsConfigured;
+        _sizeChoices = EmailDocumentCopiesPlanner.AvailableSizesMb(MailSender.MaxTotalAttachmentBytes);
+        _maxMb = _sizeChoices.Count == 0 ? 20 : _sizeChoices[^1];
+        Dialog.Changed += OnDialogChanged;
+        if (Dialog.Current != null)
+            LoadRequest(Dialog.Current);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_configured && _userId != Guid.Empty)
+            _connection = await MailSender.GetConnectionAsync(_userId);
+    }
+
+    private void OnDialogChanged() => InvokeAsync(() =>
+    {
+        if (Dialog.Current == null)
+        {
+            ResetSession();
+            return;
+        }
+        ResetSession();
+        LoadRequest(Dialog.Current);
+        StateHasChanged();
+    });
+
+    private void ResetSession()
+    {
+        _pollCts?.Cancel();
+        _step = 1;
+        _types.Clear();
+        foreach (var type in EmailDocumentTypeCatalog.DefaultSelection)
+            _types.Add(type);
+        _includeAll = false;
+        _maxMb = _sizeChoices.Count == 0 ? 20 : _sizeChoices[^1];
+        _people = new();
+        _plan = new();
+        _limitNote = null;
+        _to.Clear();
+        _cc.Clear();
+        _toInput = string.Empty;
+        _ccInput = string.Empty;
+        _subject = string.Empty;
+        _body = string.Empty;
+        _composeInitialized = false;
+        _sending = false;
+        _result = null;
+        _toInvalid = false;
+    }
+
+    private void LoadRequest(EmailDocumentCopiesDialogRequest request)
+    {
+        LoadOfficerEmail();
+        LoadTemplates();
+        LoadPeople(request);
+        if (request.ResendFromSentEmailId is Guid sentId && sentId != Guid.Empty)
+        {
+            LoadResendSource(sentId);
+            _step = 2;
+        }
+    }
+
+    private void LoadOfficerEmail()
+    {
+        if (_userId == Guid.Empty)
+            return;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationUser>();
+        _officerEmail = objectSpace.GetObjectByKey<ApplicationUser>(_userId)?.Email ?? string.Empty;
+    }
+
+    private void LoadTemplates()
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<EmailTemplate>();
+        _templates = objectSpace.GetObjectsQuery<EmailTemplate>()
+            .OrderBy(t => t.SortOrder)
+            .ThenBy(t => t.Name)
+            .AsEnumerable()
+            .Select(t => new TemplateVm(t.ID.ToString(), t.Name, t.Subject, t.Body, t.IsDefault))
+            .ToList();
+    }
+
+    private void LoadPeople(EmailDocumentCopiesDialogRequest request)
+    {
+        _people = new List<PersonVm>();
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        var fixedByPerson = (request.FixedRecords ?? Array.Empty<EmailDocumentCopiesPersonSelection>())
+            .ToDictionary(p => p.PersonId, p => p.RecordKeys);
+        foreach (var personId in request.PersonIds.Where(id => id != Guid.Empty).Distinct())
+        {
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (person == null)
+                continue;
+            var snapshot = PersonLinkedDocumentsResolver.Resolve(objectSpace, person);
+            var plan = fixedByPerson.TryGetValue(personId, out var keys)
+                ? EmailDocumentCopiesPlanner.PlanPersonFromKeys(snapshot, keys)
+                : EmailDocumentCopiesPlanner.PlanPerson(snapshot, _types, _includeAll);
+            _people.Add(new PersonVm
+            {
+                PersonId = person.ID,
+                DisplayName = snapshot.PersonDisplayName,
+                DetailViewId = person.PersonRole switch
+                {
+                    PersonRecordRole.Employee => PersonDetailViewIds.Employee,
+                    PersonRecordRole.FamilyMember => PersonDetailViewIds.FamilyMember,
+                    PersonRecordRole.TemporaryVisitor => PersonDetailViewIds.TemporaryVisitor,
+                    _ => PersonDetailViewIds.Default,
+                },
+                Plan = plan,
+            });
+        }
+        Replan();
+    }
+
+    private void Replan()
+    {
+        if (Dialog.Current?.FixedRecords == null)
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+            foreach (var person in _people)
+            {
+                var loaded = objectSpace.GetObjectByKey<Person>(person.PersonId);
+                if (loaded == null)
+                    continue;
+                person.Plan = EmailDocumentCopiesPlanner.PlanPerson(
+                    PersonLinkedDocumentsResolver.Resolve(objectSpace, loaded),
+                    _types,
+                    _includeAll);
+            }
+        }
+        _plan = EmailDocumentCopiesPlanner.Split(_people.Select(p => p.Plan), LimitBytes);
+    }
+
+    private void ToggleType(EmailDocumentType type, bool selected)
+    {
+        if (selected)
+            _types.Add(type);
+        else
+            _types.Remove(type);
+        Replan();
+    }
+
+    private void ToggleIncludeAll(ChangeEventArgs e)
+    {
+        _includeAll = e.Value is bool on && on;
+        Replan();
+    }
+
+    private void ChangeMax(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var mb) && _sizeChoices.Contains(mb))
+            _maxMb = mb;
+        _limitNote = null;
+        Replan();
+    }
+
+    private void LoadResendSource(Guid sentId)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<SentEmail>();
+        var sent = objectSpace.GetObjectByKey<SentEmail>(sentId);
+        if (sent == null)
+            return;
+        _to.AddRange(ParseRecipients(sent.ToAddresses));
+        _cc.AddRange(ParseRecipients(sent.CcAddresses));
+        _subject = sent.Subject ?? string.Empty;
+        _body = sent.Body ?? string.Empty;
+        _composeInitialized = true;
+        ApplyRememberedLimit();
+    }
+
+    private void GoToCompose()
+    {
+        _step = 2;
+        _result = null;
+        ApplyRememberedLimit();
+        if (_composeInitialized)
+            return;
+        _composeInitialized = true;
+        var template = _templates.FirstOrDefault(t => t.IsDefault) ?? _templates.FirstOrDefault();
+        if (template != null)
+            ApplyTemplate(template);
+    }
+
+    private void BackToCompose()
+    {
+        _result = null;
+        _step = 2;
+    }
+
+    private void ApplyRememberedLimit()
+    {
+        if (_userId == Guid.Empty)
+            return;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<EmailContact>();
+        var remembered = EmailContactDirectory.RememberedMaxEmailSizeMb(
+            objectSpace,
+            _userId,
+            _to.Concat(_cc).Select(r => r.Email));
+        if (remembered is int mb && mb < _maxMb && _sizeChoices.Contains(mb))
+        {
+            _maxMb = mb;
+            _limitNote = MsgFormat("EmailDocumentCopies.Recipient.Lowered", mb);
+            Replan();
+        }
+    }
+
+    private void OnTemplateChanged(ChangeEventArgs e)
+    {
+        _templateId = e.Value?.ToString() ?? string.Empty;
+        var template = _templates.FirstOrDefault(t => t.Id == _templateId);
+        if (template != null)
+            ApplyTemplate(template);
+    }
+
+    private void ApplyTemplate(TemplateVm template)
+    {
+        _templateId = template.Id;
+        var attached = _people.Where(p => p.Plan.HasAttachment).ToList();
+        var context = new EmailTemplateContext
+        {
+            PersonNames = attached.Select(p => p.DisplayName).ToList(),
+            DocumentLines = attached
+                .Select(p => $"{p.DisplayName}: {string.Join(", ", p.Plan.Records.Select(r => TypeLabel(r.Type)))}")
+                .ToList(),
+            OfficerName = _officerName,
+            Date = DateTime.Today,
+        };
+        _subject = EmailTemplateRenderer.Render(template.Subject, context);
+        _body = EmailTemplateRenderer.Render(template.Body, context);
+    }
+
+    private async Task SendAsync()
+    {
+        CommitRecipientInput("To", _to, v => _toInput = v);
+        CommitRecipientInput("Cc", _cc, v => _ccInput = v);
+        _toInvalid = _to.Count == 0;
+        if (_toInvalid)
+            return;
+        if (_connection == null)
+        {
+            _result = new EmailDocumentCopiesSendResult { Message = Msg("EmailDocumentCopies.Error.NotConnected") };
+            return;
+        }
+
+        _sending = true;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            var result = await SendService.SendAsync(new EmailDocumentCopiesSendRequest
+            {
+                UserId = _userId,
+                OfficerName = _officerName,
+                OfficerEmail = MailSender.RequiresUserConnection ? null : _officerEmail,
+                Persons = _people
+                    .Select(p => new EmailDocumentCopiesPersonSelection
+                    {
+                        PersonId = p.PersonId,
+                        RecordKeys = p.Plan.Records.Select(r => r.RecordKey).ToList(),
+                    })
+                    .Where(p => p.RecordKeys.Count > 0)
+                    .ToList(),
+                MaxBytesPerEmail = LimitBytes,
+                To = _to.ToList(),
+                Cc = _cc.ToList(),
+                Subject = _subject,
+                Body = _body,
+                SaveNewAddresses = _saveNewAddresses,
+                SourceDescription = Dialog.Current?.SourceDescription,
+            });
+            _result = result;
+            if (result.ConnectionLost)
+                _connection = null;
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+
+    private void OpenSentEmails()
+    {
+        Close();
+        Navigation.NavigateTo("/SentEmail_ListView");
+    }
+
+    private void OpenPerson(PersonVm person)
+    {
+        Navigation.NavigateTo($"/{person.DetailViewId}/{person.PersonId}");
+    }
+
+    private void OnOverlayClick()
+    {
+        if (!_sending)
+            Close();
+    }
+
+    private void Close()
+    {
+        _pollCts?.Cancel();
+        Dialog.Close();
+    }
+
+    private RenderFragment DocumentsStep() => __builder =>
+    {
+        <div class="email-doc-copies-dialog__grid">
+            <section>
+                <h3>@Msg("EmailDocumentCopies.Preview.Documents")</h3>
+                <ul class="email-doc-copies__types">
+                    @foreach (var type in EmailDocumentTypeCatalog.All)
+                    {
+                        <li>
+                            <label>
+                                <input type="checkbox" checked="@_types.Contains(type)"
+                                       @onchange="e => ToggleType(type, e.Value is bool on && on)" />
+                                @TypeLabel(type)
+                            </label>
+                            @if (EmailDocumentTypeCatalog.HasCurrentRecord(type) && !_includeAll)
+                            {
+                                <span class="email-doc-copies__pill is-current">@Msg("EmailDocumentCopies.Type.CurrentOnly")</span>
+                            }
+                        </li>
+                    }
+                </ul>
+                <label class="email-doc-copies__check">
+                    <input type="checkbox" checked="@_includeAll" @onchange="ToggleIncludeAll" />
+                    @Msg("EmailDocumentCopies.IncludeAll")
+                </label>
+            </section>
+            <section>
+                <header class="email-doc-copies-dialog__preview-head">
+                    <h3>@(_plan.IsSplit ? MsgFormat("EmailDocumentCopies.Preview.WillSend", _plan.Messages.Count) : Msg("EmailDocumentCopies.Preview.OnePdf"))</h3>
+                    <label>
+                        @Msg("EmailDocumentCopies.Preview.MaxPerEmail")
+                        <select value="@_maxMb" @onchange="ChangeMax">
+                            @foreach (var mb in _sizeChoices)
+                            {
+                                <option value="@mb">@mb MB</option>
+                            }
+                        </select>
+                    </label>
+                </header>
+                @if (_plan.IsSplit)
+                {
+                    @foreach (var message in _plan.Messages)
+                    {
+                        <article class="email-doc-copies__mail-group">
+                            <header>@MsgFormat("EmailDocumentCopies.Preview.EmailN", message.Number, _plan.Messages.Count, FormatMb(message.Bytes))</header>
+                            <ul>
+                                @foreach (var attachment in message.Attachments)
+                                {
+                                    <li>
+                                        <span class="email-doc-copies__pdf-icon">PDF</span>
+                                        @attachment.PersonDisplayName
+                                        @if (attachment.PartCount > 1)
+                                        {
+                                            <small>@MsgFormat("EmailDocumentCopies.Preview.PartOf", attachment.PartNumber, attachment.PartCount, string.Join(", ", attachment.Types.Select(TypeLabel)))</small>
+                                        }
+                                        <span>@FormatMb(attachment.Bytes) MB</span>
+                                    </li>
+                                }
+                            </ul>
+                        </article>
+                    }
+                    @if (_plan.TooLarge.Count > 0)
+                    {
+                        <p class="email-doc-copies__warn">@Msg("EmailDocumentCopies.Preview.TooLargeSplit")</p>
+                    }
+                }
+                else
+                {
+                    @foreach (var person in _people)
+                    {
+                        <article class="email-doc-copies__person">
+                            <header class="email-doc-copies__person-header">
+                                <span class="email-doc-copies__avatar">@Initials(person.DisplayName)</span>
+                                <span class="email-doc-copies__person-name">
+                                    @person.DisplayName
+                                    @if (person.Plan.HasAttachment)
+                                    {
+                                        <small>@EmailDocumentCopiesAttachmentBuilder.BuildFileName(person.DisplayName)</small>
+                                    }
+                                </span>
+                                @if (person.Plan.HasAttachment)
+                                {
+                                    <span class="email-doc-copies__record-meta">@FormatMb(person.Plan.Bytes) MB</span>
+                                }
+                            </header>
+                            @if (!person.Plan.HasAttachment)
+                            {
+                                <p class="email-doc-copies__muted">@Msg("EmailDocumentCopies.Preview.NoFilePerson")</p>
+                                <button type="button" class="email-doc-copies__link" @onclick="() => OpenPerson(person)">@Msg("EmailDocumentCopies.Preview.OpenPerson")</button>
+                            }
+                            else
+                            {
+                                <ul class="email-doc-copies__chips-static">
+                                    @foreach (var line in person.Plan.Lines)
+                                    {
+                                        @if (line.Records.Count > 0)
+                                        {
+                                            <li class="email-doc-copies__pill is-current">@TypeLabel(line.Type)@(line.FirstLabel == null ? string.Empty : " " + line.FirstLabel)</li>
+                                        }
+                                        else if (line.NoFile)
+                                        {
+                                            <li class="email-doc-copies__pill is-missing">@TypeLabel(line.Type) — @Msg("EmailDocumentCopies.Record.NoFile")</li>
+                                        }
+                                    }
+                                </ul>
+                            }
+                        </article>
+                    }
+                }
+            </section>
+        </div>
+    };
+
+    private RenderFragment ComposeStep() => __builder =>
+    {
+        <div class="email-doc-copies__connection @(!_configured || _connection == null ? "is-missing" : "is-connected")">
+            @if (!_configured)
+            {
+                <span>@Msg(MailSender.RequiresUserConnection ? "EmailDocumentCopies.Connect.NotConfigured" : "EmailDocumentCopies.Smtp.NotConfigured")</span>
+            }
+            else if (!MailSender.RequiresUserConnection)
+            {
+                <span><b>@Msg("EmailDocumentCopies.Field.From"):</b> @FormatSender(_connection)</span>
+            }
+            else if (_connection == null)
+            {
+                <span>@Msg(_waitingForConnect ? "EmailDocumentCopies.Connect.Waiting" : "EmailDocumentCopies.Connect.Prompt")</span>
+                <span class="email-doc-copies__connection-actions">
+                    <button type="button" class="email-doc-copies__btn is-primary" @onclick="ConnectAsync">@Msg("EmailDocumentCopies.Connect.Button")</button>
+                    @if (_waitingForConnect)
+                    {
+                        <button type="button" class="email-doc-copies__link" @onclick="RefreshConnectionAsync">@Msg("EmailDocumentCopies.Connect.CheckAgain")</button>
+                    }
+                </span>
+            }
+            else
+            {
+                <span><b>@Msg("EmailDocumentCopies.Field.From"):</b> @MsgFormat("EmailDocumentCopies.Connect.Connected", _connection.AccountEmail)</span>
+                <button type="button" class="email-doc-copies__link" @onclick="DisconnectAsync">@Msg("EmailDocumentCopies.Connect.Disconnect")</button>
+            }
+        </div>
+
+        @if (_configured && !MailSender.RequiresUserConnection)
+        {
+            <label class="email-doc-copies__field">
+                <span>@Msg("EmailDocumentCopies.Field.OfficerEmail")</span>
+                <input type="text" @bind="_officerEmail" placeholder="name@company.com" />
+                <small class="email-doc-copies__muted">@Msg("EmailDocumentCopies.Field.OfficerEmailHint")</small>
+            </label>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_limitNote))
+        {
+            <p class="email-doc-copies__muted">@_limitNote</p>
+        }
+
+        @RecipientField("To", _to, _toInput, v => _toInput = v)
+        @if (_toInvalid)
+        {
+            <p class="email-doc-copies__error">@Msg("EmailDocumentCopies.Error.ToRequired")</p>
+        }
+        @RecipientField("Cc", _cc, _ccInput, v => _ccInput = v)
+
+        <label class="email-doc-copies__field">
+            <span>@Msg("EmailDocumentCopies.Field.Template")</span>
+            <select value="@_templateId" @onchange="OnTemplateChanged">
+                <option value="">@Msg("EmailDocumentCopies.Template.None")</option>
+                @foreach (var template in _templates)
+                {
+                    <option value="@template.Id">@template.Name</option>
+                }
+            </select>
+        </label>
+
+        <label class="email-doc-copies__field">
+            <span>@Msg("EmailDocumentCopies.Field.Subject")</span>
+            <input type="text" maxlength="512" @bind="_subject" />
+        </label>
+
+        <label class="email-doc-copies__field">
+            <span>@Msg("EmailDocumentCopies.Field.Body")</span>
+            <textarea rows="7" @bind="_body"></textarea>
+        </label>
+
+        <div class="email-doc-copies__field">
+            <span>@Msg("EmailDocumentCopies.Field.Attachments")</span>
+            <ul class="email-doc-copies__attachments">
+                @foreach (var message in _plan.Messages)
+                {
+                    @foreach (var attachment in message.Attachments)
+                    {
+                        <li>
+                            <span class="email-doc-copies__pdf-icon">PDF</span>
+                            @EmailDocumentCopiesAttachmentBuilder.BuildFileName(attachment.PersonDisplayName, attachment.PartNumber, attachment.PartCount)
+                            <span>@FormatMb(attachment.Bytes) MB</span>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+
+        <label class="email-doc-copies__check">
+            <input type="checkbox" @bind="_saveNewAddresses" /> @Msg("EmailDocumentCopies.Option.SaveNew")
+        </label>
+    };
+
+    private RenderFragment ResultBody() => __builder =>
+    {
+        var ok = _result!.Succeeded;
+        <div class="email-doc-copies__result-page @(ok ? "is-success" : "is-error")">
+            <div class="email-doc-copies__result-icon">@(ok ? "✓" : "!")</div>
+            <h3>@Msg(ok ? "EmailDocumentCopies.Result.SentTitle" : _result.PartiallySent ? "EmailDocumentCopies.Result.PartialTitle" : "EmailDocumentCopies.Result.FailedTitle")</h3>
+            <p>@_result.Message</p>
+            @if (ok && !string.IsNullOrWhiteSpace(_officerEmail) && !MailSender.RequiresUserConnection)
+            {
+                <p class="email-doc-copies__muted">@MsgFormat("EmailDocumentCopies.Result.CopySent", _officerEmail)</p>
+            }
+            @if (_result.SkippedLabels.Count > 0)
+            {
+                <p class="email-doc-copies__warn">@MsgFormat("EmailDocumentCopies.Skipped", string.Join(", ", _result.SkippedLabels))</p>
+            }
+            @if (ok)
+            {
+                <p class="email-doc-copies__muted">@Msg("EmailDocumentCopies.Field.To"): @string.Join(", ", _to.Select(r => r.ToString()))</p>
+                <p class="email-doc-copies__muted">@Msg("EmailDocumentCopies.Field.Subject"): @_subject</p>
+            }
+            else
+            {
+                <p class="email-doc-copies__muted">@Msg("EmailDocumentCopies.Result.Kept")</p>
+            }
+        </div>
+    };
+
+    private RenderFragment RecipientField(string field, List<EmailRecipient> list, string input, Action<string> setInput) => __builder =>
+    {
+        <div class="email-doc-copies__field email-doc-copies__recipients @(_toInvalid && field == "To" ? "is-invalid" : string.Empty)">
+            <span>@Msg($"EmailDocumentCopies.Field.{field}")</span>
+            <div class="email-doc-copies__chips">
+                @foreach (var recipient in list.ToList())
+                {
+                    <span class="email-doc-copies__chip" title="@recipient.Email">
+                        @recipient.ToString()
+                        <button type="button" aria-label="remove" @onclick="() => { list.Remove(recipient); ApplyRememberedLimit(); }">&times;</button>
+                    </span>
+                }
+                <input type="text"
+                       value="@input"
+                       placeholder="@(list.Count == 0 ? Msg("EmailDocumentCopies.Field.RecipientPlaceholder") : string.Empty)"
+                       @oninput="e => OnRecipientInput(field, e.Value?.ToString() ?? string.Empty, setInput)"
+                       @onkeydown="e => OnRecipientKeyDown(e, field, list, setInput)"
+                       @onfocusout="() => CommitRecipientInput(field, list, setInput)" />
+            </div>
+            @if (_suggestField == field && _suggestions.Count > 0)
+            {
+                <ul class="email-doc-copies__suggestions">
+                    @foreach (var suggestion in _suggestions)
+                    {
+                        <li @onmousedown="() => AddSuggestion(suggestion, list, setInput)" @onmousedown:preventDefault>
+                            <b>@(string.IsNullOrWhiteSpace(suggestion.Name) ? suggestion.Email : suggestion.Name)</b>
+                            @if (!string.IsNullOrWhiteSpace(suggestion.Organization))
+                            {
+                                <span> - @suggestion.Organization</span>
+                            }
+                            <small>@suggestion.Email @(suggestion.IsShared ? string.Empty : Msg("EmailDocumentCopies.Contact.Personal"))</small>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    };
+
+    private void OnRecipientInput(string field, string value, Action<string> setInput)
+    {
+        setInput(value);
+        _suggestField = field;
+        if (_userId == Guid.Empty)
+        {
+            _suggestions = Array.Empty<EmailContactSuggestion>();
+            return;
+        }
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<EmailContact>();
+        _suggestions = EmailContactDirectory.Search(objectSpace, _userId, value.Trim())
+            .Where(s => !_to.Concat(_cc).Any(r => string.Equals(r.Email, s.Email, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+    }
+
+    private void OnRecipientKeyDown(KeyboardEventArgs e, string field, List<EmailRecipient> list, Action<string> setInput)
+    {
+        if (e.Key is "Enter" or "," or ";" or "Tab")
+            CommitRecipientInput(field, list, setInput);
+        else if (e.Key == "Escape")
+            _suggestions = Array.Empty<EmailContactSuggestion>();
+    }
+
+    private void CommitRecipientInput(string field, List<EmailRecipient> list, Action<string> setInput)
+    {
+        var input = field == "To" ? _toInput : _ccInput;
+        var parts = input.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        var invalid = new List<string>();
+        foreach (var part in parts)
+        {
+            var recipient = ParseRecipient(part);
+            if (recipient == null)
+            {
+                invalid.Add(part.Trim());
+                continue;
+            }
+            if (!list.Any(r => string.Equals(r.Email, recipient.Email, StringComparison.OrdinalIgnoreCase)))
+                list.Add(recipient);
+        }
+        setInput(string.Join(", ", invalid));
+        _suggestions = Array.Empty<EmailContactSuggestion>();
+        if (field == "To")
+            _toInvalid = _to.Count == 0;
+        ApplyRememberedLimit();
+    }
+
+    private void AddSuggestion(EmailContactSuggestion suggestion, List<EmailRecipient> list, Action<string> setInput)
+    {
+        if (!list.Any(r => string.Equals(r.Email, suggestion.Email, StringComparison.OrdinalIgnoreCase)))
+            list.Add(new EmailRecipient { Email = suggestion.Email, Name = suggestion.Name });
+        setInput(string.Empty);
+        _suggestions = Array.Empty<EmailContactSuggestion>();
+        _toInvalid = _to.Count == 0;
+        ApplyRememberedLimit();
+    }
+
+    private async Task ConnectAsync()
+    {
+        if (_userId == Guid.Empty)
+            return;
+        await JS.InvokeVoidAsync("open", MailSender.CreateConnectUrl(_userId), "_blank");
+        _waitingForConnect = true;
+        StartPolling();
+    }
+
+    private void StartPolling()
+    {
+        _pollCts?.Cancel();
+        _pollCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        var token = _pollCts.Token;
+        _ = Task.Run(async () =>
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(3));
+            try
+            {
+                while (await timer.WaitForNextTickAsync(token))
+                {
+                    bool connected = false;
+                    await InvokeAsync(async () =>
+                    {
+                        var connection = await MailSender.GetConnectionAsync(_userId, token);
+                        if (connection == null)
+                            return;
+                        connected = true;
+                        _connection = connection;
+                        _waitingForConnect = false;
+                        StateHasChanged();
+                    });
+                    if (connected)
+                        return;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+        }, token);
+    }
+
+    private async Task RefreshConnectionAsync()
+    {
+        _connection = await MailSender.GetConnectionAsync(_userId);
+        if (_connection != null)
+        {
+            _waitingForConnect = false;
+            _pollCts?.Cancel();
+        }
+    }
+
+    private async Task DisconnectAsync()
+    {
+        await MailSender.DisconnectAsync(_userId);
+        _connection = null;
+    }
+
+    private static IEnumerable<EmailRecipient> ParseRecipients(string? text) =>
+        (text ?? string.Empty)
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(ParseRecipient)
+            .Where(r => r != null)
+            .Select(r => r!);
+
+    private static EmailRecipient? ParseRecipient(string? text)
+    {
+        var value = text?.Trim().Trim(',', ';') ?? string.Empty;
+        if (value.Length == 0)
+            return null;
+        int open = value.LastIndexOf('<');
+        int close = value.LastIndexOf('>');
+        if (open >= 0 && close > open)
+        {
+            var email = value[(open + 1)..close].Trim();
+            var name = value[..open].Trim().Trim('"');
+            return EmailContactDirectory.IsValidEmail(email)
+                ? new EmailRecipient { Email = email, Name = string.IsNullOrWhiteSpace(name) ? null : name }
+                : null;
+        }
+        return EmailContactDirectory.IsValidEmail(value) ? new EmailRecipient { Email = value } : null;
+    }
+
+    private static string FormatSender(OfficerMailConnectionInfo? sender) =>
+        sender == null
+            ? string.Empty
+            : string.IsNullOrWhiteSpace(sender.AccountDisplayName)
+                ? sender.AccountEmail
+                : $"{sender.AccountDisplayName} <{sender.AccountEmail}>";
+
+    public void Dispose()
+    {
+        Dialog.Changed -= OnDialogChanged;
+        _pollCts?.Cancel();
+        _pollCts?.Dispose();
+    }
+
+    private string TypeLabel(EmailDocumentType type) => Msg(EmailDocumentTypeCatalog.LabelKey(type));
+
+    private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
+
+    private string MsgFormat(string key, params object[] args) => VisaUiMessages.FormatForCulture(_uiCultureName, key, args);
+
+    private static string Initials(string name)
+    {
+        var parts = (name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..1].ToUpperInvariant(),
+            _ => (parts[0][..1] + parts[^1][..1]).ToUpperInvariant(),
+        };
+    }
+
+    private static string FormatMb(long bytes) => $"{bytes / 1048576d:0.0}";
+}
