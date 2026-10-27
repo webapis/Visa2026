@@ -45,6 +45,19 @@ window.visaCaseWorkspaceNav = window.visaCaseWorkspaceNav || (function () {
         release: function () {
             holds = Math.max(0, holds - 1);
             apply();
+        },
+        readActiveSummaryField: function () {
+            var el = document.activeElement;
+            if (!el || typeof el.closest !== "function")
+                return null;
+            var host = el.closest("[data-summary-key]");
+            if (!host)
+                return null;
+            return {
+                key: host.getAttribute("data-summary-key") || "",
+                kind: host.getAttribute("data-summary-kind") || "",
+                value: "value" in el ? (el.value || "") : ""
+            };
         }
     };
 })();

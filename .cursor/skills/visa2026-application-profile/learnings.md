@@ -1,3 +1,10 @@
+### 2026-10-27 — Case summary Done needed two clicks
+
+- **Need**: After changing a Case summary field, the first **Done** click left the button labeled **Done**. A second click switched it to **Edit**.
+- **Fix**: A field save no longer covers the case with the opening skeleton, which was removing **Done** between mouse-down and mouse-up. **Done** also ignores the focus change so that blur cannot start another save before the click, and it still writes the focused value.
+- **Officer**: Rebuild, hard-refresh. Case summary **Edit**, change a field, click **Done** once. The button should say **Edit**.
+- **Prevent**: Do not set `WorkspaceLoading` while saving a Case summary field. Do not let **Done** move focus before the click is delivered.
+- **Cross-skill**: —
 ### 2026-10-26 — Open Linked records for a person already on the case
 
 - **Need**: Changing a linked person's records required Relink or opening the person. Officers click the person name.

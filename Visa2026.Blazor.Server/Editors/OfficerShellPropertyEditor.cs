@@ -215,15 +215,18 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         return Task.CompletedTask;
     }
 
-    private async Task LoadWorkspaceAsync(OfficerShellModel model, Guid applicationId)
+    private async Task LoadWorkspaceAsync(OfficerShellModel model, Guid applicationId, bool showLoading = true)
     {
         if (_application == null || applicationId == Guid.Empty)
             return;
 
-        model.WorkspaceLoading = true;
-        model.WorkspaceLoadingProgressPercent = -1;
-        model.WorkspaceLoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
-        await Task.Delay(16);
+        if (showLoading)
+        {
+            model.WorkspaceLoading = true;
+            model.WorkspaceLoadingProgressPercent = -1;
+            model.WorkspaceLoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
+            await Task.Delay(16);
+        }
 
         try
         {
@@ -240,8 +243,11 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         }
         finally
         {
-            model.WorkspaceLoading = false;
-            model.WorkspaceLoadingMessage = string.Empty;
+            if (showLoading)
+            {
+                model.WorkspaceLoading = false;
+                model.WorkspaceLoadingMessage = string.Empty;
+            }
         }
     }
 
@@ -827,7 +833,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
         model.HeaderFieldStatusMessage = null;
         model.HeaderFieldStatusIsError = false;
-        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        // Keep Done on the page. The opening skeleton removes it between mouse-down and
+        // mouse-up, so the first click never switches the button back to Edit.
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
     }
 
     private void OpenNewAlternativeAddress()

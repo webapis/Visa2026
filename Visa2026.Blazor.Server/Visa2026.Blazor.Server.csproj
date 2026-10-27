@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.900</AssemblyVersion>
-    <FileVersion>1.0.0.900</FileVersion>
+    <AssemblyVersion>1.0.0.901</AssemblyVersion>
+    <FileVersion>1.0.0.901</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -51,6 +51,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.2.6" />
     <!-- Web API Service (EF Core projects only need the base package) -->
     <PackageReference Include="DevExpress.ExpressApp.WebApi" Version="25.2.6" />
+    <PackageReference Include="MailKit" Version="4.18.2" />
     <!-- OData version must match what DevExpress.ExpressApp.WebApi 25.2.6 requires (>= 9.3.2) -->
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.3.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.16" />

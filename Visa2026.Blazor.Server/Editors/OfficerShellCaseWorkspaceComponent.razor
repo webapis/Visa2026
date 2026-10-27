@@ -824,7 +824,80 @@
             loadLookupCatalogs: true);
     }
 
-    private void FinishCaseSummaryEdit() => _caseSummaryEditing = false;
+    private async Task FinishCaseSummaryEdit()
+    {
+        // Mouse-down must not move focus. A field blur would save and refresh the case
+        // before mouse-up, so the click never reached this button. Read the focused
+        // value first, then leave edit mode on this same press.
+        var focused = await ReadFocusedSummaryFieldAsync();
+        _caseSummaryEditing = false;
+        await CommitFocusedSummaryFieldAsync(focused);
+    }
+
+    private async Task<FocusedSummaryField?> ReadFocusedSummaryFieldAsync()
+    {
+        try
+        {
+            return await JS.InvokeAsync<FocusedSummaryField?>("visaCaseWorkspaceNav.readActiveSummaryField");
+        }
+        catch (JSDisconnectedException)
+        {
+            return null;
+        }
+        catch (JSException)
+        {
+            return null;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
+    private async Task CommitFocusedSummaryFieldAsync(FocusedSummaryField? focused)
+    {
+        if (focused == null || string.IsNullOrWhiteSpace(focused.Key))
+            return;
+
+        var field = Snapshot?.CaseView.HeaderFields.FirstOrDefault(item =>
+            string.Equals(item.Key, focused.Key, StringComparison.Ordinal));
+        if (field == null || field.ReadOnly)
+            return;
+
+        var value = NormalizeFocusedSummaryValue(field, focused.Value);
+        if (value == null)
+            return;
+
+        if (string.Equals(field.Value ?? string.Empty, value, StringComparison.Ordinal))
+            return;
+
+        await OnHeaderFieldChanged(field.Key, value);
+    }
+
+    private static string? NormalizeFocusedSummaryValue(ApplicationWorkspaceCaseHeaderField field, string? raw)
+    {
+        if (field.Kind != ApplicationWorkspaceCaseHeaderFieldKind.Date)
+            return raw ?? string.Empty;
+
+        var text = (raw ?? string.Empty).Trim();
+        if (text.Length == 0)
+            return string.Empty;
+
+        if (DateTime.TryParseExact(text, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var display))
+            return ApplicationWorkspaceCaseHeaderField.FormatEditorDate(display);
+
+        if (DateTime.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var iso))
+            return ApplicationWorkspaceCaseHeaderField.FormatEditorDate(iso);
+
+        return null;
+    }
+
+    private sealed class FocusedSummaryField
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Kind { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+    }
 
     private void StartOrganizationEdit()
     {
@@ -1511,7 +1584,9 @@
 
     private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
     {
-        <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)">
+        <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)"
+               data-summary-key="@field.Key"
+               data-summary-kind="@field.Kind">
             <span class="cw-summary-field__label">@field.Label</span>
             @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
             {
@@ -1614,7 +1689,10 @@
                     {
                         @if (IsCaseSummaryEditing)
                         {
-                            <button type="button" class="cw-summary-mode-btn" @onclick="FinishCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
+                            <button type="button"
+                                    class="cw-summary-mode-btn"
+                                    @onmousedown:preventDefault="true"
+                                    @onclick="FinishCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
                         }
                         else
                         {
