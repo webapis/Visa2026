@@ -509,3 +509,21 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Recreate **prod app only**.
 - **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on `9bcb5232a821` until the next staging recreate.
 - **Skill**: setup-docker-engine
+
+### 2026-10-27 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.906`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:5c7382b9b78f` Created `2026-10-27T08:31:38Z` (replaces `18d62042531b` `2026-10-27T07:08Z`). Module assembly `1.0.0.906`. Prod postgres stayed **healthy** (Up 2 months). Seed gates quick (profile updated=36; approval-leg scanned=65 assigned=0; org FKs filled=0). Host poll 3 and LAN `http://10.100.128.26/LoginPage` → **200**. Scan override still on (`AzureOpenAI` / `true`).
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on `9bcb5232a821` until the next staging recreate.
+- **Skill**: setup-docker-engine
+
+### 2026-10-27 — Prod rollback after `1.0.0.906` Blazor circuit crash (`EmailDocumentCopiesDialogHost`)
+
+- **Symptom**: After Hub deploy of `1.0.0.906`, officers saw Blazor **Application Error** at `http://10.100.128.26/` (LoginPage still 200). Container stayed Up.
+- **Try**: `docker logs` showed repeated `ValueManagerContext.Storage is null` from `EmailDocumentCopiesDialogHost.OnInitialized` → `SecuritySystem.CurrentUserId` (root `_Host` component also runs on login). Pulled previous digest `sha256:18d62042531b` (`1.0.0.902`), `docker tag … webapia/visa2026:latest`, then `up -d --force-recreate --no-deps app` with the three prod `-f` files.
+- **Test**: Module `1.0.0.902`, host/LAN LoginPage **200**, no `ValueManagerContext` / `CircuitHost` failures in new logs. Staging untouched.
+- **Fix**: Rollback prod app to morning image. Workspace already uses `ISecurityStrategyBase` via `EnsureOfficerContext()` (no `SecuritySystem` in `OnInitialized`); do **not** redeploy Hub `latest` until a build that includes that fix is published.
+- **Prevent**: Root `_Host` dialog hosts must not call `SecuritySystem` during init. After a bad Hub `latest` pull, recover with `docker pull …@sha256:<previous>` + retag `:latest` + recreate app only.
+- **Skill**: setup-docker-engine
