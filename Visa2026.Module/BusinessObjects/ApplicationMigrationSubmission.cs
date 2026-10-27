@@ -45,6 +45,5 @@ public static class ApplicationMigrationSubmission
     public static bool IsComplete(ApplicationProfileInstanceProgress? row) =>
         IsState(row?.State?.Code)
         && row!.Date != default
-        && !string.IsNullOrWhiteSpace(row.SubmissionDocumentNumber)
-        && HasDocumentCopy(row);
+        && !string.IsNullOrWhiteSpace(row.SubmissionDocumentNumber);
 }

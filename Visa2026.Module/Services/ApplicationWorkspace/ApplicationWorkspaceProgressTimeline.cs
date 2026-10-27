@@ -508,19 +508,29 @@ internal static class ApplicationWorkspaceProgressTimeline
             ?? (row?.IsMinistryDecisionStep == true && !string.IsNullOrWhiteSpace(row.MinistryLetterFileName)
                 ? row
                 : null);
-        var letterId = letter != null && letter.ID != Guid.Empty
-            ? letter.ID
-            : (row != null && row.ID != Guid.Empty ? row.ID : (Guid?)null);
-
         var resultOptions = isCurrent
             ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(key, advanceOptions)
             : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+        var isMigration = string.Equals(key, MigrationKey, StringComparison.OrdinalIgnoreCase);
         var decisionRow = row?.IsMinistryDecisionStep == true ? row : null;
-        var fileOwner = decisionRow ?? letter;
-        var submissionStep = ApplicationMigrationSubmission.IsState(row?.State?.Code);
-        var storedFiles = submissionStep
-            ? ApplicationProfileInstanceProgressFiles.List(row, ApplicationProfileInstanceProgressFiles.SubmissionDocument)
-            : ApplicationProfileInstanceProgressFiles.List(fileOwner, ApplicationProfileInstanceProgressFiles.MinistryLetter);
+        var submissionStep = !isMigration && ApplicationMigrationSubmission.IsState(row?.State?.Code);
+        var fileOwner = isMigration
+            ? ResolveMigrationDocumentRow(history, row)
+            : submissionStep
+                ? row
+                : decisionRow ?? letter;
+        var fileSlot = submissionStep
+            ? ApplicationProfileInstanceProgressFiles.SubmissionDocument
+            : ApplicationProfileInstanceProgressFiles.MinistryLetter;
+        var storedFiles = ApplicationProfileInstanceProgressFiles.List(fileOwner, fileSlot);
+        var letterId = letter != null && letter.ID != Guid.Empty
+            ? letter.ID
+            : (row != null && row.ID != Guid.Empty ? row.ID : (Guid?)null);
+        if (isMigration && fileOwner != null && fileOwner.ID != Guid.Empty)
+            letterId = fileOwner.ID;
+        var awaitingMigrationDocuments = isMigration
+            && isCurrent
+            && string.Equals(stateLabel, AwaitingAsCoNumberLabel, StringComparison.OrdinalIgnoreCase);
         var hasLetter = storedFiles.Count > 0 || !string.IsNullOrWhiteSpace(letter?.MinistryLetterFileName);
         var missingLetter = ApplicationWorkspaceProgressLetterCompleteness.ResolveMissing(
             key,
@@ -546,9 +556,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             CanEditSubmissionNumber = canCorrect && submissionStep,
             CanEditResultNumber = canCorrect && decisionRow != null,
             Files = storedFiles,
-            FileSlot = submissionStep
-                ? ApplicationProfileInstanceProgressFiles.SubmissionDocument
-                : ApplicationProfileInstanceProgressFiles.MinistryLetter,
+            FileSlot = fileSlot,
             State = slotState,
             CurrentStateLabel = stateLabel,
             SlaTargetDate = isCurrent && row != null ? FormatSlaTarget(row.Date, currentSla) : string.Empty,
@@ -556,10 +564,12 @@ internal static class ApplicationWorkspaceProgressTimeline
             ProgressId = letterId,
             OfficerNotes = isCurrent ? row?.Description ?? string.Empty : string.Empty,
             MinistryLetterFileName = fileName,
-            ShowMinistryLetterUpload = (isCurrent
-                && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
-                && resultOptions.Count > 0)
-                || missingLetter,
+            ShowMinistryLetterUpload = awaitingMigrationDocuments
+                || (!isMigration
+                    && isCurrent
+                    && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
+                    && resultOptions.Count > 0)
+                || (!isMigration && missingLetter),
             MissingMinistryLetter = missingLetter,
             DecisionProgressId = decisionRow != null && decisionRow.ID != Guid.Empty
                 ? decisionRow.ID
@@ -800,6 +810,34 @@ internal static class ApplicationWorkspaceProgressTimeline
     private static ApplicationProfileInstanceProgress? LatestMigrationRow(
         IReadOnlyList<ApplicationProfileInstanceProgress> history) =>
         history.LastOrDefault(p => IsCurrentMigration(p.State?.Code, history));
+
+    /// <summary>
+    /// Document copies on the migration slot stay on the outcome row that received them
+    /// (process started, issued, or rejected), even after a later outcome row exists.
+    /// </summary>
+    private static ApplicationProfileInstanceProgress? ResolveMigrationDocumentRow(
+        IReadOnlyList<ApplicationProfileInstanceProgress> history,
+        ApplicationProfileInstanceProgress? latestRow)
+    {
+        ApplicationProfileInstanceProgress? withFiles = null;
+        foreach (var candidate in history)
+        {
+            if (!IsMigrationOutcomeRow(candidate?.State?.Code))
+                continue;
+            if (ApplicationProfileInstanceProgressFiles.List(
+                    candidate,
+                    ApplicationProfileInstanceProgressFiles.MinistryLetter).Count == 0)
+                continue;
+            withFiles = candidate;
+        }
+
+        return withFiles ?? latestRow;
+    }
+
+    private static bool IsMigrationOutcomeRow(string? code) =>
+        ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code)
+        || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase);
 
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> BuildAdvanceOptions(
         ApplicationProfileInstance application,

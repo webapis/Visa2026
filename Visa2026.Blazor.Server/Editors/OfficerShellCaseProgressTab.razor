@@ -205,6 +205,33 @@
                                 <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
                                 <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
                             </dl>
+                            @if (IsOpenAdvanceStep(step) && step.Files.Count > 0 && (step.ProgressId ?? step.DateProgressId) is Guid currentFileProgressId)
+                            {
+                                <div class="ct-step-files" style="margin-top:10px">
+                                    @foreach (var file in step.Files)
+                                    {
+                                        <div class="ct-step-file" title="@file.FileName">
+                                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                               ProgressId="currentFileProgressId"
+                                                                               FileId="file.FileId"
+                                                                               FileName="@file.FileName"
+                                                                               LinkText="@file.FileName"
+                                                                               CssClass="ct-step-file__name"
+                                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
+                                        </div>
+                                    }
+                                    @if (step.Files.Count > 1)
+                                    {
+                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                                           ProgressId="currentFileProgressId"
+                                                                           FileName="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
+                                                                           LinkText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
+                                                                           PreviewAll="true"
+                                                                           CssClass="ct-step-file__btn"
+                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
+                                    }
+                                </div>
+                            }
 
                             @if (step.CanAdvance)
                             {
@@ -246,13 +273,13 @@
                                                @bind="_submissionDocumentNumber"
                                                @bind:event="oninput"
                                                disabled="@_busy" />
-                                        <label class="ct-label @(IsSubmissionCopyInvalid ? "ct-label--error" : null)" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopy")</label>
+                                        <label class="ct-label" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopy")</label>
                                         <OfficerShellPendingProgressFiles Files="_pendingFiles"
                                                                           ApplicationProfileInstanceId="ApplicationProfileInstanceId"
                                                                           OwnerViewId="@PreviewSlotOwnerViewId"
                                                                           Busy="_busy"
                                                                           RemoveRequested="RemovePending" />
-                                        <label class="ct-upload ct-upload--action @(IsSubmissionCopyInvalid ? "ct-upload--missing" : null)">
+                                        <label class="ct-upload ct-upload--action">
                                             <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple disabled="@_busy" />
                                             <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
                                         </label>
@@ -517,11 +544,6 @@
         && ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode)
         && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_submissionDocumentNumber, out _, out _);
 
-    private bool IsSubmissionCopyInvalid =>
-        IsAdvanceFieldErrorMode
-        && ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode)
-        && _pendingFiles.Count == 0;
-
     internal string? PendingLetterFileName =>
         _pendingFiles.Count == 0 ? null : _pendingFiles[0].FileName;
 
@@ -600,7 +622,9 @@
     private static string FileUploadLabel(ApplicationWorkspaceCaseProgressStep step) =>
         string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
             ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OfficeFile")
-            : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter");
+            : IsMigrationStep(step)
+                ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents")
+                : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter");
 
     private static string StepBadge(ApplicationWorkspaceCaseProgressStep step, bool isCurrent)
     {
@@ -818,13 +842,6 @@
             return false;
         }
 
-        if (ApplicationMigrationSubmission.IsState(code)
-            && _pendingFiles.Count == 0)
-        {
-            error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired");
-            return false;
-        }
-
         var requireProcessNumber = view.Chrome.ShowProcessNumber
             && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
         if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
@@ -893,12 +910,6 @@
         if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_backfillNumber, out _, out var numberError))
         {
             _localAdvanceError = numberError;
-            return;
-        }
-
-        if (_backfillFileContent == null || _backfillFileContent.Length == 0)
-        {
-            _localAdvanceError = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired");
             return;
         }
 

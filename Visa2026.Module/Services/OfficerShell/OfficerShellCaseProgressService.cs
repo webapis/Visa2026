@@ -136,13 +136,6 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                 submissionNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
         }
 
-        if (ApplicationMigrationSubmission.IsState(chosenCode)
-            && (letterContent == null || letterContent.Length == 0))
-        {
-            return OfficerShellCaseProgressResult.Failed(
-                VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired"));
-        }
-
         var requireProcessNumber = ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
             && ApplicationProfileConfigurationResolver.ShowProcessNumber(application);
         if (requireProcessNumber)
@@ -196,7 +189,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                 return copyResult;
         }
         else if (letterContent is { Length: > 0 }
-            && (progress.IsMinistryDecisionStep || latest == null))
+            && (latest == null || CanStoreProgressFile(progress)))
         {
             var letterResult = AttachMinistryLetter(objectSpace, progress, letterFileName ?? "progress-file.pdf", letterContent);
             if (!letterResult.Success)
@@ -301,11 +294,6 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             var copyResult = AttachSubmissionDocument(objectSpace, row, fileName ?? "submission.pdf", fileContent);
             if (!copyResult.Success)
                 return copyResult;
-        }
-        else if (!ApplicationMigrationSubmission.HasDocumentCopy(row))
-        {
-            return OfficerShellCaseProgressResult.Failed(
-                VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopyRequired"));
         }
 
         if (created)
@@ -655,7 +643,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         byte[] content)
     {
         if (!CanStoreProgressFile(row))
-            return OfficerShellCaseProgressResult.Failed("File upload is only available on office preparation or an approval leg.");
+            return OfficerShellCaseProgressResult.Failed("File upload is only available on office preparation, an approval leg, or the migration service step.");
 
         var maxBytes = row.MaxDocumentSizeInMB * 1024L * 1024L;
         if (content.LongLength > maxBytes)
@@ -682,6 +670,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(
                 ApplicationWorkspaceProgressTimeline.OfficeKey,
                 code)
+            || ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code)
             || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
             || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
             || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))

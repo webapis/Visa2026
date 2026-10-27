@@ -6,6 +6,14 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-26 — Document copies on Migrasiýa gullugynda while waiting for the AS number
+
+- **Need**: On **Migrasiýa gullugynda**, while the status is still **AS … belgisine garaşylýar**, the officer stores document copies on the card before **Ýagdaýy ilerletmek**, the same way a ministry step does. After the step is finished, the pencil can still add, replace, or remove those copies. A copy is optional on this step and on the other progress steps (the submission copy was required).
+- **Fix**: The waiting migration card shows the multi-file upload. Advance stores the files on the new migration row (`PROCESS_STARTED`, and issued / rejected). The migration slot keeps showing those files after a later outcome row. Submission advance and the submission backfill no longer require a file. The submission document number stays required. Ministry steps still show **Missing** when a letter was not attached; Advance was already allowed without it.
+- **Test**: Timeline tests 27 passed. The existing `Finished_step_dates_stay_between_neighbors_and_the_open_step_stays_fixed` failure (`CanEditFiles` on an open `2_REVIEW_STARTED` step) is unchanged. Blazor Debug build: 0 errors. Progress tab was not clicked through in a running browser.
+- **Prevent**: Do not require a document copy before Advance. Do not hide the upload on the migration card once the status is no longer the waiting-for-number line. Do not drop the copies when a later issued or rejected row is added.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-10-24 — Advance progress stays enabled after the last step
 
 - **Symptom**: Case workspace **Advance progress** stayed the primary button after Issued (SLA ring Done / complete). Clicking it only stayed on Progress.

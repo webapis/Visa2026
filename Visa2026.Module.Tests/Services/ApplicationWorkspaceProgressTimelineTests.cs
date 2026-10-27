@@ -711,9 +711,88 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("current", migration.State);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationLabel, migration.Label);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.AwaitingAsCoNumberLabel, migration.CurrentStateLabel);
+        Assert.True(migration.ShowMinistryLetterUpload);
+        Assert.False(migration.MissingMinistryLetter);
+        Assert.Equal(ApplicationProfileInstanceProgressFiles.MinistryLetter, migration.FileSlot);
         Assert.Equal(
             "At the migration service · Awaiting AS (CO) number",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
+    }
+
+    [Fact]
+    public void Build_Issued_KeepsDocumentCopiesStoredWhileWaitingForTheProcessNumber()
+    {
+        var profile = ThreeLegProfile();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        var startedId = Guid.NewGuid();
+        var issuedId = Guid.NewGuid();
+        var started = new ApplicationProfileInstanceProgress
+        {
+            ID = startedId,
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = new DateTime(2026, 10, 2),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
+            ProcessNumber = "AS-1",
+            MinistryLetterFile = new FileData { ID = Guid.NewGuid(), FileName = "passport-page.jpg", Size = 20 },
+            Files = new ObservableCollection<ApplicationProfileInstanceProgressFile>(),
+        };
+        started.Files.Add(new ApplicationProfileInstanceProgressFile
+        {
+            Slot = ApplicationProfileInstanceProgressFiles.MinistryLetter,
+            SortOrder = 1,
+            File = new FileData { ID = Guid.NewGuid(), FileName = "visa-page.jpg", Size = 21 },
+        });
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = new DateTime(2026, 10, 1),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+            SubmissionDocumentNumber = "7/1",
+        });
+        application.ProgressHistory.Add(started);
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = issuedId,
+            ApplicationProfileInstance = application,
+            Order = 3,
+            Date = new DateTime(2026, 10, 8),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessIssued },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        var migration = steps.Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("issued", migration.OutcomeKind);
+        Assert.False(migration.ShowMinistryLetterUpload);
+        Assert.False(migration.MissingMinistryLetter);
+        Assert.Equal(startedId, migration.ProgressId);
+        Assert.Equal(issuedId, migration.DateProgressId);
+        Assert.Equal(2, migration.Files.Count);
+        Assert.Equal("passport-page.jpg", migration.MinistryLetterFileName);
+        Assert.True(migration.CanEditFiles);
+        Assert.Equal(ApplicationProfileInstanceProgressFiles.MinistryLetter, migration.FileSlot);
+    }
+
+    [Fact]
+    public void Submission_IsComplete_WithoutADocumentCopy()
+    {
+        var row = new ApplicationProfileInstanceProgress
+        {
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+            SubmissionDocumentNumber = "7/1",
+        };
+
+        Assert.True(ApplicationMigrationSubmission.IsComplete(row));
+        Assert.False(ApplicationMigrationSubmission.HasDocumentCopy(row));
     }
 
     private static ApplicationProfileInstanceProgress ApprovedLeg(
