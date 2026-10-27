@@ -276,15 +276,16 @@ flowchart TB
 |-------|----------------|--------|
 | Person DetailView | *(no Start application)* | Create from **Application Profile Instances** lists only |
 | Person Dossier | *(no Start application)* | Same; dossier stays read-only 360 |
-| Application Profile Instances list | **New** → Choose Application Profile | Via ministry: **step 1 profile**, **step 2 Approval legs** (always, even if one version; Default pre-selected). Direct migration: profile then create. Officer adds people on the case. |
+| Application Profile Instances list | **New** → Choose Application Profile | Via ministry: click a profile, then click an approval-leg card (Default is highlighted; it does not advance until clicked). Direct migration: click a profile. Both land on **Case summary**, then **Create application**. Company, signatory, and representative use the tenant Default and are changed on the case. |
 
 ```mermaid
 flowchart LR
   List[Application Profile Instances New]
   List --> Pick[Step 1 Choose profile]
-  Pick -->|Via ministry| Legs[Step 2 Choose Approval legs]
-  Pick -->|Direct migration| App[Create instance + live FK]
-  Legs --> App
+  Pick -->|Via ministry| Legs[Step 2 Click an approval leg]
+  Pick -->|Direct migration| Summary[Case summary]
+  Legs --> Summary
+  Summary --> App[Create application]
   App --> Case[Officer adds people on the case]
 ```
 

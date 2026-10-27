@@ -17,7 +17,6 @@ using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.ApplicationProfileWizard;
-using Visa2026.Module.Services.OrganizationCatalogs;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -69,9 +68,6 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         OpenApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, OpenApprovalLeg),
         OpenApprovalLegCatalogRequested = EventCallback.Factory.Create(this, OpenApprovalLegCatalog),
         MakeDefaultApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, SetDefaultApprovalLeg),
-        OrganizationChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SelectOrganization),
-        MakeDefaultOrganizationRequested = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, MakeDefaultOrganization),
-        OrganizationCatalogEditorRequested = EventCallback.Factory.Create<(string Kind, Guid Id)>(this, OpenOrganizationCatalogEditor),
         CaseSummaryFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, OnCaseSummaryFieldChanged),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
@@ -189,41 +185,33 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
-        if (model.Step == 3)
-        {
-            await ContinueFromOrganizationAsync();
-            return;
-        }
-
         if (model.Step == 2)
         {
             await ContinueFromLegsAsync();
             return;
         }
 
-        if (!await ShowAdvanceAsync(model, NextStepTitle(model, selected)))
-            return;
-
-        try
+        if (selected?.RequiresApprovalLegVersion == true)
         {
-            if (selected?.RequiresApprovalLegVersion == true)
+            if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs")))
+                return;
+
+            try
             {
                 EnsureSelectedVersion(model);
                 model.Step = 2;
+                model.StatusMessage = null;
+                model.IsStatusError = false;
             }
-            else
+            finally
             {
-                EnsureOrganizationSelection(model);
-                model.Step = 3;
+                model.IsAdvancing = false;
             }
 
-            model.StatusMessage = null;
-            model.IsStatusError = false;
+            return;
         }
-        finally
-        {
-            model.IsAdvancing = false;
-        }
+
+        await EnterCaseSummaryAsync();
     }
 
     private async Task BackStepAsync()
@@ -238,9 +226,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         try
         {
-            if (model.Step == 4)
-                model.Step = 3;
-            else if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
+            if (model.Step == 4 && selected?.RequiresApprovalLegVersion == true)
                 model.Step = 2;
             else
                 model.Step = 1;
@@ -268,42 +254,21 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
-        if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseOrg")))
-            return;
-
-        try
-        {
-            EnsureOrganizationSelection(model);
-            model.Step = 3;
-            model.StatusMessage = null;
-            model.IsStatusError = false;
-        }
-        finally
-        {
-            model.IsAdvancing = false;
-        }
+        await EnterCaseSummaryAsync();
     }
 
-    private async Task ContinueFromOrganizationAsync()
+    private async Task EnterCaseSummaryAsync()
     {
         var model = ComponentModel;
         if (model == null || _application == null || model.IsAdvancing)
             return;
-
-        if (model.SelectedCompanyId == Guid.Empty
-            || model.SelectedSignatoryId == Guid.Empty
-            || model.SelectedRepresentativeId == Guid.Empty)
-        {
-            model.StatusMessage = "Select Company, Signatory, and Representative.";
-            model.IsStatusError = true;
-            return;
-        }
 
         if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.CaseSummary")))
             return;
 
         try
         {
+            EnsureOrganizationSelection(model);
             LoadCaseSummaryDraft(model);
             model.Step = 4;
             model.StatusMessage = null;
@@ -583,83 +548,6 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             ?? Guid.Empty;
     }
 
-    private void SelectOrganization(ApplicationWorkspaceOrganizationLetterheadUpdate update)
-    {
-        var model = ComponentModel;
-        if (model == null || update == null)
-            return;
-
-        var id = update.SelectedId ?? Guid.Empty;
-        switch (update.Kind)
-        {
-            case OrganizationCatalogHelper.Company:
-                model.SelectedCompanyId = id;
-                break;
-            case OrganizationCatalogHelper.Signatory:
-                model.SelectedSignatoryId = id;
-                break;
-            case OrganizationCatalogHelper.Representative:
-                model.SelectedRepresentativeId = id;
-                break;
-        }
-    }
-
-    private void MakeDefaultOrganization(ApplicationWorkspaceOrganizationLetterheadUpdate update)
-    {
-        var model = ComponentModel;
-        if (model == null || _application == null || update == null)
-            return;
-
-        var id = update.SelectedId ?? Guid.Empty;
-        using var objectSpace = _application.CreateObjectSpace(typeof(CompanyProfile));
-        if (!OrganizationCatalogHelper.TryMakeDefault(objectSpace, update.Kind, id, out var error))
-        {
-            model.StatusMessage = error;
-            model.IsStatusError = true;
-            return;
-        }
-
-        LoadOrganizationCatalogs(objectSpace, model);
-        model.Step = 3;
-        model.StatusMessage = null;
-        model.IsStatusError = false;
-    }
-
-    private void OpenOrganizationCatalogEditor((string Kind, Guid Id) request)
-    {
-        if (_application == null || string.IsNullOrWhiteSpace(request.Kind))
-            return;
-
-        OrganizationCatalogsOpenHelper.TryOpenEditor(
-            _application,
-            request.Kind,
-            request.Id,
-            onClosed: () => ReloadOrganizationCatalogs(request.Kind, preferId: null),
-            onSaved: savedId => ReloadOrganizationCatalogs(request.Kind, savedId));
-    }
-
-    private void ReloadOrganizationCatalogs(string kind, Guid? preferId)
-    {
-        var model = ComponentModel;
-        if (model == null || _application == null)
-            return;
-
-        using var objectSpace = _application.CreateObjectSpace(typeof(CompanyProfile));
-        LoadOrganizationCatalogs(objectSpace, model);
-        if (preferId is Guid id && id != Guid.Empty)
-        {
-            SelectOrganization(new ApplicationWorkspaceOrganizationLetterheadUpdate
-            {
-                Kind = kind,
-                SelectedId = id,
-            });
-        }
-
-        model.Step = 3;
-        model.StatusMessage = null;
-        model.IsStatusError = false;
-    }
-
     private void OpenNewAlternativeAddress()
     {
         if (_application == null)
@@ -746,27 +634,11 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         return true;
     }
 
-    private static string NextStepTitle(
-        ApplicationProfilePickerModel model,
-        ApplicationProfilePickerModel.PickerRowModel? selected)
-    {
-        if (model.Step == 1 && selected?.RequiresApprovalLegVersion == true)
-            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs");
-
-        if (model.Step is 1 or 2)
-            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseOrg");
-
-        return VisaUiMessages.Get("ApplicationProfileInstance.Picker.CaseSummary");
-    }
-
     private static string PreviousStepTitle(
         ApplicationProfilePickerModel model,
         ApplicationProfilePickerModel.PickerRowModel? selected)
     {
-        if (model.Step == 4)
-            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseOrg");
-
-        if (model.Step == 3 && selected?.RequiresApprovalLegVersion == true)
+        if (model.Step == 4 && selected?.RequiresApprovalLegVersion == true)
             return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs");
 
         return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseProfile");

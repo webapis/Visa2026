@@ -317,10 +317,10 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 - `IApplicationProfilePickerQueryService` — active profiles, route filter, MRU sort, applicability criteria
 - `ApplicationProfilePickerNewController` — intercepts **New** on Application ListViews (skipped during data import)
 - **Use profile (live link)** creates Application, sets `ApplicationProfile` + dual-read `ApplicationType`, applies defaults, opens DetailView
-- Via ministry: **Continue →** then **Choose Approval legs** (always, even when there is one version; Default pre-selected) → **Choose Organization** → **Case summary** → **Create application**. Direct migration: profile → Organization → Case summary.
+- Via ministry: click a profile, then click an approval-leg card (Default is highlighted and does not advance until clicked) → **Case summary** → **Create application**. Direct migration: click a profile → **Case summary** → **Create application**. Tenant Default company, signatory, and representative are applied on create and edited on the case.
 - Locked profiles remain selectable (config lock badge only)
 
-**Verify:** Applications via ministry → **New** → pick profile → Approval legs → Organization → Case summary → **Create application**. Direct: profile → Organization → Case summary.
+**Verify:** Applications via ministry → **New** → click a profile → click an approval leg → Case summary → **Create application**. Direct: click a profile → Case summary → **Create application**. Back returns to the previous step. Organization is the tenant Default on the new case.
 
 **Next:** Slice 13b — drop `Applications.ApplicationTypeID` after import cutover (Report Dashboard, sync rules, PDF mapping).
 

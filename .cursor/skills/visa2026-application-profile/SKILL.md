@@ -142,7 +142,7 @@ flowchart LR
 | Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 | Case summary tiles empty / Edit does not save | Profile `Require*` off (number/date are always shown); officer-shell `HeaderFieldChanged`; post-prep lock on type/contract only | `ApplicationWorkspaceCaseHeaderFieldsHelper`; `OfficerShellPropertyEditor.SaveHeaderFieldAsync` |
 | Unchecking the last border zone rechecks an earlier etrap | Empty draft was rehydrated from the saved string. Stop F5, rebuild, hard-refresh. Clear all → **Selected: 0**, OK stores `Ýok` | `CommaSeparatedMultiSelectComponent`; `BorderZoneLocationField` |
-| Create still lands on empty Case summary | Picker must finish on **Case summary** (step 4), not Organization | `ApplicationProfilePickerCaseSummaryDraft`; Organization is **Continue** |
+| Create still lands on empty Case summary | Picker finishes on **Case summary**. Via ministry: click an approval-leg card. Direct: profile click | `EnterCaseSummaryAsync` loads the draft; tenant Default organization is applied on create |
 | Create wizard is a white card in Fluent Dark | Bind to `--dxds-color-surface-*` / `--dxds-color-content-*`. `--bs-body-bg` stays `#fff` on this host | `wwwroot/css/application-profile-picker.css` |
 | Configure Application Profile wizard shows white Review cards or light Results fields | `.ap-wizard__sum-card` is `#fbfcfd`; table inputs and tags are light | `application-profile-wizard.css`; cards and fields use `--ap-*` |
 | Case workspace sections stay light in Fluent Dark | Remap `--os-*` on `.officer-case-workspace`; dark mode retints hard-coded `#fff` panels | `wwwroot/css/officer-shell/case-workspace.css` |
@@ -150,7 +150,7 @@ flowchart LR
 | Section switch shows a light “Opening …” pane | `.cw-tab-loading` veil is `rgba(248, 250, 252, 0.78)` | `case-workspace.css`; veil is the theme panel, track is `--os-line` |
 | First open of a case shows white skeleton bars | `.cw-loading` bars use `#e2e8f0` / `#f8fafc` | `case-workspace.css`; bars shimmer between `--os-line` and the panel |
 | Organization letterhead fields stay white | Disabled `.cw-summary-field__input` is `#f8fafc` | `case-workspace.css`; Organization inputs use `--os-panel` |
-| Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config | Configuration → Organization catalogs; create **Choose Organization**; case Organization |
+| Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config. Create picker does not ask either | Case Organization edits the tenant Default rows applied at create |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |
 | People & links zeros look like filled tiles | Short tiles red; nav red count or green check | `ApplicationWorkspacePeopleLinksCompleteness`; `cw-link-tile.is-empty` |
@@ -239,7 +239,7 @@ Use when user asks *how should I configure this profile?* — tailor to **Action
 
 - Set defaults for high-friction lookups (**Visa Type**, **Category**, **Period**, **Urgency**, **Entry check point**) when type always uses same values.
 - Leave dates (**Start/End**, **Entry**) without defaults — officer fills per case.
-- Company / Signatory / Representative are **tenant catalogs**, not profile defaults. Officers pick them at create (**Choose Organization**) and on the case. Tenant **Default** is catalog `IsDefault`. Do not put them on the profile wizard.
+- Company / Signatory / Representative are **tenant catalogs**, not profile defaults. Create applies the tenant **Default** rows. Officers change them on the case Organization section. Do not put them on the profile wizard or the create picker.
 
 ### Lock awareness
 

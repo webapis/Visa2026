@@ -1,3 +1,11 @@
+### 2026-10-27 — Create wizard advances on approval-leg click
+
+- **Need**: Choosing an approval leg still required Continue, and Choose Organization was an extra step that rarely changes.
+- **Fix**: Clicking an approval-leg card (or Enter/Space) opens Case summary. Continue is gone on that step; Back stays. Direct migration goes from the profile click to Case summary. Create still applies the tenant Default company, signatory, and representative. Open, Make default, Catalog, and + New do not advance. The highlighted Default does not advance until it is clicked.
+- **Officer**: Stop F5, rebuild, hard-refresh. New via-ministry application: click a profile, click a leg, land on Case summary. Back returns to the legs. Direct: profile click opens Case summary. Organization is edited on the case.
+- **Prevent**: Do not restore a Continue button on Approval legs. Do not auto-advance from the pre-selected Default on load.
+- **Cross-skill**: —
+
 ### 2026-10-27 — Case summary Done needed two clicks
 
 - **Need**: After changing a Case summary field, the first **Done** click left the button labeled **Done**. A second click switched it to **Edit**.
