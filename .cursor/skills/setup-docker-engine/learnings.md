@@ -527,3 +527,12 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Rollback prod app to morning image. Workspace already uses `ISecurityStrategyBase` via `EnsureOfficerContext()` (no `SecuritySystem` in `OnInitialized`); do **not** redeploy Hub `latest` until a build that includes that fix is published.
 - **Prevent**: Root `_Host` dialog hosts must not call `SecuritySystem` during init. After a bad Hub `latest` pull, recover with `docker pull …@sha256:<previous>` + retag `:latest` + recreate app only.
 - **Skill**: setup-docker-engine
+
+### 2026-10-27 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.908`, post-906 fix)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod after morning rollback from bad `1.0.0.906`.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Confirmed digest `39094290b90b` ≠ bad `5c7382b9b78f`. Did **not** recreate staging. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:39094290b90b` Created `2026-10-27T11:20:33Z` (replaces rolled-back `18d62042531b` `1.0.0.902`). Module assembly `1.0.0.908`. Prod postgres **healthy**. Seed gates quick (profile updated=36; approval-leg scanned=66 assigned=0; org FKs filled=0). Host poll 3 and LAN LoginPage → **200**. No `ValueManagerContext` / `CircuitHost` lines after recreate. Scan override still on (`AzureOpenAI` / `true`).
+- **Fix**: Recreate **prod app only** onto fixed Hub build.
+- **Prevent**: After a known-bad Hub image, verify the new digest/created time before recreate and grep logs for `ValueManagerContext` before calling the deploy done.
+- **Skill**: setup-docker-engine
