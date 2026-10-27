@@ -100,7 +100,8 @@ public sealed class EmailSmtpSettingsController : ObjectViewController<ObjectVie
 
         try
         {
-            var error = mailSender.TestConnectionAsync().GetAwaiter().GetResult();
+            // Run off the Blazor circuit. Waiting here on the circuit deadlocks and leaves Loading up.
+            var error = Task.Run(() => mailSender.TestConnectionAsync()).GetAwaiter().GetResult();
             if (string.IsNullOrEmpty(error))
             {
                 Application.ShowViewStrategy.ShowMessage(

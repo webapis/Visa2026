@@ -4286,3 +4286,18 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     height: 1.125rem;
     fill: currentColor;
 }
+
+/* Read-only checks use a dark tick on the purple box. Keep the box, paint the tick white. */
+.dxbl-fl-ctrl .dxbl-checkbox.dxbl-disabled.dxbl-checkbox-checked,
+.dxbl-fl-ctrl .dxbl-checkbox:disabled.dxbl-checkbox-checked {
+    opacity: 1;
+    --dxbl-checkbox-disabled-opacity: 1;
+    --dxbl-checkbox-check-element-disabled-color: #fff;
+    --dxbl-checkbox-check-element-checked-color: #fff;
+}
+
+.dxbl-fl-ctrl .dxbl-checkbox.dxbl-disabled.dxbl-checkbox-checked .dxbl-checkbox-check-element .dxbl-image,
+.dxbl-fl-ctrl .dxbl-checkbox:disabled.dxbl-checkbox-checked .dxbl-checkbox-check-element .dxbl-image {
+    color: #fff !important;
+    opacity: 1;
+}

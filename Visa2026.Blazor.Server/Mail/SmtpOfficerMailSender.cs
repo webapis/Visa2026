@@ -71,8 +71,8 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
         var mime = BuildMessage(settings, message);
         await ConnectAuthenticateAndRunAsync(settings, async (client, token) =>
         {
-            await client.SendAsync(mime, token);
-        }, cancellationToken);
+            await client.SendAsync(mime, token).ConfigureAwait(false);
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<string?> TestConnectionAsync(CancellationToken cancellationToken = default)
@@ -83,30 +83,43 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
         if (!string.IsNullOrWhiteSpace(settings.UserName) && string.IsNullOrEmpty(settings.Password))
             return "The mail server password is not saved. Enter it on Configuration → Mail server.";
 
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(20));
         try
         {
-            await ConnectAuthenticateAndRunAsync(settings, (_, _) => Task.CompletedTask, cancellationToken);
+            await ConnectAuthenticateAndRunAsync(settings, (_, _) => Task.CompletedTask, timeout.Token, timeoutMs: 20_000)
+                .ConfigureAwait(false);
             return null;
         }
         catch (OfficerMailException ex)
         {
             return ex.Message;
         }
+        catch (OperationCanceledException)
+        {
+            return $"The mail server {settings.Host}:{settings.Port} did not respond within 20 seconds.";
+        }
     }
 
     private async Task ConnectAuthenticateAndRunAsync(
         EffectiveSettings settings,
         Func<SmtpClient, CancellationToken, Task> action,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        int? timeoutMs = null)
     {
-        using var client = new SmtpClient { Timeout = Math.Max(10, settings.TimeoutSeconds) * 1000 };
+        var timeout = timeoutMs ?? Math.Max(10, settings.TimeoutSeconds) * 1000;
+        using var client = new SmtpClient { Timeout = timeout };
         try
         {
-            await client.ConnectAsync(settings.Host, settings.Port, settings.Security, cancellationToken);
+            await client.ConnectAsync(settings.Host, settings.Port, settings.Security, cancellationToken).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(settings.UserName))
-                await client.AuthenticateAsync(settings.UserName, settings.Password ?? string.Empty, cancellationToken);
-            await action(client, cancellationToken);
-            await client.DisconnectAsync(true, cancellationToken);
+                await client.AuthenticateAsync(settings.UserName, settings.Password ?? string.Empty, cancellationToken).ConfigureAwait(false);
+            await action(client, cancellationToken).ConfigureAwait(false);
+            await client.DisconnectAsync(true, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new OfficerMailException($"The mail server {settings.Host}:{settings.Port} did not respond in time.");
         }
         catch (AuthenticationException ex)
         {

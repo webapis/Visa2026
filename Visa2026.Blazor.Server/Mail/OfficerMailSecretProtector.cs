@@ -30,19 +30,19 @@ public sealed class OfficerMailSecretProtector : IOfficerMailSecretProtector
         if (string.IsNullOrWhiteSpace(protectedValue))
             return null;
 
-        var payload = protectedValue.StartsWith(IOfficerMailSecretProtector.Prefix, StringComparison.Ordinal)
-            ? protectedValue[IOfficerMailSecretProtector.Prefix.Length..]
-            : protectedValue;
+        // Passwords saved before encryption have no marker. Use them as typed.
+        if (!protectedValue.StartsWith(IOfficerMailSecretProtector.Prefix, StringComparison.Ordinal))
+            return protectedValue;
 
+        var payload = protectedValue[IOfficerMailSecretProtector.Prefix.Length..];
         try
         {
             return protector.Unprotect(payload);
         }
         catch (Exception ex)
         {
-            // Row saved before encryption was wired, or the key ring changed: use the stored value as-is.
-            logger.LogWarning(ex, "Could not decrypt the stored SMTP password; using the saved value as plain text. Re-enter the password on Configuration → Mail server if send still fails.");
-            return payload;
+            logger.LogWarning(ex, "Could not decrypt the stored SMTP password. Re-enter it on Configuration → Mail server.");
+            return null;
         }
     }
 }
