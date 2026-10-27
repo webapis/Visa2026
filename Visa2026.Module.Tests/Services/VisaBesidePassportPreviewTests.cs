@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.Logging.Abstractions;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 using Visa2026.Module.Services.PersonLinkedDocuments;
 using Xunit;
 
@@ -106,6 +108,56 @@ public class VisaBesidePassportPreviewTests
         Assert.NotNull(latest);
         Assert.Equal(newer, latest!.FileDataId);
         Assert.Null(PersonDocumentCopyPdfMerger.LatestPassportScan(snapshot, "Visa.only"));
+    }
+
+    [Fact]
+    public void VisaIdForFile_UsesTheVisaGroupThatContainsTheScan()
+    {
+        var visaId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var fileId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        var snapshot = new ApplicationItemLinkedDocumentsSnapshot
+        {
+            Groups = new[]
+            {
+                new ApplicationItemLinkedDocumentGroup
+                {
+                    SlotKey = "Passport." + Guid.NewGuid().ToString("N"),
+                    SourceObjectType = typeof(Passport),
+                    SourceObjectId = Guid.NewGuid(),
+                    Files = new[]
+                    {
+                        new ApplicationItemLinkedDocumentFile
+                        {
+                            FileDataId = Guid.NewGuid(),
+                            HasContent = true
+                        }
+                    }
+                },
+                new ApplicationItemLinkedDocumentGroup
+                {
+                    SlotKey = "Visa." + visaId.ToString("N"),
+                    SourceObjectType = typeof(Visa),
+                    SourceObjectId = visaId,
+                    Files = new[]
+                    {
+                        new ApplicationItemLinkedDocumentFile
+                        {
+                            FileDataId = fileId,
+                            HasContent = true
+                        }
+                    }
+                }
+            }
+        };
+
+        Assert.Equal(
+            visaId,
+            ApplicationItemDocumentCopyPdfMerger.VisaIdForFile(snapshot, fileId, "Visa."));
+        Assert.Null(
+            ApplicationItemDocumentCopyPdfMerger.VisaIdForFile(snapshot, Guid.NewGuid(), "Visa."));
+        Assert.Equal(
+            visaId,
+            ApplicationItemDocumentCopyPdfMerger.VisaIdForFile(null, Guid.Empty, "Visa." + visaId.ToString("N")));
     }
 
     private static byte[] TinyBmp(int width, int height)

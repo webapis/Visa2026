@@ -88,6 +88,8 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         }
 
         var layout = printLayout ?? DocumentCopyPrintLayout.DefaultFor(slotKey);
+        bool composeVisaWithPassport = DocumentCopyPrintLayout.IsVisaKey(slotKey);
+        var passportBytesByVisa = new Dictionary<Guid, byte[]?>();
         var pdfStreams = new List<MemoryStream>();
         try
         {
@@ -95,6 +97,21 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
             {
                 if (!TryLoadFileContent(objectSpace, entry.File.FileDataId, out var fileContent, out var fileNameForExt))
                     continue;
+
+                if (composeVisaWithPassport
+                    && snapshots.TryGetValue(entry.ApplicationItemId, out var snapshot)
+                    && TryLoadLatestPassportForVisaFile(
+                        objectSpace,
+                        snapshot,
+                        entry.File.FileDataId,
+                        slotKey,
+                        passportBytesByVisa,
+                        out var passportBytes)
+                    && TryCreateVisaBesidePassportStream(passportBytes, fileContent, layout, out var paired))
+                {
+                    pdfStreams.Add(paired);
+                    continue;
+                }
 
                 if (!TryCreateMergeSlicePdfStream(fileContent, fileNameForExt, slotKey, layout, out var pdfStream))
                     continue;
@@ -190,6 +207,123 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
             return false;
 
         sources = loaded;
+        return true;
+    }
+
+    /// <summary>
+    /// Visa that owns this scan. A family preview uses slot key <c>Visa.</c>, so the id comes from
+    /// the person's visa group. A single-record preview can also be read from <c>Visa.{id}</c>.
+    /// </summary>
+    internal static Guid? VisaIdForFile(
+        ApplicationItemLinkedDocumentsSnapshot? snapshot,
+        Guid fileDataId,
+        string slotKey)
+    {
+        if (snapshot != null && fileDataId != Guid.Empty)
+        {
+            var group = snapshot.Groups.FirstOrDefault(candidate =>
+                candidate.SourceObjectId is Guid sourceId
+                && sourceId != Guid.Empty
+                && candidate.SourceObjectType == typeof(Visa)
+                && candidate.Files.Any(file => file.FileDataId == fileDataId));
+            if (group?.SourceObjectId is Guid id)
+                return id;
+        }
+
+        return TryParseSlotRecordId(slotKey, "Visa.", out Guid parsed) ? parsed : null;
+    }
+
+    internal static bool TryParseSlotRecordId(string slotKey, string prefix, out Guid id)
+    {
+        id = Guid.Empty;
+        if (string.IsNullOrWhiteSpace(slotKey)
+            || string.IsNullOrWhiteSpace(prefix)
+            || !slotKey.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string tail = slotKey.Substring(prefix.Length);
+        return Guid.TryParseExact(tail, "N", out id) || Guid.TryParse(tail, out id);
+    }
+
+    private bool TryLoadLatestPassportForVisaFile(
+        IObjectSpace objectSpace,
+        ApplicationItemLinkedDocumentsSnapshot snapshot,
+        Guid visaFileId,
+        string slotKey,
+        Dictionary<Guid, byte[]?> cache,
+        out byte[] passportBytes)
+    {
+        passportBytes = Array.Empty<byte>();
+        Guid? visaId = VisaIdForFile(snapshot, visaFileId, slotKey);
+        if (visaId is not Guid id || id == Guid.Empty)
+            return false;
+
+        if (cache.TryGetValue(id, out byte[]? cached))
+        {
+            if (cached == null || cached.Length == 0)
+                return false;
+
+            passportBytes = cached;
+            return true;
+        }
+
+        byte[]? loaded = LoadLatestPassportScan(objectSpace, id);
+        cache[id] = loaded;
+        if (loaded == null || loaded.Length == 0)
+            return false;
+
+        passportBytes = loaded;
+        return true;
+    }
+
+    /// <summary>
+    /// Latest PassportDocument on the passport that owns the visa. Those rows have no created date;
+    /// files are listed by id, and the last content file is the latest row.
+    /// </summary>
+    private byte[]? LoadLatestPassportScan(IObjectSpace objectSpace, Guid visaId)
+    {
+        Guid passportId = objectSpace.GetObjectsQuery<Visa>()
+            .Where(visa => visa.ID == visaId && visa.Passport != null)
+            .Select(visa => visa.Passport.ID)
+            .FirstOrDefault();
+        if (passportId == Guid.Empty)
+            return null;
+
+        ApplicationItemLinkedDocumentFile? latest = ApplicationItemLinkedDocumentsResolver
+            .LoadDocumentFiles<PassportDocument>(objectSpace, document => document.Passport.ID == passportId)
+            .LastOrDefault(file => file.HasContent && file.FileDataId != Guid.Empty);
+        if (latest == null)
+            return null;
+
+        return TryLoadFileContent(objectSpace, latest.FileDataId, out byte[] content, out _)
+            ? content
+            : null;
+    }
+
+    private bool TryCreateVisaBesidePassportStream(
+        byte[] passportBytes,
+        byte[] visaBytes,
+        DocumentCopyPrintLayout layout,
+        out MemoryStream pdfStream)
+    {
+        pdfStream = null!;
+        var outMs = new MemoryStream();
+        if (!SupportingDocumentsPdfSharpHelper.TryWriteVisaBesidePassport(
+                passportBytes,
+                visaBytes,
+                outMs,
+                logger,
+                layout)
+            || outMs.Length == 0)
+        {
+            outMs.Dispose();
+            return false;
+        }
+
+        outMs.Position = 0;
+        pdfStream = outMs;
         return true;
     }
 
