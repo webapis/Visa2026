@@ -10,8 +10,9 @@ using Visa2026.Module.Services.EmailDocumentCopies;
 namespace Visa2026.Blazor.Server.Mail;
 
 /// <summary>
-/// Sends document-copies email from one shared SMTP account. Settings come from
-/// <see cref="EmailSmtpSettings"/> (Configuration → Mail server); appsettings / env are a fallback.
+/// Sends document-copies email from one shared SMTP account. The Mail server screen
+/// (<see cref="EmailSmtpSettings"/>) is the saved configuration. appsettings is used only
+/// when that row does not exist yet.
 /// The officer is Reply-To and gets a Bcc copy.
 /// </summary>
 public sealed class SmtpOfficerMailSender : IOfficerMailSender
@@ -124,8 +125,11 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
         catch (AuthenticationException ex)
         {
             logger.LogWarning(ex, "SMTP authentication failed for {UserName} on {Host}.", settings.UserName, settings.Host);
+            var detail = IsOffice365Host(settings.Host)
+                ? " For Office 365 the mailbox needs Authenticated SMTP enabled and no MFA prompt. Use the full mailbox address as the user name."
+                : string.Empty;
             throw new OfficerMailException(
-                "The SMTP server rejected the username or password. For Office 365 the mailbox needs Authenticated SMTP enabled and no MFA prompt. Try the full mailbox address as the user name.",
+                "The SMTP server rejected the username or password." + detail,
                 inner: ex);
         }
         catch (SmtpCommandException ex)
@@ -149,24 +153,44 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
     {
         using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace<EmailSmtpSettings>();
         var db = EmailSmtpSettings.TryGetInstance(objectSpace);
-        var host = First(db?.Host, fileOptions.Host) ?? EmailSmtpSettings.DefaultHost;
-        var fromAddress = First(db?.FromAddress, fileOptions.FromAddress);
-        var userName = Office365UserName(First(db?.UserName, fileOptions.UserName), fromAddress);
-        var password = secretProtector.Unprotect(db?.ProtectedPassword) ?? fileOptions.Password;
+        if (db != null)
+            return FromDatabase(db);
+
+        var host = First(fileOptions.Host) ?? EmailSmtpSettings.DefaultHost;
+        var fromAddress = First(fileOptions.FromAddress);
         return new EffectiveSettings
         {
             Host = host,
-            Port = db is { Port: > 0 } ? db.Port : (fileOptions.Port > 0 ? fileOptions.Port : EmailSmtpSettings.DefaultPort),
-            Security = ResolveSecurity(db?.Security, fileOptions.Security),
-            UserName = userName,
-            Password = password,
+            Port = fileOptions.Port > 0 ? fileOptions.Port : EmailSmtpSettings.DefaultPort,
+            Security = ResolveSecurity(null, fileOptions.Security),
+            UserName = ResolveUserName(host, fileOptions.UserName, fromAddress),
+            Password = fileOptions.Password,
             FromAddress = fromAddress ?? string.Empty,
-            FromName = First(db?.FromName, fileOptions.FromName) ?? EmailSmtpSettings.DefaultFromName,
-            BccOfficer = db?.BccOfficer ?? fileOptions.BccOfficer,
-            MaxTotalAttachmentBytes = db is { MaxTotalAttachmentBytes: > 0 }
+            FromName = First(fileOptions.FromName) ?? EmailSmtpSettings.DefaultFromName,
+            BccOfficer = fileOptions.BccOfficer,
+            MaxTotalAttachmentBytes = fileOptions.MaxTotalAttachmentBytes,
+            TimeoutSeconds = fileOptions.TimeoutSeconds,
+        };
+    }
+
+    private EffectiveSettings FromDatabase(EmailSmtpSettings db)
+    {
+        var host = db.Host?.Trim() ?? string.Empty;
+        var fromAddress = db.FromAddress?.Trim() ?? string.Empty;
+        return new EffectiveSettings
+        {
+            Host = host,
+            Port = db.Port > 0 ? db.Port : EmailSmtpSettings.DefaultPort,
+            Security = ResolveSecurity(db.Security, null),
+            UserName = ResolveUserName(host, db.UserName, fromAddress),
+            Password = secretProtector.Unprotect(db.ProtectedPassword),
+            FromAddress = fromAddress,
+            FromName = string.IsNullOrWhiteSpace(db.FromName) ? EmailSmtpSettings.DefaultFromName : db.FromName.Trim(),
+            BccOfficer = db.BccOfficer,
+            MaxTotalAttachmentBytes = db.MaxTotalAttachmentBytes > 0
                 ? db.MaxTotalAttachmentBytes
-                : fileOptions.MaxTotalAttachmentBytes,
-            TimeoutSeconds = db is { TimeoutSeconds: > 0 } ? db.TimeoutSeconds : fileOptions.TimeoutSeconds,
+                : EmailSmtpSettings.DefaultMaxBytes,
+            TimeoutSeconds = db.TimeoutSeconds > 0 ? db.TimeoutSeconds : EmailSmtpSettings.DefaultTimeoutSeconds,
         };
     }
 
@@ -215,16 +239,29 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
         };
 
     /// <summary>
-    /// Office 365 SMTP AUTH expects a UPN (usually the mailbox). A short account such as G31207
-    /// is sent as-is by MailKit and Outlook answers 535 5.7.3.
+    /// Office 365 rewrites a short account to the mailbox address. The company relay expects the
+    /// short account exactly as entered, and an empty user name means connect with no login.
     /// </summary>
-    private static string? Office365UserName(string? userName, string? fromAddress)
+    private static string? ResolveUserName(string host, string? userName, string? fromAddress)
     {
+        if (!IsOffice365Host(host))
+            return string.IsNullOrWhiteSpace(userName) ? null : userName.Trim();
         if (!string.IsNullOrWhiteSpace(userName) && userName.Contains('@', StringComparison.Ordinal))
             return userName.Trim();
         if (!string.IsNullOrWhiteSpace(fromAddress) && fromAddress.Contains('@', StringComparison.Ordinal))
             return fromAddress.Trim();
         return string.IsNullOrWhiteSpace(userName) ? null : userName.Trim();
+    }
+
+    private static bool IsOffice365Host(string? host)
+    {
+        if (string.IsNullOrWhiteSpace(host))
+            return false;
+        var name = host.Trim();
+        return name.Equals("smtp.office365.com", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("smtp-mail.outlook.com", StringComparison.OrdinalIgnoreCase)
+            || name.EndsWith(".office365.com", StringComparison.OrdinalIgnoreCase)
+            || name.EndsWith(".outlook.com", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string? First(params string?[] values)

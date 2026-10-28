@@ -21,8 +21,8 @@ public enum SmtpMailSecurity
 }
 
 /// <summary>
-/// One shared SMTP account for emailed document copies. Edited under Configuration → Mail server.
-/// The password is stored encrypted; appsettings / <c>SmtpMail__Password</c> is only a fallback.
+/// One shared SMTP account for emailed document copies. Edited under Configuration → Mail server
+/// and stored in the database. The password is encrypted in <see cref="ProtectedPassword"/>.
 /// </summary>
 [DefaultClassOptions]
 [NavigationItem("Configuration")]
