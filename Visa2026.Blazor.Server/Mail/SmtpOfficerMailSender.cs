@@ -100,6 +100,11 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
         {
             return $"The mail server {settings.Host}:{settings.Port} did not respond within 20 seconds.";
         }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "SMTP test connection failed for {Host}:{Port}.", settings.Host, settings.Port);
+            return ex.Message;
+        }
     }
 
     private async Task ConnectAuthenticateAndRunAsync(
@@ -141,6 +146,13 @@ public sealed class SmtpOfficerMailSender : IOfficerMailSender
         {
             logger.LogWarning(ex, "SMTP protocol error on {Host}.", settings.Host);
             throw new OfficerMailException($"SMTP error: {ex.Message}", inner: ex);
+        }
+        catch (NotSupportedException ex)
+        {
+            logger.LogWarning(ex, "SMTP security mode is not supported on {Host}:{Port}.", settings.Host, settings.Port);
+            throw new OfficerMailException(
+                $"The mail server {settings.Host}:{settings.Port} does not support this security mode. For the company relay set Security to None.",
+                inner: ex);
         }
         catch (Exception ex) when (ex is IOException or System.Net.Sockets.SocketException or SslHandshakeException or TimeoutException)
         {

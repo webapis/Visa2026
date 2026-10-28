@@ -113,9 +113,12 @@ public sealed class EmailSmtpSettingsController : ObjectViewController<ObjectVie
                 Application.ShowViewStrategy.ShowMessage(error, InformationType.Error);
             }
         }
-        catch (OfficerMailException ex)
+        catch (Exception ex)
         {
-            Application.ShowViewStrategy.ShowMessage(ex.Message, InformationType.Error);
+            var error = ex is AggregateException aggregate ? aggregate.GetBaseException() : ex;
+            Application.ShowViewStrategy.ShowMessage(
+                error is OfficerMailException ? error.Message : $"Could not test the mail server: {error.Message}",
+                InformationType.Error);
         }
     }
 }
