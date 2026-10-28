@@ -49,7 +49,8 @@ public sealed class PersonDeleteDetachController : ObjectViewController<ObjectVi
 
     private void OnContextValidating(object sender, ContextValidatingEventArgs e)
     {
-        if (e.Context?.Id != DefaultContexts.Save && e.Context?.Id != DefaultContexts.Delete)
+        var contextId = e.Context.Id;
+        if (contextId != nameof(DefaultContexts.Save) && contextId != nameof(DefaultContexts.Delete))
             return;
 
         for (var i = e.TargetObjects.Count - 1; i >= 0; i--)
