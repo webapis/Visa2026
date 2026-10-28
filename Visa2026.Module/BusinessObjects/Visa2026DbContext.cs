@@ -1300,10 +1300,13 @@ namespace Visa2026.Module.BusinessObjects
                 .WithMany(childCollection)
                 .UsingEntity<Dictionary<string, object>>(
                     tableName,
+                    // ClientCascade drops join rows when the child is deleted. The database FK stays
+                    // ON DELETE RESTRICT (see ApplicationProfileInstanceChildSkipNavSchemaSql). Restrict
+                    // made EF null the required child FK and throw on visa/passport/… delete.
                     right => right.HasOne<TChild>()
                         .WithMany()
                         .HasForeignKey(childFk)
-                        .OnDelete(DeleteBehavior.Restrict),
+                        .OnDelete(DeleteBehavior.ClientCascade),
                     left => left.HasOne<ApplicationProfileInstance>()
                         .WithMany()
                         .HasForeignKey("ApplicationProfileInstanceId")

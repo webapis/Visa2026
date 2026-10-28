@@ -61,6 +61,14 @@ public class Visa2026DbContextModelTests
             var childJoin = context.Model.FindEntityType(joinName);
             Assert.NotNull(childJoin);
             Assert.DoesNotContain(childJoin!.GetProperties(), p => p.Name is "ID" or "LinkedAt");
+            var childFk = Assert.Single(
+                childJoin.GetForeignKeys(),
+                fk => fk.PrincipalEntityType.ClrType != typeof(ApplicationProfileInstance));
+            Assert.Equal(DeleteBehavior.ClientCascade, childFk.DeleteBehavior);
+            var instanceFk = Assert.Single(
+                childJoin.GetForeignKeys(),
+                fk => fk.PrincipalEntityType.ClrType == typeof(ApplicationProfileInstance));
+            Assert.Equal(DeleteBehavior.Cascade, instanceFk.DeleteBehavior);
         }
 
         foreach (var headerJoinName in new[]

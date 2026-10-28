@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
 using DevExpress.Persistent.BaseImpl.EF;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
@@ -134,6 +136,124 @@ public static class ApplicationProfileInstanceChildMembership
                 RemoveById(application.TravelHistories, linkedObjectId);
                 RemoveInverse(objectSpace?.GetObjectByKey<TravelHistory>(linkedObjectId)?.ApplicationProfileInstances, application);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Drops skip-nav join rows and sticky resolved links before a child record is deleted.
+    /// The join FK is required, so leaving the link in place makes EF refuse the delete.
+    /// </summary>
+    public static void DetachForDelete(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstancePersonLinkKind kind,
+        Guid linkedObjectId)
+    {
+        if (objectSpace == null || linkedObjectId == Guid.Empty)
+            return;
+        if (!TryJoin(kind, out var joinName, out var childFk))
+            return;
+
+        var applicationIds = new List<Guid>();
+        List<Dictionary<string, object>>? joinRows = null;
+        DbSet<Dictionary<string, object>>? joinSet = null;
+        Visa2026EFCoreDbContext? db = null;
+        if (objectSpace is EFCoreObjectSpace { DbContext: Visa2026EFCoreDbContext context })
+        {
+            db = context;
+            joinSet = db.Set<Dictionary<string, object>>(joinName);
+            joinRows = joinSet.Where(row => EF.Property<Guid>(row, childFk) == linkedObjectId).ToList();
+            applicationIds.AddRange(joinRows.Select(row => EF.Property<Guid>(row, "ApplicationProfileInstanceId")));
+        }
+
+        var links = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(link => link.LinkKind == kind && link.LinkedObjectId == linkedObjectId)
+            .ToList();
+        applicationIds.AddRange(links.Select(link => link.ApplicationProfileInstanceId));
+
+        foreach (var applicationId in applicationIds.Distinct())
+        {
+            if (applicationId == Guid.Empty)
+                continue;
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            if (application != null)
+                Remove(application, kind, linkedObjectId, objectSpace);
+        }
+
+        if (db != null && joinSet != null && joinRows != null)
+        {
+            foreach (var row in joinRows)
+            {
+                if (db.Entry(row).State != EntityState.Deleted)
+                    joinSet.Remove(row);
+            }
+        }
+
+        foreach (var link in links)
+        {
+            link.ApplicationProfileInstance?.PersonResolvedLinks?.Remove(link);
+            objectSpace.Delete(link);
+        }
+    }
+
+    private static bool TryJoin(
+        ApplicationProfileInstancePersonLinkKind kind,
+        out string joinName,
+        out string childFk)
+    {
+        switch (kind)
+        {
+            case ApplicationProfileInstancePersonLinkKind.Passport:
+                joinName = "ApplicationProfileInstancePassports";
+                childFk = "PassportId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.Visa:
+                joinName = "ApplicationProfileInstanceVisas";
+                childFk = "VisaId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.Education:
+                joinName = "ApplicationProfileInstanceEducations";
+                childFk = "EducationId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.AddressOfResidence:
+                joinName = "ApplicationProfileInstanceAddressesOfResidence";
+                childFk = "AddressOfResidenceId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.Position:
+                joinName = "ApplicationProfileInstanceEmployeePositionHistories";
+                childFk = "EmployeePositionHistoryId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.Salary:
+                joinName = "ApplicationProfileInstanceEmployeeSalaries";
+                childFk = "EmployeeSalaryId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.MedicalRecord:
+                joinName = "ApplicationProfileInstanceMedicalRecords";
+                childFk = "MedicalRecordId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.WorkDuty:
+                joinName = "ApplicationProfileInstanceWorkDuties";
+                childFk = "WorkDutyId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.InvitationItem:
+                joinName = "ApplicationProfileInstanceInvitationItems";
+                childFk = "InvitationItemId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.WorkPermitItem:
+                joinName = "ApplicationProfileInstanceWorkPermitItems";
+                childFk = "WorkPermitItemId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.BorderZoneItem:
+                joinName = "ApplicationProfileInstanceBorderZoneItems";
+                childFk = "BorderZoneItemId";
+                return true;
+            case ApplicationProfileInstancePersonLinkKind.TravelHistory:
+                joinName = "ApplicationProfileInstanceTravelHistories";
+                childFk = "TravelHistoryId";
+                return true;
+            default:
+                joinName = string.Empty;
+                childFk = string.Empty;
+                return false;
         }
     }
 
