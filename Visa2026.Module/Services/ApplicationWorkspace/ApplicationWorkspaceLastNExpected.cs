@@ -68,7 +68,8 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
 
     public static ApplicationWorkspaceLinkableActiveCounts Load(
         IObjectSpace? objectSpace,
-        IReadOnlyList<Person> people)
+        IReadOnlyList<Person> people,
+        bool includeNotYetStartedVisas = false)
     {
         var result = new ApplicationWorkspaceLinkableActiveCounts();
         if (objectSpace == null || people == null || people.Count == 0)
@@ -86,7 +87,7 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
                         .Where(v => v.Passport != null
                             && v.Passport.Person != null
                             && ids.Contains(v.Passport.Person.ID))))
-            .Where(v => v.StartDate != default && v.StartDate <= asOf)
+            .Where(v => v.StartDate != default && (includeNotYetStartedVisas || v.StartDate <= asOf))
             .Select(v => new { PersonId = v.Passport.Person.ID, v.ExpirationDate })
             .ToList();
         foreach (var row in visaPersonIds)

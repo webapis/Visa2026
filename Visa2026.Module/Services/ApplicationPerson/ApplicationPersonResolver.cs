@@ -470,7 +470,8 @@ public static class ApplicationProfileInstancePersonResolver
                 objectSpace,
                 person,
                 ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa),
-                includeExpired: ApplicationProfileInstancePersonValidItems.LinksLastIssuedVisaIncludingExpired(application)));
+                includeExpired: ApplicationProfileInstancePersonValidItems.LinksLastIssuedVisaIncludingExpired(application),
+                includeNotYetStarted: application?.ApplicationProfile?.CancelVisas == true));
         rows.Add((ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)));
         if (person.IsEmployee)

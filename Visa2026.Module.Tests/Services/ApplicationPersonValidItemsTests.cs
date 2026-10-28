@@ -286,6 +286,48 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
+    public void ResolveVisas_NotYetStarted_IncludedOnlyWhenRequested()
+    {
+        var person = new Person();
+        var passport = new Passport { Person = person };
+        person.Passports.Add(passport);
+        var current = CreateVisa(Today.AddMonths(-4), Today.AddMonths(1));
+        current.ID = Guid.Parse("22222222-2222-2222-2222-222222222221");
+        current.VisaNumber = "A1675723";
+        passport.Visas.Add(current);
+        var next = CreateVisa(Today.AddDays(20), Today.AddMonths(8));
+        next.ID = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        next.VisaNumber = "A1734741";
+        passport.Visas.Add(next);
+
+        var startedOnly = ApplicationProfileInstancePersonValidItems.ResolveVisas(person, 2);
+        Assert.Single(startedOnly);
+        Assert.Same(current, startedOnly[0]);
+
+        var forCancellation = ApplicationProfileInstancePersonValidItems.ResolveVisas(
+            person, 2, includeNotYetStarted: true);
+        Assert.Equal(2, forCancellation.Count);
+        Assert.Contains(forCancellation, v => v.VisaNumber == "A1734741");
+        Assert.Contains(forCancellation, v => v.VisaNumber == "A1675723");
+    }
+
+    [Fact]
+    public void CanAutoLink_CancelVisas_AllowsIssuedVisaThatHasNotStarted()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { CancelVisas = true },
+        };
+        var next = CreateVisa(Today.AddDays(20), Today.AddMonths(8));
+
+        Assert.False(ApplicationProfileInstancePersonValidItems.CanLinkVisa(next));
+        Assert.True(ApplicationProfileInstancePersonValidItems.CanAutoLink(
+            application,
+            ApplicationProfileInstancePersonLinkKind.Visa,
+            next));
+    }
+
+    [Fact]
     public void UnionDistinctById_IncludesVisaMissingFromPersonGraph()
     {
         var current = CreateVisa(Today.AddMonths(-2), Today.AddMonths(6));

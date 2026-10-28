@@ -70,7 +70,10 @@ internal static class ApplicationWorkspaceCaseBuilder
         var tabMap = tabs.ToDictionary(t => t.Key, StringComparer.OrdinalIgnoreCase);
         var rosterPeople = application?.People?.OrderBy(p => p.LastName).ThenBy(p => p.FirstName).ToList() ?? [];
         var rosterLinks = application?.PersonResolvedLinks?.ToList() ?? [];
-        var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(objectSpace, rosterPeople);
+        var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(
+            objectSpace,
+            rosterPeople,
+            includeNotYetStartedVisas: application?.ApplicationProfile?.CancelVisas == true);
         var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
         if (application != null)
             ApplySeretmezlikExclusions(people, application, objectSpace);

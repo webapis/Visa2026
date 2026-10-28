@@ -1,3 +1,11 @@
+### 2026-10-28 — Visa cancellation also links the next issued visa
+
+- **Need**: A cancellation case linked only the visa that had already started. An issued visa whose start date is still in the future stayed off, so Necati Alper Özyeter's case 9/-1863 kept A1675723 and left A1734741 (start 29.11.2026) off. The cap stays two.
+- **Fix**: When the profile has CancelVisas, `CanLinkVisa` / `ResolveVisas` accept a visa that is issued, not cancelled, not changed, and not expired, even if `StartDate` is after today. Last-N is still 2. Other profiles still require the visa to have started. A locked issued case does not Relink until it is unlocked.
+- **Officer**: Rebuild and hard-refresh. A new visa-cancellation case links the visa in force and the next issued visa that has not started, at most two. Case 9/-1863 stays as it is until Relink is allowed.
+- **Prevent**: Do not raise Last-N above 2 to pick up a future start. Do not treat a future start as linkable on issuance profiles.
+- **Cross-skill**: —
+
 ### 2026-10-27 — Create wizard advances on approval-leg click
 
 - **Need**: Choosing an approval leg still required Continue, and Choose Organization was an extra step that rarely changes.

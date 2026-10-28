@@ -201,7 +201,8 @@ public static class ReportDashboardPostgresViewsHealSql
                 && ColumnExists(connection, viewName, "PassportNumber")
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_visa_aktiv_personeller"
-                    || ColumnExists(connection, viewName, "VisaStartDate"))
+                    || (ColumnExists(connection, viewName, "VisaStartDate")
+                        && ViewDefinitionContains(connection, viewName, "RegistrationKind")))
                 && (viewName != "vw_rd_visa_uzatilanlar"
                     || ColumnExists(connection, viewName, "SecondLastApprovalDate")))
                 continue;

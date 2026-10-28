@@ -4,6 +4,18 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-28 — aktiv personeller hides cancelled and checked-out visas
+
+**Ask:** A visa still before its expiration date must leave aktiv personeller when an Application Profile instance has cancelled it or checked it out.
+
+**Now:** `vw_rd_visa_aktiv_personeller` drops a visa linked on `ApplicationProfileInstanceVisas` to ActionFamily Cancellation, or to Registration + CheckOut (`check_out` and `check_out_internal`). The link is enough; `LatestPrimaryStateCode` may be blank. The latest remaining visa per person stays. Prod employees not archived: 353 → 335 (14 cancellation links with a blank state, 4 check-out at PROCESS_ISSUED). Heal recreates the view until the definition contains `RegistrationKind`.
+
+**Prevent:** Do not wait for PROCESS_ISSUED on these links. Do not apply this exclusion to Active Visa (P)/(V); it belongs on aktiv personeller only.
+
+**Files:** `vw_rd_visa_aktiv_personeller.postgres.sql`, `ReportDashboardPostgresViewsHealSql.cs`
+
+---
+
 ## 2026-10-23 — Excel bundle drag order (shared)
 
 **Ask:** Officers reorder reports in "Reports in this file" by drag. Flat list, sheet order = list order. Shared for everyone. Persist on every drag. Unchecked stay in order. New catalog reports append at end.

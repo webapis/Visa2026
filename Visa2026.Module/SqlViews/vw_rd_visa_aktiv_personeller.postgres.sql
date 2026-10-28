@@ -2,8 +2,42 @@
 -- One row per person on Active Visa (latest current visa).
 -- PROJECT is the department. Firması is the subcontractor.
 -- A missing current work permit leaves the permit end empty.
+-- A visa linked to a cancellation instance (ActionFamily Cancellation)
+-- or a check-out instance (Registration + CheckOut, including check_out_internal)
+-- is closed even when ExpirationDate is still in the future. The link is enough;
+-- LatestPrimaryStateCode may still be blank. Then keep the latest remaining visa.
 DROP VIEW IF EXISTS vw_rd_visa_aktiv_personeller;
 CREATE VIEW vw_rd_visa_aktiv_personeller AS
+WITH open_visas AS (
+    SELECT src.*
+    FROM vw_rd_visa_active_by_project src
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM "ApplicationProfileInstanceVisas" j
+        INNER JOIN "ApplicationProfileInstances" api
+            ON api."ID" = j."ApplicationProfileInstanceId"
+           AND COALESCE(api."GCRecord", 0) = 0
+        INNER JOIN "ApplicationProfiles" ap
+            ON ap."ID" = api."ApplicationProfileID"
+           AND COALESCE(ap."GCRecord", 0) = 0
+        WHERE j."VisaId" = src."ID"
+          AND (
+              ap."ActionFamily" = 1
+              OR (
+                  ap."ActionFamily" = 2
+                  AND COALESCE(ap."RegistrationKind", 0) = 2
+              )
+          )
+    )
+),
+open_ranked AS (
+    SELECT ov.*,
+           ROW_NUMBER() OVER (
+               PARTITION BY ov."PersonOid"
+               ORDER BY ov."ExpirationDate" DESC NULLS LAST, ov."ID" DESC
+           ) AS aktiv_rn
+    FROM open_visas ov
+)
 SELECT
     a."ID"                                                                  AS "ID",
     a."PersonOid"                                                           AS "PersonOid",
@@ -50,7 +84,7 @@ SELECT
     COALESCE(NULLIF(BTRIM(a."StatusLabel"), ''), '(No project)')            AS "StatusLabel",
     'st-cat-1'                                                              AS "StatusCssClass",
     a."IsArchived"                                                          AS "IsArchived"
-FROM vw_rd_visa_active_by_project a
+FROM open_ranked a
 INNER JOIN "People" p
     ON p."ID" = a."PersonOid" AND COALESCE(p."GCRecord", 0) = 0
 LEFT JOIN "Visas" vsrc
@@ -144,4 +178,4 @@ LEFT JOIN "Regions" reg
     ON reg."ID" = addr."RegionID" AND COALESCE(reg."GCRecord", 0) = 0
 LEFT JOIN "Cities" city
     ON city."ID" = addr."CityID" AND COALESCE(city."GCRecord", 0) = 0
-WHERE a."IsOneLastValidPerPerson";
+WHERE a.aktiv_rn = 1;
