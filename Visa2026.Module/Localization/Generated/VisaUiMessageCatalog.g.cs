@@ -2756,6 +2756,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Taýýarlaryň hemmesini goş",
             ["ru-RU"] = "Добавить всех готовых",
         },
+        ["ApplicationProfileInstance.Issued.AddQuotaFull"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All people already have {0}",
+            ["tr-TR"] = "Tüm kişiler için {0} zaten var",
+            ["tk-TM"] = "Ähli adamlar üçin {0} eýýäm bar",
+            ["ru-RU"] = "У всех лиц уже есть {0}",
+        },
         ["ApplicationProfileInstance.Issued.AddPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Add",
@@ -2986,6 +2993,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu davetteki kişiler",
             ["tk-TM"] = "Bu çakylykdaky adamlar",
             ["ru-RU"] = "Люди в этом приглашении",
+        },
+        ["ApplicationProfileInstance.Issued.PersonCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "People",
+            ["tr-TR"] = "Kişiler",
+            ["tk-TM"] = "Adamlar",
+            ["ru-RU"] = "Люди",
+        },
+        ["ApplicationProfileInstance.Issued.CopyAvailable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copy",
+            ["tr-TR"] = "Kopya",
+            ["tk-TM"] = "Göçürme",
+            ["ru-RU"] = "Копия",
         },
         ["ApplicationProfileInstance.Issued.PeopleOn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

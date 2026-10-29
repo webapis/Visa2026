@@ -1,0 +1,90 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.Blazor
+@using Visa2026.Module.Localization
+
+<DxPopup Visible="@Visible"
+         VisibleChanged="OnVisibleChangedAsync"
+         HeaderText="@ResolvedTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(24rem, 90vw)"
+         CssClass="officer-delete-confirm-popup">
+    <BodyContentTemplate>
+        <p class="cs-multi-select-popup__confirm-text">@Message</p>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@ResolvedDeleteText"
+                      RenderStyle="ButtonRenderStyle.Danger"
+                      Click="@OnConfirmAsync" />
+            <DxButton Text="@ResolvedCancelText" Click="@OnCancelAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    private bool _confirming;
+
+    [Parameter] public bool Visible { get; set; }
+
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+
+    [Parameter] public string Title { get; set; } = string.Empty;
+
+    [Parameter] public string Message { get; set; } = string.Empty;
+
+    [Parameter] public string DeleteText { get; set; } = string.Empty;
+
+    [Parameter] public string CancelText { get; set; } = string.Empty;
+
+    [Parameter] public EventCallback Confirmed { get; set; }
+
+    [Parameter] public EventCallback Cancelled { get; set; }
+
+    private string ResolvedTitle =>
+        string.IsNullOrWhiteSpace(Title)
+            ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Delete")
+            : Title;
+
+    private string ResolvedDeleteText =>
+        string.IsNullOrWhiteSpace(DeleteText)
+            ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Delete")
+            : DeleteText;
+
+    private string ResolvedCancelText =>
+        string.IsNullOrWhiteSpace(CancelText)
+            ? VisaUiMessages.Get("ApplicationProfileInstance.Issued.Cancel")
+            : CancelText;
+
+    private async Task OnVisibleChangedAsync(bool visible)
+    {
+        if (VisibleChanged.HasDelegate)
+            await VisibleChanged.InvokeAsync(visible);
+
+        if (!visible && !_confirming && Cancelled.HasDelegate)
+            await Cancelled.InvokeAsync();
+    }
+
+    private async Task OnConfirmAsync()
+    {
+        _confirming = true;
+        try
+        {
+            if (VisibleChanged.HasDelegate)
+                await VisibleChanged.InvokeAsync(false);
+            if (Confirmed.HasDelegate)
+                await Confirmed.InvokeAsync();
+        }
+        finally
+        {
+            _confirming = false;
+        }
+    }
+
+    private async Task OnCancelAsync()
+    {
+        // Cancelled is raised from OnVisibleChangedAsync(false).
+        if (VisibleChanged.HasDelegate)
+            await VisibleChanged.InvokeAsync(false);
+    }
+}

@@ -26,6 +26,22 @@ public class ApplicationWorkspaceIssuedResultOverviewTests
     }
 
     [Fact]
+    public void CanCreateMore_blocks_required_at_expected_keeps_optional_open()
+    {
+        Assert.False(ApplicationWorkspaceIssuedResultOverview.CanCreateMore(null));
+        Assert.True(ApplicationWorkspaceIssuedResultOverview.CanCreateMore(
+            new() { CoverageCount = 0, ExpectedCount = 3, IsOptional = false }));
+        Assert.True(ApplicationWorkspaceIssuedResultOverview.CanCreateMore(
+            new() { CoverageCount = 2, ExpectedCount = 3, IsOptional = false }));
+        Assert.False(ApplicationWorkspaceIssuedResultOverview.CanCreateMore(
+            new() { CoverageCount = 3, ExpectedCount = 3, IsOptional = false }));
+        Assert.False(ApplicationWorkspaceIssuedResultOverview.CanCreateMore(
+            new() { CoverageCount = 0, ExpectedCount = 0, IsOptional = false }));
+        Assert.True(ApplicationWorkspaceIssuedResultOverview.CanCreateMore(
+            new() { CoverageCount = 99, ExpectedCount = 0, IsOptional = true }));
+    }
+
+    [Fact]
     public void Sum_uses_coverage_and_skips_optional_rejection()
     {
         var tiles = new List<ApplicationWorkspaceCaseIssuedTile>

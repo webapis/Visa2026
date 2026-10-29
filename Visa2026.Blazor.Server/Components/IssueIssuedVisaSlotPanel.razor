@@ -42,68 +42,6 @@
             {
                 <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Loading")</p>
             }
-            else if (_result?.Succeeded == true)
-            {
-                <p class="issue-issued-visa-slot__banner issue-issued-visa-slot__banner--success">
-                    @CreatedBannerText
-                </p>
-                @foreach (var group in CreatedGroups)
-                {
-                    <section class="issue-issued-visa-slot__group">
-                        <h3 class="issue-issued-visa-slot__group-title">@CreatedGroupTitle(group.Key)</h3>
-                        @foreach (var row in group)
-                        {
-                            <article class="issue-issued-visa-slot__card">
-                                <div class="issue-issued-visa-slot__card-head">
-                                    <span class="issue-issued-visa-slot__avatar">@Initials(row.PersonName)</span>
-                                    <span class="issue-issued-visa-slot__person">@row.PersonName</span>
-                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued")</span>
-                                </div>
-                                <dl class="issue-issued-visa-slot__readonly-grid">
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</dt>
-                                        <dd>@row.VisaNumber</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Field("VisaType")</dt>
-                                        <dd>@row.VisaTypeCaption</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Field("Category")</dt>
-                                        <dd>@row.VisaCategoryCaption</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Field("Period")</dt>
-                                        <dd>@row.VisaPeriodCaption</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued")</dt>
-                                        <dd>@row.IssueDate.ToString("dd MMM yyyy")</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Field("EndDate")</dt>
-                                        <dd>@(row.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</dt>
-                                        <dd>@row.PassportNumber</dd>
-                                    </div>
-                                    <div>
-                                        <dt>@ApplicationProfileLocalization.Field("BorderZone")</dt>
-                                        <dd>@(string.IsNullOrWhiteSpace(row.BorderZoneCaption) ? "Ýok" : row.BorderZoneCaption)</dd>
-                                    </div>
-                                </dl>
-                            </article>
-                        }
-                    </section>
-                }
-                <div class="issue-issued-visa-slot__actions">
-                    <button type="button" class="issue-issued-header-slot__btn" @onclick="ClosePanelAsync">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")</button>
-                    <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" @onclick="OpenCreatedInApp">
-                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.OpenInApp")
-                    </button>
-                </div>
-            }
             else
             {
                 @if (!_draft.IsEditMode)
@@ -407,7 +345,6 @@
     [Inject] private IApplicationWorkspacePersonUiActions? WorkspaceActions { get; set; }
 
     private IssueIssuedVisaComposeDraft? _draft;
-    private IssueIssuedVisaCreateResult? _result;
     private string? _loadError;
     private string? _actionError;
     private string? _saveMessage;
@@ -422,30 +359,10 @@
         _draft?.IsEditMode == true
             ? ApplicationProfileLocalization.IssuedComposeTitle(
                 string.IsNullOrWhiteSpace(_draft.Title) ? "Issued visa" : _draft.Title)
-            : _result?.Succeeded == true
-                ? ApplicationProfileLocalization.IssuedComposeTitle("Issued visas")
-                : ApplicationProfileLocalization.IssuedComposeTitle("New issued visa");
+            : ApplicationProfileLocalization.IssuedComposeTitle("New issued visa");
 
     private string ProfileSuffix =>
         string.IsNullOrWhiteSpace(_draft?.ProfileCode) ? string.Empty : $" · {_draft.ProfileCode}";
-
-    private string CreatedBannerText
-    {
-        get
-        {
-            var count = _result?.Rows.Count ?? 0;
-            if (_draft?.UsesInvitationSource == true)
-            {
-                return count == 1
-                    ? "1 visa created — one per person with an issued invitation."
-                    : $"{count} visas created — one per person with an issued invitation.";
-            }
-
-            return count == 1
-                ? "1 visa created — one per person on this case."
-                : $"{count} visas created — one per person on this case.";
-        }
-    }
 
     private string UnusedWarningText
     {
@@ -460,22 +377,6 @@
             return "Cannot create visas — every person on this case already has an issued visa.";
         }
     }
-
-    private IEnumerable<IGrouping<string, IssueIssuedVisaCreatedRow>> CreatedGroups =>
-        (_result?.Rows ?? Array.Empty<IssueIssuedVisaCreatedRow>())
-            .GroupBy(r => CreatedGroupKey(r));
-
-    private string CreatedGroupKey(IssueIssuedVisaCreatedRow row)
-    {
-        if (_draft?.UsesInvitationSource != true)
-            return ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleOnCase");
-        return string.IsNullOrWhiteSpace(row.InvitationNumber) ? "—" : row.InvitationNumber;
-    }
-
-    private string CreatedGroupTitle(string key) =>
-        _draft?.UsesInvitationSource == true
-            ? $"{ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation")} {key}"
-            : key;
 
     private bool CanCreate =>
         _draft != null
@@ -501,7 +402,6 @@
         if (Request == null)
         {
             _draft = null;
-            _result = null;
             _loadError = "Compose request is missing.";
             _boundOccupantKey = null;
             _pristineFingerprint = null;
@@ -513,7 +413,6 @@
             return;
 
         _boundOccupantKey = occupantKey;
-        _result = null;
         _actionError = null;
         _saveMessage = null;
         LoadDraft();
@@ -523,7 +422,6 @@
     {
         _loadError = null;
         _draft = null;
-        _result = null;
         if (Request == null || Request.ApplicationProfileInstanceId == Guid.Empty)
         {
             _loadError = "Application is not available.";
@@ -805,23 +703,21 @@
         try
         {
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-            _result = IssueIssuedVisaComposeService.Create(objectSpace, _draft);
-            if (_result.Succeeded)
+            var result = IssueIssuedVisaComposeService.Create(objectSpace, _draft);
+            if (result.Succeeded)
             {
                 WorkspaceActions?.NotifyWorkspaceChanged();
+                _busy = false;
+                await ClosePanelAsync();
+                return;
             }
-            else
-            {
-                _actionError = _result.ErrorMessage ?? "Cannot create visas.";
-                _result = null;
-            }
+
+            _actionError = result.ErrorMessage ?? "Cannot create visas.";
         }
         finally
         {
             _busy = false;
         }
-
-        await Task.CompletedTask;
     }
 
     private async Task SaveAsync()
@@ -853,24 +749,6 @@
         }
 
         await Task.CompletedTask;
-    }
-
-    private async Task OpenCreatedInApp()
-    {
-        var first = _result?.Rows.FirstOrDefault();
-        if (first == null || Request == null || first.VisaId == Guid.Empty)
-        {
-            await ClosePanelAsync();
-            return;
-        }
-
-        await SlotService.OpenIssueIssuedVisaAsync(
-            new IssueIssuedVisaSlotRequest
-            {
-                ApplicationProfileInstanceId = Request.ApplicationProfileInstanceId,
-                ExistingVisaId = first.VisaId,
-            },
-            SlotService.State.OwnerViewId);
     }
 
     private Task ClosePanelAsync() => CloseRequested.InvokeAsync();

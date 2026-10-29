@@ -492,7 +492,23 @@ function bindEvents() {
   document.querySelectorAll('[data-ws-tab]').forEach(btn => {
     btn.addEventListener('click', () => navigate(`#/case/${route.id}/${btn.dataset.wsTab}`));
   });
-  document.querySelectorAll('[data-issued-key]').forEach(btn => {
+  document.querySelectorAll('[data-issued-select]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.issuedSelect;
+      issuedFocusKey = issuedFocusKey === key ? null : key;
+      setRoute(parseRoute());
+    });
+  });
+  document.querySelectorAll('[data-issued-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled)
+        return;
+      const key = btn.dataset.issuedAdd;
+      issuedFocusKey = key;
+      setRoute(parseRoute());
+    });
+  });
+  document.querySelectorAll('[data-issued-key].cw-rail-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.issuedKey;
       issuedFocusKey = issuedFocusKey === key ? null : key;

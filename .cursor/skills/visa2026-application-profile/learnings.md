@@ -1,3 +1,24 @@
+### 2026-10-29 — Officer delete uses DxPopup confirm
+
+- **Need**: Application result Delete for Invitation (and other issued headers / visa) used the browser `confirm` dialog.
+- **Fix**: Shared `OfficerDeleteConfirmDialog` (DxPopup, Cancel + danger Delete) for case-workspace list deletes and compose-slot Delete. Message stays `ConfirmDelete` localized. XAF native deletes unchanged.
+- **Officer**: Rebuild, hard-refresh. Delete an invitation from Application result — styled popup, not the browser box.
+- **Prevent**: Do not add new `JS.confirm` / `window.confirm` for officer-shell issued deletes.
+- **Cross-skill**: —
+### 2026-10-29 — Application result header rows + no post-create summary
+
+- **Need**: After create, the Saved / Edit header / Done summary was an extra click. The Invitation (and WP / Rejection / Border zone) list showed person lines, not the letter header.
+- **Fix**: Successful create closes the preview slot (edit of an existing header still opens the form). Issued lists for Invitation / Work permit / Rejection / Border zone are one row per header with number/dates (+ invitation category/period), person count, and copy Yes/None. Preview still opens the header copy. Issued visa stays one row per visa/person.
+- **Officer**: Rebuild, hard-refresh. Create invitation → slot closes; list shows one invitation row. Preview is enabled when a copy exists.
+- **Prevent**: Do not expand issued header tiles to InvitationItem/person rows. Do not show the post-create success summary again.
+- **Cross-skill**: —
+### 2026-10-29 — Application result one-click Add
+
+- **Need**: Creating Invitation / Work permit / Rejection / Border zone / Issued visa required tile click then bottom **New**. Officers wanted one create click and quota disable.
+- **Fix**: Tile body only selects the list. **+ Add …** stays on every tile and creates immediately. Required types disable when `CoverageCount >= ExpectedCount` (same as Result overview). Rejection stays always enabled. Bottom **New** removed. `CanCreateMore` on `ApplicationWorkspaceIssuedResultOverview`.
+- **Officer**: Stop F5 if running, rebuild, hard-refresh. Application result: click **+ Add** once to create; click the rest of the card to open the list. When coverage is full (e.g. 3/3), **+ Add** is disabled.
+- **Prevent**: Do not put create only on the bottom panel. Do not swap **+ Add** for **Open** when count > 0. Do not cap Rejection.
+- **Cross-skill**: —
 ### 2026-10-28 — Visa cancellation also links the next issued visa
 
 - **Need**: A cancellation case linked only the visa that had already started. An issued visa whose start date is still in the future stayed off, so Necati Alper Özyeter's case 9/-1863 kept A1675723 and left A1734741 (start 29.11.2026) off. The cap stays two.

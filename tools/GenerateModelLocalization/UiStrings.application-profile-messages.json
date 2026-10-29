@@ -3263,6 +3263,18 @@
     "tk-TM": "{0} (döredilende goşular)",
     "ru-RU": "{0} (прикрепится при создании)"
   },
+  "ApplicationProfileInstance.Issued.PersonCount": {
+    "en-US": "People",
+    "tr-TR": "Kişiler",
+    "tk-TM": "Adamlar",
+    "ru-RU": "Люди"
+  },
+  "ApplicationProfileInstance.Issued.CopyAvailable": {
+    "en-US": "Copy",
+    "tr-TR": "Kopya",
+    "tk-TM": "Göçürme",
+    "ru-RU": "Копия"
+  },
   "ApplicationProfileInstance.Issued.PeopleOn": {
     "en-US": "People on this {0}",
     "tr-TR": "Bu {0} üzerindeki kişiler",
@@ -3448,6 +3460,12 @@
     "tr-TR": "Hazır olanların tümünü ekle",
     "tk-TM": "Taýýarlaryň hemmesini goş",
     "ru-RU": "Добавить всех готовых"
+  },
+  "ApplicationProfileInstance.Issued.AddQuotaFull": {
+    "en-US": "All people already have {0}",
+    "tr-TR": "Tüm kişiler için {0} zaten var",
+    "tk-TM": "Ähli adamlar üçin {0} eýýäm bar",
+    "ru-RU": "У всех лиц уже есть {0}"
   },
   "ApplicationProfileInstance.Issued.None": {
     "en-US": "None",

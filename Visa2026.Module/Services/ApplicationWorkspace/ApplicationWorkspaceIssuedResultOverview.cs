@@ -26,6 +26,20 @@ public static class ApplicationWorkspaceIssuedResultOverview
     public static int Missing(ApplicationWorkspaceCaseIssuedTile tile) =>
         tile == null ? 0 : Missing(tile.CoverageCount, tile.ExpectedCount, tile.IsOptional);
 
+    /// <summary>
+    /// Whether the officer may create another header of this type.
+    /// Required types: blocked once coverage reaches the Result overview expected count.
+    /// Optional types (rejection): always allowed.
+    /// </summary>
+    public static bool CanCreateMore(ApplicationWorkspaceCaseIssuedTile? tile)
+    {
+        if (tile == null)
+            return false;
+        if (tile.IsOptional)
+            return true;
+        return tile.CoverageCount < tile.ExpectedCount;
+    }
+
     public static int Percent(int issued, int expected) =>
         expected <= 0 ? 0 : Math.Clamp((int)Math.Round(100.0 * issued / expected), 0, 100);
 

@@ -395,6 +395,11 @@
             }
         </div>
     }
+
+    <OfficerDeleteConfirmDialog @bind-Visible="_issuedDeleteConfirmVisible"
+                                Message="@_issuedDeleteConfirmMessage"
+                                Confirmed="ConfirmPendingIssuedDeleteAsync"
+                                Cancelled="CancelPendingIssuedDelete" />
 </div>
 
 @code {
@@ -1232,6 +1237,11 @@
 
     private string? _selectedIssuedKey;
     private string? _issuedDeleteError;
+    private bool _issuedDeleteConfirmVisible;
+    private string _issuedDeleteConfirmMessage = string.Empty;
+    private string? _pendingIssuedDeleteCatalogKey;
+    private Guid _pendingIssuedDeleteId;
+    private bool _pendingIssuedDeleteIsVisa;
 
     private static string IssuedEmptyHint(ApplicationWorkspaceCaseView view, ApplicationWorkspaceCaseIssuedTile tile) =>
         ApplicationProfileLocalization.IssuedEmptyHint(tile.Label, view.Chrome.DisplayNumber);
@@ -1247,12 +1257,27 @@
             : key;
     }
 
+    private async Task AddIssuedHeaderAsync(ApplicationWorkspaceCaseIssuedTile tile)
+    {
+        if (tile == null || !ApplicationWorkspaceIssuedResultOverview.CanCreateMore(tile))
+            return;
+
+        _issuedDeleteError = null;
+        _selectedIssuedKey = tile.Key;
+        await NewIssuedHeaderAsync(tile.Key);
+    }
+
     private async Task NewIssuedHeaderAsync(string key)
     {
         if (TryBlockIncompleteProcessWork())
             return;
 
         if (Snapshot == null || Snapshot.ApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        var tile = Snapshot.CaseView?.IssuedRecordTiles?.FirstOrDefault(t =>
+            string.Equals(t.Key, key, StringComparison.OrdinalIgnoreCase));
+        if (tile != null && !ApplicationWorkspaceIssuedResultOverview.CanCreateMore(tile))
             return;
 
         if (IssueIssuedHeaderComposeService.TryResolveKind(key, out _))
@@ -1414,36 +1439,80 @@
         }
     }
 
-    private async Task DeleteIssuedHeaderAsync(string catalogKey, Guid headerId, string caption)
+    private Task DeleteIssuedHeaderAsync(string catalogKey, Guid headerId, string caption)
     {
         _issuedDeleteError = null;
         if (Snapshot == null || headerId == Guid.Empty)
-            return;
+            return Task.CompletedTask;
+
         if (string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase))
         {
-            await DeleteIssuedVisaAsync(headerId, caption);
-            return;
+            var visaNoun = Msg("ApplicationProfile.Doc.Visa");
+            var visaLabel = string.IsNullOrWhiteSpace(caption) ? visaNoun : $"{visaNoun} {caption.Trim()}";
+            _pendingIssuedDeleteCatalogKey = catalogKey;
+            _pendingIssuedDeleteId = headerId;
+            _pendingIssuedDeleteIsVisa = true;
+            _issuedDeleteConfirmMessage = VisaUiMessages.Format(
+                "ApplicationProfileInstance.Workspace.ConfirmDelete",
+                visaLabel);
+            _issuedDeleteConfirmVisible = true;
+            return Task.CompletedTask;
         }
+
         if (!IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out var kind))
+            return Task.CompletedTask;
+
+        var noun = IssuedHeaderNounLocalized(kind);
+        var label = string.IsNullOrWhiteSpace(caption) ? noun : $"{noun} {caption.Trim()}";
+        _pendingIssuedDeleteCatalogKey = catalogKey;
+        _pendingIssuedDeleteId = headerId;
+        _pendingIssuedDeleteIsVisa = false;
+        _issuedDeleteConfirmMessage = VisaUiMessages.Format(
+            "ApplicationProfileInstance.Workspace.ConfirmDelete",
+            label);
+        _issuedDeleteConfirmVisible = true;
+        return Task.CompletedTask;
+    }
+
+    private void CancelPendingIssuedDelete()
+    {
+        _issuedDeleteConfirmVisible = false;
+        _pendingIssuedDeleteCatalogKey = null;
+        _pendingIssuedDeleteId = Guid.Empty;
+        _pendingIssuedDeleteIsVisa = false;
+        _issuedDeleteConfirmMessage = string.Empty;
+    }
+
+    private async Task ConfirmPendingIssuedDeleteAsync()
+    {
+        var catalogKey = _pendingIssuedDeleteCatalogKey;
+        var id = _pendingIssuedDeleteId;
+        var isVisa = _pendingIssuedDeleteIsVisa;
+        CancelPendingIssuedDelete();
+
+        if (Snapshot == null || id == Guid.Empty)
             return;
 
-        var noun = IssuedHeaderNoun(kind);
-        var label = string.IsNullOrWhiteSpace(caption) ? noun : $"{noun} {caption}";
-        bool confirmed;
-        try
+        if (isVisa)
         {
-            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
-        }
-        catch (JSException)
-        {
-            return;
-        }
-        catch (InvalidOperationException)
-        {
+            using var visaSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var visaResult = IssueIssuedVisaComposeService.Delete(
+                visaSpace,
+                Snapshot.ApplicationProfileInstanceId,
+                id);
+            if (!visaResult.Succeeded)
+            {
+                _issuedDeleteError = visaResult.ErrorMessage;
+                return;
+            }
+
+            await CloseIssuedVisaSurfacesIfOpenAsync(id);
+            WorkspaceActions.NotifyWorkspaceChanged();
             return;
         }
 
-        if (!confirmed)
+        if (string.IsNullOrWhiteSpace(catalogKey)
+            || !IssueIssuedHeaderComposeService.TryResolveKind(catalogKey, out var kind))
             return;
 
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
@@ -1451,53 +1520,14 @@
             objectSpace,
             Snapshot.ApplicationProfileInstanceId,
             kind,
-            headerId);
+            id);
         if (!result.Succeeded)
         {
             _issuedDeleteError = result.ErrorMessage;
             return;
         }
 
-        await CloseIssuedHeaderPreviewIfOpenAsync(kind, headerId);
-        WorkspaceActions.NotifyWorkspaceChanged();
-    }
-
-    private async Task DeleteIssuedVisaAsync(Guid visaId, string caption)
-    {
-        _issuedDeleteError = null;
-        if (Snapshot == null || visaId == Guid.Empty)
-            return;
-
-        var label = string.IsNullOrWhiteSpace(caption) ? "visa" : $"visa {caption}";
-        bool confirmed;
-        try
-        {
-            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
-        }
-        catch (JSException)
-        {
-            return;
-        }
-        catch (InvalidOperationException)
-        {
-            return;
-        }
-
-        if (!confirmed)
-            return;
-
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        var result = IssueIssuedVisaComposeService.Delete(
-            objectSpace,
-            Snapshot.ApplicationProfileInstanceId,
-            visaId);
-        if (!result.Succeeded)
-        {
-            _issuedDeleteError = result.ErrorMessage;
-            return;
-        }
-
-        await CloseIssuedVisaSurfacesIfOpenAsync(visaId);
+        await CloseIssuedHeaderPreviewIfOpenAsync(kind, id);
         WorkspaceActions.NotifyWorkspaceChanged();
     }
 
@@ -1564,13 +1594,13 @@
         }
     }
 
-    private static string IssuedHeaderNoun(IssueIssuedHeaderKind kind) => kind switch
+    private static string IssuedHeaderNounLocalized(IssueIssuedHeaderKind kind) => kind switch
     {
-        IssueIssuedHeaderKind.Invitation => "invitation",
-        IssueIssuedHeaderKind.WorkPermit => "work permit",
-        IssueIssuedHeaderKind.Rejection => "rejection",
-        IssueIssuedHeaderKind.BorderZone => "border zone",
-        _ => "record",
+        IssueIssuedHeaderKind.Invitation => VisaUiMessages.Get("ApplicationProfile.Doc.Invitation"),
+        IssueIssuedHeaderKind.WorkPermit => VisaUiMessages.Get("ApplicationProfile.Doc.WorkPermit"),
+        IssueIssuedHeaderKind.Rejection => VisaUiMessages.Get("ApplicationProfile.Doc.Rejection"),
+        IssueIssuedHeaderKind.BorderZone => VisaUiMessages.Get("ApplicationProfile.Doc.BorderZone"),
+        _ => VisaUiMessages.Get("ApplicationProfileInstance.Issued.Record"),
     };
 
     private RenderFragment RenderSummaryTile(ApplicationWorkspaceCaseSummaryTile field) => __builder =>
@@ -1972,21 +2002,31 @@
                         @foreach (var tile in view.IssuedRecordTiles)
                         {
                             var isSelected = string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
-                            <button type="button"
-                                    class="cw-issued-btn cw-issued-btn--@tile.Tone @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
-                                    @onclick="() => SelectIssuedTile(tile.Key)">
-                                <span class="cw-issued-btn__icon">@tile.Glyph</span>
-                                <span class="cw-issued-btn__copy">
-                                    <span class="cw-issued-btn__label">@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
-                                    <strong class="cw-issued-btn__count">@(tile.Count == 0 ? "—" : tile.Count.ToString())</strong>
-                                </span>
-                                <span class="cw-issued-btn__cta">
-                                    @(tile.Count == 0
-                                        ? ApplicationProfileLocalization.IssuedAddCaption(tile.AddCaption)
-                                        : Msg("ApplicationProfileInstance.Picker.Open"))
-                                    <span aria-hidden="true">→</span>
-                                </span>
-                            </button>
+                            var canAdd = ApplicationWorkspaceIssuedResultOverview.CanCreateMore(tile);
+                            var addCaption = ApplicationProfileLocalization.IssuedAddCaption(tile.AddCaption);
+                            var addTitle = canAdd
+                                ? addCaption
+                                : VisaUiMessages.Format(
+                                    "ApplicationProfileInstance.Issued.AddQuotaFull",
+                                    ApplicationProfileLocalization.IssuedRecordLabel(tile.Label));
+                            <div class="cw-issued-btn cw-issued-btn--@tile.Tone @(tile.Count == 0 ? "is-empty" : null) @(isSelected ? "is-selected" : null) @(!canAdd ? "is-quota-full" : null)">
+                                <button type="button"
+                                        class="cw-issued-btn__select"
+                                        @onclick="() => SelectIssuedTile(tile.Key)">
+                                    <span class="cw-issued-btn__icon">@tile.Glyph</span>
+                                    <span class="cw-issued-btn__copy">
+                                        <span class="cw-issued-btn__label">@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
+                                        <strong class="cw-issued-btn__count">@(tile.Count == 0 ? "—" : tile.Count.ToString())</strong>
+                                    </span>
+                                </button>
+                                <button type="button"
+                                        class="cw-issued-btn__cta"
+                                        title="@addTitle"
+                                        disabled="@(!canAdd)"
+                                        @onclick="() => AddIssuedHeaderAsync(tile)">
+                                    @addCaption
+                                </button>
+                            </div>
                         }
                     </div>
                     @if (selectedIssued != null)
@@ -2103,9 +2143,6 @@
                             {
                                 <p class="cw-issued-panel__error">@_issuedDeleteError</p>
                             }
-                            <div class="cw-issued-panel__actions">
-                                <button type="button" class="os-btn os-btn--primary" @onclick="() => NewIssuedHeaderAsync(selectedIssued.Key)">@ApplicationProfileLocalization.IssuedNewCaption(selectedIssued.NewCaption)</button>
-                            </div>
                         </div>
                     }
             </section>

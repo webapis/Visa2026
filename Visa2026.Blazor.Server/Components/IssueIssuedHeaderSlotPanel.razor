@@ -43,65 +43,6 @@
             {
                 <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Loading")</p>
             }
-            else if (_result?.Succeeded == true && !_showFormAfterSave)
-            {
-                <div class="issue-issued-header-slot__success">
-                    <p class="issue-issued-header-slot__success-title">
-                        @(_draft.IsEditMode ? $"Saved {_result.HeaderCaption}" : $"Created {_result.HeaderCaption}")
-                    </p>
-                    <p class="issue-issued-header-slot__muted">
-                        @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit)
-                        {
-                            @($"{_result.Lines.Count} employee(s) on this letter.")
-                        }
-                        else if (_draft.IsEditMode)
-                        {
-                            @($"{_result.Lines.Count} person(s) on the letter.")
-                        }
-                        else
-                        {
-                            @($"{_result.Lines.Count} person(s) across created invitation(s).")
-                        }
-                    </p>
-
-                    <table class="issue-issued-header-slot__table">
-                        <thead>
-                            <tr>
-                                <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Person")</th>
-                                <th>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Passport")</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var line in _result.Lines)
-                            {
-                                <tr>
-                                    <td>@line.PersonName</td>
-                                    <td>@line.PassportNumber</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-
-                    <div class="issue-issued-header-slot__actions">
-                        <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" @onclick="EditSavedHeaderAsync">
-                            Edit header
-                        </button>
-                        <button type="button" class="issue-issued-header-slot__btn" @onclick="ClosePanelAsync">
-                            Done
-                        </button>
-                        @if (!_draft.IsEditMode)
-                        {
-                            <button type="button" class="issue-issued-header-slot__btn" @onclick="StartAnotherAsync">
-                                Create another
-                            </button>
-                        }
-                    </div>
-                    @if (!string.IsNullOrWhiteSpace(_actionError))
-                    {
-                        <p class="issue-issued-header-slot__error">@_actionError</p>
-                    }
-                </div>
-            }
             else
             {
                 @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !_draft.IsEditMode)
@@ -562,6 +503,11 @@
     </div>
 </div>
 
+<OfficerDeleteConfirmDialog @bind-Visible="_deleteConfirmVisible"
+                            Message="@_deleteConfirmMessage"
+                            Confirmed="ConfirmDeleteAsync"
+                            Cancelled="CancelDeleteConfirm" />
+
 @code {
     [Parameter] public IssueIssuedHeaderSlotRequest? Request { get; set; }
     [Parameter] public EventCallback CloseRequested { get; set; }
@@ -569,7 +515,6 @@
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IApplicationWorkspacePersonUiActions? WorkspaceActions { get; set; }
-    [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private IssueIssuedHeaderComposeDraft? _draft;
     private IssueIssuedHeaderCreateResult? _result;
@@ -579,6 +524,9 @@
     private string? _boundOccupantKey;
     private bool _busy;
     private bool _showFormAfterSave;
+    private bool _deleteConfirmVisible;
+    private string _deleteConfirmMessage = string.Empty;
+    private Guid _pendingDeleteHeaderId;
     private Guid? _sessionHeaderId;
     private Guid? _loadedExistingHeaderId;
     private DateTime _primaryDate = DateTime.Today;
@@ -1147,25 +1095,25 @@
                 }
 
                 WorkspaceActions?.NotifyWorkspaceChanged();
+
+                if (!wasEdit)
+                {
+                    _result = null;
+                    _busy = false;
+                    await ClosePanelAsync();
+                    return;
+                }
+
                 _draft = IssueIssuedHeaderComposeService.LoadExistingDraft(
                     objectSpace,
                     Request!.ApplicationProfileInstanceId,
                     Request.Kind,
                     _result.HeaderId);
                 ApplyDraftToBoundFields();
-
                 CapturePristine();
-
-                if (wasEdit)
-                {
-                    _showFormAfterSave = true;
-                    _saveMessage = "Saved.";
-                    _result = null;
-                }
-                else
-                {
-                    _showFormAfterSave = false;
-                }
+                _showFormAfterSave = true;
+                _saveMessage = "Saved.";
+                _result = null;
             }
             else
             {
@@ -1183,49 +1131,6 @@
             _busy = false;
         }
 
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task EditSavedHeaderAsync()
-    {
-        if (_result?.HeaderId is not Guid headerId || headerId == Guid.Empty || Request == null)
-            return;
-
-        _sessionHeaderId = headerId;
-        _result = null;
-        _showFormAfterSave = true;
-        _actionError = null;
-        _saveMessage = null;
-
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        _draft = IssueIssuedHeaderComposeService.LoadExistingDraft(
-            objectSpace,
-            Request.ApplicationProfileInstanceId,
-            Request.Kind,
-            headerId);
-        if (_draft == null)
-        {
-            _loadError = "Could not reload issued record for edit.";
-        }
-        else
-        {
-            ApplyDraftToBoundFields();
-            CapturePristine();
-        }
-
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task StartAnotherAsync()
-    {
-        _result = null;
-        _actionError = null;
-        _saveMessage = null;
-        _sessionHeaderId = null;
-        _loadedExistingHeaderId = null;
-        _boundOccupantKey = null;
-        _showFormAfterSave = false;
-        LoadDraft();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -1351,41 +1256,48 @@
             _draft.Documents.Add(row);
     }
 
-    private async Task DeleteAsync()
+    private Task DeleteAsync()
     {
         if (_draft == null || Request == null || !_draft.IsEditMode || _busy)
-            return;
+            return Task.CompletedTask;
 
         var headerId = EffectiveExistingHeaderId;
         if (headerId is not Guid id || id == Guid.Empty)
-            return;
+            return Task.CompletedTask;
 
         var noun = Request.Kind switch
         {
-            IssueIssuedHeaderKind.Invitation => "invitation",
-            IssueIssuedHeaderKind.WorkPermit => "work permit",
-            IssueIssuedHeaderKind.Rejection => "rejection",
-            IssueIssuedHeaderKind.BorderZone => "border zone",
-            _ => "record",
+            IssueIssuedHeaderKind.Invitation => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation"),
+            IssueIssuedHeaderKind.WorkPermit => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.WorkPermit"),
+            IssueIssuedHeaderKind.Rejection => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Rejection"),
+            IssueIssuedHeaderKind.BorderZone => ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.BorderZone"),
+            _ => ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Record"),
         };
         var caption = _draft.HeaderNumber?.Trim();
         var label = string.IsNullOrWhiteSpace(caption) ? noun : $"{noun} {caption}";
+        _pendingDeleteHeaderId = id;
+        _deleteConfirmMessage = VisaUiMessages.Format(
+            "ApplicationProfileInstance.Workspace.ConfirmDelete",
+            label);
+        _deleteConfirmVisible = true;
+        return Task.CompletedTask;
+    }
 
-        bool confirmed;
-        try
-        {
-            confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {label}? This cannot be undone.");
-        }
-        catch (JSException)
-        {
-            return;
-        }
-        catch (InvalidOperationException)
-        {
-            return;
-        }
+    private void CancelDeleteConfirm()
+    {
+        _deleteConfirmVisible = false;
+        _pendingDeleteHeaderId = Guid.Empty;
+        _deleteConfirmMessage = string.Empty;
+    }
 
-        if (!confirmed)
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_draft == null || Request == null || _busy)
+            return;
+
+        var id = _pendingDeleteHeaderId;
+        CancelDeleteConfirm();
+        if (id == Guid.Empty)
             return;
 
         _busy = true;

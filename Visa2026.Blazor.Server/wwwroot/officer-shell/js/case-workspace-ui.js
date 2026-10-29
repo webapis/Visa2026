@@ -125,35 +125,43 @@ function linkedRecordTile(rec) {
 function issuedRecordsFor(c) {
   if (c.tplKey === 'inv') {
     return [
-      { key: 'invitation', icon: 'bi-envelope', tone: 'blue', label: 'Invitation', count: 0, add: '+ Add invitation', newLabel: 'New invitation', panel: 'Invitations produced by this case' },
-      { key: 'issuedVisa', icon: 'bi-credit-card-2-front', tone: 'teal', label: 'Issued visa', count: 0, add: '+ Add issued visa', newLabel: 'New issued visa', panel: 'Visas issued by this case' },
+      { key: 'invitation', icon: 'bi-envelope', tone: 'blue', label: 'Invitation', count: 0, coverage: 0, expected: 3, add: '+ Add invitation', panel: 'Invitations produced by this case' },
+      { key: 'issuedVisa', icon: 'bi-credit-card-2-front', tone: 'teal', label: 'Issued visa', count: 0, coverage: 0, expected: 3, add: '+ Add issued visa', panel: 'Visas issued by this case' },
     ];
   }
   if (c.tplKey === 'wp') {
     return [
-      { key: 'workPermit', icon: 'bi-briefcase', tone: 'purple', label: 'Work permit', count: 0, add: '+ Add work permit', newLabel: 'New work permit', panel: 'Work permits produced by this case' },
+      { key: 'workPermit', icon: 'bi-briefcase', tone: 'purple', label: 'Work permit', count: 0, coverage: 0, expected: 3, add: '+ Add work permit', panel: 'Work permits produced by this case' },
     ];
   }
   return [
-    { key: 'invitation', icon: 'bi-envelope', tone: 'blue', label: 'Invitation', count: 0, add: '+ Add invitation', newLabel: 'New invitation', panel: 'Invitations produced by this case' },
-    { key: 'workPermit', icon: 'bi-briefcase', tone: 'purple', label: 'Work permit', count: 1, add: '+ Add work permit', newLabel: 'New work permit', panel: 'Work permits produced by this case', rows: [{ title: 'WP-2026-0147-01', subtitle: '10 Aug 2026' }] },
-    { key: 'borderZone', icon: 'bi-signpost-2', tone: 'green', label: 'Border zone', count: 0, add: '+ Add border zone', newLabel: 'New border zone', panel: 'Border-zone permits produced by this case' },
-    { key: 'rejection', icon: 'bi-x-octagon', tone: 'orange', label: 'Rejection', count: 0, add: '+ Add rejection', newLabel: 'New rejection', panel: 'Rejections produced by this case' },
+    { key: 'invitation', icon: 'bi-envelope', tone: 'blue', label: 'Invitation', count: 0, coverage: 0, expected: 3, add: '+ Add invitation', panel: 'Invitations produced by this case' },
+    { key: 'workPermit', icon: 'bi-briefcase', tone: 'purple', label: 'Work permit', count: 1, coverage: 1, expected: 3, add: '+ Add work permit', panel: 'Work permits produced by this case', rows: [{ title: 'WP-2026-0147-01', subtitle: '10 Aug 2026' }] },
+    { key: 'borderZone', icon: 'bi-signpost-2', tone: 'green', label: 'Border zone', count: 0, coverage: 0, expected: 3, add: '+ Add border zone', panel: 'Border-zone permits produced by this case' },
+    { key: 'rejection', icon: 'bi-x-octagon', tone: 'orange', label: 'Rejection', count: 0, coverage: 0, expected: 0, optional: true, add: '+ Add rejection', panel: 'Rejections produced by this case' },
   ];
+}
+
+function canCreateIssued(rec) {
+  return !!rec.optional || (rec.coverage || 0) < (rec.expected || 0);
 }
 
 function issuedRecordTile(rec, selectedKey) {
   const selected = rec.key === selectedKey ? ' is-selected' : '';
   const empty = rec.count === 0 ? ' is-empty' : '';
-  const body = rec.count === 0
-    ? `<span class="cw-issued-tile__add">${esc(rec.add)}</span>`
-    : `<strong class="cw-link-tile__count">${rec.count}</strong>`;
-  return `<button type="button" class="cw-link-tile cw-link-tile--${rec.tone} cw-issued-tile${empty}${selected}" data-issued-key="${esc(rec.key)}">
-    <span class="cw-link-tile__icon"><i class="bi ${rec.icon}"></i></span>
-    <span class="cw-link-tile__label">${esc(rec.label)}</span>
-    ${body}
-    <i class="bi bi-chevron-right cw-link-tile__chev"></i>
-  </button>`;
+  const canAdd = canCreateIssued(rec);
+  const disabled = canAdd ? '' : ' disabled';
+  const title = canAdd ? esc(rec.add) : `All people already have ${esc(rec.label)}`;
+  return `<div class="cw-issued-btn cw-issued-btn--${rec.tone}${empty}${selected}${canAdd ? '' : ' is-quota-full'}" data-issued-key="${esc(rec.key)}">
+    <button type="button" class="cw-issued-btn__select" data-issued-select="${esc(rec.key)}">
+      <span class="cw-issued-btn__icon"><i class="bi ${rec.icon}"></i></span>
+      <span class="cw-issued-btn__copy">
+        <span class="cw-issued-btn__label">${esc(rec.label)}</span>
+        <strong class="cw-issued-btn__count">${rec.count === 0 ? '—' : rec.count}</strong>
+      </span>
+    </button>
+    <button type="button" class="cw-issued-btn__cta" data-issued-add="${esc(rec.key)}" title="${title}"${disabled}>${esc(rec.add)}</button>
+  </div>`;
 }
 
 function issuedPanel(c, rec) {
@@ -165,7 +173,6 @@ function issuedPanel(c, rec) {
   return `<div class="cw-issued-panel">
     <h3 class="cw-issued-panel__title">${esc(rec.panel)}</h3>
     ${hint}
-    <div class="cw-issued-panel__actions"><button type="button" class="os-btn os-btn--primary">${esc(rec.newLabel)}</button></div>
   </div>`;
 }
 

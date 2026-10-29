@@ -732,10 +732,10 @@ select.cw-summary-field__input option {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr)); gap: 12px;
 }
 .cw-issued-btn {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  padding: 14px 14px 14px 12px; border-radius: 12px;
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 10px 10px 8px; border-radius: 12px;
   border: 2px solid var(--os-accent); background: var(--os-panel); color: var(--os-ink);
-  text-align: left; cursor: pointer; font: inherit;
+  text-align: left; font: inherit;
   box-shadow: 0 4px 12px rgba(29, 110, 242, 0.08);
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -744,13 +744,19 @@ select.cw-summary-field__input option {
   transform: translateY(-1px);
   box-shadow: 0 8px 16px rgba(29, 110, 242, 0.12);
 }
-.cw-issued-btn:focus-visible {
-  outline: 2px solid #93c5fd;
-  outline-offset: 2px;
-}
 .cw-issued-btn.is-selected {
   background: var(--os-accent-soft);
   box-shadow: 0 0 0 3px #bfdbfe;
+}
+.cw-issued-btn__select {
+  display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0;
+  margin: 0; padding: 4px 4px 4px 4px; border: 0; background: transparent;
+  color: inherit; text-align: left; cursor: pointer; font: inherit;
+  border-radius: 8px;
+}
+.cw-issued-btn__select:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
 }
 .cw-issued-btn__icon {
   width: 40px; height: 40px; border-radius: 10px; flex: 0 0 auto;
@@ -764,6 +770,22 @@ select.cw-summary-field__input option {
   flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 750;
   border: 1px solid var(--os-accent); color: var(--os-accent); background: var(--os-panel);
+  cursor: pointer; font: inherit; white-space: nowrap;
+}
+.cw-issued-btn__cta:hover:not(:disabled) {
+  background: var(--os-accent);
+  color: #fff;
+}
+.cw-issued-btn__cta:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+.cw-issued-btn__cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--os-line);
+  color: var(--os-muted);
+  background: var(--os-surface);
 }
 .cw-issued-panel {
   margin-top: 12px; padding: 14px 16px; border: 1px solid var(--os-line);
@@ -1575,6 +1597,7 @@ select.cw-summary-field__input option {
 .officer-case-workspace .cw-result-metric strong,
 .officer-case-workspace .cw-result-metric span,
 .officer-case-workspace .cw-issued-btn,
+.officer-case-workspace .cw-issued-btn__select,
 .officer-case-workspace .cw-issued-btn__label,
 .officer-case-workspace .cw-issued-btn__count,
 .officer-case-workspace .cw-issued-btn__cta,
@@ -1592,6 +1615,11 @@ select.cw-summary-field__input option {
 .officer-case-workspace .cw-result-board__badge {
   background: var(--os-surface);
   border-color: var(--os-line);
+}
+.officer-case-workspace .cw-issued-btn__cta:disabled {
+  background: var(--os-surface);
+  border-color: var(--os-line);
+  color: var(--os-muted);
 }
 .officer-case-workspace .cw-issued-list__head {
   background: var(--os-surface);

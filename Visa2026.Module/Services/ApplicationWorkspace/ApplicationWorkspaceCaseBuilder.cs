@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.OfficerShell;
 
@@ -494,42 +495,39 @@ internal static class ApplicationWorkspaceCaseBuilder
 
     private static readonly string[] IssuedInvitationColumnKeys =
     [
-        "ApplicationProfileInstance.Issued.Person",
-        "ApplicationProfile.Person.Passport",
         "ApplicationProfileInstance.Issued.InvitationNumber",
         "ApplicationProfile.Field.VisaCategory",
         "ApplicationProfile.Field.VisaPeriod",
         "ApplicationProfileInstance.Issued.IssuedDate",
         "ApplicationProfileInstance.Issued.ExpirationDate",
+        "ApplicationProfileInstance.Issued.PersonCount",
+        "ApplicationProfileInstance.Issued.CopyAvailable",
     ];
 
     private static readonly string[] IssuedWorkPermitColumnKeys =
     [
-        "ApplicationProfileInstance.Issued.Person",
-        "ApplicationProfile.Person.Passport",
         "ApplicationProfileInstance.Issued.WorkPermitNumber",
-        "ApplicationProfileInstance.Issued.ASNumber",
-        "ApplicationProfileInstance.Issued.WorkPermittedLocations",
-        "ApplicationProfileInstance.Issued.Start",
-        "ApplicationProfileInstance.Issued.Expiration",
+        "ApplicationProfileInstance.Issued.IssuedDate",
+        "ApplicationProfileInstance.Issued.PersonCount",
+        "ApplicationProfileInstance.Issued.CopyAvailable",
     ];
 
     private static readonly string[] IssuedBorderZoneColumnKeys =
     [
-        "ApplicationProfileInstance.Issued.Person",
-        "ApplicationProfile.Person.Passport",
         "ApplicationProfileInstance.Issued.BorderZoneNumber",
         "ApplicationProfileInstance.Issued.Start",
         "ApplicationProfileInstance.Issued.Expiration",
+        "ApplicationProfileInstance.Issued.PersonCount",
+        "ApplicationProfileInstance.Issued.CopyAvailable",
     ];
 
     private static readonly string[] IssuedRejectionColumnKeys =
     [
-        "ApplicationProfileInstance.Issued.Person",
-        "ApplicationProfile.Person.Passport",
         "ApplicationProfileInstance.Issued.RejectedDocumentNumber",
         "ApplicationProfileInstance.Issued.IssuedDate",
         "ApplicationProfileInstance.Issued.Reason",
+        "ApplicationProfileInstance.Issued.PersonCount",
+        "ApplicationProfileInstance.Issued.CopyAvailable",
     ];
 
     private static readonly string[] IssuedVisaColumnKeys =
@@ -550,54 +548,37 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<Invitation> invitations,
         HashSet<Guid> copyIds)
     {
-        var items = objectSpace != null && application.ID != Guid.Empty
-            ? objectSpace.GetObjectsQuery<InvitationItem>()
-                .Where(i => i.Invitation != null
-                    && i.Invitation.ApplicationProfileInstance != null
-                    && i.Invitation.ApplicationProfileInstance.ID == application.ID)
-                .ToList()
-            : invitations.SelectMany(h => h.InvitationItems ?? Array.Empty<InvitationItem>()).ToList();
+        var peopleByHeader = CountPeopleByHeader(
+            objectSpace != null && application.ID != Guid.Empty
+                ? objectSpace.GetObjectsQuery<InvitationItem>()
+                    .Where(i => i.Invitation != null
+                        && i.Invitation.ApplicationProfileInstance != null
+                        && i.Invitation.ApplicationProfileInstance.ID == application.ID)
+                    .Select(i => new { HeaderId = i.Invitation!.ID, PersonId = i.Person != null ? i.Person.ID : Guid.Empty })
+                    .ToList()
+                    .Select(x => (x.HeaderId, x.PersonId))
+                : invitations.SelectMany(h => (h.InvitationItems ?? Array.Empty<InvitationItem>())
+                    .Select(i => (h.ID, i.Person?.ID ?? Guid.Empty))));
 
-        if (items.Count == 0)
-        {
-            return invitations
-                .OrderByDescending(i => i.IssuedDate)
-                .Select(i => Row(
+        return invitations
+            .OrderByDescending(i => i.IssuedDate)
+            .Select(i =>
+            {
+                var hasCopy = copyIds.Contains(i.ID);
+                var people = peopleByHeader.GetValueOrDefault(i.ID);
+                return Row(
                     i.ID,
                     i.InvitationNumber,
                     FormatIssuedDate(i.IssuedDate),
-                    copyIds.Contains(i.ID),
+                    hasCopy,
                     [
-                        "—",
-                        "—",
                         Cell(i.InvitationNumber),
                         Cell(i.VisaCategory?.LocalizedDisplayName),
                         Cell(i.VisaPeriod?.LocalizedDisplayName),
                         Cell(FormatIssuedDate(i.IssuedDate)),
                         Cell(FormatIssuedDate(i.ExpirationDate)),
-                    ]))
-                .ToList();
-        }
-
-        return items
-            .OrderBy(i => i.Person?.LastName)
-            .ThenBy(i => i.Person?.FirstName)
-            .Select(item =>
-            {
-                var invitation = item.Invitation;
-                return Row(
-                    invitation?.ID ?? Guid.Empty,
-                    invitation?.InvitationNumber,
-                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
-                    invitation != null && copyIds.Contains(invitation.ID),
-                    [
-                        Cell(item.Person?.FullName),
-                        Cell(item.Passport?.PassportNumber),
-                        Cell(invitation?.InvitationNumber),
-                        Cell(invitation?.VisaCategory?.LocalizedDisplayName),
-                        Cell(invitation?.VisaPeriod?.LocalizedDisplayName),
-                        Cell(FormatIssuedDate(invitation?.IssuedDate ?? default)),
-                        Cell(FormatIssuedDate(invitation?.ExpirationDate)),
+                        people.ToString(CultureInfo.CurrentUICulture),
+                        CopyAvailableCell(hasCopy),
                     ]);
             })
             .ToList();
@@ -609,46 +590,34 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<WorkPermit> permits,
         HashSet<Guid> copyIds)
     {
-        var items = objectSpace != null && application.ID != Guid.Empty
-            ? objectSpace.GetObjectsQuery<WorkPermitItem>()
-                .Where(i => i.WorkPermit != null
-                    && i.WorkPermit.ApplicationProfileInstance != null
-                    && i.WorkPermit.ApplicationProfileInstance.ID == application.ID)
-                .ToList()
-            : permits.SelectMany(h => h.WorkPermitItems ?? Array.Empty<WorkPermitItem>()).ToList();
+        var peopleByHeader = CountPeopleByHeader(
+            objectSpace != null && application.ID != Guid.Empty
+                ? objectSpace.GetObjectsQuery<WorkPermitItem>()
+                    .Where(i => i.WorkPermit != null
+                        && i.WorkPermit.ApplicationProfileInstance != null
+                        && i.WorkPermit.ApplicationProfileInstance.ID == application.ID)
+                    .Select(i => new { HeaderId = i.WorkPermit!.ID, PersonId = i.Person != null ? i.Person.ID : Guid.Empty })
+                    .ToList()
+                    .Select(x => (x.HeaderId, x.PersonId))
+                : permits.SelectMany(h => (h.WorkPermitItems ?? Array.Empty<WorkPermitItem>())
+                    .Select(i => (h.ID, i.Person?.ID ?? Guid.Empty))));
 
-        if (items.Count == 0)
-        {
-            return permits
-                .OrderByDescending(w => w.IssuedDate)
-                .Select(w => Row(
+        return permits
+            .OrderByDescending(w => w.IssuedDate)
+            .Select(w =>
+            {
+                var hasCopy = copyIds.Contains(w.ID);
+                var people = peopleByHeader.GetValueOrDefault(w.ID);
+                return Row(
                     w.ID,
                     w.WorkPermitNumber,
                     FormatIssuedDate(w.IssuedDate),
-                    copyIds.Contains(w.ID),
-                    ["—", "—", Cell(w.WorkPermitNumber), "—", "—", Cell(FormatIssuedDate(w.IssuedDate)), "—"]))
-                .ToList();
-        }
-
-        return items
-            .OrderBy(i => i.Person?.LastName)
-            .ThenBy(i => i.Person?.FirstName)
-            .Select(item =>
-            {
-                var permit = item.WorkPermit;
-                return Row(
-                    permit?.ID ?? Guid.Empty,
-                    permit?.WorkPermitNumber ?? item.WorkPermitNumber,
-                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
-                    permit != null && copyIds.Contains(permit.ID),
+                    hasCopy,
                     [
-                        Cell(item.Person?.FullName),
-                        Cell(item.Passport?.PassportNumber),
-                        Cell(item.WorkPermitNumber ?? permit?.WorkPermitNumber),
-                        Cell(item.ASNumber),
-                        Cell(item.WorkPermittedLocations),
-                        Cell(FormatIssuedDate(item.StartDate)),
-                        Cell(FormatIssuedDate(item.ExpirationDate)),
+                        Cell(w.WorkPermitNumber),
+                        Cell(FormatIssuedDate(w.IssuedDate)),
+                        people.ToString(CultureInfo.CurrentUICulture),
+                        CopyAvailableCell(hasCopy),
                     ]);
             })
             .ToList();
@@ -660,44 +629,35 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<BorderZone> zones,
         HashSet<Guid> copyIds)
     {
-        var items = objectSpace != null && application.ID != Guid.Empty
-            ? objectSpace.GetObjectsQuery<BorderZoneItem>()
-                .Where(i => i.BorderZone != null
-                    && i.BorderZone.ApplicationProfileInstance != null
-                    && i.BorderZone.ApplicationProfileInstance.ID == application.ID)
-                .ToList()
-            : zones.SelectMany(h => h.BorderZoneItems ?? Array.Empty<BorderZoneItem>()).ToList();
+        var peopleByHeader = CountPeopleByHeader(
+            objectSpace != null && application.ID != Guid.Empty
+                ? objectSpace.GetObjectsQuery<BorderZoneItem>()
+                    .Where(i => i.BorderZone != null
+                        && i.BorderZone.ApplicationProfileInstance != null
+                        && i.BorderZone.ApplicationProfileInstance.ID == application.ID)
+                    .Select(i => new { HeaderId = i.BorderZone!.ID, PersonId = i.Person != null ? i.Person.ID : Guid.Empty })
+                    .ToList()
+                    .Select(x => (x.HeaderId, x.PersonId))
+                : zones.SelectMany(h => (h.BorderZoneItems ?? Array.Empty<BorderZoneItem>())
+                    .Select(i => (h.ID, i.Person?.ID ?? Guid.Empty))));
 
-        if (items.Count == 0)
-        {
-            return zones
-                .OrderByDescending(z => z.StartDate)
-                .Select(z => Row(
+        return zones
+            .OrderByDescending(z => z.StartDate)
+            .Select(z =>
+            {
+                var hasCopy = copyIds.Contains(z.ID);
+                var people = peopleByHeader.GetValueOrDefault(z.ID);
+                return Row(
                     z.ID,
                     z.BorderZoneNumber,
                     FormatIssuedDate(z.StartDate),
-                    copyIds.Contains(z.ID),
-                    ["—", "—", Cell(z.BorderZoneNumber), Cell(FormatIssuedDate(z.StartDate)), Cell(FormatIssuedDate(z.ExpirationDate))]))
-                .ToList();
-        }
-
-        return items
-            .OrderBy(i => i.Person?.LastName)
-            .ThenBy(i => i.Person?.FirstName)
-            .Select(item =>
-            {
-                var zone = item.BorderZone;
-                return Row(
-                    zone?.ID ?? Guid.Empty,
-                    zone?.BorderZoneNumber,
-                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
-                    zone != null && copyIds.Contains(zone.ID),
+                    hasCopy,
                     [
-                        Cell(item.Person?.FullName),
-                        Cell(item.Passport?.PassportNumber),
-                        Cell(zone?.BorderZoneNumber),
-                        Cell(FormatIssuedDate(zone?.StartDate ?? default)),
-                        Cell(FormatIssuedDate(zone?.ExpirationDate)),
+                        Cell(z.BorderZoneNumber),
+                        Cell(FormatIssuedDate(z.StartDate)),
+                        Cell(FormatIssuedDate(z.ExpirationDate)),
+                        people.ToString(CultureInfo.CurrentUICulture),
+                        CopyAvailableCell(hasCopy),
                     ]);
             })
             .ToList();
@@ -709,48 +669,59 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<Rejection> rejections,
         HashSet<Guid> copyIds)
     {
-        var items = objectSpace != null && application.ID != Guid.Empty
-            ? objectSpace.GetObjectsQuery<RejectionItem>()
-                .Where(i => i.Rejection != null
-                    && i.Rejection.ApplicationProfileInstance != null
-                    && i.Rejection.ApplicationProfileInstance.ID == application.ID)
-                .ToList()
-            : rejections.SelectMany(h => h.RejectionItems ?? Array.Empty<RejectionItem>()).ToList();
+        var peopleByHeader = CountPeopleByHeader(
+            objectSpace != null && application.ID != Guid.Empty
+                ? objectSpace.GetObjectsQuery<RejectionItem>()
+                    .Where(i => i.Rejection != null
+                        && i.Rejection.ApplicationProfileInstance != null
+                        && i.Rejection.ApplicationProfileInstance.ID == application.ID)
+                    .Select(i => new { HeaderId = i.Rejection!.ID, PersonId = i.Person != null ? i.Person.ID : Guid.Empty })
+                    .ToList()
+                    .Select(x => (x.HeaderId, x.PersonId))
+                : rejections.SelectMany(h => (h.RejectionItems ?? Array.Empty<RejectionItem>())
+                    .Select(i => (h.ID, i.Person?.ID ?? Guid.Empty))));
 
-        if (items.Count == 0)
-        {
-            return rejections
-                .OrderByDescending(r => r.Date)
-                .Select(r => Row(
+        return rejections
+            .OrderByDescending(r => r.Date)
+            .Select(r =>
+            {
+                var hasCopy = copyIds.Contains(r.ID);
+                var people = peopleByHeader.GetValueOrDefault(r.ID);
+                return Row(
                     r.ID,
                     r.RejectedDocNumber,
                     FormatIssuedDate(r.Date),
-                    copyIds.Contains(r.ID),
-                    ["—", "—", Cell(r.RejectedDocNumber), Cell(FormatIssuedDate(r.Date)), Cell(r.Reason)]))
-                .ToList();
-        }
-
-        return items
-            .OrderBy(i => i.Person?.LastName)
-            .ThenBy(i => i.Person?.FirstName)
-            .Select(item =>
-            {
-                var rejection = item.Rejection;
-                return Row(
-                    rejection?.ID ?? Guid.Empty,
-                    rejection?.RejectedDocNumber,
-                    JoinIssuedParts(item.Person?.FullName, item.Passport?.PassportNumber),
-                    rejection != null && copyIds.Contains(rejection.ID),
+                    hasCopy,
                     [
-                        Cell(item.Person?.FullName),
-                        Cell(item.Passport?.PassportNumber),
-                        Cell(rejection?.RejectedDocNumber),
-                        Cell(FormatIssuedDate(rejection?.Date ?? default)),
-                        Cell(item.Reason ?? rejection?.Reason),
+                        Cell(r.RejectedDocNumber),
+                        Cell(FormatIssuedDate(r.Date)),
+                        Cell(r.Reason),
+                        people.ToString(CultureInfo.CurrentUICulture),
+                        CopyAvailableCell(hasCopy),
                     ]);
             })
             .ToList();
     }
+
+    private static Dictionary<Guid, int> CountPeopleByHeader(IEnumerable<(Guid HeaderId, Guid PersonId)> lines)
+    {
+        var counts = new Dictionary<Guid, int>();
+        foreach (var group in lines.Where(x => x.HeaderId != Guid.Empty).GroupBy(x => x.HeaderId))
+        {
+            counts[group.Key] = group
+                .Select(x => x.PersonId)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .Count();
+        }
+
+        return counts;
+    }
+
+    private static string CopyAvailableCell(bool hasCopy) =>
+        hasCopy
+            ? VisaUiMessages.Get("ApplicationProfile.Overview.Yes")
+            : VisaUiMessages.Get("ApplicationProfileInstance.Issued.None");
 
     private static ApplicationWorkspaceCaseIssuedRow Row(
         Guid id,
