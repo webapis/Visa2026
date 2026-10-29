@@ -68,15 +68,13 @@
                 }
                 <IssueComposeFieldCueLegend />
 
-                @foreach (var group in _draft.Groups)
+                @foreach (var section in PeopleSections)
                 {
+                    if (section.People.Count == 0)
+                        continue;
                     <section class="issue-issued-visa-slot__group">
-                        <h3 class="issue-issued-visa-slot__group-title">
-                            @(_draft.UsesInvitationSource
-                                ? $"{ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation")} {group.InvitationNumber} · {group.InvitationIssuedDate:dd MMM yyyy}"
-                                : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleOnCase"))
-                        </h3>
-                        @foreach (var person in group.People)
+                        <h3 class="issue-issued-visa-slot__group-title">@section.Title</h3>
+                        @foreach (var person in section.People)
                         {
                             var issued = person.AlreadyIssued && !_draft.IsEditMode;
                             var cardClass = issued
@@ -383,6 +381,56 @@
         && !_busy
         && _draft.HasUnusedLine
         && _draft.SelectedUnusedCount > 0;
+
+    /// <summary>
+    /// Create: flat blocks (selected → not selected → already issued → not ready).
+    /// Edit: keep invitation / case grouping as loaded.
+    /// </summary>
+    private IEnumerable<(string Title, IReadOnlyList<IssueIssuedVisaPersonCardDraft> People)> PeopleSections
+    {
+        get
+        {
+            if (_draft == null)
+                return Array.Empty<(string, IReadOnlyList<IssueIssuedVisaPersonCardDraft>)>();
+
+            if (_draft.IsEditMode)
+            {
+                return _draft.Groups.Select(group => (
+                    Title: _draft.UsesInvitationSource
+                        ? $"{ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Invitation")} {group.InvitationNumber} · {group.InvitationIssuedDate:dd MMM yyyy}"
+                        : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.PeopleOnCase"),
+                    People: (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)group.People));
+            }
+
+            var people = _draft.AllPeople
+                .OrderBy(p => p.PersonName, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+            // Selected forms first so checking someone brings their editor to the top.
+            return
+            [
+                (
+                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateSelected"),
+                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
+                        .Where(p => !p.AlreadyIssued && p.IsReady && p.Include)
+                        .ToList()),
+                (
+                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateNotSelected"),
+                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
+                        .Where(p => !p.AlreadyIssued && p.IsReady && !p.Include)
+                        .ToList()),
+                (
+                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateAlreadyIssued"),
+                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
+                        .Where(p => p.AlreadyIssued)
+                        .ToList()),
+                (
+                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateNotReady"),
+                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
+                        .Where(p => !p.AlreadyIssued && !p.IsReady)
+                        .ToList()),
+            ];
+        }
+    }
 
     /// <summary>
     /// Edit: Save only when modified (XAF ObjectSpace.IsModified style).

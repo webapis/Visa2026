@@ -3287,6 +3287,30 @@
     "tk-TM": "Bu ýüztutmadaky adamlar",
     "ru-RU": "Люди в этом деле"
   },
+  "ApplicationProfileInstance.Issued.VisaCreateNotSelected": {
+    "en-US": "Not selected yet",
+    "tr-TR": "Henüz seçilmedi",
+    "tk-TM": "Entäk saýlanmady",
+    "ru-RU": "Ещё не выбраны"
+  },
+  "ApplicationProfileInstance.Issued.VisaCreateSelected": {
+    "en-US": "Selected for this create",
+    "tr-TR": "Bu oluşturma için seçildi",
+    "tk-TM": "Bu döretmek üçin saýlandy",
+    "ru-RU": "Выбраны для создания"
+  },
+  "ApplicationProfileInstance.Issued.VisaCreateAlreadyIssued": {
+    "en-US": "Already issued",
+    "tr-TR": "Zaten düzenlendi",
+    "tk-TM": "Eýýäm berildi",
+    "ru-RU": "Уже выданы"
+  },
+  "ApplicationProfileInstance.Issued.VisaCreateNotReady": {
+    "en-US": "Not ready — missing passport",
+    "tr-TR": "Hazır değil — pasaport eksik",
+    "tk-TM": "Taýýar däl — pasport ýok",
+    "ru-RU": "Не готовы — нет паспорта"
+  },
   "ApplicationProfileInstance.Issued.PeopleWorkPermit": {
     "en-US": "People on this work permit",
     "tr-TR": "Bu çalışma iznindeki kişiler",

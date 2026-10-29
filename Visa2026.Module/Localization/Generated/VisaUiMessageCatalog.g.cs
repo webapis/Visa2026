@@ -3022,6 +3022,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu ýüztutmadaky adamlar",
             ["ru-RU"] = "Люди в этом деле",
         },
+        ["ApplicationProfileInstance.Issued.VisaCreateNotSelected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not selected yet",
+            ["tr-TR"] = "Henüz seçilmedi",
+            ["tk-TM"] = "Entäk saýlanmady",
+            ["ru-RU"] = "Ещё не выбраны",
+        },
+        ["ApplicationProfileInstance.Issued.VisaCreateSelected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Selected for this create",
+            ["tr-TR"] = "Bu oluşturma için seçildi",
+            ["tk-TM"] = "Bu döretmek üçin saýlandy",
+            ["ru-RU"] = "Выбраны для создания",
+        },
+        ["ApplicationProfileInstance.Issued.VisaCreateAlreadyIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Already issued",
+            ["tr-TR"] = "Zaten düzenlendi",
+            ["tk-TM"] = "Eýýäm berildi",
+            ["ru-RU"] = "Уже выданы",
+        },
+        ["ApplicationProfileInstance.Issued.VisaCreateNotReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not ready — missing passport",
+            ["tr-TR"] = "Hazır değil — pasaport eksik",
+            ["tk-TM"] = "Taýýar däl — pasport ýok",
+            ["ru-RU"] = "Не готовы — нет паспорта",
+        },
         ["ApplicationProfileInstance.Issued.PeopleRejection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "People on this rejection",

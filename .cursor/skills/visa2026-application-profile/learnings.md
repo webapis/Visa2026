@@ -1,7 +1,7 @@
 ### 2026-10-29 — New issued visa people grouped by selection
 
 - **Need**: Unchecked people were mixed with selected and issued rows, so officers could not scan who still needed a visa.
-- **Fix**: Create mode uses flat blocks top to bottom: Not selected yet → Selected for this create → Already issued → Not ready (missing passport). No invitation sub-headers in create. Checking someone moves them into Selected with the full form. Edit mode keeps prior grouping.
+- **Fix**: Create mode uses flat blocks top to bottom: Selected for this create → Not selected yet → Already issued → Not ready (missing passport). No invitation sub-headers in create. Checking someone moves them into Selected with the full form. Edit mode keeps prior grouping.
 - **Officer**: Rebuild, hard-refresh. + Add Issued visa — unchecked names are at the top; check one to fill the visa form below.
 - **Prevent**: Do not interleave unchecked cards under invitation headers on create.
 - **Cross-skill**: —

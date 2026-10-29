@@ -133,7 +133,8 @@ public static class IssueIssuedVisaComposeService
                     PersonName = item.Person.FullName?.Trim() ?? item.Person.ToString() ?? string.Empty,
                     PassportId = passport?.ID,
                     PassportNumber = passport?.PassportNumber?.Trim() ?? string.Empty,
-                    Include = !already && passport != null,
+                    // Create: officer opts people in — visas are often issued on different dates.
+                    Include = false,
                     AlreadyIssued = already,
                     IsReady = passport != null,
                     ExistingVisaId = existingVisa?.ID,
@@ -271,7 +272,8 @@ public static class IssueIssuedVisaComposeService
                 PersonName = person.FullName?.Trim() ?? person.ToString() ?? string.Empty,
                 PassportId = passport?.ID,
                 PassportNumber = passport?.PassportNumber?.Trim() ?? string.Empty,
-                Include = !already && passport != null,
+                // Create: officer opts people in — visas are often issued on different dates.
+                Include = false,
                 AlreadyIssued = already,
                 IsReady = passport != null,
                 ExistingVisaId = existingVisa?.ID,
