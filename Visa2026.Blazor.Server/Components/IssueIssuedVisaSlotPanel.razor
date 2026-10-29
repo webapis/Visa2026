@@ -73,7 +73,7 @@
                     if (section.People.Count == 0)
                         continue;
                     <section class="issue-issued-visa-slot__group">
-                        <h3 class="issue-issued-visa-slot__group-title">@section.Title</h3>
+                        <h3 class="issue-issued-visa-slot__group-title">@(section.Title)</h3>
                         @foreach (var person in section.People)
                         {
                             var issued = person.AlreadyIssued && !_draft.IsEditMode;
