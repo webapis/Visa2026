@@ -373,6 +373,38 @@ public static class ApprovalLegProfileSlotEditor
         return Contains(row.Code, needle) || Contains(row.MinistriesLabel, needle);
     }
 
+    /// <summary>
+    /// True when the same ministry appears twice in a row.
+    /// Non-adjacent repeats (TE → EN → GU → EN) are allowed.
+    /// </summary>
+    public static bool HasAdjacentDuplicateMinistry(IReadOnlyList<ApprovalLegProfileSlotLegDraft>? legs)
+    {
+        if (legs == null || legs.Count < 2)
+            return false;
+
+        for (var i = 1; i < legs.Count; i++)
+        {
+            if (legs[i].MinistryId != Guid.Empty
+                && legs[i].MinistryId == legs[i - 1].MinistryId)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// True when <paramref name="ministryId"/> matches the last leg — adding it would make an adjacent duplicate.
+    /// </summary>
+    public static bool IsBlockedAsNextMinistry(
+        IReadOnlyList<ApprovalLegProfileSlotLegDraft>? legs,
+        Guid ministryId)
+    {
+        if (ministryId == Guid.Empty || legs == null || legs.Count == 0)
+            return false;
+
+        return legs[^1].MinistryId == ministryId;
+    }
+
     public static string AllocateUniqueCode(string? preferred, IReadOnlySet<string> existingCodes)
     {
         var baseCode = TruncateCode(string.IsNullOrWhiteSpace(preferred) ? "CHAIN" : preferred.Trim());
@@ -405,7 +437,9 @@ public static class ApprovalLegProfileSlotEditor
             return false;
         }
 
-        if (draft.Legs.Select(l => l.MinistryId).Distinct().Count() != draft.Legs.Count)
+        // Same ministry may repeat later in the chain (e.g. TE → EN → GU → EN).
+        // Adjacent repeats are not allowed (EN → EN).
+        if (HasAdjacentDuplicateMinistry(draft.Legs))
         {
             error = VisaUiMessages.Get("ApprovalLegProfile.Slot.DuplicateMinistry");
             return false;

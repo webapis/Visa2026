@@ -3198,10 +3198,10 @@
     "ru-RU": "Этот код уже используется другой цепочкой."
   },
   "ApprovalLegProfile.Slot.DuplicateMinistry": {
-    "en": "That ministry is already on this chain.",
-    "tr-TR": "Bu bakanlık zaten bu zincirde.",
-    "tk-TM": "Bu ministrlik eýýäm bu zynjyrda.",
-    "ru-RU": "Это министерство уже есть в цепочке."
+    "en": "The same ministry cannot sit next to itself. Add another ministry between repeats.",
+    "tr-TR": "Aynı bakanlık art arda olamaz. Tekrarlar arasına başka bir bakanlık ekleyin.",
+    "tk-TM": "Bir ministrlik yzyna-yzyna goýulyp bilinmez. Gaýtalanmalaryň arasynda başga ministrlik bolmaly.",
+    "ru-RU": "Одно и то же министерство нельзя ставить подряд. Между повторами добавьте другое министерство."
   },
   "ApprovalLegProfile.Slot.MinistryMissing": {
     "en": "A selected ministry is no longer available.",

@@ -128,4 +128,38 @@ public sealed class ApprovalLegProfileSlotEditorTests
         Assert.False(profile.IsActive);
         Assert.Equal("EN-AH-GU", profile.Code);
     }
+
+    [Fact]
+    public void HasAdjacentDuplicateMinistry_allows_non_adjacent_repeats()
+    {
+        var en = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var te = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var gu = Guid.Parse("33333333-3333-3333-3333-333333333333");
+        var legs = new List<ApprovalLegProfileSlotLegDraft>
+        {
+            new() { MinistryId = te, Caption = "Türkmenenergo" },
+            new() { MinistryId = en, Caption = "Energetika" },
+            new() { MinistryId = gu, Caption = "Gurluşyk" },
+            new() { MinistryId = en, Caption = "Energetika" },
+        };
+
+        Assert.False(ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry(legs));
+        Assert.False(ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry(legs, te));
+        Assert.True(ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry(legs, en));
+    }
+
+    [Fact]
+    public void HasAdjacentDuplicateMinistry_blocks_back_to_back_repeats()
+    {
+        var en = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var te = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var legs = new List<ApprovalLegProfileSlotLegDraft>
+        {
+            new() { MinistryId = te, Caption = "Türkmenenergo" },
+            new() { MinistryId = en, Caption = "Energetika" },
+            new() { MinistryId = en, Caption = "Energetika" },
+        };
+
+        Assert.True(ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry(legs));
+    }
 }

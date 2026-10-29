@@ -1,3 +1,17 @@
+### 2026-10-29 — New issued visa people grouped by selection
+
+- **Need**: Unchecked people were mixed with selected and issued rows, so officers could not scan who still needed a visa.
+- **Fix**: Create mode uses flat blocks top to bottom: Not selected yet → Selected for this create → Already issued → Not ready (missing passport). No invitation sub-headers in create. Checking someone moves them into Selected with the full form. Edit mode keeps prior grouping.
+- **Officer**: Rebuild, hard-refresh. + Add Issued visa — unchecked names are at the top; check one to fill the visa form below.
+- **Prevent**: Do not interleave unchecked cards under invitation headers on create.
+- **Cross-skill**: —
+### 2026-10-29 — New issued visa people start unchecked
+
+- **Need**: Visas are often issued on different dates. Opening New issued visa checked every eligible person, so Create Visas risked issuing everyone at once.
+- **Fix**: Invitation-source and roster-source create drafts set `Include = false`. Officer checks only the people for this batch. Edit existing visa unchanged. Already-issued rows stay non-selectable as before.
+- **Officer**: Rebuild, hard-refresh. Application result → + Add Issued visa — checkboxes are empty until checked; Create Visas only for those checked.
+- **Prevent**: Do not default `Include` to true for new issued-visa cards.
+- **Cross-skill**: —
 ### 2026-10-29 — Officer delete uses DxPopup confirm
 
 - **Need**: Application result Delete for Invitation (and other issued headers / visa) used the browser `confirm` dialog.
@@ -1998,6 +2012,13 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ---
 
+### 2026-10-29 — Approval leg chains may repeat a ministry after another ministry
+
+- **Ask**: Creating Approval Legs blocked picking the same ministry twice. Officers need chains like Türkmenenergo → Energetika → Gurluşyk → Energetika.
+- **Rule**: Non-adjacent repeats allowed. Adjacent repeats (same ministry back-to-back) stay blocked.
+- **Fix**: `AvailableMinistries` hides only the last leg’s ministry. `AddMinistry` / inline new ministry / save (`TryNormalizeDraft`) / move-up-down use `IsBlockedAsNextMinistry` / `HasAdjacentDuplicateMinistry`. Message text updated. Code helper already produced `TE-EN-GU-EN`.
+- **Test**: `ApprovalLegProfileSlotEditorTests` 13 passed (includes adjacent vs non-adjacent cases).
+- **Files**: `ApprovalLegProfileSlotEditor.cs`, `ApprovalLegProfileSlotPanel.razor`, `UiStrings.messages.json`, `VisaUiMessageCatalog.g.cs`, tests.
 ### 2026-08-21 — Import ApplicationProfile FK with type-only tenant catalog
 
 - Symptom: after `--import-visa2014` App_Inv_And_WP, ListView **Application Profile** empty; Approval leg profile filled.

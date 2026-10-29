@@ -330,8 +330,13 @@
     {
         get
         {
-            var taken = _draft?.Legs.Select(l => l.MinistryId).ToHashSet() ?? [];
-            return _ministries.Where(m => !taken.Contains(m.Id));
+            // Keep every ministry available except the last one (no adjacent repeats).
+            var legs = _draft?.Legs;
+            if (legs == null || legs.Count == 0)
+                return _ministries;
+
+            var lastId = legs[^1].MinistryId;
+            return _ministries.Where(m => m.Id != lastId);
         }
     }
 
@@ -421,7 +426,7 @@
         var option = _ministries.FirstOrDefault(m => m.Id == ministryId);
         if (option == null)
             return;
-        if (_draft.Legs.Any(l => l.MinistryId == ministryId))
+        if (ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry(_draft.Legs, ministryId))
         {
             _error = Msg("ApprovalLegProfile.Slot.DuplicateMinistry");
             return;
@@ -471,14 +476,16 @@
                 return error;
 
             _ministries = ApprovalLegProfileSlotEditor.ListMinistries(objectSpace);
-            if (created != null && !draft.Legs.Any(l => l.MinistryId == created.Id))
+            if (created == null)
+                return Msg("ApprovalLegProfile.Slot.CreateMinistryFailed");
+            if (ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry(draft.Legs, created.Id))
+                return Msg("ApprovalLegProfile.Slot.DuplicateMinistry");
+
+            draft.Legs.Add(new ApprovalLegProfileSlotLegDraft
             {
-                draft.Legs.Add(new ApprovalLegProfileSlotLegDraft
-                {
-                    MinistryId = created.Id,
-                    Caption = created.Caption,
-                });
-            }
+                MinistryId = created.Id,
+                Caption = created.Caption,
+            });
 
             _addingMinistry = false;
             _newShortName = string.Empty;
@@ -509,7 +516,17 @@
         var target = index + delta;
         if (index < 0 || index >= _draft.Legs.Count || target < 0 || target >= _draft.Legs.Count)
             return;
+
         (_draft.Legs[index], _draft.Legs[target]) = (_draft.Legs[target], _draft.Legs[index]);
+        if (ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry(_draft.Legs))
+        {
+            // Undo — same ministry cannot sit next to itself.
+            (_draft.Legs[index], _draft.Legs[target]) = (_draft.Legs[target], _draft.Legs[index]);
+            _error = Msg("ApprovalLegProfile.Slot.DuplicateMinistry");
+            return;
+        }
+
+        _error = null;
     }
 
     private void CreateAsync() => Persist(() =>
