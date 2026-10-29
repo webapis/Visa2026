@@ -2,6 +2,9 @@
 -- One person row. Every valid work permit (not cancelled, not yet expired) is listed
 -- in WorkPermitBundle, newest start date first. Passport and the scalar permit
 -- columns stay on the newest permit.
+-- A work permit linked to a cancellation instance (ActionFamily Cancellation)
+-- is closed even when ExpirationDate is still in the future. The link is enough;
+-- LatestPrimaryStateCode may still be blank.
 DROP VIEW IF EXISTS vw_rd_registration_oturum_sayisi;
 DROP VIEW IF EXISTS vw_rd_work_permit_personel_sayi;
 DROP VIEW IF EXISTS vw_rd_work_permit_kota_oranimiz;
@@ -89,8 +92,7 @@ FROM (
           WHERE j."WorkPermitItemId" = wpi."ID"
             AND COALESCE(api."GCRecord", 0) = 0
             AND COALESCE(ap."GCRecord", 0) = 0
-            AND ap."ActionFamily" = 1
-            AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
+            AND ap."ActionFamily" = 1)
     ORDER BY wpi."PersonID", wpi."StartDate" DESC NULLS LAST, wpi."ExpirationDate" DESC NULLS LAST, wpi."ID" DESC
 ) picked
 INNER JOIN "People" p
@@ -178,8 +180,7 @@ LEFT JOIN LATERAL (
           WHERE j."WorkPermitItemId" = v."ID"
             AND COALESCE(api."GCRecord", 0) = 0
             AND COALESCE(ap."GCRecord", 0) = 0
-            AND ap."ActionFamily" = 1
-            AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
+            AND ap."ActionFamily" = 1)
 ) all_permits ON TRUE
 LEFT JOIN "Countries" nat
     ON nat."ID" = p."NationalityID" AND COALESCE(nat."GCRecord", 0) = 0

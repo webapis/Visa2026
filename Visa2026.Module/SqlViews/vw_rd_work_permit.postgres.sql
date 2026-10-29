@@ -1,5 +1,7 @@
 -- Report Dashboard: valid WorkPermitItems by days remaining (By Days Remaining).
 -- One row per valid (non-cancelled, not expired) item; persons may appear more than once.
+-- A cancellation-instance link closes the permit even when ExpirationDate is still
+-- in the future. LatestPrimaryStateCode may still be blank.
 -- Buckets: < 10 days / < 1 month / < 3..6 months / ≥ 6 months.
 DROP VIEW IF EXISTS vw_rd_work_permit;
 CREATE VIEW vw_rd_work_permit AS
@@ -56,8 +58,7 @@ WHERE COALESCE(wpi."GCRecord", 0) = 0
       WHERE j."WorkPermitItemId" = wpi."ID"
         AND COALESCE(api."GCRecord", 0) = 0
         AND COALESCE(ap."GCRecord", 0) = 0
-        AND ap."ActionFamily" = 1
-        AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
+        AND ap."ActionFamily" = 1)
   AND wpi."PersonID" IS NOT NULL
   AND wpi."ExpirationDate" IS NOT NULL
   AND (wpi."ExpirationDate")::date >= CURRENT_DATE;

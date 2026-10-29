@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Npgsql;
 
 namespace Visa2026.Module.DatabaseUpdate;
@@ -202,7 +203,8 @@ public static class ReportDashboardPostgresViewsHealSql
                 && !ViewHasLegacyApplicationOid(connection, viewName)
                 && (viewName != "vw_rd_visa_aktiv_personeller"
                     || (ColumnExists(connection, viewName, "VisaStartDate")
-                        && ViewDefinitionContains(connection, viewName, "RegistrationKind")))
+                        && ViewDefinitionContains(connection, viewName, "RegistrationKind")
+                        && !WorkPermitCancellationStillRequiresIssued(connection, viewName)))
                 && (viewName != "vw_rd_visa_uzatilanlar"
                     || ColumnExists(connection, viewName, "SecondLastApprovalDate")))
                 continue;
@@ -361,11 +363,14 @@ public static class ReportDashboardPostgresViewsHealSql
         {
             if (ViewExists(connection, viewName)
                 && !ViewHasLegacyApplicationOid(connection, viewName)
+                && (viewName != "vw_rd_work_permit"
+                    || !WorkPermitCancellationStillRequiresIssued(connection, viewName))
                 && (viewName != "vw_rd_work_permit_active"
                     || (ViewDefinitionContains(connection, viewName, "chr(29)")
                         && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                         && (ColumnExists(connection, viewName, "SpecialtyLabel")
-                            || ColumnExists(connection, viewName, "specialtylabel"))))
+                            || ColumnExists(connection, viewName, "specialtylabel"))
+                        && !WorkPermitCancellationStillRequiresIssued(connection, viewName)))
                 && (viewName != "vw_rd_work_permit_a_maglumat_3"
                     || ColumnExists(connection, viewName, "WorkPermitAdditionalLocationsLabel")
                     || ColumnExists(connection, viewName, "workpermitadditionallocationslabel"))
@@ -579,13 +584,49 @@ public static class ReportDashboardPostgresViewsHealSql
         if (!ViewExists(connection, viewName) || string.IsNullOrEmpty(needle))
             return false;
 
+        var def = GetViewDefinition(connection, viewName);
+        return !string.IsNullOrEmpty(def)
+            && def.Contains(needle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// A cancellation link on a work permit used to require PROCESS_ISSUED.
+    /// The link alone now closes the permit. Visa and change-permit clauses in the
+    /// same script may still mention PROCESS_ISSUED, so match only the permit predicate.
+    /// </summary>
+    private static bool WorkPermitCancellationStillRequiresIssued(NpgsqlConnection connection, string viewName)
+    {
+        var def = GetViewDefinition(connection, viewName);
+        if (string.IsNullOrEmpty(def))
+            return true;
+
+        var compact = Regex.Replace(def, @"\s+", " ");
+        foreach (Match match in Regex.Matches(
+            compact,
+            "ActionFamily\"\\s*=\\s*1",
+            RegexOptions.IgnoreCase))
+        {
+            var start = Math.Max(0, match.Index - 250);
+            var before = compact.Substring(start, match.Index - start);
+            if (before.IndexOf("WorkPermitItemId", StringComparison.OrdinalIgnoreCase) < 0)
+                continue;
+
+            var afterLength = Math.Min(160, compact.Length - match.Index);
+            var after = compact.Substring(match.Index, afterLength);
+            if (after.IndexOf("PROCESS_ISSUED", StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string GetViewDefinition(NpgsqlConnection connection, string viewName)
+    {
         using var command = connection.CreateCommand();
         command.CommandText = """
             SELECT pg_get_viewdef(('public.' || quote_ident(@viewName))::regclass, true);
             """;
         command.Parameters.AddWithValue("viewName", viewName);
-        var def = command.ExecuteScalar() as string;
-        return !string.IsNullOrEmpty(def)
-            && def.Contains(needle, StringComparison.OrdinalIgnoreCase);
+        return command.ExecuteScalar() as string ?? string.Empty;
     }
 }

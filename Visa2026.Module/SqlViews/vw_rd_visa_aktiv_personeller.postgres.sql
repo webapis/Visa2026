@@ -114,8 +114,7 @@ LEFT JOIN LATERAL (
           WHERE j."WorkPermitItemId" = wpi."ID"
             AND COALESCE(api."GCRecord", 0) = 0
             AND COALESCE(ap."GCRecord", 0) = 0
-            AND ap."ActionFamily" = 1
-            AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED')
+            AND ap."ActionFamily" = 1)
     ORDER BY wpi."StartDate" DESC NULLS LAST, wpi."ExpirationDate" DESC NULLS LAST, wpi."ID" DESC
     LIMIT 1
 ) permit ON TRUE

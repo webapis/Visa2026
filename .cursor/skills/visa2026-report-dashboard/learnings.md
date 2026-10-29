@@ -4,6 +4,18 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-28 — cancelled work permits leave the active lists before issue
+
+**Ask:** A work permit still before its expiration date must leave the Work Permit reports when an Application Profile instance has cancelled it, the same way aktiv personeller drops a cancelled visa.
+
+**Now:** `vw_rd_work_permit_active` and `vw_rd_work_permit` drop a permit linked on `ApplicationProfileInstanceWorkPermitItems` to ActionFamily Cancellation. The link is enough; `LatestPrimaryStateCode` may be blank. The newest remaining permit stays. Çalışma izni listesi, Sanaw, A. Maglumat, A. Maglumat 2, Goşmaça barjak ýerleri, kota oranımız (foreign count), Personel sayi, and Oturum sayısı read that active view. aktiv personeller’s permit-end cell uses the same link rule. Issued `change_workpermit` lines and the current-visa lookup still require `PROCESS_ISSUED`. Heal recreates the views while a permit cancellation predicate still requires `PROCESS_ISSUED`.
+
+**Prevent:** Do not wait for PROCESS_ISSUED on a work-permit cancellation link. Do not drop the issued check from `change_workpermit` extra places. Do not apply this exclusion to Active Visa (P)/(V).
+
+**Files:** `vw_rd_work_permit_active.postgres.sql`, `vw_rd_work_permit.postgres.sql`, `vw_rd_visa_aktiv_personeller.postgres.sql`, `ReportDashboardPostgresViewsHealSql.cs`
+
+---
+
 ## 2026-10-28 — aktiv personeller hides cancelled and checked-out visas
 
 **Ask:** A visa still before its expiration date must leave aktiv personeller when an Application Profile instance has cancelled it or checked it out.
