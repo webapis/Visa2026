@@ -25,6 +25,16 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 
 ## Entries
 
+### 2026-10-29 — Turkmen UI still showed English Document copies labels (UX)
+
+- **Symptom**: With UI culture `tk-TM`, case workspace Document copies kept English: title, subtitle, PASSPORT/EDUCATION/ADDRESS/APPLICATION FORM, Person column, and header family label "Invitation". Employees top tab also stayed English.
+- **Try**: Screenshot of Document copies with Turkmen nav/actions but English catalog chrome.
+- **Test**: Regenerated `VisaUiMessageCatalog`; Module build to temp output. Officer: stop F5, rebuild, Ctrl+F5 → Document copies should show Resminama nusgalary / Pasport / Adam / Ýagdaý; chrome "Çakylyk · Başlady …"; Employees tab "Işgärler".
+- **Root cause**: Hardcoded English in `OfficerShellCaseDocumentsTab`, `ApplicationItemDocumentCopiesTypeCatalog.FamilyTitle`, `ColumnPerson`, and `OfficerShellTemplateFamily.GetLabel`. Blazor `Model.xafml` Caption="Employees" overrode Module `tk-TM` localization.
+- **Fix**: Wire strings through `VisaUiMessages` (`ApplicationItemDocumentCopies.*` + `OfficerShell.TemplateFamily.*`); fix `PersonDocumentCopies.Column.Status` tk to Ýagdaý; drop English Captions on person ListViews in Blazor `Model.xafml`.
+- **Prevent**: Do not hardcode officer-visible English in Document copies / shell chrome; add JSON keys and regenerate. Do not set ListView Caption in Blazor `Model.xafml` when Module culture diffs already localize it.
+- **Cross-skill**: document-copies | application-profile | —
+
 ### 2026-10-07 — Passport and visa default to landscape, scan on the left (preview)
 
 - **Symptom**: Fit-to-page did not change the default. A portrait sheet scales an open passport until it fills the page. The wanted default is the scan on the left of a landscape sheet, with the right side blank, for visa as well.

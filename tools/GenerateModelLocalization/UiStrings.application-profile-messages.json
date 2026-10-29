@@ -29,6 +29,36 @@
     "tk-TM": "Iş sapary",
     "ru-RU": "Командировка"
   },
+  "OfficerShell.TemplateFamily.Registration": {
+    "en-US": "Registration",
+    "tr-TR": "Kayıt",
+    "tk-TM": "Hasaba alyş",
+    "ru-RU": "Регистрация"
+  },
+  "OfficerShell.TemplateFamily.Invitation": {
+    "en-US": "Invitation",
+    "tr-TR": "Davet",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "OfficerShell.TemplateFamily.Extension": {
+    "en-US": "Visa extension",
+    "tr-TR": "Vize uzatma",
+    "tk-TM": "Wizany uzaltmak",
+    "ru-RU": "Продление визы"
+  },
+  "OfficerShell.TemplateFamily.WorkPermit": {
+    "en-US": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsady",
+    "ru-RU": "Разрешение на работу"
+  },
+  "OfficerShell.TemplateFamily.Other": {
+    "en-US": "Other",
+    "tr-TR": "Diğer",
+    "tk-TM": "Başga",
+    "ru-RU": "Другое"
+  },
   "ApplicationProfile.RegistrationKind.CheckIn": {
     "en-US": "Check in",
     "tr-TR": "Giriş kaydı",

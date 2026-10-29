@@ -8,20 +8,21 @@
 @using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Localization
 
 <div class="dc-page">
     <header class="dc-page__head">
-        <h2>Document copies</h2>
+        <h2>@VisaUiMessages.Get("ApplicationItemDocumentCopies.Title", _uiCultureName)</h2>
         <p>@DocumentsSubtitle</p>
     </header>
 
     @if (_rosterIds.Count == 0)
     {
-        <p class="os-empty">No roster lines linked yet. Link people on the People tab first.</p>
+        <p class="os-empty">@VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.EmptyNoRoster", _uiCultureName)</p>
     }
     else if (_lineIds.Count == 0)
     {
-        <p class="os-empty">Select at least one person in the header to view document copies.</p>
+        <p class="os-empty">@VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.EmptyNoSelection", _uiCultureName)</p>
     }
     else
     {
@@ -66,15 +67,19 @@
         get
         {
             if (_rosterIds.Count == 0)
-                return "Scan and manage required document copies for people in this application.";
+                return VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.SubtitleEmpty", _uiCultureName);
 
             if (_lineIds.Count == 0)
-                return "Click a person in the header to include them in Document copies.";
+                return VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.SubtitleSelectPerson", _uiCultureName);
 
             if (_lineIds.Count == _rosterIds.Count)
-                return "Grouped by document type. Preview a type to open all ready files. Preview a person to open only that file.";
+                return VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.SubtitleGroupedAll", _uiCultureName);
 
-            return $"Showing {_lineIds.Count} of {_rosterIds.Count} people by document type. Preview a type to open all ready files. Preview a person to open only that file.";
+            return VisaUiMessages.FormatForCulture(
+                _uiCultureName,
+                "ApplicationItemDocumentCopies.Workspace.SubtitleGroupedFiltered",
+                _lineIds.Count,
+                _rosterIds.Count);
         }
     }
 

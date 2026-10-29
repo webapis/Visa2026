@@ -4799,6 +4799,114 @@
     "tk-TM": "Resminama nusgalary",
     "ru-RU": "Копии документов"
   },
+  "ApplicationItemDocumentCopies.Column.Person": {
+    "en": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Adam",
+    "ru-RU": "Лицо"
+  },
+  "ApplicationItemDocumentCopies.Family.Passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "ApplicationItemDocumentCopies.Family.Education": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "ApplicationItemDocumentCopies.Family.Address": {
+    "en": "Address",
+    "tr-TR": "Adres",
+    "tk-TM": "Salgy",
+    "ru-RU": "Адрес"
+  },
+  "ApplicationItemDocumentCopies.Family.Visa": {
+    "en": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "ApplicationItemDocumentCopies.Family.Invitation": {
+    "en": "Invitation",
+    "tr-TR": "Davet",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "ApplicationItemDocumentCopies.Family.WorkPermit": {
+    "en": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsady",
+    "ru-RU": "Разрешение на работу"
+  },
+  "ApplicationItemDocumentCopies.Family.Medical": {
+    "en": "Medical",
+    "tr-TR": "Sağlık",
+    "tk-TM": "Saglyk",
+    "ru-RU": "Мед."
+  },
+  "ApplicationItemDocumentCopies.Family.Rejection": {
+    "en": "Rejection",
+    "tr-TR": "Ret",
+    "tk-TM": "Ret",
+    "ru-RU": "Отказ"
+  },
+  "ApplicationItemDocumentCopies.Family.BorderZone": {
+    "en": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet sebiti",
+    "ru-RU": "Пограничная зона"
+  },
+  "ApplicationItemDocumentCopies.Family.FamilyRelationship": {
+    "en": "Family relationship",
+    "tr-TR": "Aile ilişkisi",
+    "tk-TM": "Maşgala gatnaşygy",
+    "ru-RU": "Родство"
+  },
+  "ApplicationItemDocumentCopies.Family.ApplicationForm": {
+    "en": "Application form",
+    "tr-TR": "Başvuru formu",
+    "tk-TM": "Ýüztutma blanky",
+    "ru-RU": "Форма заявления"
+  },
+  "ApplicationItemDocumentCopies.Workspace.SubtitleEmpty": {
+    "en": "Scan and manage required document copies for people in this application.",
+    "tr-TR": "Bu başvurudaki kişiler için gerekli belge kopyalarını tarayın ve yönetin.",
+    "tk-TM": "Bu ýüztutmadaky adamlar üçin zerur resminama nusgalaryny skan ediň we dolandyryň.",
+    "ru-RU": "Сканируйте и управляйте нужными копиями документов для людей в этой заявке."
+  },
+  "ApplicationItemDocumentCopies.Workspace.SubtitleSelectPerson": {
+    "en": "Click a person in the header to include them in Document copies.",
+    "tr-TR": "Belge kopyalarına eklemek için üstteki bir kişiyi seçin.",
+    "tk-TM": "Resminama nusgalaryna goşmak üçin başlykdaky adamy saýlaň.",
+    "ru-RU": "Выберите человека в шапке, чтобы включить его в копии документов."
+  },
+  "ApplicationItemDocumentCopies.Workspace.SubtitleGroupedAll": {
+    "en": "Grouped by document type. Preview a type to open all ready files. Preview a person to open only that file.",
+    "tr-TR": "Belge türüne göre gruplandı. Tüm hazır dosyaları açmak için türü önizleyin. Yalnızca o dosyayı açmak için kişiyi önizleyin.",
+    "tk-TM": "Resminama görnüşi boýunça toparlanan. Taýýar faýllaryň hemmesini açmak üçin görnüşi deslapky gör. Diňe şol faýly açmak üçin adamy deslapky gör.",
+    "ru-RU": "Сгруппировано по типу документа. Предпросмотр типа открывает все готовые файлы. Предпросмотр человека — только его файл."
+  },
+  "ApplicationItemDocumentCopies.Workspace.SubtitleGroupedFiltered": {
+    "en": "Showing {0} of {1} people by document type. Preview a type to open all ready files. Preview a person to open only that file.",
+    "tr-TR": "{1} kişiden {0} tanesi belge türüne göre gösteriliyor. Tüm hazır dosyaları açmak için türü önizleyin. Yalnızca o dosyayı açmak için kişiyi önizleyin.",
+    "tk-TM": "{1} adamdan {0} sanysy resminama görnüşi boýunça görkezilýär. Taýýar faýllaryň hemmesini açmak üçin görnüşi deslapky gör. Diňe şol faýly açmak üçin adamy deslapky gör.",
+    "ru-RU": "Показано {0} из {1} человек по типу документа. Предпросмотр типа открывает все готовые файлы. Предпросмотр человека — только его файл."
+  },
+  "ApplicationItemDocumentCopies.Workspace.EmptyNoRoster": {
+    "en": "No roster lines linked yet. Link people on the People tab first.",
+    "tr-TR": "Henüz bağlanmış kişi yok. Önce Kişiler sekmesinde bağlayın.",
+    "tk-TM": "Entäk baglanan adam ýok. Ilki Adamlar goýmagynda baglaň.",
+    "ru-RU": "Пока нет связанных людей. Сначала свяжите их на вкладке «Люди»."
+  },
+  "ApplicationItemDocumentCopies.Workspace.EmptyNoSelection": {
+    "en": "Select at least one person in the header to view document copies.",
+    "tr-TR": "Belge kopyalarını görmek için üstte en az bir kişi seçin.",
+    "tk-TM": "Resminama nusgalaryny görmek üçin başlykda azyndan bir adam saýlaň.",
+    "ru-RU": "Выберите хотя бы одного человека в шапке, чтобы просмотреть копии документов."
+  },
   "ApplicationItemDocumentCopies.Subtitle": {
     "en": "Scanned files linked to this application line (same scope as PDF packaging).",
     "tr-TR": "Bu başvuru kalemine bağlı taranmış dosyalar (PDF paketleme ile aynı kapsam).",
@@ -5654,7 +5762,7 @@
   "PersonDocumentCopies.Column.Status": {
     "en": "Status",
     "tr-TR": "Durum",
-    "tk-TM": "Status",
+    "tk-TM": "Ýagdaý",
     "ru-RU": "Статус"
   },
   "PersonDocumentCopies.Status.Missing": {

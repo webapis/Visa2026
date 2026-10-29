@@ -1173,7 +1173,7 @@
         <ColumnInfo Id="MiddleName" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_Employees" Caption="Employees" DetailViewID="Person_DetailView_Employee">
+    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_Employee">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
@@ -1214,7 +1214,7 @@
         <ColumnInfo Id="SponsoringEmployee" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_FamilyMembers" Caption="Family Members" DetailViewID="Person_DetailView_FamilyMember">
+    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMember">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
@@ -1249,7 +1249,7 @@
         <ColumnInfo Id="Photo" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Temporary visitor" DetailViewID="Person_DetailView_TemporaryVisitor">
+    <ListView Id="Person_ListView_TemporaryVisitors" DetailViewID="Person_DetailView_TemporaryVisitor">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />

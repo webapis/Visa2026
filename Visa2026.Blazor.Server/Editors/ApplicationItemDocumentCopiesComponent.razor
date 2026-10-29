@@ -51,7 +51,7 @@
                         var canPreviewType = typeSection.ReadyCount > 0 && !typeLoading;
 
                         <section class="doc-copies-catalog__section @(typeCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
-                                 aria-label="@typeSection.Title">
+                                 aria-label="@TypeSectionTitle(typeSection.FamilyKey)">
                             <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
                                     role="button"
                                     tabindex="0"
@@ -64,7 +64,7 @@
                                 </span>
 
                                 <div class="doc-copies-catalog__section-head-main">
-                                    <span class="doc-copies-catalog__section-title">@typeSection.Title</span>
+                                    <span class="doc-copies-catalog__section-title">@TypeSectionTitle(typeSection.FamilyKey)</span>
                                     <span class="doc-copies-catalog__section-summary">@GetPersonSectionSummary(typeSection.ReadyCount, typeSection.TotalCount)</span>
                                 </div>
 
@@ -891,10 +891,12 @@
     private string PackageCancelConfirm => Msg("ApplicationItemDocumentCopies.Package.CancelConfirm");
     private string FormSlotLabel => Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm");
     private string LinkedDocumentsSectionLabel => Msg("ApplicationItemDocumentCopies.Section.LinkedDocuments");
-    private string ColumnPerson => "Person";
+    private string ColumnPerson => Msg("ApplicationItemDocumentCopies.Column.Person");
     private string ColumnRecord => Msg("PersonDocumentCopies.Column.Record");
     private string ColumnFiles => Msg("PersonDocumentCopies.Column.Files");
     private string ColumnStatus => Msg("PersonDocumentCopies.Column.Status");
+    private string TypeSectionTitle(string familyKey) =>
+        ApplicationItemDocumentCopiesTypeCatalog.FamilyTitle(familyKey, EffectiveUiCulture);
     private string StatusMissing => Msg("PersonDocumentCopies.Status.Missing");
     private string StatusReady => Msg("PersonDocumentCopies.Status.Ready");
     private string StatusPartial => Msg("ApplicationItemDocumentCopies.Status.Partial");

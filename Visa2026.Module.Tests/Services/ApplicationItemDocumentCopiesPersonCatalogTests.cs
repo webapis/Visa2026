@@ -197,7 +197,9 @@ public class ApplicationItemDocumentCopiesTypeCatalogTests
         ]);
 
         Assert.Equal(new[] { "Passport", "Education", "Visa", "ApplicationForm" }, sections.Select(s => s.FamilyKey));
-        Assert.Equal("Passport", sections[0].Title);
+        Assert.Equal(
+            ApplicationItemDocumentCopiesTypeCatalog.FamilyTitle("Passport"),
+            sections[0].Title);
         Assert.Equal(2, sections[0].ReadyCount);
         Assert.Equal(2, sections[0].TotalCount);
         Assert.Equal(0, sections[1].ReadyCount);

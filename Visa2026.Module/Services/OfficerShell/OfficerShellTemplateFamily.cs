@@ -1,5 +1,6 @@
 using System;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.OfficerShell;
 
@@ -43,13 +44,13 @@ public static class OfficerShellTemplateFamily
         };
     }
 
-    public static string GetLabel(string key) => key switch
+    public static string GetLabel(string key, string? cultureName = null) => key switch
     {
-        Registration => "Registration",
-        Invitation => "Invitation",
-        Extension => "Visa extension",
-        WorkPermit => "Work permit",
-        _ => "Other",
+        Registration => VisaUiMessages.Get("OfficerShell.TemplateFamily.Registration", cultureName),
+        Invitation => VisaUiMessages.Get("OfficerShell.TemplateFamily.Invitation", cultureName),
+        Extension => VisaUiMessages.Get("OfficerShell.TemplateFamily.Extension", cultureName),
+        WorkPermit => VisaUiMessages.Get("OfficerShell.TemplateFamily.WorkPermit", cultureName),
+        _ => VisaUiMessages.Get("OfficerShell.TemplateFamily.Other", cultureName),
     };
 
     public static string GetColor(string key) => key switch

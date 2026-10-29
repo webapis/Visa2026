@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
@@ -52,19 +53,19 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
         return FamilyOrder.Contains(family, StringComparer.Ordinal) ? family : null;
     }
 
-    public static string FamilyTitle(string familyKey) => familyKey switch
+    public static string FamilyTitle(string familyKey, string? cultureName = null) => familyKey switch
     {
-        "Passport" => "Passport",
-        "Education" => "Education",
-        "AddressOfResidence" => "Address",
-        "Visa" => "Visa",
-        "Invitation" => "Invitation",
-        "WorkPermit" => "Work permit",
-        "MedicalRecord" => "Medical",
-        "Rejection" => "Rejection",
-        "BorderZone" => "Border zone",
-        "FamilyRelationship" => "Family relationship",
-        ApplicationFormFamily => "Application form",
+        "Passport" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Passport", cultureName),
+        "Education" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Education", cultureName),
+        "AddressOfResidence" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Address", cultureName),
+        "Visa" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Visa", cultureName),
+        "Invitation" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Invitation", cultureName),
+        "WorkPermit" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.WorkPermit", cultureName),
+        "MedicalRecord" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Medical", cultureName),
+        "Rejection" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.Rejection", cultureName),
+        "BorderZone" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.BorderZone", cultureName),
+        "FamilyRelationship" => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.FamilyRelationship", cultureName),
+        ApplicationFormFamily => VisaUiMessages.Get("ApplicationItemDocumentCopies.Family.ApplicationForm", cultureName),
         _ => familyKey,
     };
 
