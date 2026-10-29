@@ -4,6 +4,30 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-10-29 — Work Permit checkboxes removed
+
+**Ask:** Remove the three Work Permit checkboxes: one last valid work permit, valid visa only, and include archived.
+
+**Now:** Those checkboxes are not rendered. A person with a current permit stays on the list with or without a visa. The list remains one current permit per person. Archived people stay off the preview and the Open ListView (`[Person.IsArchived] = False`).
+
+**Prevent:** Do not put those three checkboxes back on Work Permit. Do not start including archived people.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardComponent.razor`
+
+---
+
+## 2026-10-29 — Work Permit lists ignore the valid-visa checkbox
+
+**Ask:** A person with a current work permit must stay on çalışma izni listesi even when they have no visa. The tab showed 229 because “Diňe güýjündäki wiza” hid Jadi Marsahala Hutabarat (passport X7192908, no visa row). The sheet and the employee permit list have 230.
+
+**Now:** Work Permit is not in `SupportsValidVisaPersonsOnly`, so the checkbox is hidden and `validVisaPersonIds` is not applied. A. Maglumat, A. Maglumat 2, Goşmaça barjak ýerleri, Sanaw, and çalışma izni listesi keep that person. Personel sayi still splits Aktiv (permit and visa) from Aktiv olmayan (permit only). Oturum sayısı still requires both.
+
+**Prevent:** Do not put Work Permit back on the valid-visa checkbox. Do not drop a permit row because `VisaNumber` is blank.
+
+**Files:** `ReportDashboardCatalog.cs`
+
+---
+
 ## 2026-10-28 — cancelled work permits leave the active lists before issue
 
 **Ask:** A work permit still before its expiration date must leave the Work Permit reports when an Application Profile instance has cancelled it, the same way aktiv personeller drops a cancelled visa.

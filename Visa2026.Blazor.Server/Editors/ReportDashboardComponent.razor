@@ -205,6 +205,15 @@
                                     </button>
                                 }
                             </div>
+                            @if (ReportDashboardCatalog.SupportsPersonSearch(Category)
+                              || ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category)
+                              || ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category)
+                              || ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category)
+                              || ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category)
+                              || ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category)
+                              || ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category)
+                              || ReportDashboardCatalog.SupportsCategoryDateRange(Category))
+                            {
                             <div class="rd-sub-tab-filters">
                                 @if (ReportDashboardCatalog.SupportsPersonSearch(Category))
                                 {
@@ -303,6 +312,7 @@
                                     </label>
                                 }
                             </div>
+                            }
                         </div>
                     }
                     else if (ReportDashboardCatalog.SupportsPersonSearch(Category)

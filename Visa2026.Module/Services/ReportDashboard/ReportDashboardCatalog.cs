@@ -76,8 +76,7 @@ public static class ReportDashboardCatalog
     /// Categories that expose an Include archived toggle (Person.IsArchived on the SQL view / loader).
     /// </summary>
     public static bool SupportsIncludeArchivedPersons(ReportDashboardCategory category) =>
-        category is ReportDashboardCategory.WorkPermit
-            or ReportDashboardCategory.Education
+        category is ReportDashboardCategory.Education
             or ReportDashboardCategory.AddressOfResidence
             or ReportDashboardCategory.Subcontractor
             or ReportDashboardCategory.MedicalRecord;
@@ -85,11 +84,12 @@ public static class ReportDashboardCatalog
     /// <summary>
     /// When checked (default), include only persons with at least one valid visa
     /// (not cancelled, ExpirationDate on or after today).
+    /// Work Permit lists a person who has a valid work permit even when that person has no visa.
+    /// Personel sayi and Oturum sayısı keep their own visa split.
     /// Incomplete persons: no visa filter (soft flag inventory includes people without visas).
     /// </summary>
     public static bool SupportsValidVisaPersonsOnly(ReportDashboardCategory category) =>
-        category is ReportDashboardCategory.WorkPermit
-            or ReportDashboardCategory.Travel
+        category is ReportDashboardCategory.Travel
             or ReportDashboardCategory.BorderZone
             or ReportDashboardCategory.Passport
             or ReportDashboardCategory.Education
@@ -106,11 +106,13 @@ public static class ReportDashboardCatalog
         category is ReportDashboardCategory.VisaExtension;
 
     /// <summary>
-    /// Work Permit: toggle to count one last valid work permit per person (latest expiry).
-    /// Applies to active-by-project / by-days-remaining.
+    /// Work Permit lists are already one current permit per person. The checkbox is not shown.
     /// </summary>
-    public static bool SupportsOneLastValidWorkPermitPerPerson(ReportDashboardCategory category) =>
-        category is ReportDashboardCategory.WorkPermit;
+    public static bool SupportsOneLastValidWorkPermitPerPerson(ReportDashboardCategory category)
+    {
+        _ = category;
+        return false;
+    }
 
     /// <summary>
     /// Include completed/cancelled toggles removed — On Process / Completed tabs fix population.
@@ -1639,7 +1641,9 @@ public static class ReportDashboardCatalog
             }
         }
 
-        if (!includeArchivedPersons && SupportsIncludeArchivedPersons(category))
+        // Work Permit has no archived checkbox. Archived people stay off the list.
+        if (category == ReportDashboardCategory.WorkPermit
+            || (!includeArchivedPersons && SupportsIncludeArchivedPersons(category)))
         {
             var archivedCriteria = category switch
             {
