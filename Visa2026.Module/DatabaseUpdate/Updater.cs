@@ -396,6 +396,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApprovingMinistry>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfilePickerShelf>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileApprovalLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileApprovalLegVersion>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileTemplate>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -878,6 +879,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApprovingMinistry>(role);
             EnsureReadOnlyPermission<ApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ApplicationProfile>(role);
+            EnsureFullAccessRecursivePermission<ApplicationProfilePickerShelf>(role);
             EnsureReadOnlyPermission<ApplicationProfileApprovalLeg>(role);
             EnsureReadOnlyPermission<ApplicationProfileApprovalLegVersion>(role);
             EnsureReadOnlyPermission<ApplicationProfileTemplate>(role);
@@ -939,6 +941,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.Instances));
             // Create from yellow marks appends the new row to this collection.
             EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.NestedTemplates));
+            EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.PickerShelf));
             // The property named in the security error. Both sides are required when a criteria was involved.
             EnsureAssociationMemberWrite<ApplicationProfileInstance>(role, nameof(ApplicationProfileInstance.ApplicationProfile));
         }

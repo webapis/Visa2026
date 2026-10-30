@@ -180,41 +180,135 @@
         }
         else
         {
-            <ul class="ap-picker__list" role="listbox" aria-label="@Msg("ApplicationProfileInstance.Picker.ListAria")">
-                @foreach (var row in Rows)
+            <div class="ap-picker__tabs" role="tablist" aria-label="@Msg("ApplicationProfileInstance.Picker.Shelf.TabsAria")">
+                <button type="button"
+                        class="ap-picker__tab @(_tab.Kind == ApplicationProfilePickerTabKind.Recent ? "is-active" : null)"
+                        role="tab"
+                        aria-selected="@(_tab.Kind == ApplicationProfilePickerTabKind.Recent)"
+                        @onclick="() => SelectTab(new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.Recent))"
+                        @oncontextmenu:preventDefault="true">@Msg("ApplicationProfileInstance.Picker.Tab.Recent")</button>
+                <button type="button"
+                        class="ap-picker__tab @(_tab.Kind == ApplicationProfilePickerTabKind.All ? "is-active" : null)"
+                        role="tab"
+                        aria-selected="@(_tab.Kind == ApplicationProfilePickerTabKind.All)"
+                        @onclick="() => SelectTab(new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.All))"
+                        @oncontextmenu:preventDefault="true">@Msg("ApplicationProfileInstance.Picker.Tab.All")</button>
+                @foreach (var shelf in Shelves)
                 {
-                    var selected = row.ProfileId == SelectedProfileId;
-                    <li class="ap-picker__item @(selected ? "is-selected" : null)"
-                        role="option"
-                        aria-selected="@selected"
-                        tabindex="0"
-                        @onclick="() => SelectProfileAndContinueAsync(row.ProfileId)"
-                        @onkeydown="e => OnProfileKey(e, row.ProfileId)">
-                        <div class="ap-picker__item-main">
-                            <strong>@row.Name</strong>
-                            <div class="ap-picker__meta">@row.MetaLine</div>
-                        </div>
-                        <div class="ap-picker__badges">
-                            @if (row.IsConfigLocked)
-                            {
-                                <span class="ap-picker__badge ap-picker__badge--muted">@Msg("ApplicationProfile.Status.ConfigLocked")</span>
-                            }
-                            @if (selected)
-                            {
-                                <span class="ap-picker__badge ap-picker__badge--on">@Msg("ApplicationProfileInstance.Picker.Selected")</span>
-                            }
-                        </div>
-                    </li>
+                    var shelfActive = _tab.Kind == ApplicationProfilePickerTabKind.Shelf && _tab.ShelfId == shelf.Id;
+                    <button type="button"
+                            class="ap-picker__tab @(shelfActive ? "is-active" : null)"
+                            role="tab"
+                            aria-selected="@shelfActive"
+                            @onclick="() => SelectTab(new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.Shelf, shelf.Id))"
+                            @oncontextmenu="e => OnShelfTabContextMenu(e, shelf)"
+                            @oncontextmenu:preventDefault="true">@shelf.Name</button>
                 }
-            </ul>
+            </div>
+
+            @if (VisibleRows.Count == 0)
+            {
+                <div class="ap-picker__empty">
+                    @(_tab.Kind == ApplicationProfilePickerTabKind.Recent
+                        ? Msg("ApplicationProfileInstance.Picker.Shelf.EmptyRecent")
+                        : Msg("ApplicationProfileInstance.Picker.Shelf.Empty"))
+                </div>
+            }
+            else
+            {
+                <ul class="ap-picker__list" role="listbox" aria-label="@Msg("ApplicationProfileInstance.Picker.ListAria")" aria-busy="@IsAdvancing">
+                    @foreach (var row in VisibleRows)
+                    {
+                        var selected = row.ProfileId == SelectedProfileId;
+                        var advancing = IsAdvancing && selected;
+                        <li class="ap-picker__item @(selected ? "is-selected" : null) @(advancing ? "is-advancing" : null)"
+                            role="option"
+                            aria-selected="@selected"
+                            aria-busy="@advancing"
+                            tabindex="@(IsAdvancing && !advancing ? -1 : 0)"
+                            @onclick="() => SelectProfileAndContinueAsync(row.ProfileId)"
+                            @oncontextmenu="e => OnProfileContextMenu(e, row)"
+                            @oncontextmenu:preventDefault="true"
+                            @onkeydown="e => OnProfileKey(e, row.ProfileId)">
+                            <div class="ap-picker__item-main">
+                                <div class="ap-picker__item-title">
+                                    <strong>@row.Name</strong>
+                                    @if (advancing)
+                                    {
+                                        <span class="ap-picker__item-spinner" aria-hidden="true"></span>
+                                    }
+                                </div>
+                                <div class="ap-picker__meta">@row.MetaLine</div>
+                            </div>
+                            <div class="ap-picker__badges">
+                                @if (advancing)
+                                {
+                                    <span class="ap-picker__item-advance" role="status">@StatusMessage</span>
+                                }
+                                else
+                                {
+                                    @if (row.IsConfigLocked)
+                                    {
+                                        <span class="ap-picker__badge ap-picker__badge--muted">@Msg("ApplicationProfile.Status.ConfigLocked")</span>
+                                    }
+                                    @if (selected)
+                                    {
+                                        <span class="ap-picker__badge ap-picker__badge--on">@Msg("ApplicationProfileInstance.Picker.Selected")</span>
+                                    }
+                                }
+                            </div>
+                            @if (advancing)
+                            {
+                                <span class="ap-picker__item-track" aria-hidden="true"><span class="ap-picker__item-bar"></span></span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
 
             @if (SelectedRow?.MissingApprovalLegVersions == true)
             {
                 <div class="ap-picker__hint">@Msg("ApplicationProfileInstance.Picker.ContinueMissingVersions")</div>
             }
 
-            <div class="ap-picker__actions">
-                @RenderAdvance()
+        }
+
+        @if (_menuOpen)
+        {
+            <div class="ap-picker__ctx-backdrop" @onclick="CloseMenus"></div>
+            <div class="ap-picker__ctx" style="left:@(_menuX.ToString(System.Globalization.CultureInfo.InvariantCulture))px;top:@(_menuY.ToString(System.Globalization.CultureInfo.InvariantCulture))px" role="menu">
+                @if (_menuMode == MenuMode.Profile)
+                {
+                    <div class="ap-picker__ctx-label">@Msg("ApplicationProfileInstance.Picker.Shelf.MoveTo")</div>
+                    <button type="button" class="ap-picker__ctx-item @(_menuProfileShelfId == null ? "is-current" : null)" role="menuitem" @onclick="() => MoveProfileAsync(null)">@Msg("ApplicationProfileInstance.Picker.Shelf.RemoveFromShelf")</button>
+                    @foreach (var shelf in Shelves)
+                    {
+                        <button type="button" class="ap-picker__ctx-item @(_menuProfileShelfId == shelf.Id ? "is-current" : null)" role="menuitem" @onclick="() => MoveProfileAsync(shelf.Id)">@shelf.Name</button>
+                    }
+                    <div class="ap-picker__ctx-sep"></div>
+                    <button type="button" class="ap-picker__ctx-item" role="menuitem" @onclick="OpenCreateDialog">@Msg("ApplicationProfileInstance.Picker.Shelf.CreateNewTab")</button>
+                }
+                else if (_menuMode == MenuMode.Shelf && _menuShelf != null && !_menuShelf.IsSystem)
+                {
+                    <button type="button" class="ap-picker__ctx-item" role="menuitem" @onclick="OpenRenameDialog">@Msg("ApplicationProfileInstance.Picker.Shelf.Rename")</button>
+                    <button type="button" class="ap-picker__ctx-item ap-picker__ctx-item--danger" role="menuitem" @onclick="DeleteMenuShelfAsync">@Msg("ApplicationProfileInstance.Picker.Shelf.Delete")</button>
+                }
+            </div>
+        }
+
+        @if (_dialogOpen)
+        {
+            <div class="ap-picker__dialog-backdrop" @onclick="CloseDialog"></div>
+            <div class="ap-picker__dialog" role="dialog" aria-modal="true" aria-label="@Msg("ApplicationProfileInstance.Picker.Shelf.CreateTitle")">
+                <h2 class="ap-picker__dialog-title">@(_dialogRename ? Msg("ApplicationProfileInstance.Picker.Shelf.Rename") : Msg("ApplicationProfileInstance.Picker.Shelf.CreateTitle"))</h2>
+                <label class="ap-picker__dialog-label">
+                    <span>@Msg("ApplicationProfileInstance.Picker.Shelf.NameLabel")</span>
+                    <input class="ap-picker__dialog-input" @bind="_dialogName" @bind:event="oninput" maxlength="100" />
+                </label>
+                <div class="ap-picker__dialog-actions">
+                    <button type="button" class="ap-picker__btn" @onclick="CloseDialog">@Msg("ApplicationProfileInstance.Picker.Shelf.Cancel")</button>
+                    <button type="button" class="ap-picker__btn ap-picker__btn--primary" @onclick="ConfirmDialogAsync">@Msg("ApplicationProfileInstance.Picker.Shelf.Create")</button>
+                </div>
             </div>
         }
     }
@@ -225,6 +319,7 @@
     [Parameter] public bool IsAdvancing { get; set; }
     [Parameter] public int Step { get; set; } = 1;
     [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> Rows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PickerRowModel>();
+    [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.ShelfModel> Shelves { get; set; } = Array.Empty<ApplicationProfilePickerModel.ShelfModel>();
     [Parameter] public Guid SelectedProfileId { get; set; }
     [Parameter] public Guid SelectedVersionId { get; set; }
     [Parameter] public string? StatusMessage { get; set; }
@@ -246,8 +341,45 @@
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
 
     [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
+    [Parameter] public EventCallback<(Guid ProfileId, Guid? ShelfId)> MoveToShelfRequested { get; set; }
+    [Parameter] public EventCallback<(Guid ProfileId, string Name)> CreateShelfRequested { get; set; }
+    [Parameter] public EventCallback<(Guid ShelfId, string Name)> RenameShelfRequested { get; set; }
+    [Parameter] public EventCallback<Guid> DeleteShelfRequested { get; set; }
 
     private bool _initialLoadStarted;
+    private bool _tabInitialized;
+    private ApplicationProfilePickerTabKey _tab = new(ApplicationProfilePickerTabKind.All);
+    private bool _menuOpen;
+    private MenuMode _menuMode;
+    private double _menuX;
+    private double _menuY;
+    private Guid? _menuProfileId;
+    private Guid? _menuProfileShelfId;
+    private ApplicationProfilePickerModel.ShelfModel? _menuShelf;
+    private bool _dialogOpen;
+    private bool _dialogRename;
+    private string _dialogName = string.Empty;
+
+    private enum MenuMode { Profile, Shelf }
+
+    private IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> VisibleRows
+    {
+        get
+        {
+            IEnumerable<ApplicationProfilePickerModel.PickerRowModel> q = _tab.Kind switch
+            {
+                ApplicationProfilePickerTabKind.All => Rows,
+                ApplicationProfilePickerTabKind.Recent => Rows
+                    .Where(r => r.LastUsedAt.HasValue)
+                    .OrderByDescending(r => r.LastUsedAt)
+                    .Take(ApplicationProfilePickerShelfCodes.RecentCap),
+                ApplicationProfilePickerTabKind.Shelf when _tab.ShelfId is Guid shelfId && shelfId != Guid.Empty =>
+                    Rows.Where(r => r.ShelfId == shelfId),
+                _ => Array.Empty<ApplicationProfilePickerModel.PickerRowModel>(),
+            };
+            return q.ToList();
+        }
+    }
 
     private ApplicationProfilePickerModel.PickerRowModel? SelectedRow =>
         Rows.FirstOrDefault(r => r.ProfileId == SelectedProfileId);
@@ -257,6 +389,126 @@
 
     private bool CanCreateOnCaseSummaryStep =>
         ApplicationProfilePickerCaseSummaryDraft.CanCreate(CaseSummaryFields);
+
+    protected override void OnParametersSet()
+    {
+        EnsureDefaultTab();
+    }
+
+    private void EnsureDefaultTab()
+    {
+        if (_tabInitialized || Rows.Count == 0)
+            return;
+
+        _tab = Rows.Any(r => r.LastUsedAt.HasValue)
+            ? new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.Recent)
+            : new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.All);
+        _tabInitialized = true;
+    }
+
+    private void SelectTab(ApplicationProfilePickerTabKey tab)
+    {
+        _tab = tab;
+        CloseMenus();
+    }
+
+    private void CloseMenus()
+    {
+        _menuOpen = false;
+        _menuProfileId = null;
+        _menuShelf = null;
+    }
+
+    private void CloseDialog()
+    {
+        _dialogOpen = false;
+        _dialogName = string.Empty;
+    }
+
+    private void OnProfileContextMenu(MouseEventArgs e, ApplicationProfilePickerModel.PickerRowModel row)
+    {
+        _menuMode = MenuMode.Profile;
+        _menuProfileId = row.ProfileId;
+        _menuProfileShelfId = row.ShelfId;
+        _menuShelf = null;
+        _menuX = e.ClientX;
+        _menuY = e.ClientY;
+        _menuOpen = true;
+    }
+
+    private void OnShelfTabContextMenu(MouseEventArgs e, ApplicationProfilePickerModel.ShelfModel shelf)
+    {
+        if (shelf.IsSystem)
+            return;
+
+        _menuMode = MenuMode.Shelf;
+        _menuShelf = shelf;
+        _menuProfileId = null;
+        _menuX = e.ClientX;
+        _menuY = e.ClientY;
+        _menuOpen = true;
+    }
+
+    private async Task MoveProfileAsync(Guid? shelfId)
+    {
+        var profileId = _menuProfileId ?? Guid.Empty;
+        CloseMenus();
+        if (profileId == Guid.Empty || !MoveToShelfRequested.HasDelegate)
+            return;
+        await MoveToShelfRequested.InvokeAsync((profileId, shelfId));
+    }
+
+    private void OpenCreateDialog()
+    {
+        _dialogRename = false;
+        _dialogName = string.Empty;
+        _dialogOpen = true;
+        _menuOpen = false;
+    }
+
+    private void OpenRenameDialog()
+    {
+        if (_menuShelf == null)
+            return;
+        _dialogRename = true;
+        _dialogName = _menuShelf.Name;
+        _dialogOpen = true;
+        _menuOpen = false;
+    }
+
+    private async Task ConfirmDialogAsync()
+    {
+        var name = _dialogName;
+        var rename = _dialogRename;
+        var shelfId = _menuShelf?.Id ?? Guid.Empty;
+        var profileId = _menuProfileId ?? Guid.Empty;
+        CloseDialog();
+
+        if (rename)
+        {
+            if (shelfId == Guid.Empty || !RenameShelfRequested.HasDelegate)
+                return;
+            await RenameShelfRequested.InvokeAsync((shelfId, name));
+            return;
+        }
+
+        if (!CreateShelfRequested.HasDelegate)
+            return;
+        await CreateShelfRequested.InvokeAsync((profileId, name));
+        // After create, prefer showing the new shelf once Shelves refresh — All until then.
+        _tab = new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.All);
+    }
+
+    private async Task DeleteMenuShelfAsync()
+    {
+        var shelfId = _menuShelf?.Id ?? Guid.Empty;
+        CloseMenus();
+        if (shelfId == Guid.Empty || !DeleteShelfRequested.HasDelegate)
+            return;
+        await DeleteShelfRequested.InvokeAsync(shelfId);
+        if (_tab.Kind == ApplicationProfilePickerTabKind.Shelf && _tab.ShelfId == shelfId)
+            _tab = new ApplicationProfilePickerTabKey(ApplicationProfilePickerTabKind.All);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

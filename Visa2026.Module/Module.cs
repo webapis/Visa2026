@@ -123,6 +123,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationMigrationSlaProfileDropSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmployeeSalaryCurrencyColumnDropUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSeedUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfilePickerShelfSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileTenantCatalogSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileNestedTemplateTenantCatalogSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),

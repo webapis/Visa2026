@@ -133,6 +133,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
         public DbSet<ApplicationProfile> ApplicationProfiles { get; set; }
+        public DbSet<ApplicationProfilePickerShelf> ApplicationProfilePickerShelves { get; set; }
         public DbSet<ApplicationProfileApprovalLeg> ApplicationProfileApprovalLegs { get; set; }
         public DbSet<ApplicationProfileApprovalLegVersion> ApplicationProfileApprovalLegVersions { get; set; }
         public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
@@ -820,6 +821,18 @@ namespace Visa2026.Module.BusinessObjects
                  .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
+            
+            modelBuilder.Entity<ApplicationProfilePickerShelf>(b =>
+            {
+                b.Property(s => s.Code).HasMaxLength(64);
+                b.Property(s => s.Name).HasMaxLength(100);
+                b.HasIndex(s => s.Code)
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[Code] IS NOT NULL AND [Code] <> '' AND [GCRecord] IS NULL"));
+                b.HasIndex(s => s.SortOrder)
+                    .HasDatabaseName("IX_ApplicationProfilePickerShelves_SortOrder");
+            });
+
             modelBuilder.Entity<ApplicationProfile>(b =>
             {
                 b.Property(p => p.Name).HasMaxLength(200);
@@ -827,6 +840,11 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(p => p.SelectionCode).HasMaxLength(3);
                 b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
                 b.Property(p => p.DefaultWorkPermitLocation).HasMaxLength(500);
+                b.HasOne(p => p.PickerShelf)
+                    .WithMany(s => s.Profiles)
+                    .HasForeignKey(p => p.PickerShelfId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
                 b.HasOne(p => p.DefaultApprovalLegProfile).WithMany().HasForeignKey(p => p.DefaultApprovalLegProfileId).OnDelete(DeleteBehavior.SetNull);
                 b.Property(p => p.DefaultPurpose).HasMaxLength(700);
 #pragma warning disable CS0618

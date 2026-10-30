@@ -1,3 +1,10 @@
+### 2026-10-30 — Create picker shelf tabs (tenant-shared)
+
+- **Need**: Officers want rounded tabs on Choose Application Profile (Recent, All, Invitations, Registration, Family member only, Work permit only) plus custom shelves; right-click Move to / Create new tab; one shelf per profile (shared).
+- **Fix**: `ApplicationProfilePickerShelf` + `ApplicationProfile.PickerShelf`; heuristic seed (null only); picker UI tabs + context menu; permissions for shelf CRUD + member write on `PickerShelf`; config lock does not block shelf moves.
+- **Officer**: Stop F5, rebuild Blazor host (schema heal creates shelves table), hard-refresh. New → Choose Application Profile — tabs at top; right-click a name → Move to / Create new tab.
+- **Prevent**: Do not re-seed over non-null `PickerShelfId` on later deploys. Do not treat `PickerShelf` as a locked configuration scalar.
+- **Cross-skill**: —
 ### 2026-10-30 — Skip empty Case summary on create
 
 - **Need**: After hiding all Use fields on **Çakylygy üýtgetmek**, create still showed an empty Case summary step ("No … properties required").

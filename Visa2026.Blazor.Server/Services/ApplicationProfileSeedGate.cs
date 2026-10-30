@@ -41,6 +41,9 @@ internal static class ApplicationProfileSeedGate
                 return;
             }
 
+            // PickerShelfId must exist before any EF query on ApplicationProfile (ModuleUpdater often skipped).
+            ApplicationProfilePickerShelfSchemaSql.ApplyIfMissing(connectionString);
+
             using var scope = services.CreateScope();
             var osFactory = scope.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
             using var objectSpace = osFactory.CreateNonSecuredObjectSpace(typeof(ApplicationProfile));
@@ -76,6 +79,22 @@ internal static class ApplicationProfileSeedGate
             catch (Exception legEx)
             {
                 logger?.LogWarning(legEx, "ApprovalLegProfile catalog seed failed. Shared approval-leg chains may be incomplete.");
+            }
+
+            try
+            {
+                if (PostgresRelationExists.All(connectionString, "ApplicationProfilePickerShelves"))
+                {
+                    var shelfResult = ApplicationProfilePickerShelfSeed.EnsureSynced(objectSpace);
+                    logger?.LogInformation(
+                        "ApplicationProfile picker shelf seed: shelvesCreated={Created}, profilesAssigned={Assigned}.",
+                        shelfResult.ShelvesCreated,
+                        shelfResult.ProfilesAssigned);
+                }
+            }
+            catch (Exception shelfEx)
+            {
+                logger?.LogWarning(shelfEx, "ApplicationProfile picker shelf seed failed.");
             }
 
             if (result.TypesWithoutProfile.Count > 0)

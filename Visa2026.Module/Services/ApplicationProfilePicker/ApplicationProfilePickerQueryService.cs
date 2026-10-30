@@ -58,6 +58,7 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
                     RegistrationKind = p.RegistrationKind,
                     ProgressRoute = p.ProgressRoute,
                     IsConfigLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(p, objectSpace),
+                    ShelfId = p.PickerShelfId,
                     LastUsedAt = lastUsedByProfile.TryGetValue(p.ID, out var lastUsed) ? lastUsed : null,
                     UsedBySeedPersonCount = usage?.Count ?? 0,
                     LastUsedBySeedPersonAt = usage?.LastUsedAt,

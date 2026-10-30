@@ -22,6 +22,8 @@ public sealed class ApplicationProfilePickerRow
 
     public bool IsConfigLocked { get; init; }
 
+    public Guid? ShelfId { get; init; }
+
     public DateTime? LastUsedAt { get; init; }
 
     public int UsedBySeedPersonCount { get; init; }

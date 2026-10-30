@@ -36,6 +36,12 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public IReadOnlyList<ShelfModel> Shelves
+    {
+        get => GetPropertyValue<IReadOnlyList<ShelfModel>>() ?? Array.Empty<ShelfModel>();
+        set => SetPropertyValue(value);
+    }
+
     public Guid SelectedProfileId
     {
         get => GetPropertyValue<Guid>();
@@ -132,6 +138,30 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<(Guid ProfileId, Guid? ShelfId)> MoveToShelfRequested
+    {
+        get => GetPropertyValue<EventCallback<(Guid ProfileId, Guid? ShelfId)>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<(Guid ProfileId, string Name)> CreateShelfRequested
+    {
+        get => GetPropertyValue<EventCallback<(Guid ProfileId, string Name)>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<(Guid ShelfId, string Name)> RenameShelfRequested
+    {
+        get => GetPropertyValue<EventCallback<(Guid ShelfId, string Name)>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> DeleteShelfRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
     public IReadOnlyList<OrganizationCatalogOption> Companies
     {
         get => GetPropertyValue<IReadOnlyList<OrganizationCatalogOption>>() ?? Array.Empty<OrganizationCatalogOption>();
@@ -223,6 +253,10 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
 
         public bool IsConfigLocked { get; init; }
 
+        public Guid? ShelfId { get; init; }
+
+        public DateTime? LastUsedAt { get; init; }
+
         public bool HasOpenApplicationForSeedPerson { get; init; }
 
         public bool RequiresApprovalLegVersion { get; init; }
@@ -231,6 +265,15 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
 
         public IReadOnlyList<VersionOptionModel> ApprovalLegVersions { get; init; }
             = Array.Empty<VersionOptionModel>();
+    }
+
+    public sealed class ShelfModel
+    {
+        public Guid Id { get; init; }
+
+        public string Name { get; init; } = string.Empty;
+
+        public bool IsSystem { get; init; }
     }
 
     public sealed class VersionOptionModel

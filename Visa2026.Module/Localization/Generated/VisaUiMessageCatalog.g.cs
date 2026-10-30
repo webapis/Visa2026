@@ -4170,6 +4170,160 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Tassyklama ädim wersiýasyny saýlaň.",
             ["ru-RU"] = "Выберите версию этапов согласования.",
         },
+        ["ApplicationProfileInstance.Picker.Shelf.Cancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyrmak",
+            ["ru-RU"] = "Отмена",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.CannotDeleteSystem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "System tabs cannot be deleted.",
+            ["tr-TR"] = "Sistem sekmeleri silinemez.",
+            ["tk-TM"] = "Ulgam goýberişlerini pozup bolmaýar.",
+            ["ru-RU"] = "Системные вкладки удалить нельзя.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.CannotRenameSystem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "System tabs cannot be renamed.",
+            ["tr-TR"] = "Sistem sekmeleri yeniden adlandırılamaz.",
+            ["tk-TM"] = "Ulgam goýberişleriniň adyny üýtgedip bolmaýar.",
+            ["ru-RU"] = "Системные вкладки нельзя переименовать.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Create"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create",
+            ["tr-TR"] = "Oluştur",
+            ["tk-TM"] = "Döret",
+            ["ru-RU"] = "Создать",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.CreateNewTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Create new tab…",
+            ["tr-TR"] = "Yeni sekme oluştur…",
+            ["tk-TM"] = "Täze goýberiş döret…",
+            ["ru-RU"] = "Создать вкладку…",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.CreateTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New shelf tab",
+            ["tr-TR"] = "Yeni raf sekmesi",
+            ["tk-TM"] = "Täze goýberiş",
+            ["ru-RU"] = "Новая вкладка",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Delete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete tab",
+            ["tr-TR"] = "Sekmeyi sil",
+            ["tk-TM"] = "Goýberişi poz",
+            ["ru-RU"] = "Удалить вкладку",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.DeleteFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not delete the tab.",
+            ["tr-TR"] = "Sekme silinemedi.",
+            ["tk-TM"] = "Goýberişi pozup bolmady.",
+            ["ru-RU"] = "Не удалось удалить вкладку.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No Application Profiles on this tab. Right-click a profile on All to move it here.",
+            ["tr-TR"] = "Bu sekmede başvuru profili yok. Taşımak için Tümü sekmesinde bir profile sağ tıklayın.",
+            ["tk-TM"] = "Bu goýberişde ýüztutma profili ýok. Geçirmek üçin Ählisi-de profile sag basyň.",
+            ["ru-RU"] = "На этой вкладке нет профилей. Щёлкните правой кнопкой по профилю во вкладке «Все», чтобы переместить его сюда.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.EmptyRecent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No recently used profiles yet. Create an application to see them here.",
+            ["tr-TR"] = "Henüz son kullanılan profil yok. Görmek için bir başvuru oluşturun.",
+            ["tk-TM"] = "Entäk soňky ulanylan profil ýok. Görmek üçin ýüztutma dörediň.",
+            ["ru-RU"] = "Пока нет недавно использованных профилей. Создайте заявку — они появятся здесь.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.FamilyMemberOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family member only",
+            ["tr-TR"] = "Yalnızca aile üyesi",
+            ["tk-TM"] = "Diňe maşgala agzasy",
+            ["ru-RU"] = "Только член семьи",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitations",
+            ["tr-TR"] = "Davetiyeler",
+            ["tk-TM"] = "Çakylyklar",
+            ["ru-RU"] = "Приглашения",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.MoveFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not move the profile to that tab.",
+            ["tr-TR"] = "Profil o sekmeye taşınamadı.",
+            ["tk-TM"] = "Profili şol goýberişe geçirip bolmady.",
+            ["ru-RU"] = "Не удалось переместить профиль на эту вкладку.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.MoveTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Move to",
+            ["tr-TR"] = "Taşı",
+            ["tk-TM"] = "Geçir",
+            ["ru-RU"] = "Переместить в",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.NameExists"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A tab with that name already exists.",
+            ["tr-TR"] = "Bu ada sahip bir sekme zaten var.",
+            ["tk-TM"] = "Şeýle atly goýberiş eýýäm bar.",
+            ["ru-RU"] = "Вкладка с таким именем уже есть.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.NameLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Tab name",
+            ["tr-TR"] = "Sekme adı",
+            ["tk-TM"] = "Goýberiş ady",
+            ["ru-RU"] = "Имя вкладки",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.NameRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Enter a tab name.",
+            ["tr-TR"] = "Sekme adı girin.",
+            ["tk-TM"] = "Goýberiş adyny giriziň.",
+            ["ru-RU"] = "Введите имя вкладки.",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Registration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Hasaba alyş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.RemoveFromShelf"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All only (no shelf)",
+            ["tr-TR"] = "Yalnızca Tümü (raf yok)",
+            ["tk-TM"] = "Diňe Ählisi (goýberiş ýok)",
+            ["ru-RU"] = "Только «Все» (без полки)",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Rename"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rename…",
+            ["tr-TR"] = "Yeniden adlandır…",
+            ["tk-TM"] = "Adyny üýtget…",
+            ["ru-RU"] = "Переименовать…",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.TabsAria"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Profile shelves",
+            ["tr-TR"] = "Profil rafları",
+            ["tk-TM"] = "Profil goýberişleri",
+            ["ru-RU"] = "Полки профилей",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.WorkPermitOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit only",
+            ["tr-TR"] = "Yalnızca çalışma izni",
+            ["tk-TM"] = "Diňe iş rugsatnamasy",
+            ["ru-RU"] = "Только разрешение на работу",
+        },
         ["ApplicationProfileInstance.Picker.ShowCatalogManage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Show catalog New and Edit",
@@ -4183,6 +4337,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Yetkili imza",
             ["tk-TM"] = "Ygtyýarly gol",
             ["ru-RU"] = "Уполномоченный подписант",
+        },
+        ["ApplicationProfileInstance.Picker.Tab.All"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All",
+            ["tr-TR"] = "Tümü",
+            ["tk-TM"] = "Ählisi",
+            ["ru-RU"] = "Все",
+        },
+        ["ApplicationProfileInstance.Picker.Tab.Recent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Recent",
+            ["tr-TR"] = "Son kullanılanlar",
+            ["tk-TM"] = "Soňkylar",
+            ["ru-RU"] = "Недавние",
         },
         ["ApplicationProfileInstance.Picker.Unnamed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4450,6 +4618,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ylalaşyldy",
             ["ru-RU"] = "Согласовано",
         },
+        ["ApplicationProfileInstance.Workspace.AsNumberReceived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "AS number received",
+            ["tr-TR"] = "AS numarası alındı",
+            ["tk-TM"] = "AS belgisi alyndy",
+            ["ru-RU"] = "Номер AS получен",
+        },
         ["ApplicationProfileInstance.Workspace.AtMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "At the migration service",
@@ -4463,13 +4638,6 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "AS (CO) numarası bekleniyor",
             ["tk-TM"] = "AS (CO) belgisine garaşylýar",
             ["ru-RU"] = "Ожидается номер AS (CO)",
-        },
-        ["ApplicationProfileInstance.Workspace.AsNumberReceived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "AS number received",
-            ["tr-TR"] = "AS numarası alındı",
-            ["tk-TM"] = "AS belgisi alyndy",
-            ["ru-RU"] = "Номер AS получен",
         },
         ["ApplicationProfileInstance.Workspace.BoStatesValid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

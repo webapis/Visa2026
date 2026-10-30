@@ -38,6 +38,13 @@ namespace Visa2026.Module.BusinessObjects;
     Criteria = "IsConfigLocked",
     Enabled = false,
     Context = "DetailView")]
+[Appearance(
+    "ApplicationProfilePickerShelfAlwaysEditable",
+    AppearanceItemType = "ViewItem",
+    TargetItems = nameof(PickerShelf),
+    Enabled = true,
+    Context = "DetailView",
+    Priority = 100)]
 public class ApplicationProfile : BaseObject
 {
     public ApplicationProfile()
@@ -365,6 +372,14 @@ public class ApplicationProfile : BaseObject
     public virtual string? ApplicabilityCriteria { get; set; }
 
     public virtual bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Tenant-shared create-picker shelf (exclusive). Null = All only. Not configuration-locked.
+    /// </summary>
+    [XafDisplayName("Picker shelf")]
+    public virtual ApplicationProfilePickerShelf? PickerShelf { get; set; }
+
+    public virtual Guid? PickerShelfId { get; set; }
 
     [InverseProperty(nameof(ApplicationProfileInstance.ApplicationProfile))]
     [VisibleInDetailView(false)]

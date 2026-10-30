@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Editors;
@@ -71,6 +72,10 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         CaseSummaryFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, OnCaseSummaryFieldChanged),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
+        MoveToShelfRequested = EventCallback.Factory.Create<(Guid ProfileId, Guid? ShelfId)>(this, MoveToShelfAsync),
+        CreateShelfRequested = EventCallback.Factory.Create<(Guid ProfileId, string Name)>(this, CreateShelfAsync),
+        RenameShelfRequested = EventCallback.Factory.Create<(Guid ShelfId, string Name)>(this, RenameShelfAsync),
+        DeleteShelfRequested = EventCallback.Factory.Create<Guid>(this, DeleteShelfAsync),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -133,6 +138,14 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 : VisaUiMessages.Get("ApplicationProfileInstance.Picker.RouteHintDefault");
 
             var rows = queryService.GetProfiles(objectSpace, route, seedPersonId: null);
+            model.Shelves = ApplicationProfilePickerShelfService.ListShelves(objectSpace)
+                .Select(s => new ApplicationProfilePickerModel.ShelfModel
+                {
+                    Id = s.ID,
+                    Name = ApplicationProfilePickerShelfService.DisplayName(s),
+                    IsSystem = s.IsSystem,
+                }).ToList();
+
             model.Rows = rows.Select(r => new ApplicationProfilePickerModel.PickerRowModel
             {
                 ProfileId = r.ProfileId,
@@ -140,6 +153,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 MetaLine = r.MetaLine,
                 SeedUsageLine = r.SeedUsageLine,
                 IsConfigLocked = r.IsConfigLocked,
+                ShelfId = r.ShelfId,
+                LastUsedAt = r.LastUsedAt,
                 HasOpenApplicationForSeedPerson = r.HasOpenApplicationForSeedPerson,
                 RequiresApprovalLegVersion = r.RequiresApprovalLegVersion,
                 MissingApprovalLegVersions = r.ProgressRoute
@@ -466,6 +481,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 MetaLine = row.MetaLine,
                 SeedUsageLine = row.SeedUsageLine,
                 IsConfigLocked = row.IsConfigLocked,
+                ShelfId = row.ShelfId,
+                LastUsedAt = row.LastUsedAt,
                 HasOpenApplicationForSeedPerson = row.HasOpenApplicationForSeedPerson,
                 RequiresApprovalLegVersion = row.RequiresApprovalLegVersion,
                 MissingApprovalLegVersions = row.MissingApprovalLegVersions,
@@ -659,5 +676,114 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs");
 
         return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseProfile");
+    }
+
+    private async Task MoveToShelfAsync((Guid ProfileId, Guid? ShelfId) args)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || args.ProfileId == Guid.Empty)
+            return;
+
+        var factory = _application.ServiceProvider?.GetService<INonSecuredObjectSpaceFactory>();
+        if (factory == null)
+        {
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
+            model.IsStatusError = true;
+            return;
+        }
+
+        using var objectSpace = factory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+        if (!ApplicationProfilePickerShelfService.TryMoveToShelf(objectSpace, args.ProfileId, args.ShelfId, out var error))
+        {
+            model.StatusMessage = error ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
+            model.IsStatusError = true;
+            return;
+        }
+
+        var step = model.Step;
+        await LoadAsync(showLoading: false);
+        model.Step = step;
+    }
+
+    private async Task CreateShelfAsync((Guid ProfileId, string Name) args)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        var factory = _application.ServiceProvider?.GetService<INonSecuredObjectSpaceFactory>();
+        if (factory == null)
+        {
+            model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
+            model.IsStatusError = true;
+            return;
+        }
+
+        using var objectSpace = factory.CreateNonSecuredObjectSpace<ApplicationProfilePickerShelf>();
+        var shelf = ApplicationProfilePickerShelfService.TryCreateShelf(objectSpace, args.Name, out var error);
+        if (shelf == null)
+        {
+            model.StatusMessage = error ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.NameRequired");
+            model.IsStatusError = true;
+            return;
+        }
+
+        if (args.ProfileId != Guid.Empty
+            && !ApplicationProfilePickerShelfService.TryMoveToShelf(objectSpace, args.ProfileId, shelf.ID, out var moveError))
+        {
+            model.StatusMessage = moveError ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
+            model.IsStatusError = true;
+            return;
+        }
+
+        var step = model.Step;
+        await LoadAsync(showLoading: false);
+        model.Step = step;
+    }
+
+    private async Task RenameShelfAsync((Guid ShelfId, string Name) args)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || args.ShelfId == Guid.Empty)
+            return;
+
+        var factory = _application.ServiceProvider?.GetService<INonSecuredObjectSpaceFactory>();
+        if (factory == null)
+            return;
+
+        using var objectSpace = factory.CreateNonSecuredObjectSpace<ApplicationProfilePickerShelf>();
+        if (!ApplicationProfilePickerShelfService.TryRenameShelf(objectSpace, args.ShelfId, args.Name, out var error))
+        {
+            model.StatusMessage = error ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.NameRequired");
+            model.IsStatusError = true;
+            return;
+        }
+
+        var step = model.Step;
+        await LoadAsync(showLoading: false);
+        model.Step = step;
+    }
+
+    private async Task DeleteShelfAsync(Guid shelfId)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || shelfId == Guid.Empty)
+            return;
+
+        var factory = _application.ServiceProvider?.GetService<INonSecuredObjectSpaceFactory>();
+        if (factory == null)
+            return;
+
+        using var objectSpace = factory.CreateNonSecuredObjectSpace<ApplicationProfilePickerShelf>();
+        if (!ApplicationProfilePickerShelfService.TryDeleteShelf(objectSpace, shelfId, out var error))
+        {
+            model.StatusMessage = error ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.DeleteFailed");
+            model.IsStatusError = true;
+            return;
+        }
+
+        var step = model.Step;
+        await LoadAsync(showLoading: false);
+        model.Step = step;
     }
 }
