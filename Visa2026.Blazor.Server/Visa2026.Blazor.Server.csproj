@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.933</AssemblyVersion>
-    <FileVersion>1.0.0.933</FileVersion>
+    <AssemblyVersion>1.0.0.934</AssemblyVersion>
+    <FileVersion>1.0.0.934</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -98,7 +98,7 @@
       <DependentUpon>Model.xafml</DependentUpon>
     </None>
   </ItemGroup>
-  <!-- Model Editor stubs (Model_tr-TR.xafml, …) are not part of the build; see ReadMe.txt -->
+  <!-- Model Editor stubs (Model_tr-TR.xafml, â€¦) are not part of the build; see ReadMe.txt -->
   <Target Name="RemoveDevExpressModelEditorCultureStubs" BeforeTargets="BeforeBuild">
     <ItemGroup>
       <_DevExpressModelEditorStub Include="$(MSBuildProjectDirectory)\Model_*.xafml" />

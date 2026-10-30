@@ -1,16 +1,12 @@
-using System.Linq;
-using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
-using Microsoft.AspNetCore.Components;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Model;
-using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Renders Result-tab people-coverage chips in the instance ListView column.
+/// Hides the standalone ResultCoverageDisplay column; chips render in Application progress.
 /// </summary>
 public sealed class ApplicationListViewResultCoverageController : ViewController<ListView>
 {
@@ -85,50 +81,10 @@ public sealed class ApplicationListViewResultCoverageController : ViewController
                     StringComparison.Ordinal))
                 continue;
 
+            // Chips merge into Application progress after At the migration service.
+            columnModel.Visible = false;
             columnModel.AllowSort = false;
-            columnModel.MinWidth = 560;
-            columnModel.Width = "560px";
-            var lastVisible = gridListEditor.GridDataColumnModels
-                .Where(c => !ReferenceEquals(c, columnModel) && c.VisibleIndex >= 0)
-                .Select(c => c.VisibleIndex)
-                .DefaultIfEmpty(-1)
-                .Max();
-            columnModel.VisibleIndex = lastVisible + 1;
-            columnModel.CellDisplayTemplate = context => builder =>
-            {
-                if (context.DataItem is not ApplicationProfileInstance application)
-                {
-                    builder.AddContent(0, "—");
-                    return;
-                }
-
-                var chips = application.ListViewResultCoverageChips;
-                if (chips.Count == 0)
-                    chips = Frame.GetController<ApplicationListViewPreloadController>()?.ResultChipsFor(application.ID)
-                        ?? chips;
-                if (chips.Count == 0)
-                {
-                    builder.AddContent(0, application.ResultCoverageDisplay);
-                    return;
-                }
-
-                builder.OpenElement(0, "div");
-                builder.AddAttribute(1, "class", "lv-result-chips");
-                var seq = 2;
-                foreach (var chip in chips)
-                {
-                    builder.OpenElement(seq++, "span");
-                    builder.AddAttribute(seq++, "class", "lv-result-chip lv-result-chip--" + ApplicationWorkspaceIssuedResultListCoverage.Tone(chip));
-                    builder.AddContent(seq++, ApplicationWorkspaceIssuedResultListCoverage.Caption(chip));
-                    builder.AddContent(seq++, " ");
-                    builder.OpenElement(seq++, "strong");
-                    builder.AddContent(seq++, ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip));
-                    builder.CloseElement();
-                    builder.CloseElement();
-                }
-
-                builder.CloseElement();
-            };
+            columnModel.CellDisplayTemplate = null;
         }
     }
 }

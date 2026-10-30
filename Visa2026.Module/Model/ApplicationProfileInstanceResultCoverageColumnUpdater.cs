@@ -7,8 +7,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Model;
 
 /// <summary>
-/// Places <see cref="ApplicationProfileInstance.ResultCoverageDisplay"/> last
-/// on instance ListViews (same people coverage as Result-tab Netije syny).
+/// Hides <see cref="ApplicationProfileInstance.ResultCoverageDisplay"/> on instance ListViews.
+/// Coverage chips render inside the Application progress column after migration is reached.
 /// </summary>
 public sealed class ApplicationProfileInstanceResultCoverageColumnUpdater
     : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
@@ -34,22 +34,15 @@ public sealed class ApplicationProfileInstanceResultCoverageColumnUpdater
             if (views[listViewId] is not IModelListView listView)
                 continue;
 
-            EnsureColumn(listView);
+            HideColumn(listView);
         }
     }
 
-    internal static void EnsureColumn(IModelListView listView)
+    internal static void HideColumn(IModelListView listView)
     {
         var column = listView.Columns[ColumnId]
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
         column.PropertyName = ColumnId;
-        column.Width = 560;
-
-        var lastVisible = listView.Columns
-            .Where(c => !ReferenceEquals(c, column) && c.Index >= 0)
-            .Select(c => c.Index)
-            .DefaultIfEmpty(-1)
-            .Max();
-        column.Index = lastVisible + 1;
+        column.Index = -1;
     }
 }

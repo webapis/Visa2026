@@ -145,23 +145,24 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             columnModel.AllowSort = true;
             if (!string.IsNullOrWhiteSpace(caption))
                 columnModel.Caption = caption;
-            columnModel.MinWidth = 420;
-            columnModel.Width = "520px";
+            columnModel.MinWidth = 560;
+            columnModel.Width = "640px";
             var resultColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
                 string.Equals(
                     c.FieldName,
                     nameof(ApplicationProfileInstance.ResultCoverageDisplay),
                     StringComparison.Ordinal));
+            if (resultColumn != null)
+                resultColumn.Visible = false;
             var lastOther = gridListEditor.GridDataColumnModels
                 .Where(c => !ReferenceEquals(c, columnModel)
                     && !ReferenceEquals(c, resultColumn)
+                    && c.Visible
                     && c.VisibleIndex >= 0)
                 .Select(c => c.VisibleIndex)
                 .DefaultIfEmpty(-1)
                 .Max();
             columnModel.VisibleIndex = lastOther + 1;
-            if (resultColumn != null)
-                resultColumn.VisibleIndex = lastOther + 2;
             columnModel.CellDisplayTemplate = context => builder =>
             {
                 if (context.DataItem is not ApplicationProfileInstance application)
@@ -180,9 +181,24 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     return;
                 }
 
+                var chips = application.ListViewResultCoverageChips;
+                if (chips.Count == 0)
+                {
+                    chips = Frame.GetController<ApplicationListViewPreloadController>()?.ResultChipsFor(application.ID)
+                        ?? chips;
+                }
+
+                var showResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(steps, chips);
+                if (!showResultChips)
+                    chips = Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+
                 builder.OpenElement(0, "div");
-                builder.AddAttribute(1, "class", "lv-progress-stepper");
-                var seq = 2;
+                builder.AddAttribute(1, "class", showResultChips && chips.Count > 0
+                    ? "lv-progress-with-result"
+                    : "lv-progress-with-result lv-progress-with-result--steps-only");
+                builder.OpenElement(2, "div");
+                builder.AddAttribute(3, "class", "lv-progress-stepper");
+                var seq = 4;
                 for (var i = 0; i < steps.Count; i++)
                 {
                     var step = steps[i];
@@ -244,6 +260,11 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     builder.CloseElement();
                     builder.CloseElement();
                 }
+
+                builder.CloseElement();
+
+                if (showResultChips && chips.Count > 0)
+                    ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips);
 
                 builder.CloseElement();
             };

@@ -8,7 +8,7 @@ namespace Visa2026.Module.Model;
 
 /// <summary>
 /// Replaces LatestProgressState with the compact workspace stepper
-/// on instance ListViews (immediately before Ýüztutmanyň netijesi).
+/// on instance ListViews (last visible column; result chips merge into this cell).
 /// </summary>
 public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
     : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
@@ -44,19 +44,12 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         HideColumn(listView, ReplacedColumnId);
         HideColumn(listView, nameof(ApplicationProfileInstance.ProgressSlaStatement));
         HideColumn(listView, nameof(ApplicationProfileInstance.MigrationSlaStatement));
+        HideColumn(listView, nameof(ApplicationProfileInstance.ResultCoverageDisplay));
 
         var column = listView.Columns[ColumnId]
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
         column.PropertyName = ColumnId;
-        column.Width = 520;
-
-        var result = listView.Columns[nameof(ApplicationProfileInstance.ResultCoverageDisplay)];
-        if (result is { Index: >= 0 })
-        {
-            column.Index = result.Index;
-            result.Index = result.Index + 1;
-            return;
-        }
+        column.Width = 640;
 
         var lastVisible = listView.Columns
             .Where(c => !ReferenceEquals(c, column) && c.Index >= 0)

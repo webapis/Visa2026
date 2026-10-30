@@ -1,3 +1,17 @@
+### 2026-10-30 — Direct migration result chips on hand-in
+
+- **Need**: Via-ministry chips were merged into Application progress. Direct lists that end at Submitted to migration service showed no chips, including profiles that produce invitation and visa. Registration (Hasaba Almak) must stay without that stack.
+- **Fix**: `ShouldShowResultChips` — anchor is the migration node when it exists, otherwise the hand-in step once it is current or done. Chips require invitation, visa, work permit, or border zone (rejection-only does not). Overview and Progress tab use the same gate; chips sit beside that anchor step.
+- **Officer**: Rebuild, hard-refresh. Direct invitation/visa cases at Submitted to migration service show the vertical chips. Registration rows do not. Via-ministry unchanged.
+- **Prevent**: Do not show chips on Direct while hand-in is still pending. Do not treat Rejection alone as an issued-document profile.
+- **Cross-skill**: —
+### 2026-10-30 — Progress merges Application result chips
+
+- **Need**: ListView Application result column duplicated coverage next to the stepper. Officers wanted chips stacked to the right of **At the migration service** (last process step), only once that step is reached; remove the separate result column. Same on Progress tab / Overview progress.
+- **Fix**: Hide `ResultCoverageDisplay` on instance ListViews. `ApplicationListViewProgressStepsController` appends stacked `lv-result-chips` when `HasReachedMigrationService`. Overview `cw-prog-with-result` and Progress tab migration row show the same chips from `IssuedRecordTiles`. Prototypes + README under `docs/prototypes/application-progress-result-merged-*`.
+- **Officer**: Stop F5, rebuild, hard-refresh. Via-ministry list: no Application result column; completed rows show Invitation/Rejection/Visa under the progress cell; mid-flight before migration has no chips. Open a case Progress / Overview — chips appear beside migration when reached. Application result **tab** still composes issued docs.
+- **Prevent**: Do not add process steps after migration. Do not show chips while the migration slot is still pending. Do not remove Result-tab compose.
+- **Cross-skill**: —
 ### 2026-10-30 — Create picker shelf tabs (tenant-shared)
 
 - **Need**: Officers want rounded tabs on Choose Application Profile (Recent, All, Invitations, Registration, Family member only, Work permit only) plus custom shelves; right-click Move to / Create new tab; one shelf per profile (shared).

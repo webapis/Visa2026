@@ -102,6 +102,135 @@ public static class ApplicationWorkspaceListProgressSteps
         return "pending";
     }
 
+    /// <summary>
+    /// Result-coverage chips belong beside the last hand-off once that slot is current or done.
+    /// Via ministry and Direct Issuance/Change use the migration node. Direct routes that end at
+    /// hand-in use Submitted to migration service (no migration node).
+    /// </summary>
+    public static bool HasReachedMigrationService(IReadOnlyList<Step>? steps) =>
+        SlotReached(steps, ApplicationWorkspaceProgressTimeline.MigrationKey, static s => s.Key, static s => s.State);
+
+    /// <inheritdoc cref="HasReachedMigrationService(IReadOnlyList{Step})"/>
+    public static bool HasReachedMigrationService(IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? steps) =>
+        SlotReached(steps, ApplicationWorkspaceProgressTimeline.MigrationKey, static s => s.Key, static s => s.State);
+
+    /// <summary>
+    /// Chips show after the last process step when the profile produces invitation, visa,
+    /// work permit, or border zone. Rejection-only coverage does not.
+    /// </summary>
+    public static bool ShouldShowResultChips(
+        IReadOnlyList<Step>? steps,
+        IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? chips) =>
+        IncludesIssuedDocument(chips) && HasReachedResultAnchor(steps);
+
+    /// <inheritdoc cref="ShouldShowResultChips(IReadOnlyList{Step}, IReadOnlyList{ApplicationWorkspaceIssuedResultListCoverage.Chip})"/>
+    public static bool ShouldShowResultChips(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? steps,
+        IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? chips) =>
+        IncludesIssuedDocument(chips) && HasReachedResultAnchor(steps);
+
+    public static bool IsResultChipAnchor(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? steps,
+        ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (steps == null || steps.Count == 0)
+            return false;
+
+        var hasMigration = false;
+        for (var i = 0; i < steps.Count; i++)
+        {
+            if (IsKey(steps[i].Key, ApplicationWorkspaceProgressTimeline.MigrationKey))
+            {
+                hasMigration = true;
+                break;
+            }
+        }
+
+        var anchorKey = hasMigration
+            ? ApplicationWorkspaceProgressTimeline.MigrationKey
+            : ApplicationMigrationSubmission.TimelineKey;
+        return IsKey(step.Key, anchorKey)
+            && !string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasReachedResultAnchor(IReadOnlyList<Step>? steps)
+    {
+        if (HasReachedMigrationService(steps))
+            return true;
+
+        if (SlotExists(steps, ApplicationWorkspaceProgressTimeline.MigrationKey, static s => s.Key))
+            return false;
+
+        return SlotReached(steps, ApplicationMigrationSubmission.TimelineKey, static s => s.Key, static s => s.State);
+    }
+
+    private static bool HasReachedResultAnchor(IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? steps)
+    {
+        if (HasReachedMigrationService(steps))
+            return true;
+
+        if (SlotExists(steps, ApplicationWorkspaceProgressTimeline.MigrationKey, static s => s.Key))
+            return false;
+
+        return SlotReached(steps, ApplicationMigrationSubmission.TimelineKey, static s => s.Key, static s => s.State);
+    }
+
+    private static bool IncludesIssuedDocument(
+        IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? chips)
+    {
+        if (chips == null || chips.Count == 0)
+            return false;
+
+        for (var i = 0; i < chips.Count; i++)
+        {
+            var key = chips[i].Key;
+            if (IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation)
+                || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit)
+                || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa)
+                || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.BorderZone))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool SlotExists<T>(IReadOnlyList<T>? steps, string key, Func<T, string> keyOf)
+    {
+        if (steps == null)
+            return false;
+
+        for (var i = 0; i < steps.Count; i++)
+        {
+            if (IsKey(keyOf(steps[i]), key))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool SlotReached<T>(
+        IReadOnlyList<T>? steps,
+        string key,
+        Func<T, string> keyOf,
+        Func<T, string> stateOf)
+    {
+        if (steps == null || steps.Count == 0)
+            return false;
+
+        for (var i = 0; i < steps.Count; i++)
+        {
+            if (!IsKey(keyOf(steps[i]), key))
+                continue;
+
+            return !string.Equals(stateOf(steps[i]), "pending", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
+    }
+
+    private static bool IsKey(string? value, string key) =>
+        string.Equals(value, key, StringComparison.OrdinalIgnoreCase);
+
     public static string FormatDisplay(IReadOnlyList<Step>? steps)
     {
         if (steps == null || steps.Count == 0)

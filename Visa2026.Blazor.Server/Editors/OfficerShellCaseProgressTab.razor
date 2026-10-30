@@ -20,6 +20,12 @@
 
     <h2 class="ct-page__title">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress")</h2>
     <p class="ct-page__sub">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProgressSubtitle", view.Chrome.TemplateFamilyLabel, LocalizedCurrentStepHeading)</p>
+    @{
+        var progressChips = ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles);
+        var progressResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(view.ProgressSteps, progressChips)
+            ? progressChips
+            : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+    }
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
@@ -39,6 +45,8 @@
             };
             var letterName = step.MinistryLetterFileName;
             var letterProgressId = step.ProgressId;
+            var showResultBeside = progressResultChips.Count > 0
+                && ApplicationWorkspaceListProgressSteps.IsResultChipAnchor(view.ProgressSteps, step);
             var icon = isCurrent
                 ? "✎"
                 : tone switch
@@ -55,6 +63,8 @@
                     <span class="ct-prog-v__line"></span>
                 </div>
                 <div class="ct-prog-v__body">
+                    <div class="@(showResultBeside ? "ct-prog-v__body-row" : null)">
+                    <div class="@(showResultBeside ? "ct-prog-v__body-main" : null)">
                     <div class="ct-prog-v__head">
                         <strong>@StepText(step.Label)</strong>
                         @if (!string.IsNullOrWhiteSpace(badge))
@@ -418,6 +428,21 @@
                             }
                         </div>
                     }
+                    </div>
+                    @if (showResultBeside)
+                    {
+                        <div class="ct-prog-v__result-chips lv-result-chips lv-result-chips--stack"
+                             aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApplicationResult")">
+                            @foreach (var chip in progressResultChips)
+                            {
+                                <span class="lv-result-chip lv-result-chip--@ApplicationWorkspaceIssuedResultListCoverage.Tone(chip)">
+                                    @ApplicationWorkspaceIssuedResultListCoverage.Caption(chip)
+                                    <strong>@ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip)</strong>
+                                </span>
+                            }
+                        </div>
+                    }
+                    </div>
                 </div>
             </div>
         }

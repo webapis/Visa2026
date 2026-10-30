@@ -1821,6 +1821,13 @@
             </section>
             <section class="cw-card">
                 <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ProgressTitle")</h2>
+                @{
+                    var overviewChips = ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles);
+                    var overviewResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(view.ProgressSteps, overviewChips)
+                        ? overviewChips
+                        : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+                }
+                <div class="cw-prog-with-result">
                 <div class="cw-prog-stepper">
                 @for (var i = 0; i < view.ProgressSteps.Count; i++)
                 {
@@ -1900,6 +1907,19 @@
                             </div>
                         </div>
                     }
+                </div>
+                @if (overviewResultChips.Count > 0)
+                {
+                    <div class="lv-result-chips lv-result-chips--stack" aria-label="@Msg("ApplicationProfileInstance.Workspace.ApplicationResult")">
+                        @foreach (var chip in overviewResultChips)
+                        {
+                            <span class="lv-result-chip lv-result-chip--@ApplicationWorkspaceIssuedResultListCoverage.Tone(chip)">
+                                @ApplicationWorkspaceIssuedResultListCoverage.Caption(chip)
+                                <strong>@ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip)</strong>
+                            </span>
+                        }
+                    </div>
+                }
                 </div>
             </section>
             <section class="cw-card">

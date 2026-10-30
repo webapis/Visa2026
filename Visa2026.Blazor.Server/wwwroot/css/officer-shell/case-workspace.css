@@ -480,10 +480,29 @@ select.cw-summary-field__input option {
 .cw-sum-tile__label { grid-column: 2; font-size: 0.72rem; line-height: 1.15; color: var(--os-muted); }
 .cw-sum-tile__value { grid-column: 2; font-size: 0.9rem; line-height: 1.2; overflow-wrap: break-word; }
 
+.cw-prog-with-result {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.cw-prog-with-result .cw-prog-stepper {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cw-prog-with-result .lv-result-chips--stack {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
 .cw-prog-stepper {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(8.25rem, 1fr)); gap: 8px;
 }
-@media (max-width: 800px) { .cw-prog-stepper { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 800px) {
+  .cw-prog-with-result { flex-wrap: wrap; }
+  .cw-prog-stepper { grid-template-columns: 1fr 1fr; }
+}
 .cw-prog-step { display: flex; flex-direction: column; gap: 8px; }
 .cw-prog-step__track { display: flex; align-items: center; position: relative; }
 .cw-prog-step__dot {

@@ -4033,7 +4033,24 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     color: #78350f !important;
 }
 
-/* Instance ListView — Ýüztutmanyň netijesi people-coverage chips.
+/* Instance ListView — progress + merged Application result chips. */
+.dxbl-grid td .lv-progress-with-result,
+.lv-progress-with-result {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+}
+
+.dxbl-grid td .lv-progress-with-result .lv-progress-stepper,
+.lv-progress-with-result .lv-progress-stepper {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Ýüztutmanyň netijesi people-coverage chips (stacked beside migration step).
    Chip surface follows the Fluent theme so they stay readable on tinted rows. */
 .dxbl-grid td .lv-result-chips,
 .lv-result-chips {
@@ -4045,6 +4062,15 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     width: max-content;
     max-width: none;
     line-height: 1.2;
+}
+
+.dxbl-grid td .lv-result-chips--stack,
+.lv-result-chips--stack {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+    flex: 0 0 auto;
+    gap: 4px;
 }
 
 .dxbl-grid td .lv-result-chip,

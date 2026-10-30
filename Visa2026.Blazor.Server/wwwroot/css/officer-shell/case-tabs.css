@@ -94,6 +94,18 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-step-pen:hover { color: var(--os-accent); border-color: var(--os-accent); }
 .ct-step-pen:disabled { opacity: 0.5; cursor: default; }
 .ct-prog-v--migration .ct-prog-v__head { flex-direction: column; align-items: flex-start; gap: 2px; }
+.ct-prog-v__body-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.ct-prog-v__body-main { flex: 1 1 auto; min-width: 0; }
+.ct-prog-v__result-chips {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
 .ct-prog-v__result-number { margin: 0 0 8px; font-size: 0.82rem; font-weight: 600; color: var(--os-ink); }
 .ct-prog-v__letter { margin: 0 0 8px; font-size: 0.82rem; }
 .ct-prog-v__letter .ct-letter-preview {

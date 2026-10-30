@@ -36,6 +36,20 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
     public static string Caption(Chip chip) =>
         ApplicationProfileLocalization.IssuedResultChipLabel(chip.CatalogLabel);
 
+    public static Chip FromIssuedTile(ApplicationWorkspaceCaseIssuedTile tile) =>
+        new(tile.Key, tile.Label, tile.CoverageCount, tile.ExpectedCount, tile.IsOptional);
+
+    public static IReadOnlyList<Chip> FromIssuedTiles(IReadOnlyList<ApplicationWorkspaceCaseIssuedTile>? tiles)
+    {
+        if (tiles == null || tiles.Count == 0)
+            return Array.Empty<Chip>();
+
+        var chips = new List<Chip>(tiles.Count);
+        foreach (var tile in tiles)
+            chips.Add(FromIssuedTile(tile));
+        return chips;
+    }
+
     public static string FormatDisplay(IReadOnlyList<Chip>? chips)
     {
         if (chips == null || chips.Count == 0)
