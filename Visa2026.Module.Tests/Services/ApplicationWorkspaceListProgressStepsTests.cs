@@ -21,7 +21,7 @@ public class ApplicationWorkspaceListProgressStepsTests
 
         var steps = ApplicationWorkspaceListProgressSteps.Build(application, []);
 
-        Assert.Equal(4, steps.Count);
+        Assert.Equal(5, steps.Count);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.OfficeKey, steps[0].Key);
         Assert.Equal("current", steps[0].State);
         Assert.Equal("current", ApplicationWorkspaceListProgressSteps.Tone(steps[0]));
@@ -29,19 +29,46 @@ public class ApplicationWorkspaceListProgressStepsTests
         Assert.Equal("pending", steps[1].State);
         Assert.Equal("Turkmenenergo", steps[1].Label);
         Assert.Equal("pending", steps[2].State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[3].Key);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[3].Key);
         Assert.Equal("pending", steps[3].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[4].Key);
+        Assert.Equal("pending", steps[4].State);
         Assert.Contains(" \u00b7 ", ApplicationWorkspaceListProgressSteps.FormatDisplay(steps));
     }
 
     [Fact]
-    public void Build_direct_route_is_office_and_migration_only()
+    public void Build_direct_issuance_includes_submission_and_as_step()
     {
         var application = new ApplicationProfileInstance
         {
             ApplicationProfile = new ApplicationProfile
             {
                 ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+                ActionFamily = ApplicationProfileActionFamily.Issuance,
+            },
+            ApplicationDate = DateTime.Today,
+        };
+
+        var steps = ApplicationWorkspaceListProgressSteps.Build(application, []);
+
+        Assert.Equal(3, steps.Count);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.OfficeKey, steps[0].Key);
+        Assert.Equal("current", steps[0].State);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[1].Key);
+        Assert.Equal("pending", steps[1].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[2].Key);
+        Assert.Equal("pending", steps[2].State);
+    }
+
+    [Fact]
+    public void Build_direct_registration_ends_at_submission()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+                ActionFamily = ApplicationProfileActionFamily.Registration,
             },
             ApplicationDate = DateTime.Today,
         };
@@ -50,9 +77,7 @@ public class ApplicationWorkspaceListProgressStepsTests
 
         Assert.Equal(2, steps.Count);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.OfficeKey, steps[0].Key);
-        Assert.Equal("current", steps[0].State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[1].Key);
-        Assert.Equal("pending", steps[1].State);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[1].Key);
     }
 
     [Fact]

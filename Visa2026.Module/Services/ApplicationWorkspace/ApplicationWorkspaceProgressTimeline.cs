@@ -20,6 +20,8 @@ internal static class ApplicationWorkspaceProgressTimeline
     public const string MigrationKey = "migration";
     public const string MigrationLabel = "At the migration service";
     public const string AwaitingAsCoNumberLabel = "Awaiting AS (CO) number";
+    public const string AsNumberReceivedLabel = "AS number received";
+    public const string IssuedLabel = "Issued";
 
     public static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> Build(
         ApplicationProfileInstance application,
@@ -70,7 +72,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             ? string.Empty
             : canAdvance
                 ? string.Empty
-                : (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
+                : (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code, application)
                     ? "This application has reached a terminal progress state."
                     : "No further progress steps are available for this route.");
         var currentSla = includeAdvance
@@ -82,10 +84,16 @@ internal static class ApplicationWorkspaceProgressTimeline
         var legs = ResolveApprovalLegs(application, profile);
         var latestLeg = ResolveCurrentMinistrySlot(slotCode, legs.Count, latestOnMigration);
         var submissionRecorded = ApplicationMigrationSubmission.IsState(slotCode);
+        var route = ApplicationProfileConfigurationResolver.GetProgressRoute(application);
+        var isDirect = route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService;
+        var liveProfile = profile ?? application.ApplicationProfile;
+        var directEndsAtSubmission = ApplicationProfileConfigurationResolver.DirectEndsAtMigrationSubmission(application)
+            || (isDirect && ApplicationProfileConfigurationResolver.DirectEndsAtMigrationSubmission(liveProfile));
         var awaitingSubmission = !latestOnMigration
             && !submissionRecorded
-            && legs.Count > 0
-            && IsLastMinistryApproved(slotCode, legs.Count);
+            && (
+                (legs.Count > 0 && IsLastMinistryApproved(slotCode, legs.Count))
+                || (isDirect && IsDirectLeftOfficeAwaitingSubmission(slotCode)));
         var atOffice = slotAnchor == null;
         var cancelledOnCurrent = IsProcessCancelled(latestCode);
 
@@ -124,7 +132,8 @@ internal static class ApplicationWorkspaceProgressTimeline
                 latest));
         }
 
-        if (legs.Count > 0)
+        // Via ministry: after last approval. Direct: after Office (same timeline label).
+        if (legs.Count > 0 || isDirect)
         {
             var submissionRow = LatestSubmissionRow(history);
             var submissionState = ResolveSubmissionSlotState(
@@ -135,50 +144,91 @@ internal static class ApplicationWorkspaceProgressTimeline
                 cancelledOnCurrent);
             var submissionMissing = !ApplicationMigrationSubmission.IsComplete(submissionRow);
             var submissionCurrent = submissionState == "current";
+            // Via ministry requires document number; Direct only Date + optional file.
+            var showSubmissionFields = submissionCurrent
+                || (!isDirect && submissionState == "done" && submissionMissing);
+            var submissionAdvance = submissionCurrent
+                ? FilterDirectHandInAdvanceOptions(advanceOptions, directEndsAtSubmission)
+                : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
             steps.Add(BuildFilledStep(
                 ApplicationMigrationSubmission.TimelineKey,
                 ApplicationMigrationSubmission.TimelineLabel,
                 submissionRow,
                 submissionState,
                 submissionCurrent ? currentSla : default,
-                submissionCurrent && canAdvance,
+                submissionCurrent && canAdvance && submissionAdvance.Count > 0,
                 submissionCurrent ? advanceBlockedReason : string.Empty,
-                submissionCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+                submissionAdvance,
                 letterRow: null,
                 history,
                 latest,
-                showMigrationSubmission: submissionCurrent || (submissionState == "done" && submissionMissing),
+                showMigrationSubmission: showSubmissionFields,
+                requireSubmissionDocumentNumber: !isDirect && showSubmissionFields,
                 submissionDocumentNumber: submissionRow?.SubmissionDocumentNumber?.Trim() ?? string.Empty,
-                submissionDocumentFileName: submissionRow?.SubmissionDocumentFileName ?? string.Empty));
+                submissionDocumentFileName: submissionRow?.SubmissionDocumentFileName ?? string.Empty,
+                // Direct hand-in: Advance writes SUBMITTED_MIGRATION (no Result picker).
+                suppressResultDropdown: isDirect && submissionCurrent));
         }
 
-        var migrationRow = LatestMigrationRow(history);
-        var migrationState = ResolveMigrationSlotState(
-            atOffice,
-            latestOnMigration,
-            slotCode,
-            submissionRecorded,
-            cancelledOnCurrent);
-        var migrationCurrent = migrationState == "current";
-        if (cancelledOnCurrent && migrationCurrent)
-            migrationRow = latest;
-        steps.Add(BuildFilledStep(
-            MigrationKey,
-            MigrationLabel,
-            migrationRow,
-            migrationState,
-            migrationCurrent ? currentSla : default,
-            migrationCurrent && canAdvance,
-            migrationCurrent ? advanceBlockedReason : string.Empty,
-            migrationCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
-            letterRow: null,
-            history,
-            latest,
-            stateLabelOverride: ResolveMigrationStatusLabel(migrationRow, migrationState),
-            processNumber: ResolveMigrationProcessNumber(application, history, migrationRow, migrationState)));
+        // Direct Registration/Cancellation/Business trip ends at hand-in — no AS/Issued node.
+        if (!directEndsAtSubmission)
+        {
+            var migrationRow = LatestMigrationRow(history);
+            var migrationState = ResolveMigrationSlotState(
+                atOffice,
+                latestOnMigration,
+                slotCode,
+                submissionRecorded,
+                cancelledOnCurrent);
+            var migrationCurrent = migrationState == "current";
+            if (cancelledOnCurrent && migrationCurrent)
+                migrationRow = latest;
+            var migrationLabel = isDirect
+                ? ApplicationProfileConfigurationResolver.DirectFinalTimelineLabel(liveProfile)
+                : MigrationLabel;
+            var migrationStatusLabel = isDirect
+                ? ResolveDirectMigrationStatusLabel(migrationRow, migrationState)
+                : ResolveMigrationStatusLabel(migrationRow, migrationState);
+            // Issuance/Change after hand-in: auto Issued (no Result). Legacy PROCESS_STARTED keeps Results.
+            var directFinalAdvance = isDirect
+                && migrationCurrent
+                && canAdvance
+                && ApplicationMigrationSubmission.IsState(slotCode);
+            steps.Add(BuildFilledStep(
+                MigrationKey,
+                migrationLabel,
+                migrationRow,
+                migrationState,
+                migrationCurrent ? currentSla : default,
+                migrationCurrent && canAdvance,
+                migrationCurrent ? advanceBlockedReason : string.Empty,
+                migrationCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+                letterRow: null,
+                history,
+                latest,
+                stateLabelOverride: migrationStatusLabel,
+                processNumber: ResolveMigrationProcessNumber(application, history, migrationRow, migrationState),
+                suppressResultDropdown: directFinalAdvance,
+                requireProcessNumberOnAdvance: directFinalAdvance,
+                showOptionalOutcomeFiles: directFinalAdvance));
+        }
 
         ApplyDateBounds(steps);
         return steps;
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> FilterDirectHandInAdvanceOptions(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> options,
+        bool directEndsAtSubmission)
+    {
+        if (!directEndsAtSubmission || options.Count == 0)
+            return options;
+
+        // Final hand-in for non–Issuance/Change: no Cancelled.
+        return options
+            .Where(o => o.StateCode == null
+                || !o.StateCode.Contains("CANCELLED", StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     internal static string FormatChromeCurrentStep(IReadOnlyList<ApplicationWorkspaceCaseProgressStep> steps)
@@ -494,10 +544,14 @@ internal static class ApplicationWorkspaceProgressTimeline
         IReadOnlyList<ApplicationProfileInstanceProgress> history,
         ApplicationProfileInstanceProgress? latest,
         bool showMigrationSubmission = false,
+        bool requireSubmissionDocumentNumber = false,
         string submissionDocumentNumber = "",
         string submissionDocumentFileName = "",
         string? stateLabelOverride = null,
-        string? processNumber = null)
+        string? processNumber = null,
+        bool suppressResultDropdown = false,
+        bool requireProcessNumberOnAdvance = false,
+        bool showOptionalOutcomeFiles = false)
     {
         var isCurrent = slotState == "current";
         var stateLabel = stateLabelOverride
@@ -511,9 +565,17 @@ internal static class ApplicationWorkspaceProgressTimeline
         var resultOptions = isCurrent
             ? ApplicationWorkspaceProgressAdvancePreview.ResultOptions(key, advanceOptions)
             : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+        var cancelOption = resultOptions.FirstOrDefault(o =>
+            !string.IsNullOrWhiteSpace(o.StateCode)
+            && o.StateCode.Contains("CANCELLED", StringComparison.OrdinalIgnoreCase));
+        if (suppressResultDropdown)
+            resultOptions = Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
         var isMigration = string.Equals(key, MigrationKey, StringComparison.OrdinalIgnoreCase);
+        var isSubmissionTimeline = string.Equals(
+            key, ApplicationMigrationSubmission.TimelineKey, StringComparison.OrdinalIgnoreCase);
         var decisionRow = row?.IsMinistryDecisionStep == true ? row : null;
-        var submissionStep = !isMigration && ApplicationMigrationSubmission.IsState(row?.State?.Code);
+        var submissionStep = !isMigration
+            && (isSubmissionTimeline || ApplicationMigrationSubmission.IsState(row?.State?.Code));
         var fileOwner = isMigration
             ? ResolveMigrationDocumentRow(history, row)
             : submissionStep
@@ -565,6 +627,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             OfficerNotes = isCurrent ? row?.Description ?? string.Empty : string.Empty,
             MinistryLetterFileName = fileName,
             ShowMinistryLetterUpload = awaitingMigrationDocuments
+                || showOptionalOutcomeFiles
                 || (!isMigration
                     && isCurrent
                     && key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
@@ -585,10 +648,21 @@ internal static class ApplicationWorkspaceProgressTimeline
             ResultNumber = ResolveResultNumber(key, history),
             ProcessNumber = processNumber?.Trim() ?? string.Empty,
             ShowMigrationSubmission = showMigrationSubmission,
+            RequireSubmissionDocumentNumber = requireSubmissionDocumentNumber,
+            RequireProcessNumberOnAdvance = requireProcessNumberOnAdvance,
+            ShowCancelProgress = suppressResultDropdown && cancelOption != null && isCurrent && canAdvance,
+            CancelStateCode = cancelOption?.StateCode ?? string.Empty,
             SubmissionDocumentNumber = submissionDocumentNumber ?? string.Empty,
             SubmissionDocumentFileName = submissionDocumentFileName ?? string.Empty,
         };
     }
+
+    /// <summary>Direct: left office (Submitted) and not yet handed to migration.</summary>
+    private static bool IsDirectLeftOfficeAwaitingSubmission(string? stateCode) =>
+        string.Equals(
+            stateCode?.Trim(),
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            StringComparison.OrdinalIgnoreCase);
 
     private static string ResolveResultNumber(
         string key,
@@ -726,6 +800,25 @@ internal static class ApplicationWorkspaceProgressTimeline
         return string.Equals(slotState, "current", StringComparison.OrdinalIgnoreCase)
             ? AwaitingAsCoNumberLabel
             : string.Empty;
+    }
+
+    /// <summary>Direct final node: no "Awaiting AS" sub-status; Issued/Cancelled when done.</summary>
+    private static string ResolveDirectMigrationStatusLabel(
+        ApplicationProfileInstanceProgress? row,
+        string slotState)
+    {
+        var code = row?.State?.Code?.Trim();
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
+            return "Process issued";
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
+            return "Process rejected";
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
+            return FormatProfileStateLabel(code);
+        if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
+            return "Processing";
+
+        _ = slotState;
+        return string.Empty;
     }
 
     private static string ResolveMigrationProcessNumber(

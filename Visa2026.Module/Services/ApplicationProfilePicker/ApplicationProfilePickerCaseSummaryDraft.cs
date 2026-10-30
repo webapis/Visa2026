@@ -30,6 +30,13 @@ public static class ApplicationProfilePickerCaseSummaryDraft
     public static bool CanCreate(IEnumerable<ApplicationWorkspaceCaseHeaderField>? fields) =>
         ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredFields(ForCreate(fields)).Count == 0;
 
+    /// <summary>
+    /// Create picker skips the Case summary step when the profile has no Use fields
+    /// (empty "No … properties required" state). Defaults-only fields still show the step.
+    /// </summary>
+    public static bool ShouldSkipStep(IEnumerable<ApplicationWorkspaceCaseHeaderField>? fields) =>
+        ForCreate(fields).Count == 0;
+
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate> Merge(
         IEnumerable<ApplicationWorkspaceCaseHeaderFieldUpdate>? current,
         ApplicationWorkspaceCaseHeaderFieldUpdate incoming)

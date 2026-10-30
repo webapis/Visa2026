@@ -504,11 +504,159 @@ public class ApplicationWorkspaceProgressTimelineTests
 
         var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
 
-        Assert.Equal(2, steps.Count);
+        Assert.Equal(3, steps.Count);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.OfficeKey, steps[0].Key);
         Assert.Equal("current", steps[0].State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[1].Key);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, steps[1].Key);
         Assert.Equal("pending", steps[1].State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, steps[2].Key);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, steps[2].Label);
+        Assert.Equal("pending", steps[2].State);
+        Assert.Contains(steps[0].AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1));
+        Assert.DoesNotContain(steps[0].AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
+        Assert.DoesNotContain(steps[0].AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+    }
+
+    [Fact]
+    public void Build_DirectMigration_LeftOffice_SubmissionStepCurrent()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            MigrationSlaDays = 2,
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        Assert.Equal("done", steps[0].State);
+        var submission = steps[1];
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, submission.Key);
+        Assert.Equal("current", submission.State);
+        Assert.True(submission.ShowMigrationSubmission);
+        Assert.False(submission.RequireSubmissionDocumentNumber);
+        Assert.Contains(submission.AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+        Assert.Equal("pending", steps[2].State);
+    }
+
+    [Fact]
+    public void Build_DirectMigration_Submitted_AsNumberReceived_RequiresProcessNumber()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            ActionFamily = ApplicationProfileActionFamily.Change,
+            MigrationSlaDays = 2,
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+        });
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        Assert.Equal("done", steps[0].State);
+        Assert.Equal("done", steps[1].State);
+        var migration = steps[2];
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationKey, migration.Key);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
+        Assert.Equal("current", migration.State);
+        Assert.Equal(string.Empty, migration.CurrentStateLabel);
+        Assert.Empty(migration.ResultOptions);
+        Assert.True(migration.RequireProcessNumberOnAdvance);
+        Assert.True(migration.ShowCancelProgress);
+        Assert.Contains(migration.AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+        Assert.DoesNotContain(migration.AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
+    }
+
+    [Fact]
+    public void Build_DirectMigration_Registration_EndsAtHandIn_NoAsStep()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            ActionFamily = ApplicationProfileActionFamily.Registration,
+            MigrationSlaDays = 2,
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+
+        var empty = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        Assert.Equal(2, empty.Count);
+        Assert.Equal(ApplicationMigrationSubmission.TimelineKey, empty[1].Key);
+        Assert.DoesNotContain(empty, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+        });
+        var awaitingHandIn = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        Assert.Equal(2, awaitingHandIn.Count);
+        Assert.Equal("current", awaitingHandIn[1].State);
+        Assert.True(awaitingHandIn[1].ShowMigrationSubmission);
+        Assert.False(awaitingHandIn[1].ShowCancelProgress);
+        Assert.Contains(awaitingHandIn[1].AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+        Assert.DoesNotContain(awaitingHandIn[1].AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+        });
+        var done = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        Assert.Equal(2, done.Count);
+        Assert.Equal("done", done[0].State);
+        Assert.Equal("done", done[1].State);
+        Assert.False(done[1].CanAdvance);
+        Assert.DoesNotContain(done, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
     }
 
     [Fact]
@@ -840,15 +988,9 @@ public class ApplicationWorkspaceProgressTimelineTests
             SortOrder = 1,
                     File = new FileData { ID = Guid.NewGuid(), FileName = "scan.jpg", Size = 11 },
         });
-        var second = new ApplicationProfileInstanceProgress
-        {
-            ID = Guid.NewGuid(),
-            Date = new DateTime(2026, 9, 20),
-            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review2Started },
-        };
+        // After first-leg Approved, slot advances to leg-2 (no 2_REVIEW_STARTED in the graph).
         instance.ProgressHistory.Add(started);
         instance.ProgressHistory.Add(approved);
-        instance.ProgressHistory.Add(second);
 
         var steps = ApplicationWorkspaceProgressTimeline.Build(instance, instance.ApplicationProfile, default, objectSpace: null);
         var office = Assert.Single(steps, step => step.Key == "office");
@@ -862,9 +1004,10 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(firstLeg.CanEditFiles);
         Assert.True(firstLeg.CanEditResultNumber);
         Assert.Equal(new DateTime(2026, 9, 1), firstLeg.EarliestDate);
-        Assert.Equal(new DateTime(2026, 9, 20), firstLeg.LatestDate);
+        Assert.Null(firstLeg.LatestDate);
         Assert.Equal(2, firstLeg.Files.Count);
-        Assert.Equal(!openLeg.CanAdvance, openLeg.CanCorrectDate);
+        Assert.True(openLeg.CanAdvance);
+        Assert.False(openLeg.CanCorrectDate);
         Assert.False(openLeg.CanEditFiles);
     }
 

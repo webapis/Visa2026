@@ -38,14 +38,22 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
             TerminalStateCodes.Add(ApplicationProfileInstanceProgressLegCodes.ReviewRejected(leg));
     }
 
-    public static bool IsTerminalStateCode(string? stateCode)
+    public static bool IsTerminalStateCode(string? stateCode) =>
+        IsTerminalStateCode(stateCode, application: null);
+
+    public static bool IsTerminalStateCode(string? stateCode, ApplicationProfileInstance? application)
     {
         if (string.IsNullOrWhiteSpace(stateCode))
             return false;
 
         var trimmed = stateCode.Trim();
-        return TerminalStateCodes.Contains(trimmed)
-            || ApplicationProfileInstanceProgressLegCodes.IsReviewRejectedStateCode(trimmed);
+        if (TerminalStateCodes.Contains(trimmed)
+            || ApplicationProfileInstanceProgressLegCodes.IsReviewRejectedStateCode(trimmed))
+            return true;
+
+        // Direct Registration/Cancellation/Business trip: hand-in ends the process.
+        return ApplicationMigrationSubmission.IsState(trimmed)
+            && ApplicationProfileConfigurationResolver.DirectEndsAtMigrationSubmission(application);
     }
 
     public static IReadOnlyList<string> GetAllowedNextStateCodes(
@@ -60,7 +68,7 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         if (afterStep == null)
             return GetAllowedFirstStateCodes(application);
 
-        if (IsTerminalStateCode(afterStep.State?.Code))
+        if (IsTerminalStateCode(afterStep.State?.Code, application))
             return Array.Empty<string>();
 
         var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
@@ -80,7 +88,7 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
                 .ToList();
         }
 
-        return GetTransitions(route.Value, legCount)
+        return GetTransitions(route.Value, legCount, application)
             .Where(t => StepsEqual(t.From, fromStep))
             .Select(t => t.To.StateCode)
             .Where(routeAllowed.Contains)
@@ -115,7 +123,7 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
             return codes.ToList();
         }
 
-        if (IsTerminalStateCode(afterStep.State?.Code))
+        if (IsTerminalStateCode(afterStep.State?.Code, progress.ApplicationProfileInstance))
             return codes.ToList();
 
         foreach (var code in GetAllowedNextStateCodes(progress.ApplicationProfileInstance, afterStep, progress))
@@ -199,7 +207,7 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
             return true;
         }
 
-        if (IsTerminalStateCode(previous.State?.Code))
+        if (IsTerminalStateCode(previous.State?.Code, progress.ApplicationProfileInstance))
         {
             errorMessage = VisaUiMessages.Get("ApplicationProfileInstanceProgress.CannotAdvanceFromTerminal");
             return false;
@@ -219,7 +227,7 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         var fromStep = ProgressStep.Parse(previous);
         var toStep = ProgressStep.Parse(progress);
 
-        if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep))
+        if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep, progress.ApplicationProfileInstance))
         {
             if (progress.State?.Code != null
                 && (string.Equals(progress.State.Code.Trim(), ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
@@ -301,9 +309,11 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
         if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
         {
+            // Leave office like via-ministry (Submitted → first review-started code), then
+            // "Migrasiýa gullugyna tabşyryldy", then Process number on PROCESS_STARTED.
             return
             [
-                ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+                ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
                 ApplicationProfileInstanceProgressStateCodes.ProcessCancelled
             ];
         }
@@ -332,7 +342,8 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         ApplicationProfileInstanceProgressRouteKind route,
         int ministryLegCount,
         ProgressStep from,
-        ProgressStep to)
+        ProgressStep to,
+        ApplicationProfileInstance? application)
     {
         if (from.IsDefault || to.IsDefault)
             return false;
@@ -341,7 +352,7 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         {
             if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
             {
-                return string.Equals(to.StateCode, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
+                return string.Equals(to.StateCode, ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
                     || string.Equals(to.StateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
             }
 
@@ -350,20 +361,41 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
                 || string.Equals(to.StateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
         }
 
-        return GetTransitions(route, ministryLegCount).Any(t => StepsEqual(t.From, from) && StepsEqual(t.To, to));
+        return GetTransitions(route, ministryLegCount, application)
+            .Any(t => StepsEqual(t.From, from) && StepsEqual(t.To, to));
     }
 
     private static IEnumerable<ProgressTransition> GetTransitions(
         ApplicationProfileInstanceProgressRouteKind route,
-        int ministryLegCount)
+        int ministryLegCount,
+        ApplicationProfileInstance? application)
     {
         var processStarted = Step(ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
+        var submittedToMigration = Step(ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
         var edges = new List<ProgressTransition>();
 
         if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
         {
-            AddProcessOutcomes(edges, processStarted);
-            AddCancellationFromActiveSteps(edges, processStarted);
+            var leftOffice = Step(ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1));
+            edges.Add(new ProgressTransition(leftOffice, submittedToMigration));
+
+            if (ApplicationProfileConfigurationResolver.DirectFinalStepRequiresAsNumber(application))
+            {
+                var processIssued = Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+                // Issuance/Change: hand-in → AS number received (PROCESS_ISSUED).
+                edges.Add(new ProgressTransition(submittedToMigration, processIssued));
+                // Legacy mid-flight: cases already at PROCESS_STARTED can still finish.
+                edges.Add(new ProgressTransition(processStarted, processIssued));
+                edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));
+                AddCancellationFromActiveSteps(edges, leftOffice, submittedToMigration, processStarted, processIssued);
+            }
+            else
+            {
+                // Registration/Cancellation/Business trip: SUBMITTED_MIGRATION is terminal.
+                // Cancelled only from office (not on the final hand-in step).
+                AddCancellationFromActiveSteps(edges, leftOffice);
+            }
+
             return edges;
         }
 
@@ -391,12 +423,11 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         }
 
         var lastApproved = approvedSteps[^1];
-        var submitted = Step(ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
-        edges.Add(new ProgressTransition(lastApproved, submitted));
-        edges.Add(new ProgressTransition(submitted, processStarted));
+        edges.Add(new ProgressTransition(lastApproved, submittedToMigration));
+        edges.Add(new ProgressTransition(submittedToMigration, processStarted));
 
         AddProcessOutcomes(edges, processStarted);
-        var cancellationFrom = new List<ProgressStep> { started1, submitted, processStarted };
+        var cancellationFrom = new List<ProgressStep> { started1, submittedToMigration, processStarted };
         cancellationFrom.AddRange(approvedSteps);
         AddCancellationFromActiveSteps(edges, cancellationFrom.ToArray());
 

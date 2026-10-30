@@ -25,8 +25,7 @@ public static class ApplicationProfileInvitationAddressPolicy
         "get_invitation_fm",
         "App_Inv_According_to_WP",
         "get_invitation_according_to_wp",
-        "App_Change_Inv",
-        "change_invitation",
+        // App_Change_Inv / change_invitation — no case stay (region/city/place); officers change invitation without re-collecting address.
     };
 
     /// <summary>
@@ -42,6 +41,10 @@ public static class ApplicationProfileInvitationAddressPolicy
         string.Equals(profileCatalogKey?.Trim(), ProfileCatalogKey, StringComparison.OrdinalIgnoreCase)
         || string.Equals(code?.Trim(), ProfileCode, StringComparison.OrdinalIgnoreCase);
 
+    public static bool IsChangeInvitation(string? profileCatalogKey, string? code) =>
+        string.Equals(profileCatalogKey?.Trim(), "App_Change_Inv", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(code?.Trim(), "change_invitation", StringComparison.OrdinalIgnoreCase);
+
     private static bool IsStayKey(string? value) =>
         !string.IsNullOrWhiteSpace(value) && InvitationStayKeys.Contains(value.Trim());
 
@@ -55,6 +58,18 @@ public static class ApplicationProfileInvitationAddressPolicy
         var seedName = type.Name;
 #pragma warning restore CS0618
         return string.Equals(seedName?.Trim(), ApplicationTypeName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsChangeInvitationType(ApplicationType? type)
+    {
+        if (type == null)
+            return false;
+
+#pragma warning disable CS0618
+        var seedName = type.Name;
+        var code = type.Code;
+#pragma warning restore CS0618
+        return IsChangeInvitation(seedName, code);
     }
 
     public static bool CollectsInvitationStayType(ApplicationType? type)

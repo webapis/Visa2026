@@ -53,7 +53,15 @@ namespace Visa2026.Module.BusinessObjects
             int ministryLegCount)
         {
             if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
-                return SharedStateCodes.ToArray();
+            {
+                var direct = new List<string>(SharedStateCodes.Length + 2)
+                {
+                    ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+                    ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+                };
+                direct.AddRange(SharedStateCodes);
+                return direct;
+            }
 
             var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProfileInstanceProgressLegCodes.MaxLegCount);
             // leg 1: started+approved+rejected (3); legs 2+: approved+rejected (2 each)
@@ -121,9 +129,8 @@ namespace Visa2026.Module.BusinessObjects
                 && application?.ProjectContract == null)
                 return null;
 
-            return route.Value == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
-                ? ApplicationProfileInstanceProgressStateCodes.ProcessStarted
-                : ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1);
+            // Direct and via-ministry both leave office as first-leg Submitted (1_REVIEW_STARTED).
+            return ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1);
         }
 
         /// <summary>Legacy tuple API — LocationCode is ignored (progress is state-only).</summary>
@@ -135,6 +142,7 @@ namespace Visa2026.Module.BusinessObjects
                 return null;
 
             var location = string.Equals(state, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(state, ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration, StringComparison.OrdinalIgnoreCase)
                 ? ApplicationProfileInstanceProgressLocationCodes.AtMigrationService
                 : ApplicationProfileInstanceProgressLegCodes.AtMinistry(1);
             return (state, location);

@@ -263,16 +263,19 @@
                                     }
                                     @if (step.ShowMigrationSubmission)
                                     {
-                                        <label class="ct-label @(IsSubmissionNumberInvalid ? "ct-label--error" : null)" for="advance-submission-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumber")</label>
-                                        <input id="advance-submission-number-@ApplicationProfileInstanceId"
-                                               @ref="_advanceSubmissionNumberInput"
-                                               type="text"
-                                               class="os-input @(IsSubmissionNumberInvalid ? "is-invalid" : null)"
-                                               aria-invalid="@IsSubmissionNumberInvalid"
-                                               maxlength="@ApplicationMigrationSubmission.MaxDocumentNumberLength"
-                                               @bind="_submissionDocumentNumber"
-                                               @bind:event="oninput"
-                                               disabled="@_busy" />
+                                        @if (step.RequireSubmissionDocumentNumber)
+                                        {
+                                            <label class="ct-label @(IsSubmissionNumberInvalid ? "ct-label--error" : null)" for="advance-submission-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumber")</label>
+                                            <input id="advance-submission-number-@ApplicationProfileInstanceId"
+                                                   @ref="_advanceSubmissionNumberInput"
+                                                   type="text"
+                                                   class="os-input @(IsSubmissionNumberInvalid ? "is-invalid" : null)"
+                                                   aria-invalid="@IsSubmissionNumberInvalid"
+                                                   maxlength="@ApplicationMigrationSubmission.MaxDocumentNumberLength"
+                                                   @bind="_submissionDocumentNumber"
+                                                   @bind:event="oninput"
+                                                   disabled="@_busy" />
+                                        }
                                         <label class="ct-label" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentCopy")</label>
                                         <OfficerShellPendingProgressFiles Files="_pendingFiles"
                                                                           ApplicationProfileInstanceId="ApplicationProfileInstanceId"
@@ -345,6 +348,16 @@
                                             @onclick="AdvanceAsync">
                                         ▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")
                                     </button>
+                                    @if (step.ShowCancelProgress && !string.IsNullOrWhiteSpace(step.CancelStateCode))
+                                    {
+                                        <button type="button"
+                                                class="os-btn os-btn--ghost"
+                                                style="margin-top:10px;margin-left:8px"
+                                                disabled="@_busy"
+                                                @onclick="() => CancelProgressAsync(step)">
+                                            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Cancelled")
+                                        </button>
+                                    }
                                     @if (step.CanRevert)
                                     {
                                         <button type="button"
@@ -481,9 +494,22 @@
     internal string? SubmissionDocumentNumberOnAdvance =>
         ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode) ? _submissionDocumentNumber : null;
 
-    private bool ShowProcessNumberOnAdvance =>
-        view.Chrome.ShowProcessNumber
-        && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode);
+    private bool ShowProcessNumberOnAdvance
+    {
+        get
+        {
+            if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode)
+                && view.Chrome.ShowProcessNumber)
+                return true;
+
+            var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            return current?.RequireProcessNumberOnAdvance == true
+                && string.Equals(
+                    _selectedAdvanceStateCode,
+                    ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                    StringComparison.OrdinalIgnoreCase);
+        }
+    }
 
     private bool ShowResultNumberOnAdvance =>
         ApplicationProgressResultNumberHelper.AppliesTo(_selectedAdvanceStateCode);
@@ -539,10 +565,20 @@
         }
     }
 
-    private bool IsSubmissionNumberInvalid =>
-        IsAdvanceFieldErrorMode
-        && ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode)
-        && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_submissionDocumentNumber, out _, out _);
+    private bool IsSubmissionNumberInvalid
+    {
+        get
+        {
+            if (!IsAdvanceFieldErrorMode || !ApplicationMigrationSubmission.IsState(_selectedAdvanceStateCode))
+                return false;
+
+            var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            if (current?.RequireSubmissionDocumentNumber != true)
+                return false;
+
+            return !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_submissionDocumentNumber, out _, out _);
+        }
+    }
 
     internal string? PendingLetterFileName =>
         _pendingFiles.Count == 0 ? null : _pendingFiles[0].FileName;
@@ -768,6 +804,15 @@
 
     internal Task AdvanceFromRailAsync() => AdvanceAsync();
 
+    private async Task CancelProgressAsync(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (_busy || string.IsNullOrWhiteSpace(step.CancelStateCode))
+            return;
+
+        _selectedAdvanceStateCode = step.CancelStateCode;
+        await AdvanceAsync();
+    }
+
     private async Task AdvanceAsync()
     {
         if (_busy)
@@ -836,14 +881,21 @@
         }
 
         if (ApplicationMigrationSubmission.IsState(code)
+            && current?.RequireSubmissionDocumentNumber == true
             && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(_submissionDocumentNumber, out _, out var submissionNumberError))
         {
             error = submissionNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired");
             return false;
         }
 
-        var requireProcessNumber = view.Chrome.ShowProcessNumber
-            && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code);
+        var requireProcessNumber =
+            (view.Chrome.ShowProcessNumber
+                && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code))
+            || (current?.RequireProcessNumberOnAdvance == true
+                && string.Equals(
+                    code,
+                    ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                    StringComparison.OrdinalIgnoreCase));
         if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
         {
             error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ProcessNumberRequired");

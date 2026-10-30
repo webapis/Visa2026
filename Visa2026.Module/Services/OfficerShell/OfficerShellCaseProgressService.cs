@@ -128,16 +128,38 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         }
 
         string? normalizedSubmissionNumber = null;
-        if (ApplicationMigrationSubmission.IsState(chosenCode)
-            && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(
-                submissionDocumentNumber, out normalizedSubmissionNumber, out var submissionNumberError))
+        if (ApplicationMigrationSubmission.IsState(chosenCode))
         {
-            return OfficerShellCaseProgressResult.Failed(
-                submissionNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
+            // Via-ministry "Migrasiýa gullugyna tabşyryldy" requires a document number.
+            // Direct uses the same timeline step (Date + optional file only); Process number
+            // comes later on PROCESS_STARTED.
+            if (viaMinistries)
+            {
+                if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(
+                        submissionDocumentNumber, out normalizedSubmissionNumber, out var submissionNumberError))
+                {
+                    return OfficerShellCaseProgressResult.Failed(
+                        submissionNumberError
+                        ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(submissionDocumentNumber)
+                     && !ApplicationMigrationSubmission.TryNormalizeDocumentNumber(
+                         submissionDocumentNumber, out normalizedSubmissionNumber, out var optionalSubmissionError))
+            {
+                return OfficerShellCaseProgressResult.Failed(
+                    optionalSubmissionError
+                    ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
+            }
         }
 
-        var requireProcessNumber = ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
-            && ApplicationProfileConfigurationResolver.ShowProcessNumber(application);
+        var requireProcessNumber =
+            (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
+                && ApplicationProfileConfigurationResolver.ShowProcessNumber(application))
+            || (string.Equals(chosenCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+                && ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application)
+                    == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+                && ApplicationProfileConfigurationResolver.DirectFinalStepRequiresAsNumber(application));
         if (requireProcessNumber)
         {
             var assigned = !string.IsNullOrWhiteSpace(processNumber)
@@ -164,7 +186,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (!application.ProgressHistory.Contains(progress))
             application.ProgressHistory.Add(progress);
 
-        if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
+        if ((ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
+                || string.Equals(chosenCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
             && !string.IsNullOrWhiteSpace(application.ProcessNumber))
         {
             progress.ProcessNumber = application.ProcessNumber.Trim();

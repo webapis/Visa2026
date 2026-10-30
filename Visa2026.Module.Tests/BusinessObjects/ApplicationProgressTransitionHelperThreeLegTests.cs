@@ -40,6 +40,65 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
     }
 
     [Fact]
+    public void DirectMigration_IssuanceChange_LeavesOfficeThenSubmittedThenIssued()
+    {
+        var app = BuildDirectApplication(ApplicationProfileActionFamily.Change);
+
+        Assert.True(IsAllowedFirst(app, ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1)));
+        Assert.False(IsAllowedFirst(app, ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
+        Assert.False(IsAllowedFirst(app, ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.False(IsAllowedFirst(app, ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        // Legacy mid-flight still allowed.
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressRouteHelper.GetSuggestedNextStateAfterOfficePreparation(app));
+    }
+
+    [Fact]
+    public void DirectMigration_Registration_SubmittedIsTerminal()
+    {
+        var app = BuildDirectApplication(ApplicationProfileActionFamily.Registration);
+
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+
+        Assert.True(ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            app));
+        Assert.Empty(ApplicationProfileInstanceProgressTransitionHelper.GetAllowedNextStateCodes(
+            app,
+            new ApplicationProfileInstanceProgress
+            {
+                ApplicationProfileInstance = app,
+                State = new ApplicationState
+                {
+                    Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+                },
+            }));
+    }
+
+    [Fact]
     public void ThreeLegProfile_AllowsRejectionFromPriorStep()
     {
         var app = BuildThreeLegApplication();
@@ -130,6 +189,19 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
 
         return ApplicationProfileInstanceProgressTransitionHelper.TryValidateProgressStep(current, null, out _);
     }
+
+    private static ApplicationProfileInstance BuildDirectApplication(
+        ApplicationProfileActionFamily actionFamily = ApplicationProfileActionFamily.Issuance) =>
+        new()
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+                ActionFamily = actionFamily,
+                MigrationSlaDays = 2,
+            },
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
 
     private static ApplicationProfileInstance BuildThreeLegApplication()
     {

@@ -1805,6 +1805,12 @@
     "tk-TM": "AS (CO) belgisine garaşylýar",
     "ru-RU": "Ожидается номер AS (CO)"
   },
+  "ApplicationProfileInstance.Workspace.AsNumberReceived": {
+    "en-US": "AS number received",
+    "tr-TR": "AS numarası alındı",
+    "tk-TM": "AS belgisi alyndy",
+    "ru-RU": "Номер AS получен"
+  },
   "ApplicationProfileInstance.Workspace.Processing": {
     "en-US": "Processing",
     "tr-TR": "İşleniyor",

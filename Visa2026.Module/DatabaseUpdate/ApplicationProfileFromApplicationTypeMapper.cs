@@ -127,8 +127,11 @@ public static class ApplicationProfileFromApplicationTypeMapper
         profile.RequireVisaType = type.ShowVisaType;
         profile.RequireVisaCategory = type.ShowVisaCategory;
         profile.RequireVisaPeriod = type.ShowVisaPeriod;
-        profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-            profile.ProduceInvitation, profile.ProduceVisa, type.ShowBorderZoneLocation);
+        if (ApplicationProfileInvitationAddressPolicy.IsChangeInvitationType(type))
+            profile.RequireBorderZone = false;
+        else
+            profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+                profile.ProduceInvitation, profile.ProduceVisa, type.ShowBorderZoneLocation);
         if (profile.RequireBorderZone && string.IsNullOrWhiteSpace(profile.DefaultBorderZoneLocation))
             profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
         profile.RequireMigrationService = type.ShowMigrationService;
@@ -157,7 +160,9 @@ public static class ApplicationProfileFromApplicationTypeMapper
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
         var caklykAlmak = ApplicationProfileInvitationAddressPolicy.IsCaklykAlmakType(type);
-        profile.RequirePersonAddressOfResidence = true;
+        // Change invitation does not collect stay or person address of residence.
+        profile.RequirePersonAddressOfResidence =
+            !ApplicationProfileInvitationAddressPolicy.IsChangeInvitationType(type);
         if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStayType(type))
         {
             profile.RequireInvitationAddress = true;

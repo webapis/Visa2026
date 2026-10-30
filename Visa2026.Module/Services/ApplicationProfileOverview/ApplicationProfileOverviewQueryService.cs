@@ -248,8 +248,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Project Contract", LookupLabel(profile.DefaultProjectContract), profile.RequireProject);
         Add("Migration Service", LookupLabel(profile.DefaultMigrationService), profile.RequireMigrationService);
         Add("Border Zone", profile.DefaultBorderZoneLocation,
-            ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-                profile.ProduceInvitation, profile.ProduceVisa, profile.RequireBorderZone));
+            ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile));
         Add("Entry Check Point", LookupLabel(profile.DefaultEntryCheckPoint), profile.RequireEntryCheckPoint);
         Add("Start date", null, profile.RequireStartDate);
         Add("End date", null, profile.RequireEndDate);

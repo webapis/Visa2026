@@ -263,6 +263,19 @@ public sealed class ApplicationWorkspaceCaseProgressStep
     /// <summary>Date, document copy, and document number for the migration hand-in step.</summary>
     public bool ShowMigrationSubmission { get; init; }
 
+    /// <summary>Via ministry requires document number; Direct only Date + optional file.</summary>
+    public bool RequireSubmissionDocumentNumber { get; init; }
+
+    /// <summary>
+    /// Direct final step (Issuance/Change): Process / AS number required on Advance to Issued.
+    /// </summary>
+    public bool RequireProcessNumberOnAdvance { get; init; }
+
+    /// <summary>Direct final step: Cancelled offered as a separate control (no Result dropdown).</summary>
+    public bool ShowCancelProgress { get; init; }
+
+    public string CancelStateCode { get; init; } = string.Empty;
+
     public string SubmissionDocumentNumber { get; init; } = string.Empty;
 
     public string SubmissionDocumentFileName { get; init; } = string.Empty;

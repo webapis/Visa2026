@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.ApplicationWorkspace;
@@ -46,6 +47,28 @@ public class ApplicationProfilePickerCaseSummaryDraftTests
         };
 
         Assert.True(ApplicationProfilePickerCaseSummaryDraft.CanCreate(fields));
+    }
+
+    [Fact]
+    public void ShouldSkipStep_true_when_no_create_use_fields()
+    {
+        Assert.True(ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep(null));
+        Assert.True(ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep(Array.Empty<ApplicationWorkspaceCaseHeaderField>()));
+        Assert.True(ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep(
+        [
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber, "Process number", ApplicationWorkspaceCaseSummaryFillState.Empty),
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber, "Application number", ApplicationWorkspaceCaseSummaryFillState.Empty),
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate, "Application date", ApplicationWorkspaceCaseSummaryFillState.Default),
+        ]));
+    }
+
+    [Fact]
+    public void ShouldSkipStep_false_when_any_create_use_field_exists()
+    {
+        Assert.False(ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep(
+        [
+            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.VisaType, "Visa type", ApplicationWorkspaceCaseSummaryFillState.Default),
+        ]));
     }
 
     [Fact]

@@ -152,7 +152,9 @@ public static class ApplicationProcessNumberHelper
 
         foreach (var progress in application.ProgressHistory)
         {
-            if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(progress.State?.Code))
+            var code = progress.State?.Code;
+            if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code)
+                || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
                 progress.ProcessNumber = trimmed;
         }
 

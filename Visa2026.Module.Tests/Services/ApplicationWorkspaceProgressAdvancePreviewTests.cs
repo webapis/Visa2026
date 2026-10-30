@@ -40,6 +40,12 @@ public class ApplicationWorkspaceProgressAdvancePreviewTests
         Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
             "office",
             ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
+            "office",
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
+        Assert.True(ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted(
+            "office",
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
         Assert.False(ApplicationWorkspaceProgressAdvancePreview.IsResultForStep(
             "leg-1",
             ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1)));

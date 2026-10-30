@@ -1,3 +1,19 @@
+### 2026-10-30 — Skip empty Case summary on create
+
+- **Need**: After hiding all Use fields on **Çakylygy üýtgetmek**, create still showed an empty Case summary step ("No … properties required").
+- **Fix**: `ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep` when ForCreate field count is 0. `EnterCaseSummaryAsync` creates immediately (direct: after profile click; via-ministry: after Approval leg click). Profiles with any Use field (even all defaults) still show Case summary.
+- **Officer**: Stop F5, rebuild, hard-refresh. New Çakylygy üýtgetmek — profile click creates and opens the case (no empty Case summary). Via-ministry with empty Case summary — leg click creates.
+- **Prevent**: Do not skip when fields exist but are already defaulted; officers may still change them before create.
+- **Cross-skill**: —
+
+### 2026-10-30 — Çakylygy üýtgetmek: no address stay / no border zone
+
+- **Need**: Create Case summary for **Çakylygy üýtgetmek** should not require invitation stay, person Address of residence, or **Serhet sebiti** (Border zone).
+- **Fix**: Calik `change_invitation` / `App_Change_Inv`: `RequireInvitationAddress` / `RequireInvitationPlace` / `RequirePersonAddressOfResidence` / `RequireBorderZone` **false**. Removed from invitation-stay force-list. `ApplyRow` applies catalog false for stay + border zone (change-invitation only). `EffectiveRequireBorderZone` opts change-invitation out of Invitation/Visa force-on so sync and Case summary stay hidden. Type mapper skips address of residence and border zone for change invitation.
+- **Officer**: Stop F5, rebuild, hard-refresh so catalog sync runs. New create for Çakylygy üýtgetmek — Case summary has no Çakylyk salgysy / ýeri / Serhet sebiti; People & links has no Ýaşaýyş salgysy. Live FK also hides those on existing cases of that profile after sync.
+- **Prevent**: Do not re-add `App_Change_Inv` / `change_invitation` to the invitation-stay HashSet. Do not re-force Border zone on change-invitation via `RequireBorderZoneWhenProducingInvitationOrVisa` without the Effective opt-out.
+- **Cross-skill**: —
+
 ### 2026-10-29 — New issued visa people grouped by selection
 
 - **Need**: Unchecked people were mixed with selected and issued rows, so officers could not scan who still needed a visa.

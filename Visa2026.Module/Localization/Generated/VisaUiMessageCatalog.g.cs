@@ -4464,6 +4464,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "AS (CO) belgisine garaşylýar",
             ["ru-RU"] = "Ожидается номер AS (CO)",
         },
+        ["ApplicationProfileInstance.Workspace.AsNumberReceived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "AS number received",
+            ["tr-TR"] = "AS numarası alındı",
+            ["tk-TM"] = "AS belgisi alyndy",
+            ["ru-RU"] = "Номер AS получен",
+        },
         ["ApplicationProfileInstance.Workspace.BoStatesValid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "BO states valid",

@@ -281,8 +281,7 @@
         if (Profile == null)
             return;
 
-        if (ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-            Profile.ProduceInvitation, Profile.ProduceVisa, Profile.RequireBorderZone))
+        if (ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(Profile))
             Profile.RequireBorderZone = true;
 
         if (ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(

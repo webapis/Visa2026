@@ -270,6 +270,15 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         {
             EnsureOrganizationSelection(model);
             LoadCaseSummaryDraft(model);
+            if (ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep(model.CaseSummaryFields))
+            {
+                // Empty Case summary (no Use fields): create immediately — no empty step.
+                model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.Creating");
+                await Task.Delay(48);
+                ExecuteCreateCore(model);
+                return;
+            }
+
             model.Step = 4;
             model.StatusMessage = null;
             model.IsStatusError = false;
@@ -320,33 +329,41 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         try
         {
-            var organization = new ApplicationProfilePickerOrganizationSelection
-            {
-                CompanyId = model.SelectedCompanyId == Guid.Empty ? null : model.SelectedCompanyId,
-                SignatoryId = model.SelectedSignatoryId == Guid.Empty ? null : model.SelectedSignatoryId,
-                RepresentativeId = model.SelectedRepresentativeId == Guid.Empty ? null : model.SelectedRepresentativeId,
-            };
-
-            if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
-                    _application,
-                    model.SelectedProfileId,
-                    model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
-                    organization,
-                    _caseSummaryUpdates,
-                    out var createError))
-            {
-                model.StatusMessage = createError;
-                model.IsStatusError = true;
-                return;
-            }
-
-            model.StatusMessage = null;
-            model.IsStatusError = false;
+            ExecuteCreateCore(model);
         }
         finally
         {
             model.IsAdvancing = false;
         }
+    }
+
+    private void ExecuteCreateCore(ApplicationProfilePickerModel model)
+    {
+        if (_application == null)
+            return;
+
+        var organization = new ApplicationProfilePickerOrganizationSelection
+        {
+            CompanyId = model.SelectedCompanyId == Guid.Empty ? null : model.SelectedCompanyId,
+            SignatoryId = model.SelectedSignatoryId == Guid.Empty ? null : model.SelectedSignatoryId,
+            RepresentativeId = model.SelectedRepresentativeId == Guid.Empty ? null : model.SelectedRepresentativeId,
+        };
+
+        if (!ApplicationProfilePickerCompletionHelper.TryCreateApplication(
+                _application,
+                model.SelectedProfileId,
+                model.SelectedVersionId == Guid.Empty ? null : model.SelectedVersionId,
+                organization,
+                _caseSummaryUpdates,
+                out var createError))
+        {
+            model.StatusMessage = createError;
+            model.IsStatusError = true;
+            return;
+        }
+
+        model.StatusMessage = null;
+        model.IsStatusError = false;
     }
 
     private void SelectProfile(Guid profileId)

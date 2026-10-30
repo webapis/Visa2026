@@ -12,7 +12,6 @@ public class InvitationStayAddressCopyTests
     [InlineData("get_invitation_wp")]
     [InlineData("get_invitation_fm")]
     [InlineData("get_invitation_according_to_wp")]
-    [InlineData("change_invitation")]
     public void Invitation_receiving_templates_collect_the_stay(string code)
     {
         Assert.True(ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(null, code));
@@ -21,9 +20,26 @@ public class InvitationStayAddressCopyTests
     [Theory]
     [InlineData("get_invitation_service_passport")]
     [InlineData("work_visa")]
+    [InlineData("change_invitation")]
     public void Other_templates_do_not_collect_the_stay(string code)
     {
         Assert.False(ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(null, code));
+    }
+
+    [Fact]
+    public void Mapper_turns_address_and_stay_off_for_change_invitation()
+    {
+        var profile = new ApplicationProfile();
+#pragma warning disable CS0618
+        ApplicationProfileFromApplicationTypeMapper.Apply(
+            profile,
+            new ApplicationType { Name = "App_Change_Inv", Code = "change_invitation" });
+#pragma warning restore CS0618
+
+        Assert.False(profile.RequireInvitationAddress);
+        Assert.False(profile.RequireInvitationPlace);
+        Assert.False(profile.RequirePersonAddressOfResidence);
+        Assert.True(profile.RequirePersonPosition);
     }
 
     [Fact]

@@ -147,8 +147,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
         AddCommaSeparatedMultiSelect(fields, BorderZone, ApplicationProfileLocalization.Field("BorderZone"), "teal", "📍",
-            Visible(profile, p => ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-                    p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
+            Visible(profile, ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone,
                 ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
             application.BorderZoneLocation,
             FormatBorderZoneDisplay(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
@@ -399,8 +398,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<VisaPeriod>(objectSpace, value, item => application.VisaPeriod = item!, out error);
             case BorderZone:
-                if (!Visible(profile, p => ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-                        p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
+                if (!Visible(profile, ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone,
                     ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application))
                     return Hidden(out error);
                 return SetBorderZone(value, application, out error);

@@ -525,8 +525,11 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultVisaCategory = ResolveLookup<VisaCategory>(objectSpace, row.DefaultVisaCategoryLocalizationKey);
         profile.RequireVisaPeriod = row.RequireVisaPeriod;
         profile.DefaultVisaPeriod = ResolveLookup<VisaPeriod>(objectSpace, row.DefaultVisaPeriodLocalizationKey);
-        profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-            profile.ProduceInvitation, profile.ProduceVisa, row.RequireBorderZone);
+        if (ApplicationProfileInvitationAddressPolicy.IsChangeInvitation(row.ProfileCatalogKey, row.Code))
+            profile.RequireBorderZone = row.RequireBorderZone;
+        else
+            profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
+                profile.ProduceInvitation, profile.ProduceVisa, row.RequireBorderZone);
         if (profile.RequireBorderZone && string.IsNullOrWhiteSpace(profile.DefaultBorderZoneLocation))
             profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
         profile.RequireMigrationService = row.RequireMigrationService;
@@ -576,12 +579,17 @@ internal static class ApplicationProfileTenantCatalogSync
             profile.DefaultToCity = profile.DefaultCity;
 #pragma warning restore CS0618
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
-        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(row.ProfileCatalogKey, row.Code)
-            || row.RequireInvitationAddress)
+        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(row.ProfileCatalogKey, row.Code))
+        {
             profile.RequireInvitationAddress = true;
-        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(row.ProfileCatalogKey, row.Code)
-            || row.RequireInvitationPlace)
             profile.RequireInvitationPlace = true;
+        }
+        else
+        {
+            // Catalog is source of truth (e.g. change_invitation turns stay off).
+            profile.RequireInvitationAddress = row.RequireInvitationAddress;
+            profile.RequireInvitationPlace = row.RequireInvitationPlace;
+        }
         profile.RequirePurpose = row.RequirePurpose;
         profile.DefaultPurpose = string.IsNullOrWhiteSpace(row.DefaultPurpose) ? null : row.DefaultPurpose.Trim();
         profile.RequireProject = row.RequireProject;
@@ -599,7 +607,7 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonEducation = row.RequirePersonEducation
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
-        profile.RequirePersonAddressOfResidence = true;
+        profile.RequirePersonAddressOfResidence = row.RequirePersonAddressOfResidence;
         profile.RequirePersonVisa = row.RequirePersonVisa;
         profile.RequirePersonInvitationItem = row.RequirePersonInvitationItem;
         profile.RequirePersonWorkPermitItem = row.RequirePersonWorkPermitItem;

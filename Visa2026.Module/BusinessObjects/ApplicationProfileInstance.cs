@@ -539,10 +539,7 @@ namespace Visa2026.Module.BusinessObjects
             BusinessTripDestinationHelper.ApplyDefaultsFromProfile(this, applicationProfile);
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultPurpose))
                 Purpose = applicationProfile.DefaultPurpose.Trim();
-            if (ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-                applicationProfile.ProduceInvitation,
-                applicationProfile.ProduceVisa,
-                applicationProfile.RequireBorderZone))
+            if (ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(applicationProfile))
             {
                 BorderZoneLocation = string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation)
                     ? BorderZoneSelectionHelper.NoneValue

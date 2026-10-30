@@ -105,7 +105,7 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
         var latest = application.LatestProgress ?? application.ProgressHistory?
             .OrderByDescending(p => p.Order)
             .FirstOrDefault();
-        return ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code);
+        return ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code, application);
     }
 
     private static IReadOnlyList<ApplicationProfilePickerVersionOption> BuildVersionOptions(

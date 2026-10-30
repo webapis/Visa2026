@@ -78,6 +78,8 @@ public static class ApplicationProfileLocalization
             "Migration service" => Msg("ApplicationProfileInstance.Workspace.MigrationService"),
             "At the migration service" => Msg("ApplicationProfileInstance.Workspace.AtMigrationService"),
             "Awaiting AS (CO) number" => Msg("ApplicationProfileInstance.Workspace.AwaitingAsCoNumber"),
+            "AS number received" => Msg("ApplicationProfileInstance.Workspace.AsNumberReceived"),
+            "Issued" => Msg("ApplicationProfileInstance.Workspace.ProcessIssued"),
             "Processing" => Msg("ApplicationProfileInstance.Workspace.Processing"),
             "Process issued" => Msg("ApplicationProfileInstance.Workspace.ProcessIssued"),
             "Process rejected" => Msg("ApplicationProfileInstance.Workspace.ProcessRejected"),

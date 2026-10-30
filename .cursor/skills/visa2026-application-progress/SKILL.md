@@ -80,7 +80,9 @@ disable-model-invocation: false
 | Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |
 | Letter upload hidden when it should show | Workspace: current `leg-*` Result (pending until Advance) **or** completed Approved/Unapproved with no file (`MissingMinistryLetter` — attach to that row, no Revert). DetailView: `IsMinistryDecisionStateCode` + `[Appearance]` | Timeline flag vs `DecisionProgressId` / `ProgressId` |
 | Cancelled on Office stays “Office preparation” after Advance | History has `PROCESS_CANCELLED`; overlay on `BuildOfficeStep` + `FormatChromeCurrentStep` | Implied-office slot (no previous row) |
-| Office Result missing Submitted | `IsOfficeSubmitted` / Office `ResultOptions`; Advance still `1_REVIEW_STARTED` or `PROCESS_STARTED` | Leave-office Result, not a new timeline node |
+| Office Result missing Submitted | `IsOfficeSubmitted` / Office `ResultOptions`; Advance still `1_REVIEW_STARTED` | Leave-office Result, not a new timeline node |
+| Direct missing Migrasiýa gullugyna tabşyryldy | Direct must leave office as `1_REVIEW_STARTED`, then `SUBMITTED_MIGRATION` (Date + optional file); timeline always inserts `migration-submitted` | Not via-ministry-only; no history backfill |
+| Direct still shows At migration / Awaiting AS | Final Direct node label from ActionFamily (`AS number received` / `Issued`); advance `SUBMITTED_MIGRATION` → `PROCESS_ISSUED` | `DirectFinalStepRequiresAsNumber`; no Result dropdown |
 | Approval letter Preview shows Please wait / Adobe Reader | File is filled XFA; `ProgressLettersInlinePreview` + `PdfXfaDocument.ContainsXfa` (pdf.js, not iframe) | Preview slot occupant |
 | Application list row color wrong | **`visa2026-bo-state-colors`** — `PrimaryStateCode`, `BoStateAppearanceColors` | Not transition helper |
 | Cannot edit contract legs | `ProjectContractMinistryController` — duplicate contract row instead | Structural immutability |

@@ -307,6 +307,22 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void ShowBorderZoneLocation_ChangeInvitationRespectsRequireFlagOff()
+    {
+        var profile = new ApplicationProfile
+        {
+            Code = "change_invitation",
+            ProduceInvitation = true,
+            ProduceVisa = true,
+            RequireBorderZone = false,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.False(ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile));
+        Assert.False(ApplicationProfileConfigurationResolver.ShowBorderZoneLocation(app));
+    }
+
+    [Fact]
     public void RequireWorkPermitLocationWhenProducingWorkPermit_ForcesTrue()
     {
         Assert.True(ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(

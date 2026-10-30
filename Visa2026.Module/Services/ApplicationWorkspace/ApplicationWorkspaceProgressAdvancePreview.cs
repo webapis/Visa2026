@@ -89,6 +89,8 @@ public static class ApplicationWorkspaceProgressAdvancePreview
 
         var code = nextStateCode.Trim();
         return string.Equals(code, ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1), StringComparison.OrdinalIgnoreCase)
+            || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration, StringComparison.OrdinalIgnoreCase)
+            // Legacy direct-migration office leave jumped straight to PROCESS_STARTED.
             || string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase);
     }
 

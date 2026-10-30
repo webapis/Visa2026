@@ -103,6 +103,30 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Prevent**: After renaming ApplicationProgress → ApplicationProfileInstanceProgress, keep existing `ApplicationProgress.Sla.*` message keys (or add catalog entries before switching). Do not assume a C# type rename updates `VisaUiMessageCatalog`.
 - **Cross-skill**: visa2026-application-profile
 
+### 2026-10-30 — Direct migration: Migrasiýa gullugyna tabşyryldy step
+
+- **Need**: Direct Progress jumped Office → At migration. Officers want the same **Migrasiýa gullugyna tabşyryldy** node as via ministry (Date + optional file; Process number later).
+- **Fix**: Direct leave-office is `1_REVIEW_STARTED` (Submitted). Timeline always inserts `migration-submitted` for Direct. Advance there → `SUBMITTED_MIGRATION` (Date + optional file; document number **not** required). Then migration → `PROCESS_STARTED` with Process number. `RequireSubmissionDocumentNumber` is via-ministry only.
+- **Officer**: Stop F5, rebuild, hard-refresh. New direct case: Office Submitted → **Migrasiýa gullugyna tabşyryldy** (Date, optional file) → At the migration service (Process number). Existing mid-flight cases are unchanged except new advances follow this path.
+- **Prevent**: Do not omit the Direct submission timeline when `legs.Count == 0`. Do not require Document number on Direct submission.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-10-30 — Direct final step: AS number received / Issued
+
+- **Need**: Direct has no waiting for AS after hand-in; AS is given when issued. Rename migration node; Issuance/Change require AS number; Registration/Cancellation/Business trip finish without AS.
+- **Fix**: Direct `SUBMITTED_MIGRATION` → `PROCESS_ISSUED` (skip `PROCESS_STARTED` for new advances; legacy `PROCESS_STARTED` still finishes). Label **AS number received** (Issuance/Change) or **Issued** (other ActionFamily). No Result dropdown; Cancelled is a separate control. Process number required only when `DirectFinalStepRequiresAsNumber`. Via ministry unchanged.
+- **Officer**: Rebuild/hard-refresh. After Migrasiýa gullugyna tabşyryldy: Date + (AS/Process number if Issuance/Change) + optional file → Advance writes Issued. Cancelled button still available.
+- **Prevent**: Do not gate Direct AS on Produce*/ShowProcessNumber alone — use ActionFamily. Do not rename via-ministry “At the migration service”.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-10-30 — Direct non–Issuance/Change ends at hand-in
+
+- **Need**: Registration/Cancellation/Business trip Direct should not have an AS/Issued node; Migrasiýa gullugyna tabşyryldy is the last step.
+- **Fix**: `DirectEndsAtMigrationSubmission` — omit migration timeline node; `SUBMITTED_MIGRATION` is terminal; no Cancelled on that hand-in; Issuance/Change keep three steps (hand-in → AS number received). Via ministry unchanged; no history backfill.
+- **Officer**: Non–Issuance/Change Direct: Office → Migrasiýa (Date + optional file) → done. Issuance/Change unchanged (third AS step).
+- **Prevent**: Do not advance non–Issuance/Change Direct from `SUBMITTED_MIGRATION` to `PROCESS_ISSUED`.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-08-28 — Progress Advance errors use red banner and field borders
 
 - Failed Advance on the case Progress tab uses a red error banner (not peach `--warn`) and the same red border on empty required fields (Process number, Result, Date). Duplicate process number also rings the input. Do not restyle all shell `--warn` banners.

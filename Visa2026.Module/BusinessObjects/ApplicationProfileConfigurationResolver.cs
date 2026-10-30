@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -100,6 +101,7 @@ public static class ApplicationProfileConfigurationResolver
     /// <summary>
     /// Instance Border zone (location) is required when the profile may produce invitation or visa.
     /// Distinct from <see cref="ApplicationProfile.ProduceBorderZone"/> (border-zone permit output).
+    /// <see cref="ApplicationProfileInvitationAddressPolicy.IsChangeInvitation"/> opts out (catalog flag only).
     /// </summary>
     public static bool RequireBorderZoneWhenProducingInvitationOrVisa(
         bool produceInvitation,
@@ -107,11 +109,26 @@ public static class ApplicationProfileConfigurationResolver
         bool requireBorderZone) =>
         requireBorderZone || produceInvitation || produceVisa;
 
+    /// <summary>
+    /// Effective Border zone Use flag: change-invitation respects the catalog/profile flag only;
+    /// other profiles still force on when May produce Invitation or Visa.
+    /// </summary>
+    public static bool EffectiveRequireBorderZone(ApplicationProfile? profile)
+    {
+        if (profile == null)
+            return false;
+
+        if (ApplicationProfileInvitationAddressPolicy.IsChangeInvitation(null, profile.Code))
+            return profile.RequireBorderZone;
+
+        return RequireBorderZoneWhenProducingInvitationOrVisa(
+            profile.ProduceInvitation, profile.ProduceVisa, profile.RequireBorderZone);
+    }
+
     public static bool ShowBorderZoneLocation(ApplicationProfileInstance? application) =>
         Resolve(
             application,
-            p => RequireBorderZoneWhenProducingInvitationOrVisa(
-                p.ProduceInvitation, p.ProduceVisa, p.RequireBorderZone),
+            EffectiveRequireBorderZone,
             t => t.ShowBorderZoneLocation || t.CanIssueInvitation || t.CanIssueVisa);
 
     /// <summary>
@@ -156,6 +173,36 @@ public static class ApplicationProfileConfigurationResolver
             p => RequireProcessNumberWhenProducingIssuedDocuments(
                 p.ProduceInvitation, p.ProduceWorkPermit, p.ProduceVisa, p.RequireProcessNumber),
             t => t.CanIssueInvitation || t.CanIssueWorkPermit || t.CanIssueVisa);
+
+    /// <summary>
+    /// Direct Issuance/Change: third timeline step (AS number received → PROCESS_ISSUED).
+    /// Other ActionFamily values end at Migrasiýa gullugyna tabşyryldy (SUBMITTED_MIGRATION).
+    /// </summary>
+    public static bool DirectFinalStepRequiresAsNumber(ApplicationProfile? profile) =>
+        profile != null
+        && profile.ActionFamily is ApplicationProfileActionFamily.Issuance
+            or ApplicationProfileActionFamily.Change;
+
+    public static bool DirectFinalStepRequiresAsNumber(ApplicationProfileInstance? application) =>
+        DirectFinalStepRequiresAsNumber(application?.ApplicationProfile);
+
+    /// <summary>Direct non–Issuance/Change: hand-in is the last step (no AS / Issued node).</summary>
+    public static bool DirectEndsAtMigrationSubmission(ApplicationProfile? profile) =>
+        profile != null
+        && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+        && !DirectFinalStepRequiresAsNumber(profile);
+
+    public static bool DirectEndsAtMigrationSubmission(ApplicationProfileInstance? application) =>
+        application != null
+        && GetProgressRoute(application) == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+        && !DirectFinalStepRequiresAsNumber(application);
+
+    /// <summary>Direct Issuance/Change final timeline node label.</summary>
+    public static string DirectFinalTimelineLabel(ApplicationProfile? profile) =>
+        "AS number received";
+
+    public static string DirectFinalTimelineLabel(ApplicationProfileInstance? application) =>
+        DirectFinalTimelineLabel(application?.ApplicationProfile);
 
     /// <summary>
     /// Business-trip departure/arrival and internal registration check-in/out use From/To Region+City.

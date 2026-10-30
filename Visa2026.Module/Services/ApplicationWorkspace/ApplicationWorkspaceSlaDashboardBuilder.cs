@@ -23,7 +23,7 @@ internal static class ApplicationWorkspaceSlaDashboardBuilder
         IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps)
     {
         var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory);
-        var outcome = ResolveOutcome(progressSteps, latest?.State?.Code);
+        var outcome = ResolveOutcome(application, progressSteps, latest?.State?.Code);
         var isTerminal = outcome is "issued" or "rejected" or "cancelled";
         var start = application.ApplicationDate == default ? (DateTime?)null : application.ApplicationDate.Date;
         var completedOn = ResolveCompletedOn(application, progressSteps, latest);
@@ -210,6 +210,7 @@ internal static class ApplicationWorkspaceSlaDashboardBuilder
     }
 
     private static string ResolveOutcome(
+        ApplicationProfileInstance application,
         IReadOnlyList<ApplicationWorkspaceCaseProgressStep> progressSteps,
         string? latestCode)
     {
@@ -218,9 +219,10 @@ internal static class ApplicationWorkspaceSlaDashboardBuilder
         if (!string.IsNullOrWhiteSpace(fromStep))
             return fromStep;
 
-        if (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latestCode))
+        if (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latestCode, application))
         {
-            if (string.Equals(latestCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(latestCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase)
+                || ApplicationMigrationSubmission.IsState(latestCode))
                 return "issued";
             if (string.Equals(latestCode, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
                 return "rejected";
