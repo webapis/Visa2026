@@ -1,3 +1,12 @@
+### 2026-10-30 — Picker shelf seed: Column 'GCRecord' is null
+
+- **Symptom**: Startup log `ApplicationProfile picker shelf seed failed` with `InvalidCastException: Column 'GCRecord' is null` on `ApplicationProfilePickerShelfSeed.EnsureSynced`.
+- **Cause**: Host-start created `ApplicationProfilePickerShelves` with nullable `GCRecord` / `OptimisticLockField`. XAF omits those columns on insert; Postgres stored NULL; RETURNING then failed the int read. Same failure as `ApplicationProfileApprovalLegVersions` (2026-08-18).
+- **Fix**: `ApplicationProfilePickerShelfSchemaSql` creates and heals both columns as `NOT NULL DEFAULT 0` before the shelf insert. Runs on the next host start (`ApplyIfMissing`).
+- **Verify**: `ApplicationProfilePickerShelfSchemaSqlTests` (2 passed). Module build. Stop F5, rebuild, F5. Log should show `picker shelf seed: shelvesCreated=…` and no `Column 'GCRecord' is null`.
+- **Prevent**: Do not create new XAF tables with `"GCRecord" integer NULL`. Match Application Profiles: `"GCRecord" integer NOT NULL DEFAULT 0`.
+- **Cross-skill**: —
+
 ### 2026-10-30 — Direct migration result chips on hand-in
 
 - **Need**: Via-ministry chips were merged into Application progress. Direct lists that end at Submitted to migration service showed no chips, including profiles that produce invitation and visa. Registration (Hasaba Almak) must stay without that stack.
