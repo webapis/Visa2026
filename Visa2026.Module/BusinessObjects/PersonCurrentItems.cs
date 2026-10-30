@@ -131,12 +131,15 @@ namespace Visa2026.Module.BusinessObjects
                 .FirstOrDefault();
         }
 
-        public static InvitationItem GetCurrentInvitationItem(Person person) =>
-            person?.InvitationItems?
-                .Where(i => i != null)
-                .OrderByDescending(i => i.Invitation?.IssuedDate ?? default)
+        public static InvitationItem GetCurrentInvitationItem(Person person)
+        {
+            var asOf = DateTime.Today;
+            return person?.InvitationItems?
+                .Where(i => i != null && InvitationIsInForceOn(i, asOf))
+                .OrderByDescending(i => i.Invitation!.IssuedDate)
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
+        }
 
         public static RejectionItem GetCurrentRejectionItem(Person person) =>
             person?.RejectionItems?
@@ -607,7 +610,9 @@ namespace Visa2026.Module.BusinessObjects
 
         private static bool InvitationIsInForceOn(InvitationItem item, DateTime asOfDate)
         {
-            if (item?.Invitation == null || IssuedDocumentLifecycle.IsCancelled(item))
+            if (item?.Invitation == null
+                || IssuedDocumentLifecycle.IsCancelled(item)
+                || IssuedDocumentLifecycle.IsChanged(item))
                 return false;
 
             var issued = item.Invitation.IssuedDate;

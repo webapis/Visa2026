@@ -10568,6 +10568,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýatyryldy",
             ["ru-RU"] = "Аннулирован",
         },
+        ["PersonDossier.Status.Changed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changed",
+            ["tr-TR"] = "Değiştirildi",
+            ["tk-TM"] = "Üýtgedildi",
+            ["ru-RU"] = "Изменён",
+        },
         ["PersonDossier.Status.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Current",

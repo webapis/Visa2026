@@ -687,7 +687,7 @@ public static class PersonDossierResolver
 
     /// <summary>
     /// InvitationItem dossier status — mutually exclusive:
-    /// Cancelled (cancellation instance) → Used (visa issued) → Expired → Valid to {expiry}.
+    /// Cancelled → Changed (per InvitationItem) → Used → Expired → Valid to {expiry}.
     /// </summary>
     internal static (string Label, string CssClass) ClassifyInvitationItem(
         InvitationItem item,
@@ -695,6 +695,9 @@ public static class PersonDossierResolver
     {
         if (IssuedDocumentLifecycle.IsCancelled(item))
             return (L("Status.Cancelled"), "st-expiring");
+
+        if (IssuedDocumentLifecycle.IsChanged(item))
+            return (L("Status.Changed"), "st-expiring");
 
         var used = item.IssuedVisa != null
             || (usedInvitationItemIds != null && item.ID != Guid.Empty && usedInvitationItemIds.Contains(item.ID));

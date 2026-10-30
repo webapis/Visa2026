@@ -239,7 +239,13 @@
     "tk-TM": "Ýatyryldy",
     "ru-RU": "Аннулирован"
   },
-  "PersonDossier.Status.Expired": {
+    "PersonDossier.Status.Changed": {
+    "en": "Changed",
+    "tr-TR": "Değiştirildi",
+    "tk-TM": "Üýtgedildi",
+    "ru-RU": "Изменён"
+  },
+"PersonDossier.Status.Expired": {
     "en": "Expired",
     "tr-TR": "Süresi dolmuş",
     "tk-TM": "Möhleti geçen",

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.PersonDossier;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -281,7 +282,7 @@ internal static class ApplicationWorkspaceTabBuilder
             [
                 PersonName(person),
                 inv.Invitation?.InvitationNumber ?? inv.ID.ToString(),
-                inv.Invitation != null ? "Current" : "—",
+                InvitationLinkedStatus(inv),
             ]),
             emptyMessage: "No invitation item linked.");
 
@@ -489,4 +490,12 @@ internal static class ApplicationWorkspaceTabBuilder
 
     private static string Fmt(DateTime date) =>
         date == default ? "—" : date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+
+    private static string InvitationLinkedStatus(InvitationItem inv)
+    {
+        if (inv?.Invitation == null)
+            return "—";
+        var (label, _) = PersonDossierResolver.ClassifyInvitationItem(inv);
+        return string.IsNullOrWhiteSpace(label) ? "—" : label;
+    }
 }

@@ -32,6 +32,54 @@ public class PersonDossierInvitationStatusTests
     }
 
     [Fact]
+    public void Classify_Changed_wins_over_valid_to()
+    {
+        var item = BuildItem(expiration: DateTime.Today.AddDays(30));
+        item.ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>
+        {
+            new()
+            {
+                ApplicationProfile = new ApplicationProfile
+                {
+                    ActionFamily = ApplicationProfileActionFamily.Change,
+                },
+                LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+            },
+        };
+
+        var (label, css) = PersonDossierResolver.ClassifyInvitationItem(item);
+
+        Assert.Equal("Changed", label);
+        Assert.Equal("st-expiring", css);
+    }
+
+    [Fact]
+    public void Classify_Changed_is_per_item_not_invitation_header()
+    {
+        var invitation = new Invitation
+        {
+            InvitationNumber = "CO337330",
+            ExpirationDate = DateTime.Today.AddDays(90),
+            IssuedDate = DateTime.Today.AddMonths(-1),
+        };
+        var changed = new InvitationItem { Invitation = invitation };
+        changed.ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>
+        {
+            new()
+            {
+                ApplicationProfile = new ApplicationProfile
+                {
+                    ActionFamily = ApplicationProfileActionFamily.Change,
+                },
+                LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+            },
+        };
+        var sibling = new InvitationItem { Invitation = invitation };
+
+        Assert.Equal("Changed", PersonDossierResolver.ClassifyInvitationItem(changed).Label);
+        Assert.StartsWith("Valid to", PersonDossierResolver.ClassifyInvitationItem(sibling).Label, StringComparison.OrdinalIgnoreCase);
+    }
+    [Fact]
     public void Classify_Used_when_visa_issued()
     {
         var item = BuildItem(expiration: DateTime.Today.AddDays(30));
