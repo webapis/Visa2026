@@ -80,6 +80,37 @@ public class ApplicationProcessNumberHelperTests
     }
 
     [Fact]
+    public void TryAssign_StampsProcessStartedAndProcessIssuedHistoryRows()
+    {
+        var started = new ApplicationProfileInstanceProgress
+        {
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
+            ProcessNumber = "old",
+        };
+        var issued = new ApplicationProfileInstanceProgress
+        {
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessIssued },
+            ProcessNumber = "old",
+        };
+        var submitted = new ApplicationProfileInstanceProgress
+        {
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+            ProcessNumber = "keep",
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ProgressHistory = [started, issued, submitted],
+        };
+
+        Assert.True(ApplicationProcessNumberHelper.TryAssign(null, application, " AS99 ", requireWhenVisible: false, out var error));
+        Assert.Null(error);
+        Assert.Equal("AS99", application.ProcessNumber);
+        Assert.Equal("AS99", started.ProcessNumber);
+        Assert.Equal("AS99", issued.ProcessNumber);
+        Assert.Equal("keep", submitted.ProcessNumber);
+    }
+
+    [Fact]
     public void CopyForIssuedDocument_PrefersInstance()
     {
         var application = new ApplicationProfileInstance { ProcessNumber = " AS538188 " };
