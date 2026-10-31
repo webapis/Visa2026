@@ -135,6 +135,10 @@
                                             <dd>@person.IssueDate.ToString("dd MMM yyyy")</dd>
                                         </div>
                                         <div>
+                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</dt>
+                                            <dd>@person.StartDate.ToString("dd MMM yyyy")</dd>
+                                        </div>
+                                        <div>
                                             <dt>@ApplicationProfileLocalization.Field("EndDate")</dt>
                                             <dd>@(person.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
                                         </div>
@@ -162,6 +166,7 @@
                                     var periodKey = CueKey(card, "visaPeriod");
                                     var placeKey = CueKey(card, "visaPlace");
                                     var issueKey = CueKey(card, "issueDate");
+                                    var startKey = CueKey(card, "startDate");
                                     var expKey = CueKey(card, "expiration");
                                     var zoneKey = CueKey(card, "borderZone");
                                     var passportKey = CueKey(card, "passport");
@@ -228,6 +233,11 @@
                                             <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.IssuedDate") *</span>
                                             <OfficerDateEdit Date="card.IssueDate"
                                                              DateChanged="value => OnVisaIssueDateChangedAsync(card, value, issueKey)" />
+                                        </label>
+                                        <label class="issue-issued-header-slot__field @FieldCueClass(startKey, true, IssueComposeFieldCue.HasDate(card.StartDate))">
+                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</span>
+                                            <OfficerDateEdit Date="card.StartDate"
+                                                             DateChanged="value => OnVisaStartDateChangedAsync(card, value, startKey)" />
                                         </label>
                                         <label class="issue-issued-header-slot__field @FieldCueClass(expKey, true, IssueComposeFieldCue.HasDate(card.ExpirationDate))">
                                             <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Expiration")</span>
@@ -559,7 +569,24 @@
         DateTime? value,
         string cueKey)
     {
+        var previousIssueDate = card.IssueDate;
         card.IssueDate = value ?? DateTime.Today;
+        // Match Visa.IssueDate setter: keep StartDate aligned until the officer sets a later start.
+        if (card.StartDate == default || card.StartDate.Date == previousIssueDate.Date)
+            card.StartDate = card.IssueDate.Date;
+        else if (card.StartDate.Date < card.IssueDate.Date)
+            card.StartDate = card.IssueDate.Date;
+        ReviewField(cueKey);
+        return Task.CompletedTask;
+    }
+
+    private Task OnVisaStartDateChangedAsync(
+        IssueIssuedVisaPersonCardDraft card,
+        DateTime? value,
+        string cueKey)
+    {
+        var start = value ?? card.IssueDate;
+        card.StartDate = start.Date < card.IssueDate.Date ? card.IssueDate.Date : start.Date;
         ReviewField(cueKey);
         return Task.CompletedTask;
     }
@@ -591,6 +618,8 @@
                 _defaultFields.Add(CueKey(person, "visaPlace"));
             if (IssueComposeFieldCue.HasDate(person.IssueDate))
                 _defaultFields.Add(CueKey(person, "issueDate"));
+            if (IssueComposeFieldCue.HasDate(person.StartDate))
+                _defaultFields.Add(CueKey(person, "startDate"));
             if (IssueComposeFieldCue.HasDate(person.ExpirationDate))
                 _defaultFields.Add(CueKey(person, "expiration"));
             if (IssueComposeFieldCue.HasText(person.BorderZoneLocation))
@@ -737,6 +766,7 @@
             GuidText(person.VisaPeriodId),
             GuidText(person.VisaIssuedPlaceId),
             person.IssueDate.ToString("yyyy-MM-dd"),
+            person.StartDate.ToString("yyyy-MM-dd"),
             person.ExpirationDate?.ToString("yyyy-MM-dd") ?? string.Empty,
             person.BorderZoneLocation?.Trim() ?? string.Empty);
     }

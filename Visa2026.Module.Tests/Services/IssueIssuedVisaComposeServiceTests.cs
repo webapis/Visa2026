@@ -93,4 +93,20 @@ public class IssueIssuedVisaComposeServiceTests
                 ExistingVisaId = visaId,
             }));
     }
+
+    [Fact]
+    public void PersonCardDraft_IncludesStartDateAfterIssueDateByDefault()
+    {
+        var issue = new DateTime(2026, 12, 18);
+        var card = new IssueIssuedVisaPersonCardDraft
+        {
+            IssueDate = issue,
+            StartDate = issue,
+            ExpirationDate = issue.AddMonths(6),
+        };
+
+        Assert.Equal(issue, card.StartDate);
+        Assert.True(card.StartDate >= card.IssueDate);
+        Assert.True(card.ExpirationDate > card.StartDate);
+    }
 }

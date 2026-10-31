@@ -17,7 +17,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `VisaCategory` | `VisaCategory` | Category (e.g. entries, purpose). | Required. |
 | `VisaIssuedPlace` | `VisaIssuedPlace` | Where the visa was issued. | Required. |
 | `IssueDate` | `DateTime` | Issue date (`IssueDate` property uses a backing field; see §5.1). | Required; **`[ImmediatePostData]`**. |
-| `StartDate` | `DateTime` | Validity start. | Required; **`[ImmediatePostData]`**. Often matches issue date — see §5.1. |
+| `StartDate` | `DateTime` | Validity start. | Required; **`[ImmediatePostData]`**. Must be on or after `IssueDate` (`RuleCriteria`); often matches issue date — see §5.1. Issued-visa compose on Application Profile Instance exposes this after Issued date. |
 | `ExpirationDate` | `DateTime?` | Validity end. | Required; must be greater than `StartDate` (`RuleCriteria`). |
 | `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Required; defaults to **`Ýok`** when unset (no border zones). | `[RuleRequiredField]`; multi-select sentinel `Ýok`. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |

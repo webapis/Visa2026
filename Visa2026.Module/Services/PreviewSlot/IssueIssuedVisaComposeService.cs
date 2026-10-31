@@ -115,13 +115,18 @@ public static class IssueIssuedVisaComposeService
                 var issueDate = already && existingVisa != null && existingVisa.IssueDate != default
                     ? existingVisa.IssueDate.Date
                     : DefaultIssueDate(instance, invitation.IssuedDate);
+                var startDate = already && existingVisa != null && existingVisa.StartDate != default
+                    ? existingVisa.StartDate.Date
+                    : issueDate;
+                if (startDate < issueDate)
+                    startDate = issueDate;
                 DateTime? expiration;
                 if (already && existingVisa?.ExpirationDate is DateTime existingExp && existingExp != default)
                     expiration = existingExp.Date;
-                else if (invitation.ExpirationDate is DateTime invExp && invExp != default && invExp.Date > issueDate.Date)
+                else if (invitation.ExpirationDate is DateTime invExp && invExp != default && invExp.Date > startDate.Date)
                     expiration = invExp.Date;
                 else
-                    expiration = issueDate.AddMonths(6);
+                    expiration = startDate.AddMonths(6);
 
                 people.Add(new IssueIssuedVisaPersonCardDraft
                 {
@@ -155,6 +160,7 @@ public static class IssueIssuedVisaComposeService
                         ? existingVisa?.VisaIssuedPlace?.ID ?? defaultPlaceId
                         : defaultPlaceId,
                     IssueDate = issueDate,
+                    StartDate = startDate,
                     ExpirationDate = expiration,
                     BorderZoneLocation = already
                         ? existingVisa?.BorderZoneLocation?.Trim()
@@ -256,11 +262,16 @@ public static class IssueIssuedVisaComposeService
             var issueDate = already && existingVisa != null && existingVisa.IssueDate != default
                 ? existingVisa.IssueDate.Date
                 : DefaultIssueDate(instance, invitationIssuedDate: null);
+            var startDate = already && existingVisa != null && existingVisa.StartDate != default
+                ? existingVisa.StartDate.Date
+                : issueDate;
+            if (startDate < issueDate)
+                startDate = issueDate;
             DateTime? expiration;
             if (already && existingVisa?.ExpirationDate is DateTime existingExp && existingExp != default)
                 expiration = existingExp.Date;
             else
-                expiration = issueDate.AddMonths(6);
+                expiration = startDate.AddMonths(6);
 
             cards.Add(new IssueIssuedVisaPersonCardDraft
             {
@@ -290,6 +301,7 @@ public static class IssueIssuedVisaComposeService
                     ? existingVisa?.VisaIssuedPlace?.ID ?? defaultPlaceId
                     : defaultPlaceId,
                 IssueDate = issueDate,
+                StartDate = startDate,
                 ExpirationDate = expiration,
                 BorderZoneLocation = already
                     ? existingVisa?.BorderZoneLocation?.Trim() ?? defaultBorderZone
@@ -521,7 +533,7 @@ public static class IssueIssuedVisaComposeService
 
                 visa.VisaIssuedPlace = issuedPlace;
                 visa.IssueDate = row.IssueDate.Date;
-                visa.StartDate = row.IssueDate.Date;
+                visa.StartDate = ResolveStartDate(row).Date;
                 visa.ExpirationDate = row.ExpirationDate?.Date;
                 visa.BorderZoneLocation = string.IsNullOrWhiteSpace(row.BorderZoneLocation)
                     ? BorderZoneSelectionHelper.ResolveForIssuedVisa(item.Invitation, instance)
@@ -547,6 +559,7 @@ public static class IssueIssuedVisaComposeService
                     VisaPeriodCaption = periodCaption ?? string.Empty,
                     PassportNumber = passport.PassportNumber?.Trim() ?? row.PassportNumber,
                     IssueDate = visa.IssueDate,
+                    StartDate = visa.StartDate,
                     ExpirationDate = visa.ExpirationDate,
                     BorderZoneCaption = visa.BorderZoneLocation_NameTm,
                 });
@@ -656,7 +669,7 @@ public static class IssueIssuedVisaComposeService
 
             visa.VisaIssuedPlace = issuedPlace;
             visa.IssueDate = row.IssueDate.Date;
-            visa.StartDate = row.IssueDate.Date;
+            visa.StartDate = ResolveStartDate(row).Date;
             visa.ExpirationDate = row.ExpirationDate?.Date;
             visa.BorderZoneLocation = string.IsNullOrWhiteSpace(row.BorderZoneLocation)
                 ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
@@ -684,6 +697,7 @@ public static class IssueIssuedVisaComposeService
                 VisaPeriodCaption = periodCaption ?? string.Empty,
                 PassportNumber = passport.PassportNumber?.Trim() ?? row.PassportNumber,
                 IssueDate = visa.IssueDate,
+                StartDate = visa.StartDate,
                 ExpirationDate = visa.ExpirationDate,
                 BorderZoneCaption = visa.BorderZoneLocation_NameTm,
             });
@@ -754,6 +768,7 @@ public static class IssueIssuedVisaComposeService
                 ? objectSpace.GetObjectByKey<VisaIssuedPlace>(placeId)
                 : visa.VisaIssuedPlace;
             visa.IssueDate = row.IssueDate.Date;
+            visa.StartDate = ResolveStartDate(row).Date;
             visa.ExpirationDate = row.ExpirationDate?.Date;
             visa.BorderZoneLocation = string.IsNullOrWhiteSpace(row.BorderZoneLocation)
                 ? BorderZoneSelectionHelper.ResolveForIssuedVisa(visa.IssuingInvitationItem?.Invitation, instance)
@@ -779,6 +794,7 @@ public static class IssueIssuedVisaComposeService
                             : string.Empty,
                         PassportNumber = row.PassportNumber,
                         IssueDate = visa.IssueDate,
+                        StartDate = visa.StartDate,
                         ExpirationDate = visa.ExpirationDate,
                         BorderZoneCaption = visa.BorderZoneLocation_NameTm,
                     },
@@ -797,6 +813,9 @@ public static class IssueIssuedVisaComposeService
         var invitation = invitationItem?.Invitation;
         var person = visa.Passport?.Person ?? invitationItem?.Person;
         var issueDate = visa.IssueDate == default ? DateTime.Today : visa.IssueDate.Date;
+        var startDate = visa.StartDate == default ? issueDate : visa.StartDate.Date;
+        if (startDate < issueDate)
+            startDate = issueDate;
         return new IssueIssuedVisaPersonCardDraft
         {
             InvitationId = invitation?.ID ?? Guid.Empty,
@@ -822,6 +841,7 @@ public static class IssueIssuedVisaComposeService
                 ?? visa.IssuingApplicationProfileInstance?.VisaPeriod?.ID,
             VisaIssuedPlaceId = visa.VisaIssuedPlace?.ID,
             IssueDate = issueDate,
+            StartDate = startDate,
             ExpirationDate = visa.ExpirationDate?.Date,
             BorderZoneLocation = visa.BorderZoneLocation?.Trim() ?? string.Empty,
             Documents = ListDocuments(objectSpace, visa.ID).ToList(),
@@ -862,8 +882,11 @@ public static class IssueIssuedVisaComposeService
             return $"{row.PersonName}: issued date is required.";
         if (instance.ApplicationDate != default && !(row.IssueDate.Date > instance.ApplicationDate.Date))
             return $"{row.PersonName}: issued date must be later than the case date ({instance.ApplicationDate:dd MMM yyyy}).";
-        if (row.ExpirationDate is not DateTime exp || exp.Date <= row.IssueDate.Date)
-            return $"{row.PersonName}: expiration must be later than issued date.";
+        var startDate = ResolveStartDate(row);
+        if (startDate.Date < row.IssueDate.Date)
+            return $"{row.PersonName}: start date must be on or after issued date ({row.IssueDate:dd MMM yyyy}).";
+        if (row.ExpirationDate is not DateTime exp || exp.Date <= startDate.Date)
+            return $"{row.PersonName}: expiration must be later than start date.";
         if (row.InvitationIssuedDate != default && !(row.IssueDate.Date > row.InvitationIssuedDate.Date))
             return $"{row.PersonName}: issued date must be later than invitation {row.InvitationNumber} ({row.InvitationIssuedDate:dd MMM yyyy}).";
 
@@ -871,6 +894,13 @@ public static class IssueIssuedVisaComposeService
             return $"{row.PersonName}: passport is required.";
 
         return null;
+    }
+
+    private static DateTime ResolveStartDate(IssueIssuedVisaPersonCardDraft row)
+    {
+        if (row.StartDate == default)
+            return row.IssueDate.Date;
+        return row.StartDate.Date;
     }
 
     private static DateTime DefaultIssueDate(ApplicationProfileInstance instance, DateTime? invitationIssuedDate)

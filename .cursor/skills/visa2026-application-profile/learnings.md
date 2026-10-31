@@ -1,3 +1,18 @@
+### 2026-10-31 — ListView Completion percentage (40/60 + AS gate)
+
+- **Need**: Officers need an integer process completion % on Application Profile Instance lists — timeline steps until AS/process number, then issued-document coverage.
+- **Fix**: `ApplicationProfileInstanceCompletionPercentage` (Phase1 max 40 from done steps; after `ProcessNumber` / PROCESS_STARTED gate, Phase1 locked + Phase2 max 60 from required chips person coverage; Ret excluded). NotMapped `CompletionPercentage` warmed in `WarmListViewDisplayCache`. Column updater + Model.xafml before ProgressStepsDisplay. Captions tk/ru/tr.
+- **Verify**: `ApplicationProfileInstanceCompletionPercentageTests` — 8 passed. Module Debug build OK.
+- **Officer**: Stop F5, rebuild host, hard-refresh. In-process / route lists show Completion percentage (e.g. 24 mid-flight; 70 with AS + half issued; 100 when required chips full).
+- **Prevent**: Do not start Phase2 before AS/process number. Do not count Ret. Do not persist a DB column unless SQL sort/filter is required later.
+- **Cross-skill**: visa2026-application-progress (timeline / PROCESS_STARTED)
+### 2026-10-31 — Issued visa compose: Start date after Issued date
+
+- **Need**: Adding a visa on Application Profile Instance showed Issued + Expiration only; officers need validity start, on/after issued date.
+- **Fix**: IssueIssuedVisaPersonCardDraft.StartDate in compose UI after Issued date; create/update persist Visa.StartDate; validate start >= issued and expiration > start; BO RuleCriteria Visa_StartDate_OnOrAfter_IssueDate. Issued list column Start added. Caption `ApplicationProfileInstance.Issued.Start` → Başlanýan senesi.
+- **Officer**: Stop F5, rebuild host (VS F5 if CLI hits SDK 10 workload error), hard-refresh. Open Issued visa — Start date sits under Berlen senesi; cannot save start before issued.
+- **Prevent**: Do not set `visa.StartDate = row.IssueDate` only on create; honor the draft StartDate. Same-day start is allowed (>=).
+- **Cross-skill**: —
 ### 2026-10-31 — Result pills grow from the last progress step
 
 - **Need**: Chips after the last progress step should look like stems, slightly larger, with a fill for completed, half, not started, and rejection (Ret always purple, including 0).
@@ -3874,3 +3889,12 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - Verify: stop F5, rebuild Module + Blazor host, F5 → Applications via ministry → search `5678` → Andy Pramasta case appears. Unit: `ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilderTests`.
 - Prevent: Do not rely on DxGrid column search for nested progress fields; keep SearchBridge → FullTextFilterAction. Prefer association free-join Contains over deep Replace fold chains for EF.
 - Cross-skill: -
+
+### 2026-10-31 — Person ListView Active invitations showed Changed (CO337330)
+
+- **Symptom**: Employees ListView Active invitations listed CO337330 for Weijun Liu while dossier labeled it Öýtgedildi (Changed).
+- **Cause**: `InvitationIsInForceOn` already skipped Changed/Cancelled via `IssuedDocumentLifecycle`, but ListView InvitationItems often lack loaded `ApplicationProfileInstances` skip-nav, so in-memory `IsChanged` was false. Used was never filtered.
+- **Fix**: Batch `LoadClosedInvitationItemIds` + `LoadUsedInvitationItemIds` (and visa/WP closed helpers) via ObjectSpace in `PersonCurrentItems.ListActive*`; exclude used; same closed filter for active visas/work permits. Unit: `ListActiveInvitations_SkipsChangedAndUsed`.
+- **Verify**: Rebuild Module; open Employees → Weijun Liu — CO337330 gone from Active invitations; ASGH338897 / CO334491 remain if still Valid.
+- **Prevent**: Do not trust empty skip-nav collections on ListView for lifecycle; query M2M/`IssuingInvitationItem` through ObjectSpace (same pattern as dossier used-ids).
+- **Cross-skill**: application-profile | person-dossier

@@ -3241,10 +3241,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Issued.Start"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Start *",
-            ["tr-TR"] = "Başlangıç *",
-            ["tk-TM"] = "Başy *",
-            ["ru-RU"] = "Начало *",
+            ["en-US"] = "Start date *",
+            ["tr-TR"] = "Başlangıç tarihi *",
+            ["tk-TM"] = "Başlanýan senesi *",
+            ["ru-RU"] = "Дата начала *",
         },
         ["ApplicationProfileInstance.Issued.Status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

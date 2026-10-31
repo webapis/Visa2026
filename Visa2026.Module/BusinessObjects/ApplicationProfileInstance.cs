@@ -328,14 +328,19 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [XafDisplayName("Completion percentage")]
         [ModelDefault("AllowEdit", "False")]
-        [ModelDefault("DisplayFormat", "{0}%")]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [VisibleInLookupListView(false)]
         [NotMapped]
-        public int CompletionPercentage =>
-            listViewCompletionPercentage
-            ?? ApplicationProfileInstanceCompletionPercentage.Calculate(this);
+        public string CompletionPercentage
+        {
+            get
+            {
+                var percent = listViewCompletionPercentage
+                    ?? ApplicationProfileInstanceCompletionPercentage.Calculate(this);
+                return percent.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
+            }
+        }
 
         /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
         public void WarmListViewDisplayCache()

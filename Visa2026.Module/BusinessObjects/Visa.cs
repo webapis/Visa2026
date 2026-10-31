@@ -26,6 +26,7 @@ namespace Visa2026.Module.BusinessObjects
       [NavigationItem("Lookup/Visa/Config")]
     [DefaultProperty(nameof(VisaNumber))]
     [RuleCriteria("Visa_ExpirationDate_GreaterThan_StartDate", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
+    [RuleCriteria("Visa_StartDate_OnOrAfter_IssueDate", DefaultContexts.Save, "StartDate >= IssueDate", "Start Date must be on or after Issue Date.")]
     [Appearance("VisaStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
     [Appearance("VisaStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",

@@ -473,6 +473,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                                 Cell(v.VisaType?.LocalizedDisplayName),
                                 Cell(v.VisaCategory?.LocalizedDisplayName),
                                 Cell(FormatIssuedDate(v.IssueDate)),
+                                Cell(FormatIssuedDate(v.StartDate)),
                                 Cell(FormatIssuedDate(v.ExpirationDate)),
                                 Cell(v.ProcessNumber),
                             ]);
@@ -538,6 +539,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         "ApplicationProfile.Field.VisaType",
         "ApplicationProfile.Field.VisaCategory",
         "ApplicationProfileInstance.Issued.IssuedDate",
+        "ApplicationProfileInstance.Issued.Start",
         "ApplicationProfileInstance.Issued.Expiration",
         "ApplicationProfile.Field.ProcessNumber",
     ];

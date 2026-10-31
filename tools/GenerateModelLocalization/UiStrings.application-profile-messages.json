@@ -3444,10 +3444,10 @@
     "ru-RU": "Файл"
   },
   "ApplicationProfileInstance.Issued.Start": {
-    "en-US": "Start *",
-    "tr-TR": "Başlangıç *",
-    "tk-TM": "Başy *",
-    "ru-RU": "Начало *"
+    "en-US": "Start date *",
+    "tr-TR": "Başlangıç tarihi *",
+    "tk-TM": "Başlanýan senesi *",
+    "ru-RU": "Дата начала *"
   },
   "ApplicationProfileInstance.Issued.End": {
     "en-US": "End *",

@@ -57,6 +57,9 @@ public sealed class IssueIssuedVisaPersonCardDraft
 
     public DateTime IssueDate { get; set; } = DateTime.Today;
 
+    /// <summary>Validity start; must be on or after <see cref="IssueDate"/>.</summary>
+    public DateTime StartDate { get; set; } = DateTime.Today;
+
     public DateTime? ExpirationDate { get; set; }
 
     public string BorderZoneLocation { get; set; } = string.Empty;
@@ -156,6 +159,8 @@ public sealed class IssueIssuedVisaCreatedRow
     public string PassportNumber { get; init; } = string.Empty;
 
     public DateTime IssueDate { get; init; }
+
+    public DateTime StartDate { get; init; }
 
     public DateTime? ExpirationDate { get; init; }
 
