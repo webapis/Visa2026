@@ -5,9 +5,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Process completion 0–100 for an instance ListView: Phase 1 timeline (max 40)
-/// until AS / process number, then Phase 1 locked at 40 plus issued-document coverage (max 60).
-/// Rejection chips are excluded from Phase 2.
+/// Process completion 0–100 for an instance ListView: Phase 1 timeline (max 40) from
+/// done steps, plus Phase 2 issued-document coverage (max 60) only after AS / process number.
+/// Rejection chips are excluded from Phase 2. Empty roster (0/0) earns no Phase 2 points.
 /// </summary>
 public static class ApplicationProfileInstanceCompletionPercentage
 {
@@ -41,18 +41,18 @@ public static class ApplicationProfileInstanceCompletionPercentage
         IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? chips,
         bool asGatePassed)
     {
-        if (asGatePassed)
-        {
-            var phase2 = CalculatePhase2Points(chips);
-            return Math.Clamp(Phase1Weight + phase2, 0, 100);
-        }
+        // Always score the timeline from actual step states — do not lock Phase 1 at 40
+        // just because a process number exists (incomplete current step must stay below 100%).
+        var phase1 = CalculatePhase1Points(steps);
+        if (!asGatePassed)
+            return Math.Clamp(phase1, 0, Phase1Weight);
 
-        return Math.Clamp(CalculatePhase1Points(steps), 0, Phase1Weight);
+        var phase2 = CalculatePhase2Points(chips);
+        return Math.Clamp(phase1 + phase2, 0, 100);
     }
 
     /// <summary>
-    /// Phase 1 points (0–40): done steps / total steps. Current / pending do not count as done
-    /// (migration awaiting AS stays current → less than 40 until the gate).
+    /// Phase 1 points (0–40): done steps / total steps. Current / pending do not count as done.
     /// </summary>
     public static int CalculatePhase1Points(IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? steps)
     {
@@ -71,12 +71,12 @@ public static class ApplicationProfileInstanceCompletionPercentage
 
     /// <summary>
     /// Phase 2 points (0–60): sum(coverage) / sum(expected) over required chips.
-    /// No required expected → full Phase 2 weight (after gate).
+    /// No required expected (empty roster / 0/0 chips) → 0 Phase 2 points (not complete).
     /// </summary>
     public static int CalculatePhase2Points(IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? chips)
     {
         if (chips == null || chips.Count == 0)
-            return Phase2Weight;
+            return 0;
 
         var issued = 0;
         var expected = 0;
@@ -90,8 +90,9 @@ public static class ApplicationProfileInstanceCompletionPercentage
             expected += Math.Max(0, chip.ExpectedCount);
         }
 
+        // 0/0 on required chips (no linked people) is incomplete — not a free 60 points.
         if (expected <= 0)
-            return Phase2Weight;
+            return 0;
 
         return Math.Clamp((int)Math.Round(Phase2Weight * (double)issued / expected), 0, Phase2Weight);
     }

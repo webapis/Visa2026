@@ -19,6 +19,14 @@ public class ApplicationProfileInstanceCompletionPercentageTests
         bool optional = false) =>
         new(key, key, coverage, expected, optional);
 
+    private static ApplicationWorkspaceListProgressSteps.Step[] AllDoneSteps() =>
+    [
+        Step("office", "done"),
+        Step("leg-1", "done"),
+        Step("migration-submitted", "done"),
+        Step("migration", "done"),
+    ];
+
     [Fact]
     public void Phase1_partial_steps_no_as_stays_within_40()
     {
@@ -55,7 +63,7 @@ public class ApplicationProfileInstanceCompletionPercentageTests
     }
 
     [Fact]
-    public void After_gate_zero_docs_is_40()
+    public void After_gate_all_steps_done_zero_docs_is_40()
     {
         var chips = new[]
         {
@@ -64,7 +72,7 @@ public class ApplicationProfileInstanceCompletionPercentageTests
         };
 
         var percent = ApplicationProfileInstanceCompletionPercentage.Calculate(
-            Array.Empty<ApplicationWorkspaceListProgressSteps.Step>(),
+            AllDoneSteps(),
             chips,
             asGatePassed: true);
 
@@ -72,7 +80,7 @@ public class ApplicationProfileInstanceCompletionPercentageTests
     }
 
     [Fact]
-    public void After_gate_half_coverage_is_70()
+    public void After_gate_all_steps_done_half_coverage_is_70()
     {
         var chips = new[]
         {
@@ -80,13 +88,13 @@ public class ApplicationProfileInstanceCompletionPercentageTests
             Chip("issuedVisa", 0, 3),
         };
 
-        var percent = ApplicationProfileInstanceCompletionPercentage.Calculate(null, chips, asGatePassed: true);
+        var percent = ApplicationProfileInstanceCompletionPercentage.Calculate(AllDoneSteps(), chips, asGatePassed: true);
 
         Assert.Equal(70, percent); // 40 + round(3/6 * 60)
     }
 
     [Fact]
-    public void After_gate_full_coverage_is_100()
+    public void After_gate_all_steps_done_full_coverage_is_100()
     {
         var chips = new[]
         {
@@ -95,19 +103,57 @@ public class ApplicationProfileInstanceCompletionPercentageTests
             Chip("issuedVisa", 3, 3),
         };
 
-        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(null, chips, asGatePassed: true));
+        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(AllDoneSteps(), chips, asGatePassed: true));
     }
 
     [Fact]
-    public void After_gate_ignores_rejection_and_full_when_no_required_expected()
+    public void After_gate_incomplete_timeline_with_full_visa_is_not_100()
+    {
+        // Like 5/-889: process number present, a current step remains, visa chips full.
+        var steps = new[]
+        {
+            Step("office", "done"),
+            Step("leg-1", "done"),
+            Step("leg-2", "done"),
+            Step("migration-submitted", "current"),
+            Step("migration", "pending"),
+        };
+        var chips = new[]
+        {
+            Chip("rejection", 0, 0, optional: true),
+            Chip("issuedVisa", 2, 2),
+        };
+
+        var percent = ApplicationProfileInstanceCompletionPercentage.Calculate(steps, chips, asGatePassed: true);
+
+        Assert.Equal(84, percent); // round(3/5 * 40) + 60
+        Assert.True(percent < 100);
+    }
+
+    [Fact]
+    public void After_gate_zero_expected_chips_adds_no_phase2()
     {
         var chips = new[]
         {
-            Chip("rejection", 2, 0, optional: true),
+            Chip("invitation", 0, 0),
+            Chip("issuedVisa", 0, 0),
+            Chip("workPermit", 0, 0),
         };
 
-        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(null, chips, asGatePassed: true));
-        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(null, null, asGatePassed: true));
+        // Timeline incomplete + 0/0 chips (like 9/-1659) → phase1 only, no free 60.
+        var steps = new[]
+        {
+            Step("office", "done"),
+            Step("leg-1", "done"),
+            Step("leg-2", "done"),
+            Step("migration", "pending"),
+        };
+
+        var percent = ApplicationProfileInstanceCompletionPercentage.Calculate(steps, chips, asGatePassed: true);
+
+        Assert.Equal(30, percent); // round(3/4 * 40) + 0
+        Assert.Equal(40, ApplicationProfileInstanceCompletionPercentage.Calculate(AllDoneSteps(), chips, asGatePassed: true));
+        Assert.Equal(40, ApplicationProfileInstanceCompletionPercentage.Calculate(AllDoneSteps(), null, asGatePassed: true));
     }
 
     [Fact]
@@ -121,7 +167,7 @@ public class ApplicationProfileInstanceCompletionPercentageTests
 
         Assert.True(ApplicationProfileInstanceCompletionPercentage.HasPassedAsGate(application));
         Assert.Equal(
-            100,
+            0,
             ApplicationProfileInstanceCompletionPercentage.Calculate(
                 application.ListViewProgressSteps,
                 application.ListViewResultCoverageChips,
