@@ -1,3 +1,10 @@
+### 2026-10-31 — Gulluk service-passport: May produce Invitation + invitation Use fields
+
+- **Need**: Configure wizard for **Gulluk Pasporty Üçin Çakylyk Almak** (`get_invitation_service_passport` / `App_Sevice_Passport`) showed May produce Invitation unchecked; invitation address/place Use fields were missing vs Çakylyk Almak.
+- **Fix**: Tenant catalog `application-profile.calik-energi.json`: `ProduceInvitation` **true** (keep `ProduceRejection` true; Visa/WP/border/work-location still false). Add `RequireInvitationAddress` + `RequireInvitationPlace` **true** (aligned with `App_Inv`).
+- **Officer**: Stop F5, rebuild, F5 so tenant profile seed sync runs. Open Configure → Identity: May produce Invitation + Rejection checked; Results/Use should show invitation address and place.
+- **Prevent**: Do not set `ProduceVisa` on this profile. Do not clear Rejection. Do not reuse `get_invitation` as Code.
+- **Cross-skill**: —
 ### 2026-10-31 — ListView Completion percentage (40/60 + AS gate)
 
 - **Need**: Officers need an integer process completion % on Application Profile Instance lists — timeline steps until AS/process number, then issued-document coverage.
