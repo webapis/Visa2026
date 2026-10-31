@@ -39,15 +39,15 @@ public class ApplicationWorkspaceIssuedResultListCoverageTests
         Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, chips[0].Key);
         Assert.Equal(2, chips[0].CoverageCount);
         Assert.Equal(2, chips[0].ExpectedCount);
-        Assert.Equal("ok", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[0]));
+        Assert.Equal("done", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[0]));
         Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.Rejection, chips[1].Key);
         Assert.True(chips[1].IsOptional);
         Assert.Equal(0, chips[1].ExpectedCount);
-        Assert.Equal("opt", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[1]));
+        Assert.Equal("rej-empty", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[1]));
         Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, chips[2].Key);
         Assert.Equal(1, chips[2].CoverageCount);
         Assert.Equal(2, chips[2].ExpectedCount);
-        Assert.Equal("miss", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[2]));
+        Assert.Equal("half", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[2]));
     }
 
     [Fact]
@@ -74,6 +74,15 @@ public class ApplicationWorkspaceIssuedResultListCoverageTests
 
         Assert.Equal("0", ApplicationWorkspaceIssuedResultListCoverage.RatioText(optional));
         Assert.Equal("2 / 2", ApplicationWorkspaceIssuedResultListCoverage.RatioText(required));
+        Assert.Equal("rej-empty", ApplicationWorkspaceIssuedResultListCoverage.Tone(optional));
+        Assert.Equal("rej", ApplicationWorkspaceIssuedResultListCoverage.Tone(
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip(
+                ApplicationWorkspaceIssuedRecordsCatalog.Rejection, "Rejection", 1, 0, true)));
+        Assert.Equal("done", ApplicationWorkspaceIssuedResultListCoverage.Tone(required));
+        Assert.Equal("none", ApplicationWorkspaceIssuedResultListCoverage.Tone(
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip("invitation", "Invitation", 0, 2, false)));
+        Assert.Equal("zero", ApplicationWorkspaceIssuedResultListCoverage.Tone(
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip("borderZone", "Border zone", 0, 0, false)));
     }
 
     [Fact]

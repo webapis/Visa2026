@@ -197,7 +197,9 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     ? "lv-progress-with-result"
                     : "lv-progress-with-result lv-progress-with-result--steps-only");
                 builder.OpenElement(2, "div");
-                builder.AddAttribute(3, "class", "lv-progress-stepper");
+                builder.AddAttribute(3, "class", showResultChips && chips.Count > 0
+                    ? "lv-progress-stepper lv-progress-stepper--with-stems"
+                    : "lv-progress-stepper");
                 var seq = 4;
                 for (var i = 0; i < steps.Count; i++)
                 {
@@ -264,7 +266,12 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                 builder.CloseElement();
 
                 if (showResultChips && chips.Count > 0)
+                {
+                    builder.OpenElement(seq++, "div");
+                    builder.AddAttribute(seq++, "class", "lv-result-neck");
+                    builder.CloseElement();
                     ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips);
+                }
 
                 builder.CloseElement();
             };

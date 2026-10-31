@@ -4039,7 +4039,7 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start;
-    gap: 10px;
+    gap: 0;
     width: 100%;
     min-width: 0;
 }
@@ -4048,6 +4048,57 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 .lv-progress-with-result .lv-progress-stepper {
     flex: 1 1 auto;
     min-width: 0;
+}
+
+.dxbl-grid td .lv-progress-stepper--with-stems,
+.lv-progress-stepper--with-stems {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none;
+}
+
+.lv-progress-stepper--with-stems .lv-progress-step,
+.lv-progress-stepper--with-stems .lv-progress-step:last-child {
+    flex: 0 0 auto;
+    width: 5.4rem;
+    min-width: 5.4rem;
+    max-width: 5.4rem;
+}
+
+.lv-progress-stepper--with-stems .lv-progress-step__line {
+    flex: 0 0 18px;
+    width: 18px;
+    margin: 0 3px;
+}
+
+/* Neck from the last check into the result trunk. */
+.lv-progress-stepper--with-stems .lv-progress-step:last-child .lv-progress-step__track::after {
+    content: "";
+    flex: 1 1 8px;
+    min-width: 8px;
+    height: 2px;
+    margin-left: 2px;
+    background: #4ade80;
+}
+
+/* Grows so every row's result stack starts on the same vertical line. */
+.dxbl-grid td .lv-result-neck,
+.lv-result-neck {
+    flex: 1 1 12px;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    height: 22px;
+    min-width: 12px;
+}
+
+.dxbl-grid td .lv-result-neck::before,
+.lv-result-neck::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #4ade80;
 }
 
 /* Ýüztutmanyň netijesi people-coverage chips (stacked beside migration step).
@@ -4070,24 +4121,75 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     flex-wrap: nowrap !important;
     align-items: stretch;
     flex: 0 0 auto;
-    gap: 4px;
+    gap: 6px;
+}
+
+/* Stems leave the last progress step and branch into each result pill. */
+.dxbl-grid td .lv-result-stems,
+.lv-result-stems {
+    position: relative;
+    display: flex;
+    flex: 0 0 12.75rem;
+    width: 12.75rem;
+    box-sizing: border-box;
+    align-items: stretch;
+    align-self: flex-start;
+    margin-top: -3px;
+    padding-left: 12px;
+}
+
+.dxbl-grid td .lv-result-stems .lv-result-chips--stack,
+.lv-result-stems .lv-result-chips--stack {
+    width: 100%;
+    align-items: stretch;
+}
+
+.dxbl-grid td .lv-result-stems .lv-result-chip,
+.lv-result-stems .lv-result-chip {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.dxbl-grid td .lv-result-stems::before,
+.lv-result-stems::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    border-radius: 1px;
+    background: #4ade80;
 }
 
 .dxbl-grid td .lv-result-chip,
 .lv-result-chip {
+    position: relative;
     display: inline-flex !important;
     align-items: center;
     gap: 4px;
-    height: 22px;
-    padding: 0 8px;
+    height: 28px;
+    padding: 0 12px;
     border-radius: 999px;
-    border: 1.5px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #d0d5dd));
-    background: var(--dxds-color-surface-neutral-default-rest, var(--bs-body-bg, #fff)) !important;
-    font-size: 11px;
-    font-weight: 600;
+    border: 1.5px solid transparent;
+    background: #3f3f46 !important;
+    font-size: 12.5px;
+    font-weight: 700;
     white-space: nowrap;
     line-height: 1;
-    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
+    color: #fff !important;
+}
+
+.lv-result-chips--stack .lv-result-chip::before {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    width: 12px;
+    height: 2px;
+    margin-top: -1px;
+    background: #4ade80;
 }
 
 .dxbl-grid td .lv-result-chip strong,
@@ -4097,22 +4199,46 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     color: inherit !important;
 }
 
-.dxbl-grid td .lv-result-chip--ok,
-.lv-result-chip--ok {
-    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
-    border-color: var(--dxds-color-content-success-default-rest, var(--bs-success, #12b76a)) !important;
+.dxbl-grid td .lv-result-chip--done,
+.lv-result-chip--done {
+    background: #15803d !important;
+    border-color: #15803d !important;
+    color: #fff !important;
 }
 
-.dxbl-grid td .lv-result-chip--miss,
-.lv-result-chip--miss {
-    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
-    border-color: var(--dxds-color-content-danger-default-rest, var(--bs-danger, #f04438)) !important;
+.dxbl-grid td .lv-result-chip--half,
+.lv-result-chip--half {
+    background: #b45309 !important;
+    border-color: #b45309 !important;
+    color: #fff !important;
 }
 
-.dxbl-grid td .lv-result-chip--opt,
-.lv-result-chip--opt {
-    color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054)) !important;
-    border-color: var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #98a2b3)) !important;
+.dxbl-grid td .lv-result-chip--none,
+.lv-result-chip--none {
+    background: #ea580c !important;
+    border-color: #ea580c !important;
+    color: #fff !important;
+}
+
+.dxbl-grid td .lv-result-chip--zero,
+.lv-result-chip--zero {
+    background: #3f3f46 !important;
+    border-color: #3f3f46 !important;
+    color: #fff !important;
+}
+
+.dxbl-grid td .lv-result-chip--rej-empty,
+.lv-result-chip--rej-empty {
+    background: #111111 !important;
+    border-color: #111111 !important;
+    color: #fff !important;
+}
+
+.dxbl-grid td .lv-result-chip--rej,
+.lv-result-chip--rej {
+    background: #b91c1c !important;
+    border-color: #b91c1c !important;
+    color: #fff !important;
 }
 
 /* Instance ListView — compact workspace progress stepper.

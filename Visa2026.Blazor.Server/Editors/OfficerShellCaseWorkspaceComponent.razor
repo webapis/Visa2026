@@ -1910,6 +1910,8 @@
                 </div>
                 @if (overviewResultChips.Count > 0)
                 {
+                    <div class="lv-result-neck"></div>
+                    <div class="lv-result-stems">
                     <div class="lv-result-chips lv-result-chips--stack" aria-label="@Msg("ApplicationProfileInstance.Workspace.ApplicationResult")">
                         @foreach (var chip in overviewResultChips)
                         {
@@ -1918,6 +1920,7 @@
                                 <strong>@ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip)</strong>
                             </span>
                         }
+                    </div>
                     </div>
                 }
                 </div>

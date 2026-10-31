@@ -21,13 +21,25 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         int ExpectedCount,
         bool IsOptional);
 
+    /// <summary>
+    /// Fill for the progress-result pill. Rejection is black when empty and red when it has a count.
+    /// Other types: done (full), half (some of expected), none (0 of expected), zero (0/0).
+    /// </summary>
     public static string Tone(Chip chip)
     {
-        if (chip.IsOptional)
-            return "opt";
-        return ApplicationWorkspaceIssuedResultOverview.Missing(chip.CoverageCount, chip.ExpectedCount, chip.IsOptional) > 0
-            ? "miss"
-            : "ok";
+        if (string.Equals(chip.Key, ApplicationWorkspaceIssuedRecordsCatalog.Rejection, StringComparison.OrdinalIgnoreCase))
+            return chip.CoverageCount > 0 ? "rej" : "rej-empty";
+
+        if (chip.ExpectedCount > 0 && chip.CoverageCount >= chip.ExpectedCount)
+            return "done";
+
+        if (chip.CoverageCount > 0 && chip.ExpectedCount > chip.CoverageCount)
+            return "half";
+
+        if (chip.ExpectedCount > 0 && chip.CoverageCount <= 0)
+            return "none";
+
+        return "zero";
     }
 
     public static string RatioText(Chip chip) =>

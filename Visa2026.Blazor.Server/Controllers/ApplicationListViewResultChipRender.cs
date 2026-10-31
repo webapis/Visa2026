@@ -12,6 +12,8 @@ internal static class ApplicationListViewResultChipRender
         IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> chips)
     {
         builder.OpenElement(seq++, "div");
+        builder.AddAttribute(seq++, "class", "lv-result-stems");
+        builder.OpenElement(seq++, "div");
         builder.AddAttribute(seq++, "class", "lv-result-chips lv-result-chips--stack");
         builder.AddAttribute(seq++, "aria-label", "Application result");
         foreach (var chip in chips)
@@ -26,6 +28,7 @@ internal static class ApplicationListViewResultChipRender
             builder.CloseElement();
         }
 
+        builder.CloseElement();
         builder.CloseElement();
     }
 }

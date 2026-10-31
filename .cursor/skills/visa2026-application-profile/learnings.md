@@ -1,3 +1,10 @@
+### 2026-10-31 — Result pills grow from the last progress step
+
+- **Need**: Chips after the last progress step should look like stems, slightly larger, with a fill for completed, half, not started, and rejection (Ret always purple, including 0).
+- **Fix**: `Tone` returns done / half / none / zero / rej. List, Overview, and Progress wrap the stack in `lv-result-stems`. Prototype `docs/prototypes/application-progress-result-stems-states-prototype.jpg`.
+- **Officer**: Stop F5, rebuild, hard-refresh. Completed 1/1 green, 1/2 amber, 0/1 red, Ret purple. A short green branch joins each pill to the last step.
+- **Prevent**: Do not paint Ret with the empty gray. Do not use border-only chips for these states.
+- **Cross-skill**: —
 ### 2026-10-30 — Picker shelf seed: Column 'GCRecord' is null
 
 - **Symptom**: Startup log `ApplicationProfile picker shelf seed failed` with `InvalidCastException: Column 'GCRecord' is null` on `ApplicationProfilePickerShelfSeed.EnsureSynced`.
