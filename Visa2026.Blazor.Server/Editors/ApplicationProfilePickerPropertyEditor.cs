@@ -379,6 +379,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         model.StatusMessage = null;
         model.IsStatusError = false;
+        // Workspace opened in a new MDI tab; close the picker so Create does not leave a dead tab.
+        View?.Close();
     }
 
     private void SelectProfile(Guid profileId)

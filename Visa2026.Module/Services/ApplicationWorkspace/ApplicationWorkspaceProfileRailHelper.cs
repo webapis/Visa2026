@@ -60,7 +60,7 @@ public static class ApplicationWorkspaceProfileRailHelper
 
             var frame = sourceFrame ?? application.MainWindow;
             application.ShowViewStrategy.ShowView(
-                new ShowViewParameters(pickerView) { TargetWindow = TargetWindow.Current },
+                new ShowViewParameters(pickerView) { TargetWindow = TargetWindow.NewWindow },
                 new ShowViewSource(frame, null));
             return true;
         }

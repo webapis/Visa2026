@@ -49,8 +49,10 @@ public sealed class ApplicationProfilePickerNewController : ViewController<ListV
         if (pickerView == null)
             return;
 
+        // NewWindow keeps the ApplicationProfileInstance ListView tab mounted (TabbedMDI).
+        // Current replaced the list; Create then failed with ObjectDisposedException on BlazorWindow.
         Application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(pickerView) { TargetWindow = TargetWindow.Current },
+            new ShowViewParameters(pickerView) { TargetWindow = TargetWindow.NewWindow },
             new ShowViewSource(Frame, null));
     }
 }

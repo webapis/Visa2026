@@ -1,3 +1,11 @@
+### 2026-10-31 — Picker Create: ObjectDisposedException on BlazorWindow
+
+- **Symptom**: Prod docker `10.100.128.26` (`visa2026-prod-app-1`): Choose Application Profile → Case summary → Create/Next showed Application Error. Log: `ObjectDisposedException` on `BlazorWindow` in `ApplicationProfilePickerCompletionHelper.ShowViewInCurrentWindow` after commit.
+- **Cause**: Create opened the workspace with `TargetWindow.Current` against a stale list/picker `SourceFrame`. TabbedMDI Blazor disposes that window; New on ListView also used Current (replaced the list).
+- **Fix**: Open picker and post-create workspace/dossier with `TargetWindow.NewWindow` + `MainWindow` source (same as list→workspace). Close picker `View` after successful Create.
+- **Verify**: `dotnet build Visa2026.slnx -c Debug`. Officer: New → fill Case summary → Create opens case workspace tab; list tab remains; no Application Error.
+- **Prevent**: Do not open case workspace from picker create with `TargetWindow.Current` / stored SourceFrame. Do not reopen picker with Current over the instance ListView.
+- **Cross-skill**: visa2026-lifecycle-docker (prod log triage)
 ### 2026-10-31 — Gulluk service-passport: May produce Invitation + invitation Use fields
 
 - **Need**: Configure wizard for **Gulluk Pasporty Üçin Çakylyk Almak** (`get_invitation_service_passport` / `App_Sevice_Passport`) showed May produce Invitation unchecked; invitation address/place Use fields were missing vs Çakylyk Almak.

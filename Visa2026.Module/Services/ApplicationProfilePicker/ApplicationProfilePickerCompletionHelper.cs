@@ -175,7 +175,7 @@ public static class ApplicationProfilePickerCompletionHelper
             var dossierView = PersonDossierOpenHelper.CreateDossierView(application, seedPersonId);
             if (dossierView != null)
             {
-                ShowViewInCurrentWindow(application, dossierView);
+                ShowCreatedViewInNewWindow(application, dossierView);
             }
 
             successMessage = $"ApplicationProfileInstance {appNumber} created.{warningText}";
@@ -270,7 +270,7 @@ public static class ApplicationProfilePickerCompletionHelper
                 errorMessage = "ApplicationProfileInstance was created but the workspace could not be opened.";
                 return false;
             }
-            ShowViewInCurrentWindow(application, nestedWorkspace);
+            ShowCreatedViewInNewWindow(application, nestedWorkspace);
             return true;
         }
 
@@ -305,7 +305,7 @@ public static class ApplicationProfilePickerCompletionHelper
             return false;
         }
 
-        ShowViewInCurrentWindow(application, workspaceView);
+        ShowCreatedViewInNewWindow(application, workspaceView);
 
         return true;
     }
@@ -382,14 +382,17 @@ public static class ApplicationProfilePickerCompletionHelper
         }
     }
 
-    private static void ShowViewInCurrentWindow(XafApplication application, View view)
+    /// <summary>
+    /// Opens the created case (or dossier) in a new TabbedMDI tab.
+    /// TargetWindow.Current + a stale picker/list SourceFrame throws ObjectDisposedException
+    /// on BlazorWindow after Case summary Create (prod docker logs on 10.100.128.26).
+    /// Same pattern as ApplicationListViewWorkspaceNavigationController / overview openers.
+    /// </summary>
+    private static void ShowCreatedViewInNewWindow(XafApplication application, View view)
     {
-        var sourceFrame = ApplicationProfilePickerContextGate.GetSourceFrame(application)
-            ?? application.MainWindow;
-
         application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(view) { TargetWindow = TargetWindow.Current },
-            new ShowViewSource(sourceFrame, null));
+            new ShowViewParameters(view) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(application.MainWindow, null));
     }
 }
 
