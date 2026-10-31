@@ -76,7 +76,7 @@ namespace Visa2026.Module.BusinessObjects
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
             return passport.Visas?
-                .Where(VisaIsSelectable)
+                .Where(v => VisaIsSelectable(v))
                 .Where(v => VisaIsEffectiveOn(v, asOfDate))
                 .OrderByDescending(v => v.StartDate.Date)
                 .ThenByDescending(v => v.IssueDate.Date)
@@ -134,8 +134,13 @@ namespace Visa2026.Module.BusinessObjects
         public static InvitationItem GetCurrentInvitationItem(Person person)
         {
             var asOf = DateTime.Today;
-            return person?.InvitationItems?
-                .Where(i => i != null && InvitationIsInForceOn(i, asOf))
+            var items = person?.InvitationItems?.Where(i => i != null).ToList();
+            if (items == null || items.Count == 0)
+                return null;
+
+            var (usedIds, closedIds) = LoadInvitationLifecycleSets(person, items);
+            return items
+                .Where(i => InvitationIsInForceOn(i, asOf, usedIds, closedIds))
                 .OrderByDescending(i => i.Invitation!.IssuedDate)
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
@@ -349,13 +354,21 @@ namespace Visa2026.Module.BusinessObjects
                 return Array.Empty<PersonListActiveDocument>();
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
+            var visas = person.Passports
+                .Where(passport => passport?.Visas != null)
+                .SelectMany(passport => passport.Visas.Where(visa => visa != null))
+                .ToList();
+            var closedIds = IssuedDocumentLifecycle.LoadClosedVisaIds(
+                ResolveObjectSpace(person, visas),
+                visas.Select(visa => visa.ID).Where(id => id != Guid.Empty).ToList());
+
             var rows = new List<(DateTime Start, DateTime Issued, Guid Id, PersonListActiveDocument Document)>();
             foreach (var passport in person.Passports.Where(passport => passport != null))
             {
                 if (passport.Visas == null)
                     continue;
 
-                foreach (var visa in passport.Visas.Where(visa => VisaIsInForceOn(visa, asOfDate)))
+                foreach (var visa in passport.Visas.Where(visa => VisaIsInForceOn(visa, asOfDate, closedIds)))
                 {
                     var number = visa.VisaNumber?.Trim() ?? string.Empty;
                     rows.Add((
@@ -388,8 +401,13 @@ namespace Visa2026.Module.BusinessObjects
                 return Array.Empty<PersonListActiveDocument>();
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
-            return person.WorkPermitItems
-                .Where(item => WorkPermitIsInForceOn(item, asOfDate))
+            var items = person.WorkPermitItems.Where(item => item != null).ToList();
+            var closedIds = IssuedDocumentLifecycle.LoadClosedWorkPermitItemIds(
+                ResolveObjectSpace(person, items),
+                items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+
+            return items
+                .Where(item => WorkPermitIsInForceOn(item, asOfDate, closedIds))
                 .OrderByDescending(item => item.StartDate.Date)
                 .ThenByDescending(item => item.ID)
                 .Select(item =>
@@ -408,15 +426,21 @@ namespace Visa2026.Module.BusinessObjects
                 .ToList();
         }
 
-        /// <summary>In-force invitation lines, latest issued date first. Each line is number and issued–expiration.</summary>
+        /// <summary>
+        /// In-force invitation lines, latest issued date first. Each line is number and issued–expiration.
+        /// Excludes cancelled, changed, used, and expired (same as dossier Valid status).
+        /// </summary>
         public static IReadOnlyList<PersonListActiveDocument> ListActiveInvitations(Person person, DateTime? asOf = null)
         {
             if (person?.InvitationItems == null)
                 return Array.Empty<PersonListActiveDocument>();
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
-            return person.InvitationItems
-                .Where(item => InvitationIsInForceOn(item, asOfDate))
+            var items = person.InvitationItems.Where(item => item != null).ToList();
+            var (usedIds, closedIds) = LoadInvitationLifecycleSets(person, items);
+
+            return items
+                .Where(item => InvitationIsInForceOn(item, asOfDate, usedIds, closedIds))
                 .OrderByDescending(item => item.Invitation!.IssuedDate.Date)
                 .ThenByDescending(item => item.ID)
                 .Select(item =>
@@ -589,31 +613,92 @@ namespace Visa2026.Module.BusinessObjects
             && (!passport.IssueDate.HasValue || passport.IssueDate.Value.Date <= asOfDate)
             && (!passport.ExpirationDate.HasValue || passport.ExpirationDate.Value.Date >= asOfDate);
 
-        private static bool VisaIsSelectable(Visa v) =>
-            v != null && !IssuedDocumentLifecycle.IsCancelled(v) && v.StartDate != default;
+        private static (HashSet<Guid> UsedIds, HashSet<Guid> ClosedIds) LoadInvitationLifecycleSets(
+            Person person,
+            IReadOnlyList<InvitationItem> items)
+        {
+            var objectSpace = ResolveObjectSpace(person, items);
+            var ids = items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList();
+            return (
+                IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace, ids),
+                IssuedDocumentLifecycle.LoadClosedInvitationItemIds(objectSpace, ids));
+        }
+
+        private static DevExpress.ExpressApp.IObjectSpace ResolveObjectSpace(
+            Person person,
+            IEnumerable<BaseObject> related)
+        {
+            var objectSpace = ObjectSpaceHelper.Get(person);
+            if (objectSpace != null)
+                return objectSpace;
+
+            foreach (var entity in related)
+            {
+                objectSpace = ObjectSpaceHelper.Get(entity);
+                if (objectSpace != null)
+                    return objectSpace;
+            }
+
+            return null;
+        }
+
+        private static bool VisaIsSelectable(Visa v, IReadOnlySet<Guid> closedIds = null) =>
+            v != null
+            && v.StartDate != default
+            && !((closedIds != null && v.ID != Guid.Empty && closedIds.Contains(v.ID))
+                || IssuedDocumentLifecycle.IsCancelled(v)
+                || IssuedDocumentLifecycle.IsChanged(v));
 
         private static bool VisaIsEffectiveOn(Visa v, DateTime asOfDate) =>
             VisaIsSelectable(v) && v.StartDate.Date <= asOfDate.Date;
 
-        private static bool VisaIsInForceOn(Visa v, DateTime asOfDate) =>
-            VisaIsSelectable(v)
+        private static bool VisaIsInForceOn(Visa v, DateTime asOfDate, IReadOnlySet<Guid> closedIds = null) =>
+            VisaIsSelectable(v, closedIds)
             && v.StartDate.Date <= asOfDate
             && (!v.ExpirationDate.HasValue || v.ExpirationDate.Value.Date >= asOfDate);
 
-        private static bool WorkPermitIsInForceOn(WorkPermitItem w, DateTime asOfDate) =>
+        private static bool WorkPermitIsInForceOn(
+            WorkPermitItem w,
+            DateTime asOfDate,
+            IReadOnlySet<Guid> closedIds = null) =>
             w != null
-            && !IssuedDocumentLifecycle.IsCancelled(w)
+            && !((closedIds != null && w.ID != Guid.Empty && closedIds.Contains(w.ID))
+                || IssuedDocumentLifecycle.IsCancelled(w)
+                || IssuedDocumentLifecycle.IsChanged(w))
             && w.StartDate != default
             && w.StartDate.Date <= asOfDate
             && w.ExpirationDate != default
             && w.ExpirationDate.Date >= asOfDate;
 
-        private static bool InvitationIsInForceOn(InvitationItem item, DateTime asOfDate)
+        /// <summary>
+        /// Active for Person ListView / current-item: valid dates, not cancelled, not changed, not used.
+        /// <paramref name="usedIds"/> / <paramref name="closedIds"/> cover ListView when skip-navs are unloaded.
+        /// </summary>
+        private static bool InvitationIsInForceOn(
+            InvitationItem item,
+            DateTime asOfDate,
+            IReadOnlySet<Guid> usedIds = null,
+            IReadOnlySet<Guid> closedIds = null)
         {
-            if (item?.Invitation == null
+            if (item?.Invitation == null)
+                return false;
+
+            if ((closedIds != null && item.ID != Guid.Empty && closedIds.Contains(item.ID))
                 || IssuedDocumentLifecycle.IsCancelled(item)
                 || IssuedDocumentLifecycle.IsChanged(item))
                 return false;
+
+            if (usedIds != null)
+            {
+                if (item.ID != Guid.Empty && usedIds.Contains(item.ID))
+                    return false;
+                if (item.IssuedVisa != null)
+                    return false;
+            }
+            else if (IssuedDocumentLifecycle.IsUsed(item))
+            {
+                return false;
+            }
 
             var issued = item.Invitation.IssuedDate;
             if (issued == default || issued.Date > asOfDate)

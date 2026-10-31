@@ -81,6 +81,10 @@ public class IssuedDocumentLifecycleTests
         Assert.False(IssuedDocumentLifecycle.IsInvitationItemUsedById(objectSpace: null, item.ID));
         Assert.Empty(IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace: null));
         Assert.Empty(IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace: null, invitationItemIds: []));
+        Assert.Empty(IssuedDocumentLifecycle.LoadClosedInvitationItemIds(objectSpace: null));
+        Assert.Empty(IssuedDocumentLifecycle.LoadClosedInvitationItemIds(objectSpace: null, invitationItemIds: []));
+        Assert.Empty(IssuedDocumentLifecycle.LoadClosedVisaIds(objectSpace: null, visaIds: []));
+        Assert.Empty(IssuedDocumentLifecycle.LoadClosedWorkPermitItemIds(objectSpace: null, workPermitItemIds: []));
     }
 
     [Fact]

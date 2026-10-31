@@ -83,6 +83,93 @@ public static class IssuedDocumentLifecycle
     }
 
     /// <summary>
+    /// Invitation item IDs linked to a completed Cancellation or Change instance
+    /// (<c>PROCESS_ISSUED</c>). Used when <see cref="InvitationItem.ApplicationProfileInstances"/>
+    /// is not loaded (e.g. Person ListView Active invitations).
+    /// </summary>
+    public static HashSet<Guid> LoadClosedInvitationItemIds(IObjectSpace? objectSpace) =>
+        LoadClosedInvitationItemIds(objectSpace, invitationItemIds: null);
+
+    public static HashSet<Guid> LoadClosedInvitationItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? invitationItemIds)
+    {
+        if (objectSpace == null)
+            return [];
+        if (invitationItemIds != null && invitationItemIds.Count == 0)
+            return [];
+
+        var cancelFamily = ApplicationProfileActionFamily.Cancellation;
+        var changeFamily = ApplicationProfileActionFamily.Change;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var query = objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.ApplicationProfileInstances.Any(a =>
+                a.ApplicationProfile != null
+                && (a.ApplicationProfile.ActionFamily == cancelFamily
+                    || a.ApplicationProfile.ActionFamily == changeFamily)
+                && a.LatestPrimaryStateCode == issued));
+        if (invitationItemIds != null)
+            query = query.Where(i => invitationItemIds.Contains(i.ID));
+
+        return query.Select(i => i.ID).ToHashSet();
+    }
+
+    /// <summary>
+    /// Visa IDs linked to a completed Cancellation or Change instance.
+    /// Same purpose as <see cref="LoadClosedInvitationItemIds"/> for Person ListView active visas.
+    /// </summary>
+    public static HashSet<Guid> LoadClosedVisaIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? visaIds)
+    {
+        if (objectSpace == null)
+            return [];
+        if (visaIds != null && visaIds.Count == 0)
+            return [];
+
+        var cancelFamily = ApplicationProfileActionFamily.Cancellation;
+        var changeFamily = ApplicationProfileActionFamily.Change;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var query = objectSpace.GetObjectsQuery<Visa>()
+            .Where(v => v.ApplicationProfileInstances.Any(a =>
+                a.ApplicationProfile != null
+                && (a.ApplicationProfile.ActionFamily == cancelFamily
+                    || a.ApplicationProfile.ActionFamily == changeFamily)
+                && a.LatestPrimaryStateCode == issued));
+        if (visaIds != null)
+            query = query.Where(v => visaIds.Contains(v.ID));
+
+        return query.Select(v => v.ID).ToHashSet();
+    }
+
+    /// <summary>
+    /// Work-permit item IDs linked to a completed Cancellation or Change instance.
+    /// </summary>
+    public static HashSet<Guid> LoadClosedWorkPermitItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? workPermitItemIds)
+    {
+        if (objectSpace == null)
+            return [];
+        if (workPermitItemIds != null && workPermitItemIds.Count == 0)
+            return [];
+
+        var cancelFamily = ApplicationProfileActionFamily.Cancellation;
+        var changeFamily = ApplicationProfileActionFamily.Change;
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var query = objectSpace.GetObjectsQuery<WorkPermitItem>()
+            .Where(w => w.ApplicationProfileInstances.Any(a =>
+                a.ApplicationProfile != null
+                && (a.ApplicationProfile.ActionFamily == cancelFamily
+                    || a.ApplicationProfile.ActionFamily == changeFamily)
+                && a.LatestPrimaryStateCode == issued));
+        if (workPermitItemIds != null)
+            query = query.Where(w => workPermitItemIds.Contains(w.ID));
+
+        return query.Select(w => w.ID).ToHashSet();
+    }
+
+    /// <summary>
     /// True when the invitation line is cancelled, changed, or already used for a visa.
     /// </summary>
     public static bool IsClosedOrUsed(InvitationItem? item) =>

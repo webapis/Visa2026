@@ -133,6 +133,60 @@ public class PersonListActiveDocumentsTests
         Assert.Equal("INV-1", PersonCurrentItems.FormatActiveInvitationNumbers(person, AsOf));
     }
 
+    [Fact]
+    public void ListActiveInvitations_SkipsChangedAndUsed()
+    {
+        var person = new Person();
+        person.InvitationItems.Add(Invitation("INV-VALID", new DateTime(2026, 4, 1), new DateTime(2026, 7, 1)));
+        person.InvitationItems.Add(Invitation("INV-CHANGED", new DateTime(2026, 5, 1), new DateTime(2026, 8, 1), changed: true));
+        var used = Invitation("INV-USED", new DateTime(2026, 5, 1), new DateTime(2026, 8, 1));
+        used.IssuedVisa = new Visa();
+        person.InvitationItems.Add(used);
+
+        var rows = PersonCurrentItems.ListActiveInvitations(person, AsOf);
+
+        Assert.Single(rows);
+        Assert.Equal("INV-VALID", rows[0].Number);
+        Assert.Equal("INV-VALID", PersonCurrentItems.FormatActiveInvitationNumbers(person, AsOf));
+    }
+
+    [Fact]
+    public void ListActiveVisas_SkipsChanged()
+    {
+        var person = new Person();
+        var passport = new Passport();
+        var visa = Visa("A-CHANGED", new DateTime(2026, 1, 1), new DateTime(2026, 12, 31), "Single");
+        visa.ApplicationProfileInstances.Add(new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { ActionFamily = ApplicationProfileActionFamily.Change },
+            LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+        });
+        passport.Visas.Add(visa);
+        person.Passports.Add(passport);
+
+        Assert.Empty(PersonCurrentItems.ListActiveVisas(person, AsOf));
+    }
+
+    [Fact]
+    public void ListActiveWorkPermits_SkipsChanged()
+    {
+        var person = new Person();
+        var item = new WorkPermitItem
+        {
+            WorkPermitNumber = "WP-CHANGED",
+            StartDate = new DateTime(2026, 2, 1),
+            ExpirationDate = new DateTime(2026, 8, 1),
+        };
+        item.ApplicationProfileInstances.Add(new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { ActionFamily = ApplicationProfileActionFamily.Change },
+            LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+        });
+        person.WorkPermitItems.Add(item);
+
+        Assert.Empty(PersonCurrentItems.ListActiveWorkPermits(person, AsOf));
+    }
+
     private static Visa Visa(string number, DateTime start, DateTime expiration, string typeName) =>
         new()
         {
@@ -143,7 +197,12 @@ public class PersonListActiveDocumentsTests
             VisaType = new VisaType { NameTm = typeName },
         };
 
-    private static InvitationItem Invitation(string number, DateTime issued, DateTime expiration, bool cancelled)
+    private static InvitationItem Invitation(
+        string number,
+        DateTime issued,
+        DateTime expiration,
+        bool cancelled = false,
+        bool changed = false)
     {
         var item = new InvitationItem
         {
@@ -159,6 +218,15 @@ public class PersonListActiveDocumentsTests
             item.ApplicationProfileInstances.Add(new ApplicationProfileInstance
             {
                 ApplicationProfile = new ApplicationProfile { ActionFamily = ApplicationProfileActionFamily.Cancellation },
+                LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+            });
+        }
+
+        if (changed)
+        {
+            item.ApplicationProfileInstances.Add(new ApplicationProfileInstance
+            {
+                ApplicationProfile = new ApplicationProfile { ActionFamily = ApplicationProfileActionFamily.Change },
                 LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
             });
         }
