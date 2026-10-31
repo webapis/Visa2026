@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
 namespace Visa2026.Module.Services.HeaderLinkedDocuments;
 
@@ -52,6 +53,11 @@ public sealed class HeaderDocumentCopyPdfMerger
         if (files.Count == 0)
             return false;
 
+        var layout = printLayout ?? DocumentCopyPrintLayout.DefaultFor(recordKey);
+        byte[]? passportBytes = family == HeaderDocumentCopiesFamily.Visa
+            && DocumentCopyPrintLayout.IsVisaKey(recordKey)
+                ? LoadLatestPassportScan(objectSpace, parentId)
+                : null;
         var pdfStreams = new List<MemoryStream>();
         try
         {
@@ -60,11 +66,18 @@ public sealed class HeaderDocumentCopyPdfMerger
                 if (!TryLoadFileContent(objectSpace, file.FileDataId, out var fileContent, out var fileNameForExt))
                     continue;
 
+                if (passportBytes != null
+                    && TryCreateVisaBesidePassportStream(passportBytes, fileContent, layout, out var paired))
+                {
+                    pdfStreams.Add(paired);
+                    continue;
+                }
+
                 if (!TryCreateMergeSlicePdfStream(
                         fileContent,
                         fileNameForExt,
                         recordKey,
-                        printLayout ?? DocumentCopyPrintLayout.DefaultFor(recordKey),
+                        layout,
                         out var pdfStream))
                     continue;
 
@@ -106,6 +119,9 @@ public sealed class HeaderDocumentCopyPdfMerger
             return false;
 
         var snapshot = HeaderLinkedDocumentsResolver.Resolve(objectSpace, family, parentId);
+        byte[]? passportBytes = family == HeaderDocumentCopiesFamily.Visa
+            ? LoadLatestPassportScan(objectSpace, parentId)
+            : null;
         var pdfStreams = new List<MemoryStream>();
         try
         {
@@ -114,16 +130,27 @@ public sealed class HeaderDocumentCopyPdfMerger
                 if (string.IsNullOrWhiteSpace(record.RecordKey))
                     continue;
 
+                var layout = DocumentCopyPrintLayout.DefaultFor(record.RecordKey);
+                bool pairWithPassport = passportBytes != null
+                    && DocumentCopyPrintLayout.IsVisaKey(record.RecordKey);
+
                 foreach (var file in record.Files.Where(file => file.HasContent && file.FileDataId != Guid.Empty))
                 {
                     if (!TryLoadFileContent(objectSpace, file.FileDataId, out var fileContent, out var fileNameForExt))
                         continue;
 
+                    if (pairWithPassport
+                        && TryCreateVisaBesidePassportStream(passportBytes!, fileContent, layout, out var paired))
+                    {
+                        pdfStreams.Add(paired);
+                        continue;
+                    }
+
                     if (!TryCreateMergeSlicePdfStream(
                             fileContent,
                             fileNameForExt,
                             record.RecordKey,
-                            DocumentCopyPrintLayout.DefaultFor(record.RecordKey),
+                            layout,
                             out var pdfStream))
                         continue;
 
@@ -157,6 +184,60 @@ public sealed class HeaderDocumentCopyPdfMerger
             HeaderDocumentCopiesFamily.Visa => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Visa>(),
             _ => null,
         };
+
+    /// <summary>
+    /// Latest PassportDocument on the passport that owns the visa. Those rows have no created date;
+    /// files are listed by id, and the last content file is the latest row.
+    /// </summary>
+    private byte[]? LoadLatestPassportScan(IObjectSpace objectSpace, Guid visaId)
+    {
+        Guid passportId = objectSpace.GetObjectsQuery<Visa>()
+            .Where(visa => visa.ID == visaId && visa.Passport != null)
+            .Select(visa => visa.Passport.ID)
+            .FirstOrDefault();
+        if (passportId == Guid.Empty)
+            return null;
+
+        ApplicationItemLinkedDocumentFile? latest = LatestPassportContentFile(
+            ApplicationItemLinkedDocumentsResolver.LoadDocumentFiles<PassportDocument>(
+                objectSpace,
+                document => document.Passport.ID == passportId));
+        if (latest == null)
+            return null;
+
+        return TryLoadFileContent(objectSpace, latest.FileDataId, out byte[] content, out _)
+            ? content
+            : null;
+    }
+
+    internal static ApplicationItemLinkedDocumentFile? LatestPassportContentFile(
+        IReadOnlyList<ApplicationItemLinkedDocumentFile> files) =>
+        files?.LastOrDefault(file => file.HasContent && file.FileDataId != Guid.Empty);
+
+    private bool TryCreateVisaBesidePassportStream(
+        byte[] passportBytes,
+        byte[] visaBytes,
+        DocumentCopyPrintLayout layout,
+        out MemoryStream pdfStream)
+    {
+        pdfStream = null!;
+        var outMs = new MemoryStream();
+        if (!SupportingDocumentsPdfSharpHelper.TryWriteVisaBesidePassport(
+                passportBytes,
+                visaBytes,
+                outMs,
+                logger,
+                layout)
+            || outMs.Length == 0)
+        {
+            outMs.Dispose();
+            return false;
+        }
+
+        outMs.Position = 0;
+        pdfStream = outMs;
+        return true;
+    }
 
     private bool TryLoadFileContent(
         IObjectSpace objectSpace,

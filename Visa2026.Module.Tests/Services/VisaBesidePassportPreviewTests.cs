@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.PersonLinkedDocuments;
 using Xunit;
 
@@ -108,6 +109,33 @@ public class VisaBesidePassportPreviewTests
         Assert.NotNull(latest);
         Assert.Equal(newer, latest!.FileDataId);
         Assert.Null(PersonDocumentCopyPdfMerger.LatestPassportScan(snapshot, "Visa.only"));
+    }
+
+    [Fact]
+    public void HeaderLatestPassportContentFile_UsesTheLastContentFile()
+    {
+        var older = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var newer = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var files = new[]
+        {
+            new ApplicationItemLinkedDocumentFile { FileDataId = older, HasContent = true, FileName = "old.jpg" },
+            new ApplicationItemLinkedDocumentFile { FileDataId = Guid.Empty, HasContent = false, FileName = "empty.jpg" },
+            new ApplicationItemLinkedDocumentFile { FileDataId = newer, HasContent = true, FileName = "new.jpg" },
+        };
+
+        var latest = HeaderDocumentCopyPdfMerger.LatestPassportContentFile(files);
+        Assert.NotNull(latest);
+        Assert.Equal(newer, latest!.FileDataId);
+        Assert.Null(HeaderDocumentCopyPdfMerger.LatestPassportContentFile(Array.Empty<ApplicationItemLinkedDocumentFile>()));
+    }
+
+    [Fact]
+    public void IsVisaKey_RecognizesHeaderVisaDocumentRecordKeys()
+    {
+        Assert.True(DocumentCopyPrintLayout.IsVisaKey("VisaDocument:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+        var layout = DocumentCopyPrintLayout.DefaultFor("VisaDocument:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        Assert.Equal(DocumentCopyPrintSize.Visa, layout.Size);
+        Assert.Equal(DocumentCopyPageOrientation.Landscape, layout.Orientation);
     }
 
     [Fact]
