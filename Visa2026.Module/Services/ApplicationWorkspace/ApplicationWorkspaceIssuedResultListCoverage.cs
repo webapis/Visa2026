@@ -97,6 +97,28 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         return chips;
     }
 
+    /// <summary>
+    /// Progress-track chips. An empty rejection is hidden; other zero ratios stay
+    /// (for example Wiza 0/1) so a missing issued document is still visible.
+    /// </summary>
+    public static IReadOnlyList<Chip> ForDisplay(IReadOnlyList<Chip>? chips)
+    {
+        if (chips == null || chips.Count == 0)
+            return Array.Empty<Chip>();
+
+        var visible = new List<Chip>(chips.Count);
+        foreach (var chip in chips)
+        {
+            if (string.Equals(chip.Key, ApplicationWorkspaceIssuedRecordsCatalog.Rejection, StringComparison.OrdinalIgnoreCase)
+                && chip.CoverageCount <= 0)
+                continue;
+
+            visible.Add(chip);
+        }
+
+        return visible;
+    }
+
     public static void ApplyTo(IObjectSpace? objectSpace, IReadOnlyList<ApplicationProfileInstance> applications)
     {
         if (applications == null || applications.Count == 0)

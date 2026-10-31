@@ -111,4 +111,39 @@ public class ApplicationWorkspaceIssuedResultListCoverageTests
         Assert.All(chips, c => Assert.Equal(3, c.ExpectedCount));
         Assert.Equal("0 / 3", ApplicationWorkspaceIssuedResultListCoverage.RatioText(chips[0]));
     }
+
+    [Fact]
+    public void ForDisplay_hides_empty_rejection_and_keeps_zero_visa()
+    {
+        var chips = new[]
+        {
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip(
+                ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, "Visa", 0, 1, false),
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip(
+                ApplicationWorkspaceIssuedRecordsCatalog.Rejection, "Rejection", 0, 0, true),
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip(
+                ApplicationWorkspaceIssuedRecordsCatalog.Invitation, "Invitation", 1, 1, false),
+        };
+
+        var visible = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(chips);
+
+        Assert.Equal(2, visible.Count);
+        Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, visible[0].Key);
+        Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, visible[1].Key);
+    }
+
+    [Fact]
+    public void ForDisplay_keeps_rejection_when_it_has_a_count()
+    {
+        var chips = new[]
+        {
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip(
+                ApplicationWorkspaceIssuedRecordsCatalog.Rejection, "Rejection", 1, 0, true),
+        };
+
+        var visible = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(chips);
+
+        var chip = Assert.Single(visible);
+        Assert.Equal(1, chip.CoverageCount);
+    }
 }

@@ -21,7 +21,8 @@
     <h2 class="ct-page__title">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress")</h2>
     <p class="ct-page__sub">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProgressSubtitle", view.Chrome.TemplateFamilyLabel, LocalizedCurrentStepHeading)</p>
     @{
-        var progressChips = ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles);
+        var progressChips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(
+            ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles));
         var progressResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(view.ProgressSteps, progressChips)
             ? progressChips
             : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();

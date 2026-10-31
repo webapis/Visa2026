@@ -140,6 +140,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                         ?? chips;
                 }
 
+                chips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(chips);
                 var showResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(steps, chips);
                 if (!showResultChips)
                     chips = Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();

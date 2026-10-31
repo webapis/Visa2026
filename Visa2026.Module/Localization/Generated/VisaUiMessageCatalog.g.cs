@@ -4622,7 +4622,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "AS number received",
             ["tr-TR"] = "AS numarası alındı",
-            ["tk-TM"] = "AS belgisi alyndy",
+            ["tk-TM"] = "CO belgisi alyndy",
             ["ru-RU"] = "Номер AS получен",
         },
         ["ApplicationProfileInstance.Workspace.AtMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

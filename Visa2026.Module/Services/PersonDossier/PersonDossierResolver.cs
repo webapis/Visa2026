@@ -538,10 +538,12 @@ public static class PersonDossierResolver
                 var excluded = exclusions.ContainsKey(app.ID);
                 var compactSteps = ApplicationWorkspaceListProgressSteps.FromTimeline(
                     timeline ?? Array.Empty<ApplicationWorkspaceCaseProgressStep>());
+                var coverageChips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(
+                    app.ListViewResultCoverageChips);
                 var resultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(
                     compactSteps,
-                    app.ListViewResultCoverageChips)
-                    ? app.ListViewResultCoverageChips
+                    coverageChips)
+                    ? coverageChips
                     : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
                 return new PersonDossierRecord
                 {

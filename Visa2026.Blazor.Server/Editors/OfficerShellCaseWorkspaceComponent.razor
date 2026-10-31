@@ -1822,7 +1822,8 @@
             <section class="cw-card">
                 <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ProgressTitle")</h2>
                 @{
-                    var overviewChips = ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles);
+                    var overviewChips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(
+                        ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles));
                     var overviewResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(view.ProgressSteps, overviewChips)
                         ? overviewChips
                         : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
