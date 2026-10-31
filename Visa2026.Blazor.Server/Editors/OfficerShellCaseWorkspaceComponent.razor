@@ -1833,15 +1833,7 @@
                 {
                     var step = view.ProgressSteps[i];
                     var currentIdx = view.ProgressSteps.ToList().FindIndex(s => s.State == "current");
-                    var badge = ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
-                        !string.IsNullOrWhiteSpace(step.CurrentStateLabel)
-                            ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
-                            : step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
-                                ? Msg("ApplicationProfileInstance.Workspace.Completed")
-                                : step.State == "current" ? Msg("ApplicationProfileInstance.Workspace.InProgress")
-                                : step.State == "pending" ? Msg("ApplicationProfileInstance.Workspace.Pending")
-                                : string.Empty,
-                        step.ProcessNumber);
+                    var badge = ApplicationWorkspaceListProgressSteps.Badge(step);
                     var badgeCls = step.OutcomeKind switch
                     {
                         "issued" => "issued",

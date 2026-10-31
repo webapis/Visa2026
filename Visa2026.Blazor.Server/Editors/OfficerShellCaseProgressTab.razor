@@ -32,7 +32,7 @@
             // Result dropdown is unsaved until Advance. Keep the current node blue + pen
             // (same as Office preparation), not Issued/Approved green tick.
             var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
-            var badge = StepBadge(step, isCurrent);
+            var badge = ApplicationWorkspaceListProgressSteps.Badge(step);
             var tone = isCurrent ? "current" : step.OutcomeKind;
             var badgeCls = tone switch
             {
@@ -688,23 +688,6 @@
             : IsMigrationStep(step)
                 ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents")
                 : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter");
-
-    private static string StepBadge(ApplicationWorkspaceCaseProgressStep step, bool isCurrent)
-    {
-        string text;
-        if (!string.IsNullOrWhiteSpace(step.CurrentStateLabel))
-            text = ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel);
-        else if (step.State == "done" && !string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase))
-            text = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Completed");
-        else if (isCurrent)
-            text = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.InProgress");
-        else if (step.State == "pending")
-            text = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Pending");
-        else
-            text = string.Empty;
-
-        return ApplicationProfileLocalization.ProgressStatusWithProcessNumber(text, step.ProcessNumber);
-    }
 
     private string CurrentStepHeading
     {

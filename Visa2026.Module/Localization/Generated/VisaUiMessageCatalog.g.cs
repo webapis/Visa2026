@@ -5621,10 +5621,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Workspace.ResultNumberValue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Result number: {0}",
-            ["tr-TR"] = "Sonuç numarası: {0}",
-            ["tk-TM"] = "Netije belgisi: {0}",
-            ["ru-RU"] = "Номер результата: {0}",
+            ["en-US"] = "{0}",
+            ["tr-TR"] = "{0}",
+            ["tk-TM"] = "{0}",
+            ["ru-RU"] = "{0}",
         },
         ["ApplicationProfileInstance.Workspace.ResultRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -740,8 +740,10 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(steps[1].CanRevertToHere);
         Assert.True(steps[5].CanRevert);
         Assert.False(steps[5].CanRevertToHere);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, steps[5].Label);
+        Assert.True(string.IsNullOrEmpty(steps[5].CurrentStateLabel));
         Assert.Equal(
-            "At the migration service · Process issued",
+            ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel,
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
     }
 
@@ -825,7 +827,7 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(submission.ShowMigrationSubmission);
         Assert.Equal(string.Empty, submission.SubmissionDocumentNumber);
         Assert.Equal("current", migration.State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationLabel, migration.Label);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
         Assert.Equal("Processing", migration.CurrentStateLabel);
         Assert.Equal("7/4047", migration.ProcessNumber);
         Assert.Contains(migration.AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued
@@ -857,13 +859,13 @@ public class ApplicationWorkspaceProgressTimelineTests
         var migration = steps.Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
 
         Assert.Equal("current", migration.State);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.MigrationLabel, migration.Label);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.AwaitingAsCoNumberLabel, migration.CurrentStateLabel);
         Assert.True(migration.ShowMinistryLetterUpload);
         Assert.False(migration.MissingMinistryLetter);
         Assert.Equal(ApplicationProfileInstanceProgressFiles.MinistryLetter, migration.FileSlot);
         Assert.Equal(
-            "At the migration service · Awaiting AS (CO) number",
+            "AS number received · Awaiting AS (CO) number",
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
     }
 
@@ -919,6 +921,9 @@ public class ApplicationWorkspaceProgressTimelineTests
         var migration = steps.Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
 
         Assert.Equal("issued", migration.OutcomeKind);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
+        Assert.True(string.IsNullOrEmpty(migration.CurrentStateLabel));
+        Assert.Equal("AS-1", migration.ProcessNumber);
         Assert.False(migration.ShowMinistryLetterUpload);
         Assert.False(migration.MissingMinistryLetter);
         Assert.Equal(startedId, migration.ProgressId);

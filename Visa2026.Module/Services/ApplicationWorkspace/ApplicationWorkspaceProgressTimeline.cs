@@ -185,7 +185,7 @@ internal static class ApplicationWorkspaceProgressTimeline
                 migrationRow = latest;
             var migrationLabel = isDirect
                 ? ApplicationProfileConfigurationResolver.DirectFinalTimelineLabel(liveProfile)
-                : MigrationLabel;
+                : AsNumberReceivedLabel;
             var migrationStatusLabel = isDirect
                 ? ResolveDirectMigrationStatusLabel(migrationRow, migrationState)
                 : ResolveMigrationStatusLabel(migrationRow, migrationState);
@@ -790,8 +790,9 @@ internal static class ApplicationWorkspaceProgressTimeline
         var code = row?.State?.Code?.Trim();
         if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
             return "Processing";
+        // Issued is the application-result chips, not a status on this step.
         if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
-            return "Process issued";
+            return string.Empty;
         if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
             return "Process rejected";
         if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
@@ -828,7 +829,11 @@ internal static class ApplicationWorkspaceProgressTimeline
         string slotState)
     {
         var status = ResolveMigrationStatusLabel(migrationRow, slotState);
-        if (status is not ("Processing" or "Process issued" or "Process rejected"))
+        var issued = string.Equals(
+            migrationRow?.State?.Code,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+            StringComparison.OrdinalIgnoreCase);
+        if (!issued && status is not ("Processing" or "Process rejected"))
             return string.Empty;
 
         if (!string.IsNullOrWhiteSpace(migrationRow?.ProcessNumber))

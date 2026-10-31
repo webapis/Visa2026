@@ -269,6 +269,14 @@ public static class ApplicationWorkspaceListProgressSteps
     /// <summary>Same badge text as the case workspace progress track.</summary>
     public static string Badge(ApplicationWorkspaceCaseProgressStep step)
     {
+        // Via ministry: the last step is AS number received. Issued is the result chips, not a badge.
+        if (string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(step.OutcomeKind, "issued", StringComparison.OrdinalIgnoreCase)
+            && string.IsNullOrWhiteSpace(step.CurrentStateLabel))
+        {
+            return step.ProcessNumber?.Trim() ?? string.Empty;
+        }
+
         if (!string.IsNullOrWhiteSpace(step.CurrentStateLabel))
             return ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
                 ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel),

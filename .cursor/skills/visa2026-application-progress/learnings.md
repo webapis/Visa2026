@@ -6,6 +6,14 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-10-31 — Via ministry last step is AS belgisi alyndy
+
+- **Need**: Via-ministry progress should not show **Işlendi** / **Resmileşdirildi**. That outcome is the application result chips. The last step is **AS belgisi alyndy**.
+- **Fix**: The via-ministry migration node label is `AS number received`. `PROCESS_ISSUED` no longer sets a status badge on that step; the process number still shows. Rejected and cancelled badges stay. Direct routes are unchanged. Hereket still lists the issued history row.
+- **Test**: `ApplicationWorkspaceProgressTimelineTests` and list-progress tests, 41 passed.
+- **Prevent**: Do not put **At the migration service** back as the via-ministry last step. Do not show **Process issued** on that step. Do not drop the process number when the issued badge is hidden.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-10-26 — Document copies on Migrasiýa gullugynda while waiting for the AS number
 
 - **Need**: On **Migrasiýa gullugynda**, while the status is still **AS … belgisine garaşylýar**, the officer stores document copies on the card before **Ýagdaýy ilerletmek**, the same way a ministry step does. After the step is finished, the pencil can still add, replace, or remove those copies. A copy is optional on this step and on the other progress steps (the submission copy was required).
