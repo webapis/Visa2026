@@ -2,6 +2,7 @@ using System.Linq;
 using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
+using DevExpress.ExpressApp.Blazor.Editors.Models;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Model;
 using Visa2026.Module.Services.ApplicationWorkspace;
@@ -9,13 +10,12 @@ using Visa2026.Module.Services.ApplicationWorkspace;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Renders the compact workspace progress stepper in the instance ListView column.
+/// Compact progress stepper. Header sort uses the same FieldName as Completion percentage
+/// (one sort — no separate progress/CustomSort).
 /// </summary>
 public sealed class ApplicationListViewProgressStepsController : ViewController<ListView>
 {
     private CancellationTokenSource? deferredApplyCts;
-    private Action<GridCustomSortEventArgs>? customSortHandler;
-    private Action<GridCustomSortEventArgs>? previousCustomSort;
 
     public ApplicationListViewProgressStepsController()
     {
@@ -26,7 +26,6 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
     {
         base.OnViewControlsCreated();
         ApplyStepperTemplate();
-        WireCustomSort();
         ScheduleDeferredApply();
     }
 
@@ -53,7 +52,6 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         if (View is { IsDisposed: false })
         {
             ApplyStepperTemplate();
-            WireCustomSort();
             AutoFitColumns();
         }
     }
@@ -72,57 +70,16 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         deferredApplyCts?.Cancel();
         deferredApplyCts?.Dispose();
         deferredApplyCts = null;
-        if (customSortHandler != null
-            && View?.Editor is DxGridListEditor { GridModel: { } gridModel })
-        {
-            gridModel.CustomSort = previousCustomSort;
-        }
-
-        customSortHandler = null;
-        previousCustomSort = null;
         base.OnDeactivated();
-    }
-
-    private void WireCustomSort()
-    {
-        if (View?.Editor is not DxGridListEditor { GridModel: { } gridModel })
-            return;
-
-        if (customSortHandler != null)
-        {
-            gridModel.CustomSort = previousCustomSort;
-            customSortHandler = null;
-            previousCustomSort = null;
-        }
-
-        previousCustomSort = gridModel.CustomSort;
-        customSortHandler = e =>
-        {
-            previousCustomSort?.Invoke(e);
-            if (e.Handled || !IsProgressStepsColumn(e.FieldName))
-                return;
-
-            // NotMapped ProgressListSortKey is often missing from Value1/Value2; use the BO.
-            var key1 = SortKeyFromDataItem(e.DataItem1);
-            var key2 = SortKeyFromDataItem(e.DataItem2);
-            e.Result = key1.CompareTo(key2);
-            e.Handled = true;
-        };
-        gridModel.CustomSort = customSortHandler;
-    }
-
-    private static int SortKeyFromDataItem(object? dataItem)
-    {
-        if (dataItem is ApplicationProfileInstance application)
-            return application.ProgressListSortKey;
-
-        return int.MaxValue;
     }
 
     internal void ApplyStepperTemplate()
     {
         if (View?.Editor is not DxGridListEditor gridListEditor)
             return;
+
+        if (View.Editor is DxGridListEditor listEditor)
+            listEditor.PreventServerSideOperationsForNonPersistentMembers = false;
 
         foreach (var columnModel in gridListEditor.GridDataColumnModels)
         {
@@ -135,13 +92,13 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                 continue;
             }
 
-            if (!IsProgressStepsColumn(columnModel.FieldName))
+            if (!IsProgressStepperColumn(columnModel))
                 continue;
 
-            // Persistent FieldName so CollectionSource can sort; CustomSort uses ProgressListSortKey (color + stage).
+            // Same FieldName as Tamamlanma göterimi — one shared % sort (progress CustomSort ignored).
             var caption = columnModel.Caption;
-            columnModel.FieldName = nameof(ApplicationProfileInstance.LatestPrimaryStateCode);
-            columnModel.SortMode = GridColumnSortMode.Custom;
+            columnModel.FieldName = nameof(ApplicationProfileInstance.CompletionPercentage);
+            columnModel.SortMode = GridColumnSortMode.Value;
             columnModel.AllowSort = true;
             if (!string.IsNullOrWhiteSpace(caption))
                 columnModel.Caption = caption;
@@ -154,15 +111,10 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     StringComparison.Ordinal));
             if (resultColumn != null)
                 resultColumn.Visible = false;
-            var lastOther = gridListEditor.GridDataColumnModels
-                .Where(c => !ReferenceEquals(c, columnModel)
-                    && !ReferenceEquals(c, resultColumn)
-                    && c.Visible
-                    && c.VisibleIndex >= 0)
-                .Select(c => c.VisibleIndex)
-                .DefaultIfEmpty(-1)
-                .Max();
-            columnModel.VisibleIndex = lastOther + 1;
+
+            PlaceProgressThenPercent(gridListEditor, columnModel);
+            Frame.GetController<ApplicationListViewCompletionPercentageController>()?.ApplyPercentTemplate();
+
             columnModel.CellDisplayTemplate = context => builder =>
             {
                 if (context.DataItem is not ApplicationProfileInstance application)
@@ -278,8 +230,36 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         }
     }
 
-    private static bool IsProgressStepsColumn(string? fieldName) =>
-        string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
-        || string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressListSortKey), StringComparison.Ordinal)
-        || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal);
+    private static void PlaceProgressThenPercent(DxGridListEditor gridListEditor, DxGridDataColumnModel progressColumn)
+    {
+        var percentColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
+            !ReferenceEquals(c, progressColumn)
+            && string.Equals(c.FieldName, nameof(ApplicationProfileInstance.CompletionPercentage), StringComparison.Ordinal));
+
+        var lastOther = gridListEditor.GridDataColumnModels
+            .Where(c => !ReferenceEquals(c, progressColumn)
+                && !ReferenceEquals(c, percentColumn)
+                && c.Visible
+                && c.VisibleIndex >= 0)
+            .Select(c => c.VisibleIndex)
+            .DefaultIfEmpty(-1)
+            .Max();
+
+        progressColumn.VisibleIndex = lastOther + 1;
+        if (percentColumn != null)
+            percentColumn.VisibleIndex = progressColumn.VisibleIndex + 1;
+    }
+
+    private static bool IsProgressStepperColumn(DxGridDataColumnModel column)
+    {
+        var fieldName = column.FieldName;
+        if (string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
+            || string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressListSortKey), StringComparison.Ordinal)
+            || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal))
+            return true;
+
+        // After remap: stepper is the wide CompletionPercentage column (not the narrow % label).
+        return string.Equals(fieldName, nameof(ApplicationProfileInstance.CompletionPercentage), StringComparison.Ordinal)
+            && column.MinWidth >= 560;
+    }
 }

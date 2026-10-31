@@ -1,4 +1,5 @@
 using System;
+using DevExpress.ExpressApp;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
@@ -36,6 +37,8 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
             if (views[listViewId] is not IModelListView listView)
                 continue;
 
+            // Client mode so DxGrid CustomSort (completion %) runs; Queryable ignores Custom.
+            listView.DataAccessMode = CollectionSourceDataAccessMode.Client;
             EnsureColumn(listView);
         }
     }

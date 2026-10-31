@@ -94,6 +94,7 @@ public sealed class ApplicationProfileInstanceProgressRowAppearanceController : 
         return string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressListSortKey), StringComparison.Ordinal)
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal)
+            || string.Equals(fieldName, nameof(ApplicationProfileInstance.CompletionPercentage), StringComparison.Ordinal)
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.ResultCoverageDisplay), StringComparison.Ordinal);
     }
 

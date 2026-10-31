@@ -145,6 +145,6 @@ public class ApplicationProfileInstanceCompletionPercentageTests
 
         ApplicationProfileInstanceCompletionPercentage.ApplyTo(application);
 
-        Assert.Equal("27%", application.CompletionPercentage); // round(2/3 * 40), gate closed
+        Assert.Equal(27, application.CompletionPercentage); // round(2/3 * 40), gate closed
     }
 }

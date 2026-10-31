@@ -234,9 +234,9 @@ public static class ApplicationWorkspaceListProgressSteps
     public static string FormatDisplay(IReadOnlyList<Step>? steps)
     {
         if (steps == null || steps.Count == 0)
-            return "\u2014";
+            return "—";
 
-        return string.Join(" \u00b7 ", steps.Select(s => s.Label));
+        return string.Join(" · ", steps.Select(s => s.Label));
     }
 
     /// <summary>

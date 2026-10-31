@@ -8,7 +8,7 @@ namespace Visa2026.Module.Model;
 
 /// <summary>
 /// Places <see cref="ApplicationProfileInstance.CompletionPercentage"/> immediately
-/// before the compact progress stepper on instance ListViews.
+/// after the compact progress stepper on instance ListViews.
 /// </summary>
 public sealed class ApplicationProfileInstanceCompletionPercentageColumnUpdater
     : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
@@ -49,8 +49,7 @@ public sealed class ApplicationProfileInstanceCompletionPercentageColumnUpdater
         var progress = listView.Columns[ProgressColumnId];
         if (progress != null && progress.Index >= 0)
         {
-            column.Index = progress.Index;
-            progress.Index = progress.Index + 1;
+            column.Index = progress.Index + 1;
             return;
         }
 

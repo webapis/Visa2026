@@ -281,6 +281,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         ApplyIdCacheToListRows();
         Frame.GetController<ApplicationListViewProgressStepsController>()?.ApplyStepperTemplate();
         Frame.GetController<ApplicationListViewResultCoverageController>()?.ApplyChipTemplate();
+        Frame.GetController<ApplicationListViewCompletionPercentageController>()?.ApplyPercentTemplate();
 
         if (View != null
             && !PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id)

@@ -332,15 +332,9 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(true)]
         [VisibleInLookupListView(false)]
         [NotMapped]
-        public string CompletionPercentage
-        {
-            get
-            {
-                var percent = listViewCompletionPercentage
-                    ?? ApplicationProfileInstanceCompletionPercentage.Calculate(this);
-                return percent.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
-            }
-        }
+        public int CompletionPercentage =>
+            listViewCompletionPercentage
+            ?? ApplicationProfileInstanceCompletionPercentage.Calculate(this);
 
         /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
         public void WarmListViewDisplayCache()
@@ -369,12 +363,12 @@ namespace Visa2026.Module.BusinessObjects
         public string ListRowCssClass => listRowCssClass ?? ListViewDisplay.ListRowCssClass;
 
         /// <summary>
-        /// ListView sort key for Application progress: appearance color priority then workflow stage.
+        /// ListView sort key for the Application progress column — same 0-100 scale as CompletionPercentage.
         /// Bound by the progress stepper column (display stays the stepper template).
         /// </summary>
         [Browsable(false)]
         [NotMapped]
-        public int ProgressListSortKey => ListViewDisplay.ProgressListSortKey;
+        public int ProgressListSortKey => CompletionPercentage;
 
         /// <summary>
         /// Latest <see cref="ApplicationProfileInstanceProgress"/> state/location code for ListView row color (<see cref="IBoListRowState"/>).
