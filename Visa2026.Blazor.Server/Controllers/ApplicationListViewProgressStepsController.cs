@@ -190,7 +190,8 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                         builder.AddContent(seq++, step.Date);
                         builder.CloseElement();
                     }
-                    else if (!string.IsNullOrWhiteSpace(step.StatusLabel))
+
+                    if (!string.IsNullOrWhiteSpace(step.StatusLabel))
                     {
                         builder.OpenElement(seq++, "span");
                         builder.AddAttribute(seq++, "class", "lv-progress-step__status");

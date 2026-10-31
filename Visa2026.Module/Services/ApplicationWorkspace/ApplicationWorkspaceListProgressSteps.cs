@@ -61,13 +61,21 @@ public static class ApplicationWorkspaceListProgressSteps
             var status = showStatus
                 ? ApplicationProfileLocalization.ProgressStepLabel(step.CurrentStateLabel)
                 : string.Empty;
+            var statusLabel = ApplicationProfileLocalization.ProgressStatusWithProcessNumber(status, step.ProcessNumber);
+            if (string.IsNullOrWhiteSpace(statusLabel)
+                && string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(step.ProcessNumber))
+            {
+                statusLabel = step.ProcessNumber.Trim();
+            }
+
             result.Add(new Step(
                 step.Key,
                 ApplicationProfileLocalization.ProgressStepLabel(step.Label),
                 step.State,
                 step.OutcomeKind,
                 step.Date ?? string.Empty,
-                ApplicationProfileLocalization.ProgressStatusWithProcessNumber(status, step.ProcessNumber)));
+                statusLabel));
         }
 
         return result;

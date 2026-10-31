@@ -4052,9 +4052,14 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .dxbl-grid td .lv-progress-stepper--with-stems,
 .lv-progress-stepper--with-stems {
-    flex: 0 0 auto !important;
+    /* Longer ministry tracks scroll here. Chips stay in the cell beside the track. */
+    flex: 1 1 0 !important;
     width: auto !important;
-    max-width: none;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
 }
 
 .lv-progress-stepper--with-stems .lv-progress-step,

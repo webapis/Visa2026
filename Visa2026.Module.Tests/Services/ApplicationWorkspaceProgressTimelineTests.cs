@@ -924,6 +924,11 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
         Assert.True(string.IsNullOrEmpty(migration.CurrentStateLabel));
         Assert.Equal("AS-1", migration.ProcessNumber);
+        Assert.Equal(
+            "AS-1",
+            ApplicationWorkspaceListProgressSteps.FromTimeline(steps)
+                .Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey)
+                .StatusLabel);
         Assert.False(migration.ShowMinistryLetterUpload);
         Assert.False(migration.MissingMinistryLetter);
         Assert.Equal(startedId, migration.ProgressId);
