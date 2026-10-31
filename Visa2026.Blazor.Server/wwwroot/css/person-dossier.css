@@ -709,10 +709,27 @@
   max-width: 100%;
 }
 
+.person-dossier .lv-progress-with-result {
+  width: 100%;
+}
+
+.person-dossier .lv-progress-stepper--with-stems {
+  width: auto;
+  max-width: none;
+}
+
 .person-dossier .lv-progress-step,
 .person-dossier .lv-progress-step:last-child {
   flex: 1 1 0;
   min-width: 0;
+}
+
+.person-dossier .lv-progress-stepper--with-stems .lv-progress-step,
+.person-dossier .lv-progress-stepper--with-stems .lv-progress-step:last-child {
+  flex: 0 0 auto;
+  width: 5.4rem;
+  min-width: 5.4rem;
+  max-width: 5.4rem;
 }
 
 .person-dossier__progress-empty {

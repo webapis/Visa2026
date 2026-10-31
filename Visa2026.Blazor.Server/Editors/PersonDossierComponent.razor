@@ -5,6 +5,7 @@
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.BusinessObjects.PersonDossier
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PersonDossier
 
 <div class="person-dossier @(_viewMode == DossierViewMode.Paper ? "person-dossier--paper" : null)">
@@ -292,7 +293,8 @@
                                                     }
                                                     else
                                                     {
-                                                        <div class="lv-progress-stepper">
+                                                        <div class="lv-progress-with-result">
+                                                        <div class="lv-progress-stepper @(record.ResultChips.Count > 0 ? "lv-progress-stepper--with-stems" : null)">
                                                             @for (var stepIndex = 0; stepIndex < record.ProgressSteps.Count; stepIndex++)
                                                             {
                                                                 var step = record.ProgressSteps[stepIndex];
@@ -334,6 +336,22 @@
                                                                     </div>
                                                                 </div>
                                                             }
+                                                        </div>
+                                                        @if (record.ResultChips.Count > 0)
+                                                        {
+                                                            <div class="lv-result-neck"></div>
+                                                            <div class="lv-result-stems">
+                                                                <div class="lv-result-chips lv-result-chips--stack" aria-label="@Msg("ApplicationProfileInstance.Workspace.ApplicationResult")">
+                                                                    @foreach (var chip in record.ResultChips)
+                                                                    {
+                                                                        <span class="lv-result-chip lv-result-chip--@ApplicationWorkspaceIssuedResultListCoverage.Tone(chip)">
+                                                                            @ApplicationWorkspaceIssuedResultListCoverage.Caption(chip)
+                                                                            <strong>@ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip)</strong>
+                                                                        </span>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
                                                         </div>
                                                     }
                                                 </td>

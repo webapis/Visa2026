@@ -518,6 +518,7 @@ public static class PersonDossierResolver
             .OrderByDescending(app => app.ApplicationDate)
             .ToList();
         var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(objectSpace, apps);
+        ApplicationWorkspaceIssuedResultListCoverage.ApplyTo(objectSpace, apps);
         var invitationItems = Safe(person.InvitationItems).ToList();
         var usedInvitationIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
             objectSpace,
@@ -535,6 +536,13 @@ public static class PersonDossierResolver
 
                 timelines.TryGetValue(app.ID, out var timeline);
                 var excluded = exclusions.ContainsKey(app.ID);
+                var compactSteps = ApplicationWorkspaceListProgressSteps.FromTimeline(
+                    timeline ?? Array.Empty<ApplicationWorkspaceCaseProgressStep>());
+                var resultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(
+                    compactSteps,
+                    app.ListViewResultCoverageChips)
+                    ? app.ListViewResultCoverageChips
+                    : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
                 return new PersonDossierRecord
                 {
                     RecordKey = $"Application:{app.ID}",
@@ -552,6 +560,7 @@ public static class PersonDossierResolver
                     StatusCssClass = excluded ? "st-expiring" : string.Empty,
                     ApplicationGroupId = PersonDossierApplicationGroups.Resolve(app.ApplicationProfile),
                     ProgressSteps = ToDossierProgressSteps(timeline),
+                    ResultChips = resultChips,
                     IssuedOutcome = ResolveIssuedOutcome(
                         timeline,
                         invitationItems.FirstOrDefault(item => item.Invitation?.ApplicationProfileInstance?.ID == app.ID),

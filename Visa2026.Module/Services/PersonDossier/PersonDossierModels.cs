@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.PreviewSlot;
 
@@ -142,6 +143,13 @@ public sealed class PersonDossierRecord
     /// <summary>Instance-list progress track. Empty on sections that are not applications.</summary>
     public IReadOnlyList<PersonDossierProgressStep> ProgressSteps { get; init; } =
         Array.Empty<PersonDossierProgressStep>();
+
+    /// <summary>
+    /// Result pills that stem from the last progress step. Empty until that step is reached
+    /// and the profile produces an issued document.
+    /// </summary>
+    public IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> ResultChips { get; init; } =
+        Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
 
     public bool IsCurrent { get; init; }
 
