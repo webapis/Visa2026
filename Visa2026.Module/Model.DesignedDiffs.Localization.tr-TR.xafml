@@ -420,6 +420,7 @@
         <Member Name="Category" Caption="Kategori" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CompanyHead" Caption="Şirket Müdürü" />
+        <Member Name="CompletionPercentage" Caption="Tamamlanma yüzdesi" />
         <Member Name="CurrentState" Caption="Güncel durum" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
@@ -2520,6 +2521,7 @@
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="Category" Caption="Kategori" />
         <ColumnInfo Id="Company" Caption="Şirket" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Tamamlanma yüzdesi" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
@@ -2534,6 +2536,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />
@@ -2549,6 +2552,7 @@
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
         <ColumnInfo Id="ApplicationProfile" Caption="Başvuru profili" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Tamamlanma yüzdesi" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
@@ -2558,6 +2562,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />
@@ -2576,6 +2581,7 @@
         <ColumnInfo Id="ApplicationProfile" Caption="Başvuru profili" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Onay bakanlık profili" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Tamamlanma yüzdesi" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
@@ -2585,6 +2591,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
         <ColumnInfo Id="Urgency" Caption="Aciliyet" />
@@ -2633,10 +2640,12 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
         <ColumnInfo Id="ApplicationProfile" Caption="Başvuru profili" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Tamamlanma yüzdesi" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="MigrationService" Caption="Göç Dairesi" />
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />
         <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />

@@ -420,6 +420,7 @@
         <Member Name="Category" Caption="Категория" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CompanyHead" Caption="Руководитель" />
+        <Member Name="CompletionPercentage" Caption="Процент завершения" />
         <Member Name="CurrentState" Caption="Текущее состояние" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
@@ -2520,6 +2521,7 @@
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="Category" Caption="Категория" />
         <ColumnInfo Id="Company" Caption="Компания" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Процент завершения" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
         <ColumnInfo Id="ExpirationDate" Caption="Дата окончания" />
@@ -2534,6 +2536,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
@@ -2549,6 +2552,7 @@
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Процент завершения" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
@@ -2558,6 +2562,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
@@ -2576,6 +2581,7 @@
         <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Процент завершения" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
@@ -2585,6 +2591,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
         <ColumnInfo Id="Urgency" Caption="Срочность" />
@@ -2633,10 +2640,12 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationProfile" Caption="Профиль заявки" />
+        <ColumnInfo Id="CompletionPercentage" Caption="Процент завершения" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />
         <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />

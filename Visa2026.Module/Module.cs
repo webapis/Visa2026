@@ -151,6 +151,7 @@ namespace Visa2026.Module
             updaters.Add(new ApplicationProfileInstanceMonthNameColumnUpdater());
             updaters.Add(new ApplicationProfileInstanceResultCoverageColumnUpdater());
             updaters.Add(new ApplicationProfileInstanceProgressStepsColumnUpdater());
+            updaters.Add(new ApplicationProfileInstanceCompletionPercentageColumnUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new ListViewShowFindPanelModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());

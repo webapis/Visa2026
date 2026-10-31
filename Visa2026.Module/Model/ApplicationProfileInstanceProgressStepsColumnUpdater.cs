@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
@@ -51,8 +52,11 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         column.PropertyName = ColumnId;
         column.Width = 640;
 
+        var completionId = nameof(ApplicationProfileInstance.CompletionPercentage);
         var lastVisible = listView.Columns
-            .Where(c => !ReferenceEquals(c, column) && c.Index >= 0)
+            .Where(c => !ReferenceEquals(c, column)
+                && c.Index >= 0
+                && !string.Equals(c.Id, completionId, StringComparison.Ordinal))
             .Select(c => c.Index)
             .DefaultIfEmpty(-1)
             .Max();

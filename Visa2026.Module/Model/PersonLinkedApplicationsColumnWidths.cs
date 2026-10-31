@@ -19,10 +19,12 @@ public static class PersonLinkedApplicationsColumnWidths
 
     public static bool UsesOwnWidth(string? propertyName) =>
         propertyName is nameof(ApplicationProfileInstance.ProgressStepsDisplay)
-            or nameof(ApplicationProfileInstance.ResultCoverageDisplay);
+            or nameof(ApplicationProfileInstance.ResultCoverageDisplay)
+            or nameof(ApplicationProfileInstance.CompletionPercentage);
 
     public static int ResolveWidth(string? propertyName) => propertyName switch
     {
+        nameof(ApplicationProfileInstance.CompletionPercentage) => 90,
         nameof(ApplicationProfileInstance.FullApplicationNumber) => 180,
         nameof(ApplicationProfileInstance.ProcessNumber) => 160,
         nameof(ApplicationProfileInstance.ApplicationDate) => 150,

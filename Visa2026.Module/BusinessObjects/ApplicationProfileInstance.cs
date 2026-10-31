@@ -267,12 +267,14 @@ namespace Visa2026.Module.BusinessObjects
         private int? listViewTotalPersonCount;
         private IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? listViewResultCoverageChips;
         private IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? listViewProgressSteps;
+        private int? listViewCompletionPercentage;
 
         /// <summary>Clears cached ListView computed fields (progress display, SLA, row color).</summary>
         public void InvalidateListViewDisplayCache()
         {
             listViewDisplayState = null;
             listRowCssClass = null;
+            listViewCompletionPercentage = null;
         }
 
         public void SetListViewTotalPersonCount(int count) => listViewTotalPersonCount = count;
@@ -284,6 +286,9 @@ namespace Visa2026.Module.BusinessObjects
         public void SetListViewProgressSteps(
             IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> steps) =>
             listViewProgressSteps = steps;
+
+        public void SetListViewCompletionPercentage(int percent) =>
+            listViewCompletionPercentage = Math.Clamp(percent, 0, 100);
 
         /// <summary>Preloaded Result-tab people coverage for ListView chips. Empty until preload.</summary>
         [Browsable(false)]
@@ -317,6 +322,21 @@ namespace Visa2026.Module.BusinessObjects
         public string ProgressStepsDisplay =>
             ApplicationWorkspaceListProgressSteps.FormatDisplay(listViewProgressSteps);
 
+        /// <summary>
+        /// Process completion 0-100 (Phase 1 timeline max 40 until AS / process number,
+        /// then Phase 1 locked + issued-document coverage max 60). Display-only; filled by preload.
+        /// </summary>
+        [XafDisplayName("Completion percentage")]
+        [ModelDefault("AllowEdit", "False")]
+        [ModelDefault("DisplayFormat", "{0}%")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        [NotMapped]
+        public int CompletionPercentage =>
+            listViewCompletionPercentage
+            ?? ApplicationProfileInstanceCompletionPercentage.Calculate(this);
+
         /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
         public void WarmListViewDisplayCache()
         {
@@ -325,6 +345,7 @@ namespace Visa2026.Module.BusinessObjects
             var state = ApplicationListViewDisplayState.Resolve(this);
             listViewDisplayState = state;
             listRowCssClass = state.ListRowCssClass;
+            ApplicationProfileInstanceCompletionPercentage.ApplyTo(this);
         }
 
         private ApplicationListViewDisplayState ListViewDisplay =>

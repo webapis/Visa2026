@@ -245,7 +245,8 @@
         <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
         <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
-        <ColumnInfo Id="ProgressStepsDisplay" Index="6" Width="640" />
+        <ColumnInfo Id="CompletionPercentage" Index="6" Width="90" />
+        <ColumnInfo Id="ProgressStepsDisplay" Index="7" Width="640" />
         <ColumnInfo Id="ResultCoverageDisplay" Index="-1" Width="560" />
       </Columns>
     </ListView>
@@ -260,7 +261,8 @@
         <ColumnInfo Id="LatestProgressState" Index="-1" Width="100" />
         <ColumnInfo Id="LatestProgressDate" Index="5" Width="108" />
         <ColumnInfo Id="MigrationService" Index="6" Width="180" />
-        <ColumnInfo Id="ProgressStepsDisplay" Index="7" Width="640" />
+        <ColumnInfo Id="CompletionPercentage" Index="7" Width="90" />
+        <ColumnInfo Id="ProgressStepsDisplay" Index="8" Width="640" />
         <ColumnInfo Id="ResultCoverageDisplay" Index="-1" Width="560" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
         <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
@@ -287,7 +289,8 @@
         <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
         <ColumnInfo Id="VisaPeriod" Index="9" Width="110" />
         <ColumnInfo Id="VisaType" Index="10" Width="110" />
-        <ColumnInfo Id="ProgressStepsDisplay" Index="11" Width="640" />
+        <ColumnInfo Id="CompletionPercentage" Index="11" Width="90" />
+        <ColumnInfo Id="ProgressStepsDisplay" Index="12" Width="640" />
         <ColumnInfo Id="ResultCoverageDisplay" Index="-1" Width="560" />
       </Columns>
     </ListView>

@@ -86,6 +86,7 @@
         "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" },
+        "CompletionPercentage": { "en-US": "Completion percentage", "tr-TR": "Tamamlanma yüzdesi", "tk-TM": "Tamamlanma göterimi", "ru-RU": "Процент завершения" },
         "ResultCoverageDisplay": { "en-US": "Application result", "tr-TR": "Başvuru sonucu", "tk-TM": "Ýüztutmanyň netijesi", "ru-RU": "Результат заявки" }
       }
     },
