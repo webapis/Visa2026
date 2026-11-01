@@ -161,5 +161,29 @@ public sealed class ApprovalLegProfileSlotEditorTests
         };
 
         Assert.True(ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry(legs));
+
+    }
+
+    [Fact]
+    public void HasAdjacentDuplicateMinistry_False_ForNullEmptyOrSingle()
+    {
+        Assert.False(ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry(null));
+        Assert.False(ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry([]));
+        Assert.False(ApprovalLegProfileSlotEditor.HasAdjacentDuplicateMinistry(
+        [
+            new ApprovalLegProfileSlotLegDraft { MinistryId = Guid.NewGuid(), Caption = "EN" },
+        ]));
+    }
+
+    [Fact]
+    public void IsBlockedAsNextMinistry_False_ForEmptyMinistryOrEmptyLegs()
+    {
+        var en = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        Assert.False(ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry(null, en));
+        Assert.False(ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry([], en));
+        Assert.False(ApprovalLegProfileSlotEditor.IsBlockedAsNextMinistry(
+        [
+            new ApprovalLegProfileSlotLegDraft { MinistryId = en, Caption = "Energetika" },
+        ], Guid.Empty));
     }
 }
