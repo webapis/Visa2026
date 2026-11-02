@@ -3,6 +3,7 @@ using System.ComponentModel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.MigrationImport;
 
@@ -42,6 +43,12 @@ public sealed class ApplicationListViewWorkspaceNavigationController : ViewContr
 
     private void OnCustomHandleProcessSelectedItem(object? sender, HandledEventArgs e)
     {
+        if (ApplicationListRowActivationGate.ConsumeIfPending())
+        {
+            e.Handled = true;
+            return;
+        }
+
         if (View.CurrentObject is not ApplicationProfileInstance application)
             return;
 

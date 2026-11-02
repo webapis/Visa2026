@@ -1,4 +1,5 @@
 @using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services
 @using Visa2026.Module.Services.PreviewSlot
 
 @if (CanPreview)
@@ -6,7 +7,13 @@
     <button type="button"
             class="ct-letter-preview @CssClass"
             title="@FileName"
-            @onclick="OpenAsync">
+            data-application-id="@ApplicationProfileInstanceId.ToString("D")"
+            data-progress-id="@(ProgressId is Guid progressId ? progressId.ToString("D") : string.Empty)"
+            data-owner-view-id="@OwnerViewId"
+            @onclick="OpenAsync"
+            @onclick:stopPropagation="true"
+            @onmousedown:stopPropagation="true"
+            @onpointerdown:stopPropagation="true">
         @VisibleText
     </button>
 }
@@ -39,6 +46,8 @@
     {
         if (!CanPreview)
             return Task.CompletedTask;
+
+        ApplicationListRowActivationGate.SuppressBriefly();
 
         var ownerViewId = string.IsNullOrWhiteSpace(OwnerViewId)
             ? OfficerShellViewIds.DetailView

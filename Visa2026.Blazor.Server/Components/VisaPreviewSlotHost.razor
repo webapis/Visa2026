@@ -203,6 +203,30 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
     }
 
     [JSInvokable]
+    public Task OpenListProgressFilesFromJsAsync(
+        string applicationIdText,
+        string focusProgressIdText,
+        string ownerViewId)
+    {
+        var applicationId = Guid.TryParse(applicationIdText, out var parsedApplicationId)
+            ? parsedApplicationId
+            : Guid.Empty;
+        Guid? focusProgressId = Guid.TryParse(focusProgressIdText, out var parsedFocusId) && parsedFocusId != Guid.Empty
+            ? parsedFocusId
+            : null;
+        if (applicationId == Guid.Empty || focusProgressId == null)
+            return Task.CompletedTask;
+
+        return SlotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
+        {
+            ApplicationProfileInstanceId = applicationId,
+            FocusProgressId = focusProgressId,
+            PreviewAllFiles = true,
+            OpenPreviewOnly = true,
+        }, string.IsNullOrWhiteSpace(ownerViewId) ? null : ownerViewId);
+    }
+
+    [JSInvokable]
     public void MarkLetterLinkClickPending() => ProgressLetterLinkClickGate.MarkPending();
 
     [JSInvokable]

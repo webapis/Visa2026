@@ -679,9 +679,58 @@
                     }, 250);
                 }
 
+                function findStepFileLink(target) {
+                    return target && target.closest
+                        ? target.closest("button.lv-progress-step__files")
+                        : null;
+                }
+
+                function blockStepFileLink(event) {
+                    if (!findStepFileLink(event.target)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+
+                function openStepFileLink(event) {
+                    var link = findStepFileLink(event.target);
+                    if (!link) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var now = Date.now();
+                    if (window.visaPreviewDrawer._stepFileLinkOpenedAt
+                        && now - window.visaPreviewDrawer._stepFileLinkOpenedAt < 400) {
+                        return;
+                    }
+                    window.visaPreviewDrawer._stepFileLinkOpenedAt = now;
+                    var ref = window.visaPreviewDrawer._hostRef;
+                    if (!ref) {
+                        return;
+                    }
+                    ref.invokeMethodAsync(
+                        "OpenListProgressFilesFromJsAsync",
+                        link.getAttribute("data-application-id") || "",
+                        link.getAttribute("data-progress-id") || "",
+                        link.getAttribute("data-owner-view-id") || "");
+                }
+
                 document.addEventListener("pointerdown", blockGridRowActivation, true);
                 document.addEventListener("mousedown", blockGridRowActivation, true);
-                document.addEventListener("click", openLetterFromCell, true);
+                document.addEventListener("pointerdown", blockStepFileLink, true);
+                document.addEventListener("mousedown", blockStepFileLink, true);
+                document.addEventListener("pointerup", openStepFileLink, true);
+                document.addEventListener("click", function (event) {
+                    if (findStepFileLink(event.target)) {
+                        openStepFileLink(event);
+                        return;
+                    }
+                    openLetterFromCell(event);
+                }, true);
                 document.addEventListener("keydown", function (event) {
                     if (event.key !== "Enter" && event.key !== " ") {
                         return;
