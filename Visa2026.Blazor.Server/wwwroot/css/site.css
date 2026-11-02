@@ -4216,8 +4216,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .dxbl-grid td .lv-result-chip--none,
 .lv-result-chip--none {
-    background: #ea580c !important;
-    border-color: #ea580c !important;
+    background: #2563eb !important;
+    border-color: #2563eb !important;
     color: #fff !important;
 }
 
@@ -4299,11 +4299,54 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 }
 
 .lv-person-mark--none {
-    background: #ea580c;
+    background: #2563eb;
 }
 
 .lv-person-mark--rej {
     background: #b91c1c;
+}
+
+.lv-person-mark--used,
+.lv-result-life__pill--used {
+    background: #bbf7d0;
+    color: #14532d;
+}
+
+.lv-person-mark--expired,
+.lv-result-life__pill--expired {
+    background: #fecdd3;
+    color: #881337;
+}
+
+.lv-person-mark--cancelled,
+.lv-result-life__pill--cancelled {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.lv-person-mark--changed,
+.lv-result-life__pill--changed {
+    background: #e9d5ff;
+    color: #581c87;
+}
+
+.lv-result-life {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+}
+
+.lv-result-life__pill {
+    display: inline-flex;
+    align-items: center;
+    height: 1.35rem;
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 /* Instance ListView — compact workspace progress stepper.

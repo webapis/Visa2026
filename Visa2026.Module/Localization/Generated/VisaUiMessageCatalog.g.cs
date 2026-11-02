@@ -1510,6 +1510,76 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ret",
             ["ru-RU"] = "Отк",
         },
+        ["ApplicationProfileInstance.List.Mark.NotIssuedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not issued",
+            ["tr-TR"] = "Henüz verilmedi",
+            ["tk-TM"] = "Entäk berilmedi",
+            ["ru-RU"] = "Не выдан",
+        },
+        ["ApplicationProfileInstance.List.Mark.DocumentExpiredTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired",
+            ["tr-TR"] = "Süresi doldu",
+            ["tk-TM"] = "Möhleti geçdi",
+            ["ru-RU"] = "Истёк",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationUsed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Use",
+            ["tr-TR"] = "Kul",
+            ["tk-TM"] = "Ula",
+            ["ru-RU"] = "Исп",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationUsedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Used",
+            ["tr-TR"] = "Kullanıldı",
+            ["tk-TM"] = "Ulanyldy",
+            ["ru-RU"] = "Использовано",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationExpired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exp",
+            ["tr-TR"] = "Sür",
+            ["tk-TM"] = "Mö",
+            ["ru-RU"] = "Ист",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationExpiredTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired, not used",
+            ["tr-TR"] = "Süresi doldu, kullanılmadı",
+            ["tk-TM"] = "Möhleti geçen, ulanylmadyk",
+            ["ru-RU"] = "Истёк, не использован",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationCancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Can",
+            ["tr-TR"] = "İpt",
+            ["tk-TM"] = "Ýat",
+            ["ru-RU"] = "Отм",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationCancelledTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled",
+            ["tr-TR"] = "İptal edildi",
+            ["tk-TM"] = "Ýatyryldy",
+            ["ru-RU"] = "Отменено",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationChanged"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Chg",
+            ["tr-TR"] = "Değ",
+            ["tk-TM"] = "Üýt",
+            ["ru-RU"] = "Изм",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationChangedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changed",
+            ["tr-TR"] = "Değiştirildi",
+            ["tk-TM"] = "Üýtgedildi",
+            ["ru-RU"] = "Изменено",
+        },
         ["ApplicationProfile.Doc.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Invitation(s)",

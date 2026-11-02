@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -133,6 +134,9 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var visa = LoadPersonSets(LoadVisaPairs(objectSpace, ids));
         var borderZone = LoadPersonSets(LoadBorderZonePairs(objectSpace, ids));
         var names = ApplicationListLinkedPeople.LoadNames(objectSpace, roster);
+        var invitationLaterLife = LoadInvitationLaterLife(objectSpace, ids);
+        var expiredWorkPermit = LoadExpiredWorkPermits(objectSpace, ids);
+        var expiredVisa = LoadExpiredVisas(objectSpace, ids);
 
         foreach (var application in applications)
         {
@@ -159,8 +163,145 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 Holders(workPermit, application.ID),
                 Holders(visa, application.ID),
                 Holders(borderZone, application.ID),
-                Holders(rejection, application.ID)));
+                Holders(rejection, application.ID),
+                LaterLifeFor(invitationLaterLife, application.ID),
+                ExpiredFor(expiredWorkPermit, application.ID),
+                ExpiredFor(expiredVisa, application.ID)));
         }
+    }
+
+    private static IReadOnlyDictionary<Guid, string> LaterLifeFor(
+        IReadOnlyDictionary<Guid, Dictionary<Guid, string>> byInstance,
+        Guid applicationId) =>
+        byInstance.TryGetValue(applicationId, out var people)
+            ? people
+            : EmptyLaterLife;
+
+    private static readonly IReadOnlyDictionary<Guid, string> EmptyLaterLife =
+        new Dictionary<Guid, string>();
+
+    private static IReadOnlySet<Guid> ExpiredFor(
+        IReadOnlyDictionary<Guid, HashSet<Guid>> byInstance,
+        Guid applicationId) =>
+        byInstance.TryGetValue(applicationId, out var people) ? people : EmptyHolders;
+
+    private static Dictionary<Guid, HashSet<Guid>> LoadExpiredWorkPermits(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        if (objectSpace == null || ids.Count == 0)
+            return new Dictionary<Guid, HashSet<Guid>>();
+
+        var rows = objectSpace.GetObjectsQuery<WorkPermitItem>()
+            .Where(i => i.WorkPermit != null
+                && i.WorkPermit.ApplicationProfileInstance != null
+                && ids.Contains(i.WorkPermit.ApplicationProfileInstance.ID)
+                && i.Person != null)
+            .Select(i => new
+            {
+                InstanceId = i.WorkPermit.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                Expiration = i.ExpirationDate,
+            })
+            .ToList();
+
+        return IssuedResultExpiry.People(rows.Select(row => (
+            row.InstanceId,
+            row.PersonId,
+            row.Expiration == default ? (DateTime?)null : row.Expiration)));
+    }
+
+    private static Dictionary<Guid, HashSet<Guid>> LoadExpiredVisas(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        if (objectSpace == null || ids.Count == 0)
+            return new Dictionary<Guid, HashSet<Guid>>();
+
+        var rows = objectSpace.GetObjectsQuery<Visa>()
+            .Where(v => v.IssuingApplicationProfileInstance != null
+                && ids.Contains(v.IssuingApplicationProfileInstance.ID)
+                && v.Passport != null
+                && v.Passport.Person != null)
+            .Select(v => new
+            {
+                InstanceId = v.IssuingApplicationProfileInstance.ID,
+                PersonId = v.Passport.Person.ID,
+                Expiration = v.ExpirationDate,
+            })
+            .ToList();
+
+        return IssuedResultExpiry.People(rows.Select(row => (row.InstanceId, row.PersonId, row.Expiration)));
+    }
+
+    private static Dictionary<Guid, Dictionary<Guid, string>> LoadInvitationLaterLife(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, string>>();
+        if (objectSpace == null || ids.Count == 0)
+            return result;
+
+        var items = objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.Invitation != null
+                && i.Invitation.ApplicationProfileInstance != null
+                && ids.Contains(i.Invitation.ApplicationProfileInstance.ID)
+                && i.Person != null)
+            .Select(i => new
+            {
+                ItemId = i.ID,
+                InstanceId = i.Invitation.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                Expiration = i.Invitation.ExpirationDate,
+            })
+            .ToList();
+        if (items.Count == 0)
+            return result;
+
+        var itemIds = items.Select(i => i.ItemId).Distinct().ToList();
+        var cancelled = LoadInvitationFamily(objectSpace, itemIds, ApplicationProfileActionFamily.Cancellation);
+        var changed = LoadInvitationFamily(objectSpace, itemIds, ApplicationProfileActionFamily.Change);
+        var used = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace, itemIds);
+
+        foreach (var item in items)
+        {
+            var state = InvitationLaterLife.Resolve(
+                cancelled.Contains(item.ItemId),
+                changed.Contains(item.ItemId),
+                used.Contains(item.ItemId),
+                InvitationLaterLife.IsExpired(item.Expiration));
+            if (state == null)
+                continue;
+
+            if (!result.TryGetValue(item.InstanceId, out var people))
+            {
+                people = new Dictionary<Guid, string>();
+                result[item.InstanceId] = people;
+            }
+
+            people.TryGetValue(item.PersonId, out var current);
+            var strongest = InvitationLaterLife.Strongest(new[] { current, state });
+            if (strongest != null)
+                people[item.PersonId] = strongest;
+        }
+
+        return result;
+    }
+
+    private static HashSet<Guid> LoadInvitationFamily(
+        IObjectSpace objectSpace,
+        IReadOnlyCollection<Guid> itemIds,
+        ApplicationProfileActionFamily family)
+    {
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => itemIds.Contains(i.ID)
+                && i.ApplicationProfileInstances.Any(a =>
+                    a.ApplicationProfile != null
+                    && a.ApplicationProfile.ActionFamily == family
+                    && a.LatestPrimaryStateCode == issued))
+            .Select(i => i.ID)
+            .ToHashSet();
     }
 
     private static IReadOnlySet<Guid> Holders(

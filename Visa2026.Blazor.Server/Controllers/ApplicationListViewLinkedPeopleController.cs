@@ -128,7 +128,7 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
                 {
                     builder.OpenElement(seq++, "span");
                     builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--" + mark.Tone);
-                    builder.AddAttribute(seq++, "title", ApplicationListLinkedPeople.Title(mark.Key));
+                    builder.AddAttribute(seq++, "title", ApplicationListLinkedPeople.Title(mark));
                     builder.AddContent(seq++, ApplicationListLinkedPeople.Letters(mark.Key));
                     builder.CloseElement();
                 }

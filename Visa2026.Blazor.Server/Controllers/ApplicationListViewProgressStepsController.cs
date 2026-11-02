@@ -370,7 +370,14 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     builder.OpenElement(seq++, "div");
                     builder.AddAttribute(seq++, "class", "lv-result-neck");
                     builder.CloseElement();
-                    ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips);
+                    var people = application.ListViewLinkedPeople;
+                    if (people.Count == 0)
+                    {
+                        people = Frame.GetController<ApplicationListViewPreloadController>()
+                            ?.LinkedPeopleFor(application.ID) ?? people;
+                    }
+
+                    ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips, people);
                 }
 
                 builder.CloseElement();

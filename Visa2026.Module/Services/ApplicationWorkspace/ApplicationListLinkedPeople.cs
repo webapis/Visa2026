@@ -6,9 +6,12 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
 /// People stacked on an application list row, each with one mark per result
-/// that application produces. Green means that person's document exists,
-/// orange means it does not. A rejection mark appears only for a person who
-/// has one, in the same red as the application result chip.
+/// that application produces. Green means that person's document exists.
+/// Blue means a visa, invitation, or work permit is not issued yet. Pink
+/// means an issued one is expired. An issued invitation keeps one circle:
+/// the letters stay Çak and the fill is that person's later life. A rejection
+/// mark appears only for a person who has one, in the same red as the
+/// application result chip.
 /// </summary>
 public static class ApplicationListLinkedPeople
 {
@@ -16,7 +19,8 @@ public static class ApplicationListLinkedPeople
     public const string ToneMissing = "none";
     public const string ToneRejected = "rej";
 
-    public readonly record struct Mark(string Key, string Tone);
+    /// <param name="State">Later life of an issued invitation. Empty for every other mark.</param>
+    public readonly record struct Mark(string Key, string Tone, string? State = null);
 
     public readonly record struct Row(Guid PersonId, string Name, IReadOnlyList<Mark> Marks);
 
@@ -28,7 +32,10 @@ public static class ApplicationListLinkedPeople
         IReadOnlySet<Guid> workPermit,
         IReadOnlySet<Guid> visa,
         IReadOnlySet<Guid> borderZone,
-        IReadOnlySet<Guid> rejection)
+        IReadOnlySet<Guid> rejection,
+        IReadOnlyDictionary<Guid, string>? invitationLaterLife = null,
+        IReadOnlySet<Guid>? expiredWorkPermit = null,
+        IReadOnlySet<Guid>? expiredVisa = null)
     {
         if (application == null || activeRoster == null || activeRoster.Count == 0)
             return Array.Empty<Row>();
@@ -41,7 +48,25 @@ public static class ApplicationListLinkedPeople
             foreach (var kind in kinds)
             {
                 var holders = Holders(kind, invitation, workPermit, visa, borderZone);
-                marks.Add(new Mark(kind, holders.Contains(personId) ? ToneDone : ToneMissing));
+                var issued = holders.Contains(personId);
+                var tone = issued ? ToneDone : ToneMissing;
+                string? state = null;
+                if (issued
+                    && string.Equals(kind, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal)
+                    && invitationLaterLife != null
+                    && invitationLaterLife.TryGetValue(personId, out var laterLife)
+                    && !string.IsNullOrEmpty(laterLife))
+                {
+                    state = laterLife;
+                    tone = InvitationLaterLife.Tone(laterLife);
+                }
+                else if (issued && ExpiredState(kind, personId, expiredWorkPermit, expiredVisa) is string expired)
+                {
+                    state = expired;
+                    tone = IssuedResultExpiry.Tone;
+                }
+
+                marks.Add(new Mark(kind, tone, state));
             }
 
             if (rejection.Contains(personId))
@@ -68,8 +93,46 @@ public static class ApplicationListLinkedPeople
             VisaUiMessages.Get("ApplicationProfile.Doc.BorderZone"),
         ApplicationWorkspaceIssuedRecordsCatalog.Rejection =>
             VisaUiMessages.Get("ApplicationProfile.Doc.Rejection"),
+        IssuedResultExpiry.WorkPermit or IssuedResultExpiry.Visa =>
+            VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.DocumentExpiredTitle"),
+        InvitationLaterLife.Used =>
+            VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationUsedTitle"),
+        InvitationLaterLife.ExpiredUnused =>
+            VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationExpiredTitle"),
+        InvitationLaterLife.Cancelled =>
+            VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationCancelledTitle"),
+        InvitationLaterLife.Changed =>
+            VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationChangedTitle"),
         _ => key,
     };
+
+    public static string Title(Mark mark)
+    {
+        if (!string.IsNullOrEmpty(mark.State))
+            return Title(mark.State);
+        if (mark.Tone == ToneMissing && IsVisaInvitationOrWorkPermit(mark.Key))
+            return VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.NotIssuedTitle");
+        return Title(mark.Key);
+    }
+
+    public static int CountMarks(IReadOnlyList<Row>? rows, string key)
+    {
+        if (rows == null || rows.Count == 0 || string.IsNullOrEmpty(key))
+            return 0;
+
+        var count = 0;
+        foreach (var row in rows)
+        {
+            foreach (var mark in row.Marks)
+            {
+                if (string.Equals(mark.Key, key, StringComparison.Ordinal)
+                    || string.Equals(mark.State, key, StringComparison.Ordinal))
+                    count++;
+            }
+        }
+
+        return count;
+    }
 
     public static IReadOnlyDictionary<Guid, string> LoadNames(
         IObjectSpace? objectSpace,
@@ -141,8 +204,42 @@ public static class ApplicationListLinkedPeople
             "ApplicationProfileInstance.List.Mark.BorderZone",
         ApplicationWorkspaceIssuedRecordsCatalog.Rejection =>
             "ApplicationProfileInstance.List.Mark.Rejection",
+        IssuedResultExpiry.WorkPermit or IssuedResultExpiry.Visa =>
+            "ApplicationProfileInstance.List.Mark.InvitationExpired",
+        InvitationLaterLife.Used =>
+            "ApplicationProfileInstance.List.Mark.InvitationUsed",
+        InvitationLaterLife.ExpiredUnused =>
+            "ApplicationProfileInstance.List.Mark.InvitationExpired",
+        InvitationLaterLife.Cancelled =>
+            "ApplicationProfileInstance.List.Mark.InvitationCancelled",
+        InvitationLaterLife.Changed =>
+            "ApplicationProfileInstance.List.Mark.InvitationChanged",
         _ => key,
     };
+
+    private static string? ExpiredState(
+        string kind,
+        Guid personId,
+        IReadOnlySet<Guid>? expiredWorkPermit,
+        IReadOnlySet<Guid>? expiredVisa)
+    {
+        if (string.Equals(kind, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, StringComparison.Ordinal)
+            && expiredWorkPermit != null
+            && expiredWorkPermit.Contains(personId))
+            return IssuedResultExpiry.WorkPermit;
+
+        if (string.Equals(kind, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.Ordinal)
+            && expiredVisa != null
+            && expiredVisa.Contains(personId))
+            return IssuedResultExpiry.Visa;
+
+        return null;
+    }
+
+    private static bool IsVisaInvitationOrWorkPermit(string key) =>
+        string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal)
+        || string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, StringComparison.Ordinal)
+        || string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.Ordinal);
 
     private static readonly IReadOnlySet<Guid> Empty = new HashSet<Guid>();
 }
