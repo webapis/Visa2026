@@ -147,7 +147,6 @@ public sealed class ApplicationProfilePickerShelfTests
         Assert.Equal(ApplicationProfilePickerTabKind.Recent, tab.Kind);
     }
 
-
     [Fact]
     public void Heuristic_trailing_FM_counts_as_family()
     {
@@ -165,8 +164,8 @@ public sealed class ApplicationProfilePickerShelfTests
             ApplicationProfilePickerShelfCodes.FamilyMemberOnly,
             ApplicationProfilePickerShelfHeuristic.ResolveShelfCodes(profile));
     }
+
     [Fact]
-[Fact]
     public void Heuristic_business_trip_from_is_sapary_name()
     {
         var arrival = new ApplicationProfile { Code = "business_trip_arrival", Name = "Iş Saparyna Gelmek" };
@@ -237,7 +236,8 @@ public sealed class ApplicationProfilePickerShelfTests
             ApplicationProfilePickerShelfCodes.SystemShelves.Select(s => s.Code));
     }
 
-        public void SystemShelves_include_visa_and_keep_registration()
+    [Fact]
+    public void SystemShelves_include_visa_and_keep_registration()
     {
         var codes = ApplicationProfilePickerShelfCodes.SystemShelves.Select(s => s.Code).ToArray();
         Assert.Contains(ApplicationProfilePickerShelfCodes.Visa, codes);
