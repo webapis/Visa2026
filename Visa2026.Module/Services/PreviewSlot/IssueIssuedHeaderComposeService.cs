@@ -628,6 +628,21 @@ public static class IssueIssuedHeaderComposeService
         var defaultBorderZone = kind == IssueIssuedHeaderKind.Invitation
             ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
             : string.Empty;
+        DateTime? expirationDate = kind == IssueIssuedHeaderKind.Invitation
+            ? Invitation.ExpirationFromIssued(DateTime.Today)
+            : null;
+
+        // Çakylygy üýtgetmek: prefill expiry/category/period/border from the invitation being changed.
+        if (kind == IssueIssuedHeaderKind.Invitation && IsChangeInvitationCase(instance))
+        {
+            var source = TryResolveChangeInvitationSource(objectSpace, instance);
+            ApplyChangeInvitationSourceDefaults(
+                source,
+                ref expirationDate,
+                ref defaultCategoryId,
+                ref defaultPeriodId,
+                ref defaultBorderZone);
+        }
 
         return new IssueIssuedHeaderComposeDraft
         {
@@ -646,9 +661,7 @@ public static class IssueIssuedHeaderComposeService
             },
             HeaderNumber = string.Empty,
             PrimaryDate = DateTime.Today,
-            ExpirationDate = kind == IssueIssuedHeaderKind.Invitation
-                ? Invitation.ExpirationFromIssued(DateTime.Today)
-                : null,
+            ExpirationDate = expirationDate,
             VisaCategoryId = defaultCategoryId,
             VisaPeriodId = defaultPeriodId,
             BorderZoneLocation = defaultBorderZone,
@@ -659,6 +672,102 @@ public static class IssueIssuedHeaderComposeService
             ValidityDurations = validityDurations,
             People = people,
         };
+    }
+
+    /// <summary>
+    /// True for Çakylygy üýtgetmek (<c>change_invitation</c> / <see cref="ApplicationProfile.ChangeInvitations"/>).
+    /// </summary>
+    public static bool IsChangeInvitationCase(ApplicationProfileInstance? instance)
+    {
+        if (instance == null)
+            return false;
+
+        if (instance.ApplicationProfile?.ChangeInvitations == true)
+            return true;
+
+        if (ApplicationProfileInvitationAddressPolicy.IsChangeInvitation(null, instance.ApplicationProfile?.Code))
+            return true;
+
+        return ApplicationProfileInvitationAddressPolicy.IsChangeInvitationType(instance.ApplicationType);
+    }
+
+    /// <summary>
+    /// Invitation being changed: linked People &amp; links <see cref="InvitationItem"/> pin(s), else roster current.
+    /// Does not use invitations already issued on this case.
+    /// </summary>
+    public static Invitation? TryResolveChangeInvitationSource(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance instance)
+    {
+        if (instance == null)
+            return null;
+
+        if (objectSpace != null && instance.ID != Guid.Empty)
+        {
+            var linked = objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(i =>
+                    i.Invitation != null
+                    && i.ApplicationProfileInstances.Any(a => a.ID == instance.ID))
+                .ToList();
+            var fromPins = PickInvitationHeader(linked.Select(i => i.Invitation));
+            if (fromPins != null)
+                return fromPins;
+        }
+
+        if (instance.InvitationItems != null)
+        {
+            var fromNav = PickInvitationHeader(instance.InvitationItems.Select(i => i?.Invitation));
+            if (fromNav != null)
+                return fromNav;
+        }
+
+        var fromRoster = PickInvitationHeader(
+            ApplicationRosterHelper.GetMergeLineItems(instance)
+                .Select(line => line.CurrentInvitationItem?.Invitation));
+        return fromRoster;
+    }
+
+    /// <summary>
+    /// Copies exact expiry, visa category, visa period, and border zone (including Ýok) from the source invitation.
+    /// Number and issued date are left to the caller (new / today).
+    /// </summary>
+    public static void ApplyChangeInvitationSourceDefaults(
+        Invitation? source,
+        ref DateTime? expirationDate,
+        ref Guid? visaCategoryId,
+        ref Guid? visaPeriodId,
+        ref string borderZoneLocation)
+    {
+        if (source == null)
+            return;
+
+        if (source.ExpirationDate is DateTime expiry && expiry != default)
+            expirationDate = expiry.Date;
+
+        if (source.VisaCategory != null)
+            visaCategoryId = source.VisaCategory.ID;
+
+        if (source.VisaPeriod != null)
+            visaPeriodId = source.VisaPeriod.ID;
+
+        borderZoneLocation = string.IsNullOrWhiteSpace(source.BorderZoneLocation)
+            ? BorderZoneSelectionHelper.NoneValue
+            : source.BorderZoneLocation.Trim();
+    }
+
+    private static Invitation? PickInvitationHeader(IEnumerable<Invitation?> invitations)
+    {
+        Invitation? first = null;
+        foreach (var invitation in invitations)
+        {
+            if (invitation == null)
+                continue;
+            first ??= invitation;
+            if (!string.IsNullOrWhiteSpace(invitation.InvitationNumber))
+                return invitation;
+        }
+
+        return first;
     }
 
     public static IssueIssuedHeaderCreateResult Create(

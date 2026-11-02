@@ -151,6 +151,20 @@ public class PersonListActiveDocumentsTests
     }
 
     [Fact]
+    public void ListActiveInvitations_SkipsInvitationsWithoutApplicationProfileInstance()
+    {
+        var person = new Person();
+        person.InvitationItems.Add(Invitation("INV-LINKED", new DateTime(2026, 4, 1), new DateTime(2026, 7, 1)));
+        person.InvitationItems.Add(Invitation("INV-ORPHAN", new DateTime(2026, 5, 1), new DateTime(2026, 8, 1), linkedToInstance: false));
+
+        var rows = PersonCurrentItems.ListActiveInvitations(person, AsOf);
+
+        Assert.Single(rows);
+        Assert.Equal("INV-LINKED", rows[0].Number);
+        Assert.Equal("INV-LINKED", PersonCurrentItems.FormatActiveInvitationNumbers(person, AsOf));
+    }
+
+    [Fact]
     public void ListActiveVisas_SkipsChanged()
     {
         var person = new Person();
@@ -202,7 +216,8 @@ public class PersonListActiveDocumentsTests
         DateTime issued,
         DateTime expiration,
         bool cancelled = false,
-        bool changed = false)
+        bool changed = false,
+        bool linkedToInstance = true)
     {
         var item = new InvitationItem
         {
@@ -211,6 +226,7 @@ public class PersonListActiveDocumentsTests
                 InvitationNumber = number,
                 IssuedDate = issued,
                 ExpirationDate = expiration,
+                ApplicationProfileInstance = linkedToInstance ? new ApplicationProfileInstance() : null,
             },
         };
         if (cancelled)

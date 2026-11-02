@@ -1,3 +1,17 @@
+### 2026-11-02 — Person ListView Active invitations require ApplicationProfileInstance
+
+- **Need**: Weijun Liu Active invitations showed three date-valid lines; only one Valid case-issued invitation (e.g. ASGH338897).
+- **Fix**: `InvitationIsInForceOn` requires parent `Invitation.ApplicationProfileInstance`; ListView loads linked item IDs via ObjectSpace (FK) so unloaded navigations do not hide or wrongly include rows. Unit: `ListActiveInvitations_SkipsInvitationsWithoutApplicationProfileInstance`.
+- **Officer**: Stop F5, rebuild Module, F5 → Employees → Weijun Liu — Active invitations shows only case-issued Valid invitation(s).
+- **Prevent**: Do not treat orphan invitations (null issuing instance) as active. Do not trust unloaded `ApplicationProfileInstance` nav on ListView.
+- **Cross-skill**: person-dossier
+### 2026-11-02 — Change-invitation compose prefills from linked invitation
+
+- **Need**: On Çakylygy üýtgetmek, + Çakylyk goş should default Gutarýan senesi / Wiza kategoriýasy / Wiza möhleti / Serhet sebiti from the invitation being changed.
+- **Fix**: `IssueIssuedHeaderComposeService.LoadDraft` for `ChangeInvitations` / `change_invitation` copies exact expiry, category, period, and border (incl. Ýok) from linked `InvitationItem.Invitation` (not case-issued invitations). Number empty; issued date today; officer can edit.
+- **Officer**: Stop F5, rebuild, F5. Open change-invitation case with linked invitation → + Çakylyk goş → four fields match source; number blank; Berlen senesi = today.
+- **Prevent**: Do not copy from `instance.Invitations` (new results). Do not recompute expiry from period.
+- **Cross-skill**: —
 ### 2026-11-02 — Serhet Ýaka picker shelf tab
 
 - **Need**: Localized Serhet Ýaka tab for border-zone profiles (Serhet Ýaka Üçin Rugsatnama Almak / Rugsady Ýatyrmak).

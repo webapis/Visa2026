@@ -138,9 +138,9 @@ namespace Visa2026.Module.BusinessObjects
             if (items == null || items.Count == 0)
                 return null;
 
-            var (usedIds, closedIds) = LoadInvitationLifecycleSets(person, items);
+            var (usedIds, closedIds, linkedIds) = LoadInvitationLifecycleSets(person, items);
             return items
-                .Where(i => InvitationIsInForceOn(i, asOf, usedIds, closedIds))
+                .Where(i => InvitationIsInForceOn(i, asOf, usedIds, closedIds, linkedIds))
                 .OrderByDescending(i => i.Invitation!.IssuedDate)
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
@@ -334,8 +334,9 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         /// <summary>
-        /// Invitation lines in force on <paramref name="asOf"/>: not cancelled, issued on or before that day,
-        /// expiration empty or on or after that day. Numbers, latest issued date first.
+        /// Invitation lines in force on <paramref name="asOf"/>: issued from an Application Profile instance,
+        /// not cancelled/changed/used, issued on or before that day, expiration empty or on or after that day.
+        /// Numbers, latest issued date first.
         /// </summary>
         public static string FormatActiveInvitationNumbers(Person person, DateTime? asOf = null)
         {
@@ -428,6 +429,7 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// In-force invitation lines, latest issued date first. Each line is number and issued–expiration.
+        /// Only invitations with <see cref="Invitation.ApplicationProfileInstance"/> (case-issued).
         /// Excludes cancelled, changed, used, and expired (same as dossier Valid status).
         /// </summary>
         public static IReadOnlyList<PersonListActiveDocument> ListActiveInvitations(Person person, DateTime? asOf = null)
@@ -437,10 +439,10 @@ namespace Visa2026.Module.BusinessObjects
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
             var items = person.InvitationItems.Where(item => item != null).ToList();
-            var (usedIds, closedIds) = LoadInvitationLifecycleSets(person, items);
+            var (usedIds, closedIds, linkedIds) = LoadInvitationLifecycleSets(person, items);
 
             return items
-                .Where(item => InvitationIsInForceOn(item, asOfDate, usedIds, closedIds))
+                .Where(item => InvitationIsInForceOn(item, asOfDate, usedIds, closedIds, linkedIds))
                 .OrderByDescending(item => item.Invitation!.IssuedDate.Date)
                 .ThenByDescending(item => item.ID)
                 .Select(item =>
@@ -613,7 +615,7 @@ namespace Visa2026.Module.BusinessObjects
             && (!passport.IssueDate.HasValue || passport.IssueDate.Value.Date <= asOfDate)
             && (!passport.ExpirationDate.HasValue || passport.ExpirationDate.Value.Date >= asOfDate);
 
-        private static (HashSet<Guid> UsedIds, HashSet<Guid> ClosedIds) LoadInvitationLifecycleSets(
+        private static (HashSet<Guid> UsedIds, HashSet<Guid> ClosedIds, HashSet<Guid> LinkedIds) LoadInvitationLifecycleSets(
             Person person,
             IReadOnlyList<InvitationItem> items)
         {
@@ -621,7 +623,31 @@ namespace Visa2026.Module.BusinessObjects
             var ids = items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList();
             return (
                 IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace, ids),
-                IssuedDocumentLifecycle.LoadClosedInvitationItemIds(objectSpace, ids));
+                IssuedDocumentLifecycle.LoadClosedInvitationItemIds(objectSpace, ids),
+                LoadIssuedFromInstanceInvitationItemIds(objectSpace, ids));
+        }
+
+        /// <summary>
+        /// InvitationItem IDs whose parent invitation was issued from an Application Profile instance.
+        /// ListView often does not load <see cref="Invitation.ApplicationProfileInstance"/>; query the FK.
+        /// Returns null when there is no ObjectSpace (unit tests use the in-memory navigation).
+        /// </summary>
+        private static HashSet<Guid>? LoadIssuedFromInstanceInvitationItemIds(
+            DevExpress.ExpressApp.IObjectSpace objectSpace,
+            IReadOnlyCollection<Guid> invitationItemIds)
+        {
+            if (objectSpace == null)
+                return null;
+            if (invitationItemIds == null || invitationItemIds.Count == 0)
+                return new HashSet<Guid>();
+
+            return objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(i =>
+                    invitationItemIds.Contains(i.ID)
+                    && i.Invitation != null
+                    && i.Invitation.ApplicationProfileInstance != null)
+                .Select(i => i.ID)
+                .ToHashSet();
         }
 
         private static DevExpress.ExpressApp.IObjectSpace ResolveObjectSpace(
@@ -671,17 +697,31 @@ namespace Visa2026.Module.BusinessObjects
             && w.ExpirationDate.Date >= asOfDate;
 
         /// <summary>
-        /// Active for Person ListView / current-item: valid dates, not cancelled, not changed, not used.
-        /// <paramref name="usedIds"/> / <paramref name="closedIds"/> cover ListView when skip-navs are unloaded.
+        /// Active for Person ListView / current-item: issued from an Application Profile instance,
+        /// valid dates, not cancelled, not changed, not used.
+        /// <paramref name="usedIds"/> / <paramref name="closedIds"/> / <paramref name="linkedIds"/>
+        /// cover ListView when skip-navs are unloaded.
         /// </summary>
         private static bool InvitationIsInForceOn(
             InvitationItem item,
             DateTime asOfDate,
             IReadOnlySet<Guid> usedIds = null,
-            IReadOnlySet<Guid> closedIds = null)
+            IReadOnlySet<Guid> closedIds = null,
+            IReadOnlySet<Guid> linkedIds = null)
         {
             if (item?.Invitation == null)
                 return false;
+
+            // Orphan / legacy lines without an issuing case are not "active" on Person ListView.
+            if (linkedIds != null)
+            {
+                if (item.ID == Guid.Empty || !linkedIds.Contains(item.ID))
+                    return false;
+            }
+            else if (item.Invitation.ApplicationProfileInstance == null)
+            {
+                return false;
+            }
 
             if ((closedIds != null && item.ID != Guid.Empty && closedIds.Contains(item.ID))
                 || IssuedDocumentLifecycle.IsCancelled(item)
