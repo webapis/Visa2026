@@ -33,7 +33,7 @@ public static class ApplicationProfilePickerShelfFilter
                 .Take(ApplicationProfilePickerShelfCodes.RecentCap)
                 .ToList(),
             ApplicationProfilePickerTabKind.Shelf when tab.ShelfId is Guid shelfId && shelfId != Guid.Empty =>
-                rows.Where(r => r.ShelfId == shelfId).ToList(),
+                rows.Where(r => r.ShelfIds != null && r.ShelfIds.Contains(shelfId)).ToList(),
             _ => Array.Empty<ApplicationProfilePickerRow>(),
         };
     }

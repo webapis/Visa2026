@@ -36,6 +36,12 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
             .Select(p => new { p.ID, p.DefaultApprovalLegProfileId })
             .ToDictionary(x => x.ID, x => x.DefaultApprovalLegProfileId);
 
+        // Project M2M shelf ids (do not rely on lazy PickerShelves on catalog instances).
+        var shelfIdsByProfile = objectSpace.GetObjectsQuery<ApplicationProfile>()
+            .AsNoTracking()
+            .Select(p => new { p.ID, ShelfIds = p.PickerShelves.Select(s => s.ID).ToArray() })
+            .ToDictionary(x => x.ID, x => (IReadOnlyList<Guid>)x.ShelfIds);
+
         return ApplicationProfileOfficerCatalogSelector
             .SelectDistinctTemplates(
                 objectSpace.GetObjectsQuery<ApplicationProfile>()
@@ -58,7 +64,7 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
                     RegistrationKind = p.RegistrationKind,
                     ProgressRoute = p.ProgressRoute,
                     IsConfigLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(p, objectSpace),
-                    ShelfId = p.PickerShelfId,
+                    ShelfIds = shelfIdsByProfile.TryGetValue(p.ID, out var shelfIds) ? shelfIds : Array.Empty<Guid>(),
                     LastUsedAt = lastUsedByProfile.TryGetValue(p.ID, out var lastUsed) ? lastUsed : null,
                     UsedBySeedPersonCount = usage?.Count ?? 0,
                     LastUsedBySeedPersonAt = usage?.LastUsedAt,

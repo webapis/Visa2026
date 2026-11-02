@@ -39,7 +39,7 @@
     "App_Inv_FM": {
       "en-US": "Obtain invitation (family member)",
       "tr-TR": "Davetiye almak (aile üyesi)",
-      "tk-TM": "Çakylyk Almak FM",
+      "tk-TM": "Çakylyk Almak Maşgala agzasy",
       "ru-RU": "Получение приглашения (член семьи)"
     },
     "App_Sevice_Passport": {
@@ -177,13 +177,13 @@
     "App_Visa_Ext_FM": {
       "en-US": "Extend visa validity (family member)",
       "tr-TR": "Vize süresini uzatmak (aile üyesi)",
-      "tk-TM": "Wiza Möhletini Uzaltmak FM",
+      "tk-TM": "Wiza Möhletini Uzaltmak Maşgala agzasy",
       "ru-RU": "Продление срока визы (член семьи)"
     },
     "App_Visa_For_New_Born_FM": {
       "en-US": "Visa for newborn (family member)",
       "tr-TR": "Yeni doğan için vize (aile üyesi)",
-      "tk-TM": "Täze dogulan çaga wiza resmileşdirmek FM",
+      "tk-TM": "Täze dogulan çaga wiza resmileşdirmek Maşgala agzasy",
       "ru-RU": "Виза для новорождённого (член семьи)"
     },
     "App_Cancel_Visa_and_WP": {

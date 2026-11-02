@@ -64,7 +64,7 @@
     {
       "ApplicationTypeName": "App_Inv_FM",
       "Code": "get_invitation_fm",
-      "Name": "Çakylyk Almak FM",
+      "Name": "Çakylyk Almak Maşgala agzasy",
       "ProgressRoute": "ViaMinistries",
       "ActionFamily": "Issuance",
       "ForEmployee": false,
@@ -1835,7 +1835,7 @@
     {
       "ApplicationTypeName": "App_Visa_Ext_FM",
       "Code": "visa_ext_fm",
-      "Name": "Wiza Möhletini Uzaltmak FM",
+      "Name": "Wiza Möhletini Uzaltmak Maşgala agzasy",
       "ProgressRoute": "ViaMinistries",
       "ActionFamily": "Issuance",
       "ForEmployee": false,
@@ -1894,7 +1894,7 @@
     {
       "ApplicationTypeName": "App_Visa_For_New_Born_FM",
       "Code": "visa_for_new_born_fm",
-      "Name": "Täze dogulan çaga wiza resmileşdirmek FM",
+      "Name": "Täze dogulan çaga wiza resmileşdirmek Maşgala agzasy",
       "ProgressRoute": "ViaMinistries",
       "ActionFamily": "Issuance",
       "ForEmployee": false,

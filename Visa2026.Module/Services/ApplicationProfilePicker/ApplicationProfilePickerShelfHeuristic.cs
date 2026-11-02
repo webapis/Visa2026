@@ -1,50 +1,147 @@
 using System;
+using System.Collections.Generic;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationProfilePicker;
 
-/// <summary>One-time default shelf assignment for profiles with no picker shelf yet.</summary>
+/// <summary>
+/// Default multi-shelf assignment from <see cref="ApplicationProfile.Name"/> keywords only
+/// (ignores Produce* flags, ActionFamily, Code, audience).
+/// </summary>
 public static class ApplicationProfilePickerShelfHeuristic
 {
-    public static string? ResolveShelfCode(ApplicationProfile profile)
+    public static IReadOnlyList<string> ResolveShelfCodes(ApplicationProfile profile)
     {
         if (profile == null)
-            return null;
+            return Array.Empty<string>();
 
-        if (profile.ForFamilyMember && !profile.ForEmployee && !profile.ForTemporaryVisitor)
-            return ApplicationProfilePickerShelfCodes.FamilyMemberOnly;
+        var name = profile.Name ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(name))
+            return Array.Empty<string>();
 
-        if (profile.ActionFamily == ApplicationProfileActionFamily.Registration)
-            return ApplicationProfilePickerShelfCodes.Registration;
+        var codes = new List<string>(7);
+        var hasCakylyk = NameMentionsCakylyk(name);
 
-        if (IsInvitationRelated(profile))
-            return ApplicationProfilePickerShelfCodes.Invitations;
+        if (NameMentionsFamily(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.FamilyMemberOnly);
 
-        if (IsWorkPermitRelated(profile))
-            return ApplicationProfilePickerShelfCodes.WorkPermitOnly;
+        if (NameMentionsRegistration(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.Registration);
 
-        return null;
+        if (hasCakylyk)
+            codes.Add(ApplicationProfilePickerShelfCodes.Invitations);
+
+        // Visa tab: Wiza/Visa in name, but never when Çakylyk/Çakylygy is also present.
+        if (!hasCakylyk && NameMentionsVisa(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.Visa);
+
+        if (NameMentionsBusinessTrip(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.BusinessTrip);
+
+        if (NameMentionsWorkPermit(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.WorkPermitOnly);
+
+        if (NameMentionsBorderZone(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.BorderZone);
+
+        return codes;
     }
 
-    public static bool IsInvitationRelated(ApplicationProfile profile)
+    public static bool NameMentionsCakylyk(ApplicationProfile profile) =>
+        NameMentionsCakylyk(profile?.Name);
+
+    public static bool NameMentionsCakylyk(string? name) =>
+        ContainsIgnoreCase(name, "çakylyk")
+        || ContainsIgnoreCase(name, "cakylyk")
+        || ContainsIgnoreCase(name, "çakylygy")
+        || ContainsIgnoreCase(name, "cakylygy");
+
+    public static bool NameMentionsVisa(string? name) =>
+        ContainsIgnoreCase(name, "wiza") || ContainsIgnoreCase(name, "visa");
+
+    public static bool NameMentionsWorkPermit(string? name)
     {
-        if (profile.ProduceInvitation || profile.CancelInvitations || profile.ChangeInvitations)
+        if (ContainsIgnoreCase(name, "iş rugsat")
+            || ContainsIgnoreCase(name, "is rugsat")
+            || ContainsIgnoreCase(name, "işrugsat")
+            || ContainsIgnoreCase(name, "isrugsat")
+            || ContainsIgnoreCase(name, "work permit")
+            || ContainsIgnoreCase(name, "workpermit"))
             return true;
 
-        var code = profile.Code ?? string.Empty;
-        return code.Contains("invitation", StringComparison.OrdinalIgnoreCase);
+        // Declined / compound forms: Iş Rugsatnama goşmaça…, …Rugsatnamasyny…
+        // Require iş/is so border "Serhet … Rugsatnama" is not treated as work permit.
+        if (ContainsIgnoreCase(name, "rugsatnama")
+            || ContainsIgnoreCase(name, "rugsatnamasy")
+            || ContainsIgnoreCase(name, "rugsatnamany"))
+        {
+            return ContainsIgnoreCase(name, "iş")
+                || ContainsIgnoreCase(name, "is ");
+        }
+
+        return false;
     }
 
-    public static bool IsWorkPermitRelated(ApplicationProfile profile)
+    public static bool NameMentionsBusinessTrip(string? name) =>
+        ContainsIgnoreCase(name, "iş sapary")
+        || ContainsIgnoreCase(name, "is sapary")
+        || ContainsIgnoreCase(name, "iş saparyna")
+        || ContainsIgnoreCase(name, "is saparyna")
+        || ContainsIgnoreCase(name, "saparyna")
+        || ContainsIgnoreCase(name, "sapary")
+        || ContainsIgnoreCase(name, "business trip")
+        || ContainsIgnoreCase(name, "businesstrip");
+
+    public static bool NameMentionsBorderZone(string? name) =>
+        ContainsIgnoreCase(name, "serhet ýaka")
+        || ContainsIgnoreCase(name, "serhet yaka")
+        || ContainsIgnoreCase(name, "serhetýaka")
+        || ContainsIgnoreCase(name, "serhetyaka")
+        || ContainsIgnoreCase(name, "serhet")
+        || ContainsIgnoreCase(name, "border zone")
+        || ContainsIgnoreCase(name, "borderzone");
+
+    public static bool NameMentionsFamily(string? name)
     {
-        if (profile.ProduceWorkPermit || profile.CancelWorkPermits || profile.ChangeWorkPermits)
+        if (ContainsIgnoreCase(name, "maşgala")
+            || ContainsIgnoreCase(name, "masgala")
+            || ContainsIgnoreCase(name, "family"))
             return true;
 
-        var code = profile.Code ?? string.Empty;
-        return code.Contains("workpermit", StringComparison.OrdinalIgnoreCase)
-            || code.Contains("work_permit", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, "extend_visa_wp", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, "cancel_visa_wp", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(code, "cancel_visa_wp_ext", StringComparison.OrdinalIgnoreCase);
+        // Legacy trailing " FM" until catalogs finish renaming to Maşgala agzasy.
+        return NameEndsWithTrailingFm(name);
     }
+
+    public static bool NameMentionsRegistration(string? name) =>
+        ContainsIgnoreCase(name, "hasaba")
+        || ContainsIgnoreCase(name, "registration");
+
+    /// <summary>True when the display name ends with a standalone FM token (not GFM/TFM).</summary>
+    public static bool NameEndsWithTrailingFm(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+
+        var trimmed = NormalizeTurkicI(name).TrimEnd();
+        if (trimmed.Equals("FM", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return trimmed.EndsWith(" FM", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Case-insensitive contains after normalizing Turkish İ/ı so "İş Rugsatnama…" matches "iş rugsat".
+    /// </summary>
+    private static bool ContainsIgnoreCase(string? haystack, string needle)
+    {
+        if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle))
+            return false;
+
+        return NormalizeTurkicI(haystack)
+            .IndexOf(NormalizeTurkicI(needle), StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    /// <summary>Map Turkish dotted/dotless I so OrdinalIgnoreCase matches ASCII i/I needles.</summary>
+    private static string NormalizeTurkicI(string value) =>
+        value.Replace('\u0130', 'I').Replace('\u0131', 'i');
 }

@@ -840,11 +840,23 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(p => p.SelectionCode).HasMaxLength(3);
                 b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
                 b.Property(p => p.DefaultWorkPermitLocation).HasMaxLength(500);
-                b.HasOne(p => p.PickerShelf)
+                b.HasMany(p => p.PickerShelves)
                     .WithMany(s => s.Profiles)
-                    .HasForeignKey(p => p.PickerShelfId)
-                    .IsRequired(false)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .UsingEntity<Dictionary<string, object>>(
+                        "ApplicationProfilePickerShelfProfiles",
+                        right => right.HasOne<ApplicationProfilePickerShelf>()
+                            .WithMany()
+                            .HasForeignKey("ApplicationProfilePickerShelfId")
+                            .OnDelete(DeleteBehavior.Cascade),
+                        left => left.HasOne<ApplicationProfile>()
+                            .WithMany()
+                            .HasForeignKey("ApplicationProfileId")
+                            .OnDelete(DeleteBehavior.Cascade),
+                        join =>
+                        {
+                            join.ToTable("ApplicationProfilePickerShelfProfiles");
+                            join.HasKey("ApplicationProfileId", "ApplicationProfilePickerShelfId");
+                        });
                 b.HasOne(p => p.DefaultApprovalLegProfile).WithMany().HasForeignKey(p => p.DefaultApprovalLegProfileId).OnDelete(DeleteBehavior.SetNull);
                 b.Property(p => p.DefaultPurpose).HasMaxLength(700);
 #pragma warning disable CS0618

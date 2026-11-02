@@ -138,7 +138,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 : VisaUiMessages.Get("ApplicationProfileInstance.Picker.RouteHintDefault");
 
             var rows = queryService.GetProfiles(objectSpace, route, seedPersonId: null);
-            model.Shelves = ApplicationProfilePickerShelfService.ListShelves(objectSpace)
+            model.Shelves = ApplicationProfilePickerShelfService.ListShelves(objectSpace, route)
                 .Select(s => new ApplicationProfilePickerModel.ShelfModel
                 {
                     Id = s.ID,
@@ -153,7 +153,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 MetaLine = r.MetaLine,
                 SeedUsageLine = r.SeedUsageLine,
                 IsConfigLocked = r.IsConfigLocked,
-                ShelfId = r.ShelfId,
+                ShelfIds = r.ShelfIds,
                 LastUsedAt = r.LastUsedAt,
                 HasOpenApplicationForSeedPerson = r.HasOpenApplicationForSeedPerson,
                 RequiresApprovalLegVersion = r.RequiresApprovalLegVersion,
@@ -483,7 +483,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 MetaLine = row.MetaLine,
                 SeedUsageLine = row.SeedUsageLine,
                 IsConfigLocked = row.IsConfigLocked,
-                ShelfId = row.ShelfId,
+                ShelfIds = row.ShelfIds,
                 LastUsedAt = row.LastUsedAt,
                 HasOpenApplicationForSeedPerson = row.HasOpenApplicationForSeedPerson,
                 RequiresApprovalLegVersion = row.RequiresApprovalLegVersion,
@@ -695,7 +695,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         using var objectSpace = factory.CreateNonSecuredObjectSpace<ApplicationProfile>();
-        if (!ApplicationProfilePickerShelfService.TryMoveToShelf(objectSpace, args.ProfileId, args.ShelfId, out var error))
+        if (!ApplicationProfilePickerShelfService.TryToggleShelf(objectSpace, args.ProfileId, args.ShelfId, out var error))
         {
             model.StatusMessage = error ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
             model.IsStatusError = true;
@@ -731,7 +731,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         if (args.ProfileId != Guid.Empty
-            && !ApplicationProfilePickerShelfService.TryMoveToShelf(objectSpace, args.ProfileId, shelf.ID, out var moveError))
+            && !ApplicationProfilePickerShelfService.TryToggleShelf(objectSpace, args.ProfileId, shelf.ID, out var moveError))
         {
             model.StatusMessage = moveError ?? VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
             model.IsStatusError = true;

@@ -9,11 +9,36 @@ namespace Visa2026.Module.Services.ApplicationProfilePicker;
 
 public static class ApplicationProfilePickerShelfService
 {
-    public static IReadOnlyList<ApplicationProfilePickerShelf> ListShelves(IObjectSpace objectSpace) =>
-        objectSpace.GetObjectsQuery<ApplicationProfilePickerShelf>()
+    public static IReadOnlyList<ApplicationProfilePickerShelf> ListShelves(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstanceProgressRouteKind? progressRoute = null)
+    {
+        var shelves = objectSpace.GetObjectsQuery<ApplicationProfilePickerShelf>()
             .OrderBy(s => s.SortOrder)
             .ThenBy(s => s.Name)
             .ToList();
+
+        // Route-specific system tabs:
+        // - Via ministry: hide Registration + Business trip; keep Family member.
+        // - Direct migration: hide Family member; keep Registration + Business trip.
+        if (progressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+        {
+            shelves = shelves
+                .Where(s =>
+                    !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.Registration, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.BusinessTrip, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else if (progressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
+        {
+            shelves = shelves
+                .Where(s =>
+                    !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.FamilyMemberOnly, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        return shelves;
+    }
 
     public static string DisplayName(ApplicationProfilePickerShelf shelf)
     {
@@ -25,9 +50,12 @@ public static class ApplicationProfilePickerShelfService
             var key = shelf.Code switch
             {
                 ApplicationProfilePickerShelfCodes.Invitations => "ApplicationProfileInstance.Picker.Shelf.Invitations",
+                ApplicationProfilePickerShelfCodes.Visa => "ApplicationProfileInstance.Picker.Shelf.Visa",
                 ApplicationProfilePickerShelfCodes.Registration => "ApplicationProfileInstance.Picker.Shelf.Registration",
                 ApplicationProfilePickerShelfCodes.FamilyMemberOnly => "ApplicationProfileInstance.Picker.Shelf.FamilyMemberOnly",
+                ApplicationProfilePickerShelfCodes.BusinessTrip => "ApplicationProfileInstance.Picker.Shelf.BusinessTrip",
                 ApplicationProfilePickerShelfCodes.WorkPermitOnly => "ApplicationProfileInstance.Picker.Shelf.WorkPermitOnly",
+                ApplicationProfilePickerShelfCodes.BorderZone => "ApplicationProfileInstance.Picker.Shelf.BorderZone",
                 _ => null,
             };
             if (key != null)
@@ -37,7 +65,11 @@ public static class ApplicationProfilePickerShelfService
         return shelf.Name;
     }
 
-    public static bool TryMoveToShelf(
+    /// <summary>
+    /// Toggle membership: <paramref name="shelfId"/> null clears all shelves;
+    /// otherwise adds the shelf if missing or removes it if present.
+    /// </summary>
+    public static bool TryToggleShelf(
         IObjectSpace objectSpace,
         Guid profileId,
         Guid? shelfId,
@@ -57,19 +89,28 @@ public static class ApplicationProfilePickerShelfService
             return false;
         }
 
-        ApplicationProfilePickerShelf? shelf = null;
-        if (shelfId is Guid id && id != Guid.Empty)
+        profile.PickerShelves ??= new System.Collections.ObjectModel.ObservableCollection<ApplicationProfilePickerShelf>();
+
+        if (shelfId is not Guid id || id == Guid.Empty)
         {
-            shelf = objectSpace.GetObjectByKey<ApplicationProfilePickerShelf>(id);
-            if (shelf == null)
-            {
-                error = VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
-                return false;
-            }
+            profile.PickerShelves.Clear();
+            objectSpace.CommitChanges();
+            return true;
         }
 
-        profile.PickerShelf = shelf;
-        profile.PickerShelfId = shelf?.ID;
+        var shelf = objectSpace.GetObjectByKey<ApplicationProfilePickerShelf>(id);
+        if (shelf == null)
+        {
+            error = VisaUiMessages.Get("ApplicationProfileInstance.Picker.Shelf.MoveFailed");
+            return false;
+        }
+
+        var existing = profile.PickerShelves.FirstOrDefault(s => s.ID == shelf.ID);
+        if (existing != null)
+            profile.PickerShelves.Remove(existing);
+        else
+            profile.PickerShelves.Add(shelf);
+
         objectSpace.CommitChanges();
         return true;
     }
@@ -170,11 +211,12 @@ public static class ApplicationProfilePickerShelfService
         }
 
         foreach (var profile in objectSpace.GetObjectsQuery<ApplicationProfile>()
-                     .Where(p => p.PickerShelfId == shelfId)
+                     .Where(p => p.PickerShelves.Any(s => s.ID == shelfId))
                      .ToList())
         {
-            profile.PickerShelf = null;
-            profile.PickerShelfId = null;
+            var link = profile.PickerShelves.FirstOrDefault(s => s.ID == shelfId);
+            if (link != null)
+                profile.PickerShelves.Remove(link);
         }
 
         objectSpace.Delete(shelf);

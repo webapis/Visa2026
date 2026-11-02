@@ -324,7 +324,7 @@
         },
         {
             "Name": "App_Inv_FM",
-            "NameTm": "Çakylyk Almak FM",
+            "NameTm": "Çakylyk Almak Maşgala agzasy",
             "Code": "get_invitation",
             "PdfForm_Code": 2,
             "LifecycleStage": "Entry",
@@ -1551,7 +1551,7 @@
         },
         {
             "Name": "App_Visa_Ext_FM",
-            "NameTm": "Wiza Möhletini Uzaltmak FM",
+            "NameTm": "Wiza Möhletini Uzaltmak Maşgala agzasy",
             "Code": "visa_extension",
             "PdfForm_Code": 6,
             "LifecycleStage": "Stay",
@@ -1604,7 +1604,7 @@
         },
         {
             "Name": "App_Visa_For_New_Born_FM",
-            "NameTm": "Täze dogulan çaga wiza resmileşdirmek FM",
+            "NameTm": "Täze dogulan çaga wiza resmileşdirmek Maşgala agzasy",
             "Code": "visa_extension",
             "PdfForm_Code": 6,
             "LifecycleStage": "Stay",

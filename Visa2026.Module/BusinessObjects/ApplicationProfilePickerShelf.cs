@@ -13,6 +13,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// <summary>
 /// Tenant-shared shelf tab for the Application Profile instance create picker.
 /// Recent and All are virtual; relation/custom shelves are rows here.
+/// Profiles may belong to multiple shelves (M2M).
 /// </summary>
 [NavigationItem(false)]
 [DefaultProperty(nameof(Name))]

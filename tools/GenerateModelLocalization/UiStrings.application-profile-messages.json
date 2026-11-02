@@ -3959,23 +3959,41 @@
     "tk-TM": "Hasaba alyş",
     "ru-RU": "Регистрация"
   },
+  "ApplicationProfileInstance.Picker.Shelf.Visa": {
+    "en-US": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "ApplicationProfileInstance.Picker.Shelf.BorderZone": {
+    "en-US": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet Ýaka",
+    "ru-RU": "Приграничная зона"
+  },
+  "ApplicationProfileInstance.Picker.Shelf.BusinessTrip": {
+    "en-US": "Business trip",
+    "tr-TR": "İş seyahati",
+    "tk-TM": "Iş Sapary",
+    "ru-RU": "Командировка"
+  },
   "ApplicationProfileInstance.Picker.Shelf.FamilyMemberOnly": {
-    "en-US": "Family member only",
-    "tr-TR": "Yalnızca aile üyesi",
-    "tk-TM": "Diňe maşgala agzasy",
-    "ru-RU": "Только член семьи"
+    "en-US": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
   },
   "ApplicationProfileInstance.Picker.Shelf.WorkPermitOnly": {
-    "en-US": "Work permit only",
-    "tr-TR": "Yalnızca çalışma izni",
-    "tk-TM": "Diňe iş rugsatnamasy",
-    "ru-RU": "Только разрешение на работу"
+    "en-US": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsatnamasy",
+    "ru-RU": "Разрешение на работу"
   },
   "ApplicationProfileInstance.Picker.Shelf.MoveTo": {
-    "en-US": "Move to",
-    "tr-TR": "Taşı",
-    "tk-TM": "Geçir",
-    "ru-RU": "Переместить в"
+    "en-US": "Shelves",
+    "tr-TR": "Sekmeler",
+    "tk-TM": "Goýberişler",
+    "ru-RU": "Вкладки"
   },
   "ApplicationProfileInstance.Picker.Shelf.CreateNewTab": {
     "en-US": "Create new tab…",
@@ -4020,10 +4038,10 @@
     "ru-RU": "Удалить вкладку"
   },
   "ApplicationProfileInstance.Picker.Shelf.RemoveFromShelf": {
-    "en-US": "All only (no shelf)",
-    "tr-TR": "Yalnızca Tümü (raf yok)",
-    "tk-TM": "Diňe Ählisi (goýberiş ýok)",
-    "ru-RU": "Только «Все» (без полки)"
+    "en-US": "Clear all shelves",
+    "tr-TR": "Tüm sekmeleri temizle",
+    "tk-TM": "Ähli goýberişleri arassala",
+    "ru-RU": "Очистить все вкладки"
   },
   "ApplicationProfileInstance.Picker.Shelf.Empty": {
     "en-US": "No Application Profiles on this tab. Right-click a profile on All to move it here.",

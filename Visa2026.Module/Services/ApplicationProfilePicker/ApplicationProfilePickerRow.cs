@@ -22,7 +22,7 @@ public sealed class ApplicationProfilePickerRow
 
     public bool IsConfigLocked { get; init; }
 
-    public Guid? ShelfId { get; init; }
+    public IReadOnlyList<Guid> ShelfIds { get; init; } = Array.Empty<Guid>();
 
     public DateTime? LastUsedAt { get; init; }
 

@@ -219,7 +219,7 @@
     {
       "ApplicationTypeName": "App_Inv_FM",
       "ProfileCode": "get_invitation_fm",
-      "ProfileName": "\u00C7akylyk Almak FM",
+      "ProfileName": "\u00C7akylyk Almak Ma\u015Fgala agzasy",
       "SignOff": "approved",
       "Versions": [
         {
@@ -286,7 +286,7 @@
     {
       "ApplicationTypeName": "App_Visa_Ext_FM",
       "ProfileCode": "visa_ext_fm",
-      "ProfileName": "Wiza M\u00F6hletini Uzaltmak FM",
+      "ProfileName": "Wiza M\u00F6hletini Uzaltmak Ma\u015Fgala agzasy",
       "SignOff": "approved",
       "Versions": [
         {
@@ -301,7 +301,7 @@
     {
       "ApplicationTypeName": "App_Visa_For_New_Born_FM",
       "ProfileCode": "visa_for_new_born_fm",
-      "ProfileName": "T\u00E4ze dogulan \u00E7aga wiza resmile\u015Fdirmek FM",
+      "ProfileName": "T\u00E4ze dogulan \u00E7aga wiza resmile\u015Fdirmek Ma\u015Fgala agzasy",
       "SignOff": "approved",
       "Versions": [
         {

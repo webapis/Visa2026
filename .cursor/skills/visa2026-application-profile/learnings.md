@@ -1,3 +1,77 @@
+### 2026-11-02 — Serhet Ýaka picker shelf tab
+
+- **Need**: Localized Serhet Ýaka tab for border-zone profiles (Serhet Ýaka Üçin Rugsatnama Almak / Rugsady Ýatyrmak).
+- **Fix**: System shelf `border_zone`; name keywords serhet ýaka / serhet / border zone; shown on both via-ministry and Direct; WP heuristic still excludes Serhet…Rugsatnama without iş.
+- **Officer**: Full stop F5, rebuild, F5. Serhet Ýaka tab lists border profiles.
+- **Prevent**: Do not put Serhet…Rugsatnama on Iş rugsatnamasy (iş/is gate remains).
+- **Cross-skill**: —
+
+### 2026-11-02 — Iş Rugsatnama goşmaça → Iş rugsatnamasy tab
+
+- **Need**: Profile "Iş Rugsatnama goşmaça barjak ýeri" (and Turkish-İ spellings like "İş Rugsatnama…") belong on Iş rugsatnamasy.
+- **Fix**: Normalize Turkish İ/ı before keyword match; WP also matches rugsatnama* when name also has iş/is (excludes Serhet … Rugsatnama).
+- **Officer**: Full stop F5, rebuild, F5 so shelf sync re-links. Iş rugsatnamasy lists goşmaça barjak ýeri.
+- **Prevent**: Do not match bare rugsatnama without iş/is (border permit names).
+- **Cross-skill**: —
+
+### 2026-11-02 — Iş Sapary tab empty despite Gelmek/Gitmek names
+
+- **Symptom**: Direct picker showed Iş Sapary tab but no profiles (Iş Saparyna Gelmek/Gitmek only on Ählisi).
+- **Cause**: `ApplicationProfilePickerShelfSeed` cached `SystemCodes` in a `static readonly` HashSet. After incremental F5/hot reload the set omitted `business_trip` while `EnsureSystemShelves` still created the shelf — Sync never assigned memberships.
+- **Fix**: Recompute system codes every Sync; commit new shelves before membership sync; broaden business-trip name match (`sapary` / `saparyna`).
+- **Officer**: Stop F5 (full restart, not hot reload), rebuild, F5. Log `profilesAssigned` should be > 0; Iş Sapary lists Gelmek/Gitmek.
+- **Prevent**: Do not cache system shelf codes in static fields across seed runs.
+- **Cross-skill**: —
+
+### 2026-11-02 — Direct migration: Iş Sapary tab replaces Maşgala
+
+- **Need**: Direct create picker should not show Maşgala agzasy; show Iş Sapary for business-trip names instead. Via ministry keeps Maşgala.
+- **Fix**: System shelf `business_trip`; name keywords `iş sapary` / `is sapary` / `business trip`; `ListShelves` hides Family on DirectToMigrationService and BusinessTrip+Registration on ViaMinistries. Maşgala DB links left intact (tab hide only on Direct).
+- **Officer**: Stop F5, rebuild, F5. Direct New → Iş Sapary lists Gelmek/Gitmek; no Maşgala tab. Via ministry unchanged for Maşgala.
+- **Prevent**: Do not hide Maşgala on via-ministry. Do not delete family shelf memberships for Direct hide.
+- **Cross-skill**: —
+
+### 2026-11-02 — Çakylyklar also matches Çakylygy
+
+- **Need**: Names like Çakylygy üýtgetmek / ýatyrmak were missing from Çakylyklar (only Çakylyk matched).
+- **Fix**: `NameMentionsCakylyk` also matches `çakylygy` / `cakylygy` (still blocks Visa when present).
+- **Officer**: Stop F5, rebuild, F5 so shelf sync re-links. Çakylyklar lists change/cancel invitation names.
+- **Prevent**: Do not rely on Çakylyk as a substring of Çakylygy — they differ at the last consonant.
+- **Cross-skill**: —
+
+### 2026-11-02 — Rename trailing FM → Maşgala agzasy on family profiles
+
+- **Need**: Family profiles ended with ` FM` so they did not land on Maşgala agzasy tab (name-keyword shelves).
+- **Fix**: Tenant catalog + ApplicationTypeConfigurationCatalog + approval-leg ProfileName: trailing ` FM` → ` Maşgala agzasy`. Heuristic also treats trailing ` FM` as family until leftovers are gone. Left `DefaultVisaTypeLocalizationKey: FM` / codes / GFM-TFM alone.
+- **Officer**: Stop F5, rebuild, F5 (tenant profile sync). Picker shows … Maşgala agzasy; those rows appear under Maşgala agzasy (and Wiza/Çakylyklar when those words remain).
+- **Prevent**: Do not replace GFM/TFM or visa-type key `FM`. Only trailing display-name ` FM`.
+- **Cross-skill**: —
+
+### 2026-11-02 — Picker shelves: name keywords only + prune Visa vs Çakylyk
+
+- **Need**: Wiza must not list invitation names (Çakylyk…); ignore Produce*/ActionFamily/Code for all system tabs; recompute existing memberships.
+- **Fix**: `ApplicationProfilePickerShelfHeuristic` name-only keywords; Çakylyk blocks Visa; `SyncHeuristicShelves` adds and removes **system** shelf links to match (custom tabs untouched).
+- **Officer**: Stop F5, rebuild, F5. Wiza shows Wiza/Visa names without Çakylyk; those with Çakylyk appear under Çakylyklar (+ Iş rugsatnamasy when named).
+- **Prevent**: Do not use ProduceVisa/Code for shelf tabs. Do not leave stale Visa links when name has Çakylyk.
+- **Cross-skill**: —
+
+### 2026-11-02 — Wiza tab empty after multi-shelf migrate
+
+- **Symptom**: Via-ministry Create picker showed Wiza tab but no profiles (e.g. Wiza we Iş Rugsatnamasyny Uzaltmak missing).
+- **Cause**: After Visa shelf existed, seed only ran `AssignEmptyProfiles` — profiles that already had an exclusive shelf (work_permit_only from FK migrate) never received Visa membership.
+- **Fix**: `ApplicationProfilePickerShelfSeed.EnsureSynced` always `MergeHeuristicShelves` (add-only); membership check uses DB-projected links + loaded collection before Add.
+- **Officer**: Stop F5, rebuild, F5. Startup log `profilesAssigned` should be > 0 once; Wiza lists visa-related profiles.
+- **Prevent**: Do not gate heuristic multi-membership merge on `shelvesCreated > 0` only.
+- **Cross-skill**: —
+
+### 2026-11-02 — Picker shelves: multi-membership + Wiza / rename Diňe
+
+- **Need**: Via-ministry create picker must not show Hasaba alyş (Registration belongs on Direct migration); add **Wiza**; rename Diňe maşgala / Diňe iş rugsatnamasy; profiles like "Wiza we Iş Rugsatnamasyny Uzaltmak" must appear on both Wiza and Iş rugsatnamasy; Çakylyklar only when name mentions Çakylyk.
+- **Fix**: `ApplicationProfile.PickerShelves` M2M (join `ApplicationProfilePickerShelfProfiles`); schema migrates legacy `PickerShelfId`; system shelf `visa`; ListShelves hides Registration on ViaMinistries; heuristic returns multiple codes (flags + name; invitations = Çakylyk in Name only); context menu toggles membership; localization Wiza / Maşgala agzasy / Iş rugsatnamasy.
+- **Officer**: Stop F5, rebuild host, F5 (schema heal + Visa shelf seed). Via ministry: no Hasaba alyş, Wiza present; Direct: both Hasaba alyş and Wiza. Right-click shelves with checkmarks for multi-membership.
+- **Prevent**: Do not restore exclusive `PickerShelfId`. Do not put Registration on via-ministry tab list. Do not assign Invitations from `ProduceInvitation` alone without Çakylyk in the name.
+- **Cross-skill**: —
+
 ### 2026-10-31 — Picker Create: ObjectDisposedException on BlazorWindow
 
 - **Symptom**: Prod docker `10.100.128.26` (`visa2026-prod-app-1`): Choose Application Profile → Case summary → Create/Next showed Application Error. Log: `ObjectDisposedException` on `BlazorWindow` in `ApplicationProfilePickerCompletionHelper.ShowViewInCurrentWindow` after commit.

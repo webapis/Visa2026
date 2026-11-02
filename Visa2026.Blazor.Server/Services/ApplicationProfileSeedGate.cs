@@ -41,7 +41,7 @@ internal static class ApplicationProfileSeedGate
                 return;
             }
 
-            // PickerShelfId must exist before any EF query on ApplicationProfile (ModuleUpdater often skipped).
+            // Picker shelf tables / M2M join must exist before EF maps ApplicationProfile (ModuleUpdater often skipped).
             ApplicationProfilePickerShelfSchemaSql.ApplyIfMissing(connectionString);
 
             using var scope = services.CreateScope();

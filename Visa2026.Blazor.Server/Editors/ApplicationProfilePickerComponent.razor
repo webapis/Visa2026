@@ -280,10 +280,11 @@
                 @if (_menuMode == MenuMode.Profile)
                 {
                     <div class="ap-picker__ctx-label">@Msg("ApplicationProfileInstance.Picker.Shelf.MoveTo")</div>
-                    <button type="button" class="ap-picker__ctx-item @(_menuProfileShelfId == null ? "is-current" : null)" role="menuitem" @onclick="() => MoveProfileAsync(null)">@Msg("ApplicationProfileInstance.Picker.Shelf.RemoveFromShelf")</button>
+                    <button type="button" class="ap-picker__ctx-item @(!_menuProfileShelfIds.Any() ? "is-current" : null)" role="menuitem" @onclick="() => MoveProfileAsync(null)">@Msg("ApplicationProfileInstance.Picker.Shelf.RemoveFromShelf")</button>
                     @foreach (var shelf in Shelves)
                     {
-                        <button type="button" class="ap-picker__ctx-item @(_menuProfileShelfId == shelf.Id ? "is-current" : null)" role="menuitem" @onclick="() => MoveProfileAsync(shelf.Id)">@shelf.Name</button>
+                        var onShelf = _menuProfileShelfIds.Contains(shelf.Id);
+                        <button type="button" class="ap-picker__ctx-item @(onShelf ? "is-current" : null)" role="menuitem" @onclick="() => MoveProfileAsync(shelf.Id)">@(onShelf ? "✓ " : "")@shelf.Name</button>
                     }
                     <div class="ap-picker__ctx-sep"></div>
                     <button type="button" class="ap-picker__ctx-item" role="menuitem" @onclick="OpenCreateDialog">@Msg("ApplicationProfileInstance.Picker.Shelf.CreateNewTab")</button>
@@ -354,7 +355,7 @@
     private double _menuX;
     private double _menuY;
     private Guid? _menuProfileId;
-    private Guid? _menuProfileShelfId;
+    private IReadOnlyList<Guid> _menuProfileShelfIds = Array.Empty<Guid>();
     private ApplicationProfilePickerModel.ShelfModel? _menuShelf;
     private bool _dialogOpen;
     private bool _dialogRename;
@@ -374,7 +375,7 @@
                     .OrderByDescending(r => r.LastUsedAt)
                     .Take(ApplicationProfilePickerShelfCodes.RecentCap),
                 ApplicationProfilePickerTabKind.Shelf when _tab.ShelfId is Guid shelfId && shelfId != Guid.Empty =>
-                    Rows.Where(r => r.ShelfId == shelfId),
+                    Rows.Where(r => r.ShelfIds != null && r.ShelfIds.Contains(shelfId)),
                 _ => Array.Empty<ApplicationProfilePickerModel.PickerRowModel>(),
             };
             return q.ToList();
@@ -416,6 +417,7 @@
     {
         _menuOpen = false;
         _menuProfileId = null;
+        _menuProfileShelfIds = Array.Empty<Guid>();
         _menuShelf = null;
     }
 
@@ -429,7 +431,7 @@
     {
         _menuMode = MenuMode.Profile;
         _menuProfileId = row.ProfileId;
-        _menuProfileShelfId = row.ShelfId;
+        _menuProfileShelfIds = row.ShelfIds ?? Array.Empty<Guid>();
         _menuShelf = null;
         _menuX = e.ClientX;
         _menuY = e.ClientY;

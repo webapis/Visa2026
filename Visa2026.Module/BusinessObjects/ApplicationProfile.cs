@@ -41,7 +41,7 @@ namespace Visa2026.Module.BusinessObjects;
 [Appearance(
     "ApplicationProfilePickerShelfAlwaysEditable",
     AppearanceItemType = "ViewItem",
-    TargetItems = nameof(PickerShelf),
+    TargetItems = nameof(PickerShelves),
     Enabled = true,
     Context = "DetailView",
     Priority = 100)]
@@ -54,6 +54,7 @@ public class ApplicationProfile : BaseObject
         NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>();
         ProgressStateSettings = new ObservableCollection<ApplicationProfileProgressStateSetting>();
         Instances = new ObservableCollection<ApplicationProfileInstance>();
+        PickerShelves = new ObservableCollection<ApplicationProfilePickerShelf>();
     }
 
     [RuleRequiredField]
@@ -374,12 +375,11 @@ public class ApplicationProfile : BaseObject
     public virtual bool IsActive { get; set; } = true;
 
     /// <summary>
-    /// Tenant-shared create-picker shelf (exclusive). Null = All only. Not configuration-locked.
+    /// Tenant-shared create-picker shelves (multi-membership). Empty = All / Recent only.
+    /// Not configuration-locked.
     /// </summary>
-    [XafDisplayName("Picker shelf")]
-    public virtual ApplicationProfilePickerShelf? PickerShelf { get; set; }
-
-    public virtual Guid? PickerShelfId { get; set; }
+    [XafDisplayName("Picker shelves")]
+    public virtual IList<ApplicationProfilePickerShelf> PickerShelves { get; set; }
 
     [InverseProperty(nameof(ApplicationProfileInstance.ApplicationProfile))]
     [VisibleInDetailView(false)]

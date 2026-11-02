@@ -39,4 +39,21 @@ public class ApplicationProfilePickerShelfSchemaSqlTests
             ApplicationProfilePickerShelfSchemaSql.EnsureSchemaPostgres,
             StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Schema_CreatesJoinTable_AndMigratesLegacyPickerShelfId()
+    {
+        Assert.Contains(
+            "ApplicationProfilePickerShelfProfiles",
+            ApplicationProfilePickerShelfSchemaSql.EnsureSchemaPostgres,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "DROP COLUMN IF EXISTS \"PickerShelfId\"",
+            ApplicationProfilePickerShelfSchemaSql.EnsureSchemaPostgres,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "INSERT INTO \"ApplicationProfilePickerShelfProfiles\"",
+            ApplicationProfilePickerShelfSchemaSql.EnsureSchemaPostgres,
+            StringComparison.Ordinal);
+    }
 }

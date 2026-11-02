@@ -941,7 +941,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.Instances));
             // Create from yellow marks appends the new row to this collection.
             EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.NestedTemplates));
-            EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.PickerShelf));
+            EnsureAssociationMemberWrite<ApplicationProfile>(role, nameof(ApplicationProfile.PickerShelves));
             // The property named in the security error. Both sides are required when a criteria was involved.
             EnsureAssociationMemberWrite<ApplicationProfileInstance>(role, nameof(ApplicationProfileInstance.ApplicationProfile));
         }
