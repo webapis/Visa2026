@@ -4052,14 +4052,10 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .dxbl-grid td .lv-progress-stepper--with-stems,
 .lv-progress-stepper--with-stems {
-    /* Longer ministry tracks scroll here. Chips stay in the cell beside the track. */
-    flex: 1 1 0 !important;
+    flex: 0 0 auto !important;
     width: auto !important;
-    min-width: 0;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: thin;
+    max-width: none;
+    overflow: visible;
 }
 
 .lv-progress-stepper--with-stems .lv-progress-step,
@@ -4374,6 +4370,24 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .lv-progress-step__status-no {
     display: block;
+}
+
+button.lv-progress-step__files {
+    display: block;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    cursor: pointer;
+    color: var(--dxds-color-content-primary-default-rest, #1d4ed8);
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 /* Progress + result columns stay on the same row tint (no separate white plate). */

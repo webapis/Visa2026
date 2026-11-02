@@ -5,8 +5,12 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Process completion 0–100 for an instance ListView: Phase 1 timeline (max 40) from
-/// done steps, plus Phase 2 issued-document coverage (max 60) only after AS / process number.
+/// Process completion 0–100 for an instance ListView.
+/// Direct routes that end at hand-in (Ofisde taýýarlyk, then Migrasiýa gullugyna tabşyryldy)
+/// have no ministry legs and no visa / work permit / invitation result, so the two steps are the whole score.
+/// Routes that continue to the CO / AS step use Phase 1 (max 40) for the real steps on that track.
+/// That migration step counts once the CO / AS number is received, above "AS (CO) belgisine garaşylýar".
+/// Phase 2 issued-document coverage (max 60) starts only after that number.
 /// Rejection chips are excluded from Phase 2. Empty roster (0/0) earns no Phase 2 points.
 /// </summary>
 public static class ApplicationProfileInstanceCompletionPercentage
@@ -41,6 +45,10 @@ public static class ApplicationProfileInstanceCompletionPercentage
         IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? chips,
         bool asGatePassed)
     {
+        // Direct hand-in is the last step: no CO node and no issued-document result.
+        if (EndsAtHandIn(steps))
+            return CalculateHandInPercent(steps);
+
         // Always score the timeline from actual step states — do not lock Phase 1 at 40
         // just because a process number exists (incomplete current step must stay below 100%).
         var phase1 = CalculatePhase1Points(steps);
@@ -52,7 +60,10 @@ public static class ApplicationProfileInstanceCompletionPercentage
     }
 
     /// <summary>
-    /// Phase 1 points (0–40): done steps / total steps. Current / pending do not count as done.
+    /// Phase 1 points (0–40): completed steps / total steps.
+    /// A step is completed when it is done, or when it is the migration step and the
+    /// CO / AS number has already been received (that step comes after awaiting the number).
+    /// Other current / pending steps do not count.
     /// </summary>
     public static int CalculatePhase1Points(IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? steps)
     {
@@ -62,11 +73,62 @@ public static class ApplicationProfileInstanceCompletionPercentage
         var done = 0;
         for (var i = 0; i < steps.Count; i++)
         {
-            if (string.Equals(steps[i].State, "done", StringComparison.OrdinalIgnoreCase))
+            if (IsPhase1Complete(steps[i]))
                 done++;
         }
 
         return (int)Math.Round(Phase1Weight * (double)done / steps.Count);
+    }
+
+    /// <summary>
+    /// Office + hand-in only. Both done is 100%; there is no result phase to withhold.
+    /// </summary>
+    private static int CalculateHandInPercent(IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> steps)
+    {
+        var done = 0;
+        for (var i = 0; i < steps.Count; i++)
+        {
+            if (IsPhase1Complete(steps[i]))
+                done++;
+        }
+
+        return (int)Math.Round(100d * done / steps.Count);
+    }
+
+    private static bool EndsAtHandIn(IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? steps)
+    {
+        if (steps == null || steps.Count == 0)
+            return false;
+
+        var hasHandIn = false;
+        for (var i = 0; i < steps.Count; i++)
+        {
+            if (string.Equals(
+                    steps[i].Key,
+                    ApplicationWorkspaceProgressTimeline.MigrationKey,
+                    StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (string.Equals(
+                    steps[i].Key,
+                    ApplicationMigrationSubmission.TimelineKey,
+                    StringComparison.OrdinalIgnoreCase))
+                hasHandIn = true;
+        }
+
+        return hasHandIn;
+    }
+
+    private static bool IsPhase1Complete(ApplicationWorkspaceListProgressSteps.Step step)
+    {
+        if (string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return step.AsNumberReceived
+            && string.Equals(
+                step.Key,
+                ApplicationWorkspaceProgressTimeline.MigrationKey,
+                StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

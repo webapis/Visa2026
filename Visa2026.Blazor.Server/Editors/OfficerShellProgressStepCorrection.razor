@@ -54,13 +54,7 @@
             @foreach (var file in Step.Files)
             {
                 <div class="ct-step-file" title="@file.FileName">
-                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                       ProgressId="FileProgressId"
-                                                       FileId="file.FileId"
-                                                       FileName="@file.FileName"
-                                                       LinkText="@file.FileName"
-                                                       CssClass="ct-step-file__name"
-                                                       OwnerViewId="@OwnerViewId" />
+                    <span class="ct-step-file__name">@file.FileName</span>
                     @if (Step.CanEditFiles)
                     {
                         <label class="ct-step-file__btn">
@@ -88,10 +82,9 @@
                 {
                     <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
                                                        ProgressId="FileProgressId"
-                                                       FileName="@PreviewAllText"
-                                                       LinkText="@PreviewAllText"
+                                                       FileName="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
+                                                       LinkText="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
                                                        PreviewAll="true"
-                                                       CssClass="ct-step-file__btn"
                                                        OwnerViewId="@OwnerViewId" />
                 }
             </div>
@@ -114,11 +107,6 @@
     private string _number = string.Empty;
     private string _resultNumber = string.Empty;
     private string _stamp = string.Empty;
-
-    private string PreviewAllText =>
-        Step.Files.Count > 1
-            ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")
-            : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewFile");
 
     protected override void OnParametersSet()
     {

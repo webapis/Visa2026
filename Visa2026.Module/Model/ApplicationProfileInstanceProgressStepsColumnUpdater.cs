@@ -16,6 +16,15 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
     : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
     public const string ColumnId = nameof(ApplicationProfileInstance.ProgressStepsDisplay);
+
+    /// <summary>
+    /// Default width for office + up to five ministry legs + hand-in + CO number, plus the result chips.
+    /// An officer drag replaces this for that user; the new width is a user model difference.
+    /// </summary>
+    public const int ProgressColumnWidth = 1120;
+
+    /// <summary>Smallest width an officer can drag the progress column down to.</summary>
+    public const int ProgressColumnMinWidth = 280;
     public const string ReplacedColumnId = nameof(ApplicationProfileInstance.LatestProgressState);
 
     private static readonly string[] ApplicationInstanceListViewIds =
@@ -53,7 +62,7 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         var column = listView.Columns[ColumnId]
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
         column.PropertyName = ColumnId;
-        column.Width = 640;
+        column.Width = ProgressColumnWidth;
 
         var completionId = nameof(ApplicationProfileInstance.CompletionPercentage);
         var lastVisible = listView.Columns

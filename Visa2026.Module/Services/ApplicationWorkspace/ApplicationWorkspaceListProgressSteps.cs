@@ -19,7 +19,10 @@ public static class ApplicationWorkspaceListProgressSteps
         string State,
         string OutcomeKind,
         string Date,
-        string StatusLabel);
+        string StatusLabel,
+        Guid DocumentProgressId = default,
+        bool HasDocuments = false,
+        bool AsNumberReceived = false);
 
     public static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildTimeline(
         ApplicationProfileInstance? application,
@@ -69,13 +72,28 @@ public static class ApplicationWorkspaceListProgressSteps
                 statusLabel = step.ProcessNumber.Trim();
             }
 
+            statusLabel = AppendDocumentNumber(statusLabel, step.ResultNumber);
+            statusLabel = AppendDocumentNumber(statusLabel, step.SubmissionDocumentNumber);
+            var documentProgressId = step.ProgressId ?? step.DateProgressId ?? Guid.Empty;
+            var hasDocuments = documentProgressId != Guid.Empty
+                && (step.Files.Count > 0 || !string.IsNullOrWhiteSpace(step.MinistryLetterFileName));
+            var asNumberReceived = string.Equals(
+                    step.Key,
+                    ApplicationWorkspaceProgressTimeline.MigrationKey,
+                    StringComparison.OrdinalIgnoreCase)
+                && (!string.IsNullOrWhiteSpace(step.ProcessNumber)
+                    || string.Equals(step.OutcomeKind, "issued", StringComparison.OrdinalIgnoreCase));
+
             result.Add(new Step(
                 step.Key,
                 ApplicationProfileLocalization.ProgressStepLabel(step.Label),
                 step.State,
                 step.OutcomeKind,
                 step.Date ?? string.Empty,
-                statusLabel));
+                statusLabel,
+                documentProgressId,
+                hasDocuments,
+                asNumberReceived));
         }
 
         return result;
@@ -317,6 +335,23 @@ public static class ApplicationWorkspaceListProgressSteps
             historyByInstance.TryGetValue(application.ID, out var rows);
             application.SetListViewProgressSteps(Build(application, rows));
         }
+    }
+
+    /// <summary>
+    /// Document (result) number under the step, on its own line when the step has no status text.
+    /// </summary>
+    private static string AppendDocumentNumber(string statusLabel, string? number)
+    {
+        if (string.IsNullOrWhiteSpace(number))
+            return statusLabel;
+
+        var trimmed = number.Trim();
+        if (string.IsNullOrWhiteSpace(statusLabel))
+            return trimmed;
+        if (statusLabel.Contains(trimmed, StringComparison.Ordinal))
+            return statusLabel;
+
+        return statusLabel.Trim() + " /" + trimmed;
     }
 
     private static bool ShouldShowStatus(ApplicationWorkspaceCaseProgressStep step)

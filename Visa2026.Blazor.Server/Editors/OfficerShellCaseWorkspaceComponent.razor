@@ -403,13 +403,6 @@
 </div>
 
 @code {
-    private static string ProgressLetterText(ApplicationWorkspaceCaseProgressStep step)
-    {
-        if (step.Files.Count <= 1)
-            return step.Files.Count == 1 ? step.Files[0].FileName : string.Empty;
-        return step.Files[0].FileName + " (+" + (step.Files.Count - 1) + ")";
-    }
-
     private static (string Key, string Label, string Glyph)[] CaseTabs =>
     [
         ("overview", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Overview"), "⌂"),
@@ -1876,24 +1869,15 @@
                                 {
                                     <span class="cw-prog-step__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
                                 }
-                                @if (step.Files.Count > 0 && step.ProgressId is Guid)
+                                @if ((step.Files.Count > 0 || !string.IsNullOrWhiteSpace(step.MinistryLetterFileName))
+                                    && (step.ProgressId ?? step.DateProgressId) is Guid fileProgressId)
                                 {
                                     <span class="cw-prog-step__letter">
                                         <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                                           ProgressId="step.ProgressId"
-                                                                           FileName="@ProgressLetterText(step)"
-                                                                           LinkText="@ProgressLetterText(step)"
-                                                                           PreviewAll="@(step.Files.Count > 1)"
-                                                                           FileId="@(step.Files.Count == 1 ? (Guid?)step.Files[0].FileId : null)"
-                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
-                                    </span>
-                                }
-                                else if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid)
-                                {
-                                    <span class="cw-prog-step__letter">
-                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                                           ProgressId="step.ProgressId"
-                                                                           FileName="@step.MinistryLetterFileName"
+                                                                           ProgressId="fileProgressId"
+                                                                           FileName="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
+                                                                           LinkText="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
+                                                                           PreviewAll="true"
                                                                            OwnerViewId="@PreviewSlotOwnerViewId" />
                                     </span>
                                 }

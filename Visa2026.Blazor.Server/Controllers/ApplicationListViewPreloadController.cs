@@ -286,6 +286,11 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         if (View != null
             && !PersonLinkedApplicationsColumnWidths.SkipAutoFit(View.Id)
             && View.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
+        {
+            Frame.GetController<ApplicationListViewProgressStepsController>()?.SuppressWidthSave();
             grid.AutoFitColumnWidths();
+        }
+
+        Frame.GetController<ApplicationListViewProgressStepsController>()?.RestoreProgressColumnWidth();
     }
 }

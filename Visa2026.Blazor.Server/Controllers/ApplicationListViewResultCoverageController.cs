@@ -57,7 +57,11 @@ public sealed class ApplicationListViewResultCoverageController : ViewController
             return;
 
         if (View?.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
+        {
+            Frame.GetController<ApplicationListViewProgressStepsController>()?.SuppressWidthSave();
             grid.AutoFitColumnWidths();
+            Frame.GetController<ApplicationListViewProgressStepsController>()?.RestoreProgressColumnWidth();
+        }
     }
 
     protected override void OnDeactivated()

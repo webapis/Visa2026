@@ -749,10 +749,12 @@
 }
 
 .person-dossier__progress-letter {
-  display: inline-block;
+  display: block;
   margin-top: 2px;
   font-size: 10px;
   font-weight: 600;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* --------------------------------------------------------------- status pill

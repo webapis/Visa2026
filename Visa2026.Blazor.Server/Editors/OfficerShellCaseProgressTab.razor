@@ -45,7 +45,8 @@
                 _ => "ok",
             };
             var letterName = step.MinistryLetterFileName;
-            var letterProgressId = step.ProgressId;
+            var hasStepFiles = step.Files.Count > 0 || !string.IsNullOrWhiteSpace(letterName);
+            var stepFilesProgressId = step.ProgressId ?? step.DateProgressId;
             var showResultBeside = progressResultChips.Count > 0
                 && ApplicationWorkspaceListProgressSteps.IsResultChipAnchor(view.ProgressSteps, step);
             var icon = isCurrent
@@ -111,33 +112,17 @@
                         {
                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
                         }
-                        @if (step.Files.Count > 0 && (step.ProgressId ?? step.DateProgressId) is Guid fileProgressId)
-                        {
-                            <div class="ct-step-files">
-                                @foreach (var file in step.Files)
-                                {
-                                    <div class="ct-step-file" title="@file.FileName">
-                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                           ProgressId="fileProgressId"
-                                                                           FileId="file.FileId"
-                                                                           FileName="@file.FileName"
-                                                                           LinkText="@file.FileName"
-                                                                           CssClass="ct-step-file__name"
-                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
-                                    </div>
-                                }
-                                @if (step.Files.Count > 1)
-                                {
-                                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                       ProgressId="fileProgressId"
-                                                                       FileName="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
-                                                                       LinkText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
-                                                                       PreviewAll="true"
-                                                                       CssClass="ct-step-file__btn"
-                                                                       OwnerViewId="@PreviewSlotOwnerViewId" />
-                                }
-                            </div>
-                        }
+                    }
+                    @if (!IsEditing(step) && hasStepFiles && stepFilesProgressId is Guid stepFilesId)
+                    {
+                        <p class="ct-prog-v__letter">
+                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                               ProgressId="stepFilesId"
+                                                               FileName="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
+                                                               LinkText="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
+                                                               PreviewAll="true"
+                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
+                        </p>
                     }
                     @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
                     {
@@ -150,20 +135,7 @@
                             </button>
                         </p>
                     }
-                    @if (!CanOfferPen(step)
-                        && !IsEditing(step)
-                        && step.State != "current"
-                        && !string.IsNullOrWhiteSpace(letterName)
-                        && letterProgressId is Guid)
-                    {
-                        <p class="ct-prog-v__letter">
-                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                               ProgressId="letterProgressId"
-                                                               FileName="@letterName"
-                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
-                        </p>
-                    }
-                    else if (!CanOfferPen(step) && !IsEditing(step) && step.State != "current" && step.ShowMigrationSubmission)
+                    @if (!CanOfferPen(step) && !IsEditing(step) && step.State != "current" && step.ShowMigrationSubmission && !hasStepFiles)
                     {
                         <div class="ct-prog-v__letter-missing">
                             <label class="ct-label" for="submission-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
@@ -197,7 +169,7 @@
                             </button>
                         </div>
                     }
-                    else if (!CanOfferPen(step) && !IsEditing(step) && step.State != "current" && step.MissingMinistryLetter)
+                    else if (!CanOfferPen(step) && !IsEditing(step) && step.State != "current" && step.MissingMinistryLetter && !hasStepFiles)
                     {
                         <div class="ct-prog-v__letter-missing">
                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
@@ -216,34 +188,6 @@
                                 <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
                                 <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
                             </dl>
-                            @if (IsOpenAdvanceStep(step) && step.Files.Count > 0 && (step.ProgressId ?? step.DateProgressId) is Guid currentFileProgressId)
-                            {
-                                <div class="ct-step-files" style="margin-top:10px">
-                                    @foreach (var file in step.Files)
-                                    {
-                                        <div class="ct-step-file" title="@file.FileName">
-                                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                               ProgressId="currentFileProgressId"
-                                                                               FileId="file.FileId"
-                                                                               FileName="@file.FileName"
-                                                                               LinkText="@file.FileName"
-                                                                               CssClass="ct-step-file__name"
-                                                                               OwnerViewId="@PreviewSlotOwnerViewId" />
-                                        </div>
-                                    }
-                                    @if (step.Files.Count > 1)
-                                    {
-                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                           ProgressId="currentFileProgressId"
-                                                                           FileName="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
-                                                                           LinkText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.PreviewAllFiles")"
-                                                                           PreviewAll="true"
-                                                                           CssClass="ct-step-file__btn"
-                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
-                                    }
-                                </div>
-                            }
-
                             @if (step.CanAdvance)
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
@@ -333,15 +277,6 @@
                                         {
                                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
                                         }
-                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
-                                        {
-                                            <p class="ct-muted" style="margin:0 0 8px">
-                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                                   ProgressId="letterProgressId"
-                                                                                   FileName="@letterName"
-                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
-                                            </p>
-                                        }
                                         <OfficerShellPendingProgressFiles Files="_pendingFiles"
                                                                           ApplicationProfileInstanceId="ApplicationProfileInstanceId"
                                                                           OwnerViewId="@PreviewSlotOwnerViewId"
@@ -396,15 +331,6 @@
                                         @if (step.MissingMinistryLetter)
                                         {
                                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
-                                        }
-                                        @if (!string.IsNullOrWhiteSpace(letterName) && letterProgressId is Guid)
-                                        {
-                                            <p class="ct-muted" style="margin:0 0 8px">
-                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                                                   ProgressId="letterProgressId"
-                                                                                   FileName="@letterName"
-                                                                                   OwnerViewId="@PreviewSlotOwnerViewId" />
-                                            </p>
                                         }
                                         <OfficerShellPendingProgressFiles Files="_pendingFiles"
                                                                           ApplicationProfileInstanceId="ApplicationProfileInstanceId"

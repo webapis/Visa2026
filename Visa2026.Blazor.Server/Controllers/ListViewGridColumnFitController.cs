@@ -24,9 +24,17 @@ public sealed class ListViewGridColumnFitController : ViewController<ListView>
         if (View.Editor is not DxGridListEditor gridListEditor)
             return;
 
-        gridCapturedHandler ??= (_, e) => e.ComponentInstance.AutoFitColumnWidths();
+        gridCapturedHandler ??= (_, e) => FitColumns(e.ComponentInstance);
         gridListEditor.GridModel.ComponentInstanceCaptured += gridCapturedHandler;
-        gridListEditor.GridModel.ComponentInstance?.AutoFitColumnWidths();
+        if (gridListEditor.GridModel.ComponentInstance != null)
+            FitColumns(gridListEditor.GridModel.ComponentInstance);
+    }
+
+    private void FitColumns(IGrid grid)
+    {
+        Frame.GetController<ApplicationListViewProgressStepsController>()?.SuppressWidthSave();
+        grid.AutoFitColumnWidths();
+        Frame.GetController<ApplicationListViewProgressStepsController>()?.RestoreProgressColumnWidth();
     }
 
     protected override void OnDeactivated()

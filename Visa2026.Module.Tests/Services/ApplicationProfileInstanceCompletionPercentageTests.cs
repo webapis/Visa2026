@@ -63,6 +63,105 @@ public class ApplicationProfileInstanceCompletionPercentageTests
     }
 
     [Fact]
+    public void Co_number_received_scores_above_awaiting_as()
+    {
+        var awaiting = new[]
+        {
+            Step("office", "done"),
+            Step("leg-1", "done"),
+            Step("leg-2", "done"),
+            Step("migration-submitted", "done"),
+            Step("migration", "current"),
+        };
+        var received = new[]
+        {
+            Step("office", "done"),
+            Step("leg-1", "done"),
+            Step("leg-2", "done"),
+            Step("migration-submitted", "done"),
+            new ApplicationWorkspaceListProgressSteps.Step(
+                "migration",
+                "migration",
+                "current",
+                "current",
+                string.Empty,
+                "CO0236909",
+                default,
+                false,
+                true),
+        };
+        var chips = new[]
+        {
+            Chip("invitation", 0, 2),
+            Chip("issuedVisa", 0, 2),
+        };
+
+        var waitingPercent = ApplicationProfileInstanceCompletionPercentage.Calculate(awaiting, chips, asGatePassed: false);
+        var receivedPercent = ApplicationProfileInstanceCompletionPercentage.Calculate(received, chips, asGatePassed: true);
+
+        Assert.Equal(32, waitingPercent);
+        Assert.Equal(40, receivedPercent);
+        Assert.True(receivedPercent > waitingPercent);
+    }
+
+    [Fact]
+    public void Direct_hand_in_with_no_result_is_100_when_both_steps_are_done()
+    {
+        var steps = new[]
+        {
+            Step("office", "done"),
+            Step("migration-submitted", "done"),
+        };
+
+        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(steps, null, asGatePassed: false));
+        Assert.Equal(
+            100,
+            ApplicationProfileInstanceCompletionPercentage.Calculate(
+                steps,
+                new[] { Chip("issuedVisa", 0, 0) },
+                asGatePassed: true));
+    }
+
+    [Fact]
+    public void Direct_hand_in_only_office_done_is_half()
+    {
+        var steps = new[]
+        {
+            Step("office", "done"),
+            Step("migration-submitted", "current"),
+        };
+
+        Assert.Equal(50, ApplicationProfileInstanceCompletionPercentage.Calculate(steps, null, asGatePassed: false));
+    }
+
+    [Fact]
+    public void Direct_with_co_step_still_uses_process_then_result()
+    {
+        var steps = new[]
+        {
+            Step("office", "done"),
+            Step("migration-submitted", "done"),
+            new ApplicationWorkspaceListProgressSteps.Step(
+                "migration",
+                "migration",
+                "done",
+                "issued",
+                string.Empty,
+                "CO1",
+                default,
+                false,
+                true),
+        };
+        var chips = new[]
+        {
+            Chip("invitation", 1, 1),
+            Chip("issuedVisa", 0, 1),
+        };
+
+        Assert.Equal(70, ApplicationProfileInstanceCompletionPercentage.Calculate(steps, chips, asGatePassed: true));
+    }
+
+    [Fact]
     public void After_gate_all_steps_done_zero_docs_is_40()
     {
         var chips = new[]

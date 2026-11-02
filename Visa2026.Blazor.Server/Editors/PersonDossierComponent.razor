@@ -320,13 +320,17 @@
                                                                         {
                                                                             <span class="person-dossier__progress-result">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
                                                                         }
-                                                                        @if (step.ShowLetter && record.SourceObjectId is Guid instanceId)
+                                                                        @if (step.LetterProgressId is Guid letterId
+                                                                             && letterId != Guid.Empty
+                                                                             && !string.IsNullOrWhiteSpace(step.LetterFileName)
+                                                                             && record.SourceObjectId is Guid instanceId)
                                                                         {
                                                                             <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="instanceId"
-                                                                                                               ProgressId="step.LetterProgressId"
-                                                                                                               FileName="@step.LetterFileName"
+                                                                                                               ProgressId="letterId"
+                                                                                                               FileName="@Msg("PersonDossier.Progress.ViewFile")"
                                                                                                                OwnerViewId="@PersonDossierViewIds.DetailView"
-                                                                                                               LinkText="@Msg(step.IsOfficeFile ? "PersonDossier.Progress.ViewFile" : "PersonDossier.Progress.ViewLetter")"
+                                                                                                               LinkText="@Msg("PersonDossier.Progress.ViewFile")"
+                                                                                                               PreviewAll="true"
                                                                                                                CssClass="person-dossier__progress-letter" />
                                                                         }
                                                                         else if (step.ShowMissingLetter)

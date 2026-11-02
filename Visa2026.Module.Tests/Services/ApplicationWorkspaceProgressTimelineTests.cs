@@ -343,6 +343,9 @@ public class ApplicationWorkspaceProgressTimelineTests
         var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
 
         Assert.Equal("12/2026", steps[1].ResultNumber);
+        Assert.Equal(
+            "12/2026",
+            ApplicationWorkspaceListProgressSteps.FromTimeline(steps)[1].StatusLabel);
         Assert.Equal(string.Empty, steps[0].ResultNumber);
         Assert.Equal(string.Empty, steps[2].ResultNumber);
         Assert.Equal(string.Empty, steps[4].ResultNumber);
@@ -924,11 +927,12 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
         Assert.True(string.IsNullOrEmpty(migration.CurrentStateLabel));
         Assert.Equal("AS-1", migration.ProcessNumber);
-        Assert.Equal(
-            "AS-1",
-            ApplicationWorkspaceListProgressSteps.FromTimeline(steps)
-                .Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey)
-                .StatusLabel);
+        var compactMigration = ApplicationWorkspaceListProgressSteps.FromTimeline(steps)
+            .Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+        Assert.Equal("AS-1", compactMigration.StatusLabel);
+        Assert.True(compactMigration.HasDocuments);
+        Assert.Equal(startedId, compactMigration.DocumentProgressId);
+        Assert.True(compactMigration.AsNumberReceived);
         Assert.False(migration.ShowMinistryLetterUpload);
         Assert.False(migration.MissingMinistryLetter);
         Assert.Equal(startedId, migration.ProgressId);

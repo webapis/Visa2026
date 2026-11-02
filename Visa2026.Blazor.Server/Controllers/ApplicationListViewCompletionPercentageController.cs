@@ -3,6 +3,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Editors.Models;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Model;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
@@ -90,5 +91,9 @@ public sealed class ApplicationListViewCompletionPercentageController : ViewCont
             columnModel.FieldName,
             nameof(ApplicationProfileInstance.CompletionPercentage),
             StringComparison.Ordinal)
-        && columnModel.MinWidth < 560;
+        && !string.Equals(
+            columnModel.Name,
+            ApplicationProfileInstanceProgressStepsColumnUpdater.ColumnId,
+            StringComparison.Ordinal)
+        && columnModel.MinWidth < ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
 }

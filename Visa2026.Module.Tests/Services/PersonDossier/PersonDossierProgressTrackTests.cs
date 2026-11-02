@@ -28,7 +28,7 @@ public class PersonDossierProgressTrackTests
         var steps = PersonDossierResolver.ToDossierProgressSteps(
             ApplicationWorkspaceListProgressSteps.BuildTimeline(application, []));
 
-        Assert.Equal(2, steps.Count);
+        Assert.Equal(3, steps.Count);
         Assert.Equal("current", steps[0].Tone);
         Assert.Equal("1", steps[0].Glyph);
         Assert.False(steps[0].ConnectorDone);
@@ -36,6 +36,8 @@ public class PersonDossierProgressTrackTests
         Assert.Equal("pending", steps[1].Tone);
         Assert.Equal("2", steps[1].Glyph);
         Assert.False(string.IsNullOrWhiteSpace(steps[1].StatusLabel));
+        Assert.Equal("pending", steps[2].Tone);
+        Assert.Equal("3", steps[2].Glyph);
         Assert.True(steps[0].IsOfficeFile);
         Assert.False(steps[0].ShowLetter);
         Assert.False(steps[0].ShowMissingLetter);
@@ -120,7 +122,7 @@ public class PersonDossierProgressTrackTests
         Assert.Contains("Office", html, StringComparison.Ordinal);
         Assert.Contains("06.10.2026", html, StringComparison.Ordinal);
         Assert.Contains("\u2713", html, StringComparison.Ordinal);
-        Assert.Contains("Result number: 4/3922", html, StringComparison.Ordinal);
+        Assert.Contains("4/3922", html, StringComparison.Ordinal);
         Assert.Contains("approval.pdf", html, StringComparison.Ordinal);
         Assert.Contains("Missing", html, StringComparison.Ordinal);
         Assert.DoesNotContain(">Status<", html, StringComparison.Ordinal);

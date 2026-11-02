@@ -323,8 +323,10 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationWorkspaceListProgressSteps.FormatDisplay(listViewProgressSteps);
 
         /// <summary>
-        /// Process completion 0-100 (Phase 1 timeline max 40 until AS / process number,
-        /// then Phase 1 locked + issued-document coverage max 60). Display-only; filled by preload.
+        /// Process completion 0-100. A direct hand-in with no issued result is the whole score.
+        /// Other routes use the real steps (max 40), counting the migration step once the
+        /// CO / AS number is received, then issued-document coverage up to 60.
+        /// Display-only; filled by preload.
         /// </summary>
         [XafDisplayName("Completion percentage")]
         [ModelDefault("AllowEdit", "False")]

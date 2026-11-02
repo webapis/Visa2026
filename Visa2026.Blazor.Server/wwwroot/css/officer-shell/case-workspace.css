@@ -572,9 +572,8 @@ select.cw-summary-field__input option {
   font-weight: 600;
   display: inline-block;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .cw-link-row {
