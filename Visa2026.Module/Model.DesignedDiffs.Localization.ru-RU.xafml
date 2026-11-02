@@ -443,6 +443,7 @@
         <Member Name="People" Caption="Люди" />
         <Member Name="ProcessNumber" Caption="Номер процесса" />
         <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
+        <Member Name="LinkedPeopleDisplay" Caption="Люди" />
         <Member Name="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="Rejections" Caption="Отказы" />
@@ -2536,6 +2537,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Люди" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
@@ -2562,6 +2564,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Люди" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
@@ -2591,6 +2594,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Люди" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
@@ -2645,6 +2649,7 @@
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Люди" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />

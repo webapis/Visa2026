@@ -9,8 +9,8 @@ namespace Visa2026.Module.Controllers;
 
 /// <summary>
 /// Extends Application Profile Instance ListView FullTextSearch so officers can find
-/// cases by linked person first/last/middle name, and by ministry result number
-/// (<c>Netije belgisi</c> on progress history). Passport numbers are not searched here.
+/// cases by linked person first/last/middle name, and by the document numbers
+/// shown under progress steps. Passport numbers are not searched here.
 /// </summary>
 public sealed class ApplicationProfileInstanceListViewFullTextSearchController
     : ObjectViewController<ListView, ApplicationProfileInstance>

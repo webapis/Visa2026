@@ -407,6 +407,36 @@
     "tk-TM": "Çakylyk",
     "ru-RU": "Приглашение"
   },
+  "ApplicationProfileInstance.List.Mark.Invitation": {
+    "en-US": "Inv",
+    "tr-TR": "Dav",
+    "tk-TM": "Çak",
+    "ru-RU": "Прг"
+  },
+  "ApplicationProfileInstance.List.Mark.WorkPermit": {
+    "en-US": "WP",
+    "tr-TR": "İZ",
+    "tk-TM": "IR",
+    "ru-RU": "РнР"
+  },
+  "ApplicationProfileInstance.List.Mark.Visa": {
+    "en-US": "Vs",
+    "tr-TR": "Viz",
+    "tk-TM": "Wiz",
+    "ru-RU": "Виз"
+  },
+  "ApplicationProfileInstance.List.Mark.BorderZone": {
+    "en-US": "BZ",
+    "tr-TR": "SB",
+    "tk-TM": "Ser",
+    "ru-RU": "ПЗ"
+  },
+  "ApplicationProfileInstance.List.Mark.Rejection": {
+    "en-US": "Rej",
+    "tr-TR": "Ret",
+    "tk-TM": "Ret",
+    "ru-RU": "Отк"
+  },
   "ApplicationProfile.Doc.WorkPermit": {
     "en-US": "Work permit",
     "tr-TR": "Çalışma izni",

@@ -46,7 +46,11 @@ public static class OfficerShellApplicationSearch
         if (application.ProgressHistory != null)
         {
             foreach (var progress in application.ProgressHistory)
+            {
                 Add(parts, progress.ResultNumber);
+                Add(parts, progress.SubmissionDocumentNumber);
+                Add(parts, progress.ProcessNumber);
+            }
         }
 
         return string.Join('\n', parts);

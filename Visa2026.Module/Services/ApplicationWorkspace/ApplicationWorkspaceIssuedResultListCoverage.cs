@@ -132,6 +132,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var rejection = LoadPersonSets(LoadRejectionPairs(objectSpace, ids));
         var visa = LoadPersonSets(LoadVisaPairs(objectSpace, ids));
         var borderZone = LoadPersonSets(LoadBorderZonePairs(objectSpace, ids));
+        var names = ApplicationListLinkedPeople.LoadNames(objectSpace, roster);
 
         foreach (var application in applications)
         {
@@ -150,8 +151,24 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 [ApplicationWorkspaceIssuedRecordsCatalog.BorderZone] = CountOnRoster(borderZone, application.ID, activeRoster),
             };
             application.SetListViewResultCoverage(Build(application, rosterCount, coverage));
+            application.SetListViewLinkedPeople(ApplicationListLinkedPeople.Build(
+                application,
+                activeRoster,
+                names,
+                Holders(invitation, application.ID),
+                Holders(workPermit, application.ID),
+                Holders(visa, application.ID),
+                Holders(borderZone, application.ID),
+                Holders(rejection, application.ID)));
         }
     }
+
+    private static IReadOnlySet<Guid> Holders(
+        IReadOnlyDictionary<Guid, HashSet<Guid>> sets,
+        Guid applicationId) =>
+        sets.TryGetValue(applicationId, out var people) ? people : EmptyHolders;
+
+    private static readonly IReadOnlySet<Guid> EmptyHolders = new HashSet<Guid>();
 
     private static HashSet<Guid>? ActiveRosterIds(HashSet<Guid>? rosterIds, HashSet<Guid>? excludedIds)
     {

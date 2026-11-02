@@ -27,6 +27,8 @@ public sealed class PersonLinkedApplicationsColumnWidthsTests
             nameof(ApplicationProfileInstance.ProgressStepsDisplay)));
         Assert.True(PersonLinkedApplicationsColumnWidths.UsesOwnWidth(
             nameof(ApplicationProfileInstance.ResultCoverageDisplay)));
+        Assert.True(PersonLinkedApplicationsColumnWidths.UsesOwnWidth(
+            nameof(ApplicationProfileInstance.LinkedPeopleDisplay)));
         Assert.False(PersonLinkedApplicationsColumnWidths.UsesOwnWidth(
             nameof(ApplicationProfileInstance.FullApplicationNumber)));
     }

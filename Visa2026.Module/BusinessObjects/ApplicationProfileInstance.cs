@@ -267,6 +267,7 @@ namespace Visa2026.Module.BusinessObjects
         private int? listViewTotalPersonCount;
         private IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? listViewResultCoverageChips;
         private IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? listViewProgressSteps;
+        private IReadOnlyList<ApplicationListLinkedPeople.Row>? listViewLinkedPeople;
         private int? listViewCompletionPercentage;
 
         /// <summary>Clears cached ListView computed fields (progress display, SLA, row color).</summary>
@@ -286,6 +287,9 @@ namespace Visa2026.Module.BusinessObjects
         public void SetListViewProgressSteps(
             IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> steps) =>
             listViewProgressSteps = steps;
+
+        public void SetListViewLinkedPeople(IReadOnlyList<ApplicationListLinkedPeople.Row> people) =>
+            listViewLinkedPeople = people;
 
         public void SetListViewCompletionPercentage(int percent) =>
             listViewCompletionPercentage = Math.Clamp(percent, 0, 100);
@@ -312,6 +316,12 @@ namespace Visa2026.Module.BusinessObjects
         public IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> ListViewProgressSteps =>
             listViewProgressSteps ?? Array.Empty<ApplicationWorkspaceListProgressSteps.Step>();
 
+        /// <summary>Preloaded people and per-person result marks for the list column.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public IReadOnlyList<ApplicationListLinkedPeople.Row> ListViewLinkedPeople =>
+            listViewLinkedPeople ?? Array.Empty<ApplicationListLinkedPeople.Row>();
+
         /// <summary>Compact workspace progress path. Display-only.</summary>
         [XafDisplayName("Application progress")]
         [ModelDefault("AllowEdit", "False")]
@@ -321,6 +331,22 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ProgressStepsDisplay =>
             ApplicationWorkspaceListProgressSteps.FormatDisplay(listViewProgressSteps);
+
+        /// <summary>
+        /// People on this application, stacked in the list. Each person's result
+        /// marks are drawn by the list cell; this text is the fallback and the
+        /// value shown in exports.
+        /// </summary>
+        [XafDisplayName("People")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        [NotMapped]
+        public string LinkedPeopleDisplay =>
+            listViewLinkedPeople is { Count: > 0 }
+                ? string.Join(", ", listViewLinkedPeople.Select(row => row.Name))
+                : string.Empty;
 
         /// <summary>
         /// Process completion 0-100. A direct hand-in with no issued result is the whole score.

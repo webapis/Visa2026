@@ -1475,6 +1475,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Çakylyk",
             ["ru-RU"] = "Приглашение",
         },
+        ["ApplicationProfileInstance.List.Mark.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Inv",
+            ["tr-TR"] = "Dav",
+            ["tk-TM"] = "Çak",
+            ["ru-RU"] = "Прг",
+        },
+        ["ApplicationProfileInstance.List.Mark.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WP",
+            ["tr-TR"] = "İZ",
+            ["tk-TM"] = "IR",
+            ["ru-RU"] = "РнР",
+        },
+        ["ApplicationProfileInstance.List.Mark.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Vs",
+            ["tr-TR"] = "Viz",
+            ["tk-TM"] = "Wiz",
+            ["ru-RU"] = "Виз",
+        },
+        ["ApplicationProfileInstance.List.Mark.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "BZ",
+            ["tr-TR"] = "SB",
+            ["tk-TM"] = "Ser",
+            ["ru-RU"] = "ПЗ",
+        },
+        ["ApplicationProfileInstance.List.Mark.Rejection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rej",
+            ["tr-TR"] = "Ret",
+            ["tk-TM"] = "Ret",
+            ["ru-RU"] = "Отк",
+        },
         ["ApplicationProfile.Doc.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Invitation(s)",
@@ -10404,7 +10439,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "View file",
             ["tr-TR"] = "Dosyayı görüntüle",
-            ["tk-TM"] = "Faýly görmek",
+            ["tk-TM"] = "Nusga",
             ["ru-RU"] = "Открыть файл",
         },
         ["PersonDossier.Progress.ViewLetter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

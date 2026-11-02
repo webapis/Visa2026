@@ -32,6 +32,8 @@ public sealed class ApplicationProfileInstanceListViewFullTextSearchCriteriaBuil
         var text = criteria.ToString();
         Assert.Contains("ProgressHistory", text, StringComparison.Ordinal);
         Assert.Contains("ResultNumber", text, StringComparison.Ordinal);
+        Assert.Contains("SubmissionDocumentNumber", text, StringComparison.Ordinal);
+        Assert.Contains("ProcessNumber", text, StringComparison.Ordinal);
         Assert.Contains("4/4114", text, StringComparison.Ordinal);
     }
 

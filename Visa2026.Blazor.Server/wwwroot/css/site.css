@@ -4242,6 +4242,70 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     color: #fff !important;
 }
 
+.dxbl-grid.dxbl-grid-nowrap td.lv-plain-cell:has(.lv-people),
+.dxbl-grid.dxbl-grid-nowrap td.lv-plain-cell:has(.lv-people) .dxbl-grid-cell-content {
+    white-space: normal !important;
+    text-overflow: unset;
+    vertical-align: top;
+    height: auto;
+}
+
+.lv-people {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.lv-people__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.lv-people__name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+}
+
+.lv-people__marks {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 3px;
+}
+
+.lv-person-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 1.45rem;
+    height: 1.45rem;
+    padding: 0 3px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #fff;
+}
+
+.lv-person-mark--done {
+    background: #15803d;
+}
+
+.lv-person-mark--none {
+    background: #ea580c;
+}
+
+.lv-person-mark--rej {
+    background: #b91c1c;
+}
+
 /* Instance ListView — compact workspace progress stepper.
    The grid keeps TextWrapEnabled off. This column still wraps each step's
    title and status inside the cell so a long state (Işlenilýär /CO…) stays visible. */

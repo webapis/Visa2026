@@ -8,16 +8,28 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// FullTextSearch extras for Application Profile Instance ListViews: linked people
-/// first/last/middle names, and ministry <c>ResultNumber</c> on progress history.
+/// first/last/middle names, and the document numbers printed on progress steps
+/// (ministry result number, hand-in document number, CO / process number).
 /// </summary>
 public static class ApplicationProfileInstanceListViewFullTextSearchCriteriaBuilder
 {
     /// <summary>
-    /// Compare a compacted search key to <c>ResultNumber</c> (spaces ignored in the typed key).
+    /// Compare a compacted search key to a progress-step number (spaces ignored in the typed key).
     /// Same free-join shape as passport search so EF Core translates to EXISTS.
     /// </summary>
     public const string ResultNumberContainsCriteria =
         "Contains(Lower([ResultNumber]), ?)";
+
+    public const string SubmissionDocumentNumberContainsCriteria =
+        "Contains(Lower([SubmissionDocumentNumber]), ?)";
+
+    public const string ProgressProcessNumberContainsCriteria =
+        "Contains(Lower([ProcessNumber]), ?)";
+
+    private const string StepNumberContainsCriteria =
+        "(" + ResultNumberContainsCriteria
+        + " Or " + SubmissionDocumentNumberContainsCriteria
+        + " Or " + ProgressProcessNumberContainsCriteria + ")";
 
     public static CriteriaOperator? BuildLinkedPeopleIdentityCriteria(string searchText)
     {
@@ -40,8 +52,10 @@ public static class ApplicationProfileInstanceListViewFullTextSearchCriteriaBuil
     }
 
     /// <summary>
-    /// Match folded tokens against <see cref="BusinessObjects.ApplicationProfileInstanceProgress.ResultNumber"/>
-    /// on any progress row (Netije belgisi on ministry Approved/Unapproved steps).
+    /// Match folded tokens against the numbers shown under progress steps:
+    /// ministry <see cref="BusinessObjects.ApplicationProfileInstanceProgress.ResultNumber"/>,
+    /// hand-in <see cref="BusinessObjects.ApplicationProfileInstanceProgress.SubmissionDocumentNumber"/>,
+    /// and the CO / process number on that progress row.
     /// </summary>
     public static CriteriaOperator? BuildProgressResultNumberCriteria(string searchText)
     {
@@ -53,11 +67,18 @@ public static class ApplicationProfileInstanceListViewFullTextSearchCriteriaBuil
         if (needles.Length == 0)
             return null;
 
-        // One association filter: every token must appear in the same ResultNumber (e.g. "4"+"4114" → "4/4114").
-        var inner = string.Join(" And ", needles.Select(_ => ResultNumberContainsCriteria));
-        return CriteriaOperator.Parse(
-            $"[ProgressHistory][{inner}]",
-            needles.Cast<object>().ToArray());
+        // One association filter: every token must appear on the same progress row,
+        // in any of the three step numbers (e.g. "4 / 4114" matches stored "4/4114").
+        var inner = string.Join(" And ", needles.Select(_ => StepNumberContainsCriteria));
+        var operands = new object[needles.Length * 3];
+        for (var i = 0; i < needles.Length; i++)
+        {
+            operands[i * 3] = needles[i];
+            operands[i * 3 + 1] = needles[i];
+            operands[i * 3 + 2] = needles[i];
+        }
+
+        return CriteriaOperator.Parse($"[ProgressHistory][{inner}]", operands);
     }
 
     /// <summary>Drop spaces so typed <c>4 / 4114</c> matches stored <c>4/4114</c>.</summary>

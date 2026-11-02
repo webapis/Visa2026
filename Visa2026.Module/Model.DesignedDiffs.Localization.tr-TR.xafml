@@ -443,6 +443,7 @@
         <Member Name="People" Caption="Kişiler" />
         <Member Name="ProcessNumber" Caption="Süreç numarası" />
         <Member Name="ProgressSlaStatement" Caption="Onay süresi" />
+        <Member Name="LinkedPeopleDisplay" Caption="Kişiler" />
         <Member Name="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="Rejections" Caption="Retler" />
@@ -2536,6 +2537,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Kişiler" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
@@ -2562,6 +2564,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Kişiler" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
@@ -2591,6 +2594,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Kişiler" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
@@ -2645,6 +2649,7 @@
         <ColumnInfo Id="MigrationService" Caption="Göç Dairesi" />
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Kişiler" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />

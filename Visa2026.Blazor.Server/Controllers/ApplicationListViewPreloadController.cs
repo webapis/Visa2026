@@ -24,6 +24,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     private readonly HashSet<Guid> preloadedIds = new();
     private readonly Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>> progressById = new();
     private readonly Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>> resultById = new();
+    private readonly Dictionary<Guid, IReadOnlyList<ApplicationListLinkedPeople.Row>> peopleById = new();
     private EventHandler? collectionReloadedHandler;
     private EventHandler? collectionChangedHandler;
     private EventHandler<ComponentInstanceCapturedEventArgs<IGrid>>? gridCapturedHandler;
@@ -86,6 +87,11 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         id != Guid.Empty && resultById.TryGetValue(id, out var chips)
             ? chips
             : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+
+    internal IReadOnlyList<ApplicationListLinkedPeople.Row> LinkedPeopleFor(Guid id) =>
+        id != Guid.Empty && peopleById.TryGetValue(id, out var people)
+            ? people
+            : Array.Empty<ApplicationListLinkedPeople.Row>();
 
     internal void EnsureScrollAheadIfNeeded(IGrid grid, int visibleIndex)
     {
@@ -216,6 +222,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             application.WarmListViewDisplayCache();
             progressById[application.ID] = application.ListViewProgressSteps;
             resultById[application.ID] = application.ListViewResultCoverageChips;
+            peopleById[application.ID] = application.ListViewLinkedPeople;
             preloadedIds.Add(application.ID);
         }
 
@@ -244,6 +251,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             row.SetListViewTotalPersonCount(source.TotalPersonCount);
             row.SetListViewResultCoverage(source.ListViewResultCoverageChips);
             row.SetListViewProgressSteps(source.ListViewProgressSteps);
+            row.SetListViewLinkedPeople(source.ListViewLinkedPeople);
             row.InvalidateListViewDisplayCache();
             row.WarmListViewDisplayCache();
         }
@@ -269,6 +277,11 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
                 && resultById.TryGetValue(row.ID, out var chips)
                 && chips.Count > 0)
                 row.SetListViewResultCoverage(chips);
+
+            if (row.ListViewLinkedPeople.Count == 0
+                && peopleById.TryGetValue(row.ID, out var people)
+                && people.Count > 0)
+                row.SetListViewLinkedPeople(people);
         }
     }
 
@@ -280,6 +293,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     {
         ApplyIdCacheToListRows();
         Frame.GetController<ApplicationListViewProgressStepsController>()?.ApplyStepperTemplate();
+        Frame.GetController<ApplicationListViewLinkedPeopleController>()?.ApplyPeopleTemplate();
         Frame.GetController<ApplicationListViewResultCoverageController>()?.ApplyChipTemplate();
         Frame.GetController<ApplicationListViewCompletionPercentageController>()?.ApplyPercentTemplate();
 

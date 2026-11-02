@@ -447,6 +447,7 @@
         "VisaCategory": { "en-US": "Visa category", "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
         "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
         "CompletionPercentage": { "en-US": "Completion percentage", "tr-TR": "Tamamlanma yüzdesi", "tk-TM": "Tamamlanma göterimi", "ru-RU": "Процент завершения" },
+        "LinkedPeopleDisplay": { "en-US": "People", "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
         "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" }
       }
     },
@@ -511,6 +512,7 @@
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
         "CompletionPercentage": { "en-US": "Completion percentage", "tr-TR": "Tamamlanma yüzdesi", "tk-TM": "Tamamlanma göterimi", "ru-RU": "Процент завершения" },
+        "LinkedPeopleDisplay": { "en-US": "People", "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
         "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" }
       }
     },
@@ -573,6 +575,7 @@
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
         "CompletionPercentage": { "en-US": "Completion percentage", "tr-TR": "Tamamlanma yüzdesi", "tk-TM": "Tamamlanma göterimi", "ru-RU": "Процент завершения" },
+        "LinkedPeopleDisplay": { "en-US": "People", "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
         "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" }
       }
     },
@@ -591,6 +594,7 @@
         "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "CompletionPercentage": { "en-US": "Completion percentage", "tr-TR": "Tamamlanma yüzdesi", "tk-TM": "Tamamlanma göterimi", "ru-RU": "Процент завершения" },
+        "LinkedPeopleDisplay": { "en-US": "People", "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
         "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ösüşi", "ru-RU": "Прогресс заявки" }
       }
     },
