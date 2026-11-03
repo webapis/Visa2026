@@ -99,6 +99,75 @@ public static class ApplicationWorkspaceListProgressSteps
         return result;
     }
 
+    public const string MigrationSubmittedStepKey = "migration-submitted";
+    public const string MigrationAwaitingStepKey = "migration-awaiting";
+    public const string MigrationReceivedStepKey = "migration-received";
+
+    /// <summary>
+    /// Via-ministry list: the migration node is two columns, awaiting the CO number
+    /// and the number received, so those columns can sit on a fixed right edge.
+    /// </summary>
+    public static IReadOnlyList<Step> ExpandViaMinistryTail(IReadOnlyList<Step> steps)
+    {
+        if (steps == null || steps.Count == 0)
+            return Array.Empty<Step>();
+
+        var result = new List<Step>(steps.Count + 1);
+        foreach (var step in steps)
+        {
+            if (!string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase))
+            {
+                result.Add(step);
+                continue;
+            }
+
+            var pending = string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase);
+            var done = string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase);
+            var received = step.AsNumberReceived || done;
+            var rejected = string.Equals(step.OutcomeKind, "rejected", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(step.OutcomeKind, "cancelled", StringComparison.OrdinalIgnoreCase);
+            var awaitingLabel = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AwaitingAsCoNumber");
+            var receivedStatus = received && !string.Equals(step.StatusLabel, awaitingLabel, StringComparison.Ordinal)
+                ? step.StatusLabel
+                : string.Empty;
+
+            result.Add(new Step(
+                MigrationAwaitingStepKey,
+                awaitingLabel,
+                pending ? "pending" : received || rejected ? "done" : "current",
+                pending ? string.Empty : "ok",
+                pending ? string.Empty : step.Date,
+                string.Empty,
+                !received && step.HasDocuments ? step.DocumentProgressId : Guid.Empty,
+                !received && step.HasDocuments,
+                false));
+            var receivedState = pending || (!received && !rejected)
+                ? "pending"
+                : step.AsNumberReceived || done ? "done" : step.State;
+            var receivedOutcome = pending || (!received && !rejected)
+                ? string.Empty
+                : string.IsNullOrEmpty(step.OutcomeKind) && (step.AsNumberReceived || done) ? "ok" : step.OutcomeKind;
+            result.Add(new Step(
+                MigrationReceivedStepKey,
+                step.Label,
+                receivedState,
+                receivedOutcome,
+                received || rejected ? step.Date : string.Empty,
+                receivedStatus,
+                received && step.HasDocuments ? step.DocumentProgressId : Guid.Empty,
+                received && step.HasDocuments,
+                received));
+        }
+
+        return result;
+    }
+
+    public static bool IsViaMinistryTailStep(string? key) =>
+        string.Equals(key, MigrationSubmittedStepKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(key, MigrationAwaitingStepKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(key, MigrationReceivedStepKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase);
+
     public static string Glyph(Step step, int index1Based)
     {
         if (string.Equals(step.OutcomeKind, "rejected", StringComparison.OrdinalIgnoreCase))

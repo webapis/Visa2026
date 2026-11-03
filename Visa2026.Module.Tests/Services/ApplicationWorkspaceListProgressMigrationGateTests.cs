@@ -54,6 +54,39 @@ public sealed class ApplicationWorkspaceListProgressMigrationGateTests
     }
 
     [Fact]
+    public void ExpandViaMinistryTail_splits_the_migration_node_into_wait_and_received()
+    {
+        var letter = Guid.NewGuid();
+        var steps = new[]
+        {
+            new ApplicationWorkspaceListProgressSteps.Step("office", "Office", "done", "ok", "1 Aug", ""),
+            new ApplicationWorkspaceListProgressSteps.Step("leg-1", "Ministry", "done", "ok", "2 Aug", ""),
+            new ApplicationWorkspaceListProgressSteps.Step("migration-submitted", "Submitted", "done", "ok", "3 Aug", ""),
+            new ApplicationWorkspaceListProgressSteps.Step(
+                "migration",
+                "AS number received",
+                "current",
+                "",
+                "4 Aug",
+                "Awaiting AS (CO) number",
+                letter,
+                true,
+                false),
+        };
+
+        var expanded = ApplicationWorkspaceListProgressSteps.ExpandViaMinistryTail(steps);
+
+        Assert.Equal(
+            ["office", "leg-1", "migration-submitted", "migration-awaiting", "migration-received"],
+            expanded.Select(step => step.Key).ToArray());
+        Assert.Equal("current", expanded[3].State);
+        Assert.Equal("4 Aug", expanded[3].Date);
+        Assert.True(expanded[3].HasDocuments);
+        Assert.Equal("pending", expanded[4].State);
+        Assert.False(expanded[4].HasDocuments);
+    }
+
+    [Fact]
     public void ShouldShowResultChips_DirectHandIn_WhenInvitationProduced()
     {
         var steps = new[]

@@ -277,107 +277,164 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                 if (!showResultChips)
                     chips = Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
 
-                builder.OpenElement(0, "div");
-                builder.AddAttribute(1, "class", showResultChips && chips.Count > 0
+                var alignViaMinistry = string.Equals(
+                    View.Id,
+                    ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries,
+                    StringComparison.Ordinal);
+                if (alignViaMinistry)
+                    steps = ApplicationWorkspaceListProgressSteps.ExpandViaMinistryTail(steps);
+
+                var tailAt = alignViaMinistry
+                    ? steps.ToList().FindIndex(step => ApplicationWorkspaceListProgressSteps.IsViaMinistryTailStep(step.Key))
+                    : -1;
+                if (tailAt < 0)
+                    alignViaMinistry = false;
+
+                var wrapperClass = showResultChips && chips.Count > 0
                     ? "lv-progress-with-result"
-                    : "lv-progress-with-result lv-progress-with-result--steps-only");
+                    : "lv-progress-with-result lv-progress-with-result--steps-only";
+                if (alignViaMinistry)
+                    wrapperClass += " lv-progress-with-result--via-ministry";
+
+                builder.OpenElement(0, "div");
+                builder.AddAttribute(1, "class", wrapperClass);
                 builder.OpenElement(2, "div");
-                builder.AddAttribute(3, "class", showResultChips && chips.Count > 0
+                var stepperClass = showResultChips && chips.Count > 0
                     ? "lv-progress-stepper lv-progress-stepper--with-stems"
-                    : "lv-progress-stepper");
+                    : "lv-progress-stepper";
+                if (alignViaMinistry)
+                    stepperClass += " lv-progress-stepper--via-ministry";
+                builder.AddAttribute(3, "class", stepperClass);
                 var seq = 4;
-                for (var i = 0; i < steps.Count; i++)
+                var ownerViewId = View.Id;
+                var applicationId = application.ID;
+
+                void RenderSteps(IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> group, int numberFrom, bool lineAfterLast)
                 {
-                    var step = steps[i];
-                    var tone = ApplicationWorkspaceListProgressSteps.Tone(step);
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-progress-step lv-progress-step--" + tone);
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-progress-step__track");
-                    builder.OpenElement(seq++, "span");
-                    builder.AddAttribute(seq++, "class", "lv-progress-step__dot");
-                    builder.AddContent(seq++, ApplicationWorkspaceListProgressSteps.Glyph(step, i + 1));
-                    builder.CloseElement();
-                    if (i < steps.Count - 1)
+                    for (var i = 0; i < group.Count; i++)
                     {
-                        var lineTone = string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase)
-                            ? "done"
-                            : "pending";
+                        var step = group[i];
+                        var tone = ApplicationWorkspaceListProgressSteps.Tone(step);
+                        var drawLine = i < group.Count - 1 || lineAfterLast;
+                        builder.OpenElement(seq++, "div");
+                        builder.AddAttribute(seq++, "class", "lv-progress-step lv-progress-step--" + tone);
+                        builder.OpenElement(seq++, "div");
+                        builder.AddAttribute(seq++, "class", "lv-progress-step__track");
                         builder.OpenElement(seq++, "span");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__line lv-progress-step__line--" + lineTone);
+                        builder.AddAttribute(seq++, "class", "lv-progress-step__dot");
+                        builder.AddContent(seq++, ApplicationWorkspaceListProgressSteps.Glyph(step, numberFrom + i));
                         builder.CloseElement();
-                    }
-
-                    builder.CloseElement();
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-progress-step__meta");
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-progress-step__label");
-                    builder.AddContent(seq++, step.Label);
-                    builder.CloseElement();
-                    if (!string.IsNullOrWhiteSpace(step.Date))
-                    {
-                        builder.OpenElement(seq++, "span");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__date");
-                        builder.AddContent(seq++, step.Date);
-                        builder.CloseElement();
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(step.StatusLabel))
-                    {
-                        builder.OpenElement(seq++, "span");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__status");
-                        var statusText = step.StatusLabel;
-                        var split = statusText.IndexOf(" /", StringComparison.Ordinal);
-                        if (split > 0)
+                        if (drawLine)
                         {
-                            builder.AddContent(seq++, statusText[..split]);
+                            var lineTone = string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase)
+                                ? "done"
+                                : "pending";
                             builder.OpenElement(seq++, "span");
-                            builder.AddAttribute(seq++, "class", "lv-progress-step__status-no");
-                            builder.AddContent(seq++, statusText[(split + 1)..]);
+                            builder.AddAttribute(seq++, "class", "lv-progress-step__line lv-progress-step__line--" + lineTone);
                             builder.CloseElement();
                         }
-                        else
+
+                        builder.CloseElement();
+                        builder.OpenElement(seq++, "div");
+                        builder.AddAttribute(seq++, "class", "lv-progress-step__meta");
+                        builder.OpenElement(seq++, "div");
+                        builder.AddAttribute(seq++, "class", "lv-progress-step__label");
+                        builder.AddContent(seq++, step.Label);
+                        builder.CloseElement();
+                        if (!string.IsNullOrWhiteSpace(step.Date))
                         {
-                            builder.AddContent(seq++, statusText);
+                            builder.OpenElement(seq++, "span");
+                            builder.AddAttribute(seq++, "class", "lv-progress-step__date");
+                            builder.AddContent(seq++, step.Date);
+                            builder.CloseElement();
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(step.StatusLabel))
+                        {
+                            builder.OpenElement(seq++, "span");
+                            builder.AddAttribute(seq++, "class", "lv-progress-step__status");
+                            var statusText = step.StatusLabel;
+                            var split = statusText.IndexOf(" /", StringComparison.Ordinal);
+                            if (split > 0)
+                            {
+                                builder.AddContent(seq++, statusText[..split]);
+                                builder.OpenElement(seq++, "span");
+                                builder.AddAttribute(seq++, "class", "lv-progress-step__status-no");
+                                builder.AddContent(seq++, statusText[(split + 1)..]);
+                                builder.CloseElement();
+                            }
+                            else
+                            {
+                                builder.AddContent(seq++, statusText);
+                            }
+
+                            builder.CloseElement();
+                        }
+
+                        if (step.HasDocuments)
+                        {
+                            var viewFiles = VisaUiMessages.Get("PersonDossier.Progress.ViewFile");
+                            builder.OpenComponent<ProgressMinistryLetterPreviewLink>(seq++);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.ApplicationProfileInstanceId), applicationId);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.ProgressId), (Guid?)step.DocumentProgressId);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.PreviewAll), true);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.LinkText), viewFiles);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.FileName), viewFiles);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.OwnerViewId), ownerViewId);
+                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.CssClass), "lv-progress-step__files");
+                            builder.CloseComponent();
                         }
 
                         builder.CloseElement();
+                        builder.CloseElement();
                     }
+                }
 
-                    if (step.HasDocuments)
-                    {
-                        var viewFiles = VisaUiMessages.Get("PersonDossier.Progress.ViewFile");
-                        builder.OpenComponent<ProgressMinistryLetterPreviewLink>(seq++);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.ApplicationProfileInstanceId), application.ID);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.ProgressId), (Guid?)step.DocumentProgressId);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.PreviewAll), true);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.LinkText), viewFiles);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.FileName), viewFiles);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.OwnerViewId), View.Id);
-                        builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.CssClass), "lv-progress-step__files");
-                        builder.CloseComponent();
-                    }
-
+                if (alignViaMinistry)
+                {
+                    var lead = steps.Take(tailAt).ToList();
+                    var tail = steps.Skip(tailAt).ToList();
+                    builder.OpenElement(seq++, "div");
+                    builder.AddAttribute(seq++, "class", "lv-progress-stepper__lead");
+                    RenderSteps(lead, 1, lineAfterLast: lead.Count > 0 && tail.Count > 0);
                     builder.CloseElement();
+                    builder.OpenElement(seq++, "div");
+                    builder.AddAttribute(seq++, "class", "lv-progress-stepper__tail");
+                    RenderSteps(tail, lead.Count + 1, lineAfterLast: false);
                     builder.CloseElement();
+                }
+                else
+                {
+                    RenderSteps(steps, 1, lineAfterLast: false);
                 }
 
                 builder.CloseElement();
 
-                if (showResultChips && chips.Count > 0)
+                if (alignViaMinistry || (showResultChips && chips.Count > 0))
                 {
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-result-neck");
-                    builder.CloseElement();
-                    var people = application.ListViewLinkedPeople;
-                    if (people.Count == 0)
+                    if (alignViaMinistry)
                     {
-                        people = Frame.GetController<ApplicationListViewPreloadController>()
-                            ?.LinkedPeopleFor(application.ID) ?? people;
+                        builder.OpenElement(seq++, "div");
+                        builder.AddAttribute(seq++, "class", "lv-result-slot");
                     }
 
-                    ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips, people);
+                    if (showResultChips && chips.Count > 0)
+                    {
+                        builder.OpenElement(seq++, "div");
+                        builder.AddAttribute(seq++, "class", "lv-result-neck");
+                        builder.CloseElement();
+                        var people = application.ListViewLinkedPeople;
+                        if (people.Count == 0)
+                        {
+                            people = Frame.GetController<ApplicationListViewPreloadController>()
+                                ?.LinkedPeopleFor(application.ID) ?? people;
+                        }
+
+                        ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips, people);
+                    }
+
+                    if (alignViaMinistry)
+                        builder.CloseElement();
                 }
 
                 builder.CloseElement();

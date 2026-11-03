@@ -4072,6 +4072,76 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     margin: 0 3px;
 }
 
+/* Via ministry: ministry legs share the free width; the hand-in, CO wait, and CO number stay fixed on the right. */
+.dxbl-grid td .lv-progress-with-result--via-ministry .lv-progress-stepper--via-ministry,
+.lv-progress-with-result--via-ministry .lv-progress-stepper--via-ministry {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.lv-progress-stepper__lead,
+.lv-progress-stepper__tail {
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.lv-progress-stepper__lead {
+    flex: 1 1 auto;
+}
+
+.lv-progress-stepper__tail {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.lv-progress-stepper--via-ministry .lv-progress-stepper__lead > .lv-progress-step {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+}
+
+.lv-progress-stepper--via-ministry .lv-progress-stepper__tail > .lv-progress-step {
+    flex: 0 0 7.75rem;
+    width: 7.75rem;
+    min-width: 7.75rem;
+    max-width: 7.75rem;
+}
+
+.lv-progress-stepper--via-ministry .lv-progress-stepper__lead .lv-progress-step__line {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 10px;
+    margin: 0 4px;
+}
+
+.lv-progress-stepper--via-ministry .lv-progress-stepper__tail .lv-progress-step__line {
+    flex: 0 0 8px;
+    width: 8px;
+    margin: 0 2px;
+}
+
+.lv-progress-stepper--via-ministry .lv-progress-stepper__lead > .lv-progress-step:last-child .lv-progress-step__track::after {
+    content: none;
+}
+
+.lv-progress-with-result--via-ministry .lv-result-slot {
+    flex: 0 0 11rem;
+    width: 11rem;
+    min-width: 11rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.dxbl-grid td .lv-progress-with-result--via-ministry .lv-result-neck,
+.lv-progress-with-result--via-ministry .lv-result-neck {
+    flex: 0 0 14px !important;
+    min-width: 14px;
+}
+
 /* Neck from the last check into the result trunk. */
 .lv-progress-stepper--with-stems .lv-progress-step:last-child .lv-progress-step__track::after {
     content: "";
