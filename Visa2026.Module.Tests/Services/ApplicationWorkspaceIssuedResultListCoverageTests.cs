@@ -47,7 +47,7 @@ public class ApplicationWorkspaceIssuedResultListCoverageTests
         Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, chips[2].Key);
         Assert.Equal(1, chips[2].CoverageCount);
         Assert.Equal(2, chips[2].ExpectedCount);
-        Assert.Equal("half", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[2]));
+        Assert.Equal("none", ApplicationWorkspaceIssuedResultListCoverage.Tone(chips[2]));
     }
 
     [Fact]

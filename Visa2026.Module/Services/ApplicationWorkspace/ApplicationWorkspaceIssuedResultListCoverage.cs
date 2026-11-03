@@ -24,7 +24,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
 
     /// <summary>
     /// Fill for the progress-result pill. Rejection is black when empty and red when it has a count.
-    /// Other types: done (full), half (some of expected), none (0 of expected), zero (0/0).
+    /// Other types are issued (everyone covered) or not issued. A partial count is not issued.
     /// </summary>
     public static string Tone(Chip chip)
     {
@@ -34,10 +34,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         if (chip.ExpectedCount > 0 && chip.CoverageCount >= chip.ExpectedCount)
             return "done";
 
-        if (chip.CoverageCount > 0 && chip.ExpectedCount > chip.CoverageCount)
-            return "half";
-
-        if (chip.ExpectedCount > 0 && chip.CoverageCount <= 0)
+        if (chip.ExpectedCount > 0)
             return "none";
 
         return "zero";
