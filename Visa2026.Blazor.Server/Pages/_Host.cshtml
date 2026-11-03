@@ -743,6 +743,58 @@
                 }, true);
             })();
 
+            (function installPersonMarkCopyCapture() {
+                if (window.visaPreviewDrawer._personMarkCopyCaptureInstalled) {
+                    return;
+                }
+                window.visaPreviewDrawer._personMarkCopyCaptureInstalled = true;
+
+                function findPersonMark(target) {
+                    return target && target.closest
+                        ? target.closest("button.lv-person-mark--hit")
+                        : null;
+                }
+
+                function blockPersonMark(event) {
+                    if (!findPersonMark(event.target)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+
+                function openPersonMark(event) {
+                    var link = findPersonMark(event.target);
+                    if (!link) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var now = Date.now();
+                    if (window.visaPreviewDrawer._personMarkOpenedAt
+                        && now - window.visaPreviewDrawer._personMarkOpenedAt < 400) {
+                        return;
+                    }
+                    window.visaPreviewDrawer._personMarkOpenedAt = now;
+                    var ref = window.visaPreviewDrawer._hostRef;
+                    if (!ref) {
+                        return;
+                    }
+                    ref.invokeMethodAsync(
+                        "OpenListPersonDocumentCopyFromJsAsync",
+                        link.getAttribute("data-doc-family") || "",
+                        link.getAttribute("data-doc-parent-id") || "",
+                        link.getAttribute("data-owner-view-id") || "");
+                }
+
+                document.addEventListener("pointerdown", blockPersonMark, true);
+                document.addEventListener("mousedown", blockPersonMark, true);
+                document.addEventListener("pointerup", openPersonMark, true);
+                document.addEventListener("click", openPersonMark, true);
+            })();
+
             (function installPersonDossierLinkCapture() {
                 if (window.visaPreviewDrawer._personDossierLinkCaptureInstalled) {
                     return;

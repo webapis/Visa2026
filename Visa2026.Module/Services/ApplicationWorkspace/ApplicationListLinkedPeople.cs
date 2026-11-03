@@ -19,8 +19,9 @@ public static class ApplicationListLinkedPeople
     public const string ToneMissing = "none";
     public const string ToneRejected = "rej";
 
-    /// <param name="State">Later life of an issued invitation. Empty for every other mark.</param>
-    public readonly record struct Mark(string Key, string Tone, string? State = null);
+    /// <param name="State">Later life of an issued invitation, or expiry of an issued visa or work permit.</param>
+    /// <param name="DocumentId">Header of the issued copy. Empty when the circle is not a link.</param>
+    public readonly record struct Mark(string Key, string Tone, string? State = null, Guid DocumentId = default);
 
     public readonly record struct Row(Guid PersonId, string Name, IReadOnlyList<Mark> Marks);
 
@@ -35,7 +36,12 @@ public static class ApplicationListLinkedPeople
         IReadOnlySet<Guid> rejection,
         IReadOnlyDictionary<Guid, string>? invitationLaterLife = null,
         IReadOnlySet<Guid>? expiredWorkPermit = null,
-        IReadOnlySet<Guid>? expiredVisa = null)
+        IReadOnlySet<Guid>? expiredVisa = null,
+        IReadOnlyDictionary<Guid, Guid>? invitationDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? workPermitDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? visaDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? borderZoneDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null)
     {
         if (application == null || activeRoster == null || activeRoster.Count == 0)
             return Array.Empty<Row>();
@@ -66,11 +72,23 @@ public static class ApplicationListLinkedPeople
                     tone = IssuedResultExpiry.Tone;
                 }
 
-                marks.Add(new Mark(kind, tone, state));
+                marks.Add(new Mark(
+                    kind,
+                    tone,
+                    state,
+                    issued ? DocumentOf(kind, personId, invitationDocuments, workPermitDocuments, visaDocuments, borderZoneDocuments) : Guid.Empty));
             }
 
             if (rejection.Contains(personId))
-                marks.Add(new Mark(ApplicationWorkspaceIssuedRecordsCatalog.Rejection, ToneRejected));
+            {
+                marks.Add(new Mark(
+                    ApplicationWorkspaceIssuedRecordsCatalog.Rejection,
+                    ToneRejected,
+                    DocumentId: DocumentOf(
+                        ApplicationWorkspaceIssuedRecordsCatalog.Rejection,
+                        personId,
+                        rejectionDocuments: rejectionDocuments)));
+            }
 
             rows.Add(new Row(personId, NameOf(names, personId), marks));
         }
@@ -105,6 +123,14 @@ public static class ApplicationListLinkedPeople
             VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationChangedTitle"),
         _ => key,
     };
+
+    /// <summary>
+    /// An issued circle with a real header opens that copy. A circle that was not issued stays plain text.
+    /// </summary>
+    public static bool CanPreview(Mark mark) =>
+        mark.Tone != ToneMissing
+        && mark.DocumentId != Guid.Empty
+        && ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(mark.Key, out _);
 
     public static string Title(Mark mark)
     {
@@ -234,6 +260,27 @@ public static class ApplicationListLinkedPeople
             return IssuedResultExpiry.Visa;
 
         return null;
+    }
+
+    private static Guid DocumentOf(
+        string key,
+        Guid personId,
+        IReadOnlyDictionary<Guid, Guid>? invitationDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? workPermitDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? visaDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? borderZoneDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null)
+    {
+        var documents = key switch
+        {
+            ApplicationWorkspaceIssuedRecordsCatalog.Invitation => invitationDocuments,
+            ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit => workPermitDocuments,
+            ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa => visaDocuments,
+            ApplicationWorkspaceIssuedRecordsCatalog.BorderZone => borderZoneDocuments,
+            ApplicationWorkspaceIssuedRecordsCatalog.Rejection => rejectionDocuments,
+            _ => null,
+        };
+        return documents != null && documents.TryGetValue(personId, out var documentId) ? documentId : Guid.Empty;
     }
 
     private static bool IsVisaInvitationOrWorkPermit(string key) =>

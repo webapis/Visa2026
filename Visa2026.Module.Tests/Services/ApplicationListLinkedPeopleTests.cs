@@ -235,6 +235,44 @@ public class ApplicationListLinkedPeopleTests
     }
 
     [Fact]
+    public void Build_links_only_an_issued_circle_that_has_a_document()
+    {
+        var person = Guid.NewGuid();
+        var invitationId = Guid.NewGuid();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                ProduceVisa = true,
+            },
+        };
+
+        var rows = ApplicationListLinkedPeople.Build(
+            application,
+            [person],
+            new Dictionary<Guid, string> { [person] = "Rohit Vilas Kakad" },
+            invitation: new HashSet<Guid> { person },
+            workPermit: new HashSet<Guid>(),
+            visa: new HashSet<Guid>(),
+            borderZone: new HashSet<Guid>(),
+            rejection: new HashSet<Guid>(),
+            invitationLaterLife: new Dictionary<Guid, string>
+            {
+                [person] = InvitationLaterLife.ExpiredUnused,
+            },
+            invitationDocuments: new Dictionary<Guid, Guid> { [person] = invitationId });
+
+        var invitation = rows[0].Marks[0];
+        var visa = rows[0].Marks[1];
+        Assert.Equal(invitationId, invitation.DocumentId);
+        Assert.Equal(InvitationLaterLife.ToneExpired, invitation.Tone);
+        Assert.True(ApplicationListLinkedPeople.CanPreview(invitation));
+        Assert.Equal(Guid.Empty, visa.DocumentId);
+        Assert.False(ApplicationListLinkedPeople.CanPreview(visa));
+    }
+
+    [Fact]
     public void FormatName_uses_first_middle_last()
     {
         Assert.Equal("Ali Gurban Berdiyev", ApplicationListLinkedPeople.FormatName("Ali", "Gurban", "Berdiyev"));

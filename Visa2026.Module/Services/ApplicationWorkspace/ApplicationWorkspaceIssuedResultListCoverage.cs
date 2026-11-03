@@ -128,11 +128,16 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var ids = applications.Select(a => a.ID).Where(id => id != Guid.Empty).Distinct().ToList();
         var roster = LoadPersonSets(LoadRosterPairs(objectSpace, ids));
         var excluded = LoadPersonSets(LoadExcludedPairs(objectSpace, ids));
-        var invitation = LoadPersonSets(LoadInvitationPairs(objectSpace, ids));
-        var workPermit = LoadPersonSets(LoadWorkPermitPairs(objectSpace, ids));
-        var rejection = LoadPersonSets(LoadRejectionPairs(objectSpace, ids));
-        var visa = LoadPersonSets(LoadVisaPairs(objectSpace, ids));
-        var borderZone = LoadPersonSets(LoadBorderZonePairs(objectSpace, ids));
+        var invitationIndex = IndexIssuedDocuments(LoadInvitationPairs(objectSpace, ids));
+        var workPermitIndex = IndexIssuedDocuments(LoadWorkPermitPairs(objectSpace, ids));
+        var rejectionIndex = IndexIssuedDocuments(LoadRejectionPairs(objectSpace, ids));
+        var visaIndex = IndexIssuedDocuments(LoadVisaPairs(objectSpace, ids));
+        var borderZoneIndex = IndexIssuedDocuments(LoadBorderZonePairs(objectSpace, ids));
+        var invitation = invitationIndex.People;
+        var workPermit = workPermitIndex.People;
+        var rejection = rejectionIndex.People;
+        var visa = visaIndex.People;
+        var borderZone = borderZoneIndex.People;
         var names = ApplicationListLinkedPeople.LoadNames(objectSpace, roster);
         var invitationLaterLife = LoadInvitationLaterLife(objectSpace, ids);
         var expiredWorkPermit = LoadExpiredWorkPermits(objectSpace, ids);
@@ -166,7 +171,12 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 Holders(rejection, application.ID),
                 LaterLifeFor(invitationLaterLife, application.ID),
                 ExpiredFor(expiredWorkPermit, application.ID),
-                ExpiredFor(expiredVisa, application.ID)));
+                ExpiredFor(expiredVisa, application.ID),
+                DocumentsFor(invitationIndex.Documents, application.ID),
+                DocumentsFor(workPermitIndex.Documents, application.ID),
+                DocumentsFor(visaIndex.Documents, application.ID),
+                DocumentsFor(borderZoneIndex.Documents, application.ID),
+                DocumentsFor(rejectionIndex.Documents, application.ID)));
         }
     }
 
@@ -337,6 +347,48 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         return people.Count(rosterIds.Contains);
     }
 
+    private readonly record struct IssuedDocumentIndex(
+        Dictionary<Guid, HashSet<Guid>> People,
+        Dictionary<Guid, Dictionary<Guid, Guid>> Documents);
+
+    private static IssuedDocumentIndex IndexIssuedDocuments(
+        IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> triples)
+    {
+        var people = new Dictionary<Guid, HashSet<Guid>>();
+        var documents = new Dictionary<Guid, Dictionary<Guid, Guid>>();
+        foreach (var (instanceId, personId, documentId) in triples)
+        {
+            if (instanceId == Guid.Empty || personId == Guid.Empty)
+                continue;
+            if (!people.TryGetValue(instanceId, out var set))
+            {
+                set = [];
+                people[instanceId] = set;
+            }
+
+            set.Add(personId);
+            if (documentId == Guid.Empty)
+                continue;
+            if (!documents.TryGetValue(instanceId, out var byPerson))
+            {
+                byPerson = [];
+                documents[instanceId] = byPerson;
+            }
+
+            byPerson.TryAdd(personId, documentId);
+        }
+
+        return new IssuedDocumentIndex(people, documents);
+    }
+
+    private static IReadOnlyDictionary<Guid, Guid> DocumentsFor(
+        IReadOnlyDictionary<Guid, Dictionary<Guid, Guid>> byInstance,
+        Guid applicationId) =>
+        byInstance.TryGetValue(applicationId, out var documents) ? documents : EmptyDocuments;
+
+    private static readonly IReadOnlyDictionary<Guid, Guid> EmptyDocuments =
+        new Dictionary<Guid, Guid>();
+
     private static Dictionary<Guid, HashSet<Guid>> LoadPersonSets(IEnumerable<(Guid InstanceId, Guid PersonId)> pairs)
     {
         var map = new Dictionary<Guid, HashSet<Guid>>();
@@ -399,7 +451,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
             .Select(p => (instanceByExclusion[p.ExclusionId], p.PersonId));
     }
 
-    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadInvitationPairs(
+    private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadInvitationPairs(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)
     {
@@ -411,12 +463,17 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 && i.Invitation.ApplicationProfileInstance != null
                 && ids.Contains(i.Invitation.ApplicationProfileInstance.ID)
                 && i.Person != null)
-            .Select(i => new { InstanceId = i.Invitation.ApplicationProfileInstance.ID, PersonId = i.Person.ID })
+            .Select(i => new
+            {
+                InstanceId = i.Invitation.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                DocumentId = i.Invitation.ID,
+            })
             .ToList()
-            .Select(x => (x.InstanceId, x.PersonId));
+            .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
     }
 
-    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadWorkPermitPairs(
+    private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadWorkPermitPairs(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)
     {
@@ -428,12 +485,17 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 && i.WorkPermit.ApplicationProfileInstance != null
                 && ids.Contains(i.WorkPermit.ApplicationProfileInstance.ID)
                 && i.Person != null)
-            .Select(i => new { InstanceId = i.WorkPermit.ApplicationProfileInstance.ID, PersonId = i.Person.ID })
+            .Select(i => new
+            {
+                InstanceId = i.WorkPermit.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                DocumentId = i.WorkPermit.ID,
+            })
             .ToList()
-            .Select(x => (x.InstanceId, x.PersonId));
+            .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
     }
 
-    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadRejectionPairs(
+    private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadRejectionPairs(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)
     {
@@ -445,12 +507,17 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 && i.Rejection.ApplicationProfileInstance != null
                 && ids.Contains(i.Rejection.ApplicationProfileInstance.ID)
                 && i.Person != null)
-            .Select(i => new { InstanceId = i.Rejection.ApplicationProfileInstance.ID, PersonId = i.Person.ID })
+            .Select(i => new
+            {
+                InstanceId = i.Rejection.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                DocumentId = i.Rejection.ID,
+            })
             .ToList()
-            .Select(x => (x.InstanceId, x.PersonId));
+            .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
     }
 
-    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadVisaPairs(
+    private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadVisaPairs(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)
     {
@@ -462,12 +529,17 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 && ids.Contains(v.IssuingApplicationProfileInstance.ID)
                 && v.Passport != null
                 && v.Passport.Person != null)
-            .Select(v => new { InstanceId = v.IssuingApplicationProfileInstance.ID, PersonId = v.Passport.Person.ID })
+            .Select(v => new
+            {
+                InstanceId = v.IssuingApplicationProfileInstance.ID,
+                PersonId = v.Passport.Person.ID,
+                DocumentId = v.ID,
+            })
             .ToList()
-            .Select(x => (x.InstanceId, x.PersonId));
+            .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
     }
 
-    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadBorderZonePairs(
+    private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadBorderZonePairs(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)
     {
@@ -479,8 +551,13 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 && i.BorderZone.ApplicationProfileInstance != null
                 && ids.Contains(i.BorderZone.ApplicationProfileInstance.ID)
                 && i.Person != null)
-            .Select(i => new { InstanceId = i.BorderZone.ApplicationProfileInstance.ID, PersonId = i.Person.ID })
+            .Select(i => new
+            {
+                InstanceId = i.BorderZone.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                DocumentId = i.BorderZone.ID,
+            })
             .ToList()
-            .Select(x => (x.InstanceId, x.PersonId));
+            .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
     }
 }

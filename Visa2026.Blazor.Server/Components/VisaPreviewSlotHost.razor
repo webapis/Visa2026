@@ -308,6 +308,24 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
     }
 
     [JSInvokable]
+    public Task OpenListPersonDocumentCopyFromJsAsync(string familyText, string parentIdText, string? ownerViewId = null)
+    {
+        if (!Enum.TryParse<HeaderDocumentCopiesFamily>(familyText, ignoreCase: true, out var family))
+            return Task.CompletedTask;
+
+        if (!Guid.TryParse(parentIdText, out var parentId) || parentId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return SlotService.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = family,
+            ParentId = parentId,
+            OpenPreviewOnly = true,
+            PreviewAllCopies = true,
+        }, string.IsNullOrWhiteSpace(ownerViewId) ? null : ownerViewId);
+    }
+
+    [JSInvokable]
     public Task OpenHeaderDocumentCopiesPreviewFromJsAsync(string familyText, string parentIdText, string? ownerViewId = null)
     {
         if (!Enum.TryParse<HeaderDocumentCopiesFamily>(familyText, ignoreCase: true, out var family))

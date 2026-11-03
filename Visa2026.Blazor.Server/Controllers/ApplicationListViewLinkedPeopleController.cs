@@ -76,6 +76,7 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
             if (string.IsNullOrEmpty(columnModel.Name))
                 columnModel.Name = ApplicationProfileInstanceLinkedPeopleColumnUpdater.ColumnId;
 
+            var ownerViewId = View?.Id ?? string.Empty;
             columnModel.CellDisplayTemplate = context => builder =>
             {
                 if (context.DataItem is not ApplicationProfileInstance application)
@@ -99,14 +100,15 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
                     return;
                 }
 
-                RenderPeople(builder, people);
+                RenderPeople(builder, people, ownerViewId);
             };
         }
     }
 
     private static void RenderPeople(
         RenderTreeBuilder builder,
-        IReadOnlyList<ApplicationListLinkedPeople.Row> people)
+        IReadOnlyList<ApplicationListLinkedPeople.Row> people,
+        string ownerViewId)
     {
         builder.OpenElement(0, "div");
         builder.AddAttribute(1, "class", "lv-people");
@@ -125,13 +127,7 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
                 builder.OpenElement(seq++, "span");
                 builder.AddAttribute(seq++, "class", "lv-people__marks");
                 foreach (var mark in person.Marks)
-                {
-                    builder.OpenElement(seq++, "span");
-                    builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--" + mark.Tone);
-                    builder.AddAttribute(seq++, "title", ApplicationListLinkedPeople.Title(mark));
-                    builder.AddContent(seq++, ApplicationListLinkedPeople.Letters(mark.Key));
-                    builder.CloseElement();
-                }
+                    RenderMark(builder, ref seq, mark, person.Name, ownerViewId);
 
                 builder.CloseElement();
             }
@@ -139,6 +135,38 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
             builder.CloseElement();
         }
 
+        builder.CloseElement();
+    }
+
+    private static void RenderMark(
+        RenderTreeBuilder builder,
+        ref int seq,
+        ApplicationListLinkedPeople.Mark mark,
+        string personName,
+        string ownerViewId)
+    {
+        var title = ApplicationListLinkedPeople.Title(mark);
+        var letters = ApplicationListLinkedPeople.Letters(mark.Key);
+        if (!ApplicationListLinkedPeople.CanPreview(mark)
+            || !ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(mark.Key, out var family))
+        {
+            builder.OpenElement(seq++, "span");
+            builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--" + mark.Tone);
+            builder.AddAttribute(seq++, "title", title);
+            builder.AddContent(seq++, letters);
+            builder.CloseElement();
+            return;
+        }
+
+        builder.OpenElement(seq++, "button");
+        builder.AddAttribute(seq++, "type", "button");
+        builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--hit lv-person-mark--" + mark.Tone);
+        builder.AddAttribute(seq++, "title", title);
+        builder.AddAttribute(seq++, "aria-label", string.IsNullOrWhiteSpace(personName) ? title : title + " — " + personName);
+        builder.AddAttribute(seq++, "data-doc-family", family.ToString());
+        builder.AddAttribute(seq++, "data-doc-parent-id", mark.DocumentId.ToString("D"));
+        builder.AddAttribute(seq++, "data-owner-view-id", ownerViewId);
+        builder.AddContent(seq++, letters);
         builder.CloseElement();
     }
 }

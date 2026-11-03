@@ -4362,6 +4362,66 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     line-height: 1;
     letter-spacing: 0;
     color: #fff;
+    cursor: default;
+}
+
+button.lv-person-mark--hit {
+    margin: 0;
+    border: 0;
+    background-image: none;
+    box-shadow: none;
+    font: inherit;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.dxbl-grid td .lv-person-mark:not(.lv-person-mark--hit) {
+    cursor: default !important;
+}
+
+.dxbl-grid td button.lv-person-mark--hit,
+button.lv-person-mark--hit::before {
+    cursor: pointer !important;
+}
+
+button.lv-person-mark--hit::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+}
+
+button.lv-person-mark--hit.lv-person-mark--done {
+    background: #15803d;
+    color: #fff;
+}
+
+button.lv-person-mark--hit.lv-person-mark--rej {
+    background: #b91c1c;
+    color: #fff;
+}
+
+button.lv-person-mark--hit.lv-person-mark--used {
+    background: #bbf7d0;
+    color: #14532d;
+}
+
+button.lv-person-mark--hit.lv-person-mark--expired {
+    background: #fecdd3;
+    color: #881337;
+}
+
+button.lv-person-mark--hit.lv-person-mark--cancelled {
+    background: #f8d7da;
+    color: #842029;
+}
+
+button.lv-person-mark--hit.lv-person-mark--changed {
+    background: #e9d5ff;
+    color: #581c87;
 }
 
 .lv-person-mark--done {
