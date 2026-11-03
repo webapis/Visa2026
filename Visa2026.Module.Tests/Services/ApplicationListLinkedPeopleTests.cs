@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Xunit;
@@ -386,6 +387,69 @@ public class ApplicationListLinkedPeopleTests
         Assert.Equal(InvitationLaterLife.InForce, mixed[1].Life);
         Assert.All(same, person => Assert.Equal(InvitationLaterLife.InForce, person.Life));
     }
+
+    [Fact]
+    public void Circle_hover_names_the_document_and_its_state()
+    {
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("tk-TM");
+
+            Assert.Equal("Wiza güýjünde", Title(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, ApplicationListLinkedPeople.ToneDone));
+            Assert.Equal(
+                "Wiza möhleti geçdi",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, IssuedResultExpiry.Tone, IssuedResultExpiry.Visa));
+            Assert.Equal(
+                "Wiza entäk berilmedi",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, ApplicationListLinkedPeople.ToneMissing));
+            Assert.Equal(
+                "Iş rugsady güýjünde",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, ApplicationListLinkedPeople.ToneDone));
+            Assert.Equal(
+                "Iş rugsady möhleti geçdi",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, IssuedResultExpiry.Tone, IssuedResultExpiry.WorkPermit));
+            Assert.Equal(
+                "Çakylyk güýjünde",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, ApplicationListLinkedPeople.ToneDone));
+            Assert.Equal(
+                "Çakylyk ulanyldy",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, InvitationLaterLife.ToneUsed, InvitationLaterLife.Used));
+            Assert.Equal(
+                "Çakylyk möhleti geçdi",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, InvitationLaterLife.ToneExpired, InvitationLaterLife.ExpiredUnused));
+            Assert.Equal(
+                "Çakylyk ýatyryldy",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, InvitationLaterLife.ToneCancelled, InvitationLaterLife.Cancelled));
+            Assert.Equal(
+                "Çakylyk üýtgedildi",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.Invitation, InvitationLaterLife.ToneChanged, InvitationLaterLife.Changed));
+            Assert.Equal(
+                "Serhet sebiti güýjünde",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.BorderZone, ApplicationListLinkedPeople.ToneDone));
+            Assert.Equal(
+                "Serhet sebiti entäk berilmedi",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.BorderZone, ApplicationListLinkedPeople.ToneMissing));
+            Assert.Equal(
+                "Ret",
+                Title(ApplicationWorkspaceIssuedRecordsCatalog.Rejection, ApplicationListLinkedPeople.ToneRejected));
+            Assert.Equal(
+                "Täze çakylyk ulanyldy",
+                ApplicationListLinkedPeople.Title(new ApplicationListLinkedPeople.InvitationReplacement(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "10/-2125",
+                    InvitationLaterLife.ToneUsed,
+                    InvitationLaterLife.Used)));
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
+    }
+
+    private static string Title(string key, string tone, string? state = null) =>
+        ApplicationListLinkedPeople.Title(new ApplicationListLinkedPeople.Mark(key, tone, state));
 
     [Fact]
     public void FormatName_uses_first_middle_last()

@@ -212,8 +212,7 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
     {
         var letters = ApplicationListLinkedPeople.Letters(ApplicationWorkspaceIssuedRecordsCatalog.Invitation);
         var life = ApplicationListLinkedPeople.InvitationLife(replacement);
-        var label = Visa2026.Module.Localization.VisaUiMessages.Get(
-            "ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle");
+        var label = ApplicationListLinkedPeople.Title(replacement);
 
         builder.OpenElement(seq++, "span");
         builder.AddAttribute(seq++, "class", "lv-person-mark-follow");

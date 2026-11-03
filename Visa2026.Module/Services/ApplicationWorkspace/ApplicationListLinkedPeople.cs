@@ -1,3 +1,4 @@
+using System.Globalization;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
@@ -201,14 +202,31 @@ public static class ApplicationListLinkedPeople
         && mark.DocumentId != Guid.Empty
         && ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(mark.Key, out _);
 
+    /// <summary>
+    /// Hover on a circle: the document name and its state, such as "Wiza güýjünde".
+    /// A rejection has no later life, so the hover is the document name alone.
+    /// </summary>
     public static string Title(Mark mark)
     {
-        if (!string.IsNullOrEmpty(mark.State))
-            return Title(mark.State);
-        if (mark.Tone == ToneMissing && IsVisaInvitationOrWorkPermit(mark.Key))
-            return VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.NotIssuedTitle");
-        return Title(mark.Key);
+        var document = Title(mark.Key);
+        if (string.Equals(mark.Key, ApplicationWorkspaceIssuedRecordsCatalog.Rejection, StringComparison.Ordinal))
+            return document;
+
+        if (mark.Tone == ToneMissing)
+        {
+            return JoinNameAndState(
+                document,
+                VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.NotIssuedTitle"));
+        }
+
+        return JoinNameAndState(document, StateWord(mark.State));
     }
+
+    /// <summary>Hover on the invitation that replaced a changed one: "Täze çakylyk güýjünde".</summary>
+    public static string Title(InvitationReplacement replacement) =>
+        JoinNameAndState(
+            VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle"),
+            StateWord(InvitationLife(replacement)));
 
     public static int CountMarks(IReadOnlyList<Row>? rows, string key)
     {
@@ -352,10 +370,44 @@ public static class ApplicationListLinkedPeople
         return documents != null && documents.TryGetValue(personId, out var documentId) ? documentId : Guid.Empty;
     }
 
-    private static bool IsVisaInvitationOrWorkPermit(string key) =>
-        string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal)
-        || string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, StringComparison.Ordinal)
-        || string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.Ordinal);
+    private static string StateWord(string? state)
+    {
+        if (string.IsNullOrEmpty(state)
+            || string.Equals(state, InvitationLaterLife.InForce, StringComparison.Ordinal))
+        {
+            return VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationInForce");
+        }
+
+        return state switch
+        {
+            IssuedResultExpiry.WorkPermit or IssuedResultExpiry.Visa or InvitationLaterLife.ExpiredUnused =>
+                VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.DocumentExpiredTitle"),
+            InvitationLaterLife.Used =>
+                VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationUsedTitle"),
+            InvitationLaterLife.Cancelled =>
+                VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationCancelledTitle"),
+            InvitationLaterLife.Changed =>
+                VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.InvitationChangedTitle"),
+            _ => "",
+        };
+    }
+
+    private static string JoinNameAndState(string name, string state)
+    {
+        if (string.IsNullOrWhiteSpace(state))
+            return name;
+
+        return name + " " + LowerFirst(state.Trim());
+    }
+
+    private static string LowerFirst(string value)
+    {
+        if (value.Length == 0)
+            return value;
+
+        var first = char.ToLower(value[0], CultureInfo.CurrentUICulture);
+        return value.Length == 1 ? first.ToString() : first + value[1..];
+    }
 
     private static readonly IReadOnlySet<Guid> Empty = new HashSet<Guid>();
 }
