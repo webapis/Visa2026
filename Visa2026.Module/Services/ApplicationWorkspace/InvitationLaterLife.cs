@@ -9,6 +9,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// </summary>
 public static class InvitationLaterLife
 {
+    public const string InForce = "invitationInForce";
     public const string Used = "invitationUsed";
     public const string ExpiredUnused = "invitationExpiredUnused";
     public const string Cancelled = "invitationCancelled";
@@ -51,6 +52,20 @@ public static class InvitationLaterLife
 
         return best;
     }
+
+    public static string BannerTone(string? life) =>
+        string.IsNullOrEmpty(life) || string.Equals(life, InForce, StringComparison.Ordinal)
+            ? "done"
+            : Tone(life);
+
+    public static string BannerMessageKey(string? life) => life switch
+    {
+        Used => "ApplicationProfileInstance.List.Mark.InvitationUsedTitle",
+        ExpiredUnused => "ApplicationProfileInstance.List.Mark.DocumentExpiredTitle",
+        Cancelled => "ApplicationProfileInstance.List.Mark.InvitationCancelledTitle",
+        Changed => "ApplicationProfileInstance.List.Mark.InvitationChangedTitle",
+        _ => "ApplicationProfileInstance.List.Mark.InvitationInForce",
+    };
 
     public static string Tone(string key) => key switch
     {

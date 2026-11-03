@@ -755,8 +755,20 @@
                         : null;
                 }
 
+                function findFollowCard(target) {
+                    return target && target.closest
+                        ? target.closest(".lv-person-mark-follow__card")
+                        : null;
+                }
+
+                function findFollowApplication(target) {
+                    return target && target.closest
+                        ? target.closest("button.lv-person-mark-follow__app")
+                        : null;
+                }
+
                 function blockPersonMark(event) {
-                    if (!findPersonMark(event.target)) {
+                    if (!findPersonMark(event.target) && !findFollowCard(event.target)) {
                         return;
                     }
                     event.preventDefault();
@@ -786,13 +798,50 @@
                         "OpenListPersonDocumentCopyFromJsAsync",
                         link.getAttribute("data-doc-family") || "",
                         link.getAttribute("data-doc-parent-id") || "",
-                        link.getAttribute("data-owner-view-id") || "");
+                        link.getAttribute("data-owner-view-id") || "",
+                        link.getAttribute("data-doc-life") || "",
+                        link.getAttribute("data-doc-person-id") || "");
+                }
+
+                function openFollowApplication(event) {
+                    var link = findFollowApplication(event.target);
+                    if (!link) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var now = Date.now();
+                    if (window.visaPreviewDrawer._personMarkOpenedAt
+                        && now - window.visaPreviewDrawer._personMarkOpenedAt < 400) {
+                        return;
+                    }
+                    window.visaPreviewDrawer._personMarkOpenedAt = now;
+                    var ref = window.visaPreviewDrawer._hostRef;
+                    if (!ref) {
+                        return;
+                    }
+                    ref.invokeMethodAsync(
+                        "OpenListApplicationFromJsAsync",
+                        link.getAttribute("data-application-id") || "");
                 }
 
                 document.addEventListener("pointerdown", blockPersonMark, true);
                 document.addEventListener("mousedown", blockPersonMark, true);
-                document.addEventListener("pointerup", openPersonMark, true);
-                document.addEventListener("click", openPersonMark, true);
+                document.addEventListener("pointerup", function (event) {
+                    if (findFollowApplication(event.target)) {
+                        openFollowApplication(event);
+                        return;
+                    }
+                    openPersonMark(event);
+                }, true);
+                document.addEventListener("click", function (event) {
+                    if (findFollowApplication(event.target)) {
+                        openFollowApplication(event);
+                        return;
+                    }
+                    openPersonMark(event);
+                }, true);
             })();
 
             (function installPersonDossierLinkCapture() {

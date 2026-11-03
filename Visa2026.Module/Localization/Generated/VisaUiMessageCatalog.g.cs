@@ -1580,6 +1580,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Üýtgedildi",
             ["ru-RU"] = "Изменено",
         },
+        ["ApplicationProfileInstance.List.Mark.InvitationInForce"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In force",
+            ["tr-TR"] = "Yürürlükte",
+            ["tk-TM"] = "Güýjünde",
+            ["ru-RU"] = "Действует",
+        },
+        ["ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New invitation",
+            ["tr-TR"] = "Yeni davetiye",
+            ["tk-TM"] = "Täze çakylyk",
+            ["ru-RU"] = "Новое приглашение",
+        },
         ["ApplicationProfile.Doc.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Invitation(s)",

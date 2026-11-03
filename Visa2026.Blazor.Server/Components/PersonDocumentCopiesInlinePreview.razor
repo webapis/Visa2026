@@ -4,7 +4,10 @@
 @using Microsoft.JSInterop
 @using System.IO
 @using Microsoft.AspNetCore.Http
+@using DevExpress.ExpressApp
 @using DevExpress.ExpressApp.Blazor.Services
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
@@ -14,6 +17,7 @@
 @implements IAsyncDisposable
 
 <div class="report-package-inline-preview app-item-doc-copies-preview">
+    <InvitationPreviewStateBar States="_invitationStates" UiCultureName="@EffectiveUiCulture" />
     <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
         <h3 class="app-item-doc-copies-preview__title">@HeaderText</h3>
         <div class="app-item-doc-copies-preview__header-actions">
@@ -81,6 +85,7 @@
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
 
     private string _fileName = string.Empty;
     private string _error = string.Empty;
@@ -114,6 +119,9 @@
 
     private bool ShowPrintLayout => DocumentCopyPrintLayout.AppliesTo(_activeRecordKey);
 
+    private IReadOnlyList<InvitationPreviewStates.PersonState> _invitationStates =
+        Array.Empty<InvitationPreviewStates.PersonState>();
+
     public async Task OpenAsync(PersonDocumentCopiesInlinePreviewRequest request)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.RecordKey))
@@ -123,9 +131,32 @@
             _printLayout = DocumentCopyPrintLayout.DefaultFor(request.RecordKey);
 
         _activeRecordKey = request.RecordKey;
+        _invitationStates = ResolveInvitationStates(request.RecordKey);
         _previewHeaderLabel = request.DisplayName;
         _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
         await LoadCurrentPdfAsync();
+    }
+
+    private IReadOnlyList<InvitationPreviewStates.PersonState> ResolveInvitationStates(string recordKey)
+    {
+        const string prefix = "InvitationItem:";
+        if (string.IsNullOrWhiteSpace(recordKey)
+            || !recordKey.StartsWith(prefix, StringComparison.Ordinal)
+            || !Guid.TryParse(recordKey[prefix.Length..], out var itemId)
+            || itemId == Guid.Empty)
+        {
+            return Array.Empty<InvitationPreviewStates.PersonState>();
+        }
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<InvitationItem>();
+            return InvitationPreviewStates.ForItem(objectSpace, itemId);
+        }
+        catch (Exception)
+        {
+            return Array.Empty<InvitationPreviewStates.PersonState>();
+        }
     }
 
     private async Task OnPrintLayoutChanged(DocumentCopyPrintLayout layout)

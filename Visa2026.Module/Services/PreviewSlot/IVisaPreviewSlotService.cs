@@ -189,6 +189,14 @@ public sealed class HeaderDocumentCopiesSlotRequest
     /// When true, every scan on this header is one PDF in the preview. The catalog stays closed.
     /// </summary>
     public bool PreviewAllCopies { get; init; }
+
+    /// <summary>
+    /// Invitation later life shown as a banner on the preview. Empty for other document families.
+    /// </summary>
+    public string? InvitationLifeKey { get; init; }
+
+    /// <summary>When set, the banner is this person's state on the invitation.</summary>
+    public Guid? PersonId { get; init; }
 }
 
 /// <summary>
@@ -292,4 +300,10 @@ public sealed class HeaderDocumentCopiesInlinePreviewRequest
 
     /// <summary>Merge every scan on the header into the preview, in catalog order.</summary>
     public bool PreviewAllCopies { get; init; }
+
+    /// <summary>Invitation later life shown above the copy. Empty for other families.</summary>
+    public string? InvitationLifeKey { get; init; }
+
+    /// <summary>When set, the banner is this person's state on the invitation.</summary>
+    public Guid? PersonId { get; init; }
 }

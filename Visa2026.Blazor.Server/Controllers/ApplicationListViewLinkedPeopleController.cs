@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Model;
 using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
@@ -20,9 +21,16 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
         TargetObjectType = typeof(ApplicationProfileInstance);
     }
 
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        ApplicationListLinkedPeopleOpenBridge.Attach(this);
+    }
+
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
+        ApplicationListLinkedPeopleOpenBridge.Attach(this);
         ApplyPeopleTemplate();
         ScheduleDeferredApply();
     }
@@ -51,8 +59,20 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
             ApplyPeopleTemplate();
     }
 
+    internal void OpenApplication(Guid applicationId)
+    {
+        var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(Application, applicationId);
+        if (workspaceView == null)
+            return;
+
+        Application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(Frame, null));
+    }
+
     protected override void OnDeactivated()
     {
+        ApplicationListLinkedPeopleOpenBridge.Detach(this);
         deferredApplyCts?.Cancel();
         deferredApplyCts?.Dispose();
         deferredApplyCts = null;
@@ -127,7 +147,11 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
                 builder.OpenElement(seq++, "span");
                 builder.AddAttribute(seq++, "class", "lv-people__marks");
                 foreach (var mark in person.Marks)
-                    RenderMark(builder, ref seq, mark, person.Name, ownerViewId);
+                {
+                    RenderMark(builder, ref seq, mark, person.Name, person.PersonId, ownerViewId);
+                    if (mark.Replacement != null)
+                        RenderReplacement(builder, ref seq, mark.Replacement, person.Name, person.PersonId, ownerViewId);
+                }
 
                 builder.CloseElement();
             }
@@ -143,6 +167,7 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
         ref int seq,
         ApplicationListLinkedPeople.Mark mark,
         string personName,
+        Guid personId,
         string ownerViewId)
     {
         var title = ApplicationListLinkedPeople.Title(mark);
@@ -165,8 +190,59 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
         builder.AddAttribute(seq++, "aria-label", string.IsNullOrWhiteSpace(personName) ? title : title + " — " + personName);
         builder.AddAttribute(seq++, "data-doc-family", family.ToString());
         builder.AddAttribute(seq++, "data-doc-parent-id", mark.DocumentId.ToString("D"));
+        builder.AddAttribute(seq++, "data-doc-life", ApplicationListLinkedPeople.InvitationLife(mark));
+        if (personId != Guid.Empty
+            && string.Equals(mark.Key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal))
+        {
+            builder.AddAttribute(seq++, "data-doc-person-id", personId.ToString("D"));
+        }
+
         builder.AddAttribute(seq++, "data-owner-view-id", ownerViewId);
         builder.AddContent(seq++, letters);
+        builder.CloseElement();
+    }
+
+    private static void RenderReplacement(
+        RenderTreeBuilder builder,
+        ref int seq,
+        ApplicationListLinkedPeople.InvitationReplacement replacement,
+        string personName,
+        Guid personId,
+        string ownerViewId)
+    {
+        var letters = ApplicationListLinkedPeople.Letters(ApplicationWorkspaceIssuedRecordsCatalog.Invitation);
+        var life = ApplicationListLinkedPeople.InvitationLife(replacement);
+        var label = Visa2026.Module.Localization.VisaUiMessages.Get(
+            "ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle");
+
+        builder.OpenElement(seq++, "span");
+        builder.AddAttribute(seq++, "class", "lv-person-mark-follow");
+        builder.OpenElement(seq++, "button");
+        builder.AddAttribute(seq++, "type", "button");
+        builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--hit lv-person-mark--" + replacement.Tone);
+        builder.AddAttribute(seq++, "aria-label", string.IsNullOrWhiteSpace(personName) ? label : label + " — " + personName);
+        builder.AddAttribute(seq++, "data-doc-family", HeaderDocumentCopiesFamily.Invitation.ToString());
+        builder.AddAttribute(seq++, "data-doc-parent-id", replacement.DocumentId.ToString("D"));
+        builder.AddAttribute(seq++, "data-doc-life", life);
+        if (personId != Guid.Empty)
+            builder.AddAttribute(seq++, "data-doc-person-id", personId.ToString("D"));
+        builder.AddAttribute(seq++, "data-owner-view-id", ownerViewId);
+        builder.AddContent(seq++, letters);
+        builder.CloseElement();
+
+        builder.OpenElement(seq++, "span");
+        builder.AddAttribute(seq++, "class", "lv-person-mark-follow__card");
+        builder.OpenElement(seq++, "span");
+        builder.AddAttribute(seq++, "class", "lv-person-mark-follow__label");
+        builder.AddContent(seq++, label);
+        builder.CloseElement();
+        builder.OpenElement(seq++, "button");
+        builder.AddAttribute(seq++, "type", "button");
+        builder.AddAttribute(seq++, "class", "lv-person-mark-follow__app");
+        builder.AddAttribute(seq++, "data-application-id", replacement.ApplicationId.ToString("D"));
+        builder.AddContent(seq++, string.IsNullOrWhiteSpace(replacement.ApplicationNumber) ? "—" : replacement.ApplicationNumber);
+        builder.CloseElement();
+        builder.CloseElement();
         builder.CloseElement();
     }
 }

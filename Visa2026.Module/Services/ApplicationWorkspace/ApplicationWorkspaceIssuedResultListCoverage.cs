@@ -140,6 +140,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var borderZone = borderZoneIndex.People;
         var names = ApplicationListLinkedPeople.LoadNames(objectSpace, roster);
         var invitationLaterLife = LoadInvitationLaterLife(objectSpace, ids);
+        var invitationReplacements = LoadInvitationReplacements(objectSpace, ids);
         var expiredWorkPermit = LoadExpiredWorkPermits(objectSpace, ids);
         var expiredVisa = LoadExpiredVisas(objectSpace, ids);
 
@@ -176,8 +177,125 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 DocumentsFor(workPermitIndex.Documents, application.ID),
                 DocumentsFor(visaIndex.Documents, application.ID),
                 DocumentsFor(borderZoneIndex.Documents, application.ID),
-                DocumentsFor(rejectionIndex.Documents, application.ID)));
+                DocumentsFor(rejectionIndex.Documents, application.ID),
+                ReplacementsFor(invitationReplacements, application.ID)));
         }
+    }
+
+    private static IReadOnlyDictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement> ReplacementsFor(
+        IReadOnlyDictionary<Guid, Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>> byInstance,
+        Guid applicationId) =>
+        byInstance.TryGetValue(applicationId, out var people) ? people : EmptyReplacements;
+
+    private static readonly IReadOnlyDictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement> EmptyReplacements =
+        new Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>();
+
+    private static Dictionary<Guid, Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>> LoadInvitationReplacements(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>>();
+        if (objectSpace == null || ids.Count == 0)
+            return result;
+
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var changeFamily = ApplicationProfileActionFamily.Change;
+        var links = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => a.ApplicationProfile != null
+                && a.ApplicationProfile.ActionFamily == changeFamily
+                && a.LatestPrimaryStateCode == issued
+                && a.InvitationItems.Any(i =>
+                    i.Invitation != null
+                    && i.Invitation.ApplicationProfileInstance != null
+                    && ids.Contains(i.Invitation.ApplicationProfileInstance.ID)
+                    && i.Person != null))
+            .SelectMany(a => a.InvitationItems
+                .Where(i => i.Invitation != null
+                    && i.Invitation.ApplicationProfileInstance != null
+                    && ids.Contains(i.Invitation.ApplicationProfileInstance.ID)
+                    && i.Person != null)
+                .Select(i => new
+                {
+                    ChangeId = a.ID,
+                    Number = a.FullApplicationNumber,
+                    Date = a.ApplicationDate,
+                    PersonId = i.Person.ID,
+                    OldInstanceId = i.Invitation.ApplicationProfileInstance.ID,
+                }))
+            .ToList();
+        if (links.Count == 0)
+            return result;
+
+        var changeIds = links.Select(link => link.ChangeId).Distinct().ToList();
+        var copies = objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.Invitation != null
+                && i.Invitation.ApplicationProfileInstance != null
+                && changeIds.Contains(i.Invitation.ApplicationProfileInstance.ID)
+                && i.Person != null)
+            .Select(i => new
+            {
+                ChangeId = i.Invitation.ApplicationProfileInstance.ID,
+                PersonId = i.Person.ID,
+                DocumentId = i.Invitation.ID,
+                ItemId = i.ID,
+                Expiration = i.Invitation.ExpirationDate,
+            })
+            .ToList();
+        if (copies.Count == 0)
+            return result;
+
+        var itemIds = copies.Select(copy => copy.ItemId).Distinct().ToList();
+        var cancelled = LoadInvitationFamily(objectSpace, itemIds, ApplicationProfileActionFamily.Cancellation);
+        var changed = LoadInvitationFamily(objectSpace, itemIds, ApplicationProfileActionFamily.Change);
+        var used = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(objectSpace, itemIds);
+        var lifeByItem = new Dictionary<Guid, string>();
+        foreach (var copy in copies)
+        {
+            var life = InvitationLaterLife.Resolve(
+                cancelled.Contains(copy.ItemId),
+                changed.Contains(copy.ItemId),
+                used.Contains(copy.ItemId),
+                InvitationLaterLife.IsExpired(copy.Expiration));
+            if (life != null)
+                lifeByItem[copy.ItemId] = life;
+        }
+
+        var copyByChangePerson = new Dictionary<(Guid ChangeId, Guid PersonId), (Guid DocumentId, Guid ItemId)>();
+        foreach (var copy in copies)
+            copyByChangePerson.TryAdd((copy.ChangeId, copy.PersonId), (copy.DocumentId, copy.ItemId));
+
+        var grouped = new Dictionary<(Guid OldInstanceId, Guid PersonId), List<(DateTime Date, Guid DocumentId, Guid ApplicationId, string? Number, string? Life)>>();
+        foreach (var link in links)
+        {
+            if (!copyByChangePerson.TryGetValue((link.ChangeId, link.PersonId), out var copy))
+                continue;
+
+            var key = (link.OldInstanceId, link.PersonId);
+            if (!grouped.TryGetValue(key, out var options))
+            {
+                options = [];
+                grouped[key] = options;
+            }
+
+            lifeByItem.TryGetValue(copy.ItemId, out var life);
+            options.Add((link.Date, copy.DocumentId, link.ChangeId, link.Number, life));
+        }
+
+        foreach (var (key, options) in grouped)
+        {
+            var chosen = ApplicationListLinkedPeople.ChooseSuccessor(options);
+            if (chosen == null)
+                continue;
+            if (!result.TryGetValue(key.OldInstanceId, out var people))
+            {
+                people = [];
+                result[key.OldInstanceId] = people;
+            }
+
+            people[key.PersonId] = chosen;
+        }
+
+        return result;
     }
 
     private static IReadOnlyDictionary<Guid, string> LaterLifeFor(

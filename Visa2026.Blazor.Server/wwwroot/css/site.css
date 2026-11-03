@@ -4424,6 +4424,147 @@ button.lv-person-mark--hit.lv-person-mark--changed {
     color: #581c87;
 }
 
+.lv-person-mark-follow {
+    position: relative;
+    display: inline-flex;
+}
+
+.lv-person-mark-follow__card {
+    display: none;
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 7.5rem;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: #111827;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.lv-person-mark-follow:hover .lv-person-mark-follow__card,
+.lv-person-mark-follow:focus-within .lv-person-mark-follow__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.lv-person-mark-follow__label {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+button.lv-person-mark-follow__app {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #93c5fd;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.dxbl-grid td:has(.lv-person-mark-follow) {
+    overflow: visible;
+}
+
+.invitation-life-banner {
+    margin: 0 0 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    letter-spacing: 0.01em;
+}
+
+.invitation-life-banner--done {
+    background: #15803d;
+    color: #fff;
+}
+
+.invitation-life-banner--used {
+    background: #bbf7d0;
+    color: #14532d;
+}
+
+.invitation-life-banner--expired {
+    background: #fecdd3;
+    color: #881337;
+}
+
+.invitation-life-banner--cancelled {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.invitation-life-banner--changed {
+    background: #e9d5ff;
+    color: #581c87;
+}
+
+.invitation-life-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+
+.invitation-life-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 16rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    line-height: 1.2;
+}
+
+.invitation-life-chip__name {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.invitation-life-chip__state {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.invitation-life-chip--done {
+    background: #15803d;
+    color: #fff;
+}
+
+.invitation-life-chip--used {
+    background: #bbf7d0;
+    color: #14532d;
+}
+
+.invitation-life-chip--expired {
+    background: #fecdd3;
+    color: #881337;
+}
+
+.invitation-life-chip--cancelled {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.invitation-life-chip--changed {
+    background: #e9d5ff;
+    color: #581c87;
+}
+
 .lv-person-mark--done {
     background: #15803d;
 }

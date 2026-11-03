@@ -1,0 +1,29 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+@if (States.Count > 0)
+{
+    <div class="invitation-life-chips" role="status">
+        @foreach (var person in States)
+        {
+            <span class="invitation-life-chip invitation-life-chip--@InvitationLaterLife.BannerTone(person.Life)">
+                @if (!string.IsNullOrWhiteSpace(person.Name))
+                {
+                    <span class="invitation-life-chip__name">@person.Name</span>
+                }
+                <span class="invitation-life-chip__state">@Label(person.Life)</span>
+            </span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyList<InvitationPreviewStates.PersonState> States { get; set; } =
+        Array.Empty<InvitationPreviewStates.PersonState>();
+
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    private string Label(string life) =>
+        VisaUiMessages.Get(InvitationLaterLife.BannerMessageKey(life), UiCultureName);
+}

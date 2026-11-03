@@ -115,8 +115,15 @@ public static class VisaPreviewSlotOccupantKeys
         };
 
         var key = $"{prefix}:{request.ParentId:N}";
+        var life = string.IsNullOrWhiteSpace(request.InvitationLifeKey)
+            ? ""
+            : $"|life:{request.InvitationLifeKey.Trim()}";
+        var person = request.PersonId is Guid personId && personId != Guid.Empty
+            ? $"|person:{personId:N}"
+            : "";
+        life += person;
         if (request.PreviewAllCopies)
-            return $"{key}|preview:all";
+            return $"{key}|preview:all{life}";
 
         if (request.OpenPreviewOnly)
         {

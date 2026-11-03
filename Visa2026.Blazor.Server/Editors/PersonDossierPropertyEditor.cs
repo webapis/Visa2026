@@ -13,6 +13,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.PersonDossier;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.PreviewSlot;
 using Visa2026.Module.Services.ApplicationWorkspace;
@@ -150,6 +151,11 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
                     ParentId = record.PreviewParentId!.Value,
                     FocusDisplayName = record.Cells.Count > 0 ? record.Cells[0] : null,
                     OpenPreviewOnly = true,
+                    PersonId = record.PreviewFamily == HeaderDocumentCopiesFamily.Invitation
+                        && ResolvePersonId() is var dossierPersonId
+                        && dossierPersonId != Guid.Empty
+                        ? dossierPersonId
+                        : null,
                 },
                 PersonDossierViewIds.DetailView);
         }

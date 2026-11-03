@@ -308,7 +308,12 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
     }
 
     [JSInvokable]
-    public Task OpenListPersonDocumentCopyFromJsAsync(string familyText, string parentIdText, string? ownerViewId = null)
+    public Task OpenListPersonDocumentCopyFromJsAsync(
+        string familyText,
+        string parentIdText,
+        string? ownerViewId = null,
+        string? invitationLifeKey = null,
+        string? personIdText = null)
     {
         if (!Enum.TryParse<HeaderDocumentCopiesFamily>(familyText, ignoreCase: true, out var family))
             return Task.CompletedTask;
@@ -322,7 +327,18 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
             ParentId = parentId,
             OpenPreviewOnly = true,
             PreviewAllCopies = true,
+            InvitationLifeKey = string.IsNullOrWhiteSpace(invitationLifeKey) ? null : invitationLifeKey.Trim(),
+            PersonId = Guid.TryParse(personIdText, out var personId) && personId != Guid.Empty ? personId : null,
         }, string.IsNullOrWhiteSpace(ownerViewId) ? null : ownerViewId);
+    }
+
+    [JSInvokable]
+    public Task OpenListApplicationFromJsAsync(string applicationIdText)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return InvokeAsync(() => ApplicationListLinkedPeopleOpenBridge.TryOpen(applicationId));
     }
 
     [JSInvokable]

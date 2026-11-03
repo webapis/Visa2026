@@ -21,7 +21,21 @@ public static class ApplicationListLinkedPeople
 
     /// <param name="State">Later life of an issued invitation, or expiry of an issued visa or work permit.</param>
     /// <param name="DocumentId">Header of the issued copy. Empty when the circle is not a link.</param>
-    public readonly record struct Mark(string Key, string Tone, string? State = null, Guid DocumentId = default);
+    /// <param name="Replacement">The issued invitation that replaced a changed one. Shown beside that circle.</param>
+    public readonly record struct Mark(
+        string Key,
+        string Tone,
+        string? State = null,
+        Guid DocumentId = default,
+        InvitationReplacement? Replacement = null);
+
+    /// <summary>New invitation issued by a completed change, for one person.</summary>
+    public sealed record InvitationReplacement(
+        Guid DocumentId,
+        Guid ApplicationId,
+        string ApplicationNumber,
+        string Tone,
+        string? State);
 
     public readonly record struct Row(Guid PersonId, string Name, IReadOnlyList<Mark> Marks);
 
@@ -41,7 +55,8 @@ public static class ApplicationListLinkedPeople
         IReadOnlyDictionary<Guid, Guid>? workPermitDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? visaDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? borderZoneDocuments = null,
-        IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null)
+        IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null,
+        IReadOnlyDictionary<Guid, InvitationReplacement>? invitationReplacements = null)
     {
         if (application == null || activeRoster == null || activeRoster.Count == 0)
             return Array.Empty<Row>();
@@ -72,11 +87,21 @@ public static class ApplicationListLinkedPeople
                     tone = IssuedResultExpiry.Tone;
                 }
 
-                marks.Add(new Mark(
+                var mark = new Mark(
                     kind,
                     tone,
                     state,
-                    issued ? DocumentOf(kind, personId, invitationDocuments, workPermitDocuments, visaDocuments, borderZoneDocuments) : Guid.Empty));
+                    issued ? DocumentOf(kind, personId, invitationDocuments, workPermitDocuments, visaDocuments, borderZoneDocuments) : Guid.Empty);
+                if (issued
+                    && string.Equals(state, InvitationLaterLife.Changed, StringComparison.Ordinal)
+                    && invitationReplacements != null
+                    && invitationReplacements.TryGetValue(personId, out var replacement)
+                    && replacement.DocumentId != Guid.Empty)
+                {
+                    mark = mark with { Replacement = replacement };
+                }
+
+                marks.Add(mark);
             }
 
             if (rejection.Contains(personId))
@@ -127,6 +152,50 @@ public static class ApplicationListLinkedPeople
     /// <summary>
     /// An issued circle with a real header opens that copy. A circle that was not issued stays plain text.
     /// </summary>
+    public static string InvitationLife(Mark mark) =>
+        string.Equals(mark.Key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal)
+            ? string.IsNullOrEmpty(mark.State) ? InvitationLaterLife.InForce : mark.State!
+            : "";
+
+    public static string InvitationLife(InvitationReplacement replacement) =>
+        string.IsNullOrEmpty(replacement.State) ? InvitationLaterLife.InForce : replacement.State!;
+
+    /// <summary>
+    /// Latest issued replacement wins. A change that has no new invitation is ignored.
+    /// </summary>
+    public static InvitationReplacement? ChooseSuccessor(
+        IEnumerable<(DateTime Date, Guid DocumentId, Guid ApplicationId, string? Number, string? Life)> options)
+    {
+        InvitationReplacement? best = null;
+        var bestDate = DateTime.MinValue;
+        var bestNumber = "";
+        foreach (var option in options)
+        {
+            if (option.DocumentId == Guid.Empty || option.ApplicationId == Guid.Empty)
+                continue;
+
+            var number = option.Number?.Trim() ?? "";
+            if (best != null
+                && (option.Date < bestDate
+                    || (option.Date == bestDate && string.Compare(number, bestNumber, StringComparison.Ordinal) <= 0)))
+            {
+                continue;
+            }
+
+            bestDate = option.Date;
+            bestNumber = number;
+            var life = string.IsNullOrEmpty(option.Life) ? null : option.Life;
+            best = new InvitationReplacement(
+                option.DocumentId,
+                option.ApplicationId,
+                number,
+                life == null ? ToneDone : InvitationLaterLife.Tone(life),
+                life);
+        }
+
+        return best;
+    }
+
     public static bool CanPreview(Mark mark) =>
         mark.Tone != ToneMissing
         && mark.DocumentId != Guid.Empty

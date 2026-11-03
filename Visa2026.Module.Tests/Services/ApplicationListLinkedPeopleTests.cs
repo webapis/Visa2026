@@ -273,6 +273,121 @@ public class ApplicationListLinkedPeopleTests
     }
 
     [Fact]
+    public void Build_places_the_new_invitation_beside_a_changed_one()
+    {
+        var person = Guid.NewGuid();
+        var oldInvitationId = Guid.NewGuid();
+        var newInvitationId = Guid.NewGuid();
+        var changeApplicationId = Guid.NewGuid();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { ProduceInvitation = true },
+        };
+        var replacement = new ApplicationListLinkedPeople.InvitationReplacement(
+            newInvitationId,
+            changeApplicationId,
+            "10/-2125",
+            ApplicationListLinkedPeople.ToneDone,
+            null);
+
+        var rows = ApplicationListLinkedPeople.Build(
+            application,
+            [person],
+            new Dictionary<Guid, string> { [person] = "Weijun Liu" },
+            invitation: new HashSet<Guid> { person },
+            workPermit: new HashSet<Guid>(),
+            visa: new HashSet<Guid>(),
+            borderZone: new HashSet<Guid>(),
+            rejection: new HashSet<Guid>(),
+            invitationLaterLife: new Dictionary<Guid, string> { [person] = InvitationLaterLife.Changed },
+            invitationDocuments: new Dictionary<Guid, Guid> { [person] = oldInvitationId },
+            invitationReplacements: new Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>
+            {
+                [person] = replacement,
+            });
+
+        var mark = rows[0].Marks[0];
+        Assert.Equal(oldInvitationId, mark.DocumentId);
+        Assert.Equal(InvitationLaterLife.Changed, mark.State);
+        Assert.Equal(replacement, mark.Replacement);
+        Assert.Equal(InvitationLaterLife.InForce, ApplicationListLinkedPeople.InvitationLife(replacement));
+    }
+
+    [Fact]
+    public void Build_does_not_add_a_new_invitation_when_the_old_one_is_still_in_force()
+    {
+        var person = Guid.NewGuid();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { ProduceInvitation = true },
+        };
+
+        var rows = ApplicationListLinkedPeople.Build(
+            application,
+            [person],
+            new Dictionary<Guid, string> { [person] = "Zihie Liu" },
+            invitation: new HashSet<Guid> { person },
+            workPermit: new HashSet<Guid>(),
+            visa: new HashSet<Guid>(),
+            borderZone: new HashSet<Guid>(),
+            rejection: new HashSet<Guid>(),
+            invitationReplacements: new Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>
+            {
+                [person] = new ApplicationListLinkedPeople.InvitationReplacement(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "10/-2125",
+                    ApplicationListLinkedPeople.ToneDone,
+                    null),
+            });
+
+        Assert.Null(rows[0].Marks[0].Replacement);
+    }
+
+    [Fact]
+    public void ChooseSuccessor_keeps_the_latest_issued_invitation_and_its_color()
+    {
+        var older = Guid.NewGuid();
+        var newer = Guid.NewGuid();
+        var newerDocument = Guid.NewGuid();
+        var chosen = ApplicationListLinkedPeople.ChooseSuccessor(
+        [
+            (new DateTime(2026, 1, 1), Guid.NewGuid(), older, "10/-1000", null),
+            (new DateTime(2026, 10, 1), newerDocument, newer, "10/-2125", InvitationLaterLife.Used),
+        ]);
+
+        Assert.NotNull(chosen);
+        Assert.Equal(newerDocument, chosen!.DocumentId);
+        Assert.Equal(newer, chosen.ApplicationId);
+        Assert.Equal("10/-2125", chosen.ApplicationNumber);
+        Assert.Equal(InvitationLaterLife.ToneUsed, chosen.Tone);
+        Assert.Equal(InvitationLaterLife.Used, chosen.State);
+    }
+
+    [Fact]
+    public void Invitation_preview_keeps_every_person_even_when_the_state_matches()
+    {
+        var weijun = Guid.NewGuid();
+        var zihie = Guid.NewGuid();
+        var mixed = new[]
+        {
+            new InvitationPreviewStates.PersonState(weijun, "Weijun Liu", InvitationLaterLife.Changed),
+            new InvitationPreviewStates.PersonState(zihie, "Zihie Liu", InvitationLaterLife.InForce),
+        };
+        var same = new[]
+        {
+            new InvitationPreviewStates.PersonState(weijun, "Weijun Liu", InvitationLaterLife.InForce),
+            new InvitationPreviewStates.PersonState(zihie, "Zihie Liu", InvitationLaterLife.InForce),
+        };
+
+        Assert.Equal(2, mixed.Length);
+        Assert.Equal(2, same.Length);
+        Assert.Equal(InvitationLaterLife.Changed, mixed[0].Life);
+        Assert.Equal(InvitationLaterLife.InForce, mixed[1].Life);
+        Assert.All(same, person => Assert.Equal(InvitationLaterLife.InForce, person.Life));
+    }
+
+    [Fact]
     public void FormatName_uses_first_middle_last()
     {
         Assert.Equal("Ali Gurban Berdiyev", ApplicationListLinkedPeople.FormatName("Ali", "Gurban", "Berdiyev"));

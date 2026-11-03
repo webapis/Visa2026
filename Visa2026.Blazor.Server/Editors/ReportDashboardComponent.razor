@@ -2425,6 +2425,7 @@
             FocusRecordKey = onlyCopy?.RecordKey,
             FocusDisplayName = onlyCopy?.RecordLabel ?? row.ColumnE,
             OpenPreviewOnly = onlyCopy != null,
+            PersonId = row.PersonId is Guid personId && personId != Guid.Empty ? personId : null,
         });
     }
 

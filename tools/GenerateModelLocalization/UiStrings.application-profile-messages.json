@@ -497,6 +497,18 @@
     "tk-TM": "Üýtgedildi",
     "ru-RU": "Изменено"
   },
+  "ApplicationProfileInstance.List.Mark.InvitationInForce": {
+    "en-US": "In force",
+    "tr-TR": "Yürürlükte",
+    "tk-TM": "Güýjünde",
+    "ru-RU": "Действует"
+  },
+  "ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle": {
+    "en-US": "New invitation",
+    "tr-TR": "Yeni davetiye",
+    "tk-TM": "Täze çakylyk",
+    "ru-RU": "Новое приглашение"
+  },
   "ApplicationProfile.Doc.WorkPermit": {
     "en-US": "Work permit",
     "tr-TR": "Çalışma izni",
