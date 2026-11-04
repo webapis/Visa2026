@@ -53,7 +53,8 @@ public static class ApplicationProfilePickerCaseSummaryDraft
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
         IObjectSpace objectSpace,
         Guid profileId,
-        IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? updates = null)
+        IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? updates = null,
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute = null)
     {
         ArgumentNullException.ThrowIfNull(objectSpace);
         if (profileId == Guid.Empty)
@@ -64,7 +65,13 @@ public static class ApplicationProfilePickerCaseSummaryDraft
             return Array.Empty<ApplicationWorkspaceCaseHeaderField>();
 
         var draft = objectSpace.CreateObject<ApplicationProfileInstance>();
-        ApplicationProfilePickerApplyHelper.ApplyProfileToNewApplication(objectSpace, draft, profile);
+        // Pass create-list route so Via Submit-to-organization fields/options appear
+        // (Seretmezlik template ProgressRoute is Direct).
+        ApplicationProfilePickerApplyHelper.ApplyProfileToNewApplication(
+            objectSpace,
+            draft,
+            profile,
+            creationProgressRoute);
         TryApplyUpdates(draft, objectSpace, updates, out _);
         return ForCreate(ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
             draft,

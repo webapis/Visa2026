@@ -124,7 +124,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
 
         var ids = applications.Select(a => a.ID).Where(id => id != Guid.Empty).Distinct().ToList();
         var roster = LoadPersonSets(LoadRosterPairs(objectSpace, ids));
-        var excluded = LoadPersonSets(LoadExcludedPairs(objectSpace, ids));
+        var excludedByInstance = LoadExcludedPeopleByInstance(objectSpace, ids);
         var invitationIndex = IndexIssuedDocuments(LoadInvitationPairs(objectSpace, ids));
         var workPermitIndex = IndexIssuedDocuments(LoadWorkPermitPairs(objectSpace, ids));
         var rejectionIndex = IndexIssuedDocuments(LoadRejectionPairs(objectSpace, ids));
@@ -144,7 +144,10 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         foreach (var application in applications)
         {
             roster.TryGetValue(application.ID, out var rosterIds);
-            excluded.TryGetValue(application.ID, out var excludedIds);
+            excludedByInstance.TryGetValue(application.ID, out var exclusions);
+            var excludedIds = exclusions is { Count: > 0 }
+                ? new HashSet<Guid>(exclusions.Keys)
+                : null;
             var activeRoster = ActiveRosterIds(rosterIds, excludedIds);
             var rosterCount = rosterIds is { Count: > 0 }
                 ? activeRoster?.Count ?? 0
@@ -158,9 +161,10 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 [ApplicationWorkspaceIssuedRecordsCatalog.BorderZone] = CountOnRoster(borderZone, application.ID, activeRoster),
             };
             application.SetListViewResultCoverage(Build(application, rosterCount, coverage));
+            // Full roster so excluded people still appear with the case Excluded badge (no Inv/Visa/WP marks).
             application.SetListViewLinkedPeople(ApplicationListLinkedPeople.Build(
                 application,
-                activeRoster,
+                rosterIds,
                 names,
                 Holders(invitation, application.ID),
                 Holders(workPermit, application.ID),
@@ -175,7 +179,8 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 DocumentsFor(visaIndex.Documents, application.ID),
                 DocumentsFor(borderZoneIndex.Documents, application.ID),
                 DocumentsFor(rejectionIndex.Documents, application.ID),
-                ReplacementsFor(invitationReplacements, application.ID)));
+                ReplacementsFor(invitationReplacements, application.ID),
+                exclusions));
         }
     }
 
@@ -545,25 +550,93 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         return fromPeople.Concat(fromLinks);
     }
 
-    private static IEnumerable<(Guid InstanceId, Guid PersonId)> LoadExcludedPairs(
+    /// <summary>
+    /// Same sources as <see cref="ApplicationProfileInstanceExclusionQueries.GetExcludedPeople"/> —
+    /// Seretmezlik reverse links first, then legacy in-case letters — batched for ListView.
+    /// </summary>
+    private static Dictionary<Guid, Dictionary<Guid, ApplicationProfileInstanceExcludedPerson>> LoadExcludedPeopleByInstance(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)
     {
+        var result = new Dictionary<Guid, Dictionary<Guid, ApplicationProfileInstanceExcludedPerson>>();
         if (objectSpace == null || ids.Count == 0)
-            return [];
+            return result;
+
+        void Put(Guid targetId, Guid personId, ApplicationProfileInstanceExcludedPerson meta)
+        {
+            if (targetId == Guid.Empty || personId == Guid.Empty)
+                return;
+            if (!result.TryGetValue(targetId, out var byPerson))
+            {
+                byPerson = new Dictionary<Guid, ApplicationProfileInstanceExcludedPerson>();
+                result[targetId] = byPerson;
+            }
+
+            byPerson.TryAdd(personId, meta);
+        }
+
+        var seretmezlikCases = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(i => i.TargetApplicationProfileInstanceId != null
+                && ids.Contains(i.TargetApplicationProfileInstanceId.Value))
+            .OrderBy(i => i.ApplicationDate)
+            .ToList();
+        if (seretmezlikCases.Count > 0)
+        {
+            var seretmezlikIds = seretmezlikCases.Select(s => s.ID).ToList();
+            var peopleBySeretmezlik = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Where(a => seretmezlikIds.Contains(a.ID))
+                .SelectMany(a => a.People.Select(p => new { InstanceId = a.ID, PersonId = p.ID }))
+                .ToList()
+                .GroupBy(x => x.InstanceId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.PersonId).Where(id => id != Guid.Empty).Distinct().ToList());
+
+            foreach (var seretmezlik in seretmezlikCases)
+            {
+                var targetId = seretmezlik.TargetApplicationProfileInstanceId ?? Guid.Empty;
+                if (targetId == Guid.Empty)
+                    continue;
+
+                var letterNumber = ApplicationProfileInstanceExclusionQueries.FormatSeretmezlikLetterNumber(seretmezlik);
+                var letterDate = seretmezlik.ApplicationDate == default
+                    ? DateTime.Today
+                    : seretmezlik.ApplicationDate.Date;
+                if (!peopleBySeretmezlik.TryGetValue(seretmezlik.ID, out var personIds))
+                    continue;
+
+                foreach (var personId in personIds)
+                {
+                    Put(
+                        targetId,
+                        personId,
+                        new ApplicationProfileInstanceExcludedPerson(seretmezlik.ID, letterNumber, letterDate));
+                }
+            }
+        }
 
         var letters = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusion>()
             .Where(e => ids.Contains(e.ApplicationProfileInstanceId))
             .ToList();
         if (letters.Count == 0)
-            return [];
+            return result;
 
-        var instanceByExclusion = letters.ToDictionary(e => e.ID, e => e.ApplicationProfileInstanceId);
-        var exclusionIds = instanceByExclusion.Keys.ToList();
-        return objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
+        var letterById = letters.ToDictionary(e => e.ID);
+        var exclusionIds = letterById.Keys.ToList();
+        var legacyPeople = objectSpace.GetObjectsQuery<ApplicationProfileInstanceExclusionPerson>()
             .Where(p => exclusionIds.Contains(p.ExclusionId) && p.PersonId != Guid.Empty)
-            .ToList()
-            .Select(p => (instanceByExclusion[p.ExclusionId], p.PersonId));
+            .ToList();
+
+        foreach (var row in legacyPeople.OrderBy(p =>
+                     letterById.TryGetValue(p.ExclusionId, out var letter) ? letter.LetterDate : DateTime.MaxValue))
+        {
+            if (!letterById.TryGetValue(row.ExclusionId, out var letter))
+                continue;
+            Put(
+                letter.ApplicationProfileInstanceId,
+                row.PersonId,
+                new ApplicationProfileInstanceExcludedPerson(letter.ID, letter.LetterNumber, letter.LetterDate));
+        }
+
+        return result;
     }
 
     private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadInvitationPairs(

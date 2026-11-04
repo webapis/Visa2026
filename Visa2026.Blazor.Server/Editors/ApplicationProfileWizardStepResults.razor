@@ -250,6 +250,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td><input type="checkbox" @bind="Profile.RequireTargetApplicationProfileInstance" disabled="@Disabled" /></td>
+                    <td>@Field("TargetApplicationProfileInstance")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
+                    <td></td>
+                    <td class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.TargetApplicationProfileInstanceHint")</td>
+                </tr>
+                <tr>
                     <td><input type="checkbox" @bind="Profile.RequireEntryDate" disabled="@Disabled" /></td>
                     <td>@Field("EntryDate")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindDate")</span></td>
                     <td>—</td><td>—</td>

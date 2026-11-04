@@ -12,6 +12,39 @@
     {
         <div class="ap-picker__loading" role="status">@Msg("ApplicationProfileInstance.Picker.Loading")</div>
     }
+    else if (Step == 2 && SelectedRow?.RequiresSubmitToOrganization == true)
+    {
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">@Msg("ApplicationProfileInstance.Picker.SubmitToOrganization")</h1>
+                <p class="ap-picker__profile-name" title="@SelectedProfileName">@SelectedProfileName</p>
+                <p class="ap-picker__sub">@Msg("ApplicationProfileInstance.Picker.SubmitToOrganizationSub")</p>
+            </div>
+        </header>
+
+        @RenderStatus()
+
+        <div class="ap-picker__section-head">
+            <h2 class="ap-picker__section-title">@Msg("ApplicationProfileInstance.Picker.SubmitToOrganizationMinistries")</h2>
+        </div>
+        <div class="ap-picker__versions">
+            @foreach (var option in SubmitToOrganizationOptions.Where(o => string.Equals(o.Kind, "ministry", StringComparison.OrdinalIgnoreCase)))
+            {
+                var selected = string.Equals(option.Value, SelectedSubmitToOrganizationValue, StringComparison.OrdinalIgnoreCase);
+                <div class="ap-picker__version @(selected ? "is-selected" : null)"
+                     role="button"
+                     tabindex="0"
+                     @onclick="() => SelectSubmitToOrganizationAndContinueAsync(option.Value)">
+                    <span class="ap-picker__version-title">@option.Name</span>
+                </div>
+            }
+        </div>
+
+        <div class="ap-picker__actions">
+            @RenderAdvance()
+            <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+        </div>
+    }
     else if (Step == 2)
     {
         <header class="ap-picker__header">
@@ -110,7 +143,9 @@
                 <p class="ap-picker__sub">@Msg("ApplicationProfileInstance.Picker.CaseSummarySub")</p>
                 <p class="ap-picker__crumb">
                     @Msg("ApplicationProfileInstance.Picker.CrumbProfile") ·
-                    @(SelectedRow?.RequiresApprovalLegVersion == true ? Msg("ApplicationProfileInstance.Picker.CrumbLegs") + " · " : null)
+                    @(SelectedRow?.RequiresSubmitToOrganization == true ? Msg("ApplicationProfileInstance.Picker.CrumbSubmitToOrganization") + " · "
+                        : SelectedRow?.RequiresApprovalLegVersion == true ? Msg("ApplicationProfileInstance.Picker.CrumbLegs") + " · "
+                        : null)
                     <strong>@Msg("ApplicationProfileInstance.Picker.CaseSummary")</strong>
                 </p>
             </div>
@@ -323,6 +358,10 @@
     [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.ShelfModel> Shelves { get; set; } = Array.Empty<ApplicationProfilePickerModel.ShelfModel>();
     [Parameter] public Guid SelectedProfileId { get; set; }
     [Parameter] public Guid SelectedVersionId { get; set; }
+    [Parameter] public string SelectedSubmitToOrganizationValue { get; set; } = string.Empty;
+    [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.SubmitToOrganizationOptionModel> SubmitToOrganizationOptions { get; set; }
+        = Array.Empty<ApplicationProfilePickerModel.SubmitToOrganizationOptionModel>();
+    [Parameter] public EventCallback<string> SelectSubmitToOrganizationRequested { get; set; }
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public bool IsStatusWarning { get; set; }
@@ -571,6 +610,16 @@
             await NextStepRequested.InvokeAsync();
     }
 
+    private async Task SelectSubmitToOrganizationAndContinueAsync(string value)
+    {
+        if (IsAdvancing || string.IsNullOrWhiteSpace(value))
+            return;
+        if (SelectSubmitToOrganizationRequested.HasDelegate)
+            await SelectSubmitToOrganizationRequested.InvokeAsync(value);
+        if (NextStepRequested.HasDelegate)
+            await NextStepRequested.InvokeAsync();
+    }
+
     private async Task UseProfileAsync()
     {
         if (UseProfileRequested.HasDelegate)
@@ -635,6 +684,24 @@
                                          CatalogItems="@field.MultiSelectOptions"
                                          ValueChanged="@(value => OnCaseSummaryFieldChanged(field.Key, value))" />
             }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+                     && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
+            {
+                <TargetApplicationSearchField Value="@field.Value"
+                                              Options="@field.Options"
+                                              ReadOnly="@field.ReadOnly"
+                                              Placeholder="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"
+                                              Title="@Msg("ApplicationProfile.Field.TargetApplicationProfileInstance")"
+                                              Subtitle="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchSub")"
+                                              SearchPlaceholder="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchPlaceholder")"
+                                              OpenLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchOpen")"
+                                              ChangeLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchChange")"
+                                              CancelLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchCancel")"
+                                              SelectLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchSelect")"
+                                              EmptyLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchEmpty")"
+                                              NoPeopleLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationNoPeople")"
+                                              ValueChanged="value => OnCaseSummaryFieldChanged(field.Key, value)" />
+            }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
             {
                 <div class="cw-summary-lookup-row">
@@ -645,8 +712,10 @@
                         <option value="">@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")</option>
                         @foreach (var option in field.Options)
                         {
-                            var optionId = option.Id.ToString("D");
-                            <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                            var optionValue = !string.IsNullOrWhiteSpace(option.SearchText)
+                                ? option.SearchText
+                                : option.Id.ToString("D");
+                            <option value="@optionValue" selected="@(string.Equals(field.Value, optionValue, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
                         }
                     </select>
                     @if (CanAddAlternativeAddress(field))

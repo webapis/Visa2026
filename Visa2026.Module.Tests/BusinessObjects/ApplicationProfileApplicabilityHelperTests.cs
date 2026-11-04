@@ -35,6 +35,27 @@ public class ApplicationProfileApplicabilityHelperTests
     }
 
     [Fact]
+    public void IsProfileSelectable_AllowsSeretmezlikOnEitherProgressRoute()
+    {
+        var profile = new ApplicationProfile
+        {
+            IsActive = true,
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            RequireTargetApplicationProfileInstance = true,
+        };
+
+        Assert.True(ApplicationProfileApplicabilityHelper.IsProfileSelectable(
+            profile,
+            null,
+            ApplicationProfileInstanceProgressRouteKind.ViaMinistries));
+
+        Assert.True(ApplicationProfileApplicabilityHelper.IsProfileSelectable(
+            profile,
+            null,
+            ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService));
+    }
+
+    [Fact]
     public void IsProfileSelectable_AllowsEmptyApplicabilityCriteria()
     {
         var profile = new ApplicationProfile

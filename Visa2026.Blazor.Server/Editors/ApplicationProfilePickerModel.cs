@@ -54,6 +54,25 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public string SelectedSubmitToOrganizationValue
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<SubmitToOrganizationOptionModel> SubmitToOrganizationOptions
+    {
+        get => GetPropertyValue<IReadOnlyList<SubmitToOrganizationOptionModel>>()
+            ?? Array.Empty<SubmitToOrganizationOptionModel>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<string> SelectSubmitToOrganizationRequested
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
     public string? StatusMessage
     {
         get => GetPropertyValue<string?>();
@@ -261,10 +280,21 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
 
         public bool RequiresApprovalLegVersion { get; init; }
 
+        public bool RequiresSubmitToOrganization { get; init; }
+
         public bool MissingApprovalLegVersions { get; init; }
 
         public IReadOnlyList<VersionOptionModel> ApprovalLegVersions { get; init; }
             = Array.Empty<VersionOptionModel>();
+    }
+
+    public sealed class SubmitToOrganizationOptionModel
+    {
+        public string Value { get; init; } = string.Empty;
+
+        public string Name { get; init; } = string.Empty;
+
+        public string Kind { get; init; } = string.Empty;
     }
 
     public sealed class ShelfModel

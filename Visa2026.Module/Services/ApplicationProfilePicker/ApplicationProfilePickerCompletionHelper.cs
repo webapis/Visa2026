@@ -227,14 +227,17 @@ public static class ApplicationProfilePickerCompletionHelper
                 approvalLegVersionId,
                 objectSpace,
                 out var sharedProfile,
-                out errorMessage))
+                out errorMessage,
+                context?.CreationProgressRoute))
         {
             return false;
         }
 
         // Legacy nested versions if the shared catalog is empty
         if (sharedProfile == null
-            && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+            && ApplicationProfileApprovalLegVersionHelper.ResolveEffectiveCreateRoute(
+                    profile, context?.CreationProgressRoute)
+                == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
             && ApplicationProfileApprovalLegVersionHelper.GetOrderedVersions(profile).Count > 0)
         {
             if (!ApplicationProfileApprovalLegVersionHelper.TryResolveVersionForCreate(

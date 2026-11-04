@@ -28,4 +28,17 @@ public class ApplicationProfilePickerRowTests
 
         Assert.False(row.RequiresApprovalLegVersion);
     }
+
+    [Fact]
+    public void RequiresApprovalLegVersion_TrueWhenCreateListOverridesToVia()
+    {
+        // QueryService sets ProgressRoute from the create-list filter for dual-list Seretmezlik.
+        var row = new ApplicationProfilePickerRow
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            Code = "seretmezlik",
+        };
+
+        Assert.True(row.RequiresApprovalLegVersion);
+    }
 }

@@ -295,6 +295,21 @@ public class ApplicationProfile : BaseObject
     public virtual CheckPoint? DefaultEntryCheckPoint { get; set; }
     public virtual Guid? DefaultEntryCheckPointId { get; set; }
 
+    /// <summary>
+    /// Seretmezlik templates: Case summary requires a target Application Profile Instance
+    /// (invitation / visa / work-permit case) whose roster people can be excluded.
+    /// No profile-level default — officers pick the instance at create.
+    /// </summary>
+    [XafDisplayName("Target application profile instance")]
+    public virtual bool RequireTargetApplicationProfileInstance { get; set; }
+
+    /// <summary>
+    /// Officer picks one ApprovingMinistry or MigrationService at create (not Approval legs).
+    /// Progress ends at Submitted to {organization}. Reusable beyond Seretmezlik.
+    /// </summary>
+    [XafDisplayName("Submit to organization")]
+    public virtual bool RequireSubmitToOrganization { get; set; }
+
     // Unused leftover: tenant Default lives on catalog IsDefault, not on the profile.
     [VisibleInDetailView(false), VisibleInListView(false), VisibleInLookupListView(false)]
     public virtual AuthorizedSignatory? DefaultAuthorizedSignatory { get; set; }
@@ -1086,6 +1101,8 @@ public static class ApplicationProfileLockHelper
         || original.RequireEntryDate != current.RequireEntryDate
         || original.RequireEntryCheckPoint != current.RequireEntryCheckPoint
         || original.DefaultEntryCheckPointId != current.DefaultEntryCheckPointId
+        || original.RequireTargetApplicationProfileInstance != current.RequireTargetApplicationProfileInstance
+        || original.RequireSubmitToOrganization != current.RequireSubmitToOrganization
         || original.DefaultAuthorizedSignatoryId != current.DefaultAuthorizedSignatoryId
         || original.DefaultVisaRepresentativeId != current.DefaultVisaRepresentativeId
         || original.MinistrySlaDays != current.MinistrySlaDays

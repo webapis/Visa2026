@@ -55,6 +55,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string InstanceNumber = "InstanceNumber";
     public const string InstanceDate = "InstanceDate";
     public const string ProcessNumber = "ProcessNumber";
+    public const string TargetApplicationProfileInstance = "TargetApplicationProfileInstance";
+    public const string SubmitToOrganization = "SubmitToOrganization";
     public const int InstanceNumberMaxLength = 100;
 
     /// <summary>Case summary right-frame fields: number, date, process number, urgency (when shown).</summary>
@@ -110,6 +112,32 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             processNumber,
             ApplicationProcessNumberHelper.MaxLength,
             ProcessNumberFill(application, processNumber));
+
+        var targetVisible = Visible(
+            profile,
+            p => p.RequireTargetApplicationProfileInstance,
+            ApplicationProfileConfigurationResolver.ShowTargetApplicationProfileInstance,
+            application);
+        var targetLocked = targetVisible
+            && application.TargetApplicationProfileInstanceId.HasValue
+            && application.TargetApplicationProfileInstanceId.Value != Guid.Empty
+            && (application.People?.Any(p => p != null && p.ID != Guid.Empty) == true);
+        AddLookup(
+            fields,
+            TargetApplicationProfileInstance,
+            ApplicationProfileLocalization.Field("TargetApplicationProfileInstance"),
+            "purple",
+            "🔗",
+            targetVisible,
+            application.TargetApplicationProfileInstanceId ?? application.TargetApplicationProfileInstance?.ID,
+            FormatTargetInstanceLabel(application.TargetApplicationProfileInstance),
+            catalogs.TargetApplicationProfileInstances,
+            readOnly: targetLocked,
+            LookupFill(
+                application.TargetApplicationProfileInstanceId ?? application.TargetApplicationProfileInstance?.ID,
+                defaultId: null));
+
+        AddSubmitToOrganizationField(fields, application, profile, catalogs);
 
         AddLookup(fields, VisaType, ApplicationProfileLocalization.Field("VisaType"), "blue", "🛂",
             Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application),
@@ -385,6 +413,19 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     value,
                     requireWhenVisible: ApplicationProcessNumberHelper.HasProcessStartedStep(application),
                     out error);
+            case TargetApplicationProfileInstance:
+                if (!Visible(
+                    profile,
+                    p => p.RequireTargetApplicationProfileInstance,
+                    ApplicationProfileConfigurationResolver.ShowTargetApplicationProfileInstance,
+                    application))
+                    return Hidden(out error);
+                return TrySetTargetApplicationProfileInstance(application, objectSpace, value, out error);
+            case SubmitToOrganization:
+                if (!ApplicationProfileConfigurationResolver.ShowSubmitToOrganization(application))
+                    return Hidden(out error);
+                return ApplicationProfileSubmitToOrganizationHelper
+                    .TryApply(objectSpace, application, value, out error);
             case VisaType:
                 if (!Visible(profile, p => p.RequireVisaType, ApplicationProfileConfigurationResolver.ShowVisaType, application))
                     return Hidden(out error);
@@ -831,6 +872,41 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         });
     }
 
+    private static void AddSubmitToOrganizationField(
+        List<ApplicationWorkspaceCaseHeaderField> fields,
+        ApplicationProfileInstance application,
+        ApplicationProfile? profile,
+        Catalogs catalogs)
+    {
+        // Via create list only — not profile.Require* alone (Direct hides this field).
+        if (!ApplicationProfileConfigurationResolver.ShowSubmitToOrganization(application))
+            return;
+
+        var value = ApplicationProfileSubmitToOrganizationHelper
+            .EncodeValue(application);
+        var label = ApplicationProfileSubmitToOrganizationHelper
+            .FormatDestinationLabel(application);
+        var selectedId = application.SubmitToApprovingMinistryId
+            ?? application.SubmitToApprovingMinistry?.ID
+            ?? application.SubmitToMigrationServiceId
+            ?? application.SubmitToMigrationService?.ID;
+
+        fields.Add(new ApplicationWorkspaceCaseHeaderField
+        {
+            Key = SubmitToOrganization,
+            Label = ApplicationProfileLocalization.Field("SubmitToOrganization"),
+            Kind = ApplicationWorkspaceCaseHeaderFieldKind.Lookup,
+            Tone = "teal",
+            Glyph = "🏛",
+            SelectedId = selectedId,
+            Value = value,
+            DisplayValue = string.IsNullOrWhiteSpace(label) ? "—" : label!,
+            Options = catalogs.SubmitToOrganizations,
+            ReadOnly = false,
+            FillState = LookupFill(selectedId, defaultId: null),
+        });
+    }
+
     private static void AddDate(
         List<ApplicationWorkspaceCaseHeaderField> fields,
         string key,
@@ -1064,6 +1140,78 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return ApplicationProcessNumberHelper.HasProcessStartedStep(application)
             ? ApplicationWorkspaceCaseSummaryFillState.Empty
             : ApplicationWorkspaceCaseSummaryFillState.Default;
+    }
+
+    private static string FormatTargetInstanceLabel(ApplicationProfileInstance? target)
+    {
+        if (target == null)
+            return string.Empty;
+
+        var number = !string.IsNullOrWhiteSpace(target.FullApplicationNumber)
+            ? target.FullApplicationNumber.Trim()
+            : target.ApplicationNumber?.Trim() ?? string.Empty;
+        var profileName = target.ApplicationProfile?.DisplayName
+            ?? target.ApplicationProfile?.Name
+            ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(number) && string.IsNullOrWhiteSpace(profileName))
+            return string.Empty;
+        if (string.IsNullOrWhiteSpace(profileName))
+            return number;
+        if (string.IsNullOrWhiteSpace(number))
+            return profileName;
+        return $"{number} · {profileName}";
+    }
+
+    private static bool TrySetTargetApplicationProfileInstance(
+        ApplicationProfileInstance application,
+        IObjectSpace objectSpace,
+        string? value,
+        out string? error)
+    {
+        error = null;
+        if (application.People?.Any(p => p != null && p.ID != Guid.Empty) == true
+            && application.TargetApplicationProfileInstanceId.HasValue
+            && application.TargetApplicationProfileInstanceId.Value != Guid.Empty)
+        {
+            error = "Target application cannot change after people are linked to this Seretmezlik case.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            application.TargetApplicationProfileInstance = null;
+            application.TargetApplicationProfileInstanceId = null;
+            return true;
+        }
+
+        if (!Guid.TryParse(value.Trim(), out var id) || id == Guid.Empty)
+        {
+            error = "Select a valid target application.";
+            return false;
+        }
+
+        if (id == application.ID)
+        {
+            error = "A Seretmezlik case cannot target itself.";
+            return false;
+        }
+
+        var target = objectSpace.GetObjectByKey<ApplicationProfileInstance>(id);
+        if (target == null)
+        {
+            error = "Target application was not found.";
+            return false;
+        }
+
+        if (ApplicationProfileConfigurationResolver.IsSeretmezlikInstance(target))
+        {
+            error = "Choose an issuance case, not another Seretmezlik case.";
+            return false;
+        }
+
+        application.TargetApplicationProfileInstance = target;
+        application.TargetApplicationProfileInstanceId = target.ID;
+        return true;
     }
 
     private static bool SetDate(string? value, Action<DateTime?> assign, out string? error)
@@ -1433,6 +1581,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> BusinessTripAddresses { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> AlternativeAddresses { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> TargetApplicationProfileInstances { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> SubmitToOrganizations { get; init; } = [];
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
         public IReadOnlyList<string> WorkPermittedLocationNames { get; init; } = [];
 
@@ -1460,6 +1610,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 #pragma warning restore CS0618
                 CheckPoints = LoadItems<CheckPoint>(objectSpace),
                 AlternativeAddresses = LoadAlternativeAddresses(objectSpace),
+                TargetApplicationProfileInstances = LoadTargetApplicationProfileInstances(objectSpace),
+                SubmitToOrganizations = LoadSubmitToOrganizationOptions(objectSpace),
                 BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
                     objectSpace,
                     typeof(BorderZoneName),
@@ -1468,6 +1620,51 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     objectSpace,
                     typeof(WorkPermittedLocationName),
                     string.Empty),
+            };
+        }
+
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadTargetApplicationProfileInstances(
+            IObjectSpace objectSpace)
+        {
+            return objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Include(i => i.ApplicationProfile)
+                .Include(i => i.People)
+                .Where(i => i.ApplicationProfile == null
+                    || !i.ApplicationProfile.RequireTargetApplicationProfileInstance)
+                .OrderByDescending(i => i.ApplicationDate)
+                .Take(500)
+                .ToList()
+                .Select(ToTargetApplicationLookupOption)
+                .Where(o => !string.IsNullOrWhiteSpace(o.DisplayName))
+                .ToList();
+        }
+
+        private static ApplicationWorkspaceLookupOption ToTargetApplicationLookupOption(
+            ApplicationProfileInstance instance)
+        {
+            var display = FormatTargetInstanceLabel(instance);
+            var peopleNames = (instance.People ?? Enumerable.Empty<Person>())
+                .Where(p => p != null && !string.IsNullOrWhiteSpace(p.FullName))
+                .Select(p => p.FullName!.Trim())
+                .Distinct(StringComparer.CurrentCultureIgnoreCase)
+                .OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+            var detail = peopleNames.Count == 0
+                ? string.Empty
+                : string.Join(", ", peopleNames);
+            var number = !string.IsNullOrWhiteSpace(instance.FullApplicationNumber)
+                ? instance.FullApplicationNumber.Trim()
+                : instance.ApplicationNumber?.Trim() ?? string.Empty;
+            var search = string.Join(
+                ' ',
+                new[] { number, display, detail }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+            return new ApplicationWorkspaceLookupOption
+            {
+                Id = instance.ID,
+                DisplayName = display,
+                Detail = detail,
+                SearchText = search,
             };
         }
 
@@ -1515,6 +1712,28 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .OrderBy(item => item.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
         }
+
+        /// <summary>Via Submit-to-organization: ApprovingMinistry only (no MigrationService).</summary>
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadSubmitToOrganizationOptions(
+            IObjectSpace objectSpace) =>
+            objectSpace.GetObjectsQuery<ApprovingMinistry>()
+                .AsEnumerable()
+                .Select(m =>
+                {
+                    var name = string.IsNullOrWhiteSpace(m.ShortNameTm) ? m.NameTm : m.ShortNameTm;
+                    name = name?.Trim() ?? string.Empty;
+                    return new ApplicationWorkspaceLookupOption
+                    {
+                        Id = m.ID,
+                        DisplayName = string.IsNullOrWhiteSpace(name) ? m.ID.ToString("D") : name,
+                        Detail = "ministry",
+                        SearchText = ApplicationProfileSubmitToOrganizationHelper
+                            .MinistryValuePrefix + m.ID.ToString("D"),
+                    };
+                })
+                .Where(o => !string.IsNullOrWhiteSpace(o.DisplayName))
+                .OrderBy(o => o.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
 
         private static IReadOnlyList<SiteCatalogOption> LoadLodgings(IObjectSpace objectSpace) =>
             LoadSites(

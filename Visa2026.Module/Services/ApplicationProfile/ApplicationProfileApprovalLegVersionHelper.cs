@@ -196,10 +196,22 @@ public static class ApplicationProfileApprovalLegVersionHelper
         return profile?.ApprovalLegs?.Count(l => l.ApprovingMinistry != null) ?? 0;
     }
 
-    public static bool RequiresVersionPick(ApplicationProfile? profile, IObjectSpace? objectSpace = null) =>
+    public static bool RequiresVersionPick(
+        ApplicationProfile? profile,
+        IObjectSpace? objectSpace = null,
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute = null) =>
         profile != null
-        && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+        && ResolveEffectiveCreateRoute(profile, creationProgressRoute)
+            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
         && (GetSharedActiveProfiles(objectSpace).Count > 0 || GetOrderedVersions(profile).Count > 0);
+
+    /// <summary>
+    /// Create-list route when set (Seretmezlik on Via vs Direct); otherwise the profile template route.
+    /// </summary>
+    public static ApplicationProfileInstanceProgressRouteKind ResolveEffectiveCreateRoute(
+        ApplicationProfile profile,
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute) =>
+        creationProgressRoute ?? profile.ProgressRoute;
 
     /// <summary>Resolve shared <see cref="ApprovalLegProfile"/> for instance create (preferred path).</summary>
     public static bool TryResolveSharedProfileForCreate(
@@ -207,12 +219,18 @@ public static class ApplicationProfileApprovalLegVersionHelper
         Guid? requestedApprovalLegProfileId,
         IObjectSpace objectSpace,
         out ApprovalLegProfile? sharedProfile,
-        out string? errorMessage)
+        out string? errorMessage,
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute = null)
     {
         sharedProfile = null;
         errorMessage = null;
 
-        if (profile.ProgressRoute != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
+        // Submit-to-organization templates never use Approval legs.
+        if (ApplicationProfileConfigurationResolver.IsSubmitToOrganizationProfile(profile))
+            return true;
+
+        if (ResolveEffectiveCreateRoute(profile, creationProgressRoute)
+            != ApplicationProfileInstanceProgressRouteKind.ViaMinistries)
             return true;
 
         // Prefer a single keyed load for the write ObjectSpace — do not pull the entire

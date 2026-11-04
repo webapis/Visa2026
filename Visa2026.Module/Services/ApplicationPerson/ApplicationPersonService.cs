@@ -5,6 +5,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.MigrationImport;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
@@ -24,6 +25,10 @@ public static class ApplicationProfileInstancePersonService
             return null;
 
         if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            return null;
+
+        if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateLinkPerson(
+                objectSpace, application, person, out _))
             return null;
 
         application.People ??= new System.Collections.ObjectModel.ObservableCollection<Person>();
@@ -184,6 +189,11 @@ public static class ApplicationProfileInstancePersonService
             return;
 
         if (!ignoreRosterLock && ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            return;
+
+        if (!ignoreRosterLock
+            && ApplicationProfileInstanceSeretmezlikRosterHelper.IsSeretmezlik(application)
+            && application.People?.Any(p => p != null && p.ID == person.ID) == true)
             return;
 
         var personId = person.ID;

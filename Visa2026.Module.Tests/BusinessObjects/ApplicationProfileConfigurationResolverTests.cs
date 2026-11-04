@@ -41,6 +41,47 @@ public class ApplicationProfileConfigurationResolverTests
     }
 
     [Fact]
+    public void GetProgressRoute_ViaEvidenceWinsOverDirectSeretmezlikTemplate()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            RequireTargetApplicationProfileInstance = true,
+        };
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApprovalLegSnapshots =
+            [
+                new ApplicationProfileInstanceApprovalLegSnapshot
+                {
+                    Sequence = 1,
+                    MinistryShortName = "TNGIZ",
+                },
+            ],
+        };
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+            ApplicationProfileConfigurationResolver.GetProgressRoute(app));
+    }
+
+    [Fact]
+    public void GetProgressRoute_DirectSeretmezlikWithoutLegsStaysDirect()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            RequireTargetApplicationProfileInstance = true,
+        };
+        var app = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            ApplicationProfileConfigurationResolver.GetProgressRoute(app));
+    }
+
+    [Fact]
     public void ShowVisaType_UsesProfileRequireFlag()
     {
         var profile = new ApplicationProfile { RequireVisaType = true };

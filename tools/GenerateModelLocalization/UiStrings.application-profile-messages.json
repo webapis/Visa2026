@@ -173,6 +173,59 @@
     "tk-TM": "Proses belgisi",
     "ru-RU": "Номер процесса"
   },
+  "ApplicationProfile.Field.SubmitToOrganization": {
+    "en-US": "Submit to organization",
+    "tr-TR": "Kuruma gönder",
+    "tk-TM": "Gurama iber",
+    "ru-RU": "Отправить в организацию"
+  },
+  "ApplicationProfileInstance.Picker.SubmitToOrganization": {
+    "en-US": "Submit to organization",
+    "tr-TR": "Kuruma gönder",
+    "tk-TM": "Gurama iber",
+    "ru-RU": "Отправить в организацию"
+  },
+  "ApplicationProfileInstance.Picker.SubmitToOrganizationSub": {
+    "en-US": "Choose the ministry this letter is submitted to. Progress shows Submitted to that ministry.",
+    "tr-TR": "Bu mektubun gönderileceği bakanlığı seçin. İlerleme o bakana gönderildi olarak görünür.",
+    "tk-TM": "Bu hatyň iberiljek ministrligini saýlaň. Progress şol ministrlige iberildi diýip görkezýär.",
+    "ru-RU": "Выберите министерство, куда подаётся письмо. В прогрессе будет «Отправлено в …»."
+  },
+  "ApplicationProfileInstance.Picker.SubmitToOrganizationMinistries": {
+    "en-US": "Ministries",
+    "tr-TR": "Bakanlıklar",
+    "tk-TM": "Ministrlikler",
+    "ru-RU": "Министерства"
+  },
+  "ApplicationProfileInstance.Picker.SubmitToOrganizationMigrations": {
+    "en-US": "Migration services",
+    "tr-TR": "Göç hizmetleri",
+    "tk-TM": "Migrasiýa gulluklary",
+    "ru-RU": "Службы миграции"
+  },
+  "ApplicationProfileInstance.Picker.SelectSubmitToOrganization": {
+    "en-US": "Select a ministry or migration service.",
+    "tr-TR": "Bir bakanlık veya göç hizmeti seçin.",
+    "tk-TM": "Ministrlik ýa-da migrasiýa gullugyny saýlaň.",
+    "ru-RU": "Выберите министерство или службу миграции."
+  },
+  "ApplicationProfileInstance.Picker.CrumbSubmitToOrganization": {
+    "en-US": "Organization",
+    "tr-TR": "Kurum",
+    "tk-TM": "Gurama",
+    "ru-RU": "Организация"
+  },  "ApplicationProfile.Field.TargetApplicationProfileInstance": {
+    "en-US": "Target application",
+    "tr-TR": "Hedef başvuru",
+    "tk-TM": "Nyşanlanan ýüztutma",
+    "ru-RU": "Целевая заявка"
+  },
+  "ApplicationProfile.Wizard.TargetApplicationProfileInstanceHint": {
+    "en-US": "Instance picks one issuance case (invitation / visa / work permit). No profile default.",
+    "tr-TR": "Örnek, bir düzenleme davasını seçer (davetiye / vize / çalışma izni). Şablon varsayılanı yok.",
+    "tk-TM": "Mysal bir çykaryş ýüztutmasyny saýlaýar (çakylyk / wiza / iş rugsady). Şablonda bellenen baha ýok.",
+    "ru-RU": "Экземпляр выбирает одно дело на выдачу (приглашение / виза / разрешение). Без значения по умолчанию в шаблоне."
+  },
   "ApplicationProfile.Field.VisaType": {
     "en-US": "Visa type",
     "tr-TR": "Vize türü",
@@ -2369,6 +2422,54 @@
     "tk-TM": "— Saýlaň —",
     "ru-RU": "— Выберите —"
   },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchSub": {
+    "en-US": "Search by application number or person name, then Select.",
+    "tr-TR": "Başvuru numarası veya kişi adına göre arayın, sonra Seçin.",
+    "tk-TM": "Ýüztutma belgisi ýa-da adamyň ady boýunça gözläň, soňra Saýlaň.",
+    "ru-RU": "Ищите по номеру заявки или имени человека, затем Выберите."
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchPlaceholder": {
+    "en-US": "Application number or person name…",
+    "tr-TR": "Başvuru numarası veya kişi adı…",
+    "tk-TM": "Ýüztutma belgisi ýa-da adamyň ady…",
+    "ru-RU": "Номер заявки или имя человека…"
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchOpen": {
+    "en-US": "Search…",
+    "tr-TR": "Ara…",
+    "tk-TM": "Gözle…",
+    "ru-RU": "Найти…"
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchChange": {
+    "en-US": "Change",
+    "tr-TR": "Değiştir",
+    "tk-TM": "Üýtget",
+    "ru-RU": "Изменить"
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchCancel": {
+    "en-US": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchSelect": {
+    "en-US": "Select",
+    "tr-TR": "Seç",
+    "tk-TM": "Saýla",
+    "ru-RU": "Выбрать"
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationSearchEmpty": {
+    "en-US": "No matching applications.",
+    "tr-TR": "Eşleşen başvuru yok.",
+    "tk-TM": "Gabat gelýän ýüztutma ýok.",
+    "ru-RU": "Подходящих заявок нет."
+  },
+  "ApplicationProfileInstance.Picker.TargetApplicationNoPeople": {
+    "en-US": "No people on roster",
+    "tr-TR": "Kadroda kişi yok",
+    "tk-TM": "Sanawda adam ýok",
+    "ru-RU": "В составе нет людей"
+  },
   "ApplicationProfileInstance.Picker.MetaLine": {
     "en-US": "{0} · Related to: {1} · {2}",
     "tr-TR": "{0} · İlgili: {1} · {2}",
@@ -4067,11 +4168,29 @@
     "tk-TM": "Wiza",
     "ru-RU": "Виза"
   },
+  "ApplicationProfileInstance.People.ExcludedByTitle": {
+    "en-US": "Excluded by Seretmezlik № {0} · {1}",
+    "tr-TR": "Seretmezlik ile hariç № {0} · {1}",
+    "tk-TM": "Seretmezlik № {0} · {1}",
+    "ru-RU": "Исключён по Seretmezlik № {0} · {1}"
+  },
+  "ApplicationProfileInstance.People.ExcludedStayOnRoster": {
+    "en-US": "Excluded people stay on the roster",
+    "tr-TR": "Hariç tutulan kişiler listede kalır",
+    "tk-TM": "Seretmezlik edilen adamlar sanawda galýar",
+    "ru-RU": "Исключённые остаются в списке"
+  },
   "ApplicationProfileInstance.Picker.Shelf.BorderZone": {
     "en-US": "Border zone",
     "tr-TR": "Sınır bölgesi",
     "tk-TM": "Serhet Ýaka",
     "ru-RU": "Приграничная зона"
+  },
+  "ApplicationProfileInstance.Picker.Shelf.Seretmezlik": {
+    "en-US": "Seretmezlik",
+    "tr-TR": "Seretmezlik",
+    "tk-TM": "Seretmezlik",
+    "ru-RU": "Seretmezlik"
   },
   "ApplicationProfileInstance.Picker.Shelf.BusinessTrip": {
     "en-US": "Business trip",

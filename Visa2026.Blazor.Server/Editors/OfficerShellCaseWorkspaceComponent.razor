@@ -411,7 +411,7 @@
         ("result", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApplicationResult"), "⚑"),
         ("documents", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents"), "📄"),
         ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar"), "📦"),
-        ("seretmezlik", "Seretmezlik", "⊘"),
+        // Seretmezlik tab removed (slice 15): use standalone Seretmezlik Application Profile Instance.
         ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla"), "⏱"),
         ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization"), "🏢"),
     ];
@@ -544,10 +544,10 @@
             ? Array.Empty<Guid>()
             : _selectedDocumentPersonIds.ToList();
 
-    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "seretmezlik" or "organization";
+    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "organization";
 
     private static string ExcludedTitle(ApplicationWorkspaceCasePerson person) =>
-        $"Excluded by Seretmezlik № {person.ExcludedLetterNumber} · {person.ExcludedLetterDate:dd.MM.yyyy}";
+        ApplicationListLinkedPeople.FormatExcludedTitle(person.ExcludedLetterNumber, person.ExcludedLetterDate);
 
     private string? EffectivePeopleRecordKey =>
         !string.IsNullOrWhiteSpace(_peopleRecordKey)
@@ -1627,6 +1627,24 @@
                                          CatalogItems="@field.MultiSelectOptions"
                                          ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
             }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+                     && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
+            {
+                <TargetApplicationSearchField Value="@field.Value"
+                                              Options="@field.Options"
+                                              ReadOnly="@field.ReadOnly"
+                                              Placeholder="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"
+                                              Title="@Msg("ApplicationProfile.Field.TargetApplicationProfileInstance")"
+                                              Subtitle="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchSub")"
+                                              SearchPlaceholder="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchPlaceholder")"
+                                              OpenLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchOpen")"
+                                              ChangeLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchChange")"
+                                              CancelLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchCancel")"
+                                              SelectLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchSelect")"
+                                              EmptyLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchEmpty")"
+                                              NoPeopleLabel="@Msg("ApplicationProfileInstance.Picker.TargetApplicationNoPeople")"
+                                              ValueChanged="value => OnHeaderFieldChanged(field.Key, value)" />
+            }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
             {
                 <div class="cw-summary-lookup-row">
@@ -1637,8 +1655,10 @@
                         <option value="">— Select —</option>
                         @foreach (var option in field.Options)
                         {
-                            var optionId = option.Id.ToString("D");
-                            <option value="@optionId" selected="@(string.Equals(field.Value, optionId, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                            var optionValue = !string.IsNullOrWhiteSpace(option.SearchText)
+                                ? option.SearchText
+                                : option.Id.ToString("D");
+                            <option value="@optionValue" selected="@(string.Equals(field.Value, optionValue, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
                         }
                     </select>
                     @if (CanAddAlternativeAddress(field))
@@ -2482,7 +2502,7 @@
                                                 @onclick="() => OpenExistingPersonLinkReviewAsync(person.PersonId)">@person.Name</button>
                                         @if (person.IsExcluded)
                                         {
-                                            <span class="cw-excluded-badge" title="@ExcludedTitle(person)">⊘ Excluded · № @person.ExcludedLetterNumber · @person.ExcludedLetterDate?.ToString("dd.MM.yyyy")</span>
+                                            <span class="cw-excluded-badge" title="@ExcludedTitle(person)">@ApplicationListLinkedPeople.FormatExcludedBadge(person.ExcludedLetterNumber, person.ExcludedLetterDate)</span>
                                         }
                                     </td>
                                     <td>@person.RoleLabel</td>
@@ -2501,7 +2521,7 @@
                                         <button type="button"
                                                 class="os-btn ct-btn-sm"
                                                 disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty || IsRelinking || person.IsExcluded)"
-                                                title="@(person.IsExcluded ? "Excluded people stay on the roster" : null)"
+                                                title="@(person.IsExcluded ? VisaUiMessages.Get("ApplicationProfileInstance.People.ExcludedStayOnRoster") : null)"
                                                 @onclick:stopPropagation="true"
                                                 @onclick="() => UnlinkPersonById(person.PersonId)">Unlink</button>
                                     </td>

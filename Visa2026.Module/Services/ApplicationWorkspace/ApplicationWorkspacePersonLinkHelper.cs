@@ -7,6 +7,7 @@ using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -61,6 +62,16 @@ public static class ApplicationWorkspacePersonLinkHelper
             }
 
             var person = linkObjectSpace.GetObject(selectedPerson);
+            if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateLinkPerson(
+                    linkObjectSpace, applicationBo, person, out var seretmezlikError))
+            {
+                application.ShowViewStrategy.ShowMessage(
+                    seretmezlikError ?? "Could not link the selected person.",
+                    InformationType.Warning);
+                e.Cancel = true;
+                return;
+            }
+
             var linked = ApplicationProfileInstancePersonService.LinkPerson(linkObjectSpace, applicationBo, person);
             if (linked == null)
             {

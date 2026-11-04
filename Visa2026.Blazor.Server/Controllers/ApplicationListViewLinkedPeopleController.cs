@@ -136,13 +136,25 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
         foreach (var person in people)
         {
             builder.OpenElement(seq++, "div");
-            builder.AddAttribute(seq++, "class", "lv-people__row");
+            builder.AddAttribute(seq++, "class", person.IsExcluded ? "lv-people__row is-excluded" : "lv-people__row");
             builder.OpenElement(seq++, "span");
             builder.AddAttribute(seq++, "class", "lv-people__name");
             builder.AddContent(seq++, person.Name);
             builder.CloseElement();
 
-            if (person.Marks.Count > 0)
+            if (person.IsExcluded)
+            {
+                var badge = ApplicationListLinkedPeople.FormatExcludedBadge(person);
+                if (!string.IsNullOrEmpty(badge))
+                {
+                    builder.OpenElement(seq++, "span");
+                    builder.AddAttribute(seq++, "class", "lv-people__excluded");
+                    builder.AddAttribute(seq++, "title", badge);
+                    builder.AddContent(seq++, badge);
+                    builder.CloseElement();
+                }
+            }
+            else if (person.Marks.Count > 0)
             {
                 builder.OpenElement(seq++, "span");
                 builder.AddAttribute(seq++, "class", "lv-people__marks");

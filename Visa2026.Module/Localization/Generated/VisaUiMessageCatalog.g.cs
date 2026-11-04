@@ -1867,6 +1867,61 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Proses belgisi",
             ["ru-RU"] = "Номер процесса",
         },
+        ["ApplicationProfile.Field.SubmitToOrganization"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Submit to organization",
+            ["tr-TR"] = "Kuruma gönder",
+            ["tk-TM"] = "Gurama iber",
+            ["ru-RU"] = "Отправить в организацию",
+        },
+        ["ApplicationProfileInstance.Picker.SubmitToOrganization"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Submit to organization",
+            ["tr-TR"] = "Kuruma gönder",
+            ["tk-TM"] = "Gurama iber",
+            ["ru-RU"] = "Отправить в организацию",
+        },
+        ["ApplicationProfileInstance.Picker.SubmitToOrganizationSub"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Choose the ministry this letter is submitted to. Progress shows Submitted to that ministry.",
+            ["tr-TR"] = "Bu mektubun gönderileceği bakanlığı seçin. İlerleme o bakana gönderildi olarak görünür.",
+            ["tk-TM"] = "Bu hatyň iberiljek ministrligini saýlaň. Progress şol ministrlige iberildi diýip görkezýär.",
+            ["ru-RU"] = "Выберите министерство, куда подаётся письмо. В прогрессе будет «Отправлено в …».",
+        },
+        ["ApplicationProfileInstance.Picker.SubmitToOrganizationMinistries"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ministries",
+            ["tr-TR"] = "Bakanlıklar",
+            ["tk-TM"] = "Ministrlikler",
+            ["ru-RU"] = "Министерства",
+        },
+        ["ApplicationProfileInstance.Picker.SubmitToOrganizationMigrations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Migration services",
+            ["tr-TR"] = "Göç hizmetleri",
+            ["tk-TM"] = "Migrasiýa gulluklary",
+            ["ru-RU"] = "Службы миграции",
+        },
+        ["ApplicationProfileInstance.Picker.SelectSubmitToOrganization"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select a ministry or migration service.",
+            ["tr-TR"] = "Bir bakanlık veya göç hizmeti seçin.",
+            ["tk-TM"] = "Ministrlik ýa-da migrasiýa gullugyny saýlaň.",
+            ["ru-RU"] = "Выберите министерство или службу миграции.",
+        },
+        ["ApplicationProfileInstance.Picker.CrumbSubmitToOrganization"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Organization",
+            ["tr-TR"] = "Kurum",
+            ["tk-TM"] = "Gurama",
+            ["ru-RU"] = "Организация",
+        },        ["ApplicationProfile.Field.TargetApplicationProfileInstance"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Target application",
+            ["tr-TR"] = "Hedef başvuru",
+            ["tk-TM"] = "Nyşanlanan ýüztutma",
+            ["ru-RU"] = "Целевая заявка",
+        },
         ["ApplicationProfile.Field.Project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Project",
@@ -2692,6 +2747,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Göç dairesine gönderirken girilir. Örnekler arasında benzersizdir.",
             ["tk-TM"] = "Migrasiýa gullugyna iberilende girizilýär. Ýüzlemeler arasynda üýtgeşik.",
             ["ru-RU"] = "Вводится при подаче в миграционную службу. Уникален среди экземпляров.",
+        },
+        ["ApplicationProfile.Wizard.TargetApplicationProfileInstanceHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Instance picks one issuance case (invitation / visa / work permit). No profile default.",
+            ["tr-TR"] = "Örnek, bir düzenleme davasını seçer (davetiye / vize / çalışma izni). Şablon varsayılanı yok.",
+            ["tk-TM"] = "Mysal bir çykaryş ýüztutmasyny saýlaýar (çakylyk / wiza / iş rugsady). Şablonda bellenen baha ýok.",
+            ["ru-RU"] = "Экземпляр выбирает одно дело на выдачу (приглашение / виза / разрешение). Без значения по умолчанию в шаблоне.",
         },
         ["ApplicationProfile.Wizard.ProfileName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4282,6 +4344,62 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "— Saýlaň —",
             ["ru-RU"] = "— Выберите —",
         },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchSub"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Search by application number or person name, then Select.",
+            ["tr-TR"] = "Başvuru numarası veya kişi adına göre arayın, sonra Seçin.",
+            ["tk-TM"] = "Ýüztutma belgisi ýa-da adamyň ady boýunça gözläň, soňra Saýlaň.",
+            ["ru-RU"] = "Ищите по номеру заявки или имени человека, затем Выберите.",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application number or person name…",
+            ["tr-TR"] = "Başvuru numarası veya kişi adı…",
+            ["tk-TM"] = "Ýüztutma belgisi ýa-da adamyň ady…",
+            ["ru-RU"] = "Номер заявки или имя человека…",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchOpen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Search…",
+            ["tr-TR"] = "Ara…",
+            ["tk-TM"] = "Gözle…",
+            ["ru-RU"] = "Найти…",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchChange"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Change",
+            ["tr-TR"] = "Değiştir",
+            ["tk-TM"] = "Üýtget",
+            ["ru-RU"] = "Изменить",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchCancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchSelect"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select",
+            ["tr-TR"] = "Seç",
+            ["tk-TM"] = "Saýla",
+            ["ru-RU"] = "Выбрать",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationSearchEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No matching applications.",
+            ["tr-TR"] = "Eşleşen başvuru yok.",
+            ["tk-TM"] = "Gabat gelýän ýüztutma ýok.",
+            ["ru-RU"] = "Подходящих заявок нет.",
+        },
+        ["ApplicationProfileInstance.Picker.TargetApplicationNoPeople"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No people on roster",
+            ["tr-TR"] = "Kadroda kişi yok",
+            ["tk-TM"] = "Sanawda adam ýok",
+            ["ru-RU"] = "В составе нет людей",
+        },
         ["ApplicationProfileInstance.Picker.SelectVersion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select an approval-leg version.",
@@ -4359,12 +4477,33 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Entäk soňky ulanylan profil ýok. Görmek üçin ýüztutma dörediň.",
             ["ru-RU"] = "Пока нет недавно использованных профилей. Создайте заявку — они появятся здесь.",
         },
+        ["ApplicationProfileInstance.People.ExcludedByTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excluded by Seretmezlik № {0} · {1}",
+            ["tr-TR"] = "Seretmezlik ile hariç № {0} · {1}",
+            ["tk-TM"] = "Seretmezlik № {0} · {1}",
+            ["ru-RU"] = "Исключён по Seretmezlik № {0} · {1}",
+        },
+        ["ApplicationProfileInstance.People.ExcludedStayOnRoster"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excluded people stay on the roster",
+            ["tr-TR"] = "Hariç tutulan kişiler listede kalır",
+            ["tk-TM"] = "Seretmezlik edilen adamlar sanawda galýar",
+            ["ru-RU"] = "Исключённые остаются в списке",
+        },
         ["ApplicationProfileInstance.Picker.Shelf.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Border zone",
             ["tr-TR"] = "Sınır bölgesi",
             ["tk-TM"] = "Serhet Ýaka",
             ["ru-RU"] = "Приграничная зона",
+        },
+        ["ApplicationProfileInstance.Picker.Shelf.Seretmezlik"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Seretmezlik",
+            ["tr-TR"] = "Seretmezlik",
+            ["tk-TM"] = "Seretmezlik",
+            ["ru-RU"] = "Seretmezlik",
         },
         ["ApplicationProfileInstance.Picker.Shelf.BusinessTrip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

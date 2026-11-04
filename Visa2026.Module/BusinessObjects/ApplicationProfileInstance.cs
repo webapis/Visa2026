@@ -245,11 +245,10 @@ namespace Visa2026.Module.BusinessObjects
         public Action<string?>? ApplicationTypeQuickCodeChanged { get; set; }
 
         /// <summary>
-        /// Set when <see cref="Application"/> is created from a route-specific ListView
-        /// (<see cref="ApplicationProfileInstanceProgressRouteNavigation"/>). Filters the type-code picker until saved.
+        /// Progress route from the create list (Via vs Direct). Persisted so dual-list profiles
+        /// (Seretmezlik) keep ministry vs migration timelines and ListView filters after reload.
         /// </summary>
         [Browsable(false)]
-        [NotMapped]
         public virtual ApplicationProfileInstanceProgressRouteKind? CreationProgressRoute { get; set; }
 
         /// <summary>Filtered by <see cref="ApplicationProfileInstanceProgressRouteHelper"/> for nested <see cref="ApplicationProfileInstanceProgress"/> entry.</summary>
@@ -713,6 +712,42 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("EntryCheckPointVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowEntryCheckPoint", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual CheckPoint? EntryCheckPoint { get; set; }
+
+        /// <summary>
+        /// Seretmezlik: issuance case whose roster people are stopped from further processing
+        /// when linked on this instance. Immutable after any people are saved on this roster.
+        /// </summary>
+        [Appearance("TargetApplicationProfileInstanceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowTargetApplicationProfileInstance", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Target application")]
+        public virtual ApplicationProfileInstance? TargetApplicationProfileInstance { get; set; }
+
+        [Browsable(false)]
+        public virtual Guid? TargetApplicationProfileInstanceId { get; set; }
+
+        /// <summary>
+        /// Submit-to-organization destination (ministry). Mutually exclusive with
+        /// <see cref="SubmitToMigrationService"/>.
+        /// </summary>
+        [Appearance("SubmitToApprovingMinistryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowSubmitToOrganization", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Submit to ministry")]
+        public virtual ApprovingMinistry? SubmitToApprovingMinistry { get; set; }
+
+        [Browsable(false)]
+        public virtual Guid? SubmitToApprovingMinistryId { get; set; }
+
+        /// <summary>
+        /// Submit-to-organization destination (migration service). Mutually exclusive with
+        /// <see cref="SubmitToApprovingMinistry"/>.
+        /// </summary>
+        [Appearance("SubmitToMigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowSubmitToOrganization", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Submit to migration service")]
+        public virtual MigrationService? SubmitToMigrationService { get; set; }
+
+        [Browsable(false)]
+        public virtual Guid? SubmitToMigrationServiceId { get; set; }
 
         [Browsable(false)]
         [VisibleInDetailView(false)]

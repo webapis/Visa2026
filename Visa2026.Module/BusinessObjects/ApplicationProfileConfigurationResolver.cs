@@ -16,13 +16,37 @@ public static class ApplicationProfileConfigurationResolver
         if (application == null)
             return null;
 
+        // Submit-to-organization profiles never use Approval-leg Via graphs.
+        if (IsSubmitToOrganizationProfile(application.ApplicationProfile))
+            return ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService;
+
         if (application.CreationProgressRoute.HasValue)
             return application.CreationProgressRoute.Value;
+
+        // Dual-list Seretmezlik legacy: Via create stamped approval legs while template ProgressRoute is Direct.
+        if (HasPersistedViaMinistryEvidence(application))
+            return ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
         if (application.ApplicationProfile != null)
             return application.ApplicationProfile.ProgressRoute;
 
         return application.ApplicationType?.ApplicationProfileInstanceProgressRoute;
+    }
+
+    /// <summary>
+    /// True when the instance carries ministry approval-leg data from a Via create
+    /// (shared profile FK and/or snapshot rows).
+    /// </summary>
+    public static bool HasPersistedViaMinistryEvidence(ApplicationProfileInstance? application)
+    {
+        if (application == null)
+            return false;
+
+        if (application.ApprovalLegProfile != null)
+            return true;
+
+        return application.ApprovalLegSnapshots?
+            .Any(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) == true;
     }
 
     public static bool HasConfiguration(ApplicationProfileInstance? application) =>
@@ -85,6 +109,45 @@ public static class ApplicationProfileConfigurationResolver
 
     public static bool ShowEntryCheckPoint(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireEntryCheckPoint, t => false);
+
+    /// <summary>
+    /// Seretmezlik (and any profile that requires a target case): show Target Application Profile Instance.
+    /// </summary>
+    public static bool ShowTargetApplicationProfileInstance(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.RequireTargetApplicationProfileInstance, _ => false);
+
+    /// <summary>
+    /// Via-create Submit-to-organization only (ministry picker). Direct-create skips destination
+    /// and uses the generic migration hand-in label.
+    /// </summary>
+    public static bool ShowSubmitToOrganization(ApplicationProfileInstance? application) =>
+        IsSubmitToOrganizationProfile(application?.ApplicationProfile)
+        && ResolveCreateListRoute(application)
+            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+
+    public static bool IsSubmitToOrganizationProfile(ApplicationProfile? profile) =>
+        profile?.RequireSubmitToOrganization == true;
+
+    /// <summary>Create-list route (Via vs Direct), not the progress-graph route.</summary>
+    public static ApplicationProfileInstanceProgressRouteKind? ResolveCreateListRoute(
+        ApplicationProfileInstance? application)
+    {
+        if (application == null)
+            return null;
+
+        if (application.CreationProgressRoute.HasValue)
+            return application.CreationProgressRoute.Value;
+
+        return application.ApplicationProfile?.ProgressRoute
+            ?? application.ApplicationType?.ApplicationProfileInstanceProgressRoute;
+    }
+
+    /// <summary>True when this profile's instances exclude people on a linked target case.</summary>
+    public static bool IsSeretmezlikProfile(ApplicationProfile? profile) =>
+        profile?.RequireTargetApplicationProfileInstance == true;
+
+    public static bool IsSeretmezlikInstance(ApplicationProfileInstance? application) =>
+        IsSeretmezlikProfile(application?.ApplicationProfile);
 
     public static bool ShowVisaCategory(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequireVisaCategory, t => t.ShowVisaCategory);
@@ -189,13 +252,15 @@ public static class ApplicationProfileConfigurationResolver
     /// <summary>Direct non–Issuance/Change: hand-in is the last step (no AS / Issued node).</summary>
     public static bool DirectEndsAtMigrationSubmission(ApplicationProfile? profile) =>
         profile != null
-        && profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
-        && !DirectFinalStepRequiresAsNumber(profile);
+        && (IsSubmitToOrganizationProfile(profile)
+            || (profile.ProgressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+                && !DirectFinalStepRequiresAsNumber(profile)));
 
     public static bool DirectEndsAtMigrationSubmission(ApplicationProfileInstance? application) =>
         application != null
-        && GetProgressRoute(application) == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
-        && !DirectFinalStepRequiresAsNumber(application);
+        && (IsSubmitToOrganizationProfile(application.ApplicationProfile)
+            || (GetProgressRoute(application) == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService
+                && !DirectFinalStepRequiresAsNumber(application)));
 
     /// <summary>Direct Issuance/Change final timeline node label.</summary>
     public static string DirectFinalTimelineLabel(ApplicationProfile? profile) =>

@@ -92,6 +92,22 @@ public class ApplicationWorkspaceLinkedRecordsCatalogTests
     }
 
     [Fact]
+    public void IsIssuanceTileHiddenWhenExcluded_covers_inv_visa_wp_bz_rejection_only()
+    {
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("inv"));
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("visa"));
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("wp"));
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("bz"));
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("rejection"));
+        Assert.False(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("passport"));
+        Assert.False(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded("workduty"));
+        Assert.True(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded(
+            ApplicationProfileInstancePersonLinkKind.InvitationItem));
+        Assert.False(ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded(
+            ApplicationProfileInstancePersonLinkKind.Passport));
+    }
+
+    [Fact]
     public void Definitions_IncludesWorkDutyTileSeparateFromPosition()
     {
         Assert.Contains(ApplicationWorkspaceLinkedRecordsCatalog.Definitions,

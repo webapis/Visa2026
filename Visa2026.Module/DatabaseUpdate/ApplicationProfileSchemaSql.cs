@@ -75,6 +75,8 @@ public static class ApplicationProfileSchemaSql
             "RequireEntryDate" boolean NOT NULL DEFAULT false,
             "RequireEntryCheckPoint" boolean NOT NULL DEFAULT false,
             "DefaultEntryCheckPointId" uuid NULL,
+            "RequireTargetApplicationProfileInstance" boolean NOT NULL DEFAULT false,
+            "RequireSubmitToOrganization" boolean NOT NULL DEFAULT false,
             "DefaultAuthorizedSignatoryId" uuid NULL,
             "DefaultVisaRepresentativeId" uuid NULL,
             "MinistrySlaDays" integer NOT NULL DEFAULT 14,
@@ -719,6 +721,43 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureRequireProcessNumberPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireProcessNumber" boolean NOT NULL DEFAULT false;""";
 
+    internal const string EnsureRequireTargetApplicationProfileInstancePostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireTargetApplicationProfileInstance" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureRequireSubmitToOrganizationPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireSubmitToOrganization" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureInstanceTargetApplicationProfileInstanceIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "TargetApplicationProfileInstanceId" uuid NULL;""";
+
+    internal const string EnsureInstanceSubmitToApprovingMinistryIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "SubmitToApprovingMinistryId" uuid NULL;""";
+
+    internal const string EnsureInstanceSubmitToMigrationServiceIdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "SubmitToMigrationServiceId" uuid NULL;""";
+
+    internal const string EnsureInstanceCreationProgressRoutePostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "CreationProgressRoute" integer NULL;""";
+
+    /// <summary>
+    /// Stamp Via on instances that already have approval-leg evidence (dual-list Seretmezlik created before the column existed).
+    /// </summary>
+    internal const string BackfillInstanceCreationProgressRouteViaPostgres = """
+        UPDATE "ApplicationProfileInstances" i
+        SET "CreationProgressRoute" = 0
+        WHERE i."CreationProgressRoute" IS NULL
+          AND (
+            i."ApprovalLegProfileID" IS NOT NULL
+            OR EXISTS (
+              SELECT 1
+              FROM "ApplicationProfileInstanceApprovalLegSnapshots" s
+              WHERE s."ApplicationProfileInstanceId" = i."ID"
+                AND COALESCE(TRIM(s."MinistryShortName"), '') <> ''
+                AND COALESCE(s."GCRecord", 0) = 0
+            )
+          );
+        """;
+
     /// <summary>
     /// Converts instance work-permit location from FK (<c>MovementPermitLocationID</c>) to
     /// comma-separated <c>MovementPermitLocation</c> text using <c>WorkPermittedLocationName</c>.
@@ -910,6 +949,13 @@ public static class ApplicationProfileSchemaSql
         BackfillApprovalLegVersionsPostgres,
         EnsureDefaultWorkPermitLocationPostgres,
         EnsureRequireProcessNumberPostgres,
+        EnsureRequireTargetApplicationProfileInstancePostgres,
+        EnsureRequireSubmitToOrganizationPostgres,
+        EnsureInstanceTargetApplicationProfileInstanceIdPostgres,
+        EnsureInstanceSubmitToApprovingMinistryIdPostgres,
+        EnsureInstanceSubmitToMigrationServiceIdPostgres,
+        EnsureInstanceCreationProgressRoutePostgres,
+        BackfillInstanceCreationProgressRouteViaPostgres,
         EnsureDefaultApprovalLegProfilePostgres,
         EnsurePersonPassportLastCountPostgres,
         EnsurePersonVisaLastCountPostgres,
@@ -1088,6 +1134,51 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireProcessNumber') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD RequireProcessNumber bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireTargetApplicationProfileInstance') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequireTargetApplicationProfileInstance bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequireTargetApplicationProfileInstance DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireSubmitToOrganization') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequireSubmitToOrganization bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequireSubmitToOrganization DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'TargetApplicationProfileInstanceId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD TargetApplicationProfileInstanceId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'SubmitToApprovingMinistryId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD SubmitToApprovingMinistryId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'SubmitToMigrationServiceId') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD SubmitToMigrationServiceId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'CreationProgressRoute') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD CreationProgressRoute int NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'CreationProgressRoute') IS NOT NULL
+        BEGIN
+            UPDATE i
+            SET CreationProgressRoute = 0
+            FROM dbo.ApplicationProfileInstances i
+            WHERE i.CreationProgressRoute IS NULL
+              AND (
+                i.ApprovalLegProfileID IS NOT NULL
+                OR EXISTS (
+                  SELECT 1
+                  FROM dbo.ApplicationProfileInstanceApprovalLegSnapshots s
+                  WHERE s.ApplicationProfileInstanceId = i.ID
+                    AND NULLIF(LTRIM(RTRIM(s.MinistryShortName)), N'') IS NOT NULL
+                    AND ISNULL(s.GCRecord, 0) = 0
+                )
+              );
+        END
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireInvitationAddress') IS NULL

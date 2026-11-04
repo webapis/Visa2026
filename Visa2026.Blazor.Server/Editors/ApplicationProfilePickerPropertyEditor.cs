@@ -65,6 +65,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         BackStepRequested = EventCallback.Factory.Create(this, BackStepAsync),
         SelectProfileRequested = EventCallback.Factory.Create<Guid>(this, SelectProfile),
         SelectVersionRequested = EventCallback.Factory.Create<Guid>(this, SelectVersion),
+        SelectSubmitToOrganizationRequested = EventCallback.Factory.Create<string>(this, SelectSubmitToOrganization),
         NewApprovalLegRequested = EventCallback.Factory.Create(this, OpenNewApprovalLeg),
         OpenApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, OpenApprovalLeg),
         OpenApprovalLegCatalogRequested = EventCallback.Factory.Create(this, OpenApprovalLegCatalog),
@@ -157,8 +158,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 LastUsedAt = r.LastUsedAt,
                 HasOpenApplicationForSeedPerson = r.HasOpenApplicationForSeedPerson,
                 RequiresApprovalLegVersion = r.RequiresApprovalLegVersion,
-                MissingApprovalLegVersions = r.ProgressRoute
-                    == ApplicationProfileInstanceProgressRouteKind.ViaMinistries
+                RequiresSubmitToOrganization = r.RequiresSubmitToOrganization,
+                MissingApprovalLegVersions = r.RequiresApprovalLegVersion
                     && r.ApprovalLegVersions.Count == 0,
                 ApprovalLegVersions = r.ApprovalLegVersions.Select(v => new ApplicationProfilePickerModel.VersionOptionModel
                 {
@@ -206,6 +207,26 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
         }
 
+        if (selected?.RequiresSubmitToOrganization == true)
+        {
+            if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.SubmitToOrganization")))
+                return;
+
+            try
+            {
+                LoadSubmitToOrganizationOptions(model);
+                model.Step = 2;
+                model.StatusMessage = null;
+                model.IsStatusError = false;
+            }
+            finally
+            {
+                model.IsAdvancing = false;
+            }
+
+            return;
+        }
+
         if (selected?.RequiresApprovalLegVersion == true)
         {
             if (!await ShowAdvanceAsync(model, VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs")))
@@ -241,7 +262,9 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         try
         {
-            if (model.Step == 4 && selected?.RequiresApprovalLegVersion == true)
+            if (model.Step == 4
+                && (selected?.RequiresApprovalLegVersion == true
+                    || selected?.RequiresSubmitToOrganization == true))
                 model.Step = 2;
             else
                 model.Step = 1;
@@ -262,6 +285,27 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (model == null || model.IsAdvancing)
             return;
 
+        var selected = model.Rows.FirstOrDefault(r => r.ProfileId == model.SelectedProfileId);
+        if (selected?.RequiresSubmitToOrganization == true)
+        {
+            if (string.IsNullOrWhiteSpace(model.SelectedSubmitToOrganizationValue))
+            {
+                model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.SelectSubmitToOrganization");
+                model.IsStatusError = true;
+                return;
+            }
+
+            _caseSummaryUpdates = ApplicationProfilePickerCaseSummaryDraft.Merge(
+                _caseSummaryUpdates,
+                new ApplicationWorkspaceCaseHeaderFieldUpdate
+                {
+                    Key = ApplicationWorkspaceCaseHeaderFieldsHelper.SubmitToOrganization,
+                    Value = model.SelectedSubmitToOrganizationValue,
+                });
+            await EnterCaseSummaryAsync();
+            return;
+        }
+
         if (model.SelectedVersionId == Guid.Empty)
         {
             model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.SelectVersion");
@@ -270,6 +314,65 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
 
         await EnterCaseSummaryAsync();
+    }
+
+    private void LoadSubmitToOrganizationOptions(ApplicationProfilePickerModel model)
+    {
+        if (_application == null)
+        {
+            model.SubmitToOrganizationOptions = Array.Empty<ApplicationProfilePickerModel.SubmitToOrganizationOptionModel>();
+            return;
+        }
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(ApprovingMinistry));
+        var route = OpenContext?.CreationProgressRoute;
+        var fields = ApplicationProfilePickerCaseSummaryDraft.Build(
+            objectSpace,
+            model.SelectedProfileId,
+            _caseSummaryUpdates,
+            route);
+        var submitField = fields.FirstOrDefault(f =>
+            string.Equals(
+                f.Key,
+                ApplicationWorkspaceCaseHeaderFieldsHelper.SubmitToOrganization,
+                StringComparison.Ordinal));
+
+        var options = submitField?.Options;
+        if (options == null || options.Count == 0)
+        {
+            // Direct load when draft field was skipped (route not stamped yet).
+            options = objectSpace.GetObjectsQuery<ApprovingMinistry>()
+                .AsEnumerable()
+                .Select(m =>
+                {
+                    var name = string.IsNullOrWhiteSpace(m.ShortNameTm) ? m.NameTm : m.ShortNameTm;
+                    name = name?.Trim() ?? string.Empty;
+                    return new ApplicationWorkspaceLookupOption
+                    {
+                        Id = m.ID,
+                        DisplayName = string.IsNullOrWhiteSpace(name) ? m.ID.ToString("D") : name,
+                        Detail = "ministry",
+                        SearchText = ApplicationProfileSubmitToOrganizationHelper.MinistryValuePrefix
+                            + m.ID.ToString("D"),
+                    };
+                })
+                .Where(o => !string.IsNullOrWhiteSpace(o.DisplayName))
+                .OrderBy(o => o.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+        }
+
+        model.SubmitToOrganizationOptions = options
+            .Select(o => new ApplicationProfilePickerModel.SubmitToOrganizationOptionModel
+            {
+                Value = string.IsNullOrWhiteSpace(o.SearchText) ? o.Id.ToString("D") : o.SearchText!,
+                Name = o.DisplayName,
+                Kind = string.IsNullOrWhiteSpace(o.Detail) ? "ministry" : o.Detail!,
+            })
+            .ToList();
+
+        if (string.IsNullOrWhiteSpace(model.SelectedSubmitToOrganizationValue)
+            && !string.IsNullOrWhiteSpace(submitField?.Value))
+            model.SelectedSubmitToOrganizationValue = submitField!.Value;
     }
 
     private async Task EnterCaseSummaryAsync()
@@ -487,6 +590,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 LastUsedAt = row.LastUsedAt,
                 HasOpenApplicationForSeedPerson = row.HasOpenApplicationForSeedPerson,
                 RequiresApprovalLegVersion = row.RequiresApprovalLegVersion,
+                RequiresSubmitToOrganization = row.RequiresSubmitToOrganization,
                 MissingApprovalLegVersions = row.MissingApprovalLegVersions,
                 ApprovalLegVersions = row.ApprovalLegVersions.Select(v => new ApplicationProfilePickerModel.VersionOptionModel
                 {
@@ -497,6 +601,14 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
                 }).ToList(),
             };
         }).ToList();
+    }
+
+    private void SelectSubmitToOrganization(string value)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+        model.SelectedSubmitToOrganizationValue = value ?? string.Empty;
     }
 
     private void OpenApprovalLegCatalog()
@@ -652,7 +764,8 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         model.CaseSummaryFields = ApplicationProfilePickerCaseSummaryDraft.Build(
             objectSpace,
             model.SelectedProfileId,
-            _caseSummaryUpdates);
+            _caseSummaryUpdates,
+            OpenContext?.CreationProgressRoute);
     }
 
     private static async Task<bool> ShowAdvanceAsync(
@@ -674,6 +787,9 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         ApplicationProfilePickerModel model,
         ApplicationProfilePickerModel.PickerRowModel? selected)
     {
+        if (model.Step == 4 && selected?.RequiresSubmitToOrganization == true)
+            return VisaUiMessages.Get("ApplicationProfileInstance.Picker.SubmitToOrganization");
+
         if (model.Step == 4 && selected?.RequiresApprovalLegVersion == true)
             return VisaUiMessages.Get("ApplicationProfileInstance.Picker.ChooseLegs");
 

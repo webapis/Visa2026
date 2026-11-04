@@ -56,6 +56,7 @@ public static class ApplicationProfilePickerShelfService
                 ApplicationProfilePickerShelfCodes.BusinessTrip => "ApplicationProfileInstance.Picker.Shelf.BusinessTrip",
                 ApplicationProfilePickerShelfCodes.WorkPermitOnly => "ApplicationProfileInstance.Picker.Shelf.WorkPermitOnly",
                 ApplicationProfilePickerShelfCodes.BorderZone => "ApplicationProfileInstance.Picker.Shelf.BorderZone",
+                ApplicationProfilePickerShelfCodes.Seretmezlik => "ApplicationProfileInstance.Picker.Shelf.Seretmezlik",
                 _ => null,
             };
             if (key != null)

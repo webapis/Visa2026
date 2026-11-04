@@ -31,6 +31,16 @@ public partial class ApplicationProfileInstance
 
     [Browsable(false)]
     [NotMapped]
+    public bool CfgShowTargetApplicationProfileInstance =>
+        ApplicationProfileConfigurationResolver.ShowTargetApplicationProfileInstance(this);
+
+    [Browsable(false)]
+    [NotMapped]
+    public bool CfgShowSubmitToOrganization =>
+        ApplicationProfileConfigurationResolver.ShowSubmitToOrganization(this);
+
+    [Browsable(false)]
+    [NotMapped]
     public bool CfgShowProjectContract =>
         ApplicationProfileConfigurationResolver.ShowProjectContract(this);
 

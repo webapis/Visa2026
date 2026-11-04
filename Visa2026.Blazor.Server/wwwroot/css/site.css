@@ -4332,10 +4332,33 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     min-width: 0;
 }
 
+.lv-people__row.is-excluded .lv-people__name {
+    opacity: 0.55;
+    text-decoration: line-through;
+}
+
 .lv-people__name {
     min-width: 0;
     overflow-wrap: anywhere;
     line-height: 1.25;
+}
+
+.lv-people__excluded {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    max-width: 100%;
+    margin-left: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #fecaca;
+    color: #991b1b;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .lv-people__marks {

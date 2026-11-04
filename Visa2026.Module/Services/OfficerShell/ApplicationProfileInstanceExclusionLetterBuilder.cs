@@ -10,6 +10,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.OfficerShell;
@@ -95,6 +96,37 @@ public static class ApplicationProfileInstanceExclusionLetterBuilder
         return new ApplicationProfileInstanceExclusionDocument(
             content,
             BuildFileName(exclusion, kind, isExcel ? ".xlsx" : ".docx"),
+            isExcel ? ExcelContentType : WordContentType);
+    }
+
+    /// <summary>
+    /// Standalone Seretmezlik Application Profile Instance: letter = the case itself;
+    /// people = Seretmezlik roster; reference fields prefilled from the <paramref name="target"/> case.
+    /// </summary>
+    public static ApplicationProfileInstanceExclusionDocument GenerateFromSeretmezlikInstance(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance seretmezlik,
+        ApplicationProfileInstanceExclusionTemplateKind kind,
+        ApplicationProfileInstanceExclusionDraft? letterDetails = null)
+    {
+        ArgumentNullException.ThrowIfNull(objectSpace);
+        ArgumentNullException.ThrowIfNull(seretmezlik);
+
+        var target = seretmezlik.TargetApplicationProfileInstance
+            ?? (seretmezlik.TargetApplicationProfileInstanceId is Guid tid && tid != Guid.Empty
+                ? objectSpace.GetObjectByKey<ApplicationProfileInstance>(tid)
+                : null);
+        var template = GetTemplate(objectSpace, kind);
+        var data = BuildMergeDataFromSeretmezlikInstance(seretmezlik, target, objectSpace, letterDetails);
+        var isExcel = IsExcel(template.FileName);
+        var content = isExcel ? MergeExcel(template.Content, data) : Merge(template.Content, data);
+        var letterNumber = ApplicationProfileInstanceExclusionQueries.FormatSeretmezlikLetterNumber(seretmezlik);
+        var fileName = kind == ApplicationProfileInstanceExclusionTemplateKind.Roster
+            ? $"Seretmezlik_sanaw_{SanitizeFilePart(letterNumber)}{(isExcel ? ".xlsx" : ".docx")}"
+            : $"Seretmezlik_haty_{SanitizeFilePart(letterNumber)}{(isExcel ? ".xlsx" : ".docx")}";
+        return new ApplicationProfileInstanceExclusionDocument(
+            content,
+            fileName,
             isExcel ? ExcelContentType : WordContentType);
     }
 
@@ -335,6 +367,53 @@ public static class ApplicationProfileInstanceExclusionLetterBuilder
         };
     }
 
+    /// <summary>
+    /// Merge tokens for a standalone Seretmezlik instance. Prefers <paramref name="letterDetails"/>;
+    /// otherwise uses Seretmezlik ApplicationNumber/Date and target roster size / letterhead.
+    /// </summary>
+    public static Dictionary<string, object> BuildMergeDataFromSeretmezlikInstance(
+        ApplicationProfileInstance seretmezlik,
+        ApplicationProfileInstance? target,
+        IObjectSpace? objectSpace = null,
+        ApplicationProfileInstanceExclusionDraft? letterDetails = null)
+    {
+        ArgumentNullException.ThrowIfNull(seretmezlik);
+
+        var letterheadSource = target ?? seretmezlik;
+        var people = (seretmezlik.People ?? Enumerable.Empty<Person>())
+            .Where(p => p != null)
+            .Select((p, i) => BuildPersonRow(i + 1, p!))
+            .ToList();
+
+        var letterNumber = ApplicationProfileInstanceExclusionQueries.FormatSeretmezlikLetterNumber(seretmezlik);
+        var letterDate = letterDetails?.LetterDate
+            ?? (seretmezlik.ApplicationDate == default ? DateTime.Today : seretmezlik.ApplicationDate.Date);
+        var originalCount = letterDetails?.OriginalRosterCount > 0
+            ? letterDetails.OriginalRosterCount
+            : target?.People?.Count(p => p != null) ?? people.Count;
+
+        return new Dictionary<string, object>
+        {
+            ["LetterNumber"] = letterNumber,
+            ["LetterDate"] = FormatDate(letterDate),
+            ["AddresseeName"] = letterDetails?.AddresseeName ?? string.Empty,
+            ["Salutation"] = letterDetails?.Salutation ?? string.Empty,
+            ["ReferenceMinistryName"] = letterDetails?.ReferenceMinistryName ?? string.Empty,
+            ["ReferenceMinistryGenitive"] = TurkmenGenitive(letterDetails?.ReferenceMinistryName),
+            ["ReferenceLetterDate"] = FormatDate(letterDetails?.ReferenceLetterDate),
+            ["ReferenceLetterNumber"] = letterDetails?.ReferenceLetterNumber ?? string.Empty,
+            ["Subject"] = letterDetails?.Subject ?? string.Empty,
+            ["OriginalRosterCount"] = originalCount.ToString(CultureInfo.InvariantCulture),
+            ["ExcludedCount"] = people.Count.ToString(CultureInfo.InvariantCulture),
+            ["ExcludedCountText"] = people.Count > 0 ? ApplicationProfileInstance.NumberToTurkmenWords(people.Count) : string.Empty,
+            ["ApplicationNumber"] = target?.FullApplicationNumber ?? letterNumber,
+            ["CompanyName"] = ApplicationProfileInstanceOrganizationLetterheadHelper.Resolve(letterheadSource, objectSpace).CompanyName ?? string.Empty,
+            ["SignatoryName"] = letterheadSource.Application_CompanyHead_FullName ?? string.Empty,
+            ["SignatoryPosition"] = letterheadSource.Application_CompanyHead_PositionTm ?? string.Empty,
+            [LoopName] = people,
+        };
+    }
+
     /// <summary>Merge data filled from the placeholder catalog examples (upload trial merge, template preview).</summary>
     public static Dictionary<string, object> BuildSampleMergeData()
     {
@@ -434,6 +513,29 @@ public static class ApplicationProfileInstanceExclusionLetterBuilder
                 ? person.Nationality.NameTm
                 : person?.Nationality?.Name ?? string.Empty,
         };
+    }
+
+    private static Dictionary<string, object> BuildPersonRow(int index, Person person) =>
+        new()
+        {
+            ["Index"] = index.ToString(CultureInfo.InvariantCulture),
+            ["FullName"] = person.FullName ?? string.Empty,
+            ["LastName"] = person.LastName ?? string.Empty,
+            ["FirstName"] = person.FirstName ?? string.Empty,
+            ["MiddleName"] = person.MiddleName ?? string.Empty,
+            ["PassportNumber"] = ApplicationProfileInstancePersonValidItems.ResolvePassport(person)?.PassportNumber ?? string.Empty,
+            ["DateOfBirth"] = FormatDate(person.DateOfBirth),
+            ["BirthPlace"] = person.BirthPlace ?? string.Empty,
+            ["Nationality"] = !string.IsNullOrWhiteSpace(person.Nationality?.NameTm)
+                ? person.Nationality.NameTm
+                : person.Nationality?.Name ?? string.Empty,
+        };
+
+    private static string SanitizeFilePart(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "draft";
+        return new string(value.Trim().Select(c => Path.GetInvalidFileNameChars().Contains(c) || c == ' ' ? '_' : c).ToArray());
     }
 
     private static string ReplaceTokens(string text, IReadOnlyDictionary<string, object> header, IReadOnlyDictionary<string, object>? row) =>

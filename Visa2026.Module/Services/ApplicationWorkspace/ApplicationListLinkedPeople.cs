@@ -2,6 +2,7 @@ using System.Globalization;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -38,11 +39,51 @@ public static class ApplicationListLinkedPeople
         string Tone,
         string? State);
 
-    public readonly record struct Row(Guid PersonId, string Name, IReadOnlyList<Mark> Marks);
+    /// <param name="ExcludedLetterNumber">Seretmezlik letter / case number when this person is excluded on the target.</param>
+    /// <param name="ExcludedLetterDate">Letter / application date for the same excluded state as People &amp; links.</param>
+    public readonly record struct Row(
+        Guid PersonId,
+        string Name,
+        IReadOnlyList<Mark> Marks,
+        string? ExcludedLetterNumber = null,
+        DateTime? ExcludedLetterDate = null)
+    {
+        public bool IsExcluded => ExcludedLetterDate.HasValue;
+    }
 
+    /// <summary>
+    /// Same badge as Target case People &amp; links — localized via <c>PersonDossier.Status.Excluded</c>
+    /// (e.g. tk-TM: <c>⊘ Seretmezlik · № … · dd.MM.yyyy</c>).
+    /// </summary>
+    public static string FormatExcludedBadge(string? letterNumber, DateTime? letterDate)
+    {
+        if (!letterDate.HasValue)
+            return string.Empty;
+
+        var number = string.IsNullOrWhiteSpace(letterNumber) ? "—" : letterNumber.Trim();
+        var date = letterDate.Value.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+        return "⊘ " + VisaUiMessages.Format("PersonDossier.Status.Excluded", number, date);
+    }
+
+    public static string FormatExcludedBadge(Row row) =>
+        FormatExcludedBadge(row.ExcludedLetterNumber, row.ExcludedLetterDate);
+
+    /// <summary>Hover / title — localized <c>ApplicationProfileInstance.People.ExcludedByTitle</c>.</summary>
+    public static string FormatExcludedTitle(string? letterNumber, DateTime? letterDate)
+    {
+        if (!letterDate.HasValue)
+            return string.Empty;
+
+        var number = string.IsNullOrWhiteSpace(letterNumber) ? "—" : letterNumber.Trim();
+        var date = letterDate.Value.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+        return VisaUiMessages.Format("ApplicationProfileInstance.People.ExcludedByTitle", number, date);
+    }
+
+    /// <param name="roster">Full target roster (including Seretmezlik-excluded people). Coverage still uses the active set elsewhere.</param>
+    /// <param name="exclusions">Excluded people → letter meta; those rows get no Inv/Visa/WP marks.</param>
     public static IReadOnlyList<Row> Build(
         ApplicationProfileInstance? application,
-        IReadOnlyCollection<Guid>? activeRoster,
+        IReadOnlyCollection<Guid>? roster,
         IReadOnlyDictionary<Guid, string> names,
         IReadOnlySet<Guid> invitation,
         IReadOnlySet<Guid> workPermit,
@@ -57,15 +98,27 @@ public static class ApplicationListLinkedPeople
         IReadOnlyDictionary<Guid, Guid>? visaDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? borderZoneDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null,
-        IReadOnlyDictionary<Guid, InvitationReplacement>? invitationReplacements = null)
+        IReadOnlyDictionary<Guid, InvitationReplacement>? invitationReplacements = null,
+        IReadOnlyDictionary<Guid, ApplicationProfileInstanceExcludedPerson>? exclusions = null)
     {
-        if (application == null || activeRoster == null || activeRoster.Count == 0)
+        if (application == null || roster == null || roster.Count == 0)
             return Array.Empty<Row>();
 
         var kinds = VisibleKinds(application);
-        var rows = new List<Row>(activeRoster.Count);
-        foreach (var personId in activeRoster.OrderBy(id => NameOf(names, id), StringComparer.CurrentCultureIgnoreCase))
+        var rows = new List<Row>(roster.Count);
+        foreach (var personId in roster.OrderBy(id => NameOf(names, id), StringComparer.CurrentCultureIgnoreCase))
         {
+            if (exclusions != null && exclusions.TryGetValue(personId, out var excluded))
+            {
+                rows.Add(new Row(
+                    personId,
+                    NameOf(names, personId),
+                    Array.Empty<Mark>(),
+                    excluded.LetterNumber,
+                    excluded.LetterDate));
+                continue;
+            }
+
             var marks = new List<Mark>(kinds.Count + 1);
             foreach (var kind in kinds)
             {

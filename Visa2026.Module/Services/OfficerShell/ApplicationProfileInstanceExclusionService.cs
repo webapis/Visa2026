@@ -107,26 +107,10 @@ public sealed class ApplicationProfileInstanceExclusionService : IApplicationPro
 
     public bool CanCreate(ApplicationProfileInstance instance, out string? reason)
     {
-        reason = null;
-        if (instance == null)
-        {
-            reason = "Case not found.";
-            return false;
-        }
-
-        if (!instance.IsLockedAfterOfficePreparation)
-        {
-            reason = "Seretmezlik is available after the case has left office preparation.";
-            return false;
-        }
-
-        if (instance.IsWorkflowTerminal)
-        {
-            reason = "This case is closed. Seretmezlik letters can no longer be prepared.";
-            return false;
-        }
-
-        return true;
+        // Slice 15: in-case Seretmezlik letters are deprecated. Create a Seretmezlik
+        // Application Profile Instance linked to the target case instead.
+        reason = "Seretmezlik is prepared as its own Application Profile Instance. Create a Seretmezlik case and set the target application.";
+        return false;
     }
 
     /// <summary>
@@ -495,6 +479,32 @@ public static class ApplicationProfileInstanceExclusionQueries
         if (objectSpace == null || instanceId == Guid.Empty)
             return result;
 
+        // New model: Seretmezlik Application Profile Instances that target this case.
+        // Their roster people are excluded immediately when linked.
+        var seretmezlikCases = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(i => i.TargetApplicationProfileInstanceId == instanceId)
+            .OrderBy(i => i.ApplicationDate)
+            .ToList();
+        foreach (var seretmezlik in seretmezlikCases)
+        {
+            var letterNumber = FormatSeretmezlikLetterNumber(seretmezlik);
+            var letterDate = seretmezlik.ApplicationDate == default
+                ? DateTime.Today
+                : seretmezlik.ApplicationDate.Date;
+            if (seretmezlik.People == null)
+                continue;
+            foreach (var person in seretmezlik.People)
+            {
+                if (person == null || person.ID == Guid.Empty || result.ContainsKey(person.ID))
+                    continue;
+                result[person.ID] = new ApplicationProfileInstanceExcludedPerson(
+                    seretmezlik.ID,
+                    letterNumber,
+                    letterDate);
+            }
+        }
+
+        // Legacy in-case Exclusion letters (history only; fill gaps not covered by new instances).
         // Do not project p.Exclusion.* in the query. EF security evaluates that
         // navigation as a query parameter and throws NullReferenceException, which
         // blocks opening the case.
@@ -523,7 +533,7 @@ public static class ApplicationProfileInstanceExclusionQueries
     }
 
     /// <summary>
-    /// Person ids on Seretmezlik letters for this instance.
+    /// Person ids excluded on this target instance (Seretmezlik reverse links + legacy letters).
     /// Prefers ObjectSpace query; falls back to in-memory <see cref="ApplicationProfileInstance.Exclusions"/>.
     /// </summary>
     public static HashSet<Guid> GetExcludedPersonIds(ApplicationProfileInstance? application, IObjectSpace? objectSpace)
@@ -536,8 +546,7 @@ public static class ApplicationProfileInstanceExclusionQueries
         {
             foreach (var id in GetExcludedPeople(objectSpace, application.ID).Keys)
                 ids.Add(id);
-            if (ids.Count > 0)
-                return ids;
+            return ids;
         }
 
         if (application.Exclusions == null)
@@ -559,5 +568,34 @@ public static class ApplicationProfileInstanceExclusionQueries
         }
 
         return ids;
+    }
+
+    public static string FormatSeretmezlikLetterNumber(ApplicationProfileInstance seretmezlik)
+    {
+        if (!string.IsNullOrWhiteSpace(seretmezlik.FullApplicationNumber))
+            return seretmezlik.FullApplicationNumber.Trim();
+        if (!string.IsNullOrWhiteSpace(seretmezlik.ApplicationNumber))
+            return seretmezlik.ApplicationNumber.Trim();
+        return seretmezlik.ID.ToString("N")[..8];
+    }
+
+    /// <summary>
+    /// Active (non-excluded) people remaining on the target after Seretmezlik roster people are counted.
+    /// </summary>
+    public static int CountRemainingActiveOnTarget(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance target)
+    {
+        if (objectSpace == null || target == null)
+            return 0;
+
+        var excluded = GetExcludedPersonIds(target, objectSpace);
+        var roster = target.People?
+            .Where(p => p != null && p.ID != Guid.Empty)
+            .Select(p => p.ID)
+            .Distinct()
+            .ToList()
+            ?? [];
+        return roster.Count(id => !excluded.Contains(id));
     }
 }

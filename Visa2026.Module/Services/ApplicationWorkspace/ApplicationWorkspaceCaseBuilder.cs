@@ -817,6 +817,13 @@ internal static class ApplicationWorkspaceCaseBuilder
                 continue;
             person.ExcludedLetterNumber = ex.LetterNumber;
             person.ExcludedLetterDate = ex.LetterDate;
+            // Target People & links: keep master-data tiles; strip Inv / Visa / WP / BZ / Rejection.
+            if (person.Records is { Count: > 0 })
+            {
+                person.Records = person.Records
+                    .Where(r => !ApplicationWorkspaceLinkedRecordsCatalog.IsIssuanceTileHiddenWhenExcluded(r.Key))
+                    .ToList();
+            }
         }
     }
 

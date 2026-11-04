@@ -16,7 +16,12 @@ public static class ApplicationProfileApplicabilityHelper
         if (profile == null || !profile.IsActive)
             return false;
 
-        if (progressRouteFilter.HasValue && profile.ProgressRoute != progressRouteFilter.Value)
+        // Seretmezlik (and any RequireTarget* profile) appears on both Via and Direct create lists;
+        // CreationProgressRoute on the new instance comes from the list the officer opened.
+        if (progressRouteFilter.HasValue
+            && profile.ProgressRoute != progressRouteFilter.Value
+            && !ApplicationProfileConfigurationResolver.IsSeretmezlikProfile(profile)
+            && !ApplicationProfileConfigurationResolver.IsSubmitToOrganizationProfile(profile))
             return false;
 
         if (string.IsNullOrWhiteSpace(profile.ApplicabilityCriteria))

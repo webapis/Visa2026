@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationPersonLink;
 
@@ -18,6 +19,20 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
         if (objectSpace == null || applicationId == Guid.Empty || maxResults <= 0)
             return Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
 
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+
+        // Seretmezlik: only active people on the Target application (empty when target unset).
+        CriteriaOperator? rosterScope = null;
+        if (ApplicationProfileInstanceSeretmezlikRosterHelper.IsSeretmezlik(application))
+        {
+            var allowedIds = ApplicationProfileInstanceSeretmezlikRosterHelper
+                .GetLinkableTargetPersonIds(objectSpace, application!);
+            if (allowedIds.Count == 0)
+                return Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
+
+            rosterScope = new InOperator(nameof(Person.ID), allowedIds.Cast<object>().ToArray());
+        }
+
         var notLinked = CriteriaOperator.Parse(
             "Not [ApplicationProfileInstances][ID = ?]",
             applicationId);
@@ -26,9 +41,11 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
         var passport = PersonListViewFullTextSearchCriteriaBuilder.BuildPassportNumberCriteria(searchText ?? string.Empty);
         var search = PersonListViewFullTextSearchCriteriaBuilder.CombineOr(identity, passport);
 
-        var criteria = search == null
-            ? notLinked
-            : GroupOperator.And(notLinked, search);
+        CriteriaOperator criteria = notLinked;
+        if (rosterScope != null)
+            criteria = GroupOperator.And(criteria, rosterScope);
+        if (search != null)
+            criteria = GroupOperator.And(criteria, search);
 
         return objectSpace.GetObjects<Person>(criteria, true)
             .Cast<Person>()

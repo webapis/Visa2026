@@ -62,7 +62,12 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
                     SelectionCode = p.SelectionCode,
                     ActionFamily = p.ActionFamily,
                     RegistrationKind = p.RegistrationKind,
-                    ProgressRoute = p.ProgressRoute,
+                    // Create-list route wins so dual-list profiles (Seretmezlik) show Via/Direct
+                    // and Require approval-leg step matching the list the officer opened.
+                    ProgressRoute = progressRouteFilter ?? p.ProgressRoute,
+                    // Via list only — Direct create skips org step (generic migration hand-in).
+                    RequiresSubmitToOrganization = p.RequireSubmitToOrganization
+                        && progressRouteFilter == ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
                     IsConfigLocked = ApplicationProfileLockHelper.IsProfileConfigLocked(p, objectSpace),
                     ShelfIds = shelfIdsByProfile.TryGetValue(p.ID, out var shelfIds) ? shelfIds : Array.Empty<Guid>(),
                     LastUsedAt = lastUsedByProfile.TryGetValue(p.ID, out var lastUsed) ? lastUsed : null,

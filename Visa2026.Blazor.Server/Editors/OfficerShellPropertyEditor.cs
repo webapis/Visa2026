@@ -517,6 +517,15 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 return;
             }
 
+            if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateLinkPerson(
+                    objectSpace, application, person, out var seretmezlikError))
+            {
+                model.PersonLinkStatusMessage = seretmezlikError
+                    ?? "Could not link the selected person.";
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
             if (ApplicationProfileInstancePersonLinkPassportGate.TryGetBlockReason(person, out var passportBlock))
             {
                 model.PersonLinkStatusMessage = passportBlock;
@@ -974,6 +983,15 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         var person = objectSpace.GetObjectByKey<Person>(personId);
         if (application == null || person == null)
             return;
+
+        if (ApplicationProfileInstanceSeretmezlikRosterHelper.IsSeretmezlik(application)
+            && application.People?.Any(p => p != null && p.ID == personId) == true)
+        {
+            model.PersonLinkStatusMessage =
+                "People linked to a Seretmezlik case cannot be removed (exclusion is permanent).";
+            model.PersonLinkStatusIsError = true;
+            return;
+        }
 
         ApplicationProfileInstancePersonService.UnlinkPerson(objectSpace, application, person);
         if (objectSpace.IsModified)

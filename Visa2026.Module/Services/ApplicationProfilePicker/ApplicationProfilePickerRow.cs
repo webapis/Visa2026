@@ -35,8 +35,11 @@ public sealed class ApplicationProfilePickerRow
     public IReadOnlyList<ApplicationProfilePickerVersionOption> ApprovalLegVersions { get; init; }
         = Array.Empty<ApplicationProfilePickerVersionOption>();
 
+    public bool RequiresSubmitToOrganization { get; init; }
+
     public bool RequiresApprovalLegVersion =>
-        ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+        !RequiresSubmitToOrganization
+        && ProgressRoute == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
 
     public string MetaLine =>
         VisaUiMessages.Format(

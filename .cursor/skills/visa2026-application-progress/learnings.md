@@ -6,6 +6,13 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-03 — Dual-list Seretmezlik Via create lost ministry route
+
+- **Need**: Via-created Seretmezlik must use ministry progress graph (TNGIZ etc.), not Direct "Submitted to migration service".
+- **Fix**: Mapped `CreationProgressRoute`; `GetProgressRoute` prefers create route then approval-leg evidence; Postgres/SQL heal column + backfill.
+- **Officer**: Rebuild + F5. Existing Via Seretmezlik with TNGIZ snapshots heals to Via timeline.
+- **Prevent**: Do not rely on in-memory CreationProgressRoute only.
+- **Cross-skill**: visa2026-application-profile
 ### 2026-10-31 — Via ministry last step is AS belgisi alyndy
 
 - **Need**: Via-ministry progress should not show **Işlendi** / **Resmileşdirildi**. That outcome is the application result chips. The last step is **AS belgisi alyndy**.

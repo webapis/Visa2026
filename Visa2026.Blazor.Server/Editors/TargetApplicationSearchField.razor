@@ -1,0 +1,170 @@
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="target-app-search">
+    <div class="target-app-search__value cw-summary-field__input @(ReadOnly ? "is-readonly" : null)"
+         title="@SelectedDisplay">
+        @(string.IsNullOrWhiteSpace(SelectedDisplay) ? Placeholder : SelectedDisplay)
+    </div>
+    @if (!ReadOnly)
+    {
+        <button type="button"
+                class="target-app-search__open"
+                @onclick="OpenAsync">
+            @(string.IsNullOrWhiteSpace(Value) ? OpenLabel : ChangeLabel)
+        </button>
+    }
+</div>
+
+@if (_open)
+{
+    <div class="target-app-search-modal-back" @onclick="CloseAsync"></div>
+    <div class="target-app-search-modal" role="dialog" aria-modal="true" aria-labelledby="@_titleId">
+        <header class="target-app-search-modal__head">
+            <div>
+                <h3 id="@_titleId" class="target-app-search-modal__title">@Title</h3>
+                <p class="target-app-search-modal__sub">@Subtitle</p>
+            </div>
+            <button type="button" class="target-app-search-modal__close" @onclick="CloseAsync">@CancelLabel</button>
+        </header>
+
+        <div class="target-app-search-modal__search">
+            <input type="search"
+                   class="target-app-search-modal__input"
+                   placeholder="@SearchPlaceholder"
+                   value="@_query"
+                   @oninput="OnQueryInput"
+                   @ref="_searchInput" />
+        </div>
+
+        @if (Filtered.Count == 0)
+        {
+            <p class="target-app-search-modal__empty">@EmptyLabel</p>
+        }
+        else
+        {
+            <ul class="target-app-search-modal__list" role="listbox">
+                @foreach (var option in Filtered)
+                {
+                    var optionId = option.Id.ToString("D");
+                    var selected = string.Equals(Value, optionId, StringComparison.OrdinalIgnoreCase);
+                    <li class="target-app-search-modal__item @(selected ? "is-selected" : null)">
+                        <div class="target-app-search-modal__body">
+                            <strong>@option.DisplayName</strong>
+                            @if (!string.IsNullOrWhiteSpace(option.Detail))
+                            {
+                                <span class="target-app-search-modal__detail">@option.Detail</span>
+                            }
+                            else
+                            {
+                                <span class="target-app-search-modal__detail is-muted">@NoPeopleLabel</span>
+                            }
+                        </div>
+                        <button type="button"
+                                class="target-app-search-modal__select"
+                                @onclick="() => SelectAsync(optionId)">
+                            @SelectLabel
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+@code {
+    private readonly string _titleId = "target-app-search-" + Guid.NewGuid().ToString("N");
+    private bool _open;
+    private string _query = string.Empty;
+    private ElementReference _searchInput;
+
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; set; } = Array.Empty<ApplicationWorkspaceLookupOption>();
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "— Select —";
+    [Parameter] public string Title { get; set; } = "Find target application";
+    [Parameter] public string Subtitle { get; set; } = "Search by application number or person name.";
+    [Parameter] public string SearchPlaceholder { get; set; } = "Application number or person name…";
+    [Parameter] public string OpenLabel { get; set; } = "Search…";
+    [Parameter] public string ChangeLabel { get; set; } = "Change";
+    [Parameter] public string CancelLabel { get; set; } = "Cancel";
+    [Parameter] public string SelectLabel { get; set; } = "Select";
+    [Parameter] public string EmptyLabel { get; set; } = "No matching applications.";
+    [Parameter] public string NoPeopleLabel { get; set; } = "No people on roster";
+
+    private string SelectedDisplay
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Value))
+                return string.Empty;
+            var match = Options.FirstOrDefault(o =>
+                string.Equals(o.Id.ToString("D"), Value, StringComparison.OrdinalIgnoreCase));
+            return match?.DisplayName ?? Value ?? string.Empty;
+        }
+    }
+
+    private IReadOnlyList<ApplicationWorkspaceLookupOption> Filtered
+    {
+        get
+        {
+            var q = (_query ?? string.Empty).Trim();
+            IEnumerable<ApplicationWorkspaceLookupOption> source = Options ?? Array.Empty<ApplicationWorkspaceLookupOption>();
+            if (!string.IsNullOrEmpty(q))
+            {
+                source = source.Where(o =>
+                {
+                    var hay = string.IsNullOrWhiteSpace(o.SearchText) ? o.DisplayName : o.SearchText;
+                    return hay.Contains(q, StringComparison.CurrentCultureIgnoreCase);
+                });
+            }
+
+            return source.Take(80).ToList();
+        }
+    }
+
+    private bool _focusSearch;
+
+    private Task OpenAsync()
+    {
+        if (ReadOnly)
+            return Task.CompletedTask;
+        _open = true;
+        _query = string.Empty;
+        _focusSearch = true;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusSearch || !_open)
+            return;
+        _focusSearch = false;
+        try
+        {
+            await _searchInput.FocusAsync();
+        }
+        catch
+        {
+            // Focus is best-effort when the dialog first paints.
+        }
+    }
+
+    private Task CloseAsync()
+    {
+        _open = false;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void OnQueryInput(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task SelectAsync(string optionId)
+    {
+        if (ValueChanged.HasDelegate)
+            await ValueChanged.InvokeAsync(optionId);
+        _open = false;
+    }
+}

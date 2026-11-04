@@ -5,8 +5,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.ApplicationProfilePicker;
 
 /// <summary>
-/// Default multi-shelf assignment from <see cref="ApplicationProfile.Name"/> keywords only
-/// (ignores Produce* flags, ActionFamily, Code, audience).
+/// Default multi-shelf assignment from <see cref="ApplicationProfile.Name"/> keywords
+/// (and Seretmezlik via <see cref="ApplicationProfile.RequireTargetApplicationProfileInstance"/>).
+/// Ignores Produce* flags, ActionFamily, Code, audience.
 /// </summary>
 public static class ApplicationProfilePickerShelfHeuristic
 {
@@ -16,10 +17,16 @@ public static class ApplicationProfilePickerShelfHeuristic
             return Array.Empty<string>();
 
         var name = profile.Name ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(name))
-            return Array.Empty<string>();
+        var codes = new List<string>(8);
 
-        var codes = new List<string>(7);
+        // Dual-list standalone exclusion profile — shelf even if Name is empty/renamed.
+        if (ApplicationProfileConfigurationResolver.IsSeretmezlikProfile(profile)
+            || NameMentionsSeretmezlik(name))
+            codes.Add(ApplicationProfilePickerShelfCodes.Seretmezlik);
+
+        if (string.IsNullOrWhiteSpace(name))
+            return codes;
+
         var hasCakylyk = NameMentionsCakylyk(name);
 
         if (NameMentionsFamily(name))
@@ -46,6 +53,9 @@ public static class ApplicationProfilePickerShelfHeuristic
 
         return codes;
     }
+
+    public static bool NameMentionsSeretmezlik(string? name) =>
+        ContainsIgnoreCase(name, "seretmezlik");
 
     public static bool NameMentionsCakylyk(ApplicationProfile profile) =>
         NameMentionsCakylyk(profile?.Name);

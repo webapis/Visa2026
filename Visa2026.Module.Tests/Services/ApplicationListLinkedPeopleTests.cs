@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.OfficerShell;
 using Xunit;
 
 namespace Visa2026.Module.Tests.Services;
@@ -69,13 +70,77 @@ public class ApplicationListLinkedPeopleTests
 
         Assert.Empty(ApplicationListLinkedPeople.Build(
             application,
-            activeRoster: null,
+            roster: null,
             names: new Dictionary<Guid, string>(),
             invitation: new HashSet<Guid>(),
             workPermit: new HashSet<Guid>(),
             visa: new HashSet<Guid>(),
             borderZone: new HashSet<Guid>(),
             rejection: new HashSet<Guid>()));
+    }
+
+    [Fact]
+    public void Build_shows_excluded_people_without_issuance_marks()
+    {
+        var active = Guid.NewGuid();
+        var excluded = Guid.NewGuid();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                ProduceVisa = true,
+                ProduceWorkPermit = true,
+            },
+        };
+        var letterDate = new DateTime(2024, 11, 4);
+
+        var rows = ApplicationListLinkedPeople.Build(
+            application,
+            [active, excluded],
+            new Dictionary<Guid, string>
+            {
+                [active] = "Ali Active",
+                [excluded] = "Berdi Excluded",
+            },
+            invitation: new HashSet<Guid> { active, excluded },
+            workPermit: new HashSet<Guid> { active, excluded },
+            visa: new HashSet<Guid> { active, excluded },
+            borderZone: new HashSet<Guid>(),
+            rejection: new HashSet<Guid>(),
+            exclusions: new Dictionary<Guid, ApplicationProfileInstanceExcludedPerson>
+            {
+                [excluded] = new(Guid.NewGuid(), "11/-003", letterDate),
+            });
+
+        Assert.Equal(2, rows.Count);
+        Assert.Equal("Ali Active", rows[0].Name);
+        Assert.False(rows[0].IsExcluded);
+        Assert.Equal(3, rows[0].Marks.Count);
+
+        Assert.Equal("Berdi Excluded", rows[1].Name);
+        Assert.True(rows[1].IsExcluded);
+        Assert.Empty(rows[1].Marks);
+        Assert.Equal("11/-003", rows[1].ExcludedLetterNumber);
+        Assert.Equal(letterDate, rows[1].ExcludedLetterDate);
+
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+            Assert.Equal(
+                "⊘ Excluded · № 11/-003 · 04.11.2024",
+                ApplicationListLinkedPeople.FormatExcludedBadge(rows[1]));
+
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("tk-TM");
+            Assert.Equal(
+                "⊘ Seretmezlik · № 11/-003 · 04.11.2024",
+                ApplicationListLinkedPeople.FormatExcludedBadge(rows[1]));
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Fact]

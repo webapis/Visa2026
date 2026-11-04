@@ -102,6 +102,15 @@ public sealed class ApplicationWorkspaceLookupOption
     public Guid Id { get; init; }
 
     public string DisplayName { get; init; } = string.Empty;
+
+    /// <summary>Secondary line (e.g. people full names on a target Application Profile Instance).</summary>
+    public string Detail { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Free-text index for client search dialogs (application number, profile name, people names).
+    /// When empty, UIs fall back to <see cref="DisplayName"/>.
+    /// </summary>
+    public string SearchText { get; init; } = string.Empty;
 }
 
 public sealed class ApplicationWorkspaceCaseHeaderField
@@ -363,7 +372,8 @@ public sealed class ApplicationWorkspaceCasePerson
 
     public string VisaNumber { get; init; } = string.Empty;
 
-    public IReadOnlyList<ApplicationWorkspaceCasePersonRecord> Records { get; init; }
+    /// <summary>May be rewritten when Seretmezlik exclusion strips Inv/Visa/WP tiles.</summary>
+    public IReadOnlyList<ApplicationWorkspaceCasePersonRecord> Records { get; set; }
         = Array.Empty<ApplicationWorkspaceCasePersonRecord>();
 
     /// <summary>Seretmezlik letter that excluded this person (null = still active on the case).</summary>

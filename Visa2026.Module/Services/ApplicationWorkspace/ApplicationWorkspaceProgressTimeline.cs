@@ -150,9 +150,13 @@ internal static class ApplicationWorkspaceProgressTimeline
             var submissionAdvance = submissionCurrent
                 ? FilterDirectHandInAdvanceOptions(advanceOptions, directEndsAtSubmission)
                 : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+            var submissionLabel = ApplicationProfileConfigurationResolver.IsSubmitToOrganizationProfile(liveProfile)
+                ? ApplicationProfileSubmitToOrganizationHelper
+                    .TimelineSubmissionLabel(application)
+                : ApplicationMigrationSubmission.TimelineLabel;
             steps.Add(BuildFilledStep(
                 ApplicationMigrationSubmission.TimelineKey,
-                ApplicationMigrationSubmission.TimelineLabel,
+                submissionLabel,
                 submissionRow,
                 submissionState,
                 submissionCurrent ? currentSla : default,

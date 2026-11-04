@@ -264,6 +264,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Process number", null,
             ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
                 profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, profile.RequireProcessNumber));
+        Add("Target application profile instance", null, profile.RequireTargetApplicationProfileInstance);
+        Add("Submit to organization", null, profile.RequireSubmitToOrganization);
         Add("Entry date", null, profile.RequireEntryDate);
 
         return rows;

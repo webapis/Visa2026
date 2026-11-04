@@ -31,11 +31,14 @@ public static class ApplicationProfileInstanceApprovalLegBackfill
             batchSize = DefaultBatchSize;
 
         var via = ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
-        // CreationProgressRoute is [NotMapped] — do not filter on it in SQL.
         var ids = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a =>
-                (a.ApplicationProfile != null && a.ApplicationProfile.ProgressRoute == via)
-                || (a.ApplicationType != null && a.ApplicationType.ApplicationProfileInstanceProgressRoute == via))
+                a.CreationProgressRoute == via
+                || (a.ApplicationProfile != null && a.ApplicationProfile.ProgressRoute == via)
+                || (a.ApplicationType != null && a.ApplicationType.ApplicationProfileInstanceProgressRoute == via)
+                // Dual-list Seretmezlik: Direct template + Via create stamped legs.
+                || a.ApprovalLegProfile != null
+                || a.ApprovalLegSnapshots.Any(s => s.MinistryShortName != null && s.MinistryShortName != ""))
             .Select(a => a.ID)
             .ToList();
 

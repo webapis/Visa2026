@@ -148,6 +148,10 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireEntryCheckPoint { get; set; }
 
+    public bool RequireTargetApplicationProfileInstance { get; set; }
+
+    public bool RequireSubmitToOrganization { get; set; }
+
     public bool RequirePersonPassport { get; set; }
 
     public bool RequirePersonEducation { get; set; }
@@ -284,6 +288,8 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireProcessNumber = profile.RequireProcessNumber,
             RequireEntryDate = profile.RequireEntryDate,
             RequireEntryCheckPoint = profile.RequireEntryCheckPoint,
+            RequireTargetApplicationProfileInstance = profile.RequireTargetApplicationProfileInstance,
+            RequireSubmitToOrganization = profile.RequireSubmitToOrganization,
             RequirePersonPassport = profile.RequirePersonPassport,
             RequirePersonEducation = profile.RequirePersonEducation,
             RequirePersonPosition = profile.RequirePersonPosition,
@@ -602,6 +608,8 @@ internal static class ApplicationProfileTenantCatalogSync
             profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, row.RequireProcessNumber);
         profile.RequireEntryDate = row.RequireEntryDate;
         profile.RequireEntryCheckPoint = row.RequireEntryCheckPoint;
+        profile.RequireTargetApplicationProfileInstance = row.RequireTargetApplicationProfileInstance;
+        profile.RequireSubmitToOrganization = row.RequireSubmitToOrganization;
 
         profile.RequirePersonPassport = row.RequirePersonPassport;
         profile.RequirePersonEducation = row.RequirePersonEducation

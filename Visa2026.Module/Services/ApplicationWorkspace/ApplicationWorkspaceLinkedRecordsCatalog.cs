@@ -100,6 +100,28 @@ public static class ApplicationWorkspaceLinkedRecordsCatalog
     public static string GlyphForTabKey(string tabKey) =>
         TryGetByTabKey(tabKey, out var def) ? def.Glyph : "📎";
 
+    /// <summary>
+    /// Invitation / visa / work permit / border zone / rejection tiles — hidden for Seretmezlik-excluded people on Target People &amp; links.
+    /// </summary>
+    public static bool IsIssuanceTileHiddenWhenExcluded(string? personRecordKey)
+    {
+        if (string.IsNullOrWhiteSpace(personRecordKey))
+            return false;
+
+        return string.Equals(personRecordKey, "inv", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(personRecordKey, "visa", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(personRecordKey, "wp", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(personRecordKey, "bz", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(personRecordKey, "rejection", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsIssuanceTileHiddenWhenExcluded(ApplicationProfileInstancePersonLinkKind kind) =>
+        kind is ApplicationProfileInstancePersonLinkKind.InvitationItem
+            or ApplicationProfileInstancePersonLinkKind.Visa
+            or ApplicationProfileInstancePersonLinkKind.WorkPermitItem
+            or ApplicationProfileInstancePersonLinkKind.BorderZoneItem
+            or ApplicationProfileInstancePersonLinkKind.RejectionItem;
+
     private static bool HasResolvedLink(ApplicationProfileInstancePersonResolvedLink? link, ApplicationProfileInstancePersonLinkKind kind) =>
         link?.LinkKind == kind
         && link.LinkedObjectId is Guid id

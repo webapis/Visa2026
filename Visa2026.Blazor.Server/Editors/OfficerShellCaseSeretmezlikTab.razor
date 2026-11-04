@@ -126,7 +126,7 @@
                         <td>
                             @if (row.IsExcluded)
                             {
-                                <span class="sm-excl-badge">⊘ Excluded · № @row.ExcludedLetterNumber · @FormatDate(row.ExcludedLetterDate)</span>
+                                <span class="sm-excl-badge">@ApplicationListLinkedPeople.FormatExcludedBadge(row.ExcludedLetterNumber, row.ExcludedLetterDate)</span>
                             }
                             else
                             {

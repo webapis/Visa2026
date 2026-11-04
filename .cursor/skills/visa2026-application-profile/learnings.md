@@ -1,3 +1,61 @@
+### 2026-11-04 — Localize Seretmezlik Excluded badge
+
+- **Need**: ListView / People & links showed English "Excluded" while UI culture was Turkmen.
+- **Fix**: `FormatExcludedBadge` uses `PersonDossier.Status.Excluded` (tk: Seretmezlik); case title/tooltip keys `ApplicationProfileInstance.People.ExcludedByTitle` / `ExcludedStayOnRoster`.
+- **Officer**: Rebuild + F5 with tk-TM — badge reads `⊘ Seretmezlik · № …`.
+- **Prevent**: Do not hardcode English "Excluded" in ListView or People badge markup.
+- **Cross-skill**: —
+### 2026-11-04 — Target ListView Seretmezlik Excluded + hide Inv/Visa/WP
+
+- **Need**: Same Excluded badge as Target case People on Target Application Profile Instance ListView; strip Inv/Visa/WP (and BZ/Rejection) circles/tiles for excluded people.
+- **Fix**: `ApplicationListLinkedPeople.Row` exclusion meta; `Build` keeps full roster with empty marks for excluded; ListView batch exclusions include Seretmezlik reverse links; People & links strips issuance tiles on exclude; `lv-people__excluded` CSS.
+- **Officer**: Rebuild + F5. Open Via/Direct list with a Target that has Seretmezlik-excluded people — People column shows `⊘ Excluded · № …` and no Inv/Visa/WP circles for them. Open that case People & links — excluded person has no Inv/Visa/WP tiles.
+- **Prevent**: Do not omit excluded people from ListView People. Do not load ListView exclusions from legacy letters only (misses standalone Seretmezlik).
+- **Cross-skill**: —
+### 2026-11-04 — Seretmezlik Link person lists only active target roster
+
+- **Need**: Link existing must not offer random Employees; only people still active on the Target application (not excluded by another Seretmezlik). No target → empty candidates.
+- **Fix**: `GetLinkableTargetPersonIds` + `SearchCandidates` InOperator scope; `TryValidateLinkPerson` rejects already-excluded.
+- **Officer**: Rebuild + F5. Open Seretmezlik with Target set → Link existing shows only that case’s active people. Clear Target → empty list.
+- **Prevent**: Do not use global Person search for Seretmezlik link picker.
+- **Cross-skill**: —
+### 2026-11-04 — Seretmezlik Via ministries-only; Direct skips org step
+
+- **Need**: Via Seretmezlik must not list Migration services; Direct Seretmezlik must skip Submit to organization (generic migration hand-in like invitation change).
+- **Fix**: `RequiresSubmitToOrganization` only when create-list is Via; options/catalog = ApprovingMinistry only; `ShowSubmitToOrganization` requires Via `CreationProgressRoute`; empty destination → `Submitted to migration service`.
+- **Officer**: Rebuild + F5. Via New → Seretmezlik → ministries only. Direct New → Seretmezlik → Case summary (no org step); progress generic migration hand-in.
+- **Prevent**: Do not show MigrationService cards on Via Submit-to-organization. Do not require destination on Direct Seretmezlik.
+- **Cross-skill**: —
+### 2026-11-03 — Seretmezlik Submit to organization (no Approval legs)
+
+- **Need**: Seretmezlik must not use Approval legs. Officer picks one ApprovingMinistry or MigrationService; progress is Office → Submitted to {org} (last step). Same pattern reusable via RequireSubmitToOrganization. Dual Via/Direct lists kept; destination editable after create.
+- **Fix**: Profile flag + instance FKs; wizard org step; case summary field; GetProgressRoute forces Direct; timeline label from destination; seed App_Seretmezlik RequireSubmitToOrganization.
+- **Officer**: Stop F5, rebuild, F5 (schema + seed). New Seretmezlik: pick org (not TNGIZ approval chain) → Case summary → create. Progress shows Submitted to {org}. Change destination on Case summary anytime.
+- **Prevent**: Do not open Choose Approval legs for RequireSubmitToOrganization profiles. Do not add AS/migration nodes after org hand-in.
+- **Cross-skill**: visa2026-application-progress
+### 2026-11-03 — Via Seretmezlik showed Direct migration progress
+
+- **Need**: Seretmezlik created from Via ministry (e.g. TNGIZ legs) must show ministry submission steps, not "Submitted to migration service".
+- **Cause**: `CreationProgressRoute` was `[NotMapped]`; after reload `GetProgressRoute` fell back to seed `ProgressRoute` = Direct.
+- **Fix**: Persist `CreationProgressRoute`; schema ensure + backfill Via when approval-leg FK/snapshots exist; `GetProgressRoute` also treats leg evidence as Via.
+- **Officer**: Stop F5, rebuild, F5 (schema heal). Reopen Via Seretmezlik 11/-004 — progress should show ministry steps. New Via creates keep Via after reload.
+- **Prevent**: Do not mark `CreationProgressRoute` NotMapped again. Dual-list profiles need a persisted create-route.
+- **Cross-skill**: visa2026-application-progress
+### 2026-11-03 — Seretmezlik on both Via and Direct create lists (B)
+
+- **Need**: One Seretmezlik profile must appear on ministry (Via) and Direct New lists; Approval legs only when creating from Via; discoverable shelf.
+- **Fix**: `IsProfileSelectable` skips ProgressRoute mismatch for `IsSeretmezlikProfile`; picker `ProgressRoute` = create-list filter; `TryResolveSharedProfileForCreate` / nested path use `CreationProgressRoute`; system shelf `seretmezlik` + heuristic (flag or name).
+- **Officer**: Stop F5, rebuild, F5 (shelf seed sync). Open New from Via → Seretmezlik tab → pick Seretmezlik → choose approval legs → create. From Direct → same profile without approval-leg step. CreationProgressRoute matches the list.
+- **Prevent**: Do not seed two Seretmezlik profiles (one Via / one Direct). Do not gate approval legs on template `ProgressRoute` alone for dual-list profiles.
+- **Cross-skill**: —
+### 2026-11-03 — Seretmezlik as standalone Application Profile (slice 15)
+
+- **Need**: Deprecate in-case Seretmezlik tab; Seretmezlik is its own Application Profile. One Seretmezlik instance → one target issuance instance; roster people = excluded set (immediate, irreversible); letter = the Seretmezlik case.
+- **Fix**: `RequireTargetApplicationProfileInstance` + instance FK; wizard/case-summary field; seed `App_Seretmezlik`; `ApplicationProfileInstanceExclusionQueries` unions reverse Seretmezlik links + legacy letters; `ApplicationProfileInstanceSeretmezlikRosterHelper` on Link/Unlink; letter `GenerateFromSeretmezlikInstance`; hide workspace tab; Exclusion `CanCreate` always false.
+- **Officer**: Rebuild + F5 / deploy seed sync. Create from Seretmezlik template → set Target application → link people from that case. People show Excluded on the target. Do not use the old case Seretmezlik tab.
+- **Prevent**: Do not create new `ApplicationProfileInstanceExclusion` rows. Do not allow Seretmezlik→Seretmezlik targets. Do not unlink people from a Seretmezlik roster after save.
+- **Cross-skill**: —
+
 ### 2026-11-02 — Person ListView Active invitations require ApplicationProfileInstance
 
 - **Need**: Weijun Liu Active invitations showed three date-valid lines; only one Valid case-issued invitation (e.g. ASGH338897).

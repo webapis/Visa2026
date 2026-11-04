@@ -800,6 +800,14 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey(a => a.OrganizationRepresentativeId)
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.TargetApplicationProfileInstance)
+                    .WithMany()
+                    .HasForeignKey(a => a.TargetApplicationProfileInstanceId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasIndex(a => a.TargetApplicationProfileInstanceId)
+                    .HasDatabaseName("IX_ApplicationProfileInstances_TargetApplicationProfileInstanceId")
+                    .HasFilter(IndexFilter("[TargetApplicationProfileInstanceId] IS NOT NULL AND [GCRecord] IS NULL"));
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.Property(a => a.MovementPermitLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })

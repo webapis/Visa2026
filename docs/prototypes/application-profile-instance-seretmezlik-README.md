@@ -1,8 +1,8 @@
 # Seretmezlik — exclude people from processing (2026-09-24)
 
-New case workspace section on the Application Profile Instance. After the case has been submitted, the officer prepares a letter (and roster) asking the current holder — a ministry leg or the Migration Service — to stop processing one or more people. One instance can have several Seretmezlik letters on different dates, each with its own number.
+~~New case workspace section on the Application Profile Instance.~~ **Superseded by slice 15 (2026-11-03):** Seretmezlik is a standalone Application Profile template. Officers create a Seretmezlik Application Profile Instance, set **Target application** (one issuance case), and link people from that target’s roster. Those people are Excluded on the target immediately; the Seretmezlik case itself is the letter. The in-case Seretmezlik tab is hidden; legacy `ApplicationProfileInstanceExclusion*` rows remain for history only.
 
-**Status:** Prototype approved; **implemented** 2026-09-24 (Application Profile slice 14).
+**Status:** Prototype approved; **implemented** 2026-09-24 (slice 14); **standalone profile** 2026-11-03 (slice 15).
 
 ## Implementation
 

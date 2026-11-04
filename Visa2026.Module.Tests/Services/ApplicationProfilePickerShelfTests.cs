@@ -237,6 +237,38 @@ public sealed class ApplicationProfilePickerShelfTests
     }
 
     [Fact]
+    public void SystemShelves_include_seretmezlik()
+    {
+        Assert.Contains(
+            ApplicationProfilePickerShelfCodes.Seretmezlik,
+            ApplicationProfilePickerShelfCodes.SystemShelves.Select(s => s.Code));
+    }
+
+    [Fact]
+    public void ResolveShelfCodes_Seretmezlik_ByRequireTargetFlag()
+    {
+        var profile = new ApplicationProfile
+        {
+            Name = "Exclusion letter",
+            RequireTargetApplicationProfileInstance = true,
+        };
+
+        Assert.Equal(
+            ApplicationProfilePickerShelfCodes.Seretmezlik,
+            Assert.Single(ApplicationProfilePickerShelfHeuristic.ResolveShelfCodes(profile)));
+    }
+
+    [Fact]
+    public void ResolveShelfCodes_Seretmezlik_ByName()
+    {
+        var profile = new ApplicationProfile { Name = "Seretmezlik" };
+
+        Assert.Contains(
+            ApplicationProfilePickerShelfCodes.Seretmezlik,
+            ApplicationProfilePickerShelfHeuristic.ResolveShelfCodes(profile));
+    }
+
+    [Fact]
     public void SystemShelves_include_visa_and_keep_registration()
     {
         var codes = ApplicationProfilePickerShelfCodes.SystemShelves.Select(s => s.Code).ToArray();

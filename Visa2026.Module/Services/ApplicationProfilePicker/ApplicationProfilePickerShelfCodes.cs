@@ -9,6 +9,7 @@ public static class ApplicationProfilePickerShelfCodes
     public const string BusinessTrip = "business_trip";
     public const string WorkPermitOnly = "work_permit_only";
     public const string BorderZone = "border_zone";
+    public const string Seretmezlik = "seretmezlik";
 
     public const int RecentCap = 12;
 
@@ -21,5 +22,6 @@ public static class ApplicationProfilePickerShelfCodes
         (BusinessTrip, "Business trip", 45),
         (WorkPermitOnly, "Work permit", 50),
         (BorderZone, "Border zone", 55),
+        (Seretmezlik, "Seretmezlik", 60),
     ];
 }
