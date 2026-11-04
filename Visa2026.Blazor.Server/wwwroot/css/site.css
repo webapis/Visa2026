@@ -4279,9 +4279,13 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .dxbl-grid td .lv-result-chip--none,
 .lv-result-chip--none {
-    background: #2563eb !important;
-    border-color: #2563eb !important;
-    color: #fff !important;
+    background: #4b5563 !important;
+    border-color: #4b5563 !important;
+    color: #d1d5db !important;
+}
+
+.lv-result-chips--stack .lv-result-chip--none::before {
+    background: #6b7280;
 }
 
 .dxbl-grid td .lv-result-chip--zero,
@@ -4563,7 +4567,8 @@ button.lv-person-mark-follow__app {
 }
 
 .lv-person-mark--none {
-    background: #2563eb;
+    background: #4b5563;
+    color: #d1d5db;
 }
 
 .lv-person-mark--rej {

@@ -8,7 +8,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// <summary>
 /// People stacked on an application list row, each with one mark per result
 /// that application produces. Green means that person's document exists.
-/// Blue means a visa, invitation, or work permit is not issued yet. Pink
+/// Gray, like a disabled button, means a visa, invitation, work permit, or border zone is not issued yet. Pink
 /// means an issued one is expired. An issued invitation keeps one circle:
 /// the letters stay Çak and the fill is that person's later life. A rejection
 /// mark appears only for a person who has one, in the same red as the
