@@ -1,3 +1,19 @@
+### 2026-11-04 — Person delete still failed with single "Person" required
+
+- **Need**: Employees ListView delete still showed `"Person" boş bolmaly däl` after WP-item detach.
+- **Cause**: Save validation still ran on related rows (Passport/ResolvedLink/etc.) whose Person FK was nulled; detecting delete via `ModifiedObjects` missed people already marked deleted.
+- **Fix**: `PersonDeleteDetachController` tracks deleting person IDs from `Deleting` event and clears Save validation targets for that commit.
+- **Officer**: Rebuild + F5; delete Demo employee from Işgärler — should succeed.
+- **Prevent**: Do not rely on ModifiedObjects alone to detect in-flight Person delete during ContextValidating.
+- **Cross-skill**: —
+### 2026-11-04 — Person delete blocked by WorkPermitItem Person/position required
+
+- **Need**: Delete person from Employees / case people failed with "Person"/"Adam"/"Häzirki wezipesi" bos bolmamaly.
+- **Cause**: DetachForPersonDelete removed roster links and BorderZoneItems but left WorkPermitItem/InvitationItem/RejectionItem; Person FK null cleared CurrentPositionHistory and Save validation still ran on those modified rows.
+- **Fix**: DetachForPersonDelete also deletes WP/Inv/Rejection items; PersonDeleteDetachController skips orphaned null-Person lines while a Person is being deleted.
+- **Officer**: Rebuild + F5; delete person who has issued work-permit lines — should succeed.
+- **Prevent**: When deleting Person, always delete person-line issued items before commit, not only BorderZoneItem.
+- **Cross-skill**: —
 ### 2026-11-04 — Extension issued Visa/WP date defaults from linked docs + case period
 
 - **Need**: Visa/WP extension compose left officers typing Start/End; WP copied same dates when still valid; roster visa used hardcoded +6 months; period dropdown on issued visa duplicated Case summary.

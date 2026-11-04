@@ -172,6 +172,23 @@ public static class ApplicationProfileInstancePersonService
         foreach (var link in leftoverLinks)
             objectSpace.Delete(link);
 
+        // Delete person-owned issued lines before Person FK is nulled — otherwise Save validation
+        // fires ("Person"/"Adam"/"Häzirki wezipesi" required) on orphaned modified rows.
+        foreach (var item in objectSpace.GetObjectsQuery<WorkPermitItem>()
+                     .Where(i => i.Person != null && i.Person.ID == personId)
+                     .ToList())
+            objectSpace.Delete(item);
+
+        foreach (var item in objectSpace.GetObjectsQuery<InvitationItem>()
+                     .Where(i => i.Person != null && i.Person.ID == personId)
+                     .ToList())
+            objectSpace.Delete(item);
+
+        foreach (var item in objectSpace.GetObjectsQuery<RejectionItem>()
+                     .Where(i => i.Person != null && i.Person.ID == personId)
+                     .ToList())
+            objectSpace.Delete(item);
+
         var borderZoneItems = objectSpace.GetObjectsQuery<BorderZoneItem>()
             .Where(i => i.Person != null && i.Person.ID == personId)
             .ToList();
