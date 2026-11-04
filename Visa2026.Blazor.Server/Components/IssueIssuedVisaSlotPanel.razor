@@ -203,19 +203,30 @@
                                                 }
                                             </select>
                                         </label>
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(periodKey, true, IssueComposeFieldCue.HasId(card.VisaPeriodId))">
-                                            <span>@ApplicationProfileLocalization.Field("VisaPeriod") *</span>
-                                            <select class="issue-issued-header-slot__input"
-                                                    value="@GuidText(card.VisaPeriodId)"
-                                                    @onchange="e => SetGuidAndReview(v => card.VisaPeriodId = v, e.Value, periodKey)"
-                                                    @onfocusout="() => ReviewField(periodKey)">
-                                                <option value="">—</option>
-                                                @foreach (var opt in _draft.VisaPeriods)
-                                                {
-                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                                                }
-                                            </select>
-                                        </label>
+                                        @if (_draft.UsesInvitationSource)
+                                        {
+                                            <label class="issue-issued-header-slot__field @FieldCueClass(periodKey, true, IssueComposeFieldCue.HasId(card.VisaPeriodId))">
+                                                <span>@ApplicationProfileLocalization.Field("VisaPeriod") *</span>
+                                                <select class="issue-issued-header-slot__input"
+                                                        value="@GuidText(card.VisaPeriodId)"
+                                                        @onchange="e => SetGuidAndReview(v => card.VisaPeriodId = v, e.Value, periodKey)"
+                                                        @onfocusout="() => ReviewField(periodKey)">
+                                                    <option value="">—</option>
+                                                    @foreach (var opt in _draft.VisaPeriods)
+                                                    {
+                                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                                    }
+                                                </select>
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <label class="issue-issued-header-slot__field issue-issued-header-slot__field--readonly">
+                                                <span>@ApplicationProfileLocalization.Field("VisaPeriod")</span>
+                                                <input class="issue-issued-header-slot__input" readonly
+                                                       value="@(LookupCaption(_draft.VisaPeriods, card.VisaPeriodId))" />
+                                            </label>
+                                        }
                                         <label class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(card.VisaIssuedPlaceId))">
                                             <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</span>
                                             <select class="issue-issued-header-slot__input"
@@ -612,7 +623,7 @@
                 _defaultFields.Add(CueKey(person, "visaType"));
             if (IssueComposeFieldCue.HasId(person.VisaCategoryId))
                 _defaultFields.Add(CueKey(person, "visaCategory"));
-            if (IssueComposeFieldCue.HasId(person.VisaPeriodId))
+            if (_draft.UsesInvitationSource && IssueComposeFieldCue.HasId(person.VisaPeriodId))
                 _defaultFields.Add(CueKey(person, "visaPeriod"));
             if (IssueComposeFieldCue.HasId(person.VisaIssuedPlaceId))
                 _defaultFields.Add(CueKey(person, "visaPlace"));

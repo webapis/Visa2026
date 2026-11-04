@@ -262,16 +262,37 @@ public static class IssueIssuedVisaComposeService
             var issueDate = already && existingVisa != null && existingVisa.IssueDate != default
                 ? existingVisa.IssueDate.Date
                 : DefaultIssueDate(instance, invitationIssuedDate: null);
-            var startDate = already && existingVisa != null && existingVisa.StartDate != default
-                ? existingVisa.StartDate.Date
-                : issueDate;
-            if (startDate < issueDate)
-                startDate = issueDate;
+            DateTime startDate;
             DateTime? expiration;
-            if (already && existingVisa?.ExpirationDate is DateTime existingExp && existingExp != default)
-                expiration = existingExp.Date;
+            if (already && existingVisa != null && existingVisa.StartDate != default)
+            {
+                startDate = existingVisa.StartDate.Date;
+                if (startDate < issueDate)
+                    startDate = issueDate;
+                expiration = existingVisa.ExpirationDate is DateTime existingExp && existingExp != default
+                    ? existingExp.Date
+                    : null;
+            }
             else
-                expiration = startDate.AddMonths(6);
+            {
+                var linkedVisa = IssuedExtensionDefaultsHelper.TryResolveLinkedVisa(objectSpace, instance, person);
+                if (IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
+                        linkedVisa?.ExpirationDate,
+                        issueDate,
+                        instance.VisaPeriod,
+                        out var extStart,
+                        out var extEnd,
+                        out _))
+                {
+                    startDate = extStart;
+                    expiration = extEnd;
+                }
+                else
+                {
+                    startDate = issueDate;
+                    expiration = null;
+                }
+            }
 
             cards.Add(new IssueIssuedVisaPersonCardDraft
             {
@@ -296,6 +317,7 @@ public static class IssueIssuedVisaComposeService
                 VisaCategoryId = already
                     ? existingVisa?.VisaCategory?.ID ?? defaultCategoryId
                     : defaultCategoryId,
+                // Period is case-summary only for roster/extension — caption for UI, not editable.
                 VisaPeriodId = defaultPeriodId,
                 VisaIssuedPlaceId = already
                     ? existingVisa?.VisaIssuedPlace?.ID ?? defaultPlaceId
@@ -876,7 +898,10 @@ public static class IssueIssuedVisaComposeService
             return $"{row.PersonName}: visa category is required.";
         if (row.VisaIssuedPlaceId is not Guid placeId || placeId == Guid.Empty)
             return $"{row.PersonName}: visa issued place is required.";
-        if (excludeVisaId is null && (row.VisaPeriodId is not Guid periodId || periodId == Guid.Empty))
+        // Period is persisted on invitation / case summary — not on Visa. Require only for invitation-sourced compose UI.
+        if (excludeVisaId is null
+            && UsesInvitationSource(instance)
+            && (row.VisaPeriodId is not Guid periodId || periodId == Guid.Empty))
             return $"{row.PersonName}: visa period is required.";
         if (row.IssueDate == default)
             return $"{row.PersonName}: issued date is required.";

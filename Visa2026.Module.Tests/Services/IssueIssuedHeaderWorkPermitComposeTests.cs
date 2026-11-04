@@ -56,4 +56,22 @@ public class IssueIssuedHeaderWorkPermitComposeTests
         row.WorkPermittedLocations = "Ahal";
         Assert.True(IssueIssuedHeaderComposeService.IsWorkPermitCardComplete(row));
     }
+
+    [Fact]
+    public void TryComputeExtensionDates_FromLinkedWorkPermitEnd()
+    {
+        var period = new VisaPeriod { PdfForm__Code = "AY", PdfForm_Count = 6 };
+        var linkedEnd = new DateTime(2025, 1, 21);
+
+        Assert.True(IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
+            linkedEnd,
+            new DateTime(2024, 10, 20),
+            period,
+            out var start,
+            out var end,
+            out _));
+
+        Assert.Equal(linkedEnd, start);
+        Assert.Equal(new DateTime(2025, 7, 21), end);
+    }
 }

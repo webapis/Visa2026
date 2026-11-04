@@ -577,7 +577,7 @@ public static class IssueIssuedHeaderComposeService
                     IsEmployee = p.IsEmployee,
                 };
                 if (kind == IssueIssuedHeaderKind.WorkPermit)
-                    ApplyWorkPermitCardDefaults(p, line, defaultWpLocations, instance);
+                    ApplyWorkPermitCardDefaults(objectSpace, p, line, defaultWpLocations, instance);
                 return line;
             })
             .Where(line => kind != IssueIssuedHeaderKind.Invitation || !line.IncludeLocked)
@@ -1948,6 +1948,7 @@ public static class IssueIssuedHeaderComposeService
     }
 
     private static void ApplyWorkPermitCardDefaults(
+        IObjectSpace objectSpace,
         Person person,
         IssueIssuedHeaderPersonLineDraft line,
         string defaultLocations,
@@ -1975,29 +1976,28 @@ public static class IssueIssuedHeaderComposeService
             line.Include = true;
         }
 
-        var last = PersonCurrentItems.GetCurrentWorkPermitItem(person);
-        if (TryCopyDatesFromLastWorkPermit(last, DateTime.Today, out var start, out var end))
+        var linked = IssuedExtensionDefaultsHelper.TryResolveLinkedWorkPermitItem(objectSpace, instance, person);
+        if (IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
+                linked?.ExpirationDate,
+                DateTime.Today,
+                instance.VisaPeriod,
+                out var start,
+                out var end,
+                out var note))
         {
             line.ItemStartDate = start;
             line.ItemExpirationDate = end;
-            var number = last?.WorkPermitNumber?.Trim();
+            var number = linked?.WorkPermitNumber?.Trim();
             line.DatePrefillNote = string.IsNullOrWhiteSpace(number)
-                ? "Start and End copied from last work permit (still valid)."
-                : $"Start and End copied from last work permit {number} (still valid).";
-        }
-        else if (last != null && last.ExpirationDate != default)
-        {
-            var number = last.WorkPermitNumber?.Trim();
-            line.DatePrefillNote = string.IsNullOrWhiteSpace(number)
-                ? $"Last work permit expired {last.ExpirationDate:dd MMM yyyy} — enter Start and End."
-                : $"Last work permit {number} expired {last.ExpirationDate:dd MMM yyyy} — enter Start and End.";
+                ? note
+                : $"{note} ({number})";
         }
         else
         {
-            line.DatePrefillNote = "No previous work permit — enter Start and End.";
+            line.DatePrefillNote = note;
         }
 
-        line.WorkPermittedLocations = defaultLocations;
+        line.WorkPermittedLocations = IssuedExtensionDefaultsHelper.ResolveWorkPermitLocations(linked, defaultLocations);
         ApplyInstanceProcessNumberToWorkPermitCard(line, instance);
     }
 

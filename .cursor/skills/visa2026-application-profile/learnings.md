@@ -1,3 +1,10 @@
+### 2026-11-04 — Extension issued Visa/WP date defaults from linked docs + case period
+
+- **Need**: Visa/WP extension compose left officers typing Start/End; WP copied same dates when still valid; roster visa used hardcoded +6 months; period dropdown on issued visa duplicated Case summary.
+- **Fix**: `IssuedExtensionDefaultsHelper` (linked ResolvedLink → PersonCurrentItems; `TryAddVisaPeriod` via PdfForm__Code AY/GUN/YYL; Start=linked end, End=linked+period). Wired in `IssueIssuedVisaComposeService.LoadRosterSourceDraft` and `IssueIssuedHeaderComposeService.ApplyWorkPermitCardDefaults` (locations prefer linked WP). Invitation / invitation-sourced visa unchanged. Issued-visa panel: period read-only when `!UsesInvitationSource`.
+- **Officer**: Open visa+WP extension case → + Add issued visa / + Add work permit — dates/category/border/locations prefilled from People & links + Ýüztutma gysgaçasy. Invitation apps unchanged.
+- **Prevent**: Do not hardcoded AddMonths(6) on roster visa. Do not copy WP Start/End wholesale. Do not persist VisaPeriod on Visa BO. Do not change invitation compose defaults.
+- **Cross-skill**: —
 ### 2026-11-04 — Localize Seretmezlik Excluded badge
 
 - **Need**: ListView / People & links showed English "Excluded" while UI culture was Turkmen.
