@@ -87,6 +87,7 @@ public static class IssueIssuedVisaComposeService
         var defaultTypeId = instance.VisaType?.ID
             ?? instance.ApplicationProfile?.DefaultVisaType?.ID
             ?? visaTypes.FirstOrDefault()?.Id;
+        var excluded = IssueIssuedSeretmezlikGate.ExcludedPersonIds(objectSpace, instance);
         var issuedPersonIds = new HashSet<Guid>();
         var groups = new List<IssueIssuedVisaInvitationGroupDraft>();
         foreach (var invitation in invitations)
@@ -106,6 +107,8 @@ public static class IssueIssuedVisaComposeService
                     continue;
 
                 issuedPersonIds.Add(item.Person.ID);
+                if (IssueIssuedSeretmezlikGate.IsExcluded(item.Person.ID, excluded))
+                    continue;
                 visaByItemId.TryGetValue(item.ID, out var existingVisa);
                 existingVisa ??= item.IssuedVisa;
                 var already = IssuedDocumentLifecycle.IsUsed(item) || existingVisa != null;
@@ -185,7 +188,9 @@ public static class IssueIssuedVisaComposeService
         }
 
         var omitted = ApplicationRosterHelper.GetRosterPeople(instance)
-            .Where(p => p != null && !issuedPersonIds.Contains(p.ID))
+            .Where(p => p != null
+                && !issuedPersonIds.Contains(p.ID)
+                && !IssueIssuedSeretmezlikGate.IsExcluded(p!.ID, excluded))
             .OrderBy(p => p!.LastName)
             .ThenBy(p => p!.FirstName)
             .Select(p => p!.FullName?.Trim() ?? p.ToString() ?? string.Empty)
@@ -246,8 +251,9 @@ public static class IssueIssuedVisaComposeService
                 g => g.Key,
                 g => g.OrderByDescending(v => v.IssueDate).ThenByDescending(v => v.ID).First());
 
+        var excluded = IssueIssuedSeretmezlikGate.ExcludedPersonIds(objectSpace, instance);
         var people = ApplicationRosterHelper.GetRosterPeople(instance)
-            .Where(p => p != null)
+            .Where(p => p != null && !IssueIssuedSeretmezlikGate.IsExcluded(p!.ID, excluded))
             .OrderBy(p => p!.LastName)
             .ThenBy(p => p!.FirstName)
             .ToList();
@@ -473,6 +479,13 @@ public static class IssueIssuedVisaComposeService
             };
         }
 
+            var excludedInvite = IssueIssuedSeretmezlikGate.RejectIfSelectingExcluded(
+                objectSpace,
+                instance,
+                selected.Select(p => (p.PersonId, (Guid?)null, p.PersonName)));
+            if (excludedInvite != null)
+                return new IssueIssuedVisaCreateResult { Succeeded = false, ErrorMessage = excludedInvite };
+
             var numbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var row in selected)
             {
@@ -606,6 +619,13 @@ public static class IssueIssuedVisaComposeService
                 : "Cannot create visas — every person on this case already has an issued visa.";
             return new IssueIssuedVisaCreateResult { Succeeded = false, ErrorMessage = message };
         }
+
+        var excludedRoster = IssueIssuedSeretmezlikGate.RejectIfSelectingExcluded(
+            objectSpace,
+            instance,
+            selected.Select(p => (p.PersonId, (Guid?)null, p.PersonName)));
+        if (excludedRoster != null)
+            return new IssueIssuedVisaCreateResult { Succeeded = false, ErrorMessage = excludedRoster };
 
         var numbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var row in selected)

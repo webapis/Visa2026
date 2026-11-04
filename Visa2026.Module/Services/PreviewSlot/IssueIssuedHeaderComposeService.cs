@@ -542,8 +542,16 @@ public static class IssueIssuedHeaderComposeService
             : new Dictionary<Guid, string>();
 
         var defaultWpLocations = instance.MovementPermitLocation?.Trim() ?? string.Empty;
+        var excluded = IssueIssuedSeretmezlikGate.ExcludedPersonIds(objectSpace, instance);
+        // Create: hide Seretmezlik. Edit: keep people already on this letter even if excluded.
+        var retainOnHeader = excludeInvitationIdFromOccupancy is Guid editHeaderId && editHeaderId != Guid.Empty
+            ? LoadPersonIdsOnHeader(objectSpace, kind, editHeaderId)
+            : null;
         var people = ApplicationRosterHelper.GetRosterPeople(instance)
             .Where(p => p != null)
+            .Where(p =>
+                !IssueIssuedSeretmezlikGate.IsExcluded(p!.ID, excluded)
+                || (retainOnHeader != null && retainOnHeader.Contains(p.ID)))
             .Where(p => kind != IssueIssuedHeaderKind.WorkPermit || p!.IsEmployee)
             .OrderBy(p => p!.LastName)
             .ThenBy(p => p!.FirstName)
@@ -833,6 +841,19 @@ public static class IssueIssuedHeaderComposeService
             };
         }
 
+        var excludedCreate = IssueIssuedSeretmezlikGate.RejectIfSelectingExcluded(
+            objectSpace,
+            instance,
+            selected.Select(p => (p.PersonId, p.ExistingLineId, p.PersonName)));
+        if (excludedCreate != null)
+        {
+            return new IssueIssuedHeaderCreateResult
+            {
+                Succeeded = false,
+                ErrorMessage = excludedCreate,
+            };
+        }
+
         if ((draft.Kind == IssueIssuedHeaderKind.Invitation || draft.Kind == IssueIssuedHeaderKind.WorkPermit)
             && !ApplicationProcessNumberHelper.TryRequireForIssued(instance, out var processNumberError))
         {
@@ -933,6 +954,33 @@ public static class IssueIssuedHeaderComposeService
                     && ii.Person != null))
             .Select(ii => ii.Person!.ID)
             .ToHashSet();
+    }
+
+    private static HashSet<Guid> LoadPersonIdsOnHeader(
+        IObjectSpace objectSpace,
+        IssueIssuedHeaderKind kind,
+        Guid headerId)
+    {
+        if (objectSpace == null || headerId == Guid.Empty)
+            return new HashSet<Guid>();
+
+        return kind switch
+        {
+            IssueIssuedHeaderKind.Invitation => QueryInvitationPersonIds(objectSpace, headerId),
+            IssueIssuedHeaderKind.WorkPermit => objectSpace.GetObjectsQuery<WorkPermitItem>()
+                .Where(i => i.WorkPermit != null && i.WorkPermit.ID == headerId && i.Person != null)
+                .Select(i => i.Person!.ID)
+                .ToHashSet(),
+            IssueIssuedHeaderKind.Rejection => objectSpace.GetObjectsQuery<RejectionItem>()
+                .Where(i => i.Rejection != null && i.Rejection.ID == headerId && i.Person != null)
+                .Select(i => i.Person!.ID)
+                .ToHashSet(),
+            IssueIssuedHeaderKind.BorderZone => objectSpace.GetObjectsQuery<BorderZoneItem>()
+                .Where(i => i.BorderZone != null && i.BorderZone.ID == headerId && i.Person != null)
+                .Select(i => i.Person!.ID)
+                .ToHashSet(),
+            _ => new HashSet<Guid>(),
+        };
     }
     private static Dictionary<Guid, string> LoadInvitationOccupancyMap(
         IObjectSpace objectSpace,
@@ -1500,6 +1548,23 @@ public static class IssueIssuedHeaderComposeService
                 Succeeded = false,
                 ErrorMessage = "Number is required.",
             };
+        }
+
+        var updateInstance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(draft.ApplicationProfileInstanceId);
+        if (syncPeople || draft.Kind != IssueIssuedHeaderKind.Invitation)
+        {
+            var excludedUpdate = IssueIssuedSeretmezlikGate.RejectIfSelectingExcluded(
+                objectSpace,
+                updateInstance,
+                selected.Select(p => (p.PersonId, p.ExistingLineId, p.PersonName)));
+            if (excludedUpdate != null)
+            {
+                return new IssueIssuedHeaderCreateResult
+                {
+                    Succeeded = false,
+                    ErrorMessage = excludedUpdate,
+                };
+            }
         }
 
         try

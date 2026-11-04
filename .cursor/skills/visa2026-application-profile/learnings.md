@@ -1,3 +1,40 @@
+### 2026-11-04 — Gulluk Pasporty Çakylyk create defaults
+
+- **Need**: New instance for **Gulluk Pasporty Üçin Çakylyk Almak** should default like the Case summary screenshot: OF-Gulluk, bir gezeklik, 30 gün, Adaty tertipde, Serhet Ýok; leave Tastama / invitation place / address empty.
+- **Fix**: Tenant profile `get_invitation_service_passport` defaults Category **Single**, Period **Day30** (was Multiple / Day10). Visa type OF + Urgency NORM unchanged; border zone still auto Ýok when RequireBorderZone. ApplicationType DurationInDays 30 for parity.
+- **Officer**: Rebuild + F5 (catalog sync). New → Gulluk Pasporty → Case summary shows OF / bir gezeklik / 30 gün / Adaty / Ýok.
+- **Prevent**: Do not leave service-passport period at Day10 after product lock to 30 days.
+- **Cross-skill**: —
+### 2026-11-04 — Hide Seretmezlik from Application Result create
+
+- **Need**: Officers must not create Invitation / WP / Visa / Border zone / Rejection for Seretmezlik-excluded people.
+- **Fix**: `IssueIssuedSeretmezlikGate` — create pickers omit excluded; Create/Update reject new excluded selections; edit keeps people already on the letter.
+- **Officer**: Rebuild + F5. Open Application Result create for Invitation/WP/Visa — excluded people absent. Tampering selection returns Seretmezlik error.
+- **Prevent**: Do not list excluded people in IssueIssued* LoadDraft create lists.
+- **Cross-skill**: —
+### 2026-11-04 — Work permit location editable + Linked records tile
+
+- **Need**: Linked records dialog showed Work permit location as read-only; Overview Linked records tiles omitted it.
+- **Fix**: Gear-on overview uses `BorderZoneLocationField` (WorkPermittedLocation). Join/Save writes via `TryApplyEditedLocations`. Overview + People tiles include `wp-location` when ProduceWorkPermit + WP configured; TabBuilder `wp-location` tab.
+- **Officer**: Rebuild, hard-refresh. Gear on Linked records → edit Work permit location multi-select → Join/Save. Overview Linked records shows Work permit location tile after Work permit.
+- **Prevent**: Do not leave location as OmitFromJoin static text only.
+- **Cross-skill**: —
+### 2026-11-04 — Work permit location row missing on Linked records
+
+- **Need**: Linked records overview showed Work permit number only; no Work permit location line.
+- **Cause**: Location is case-level on WorkPermitItem.WorkPermittedLocations; PersonLinkReview only listed catalog LinkKinds.
+- **Fix**: Overview adds a Work permit location row when ProduceWorkPermit + WP tile configured (`ShowInLinkReview`). TabKey avoids clashing with Work permit. Join still fills empty via `CaseWorkPermitLocationCopy`.
+- **Officer**: Rebuild Blazor host, hard-refresh. Open a person on a WP-producing case → Linked records shows Work permit location under Work permit.
+- **Prevent**: Do not assume officers see location inside the Work permit number summary alone.
+- **Cross-skill**: —
+### 2026-11-04 — WorkPermitLocation on Person data + case→person default
+
+- **Need**: Person data wizard should show WorkPermitLocation for profiles that produce work permit; Case summary location should fill empty linked WorkPermitItem.WorkPermittedLocations (Join) and tick-overwrite when it differs.
+- **Cause**: RequireWorkPermitLocation lived only on Results/Case summary; get_invitation_wp had RequirePersonWorkPermitItem false so the dual gate never opened.
+- **Fix**: Person data checkbox when ProduceWorkPermit && RequirePersonWorkPermitItem (forced on with ProduceWorkPermit). `CaseWorkPermitLocationCopy` for Join/ensure/tick. Seed `get_invitation_wp` RequirePersonWorkPermitItem true. WP linked-records tick in case workspace.
+- **Officer**: Stop F5, rebuild, hard-refresh. Configure a WP-producing profile → Person data shows Work permit location when Work permit data is on. Link/Join fills empty WP locations from Case summary; tick overwrites when they differ. Sync catalog so get_invitation_wp picks up Work permit data.
+- **Prevent**: Do not show WorkPermitLocation on Person data without both ProduceWorkPermit and RequirePersonWorkPermitItem. Do not create a new WorkPermitItem on tick.
+- **Cross-skill**: —
 ### 2026-11-04 — Person delete still failed with single "Person" required
 
 - **Need**: Employees ListView delete still showed `"Person" boş bolmaly däl` after WP-item detach.
@@ -4082,3 +4119,17 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Verify**: Rebuild Module; open Employees → Weijun Liu — CO337330 gone from Active invitations; ASGH338897 / CO334491 remain if still Valid.
 - **Prevent**: Do not trust empty skip-nav collections on ListView for lifecycle; query M2M/`IssuingInvitationItem` through ObjectSpace (same pattern as dossier used-ids).
 - **Cross-skill**: application-profile | person-dossier
+
+## 2026-11-04 — Border zone location (WorkPermitLocation mirror)
+
+- Person value lives on **`BorderZoneItem.BorderZoneLocation`** (comma-separated `BorderZoneName`, same editor as Case summary). Postgres heal: `EnsureBorderZoneItemBorderZoneLocationPostgres`.
+- Dual gate: **`RequirePersonBorderZoneItem` + `EffectiveRequireBorderZone`**. Helper: `CaseBorderZoneLocationCopy` (Join fill-empty, Case save ensure, tick overwrite same linked item; gear-on overview edit via `TabKey = BorderZoneLocation` / `OmitFromJoin`).
+- Wizard Person data shows Case **Border zone** Use (`RequireBorderZone`) when the dual gate is on; Invitation/Visa produce keeps it checked/disabled like Results.
+- Calik seed: **`get_border_zone`** → `RequirePersonBorderZoneItem: true` (do not mass-enable on invitation/visa-only templates).
+- `Ýok` is a real complete value (same as Case summary sentinel). Linked records: `bz-location` tab/tile + officer tick/hint strings.
+
+## 2026-11-04 — Person Border zone item on visa-issuing profiles
+
+- Linked records **Border zone** row is gated by `RequirePersonBorderZoneItem` (not Case summary border zone alone).
+- Calik seed: set `RequirePersonBorderZoneItem: true` for every profile with `ProduceVisa` or `ProduceBorderZone` (plus existing `cancel_borderzone`). `get_invitation_wp` and other visa issuers now show Border zone (+ location when dual gate opens).
+- Restart / catalog sync required for already-seeded DBs to pick up the JSON flip.

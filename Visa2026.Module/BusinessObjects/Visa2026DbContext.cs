@@ -1207,6 +1207,10 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(wpi => wpi.WorkPermittedLocations).HasMaxLength(500);
             });
 
+            modelBuilder.Entity<BorderZoneItem>(b => {
+                b.Property(i => i.BorderZoneLocation).HasMaxLength(500);
+            });
+
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(v => v.IssuingApplicationProfileInstance)

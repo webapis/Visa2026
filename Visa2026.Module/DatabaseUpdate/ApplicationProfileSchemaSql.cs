@@ -715,6 +715,9 @@ public static class ApplicationProfileSchemaSql
 
     internal const string EnsurePersonBorderZoneItemLastCountPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonBorderZoneItemLastCount" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsureBorderZoneItemBorderZoneLocationPostgres =
+        """ALTER TABLE "BorderZoneItems" ADD COLUMN IF NOT EXISTS "BorderZoneLocation" character varying(500) NULL;""";
     internal const string EnsureDefaultWorkPermitLocationPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "DefaultWorkPermitLocation" character varying(500) NULL;""";
 
@@ -948,6 +951,7 @@ public static class ApplicationProfileSchemaSql
         EnsureInstanceApprovalLegVersionIdPostgres,
         BackfillApprovalLegVersionsPostgres,
         EnsureDefaultWorkPermitLocationPostgres,
+        EnsureBorderZoneItemBorderZoneLocationPostgres,
         EnsureRequireProcessNumberPostgres,
         EnsureRequireTargetApplicationProfileInstancePostgres,
         EnsureRequireSubmitToOrganizationPostgres,

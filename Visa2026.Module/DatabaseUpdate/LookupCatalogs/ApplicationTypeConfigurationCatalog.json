@@ -382,7 +382,7 @@
             "PdfForm_Code": 2,
             "LifecycleStage": "Entry",
             "Category": "Employee",
-            "DurationInDays": 10,
+            "DurationInDays": 30,
             "Flags": {
                 "CanIssueVisa": false,
                 "CanIssueInvitation": false,

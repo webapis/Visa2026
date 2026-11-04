@@ -442,7 +442,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 if (!Visible(profile, ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone,
                     ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application))
                     return Hidden(out error);
-                return SetBorderZone(value, application, out error);
+                if (!SetBorderZone(value, application, out error))
+                    return false;
+                CaseBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
+                return true;
             case EntryCheckPoint:
                 if (!Visible(profile, p => p.RequireEntryCheckPoint, ApplicationProfileConfigurationResolver.ShowEntryCheckPoint, application))
                     return Hidden(out error);
@@ -676,7 +679,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         p.ProduceWorkPermit, p.RequireWorkPermitLocation),
                     ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application))
                     return Hidden(out error);
-                return SetWorkPermitLocation(value, application, out error);
+                if (!SetWorkPermitLocation(value, application, out error))
+                    return false;
+                CaseWorkPermitLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
+                return true;
             default:
                 error = ApplicationProfileLocalization.Field("CannotEdit");
                 return false;

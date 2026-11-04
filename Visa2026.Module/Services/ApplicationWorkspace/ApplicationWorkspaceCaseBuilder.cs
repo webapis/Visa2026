@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.OfficerShell;
@@ -283,6 +284,64 @@ internal static class ApplicationWorkspaceCaseBuilder
                     Glyph = def.Glyph,
                 });
                 toneIndex++;
+            
+
+                if (def.Kind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
+                    && CaseWorkPermitLocationCopy.ShowInLinkReview(application))
+                {
+                    var locExpected = people.Sum(p =>
+                    {
+                        var record = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, "wp-location", StringComparison.OrdinalIgnoreCase));
+                        return record?.ExpectedCount ?? 0;
+                    });
+                    var locCount = people.Sum(p =>
+                    {
+                        var record = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, "wp-location", StringComparison.OrdinalIgnoreCase));
+                        return record?.Count ?? 0;
+                    });
+                    if (locExpected == 0 && people.Count == 0)
+                        locExpected = 1;
+                    tiles.Add(new ApplicationWorkspaceCaseLinkedTile
+                    {
+                        TabKey = "wp-location",
+                        Label = "Work permit location",
+                        Count = locCount,
+                        ExpectedCount = locExpected,
+                        Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                        Glyph = "📍",
+                    });
+                    toneIndex++;
+                }
+                if (def.Kind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem
+                    && CaseBorderZoneLocationCopy.ShowInLinkReview(application))
+                {
+                    var locExpected = people.Sum(p =>
+                    {
+                        var record = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, "bz-location", StringComparison.OrdinalIgnoreCase));
+                        return record?.ExpectedCount ?? 0;
+                    });
+                    var locCount = people.Sum(p =>
+                    {
+                        var record = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, "bz-location", StringComparison.OrdinalIgnoreCase));
+                        return record?.Count ?? 0;
+                    });
+                    if (locExpected == 0 && people.Count == 0)
+                        locExpected = 1;
+                    tiles.Add(new ApplicationWorkspaceCaseLinkedTile
+                    {
+                        TabKey = "bz-location",
+                        Label = "Border zone location",
+                        Count = locCount,
+                        ExpectedCount = locExpected,
+                        Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                        Glyph = "📍",
+                    });
+                    toneIndex++;
+                }
             }
 
             return tiles;
@@ -1010,6 +1069,46 @@ internal static class ApplicationWorkspaceCaseBuilder
                 Tone = LinkedTones[toneIndex % LinkedTones.Length],
             });
             toneIndex++;
+        
+
+            if (def.Kind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
+                && CaseWorkPermitLocationCopy.ShowInLinkReview(application))
+            {
+                var locationText = FirstCellForPerson(tabs, "wp-location", personName, 1);
+                var hasLocation = !string.IsNullOrWhiteSpace(locationText)
+                    && !string.Equals(locationText, "—", StringComparison.Ordinal);
+                var locationExpected = count > 0 ? 1 : 0;
+                records.Add(new ApplicationWorkspaceCasePersonRecord
+                {
+                    Key = "wp-location",
+                    Label = "Work permit location",
+                    Count = hasLocation ? 1 : 0,
+                    ExpectedCount = locationExpected,
+                    State = locationExpected == 0 || hasLocation ? "valid" : "empty",
+                    Glyph = "📍",
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                });
+                toneIndex++;
+            }
+            if (def.Kind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem
+                && CaseBorderZoneLocationCopy.ShowInLinkReview(application))
+            {
+                var locationText = FirstCellForPerson(tabs, "bz-location", personName, 1);
+                var hasLocation = !string.IsNullOrWhiteSpace(locationText)
+                    && !string.Equals(locationText, "—", StringComparison.Ordinal);
+                var locationExpected = count > 0 ? 1 : 0;
+                records.Add(new ApplicationWorkspaceCasePersonRecord
+                {
+                    Key = "bz-location",
+                    Label = "Border zone location",
+                    Count = hasLocation ? 1 : 0,
+                    ExpectedCount = locationExpected,
+                    State = locationExpected == 0 || hasLocation ? "valid" : "empty",
+                    Glyph = "📍",
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                });
+                toneIndex++;
+            }
         }
 
         return records;

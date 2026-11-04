@@ -3088,7 +3088,29 @@
     "tk-TM": "Ýüztutmanyň salgysyny göçür",
     "ru-RU": "Копировать адрес из сводки дела"
   },
-  "ApplicationProfileInstance.Workspace.UseCaseAddressHint": {
+  "ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocation": {
+    "en-US": "Copy case summary work permit location",
+    "tr-TR": "Dava özeti çalışma izni yerini kopyala",
+    "tk-TM": "Ýüztutmanyň iş rugsady ýerini göçür",
+    "ru-RU": "Копировать место разрешения на работу из сводки дела"
+  },
+  "ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocationHint": {
+    "en-US": "This work permit location differs from Case summary. Tick overwrites the location on the same linked work permit item.",
+    "tr-TR": "Bu çalışma izni yeri dava özetinden farklı. Onay işareti aynı bağlı çalışma izni kalemindeki yeri üzerine yazar.",
+    "tk-TM": "Bu iş rugsady ýeri ýüztutmanyň gysgaçasyndan tapawutly. Bellik şol baglanan iş rugsady setirindäki ýeri täzeleýär.",
+    "ru-RU": "Место разрешения на работу отличается от сводки дела. Галочка перезаписывает место в той же связанной позиции разрешения."
+  },    "ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocation": {
+    "en-US": "Copy case summary border zone location",
+    "tr-TR": "Dava özeti serhat bölgesi yerini kopyala",
+    "tk-TM": "Ýüztutmanyň serhet ýaka ýerini göçür",
+    "ru-RU": "Копировать приграничную зону из сводки дела"
+  },
+  "ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocationHint": {
+    "en-US": "This border zone location differs from Case summary. Tick overwrites the location on the same linked border zone item.",
+    "tr-TR": "Bu serhat bölgesi yeri dava özetinden farklı. Onay işareti aynı bağlı serhat bölgesi kalemindeki yeri üzerine yazar.",
+    "tk-TM": "Bu serhet ýaka ýeri ýüztutmanyň gysgaçasyndan tapawutly. Bellik şol baglanan serhet ýaka setirindäki ýeri täzeleýär.",
+    "ru-RU": "Приграничная зона отличается от сводки дела. Галочка перезаписывает место в той же связанной позиции."
+  },"ApplicationProfileInstance.Workspace.UseCaseAddressHint": {
     "en-US": "This address differs from Case summary. Tick adds a new address of residence from Case summary and relinks this case. The previous address stays on the person.",
     "tr-TR": "Bu adres dava özetinden farklı. Onay işareti dava özetinden yeni bir ikamet adresi ekler ve bu davayı ona bağlar. Önceki adres kişide kalır.",
     "tk-TM": "Bu salgy ýüztutmanyň gysgaçasynyň salgysyndan tapawutly. Bellik täze ýaşaýyş salgysyny goşýar we bu ýüztutmany oňa baglaýar. Öňki salgy adamda galýar.",
@@ -3927,6 +3949,12 @@
     "tr-TR": "Bağla",
     "tk-TM": "Bagla",
     "ru-RU": "Привязать"
+  },
+  "ApplicationProfileInstance.LinkReview.CaseSummary": {
+    "en-US": "Case summary",
+    "tr-TR": "Dava özeti",
+    "tk-TM": "Ýüztutmanyň gysgaçasy",
+    "ru-RU": "Сводка дела"
   },
   "ApplicationProfileInstance.LinkReview.Edit": {
     "en-US": "Edit",

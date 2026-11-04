@@ -2332,7 +2332,7 @@
                                     @onclick='() => SelectReviewTab("overview")'>@Msg("ApplicationProfileInstance.Workspace.Overview")</button>
                             @foreach (var tab in PersonLinkReviewLines)
                             {
-                                var tabKey = tab.Kind.ToString();
+                                var tabKey = tab.ResolveTabKey();
                                 <button type="button"
                                         class="os-link-review-tabs__tab @(_reviewTab == tabKey ? "is-active" : null)"
                                         role="tab"
@@ -2348,7 +2348,33 @@
                             {
                                 <div class="os-link-review__row">
                                     <span class="os-link-review__label">@ApplicationProfileLocalization.LinkedRecordLabel(line.Label)</span>
-                                    @if (_reviewGearOn && line.Choices.Count > 0)
+                                    @if (IsWorkPermitLocationReviewLine(line) && _reviewGearOn)
+                                    {
+                                        <div class="os-link-review__value os-link-review__value--multiselect">
+                                            <BorderZoneLocationField Value="@(line.Summary == "—" ? null : line.Summary)"
+                                                                     EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
+                                                                     ReadOnly="false"
+                                                                     ValueChanged="value => OnWorkPermitLocationReviewChanged(line, value)" />
+                                        </div>
+                                    }
+                                    else if (IsWorkPermitLocationReviewLine(line))
+                                    {
+                                        <span class="os-link-review__value">@line.Summary</span>
+                                    }
+                                    else if (IsBorderZoneLocationReviewLine(line) && _reviewGearOn)
+                                    {
+                                        <div class="os-link-review__value os-link-review__value--multiselect">
+                                            <BorderZoneLocationField Value="@(line.Summary == "—" ? null : line.Summary)"
+                                                                     EditorAlias="@CommaSeparatedMultiSelectEditorAliases.BorderZone"
+                                                                     ReadOnly="false"
+                                                                     ValueChanged="value => OnBorderZoneLocationReviewChanged(line, value)" />
+                                        </div>
+                                    }
+                                    else if (IsBorderZoneLocationReviewLine(line))
+                                    {
+                                        <span class="os-link-review__value">@line.Summary</span>
+                                    }
+                                    else if (_reviewGearOn && line.Choices.Count > 0)
                                     {
                                         <select class="os-link-review__select"
                                                 value="@line.ObjectId"
@@ -2363,7 +2389,7 @@
                                     {
                                         <span class="os-link-review__value">@line.Summary</span>
                                     }
-                                    @if (_reviewGearOn)
+                                    @if (_reviewGearOn && !line.OmitFromJoin)
                                     {
                                         <span class="os-link-review__icons">
                                             <button type="button"
@@ -2580,7 +2606,14 @@
                                 var columns = LinkedRecordColumns(tab);
                                 var linkedRows = PersonLinkedRows(person, selected.Key);
                                 var isAddress = string.Equals(selected.Key, "address", StringComparison.OrdinalIgnoreCase);
+                                var isWorkPermit = string.Equals(selected.Key, "wp", StringComparison.OrdinalIgnoreCase)
+                                    || string.Equals(selected.Key, "wp-location", StringComparison.OrdinalIgnoreCase);
+                                var isBorderZone = string.Equals(selected.Key, "bz", StringComparison.OrdinalIgnoreCase)
+                                    || string.Equals(selected.Key, "bz-location", StringComparison.OrdinalIgnoreCase);
                                 var offerCaseAddress = isAddress && linkedRows.Any(row => row.OfferCaseAddress);
+                                var offerCaseWorkPermitLocation = isWorkPermit && linkedRows.Any(row => row.OfferCaseAddress);
+                                var offerCaseBorderZoneLocation = isBorderZone && linkedRows.Any(row => row.OfferCaseAddress);
+                                var showCaseTickColumn = (isAddress || (isWorkPermit && offerCaseWorkPermitLocation) || (isBorderZone && offerCaseBorderZoneLocation)) && !view.Chrome.ResolvedLinksLocked;
                                 <div class="cw-issued-panel ct-person-panel__records @(isAddress && _addressEditorId != Guid.Empty ? "ct-person-panel__records--editor" : null)">
                                     <div class="ct-person-panel__records-main">
                                     <h3 class="cw-issued-panel__title">@selected.Label</h3>
@@ -2588,7 +2621,15 @@
                                     {
                                         <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseAddressHint")</p>
                                     }
-                                    @if (!string.IsNullOrWhiteSpace(_addressActionError) && isAddress)
+                                    @if (offerCaseWorkPermitLocation)
+                                    {
+                                        <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocationHint")</p>
+                                    }
+                                    @if (offerCaseBorderZoneLocation)
+                                    {
+                                        <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocationHint")</p>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(_addressActionError) && (isAddress || isWorkPermit || isBorderZone))
                                     {
                                         <p class="cw-issued-panel__hint ct-address-editor__error">@_addressActionError</p>
                                     }
@@ -2605,7 +2646,7 @@
                                                     {
                                                         <th>@column</th>
                                                     }
-                                                    @if (isAddress && !view.Chrome.ResolvedLinksLocked)
+                                                    @if (showCaseTickColumn || (isAddress && !view.Chrome.ResolvedLinksLocked))
                                                     {
                                                         <th></th>
                                                     }
@@ -2635,6 +2676,24 @@
                                                                         class="cw-addr-icon cw-addr-icon--pen"
                                                                         title="@Msg("ApplicationProfileInstance.Workspace.EditAddress")"
                                                                         @onclick="() => OpenAddressEditor(entryId)">✎</button>
+                                                            </td>
+                                                        }
+                                                        else if (isWorkPermit && !view.Chrome.ResolvedLinksLocked && entry.OfferCaseAddress)
+                                                        {
+                                                            <td class="cw-addr-actions">
+                                                                <button type="button"
+                                                                        class="cw-addr-icon cw-addr-icon--tick"
+                                                                        title="@Msg("ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocation")"
+                                                                        @onclick="() => UseCaseWorkPermitLocationAsync(personId, entryId)">✓</button>
+                                                            </td>
+                                                        }
+                                                        else if (isBorderZone && !view.Chrome.ResolvedLinksLocked && entry.OfferCaseAddress)
+                                                        {
+                                                            <td class="cw-addr-actions">
+                                                                <button type="button"
+                                                                        class="cw-addr-icon cw-addr-icon--tick"
+                                                                        title="@Msg("ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocation")"
+                                                                        @onclick="() => UseCaseBorderZoneLocationAsync(personId, entryId)">✓</button>
                                                             </td>
                                                         }
                                                     </tr>
@@ -3183,6 +3242,87 @@
         WorkspaceActions.NotifyWorkspaceChanged();
         await Task.CompletedTask;
     }
+    private static bool IsWorkPermitLocationReviewLine(PersonLinkReviewLine line) =>
+        line.OmitFromJoin
+        && string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal);
+
+    private static bool IsBorderZoneLocationReviewLine(PersonLinkReviewLine line) =>
+        line.OmitFromJoin
+        && string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal);
+
+    private void OnWorkPermitLocationReviewChanged(PersonLinkReviewLine line, string? value)
+    {
+        line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+    }
+
+    private void OnBorderZoneLocationReviewChanged(PersonLinkReviewLine line, string? value)
+    {
+        line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+    }
+    private async Task UseCaseWorkPermitLocationAsync(Guid personId, Guid workPermitItemId)
+    {
+        _addressActionError = null;
+        if (Snapshot == null || personId == Guid.Empty || workPermitItemId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!CaseWorkPermitLocationCopy.TryOverwriteFromCase(
+                objectSpace,
+                Snapshot.ApplicationProfileInstanceId,
+                personId,
+                workPermitItemId,
+                out var error))
+        {
+            _addressActionError = error;
+            return;
+        }
+
+        try
+        {
+            if (objectSpace.IsModified)
+                objectSpace.CommitChanges();
+        }
+        catch (Exception ex)
+        {
+            _addressActionError = ex.Message;
+            return;
+        }
+
+        WorkspaceActions.NotifyWorkspaceChanged();
+        await Task.CompletedTask;
+    }
+    private async Task UseCaseBorderZoneLocationAsync(Guid personId, Guid borderZoneItemId)
+    {
+        _addressActionError = null;
+        if (Snapshot == null || personId == Guid.Empty || borderZoneItemId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!CaseBorderZoneLocationCopy.TryOverwriteFromCase(
+                objectSpace,
+                Snapshot.ApplicationProfileInstanceId,
+                personId,
+                borderZoneItemId,
+                out var error))
+        {
+            _addressActionError = error;
+            return;
+        }
+
+        try
+        {
+            if (objectSpace.IsModified)
+                objectSpace.CommitChanges();
+        }
+        catch (Exception ex)
+        {
+            _addressActionError = ex.Message;
+            return;
+        }
+
+        WorkspaceActions.NotifyWorkspaceChanged();
+        await Task.CompletedTask;
+    }
 
     private static IReadOnlyList<string> LinkedRecordColumns(ApplicationWorkspaceTab? tab)
     {
@@ -3254,7 +3394,7 @@
     private bool _reviewCreateSaving;
     private string _reviewTab = "overview";
     private PersonLinkReviewLine? ActiveReviewLine =>
-        PersonLinkReviewLines.FirstOrDefault(line => line.Kind.ToString() == _reviewTab);
+        PersonLinkReviewLines.FirstOrDefault(line => line.ResolveTabKey() == _reviewTab);
 
     private async Task StartCreateAsync(PersonLinkReviewLine line)
     {

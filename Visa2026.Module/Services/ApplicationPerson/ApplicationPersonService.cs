@@ -81,6 +81,8 @@ public static class ApplicationProfileInstancePersonService
 
         ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
         InvitationStayAddressCopy.EnsureForPeopleWithoutAddress(objectSpace, trackedApplication);
+        CaseWorkPermitLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, trackedApplication);
+        CaseBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, trackedApplication);
 
         if (trackedPerson.ID != Guid.Empty && !objectSpace.IsNewObject(trackedPerson))
             objectSpace.ReloadObject(trackedPerson);
@@ -109,6 +111,9 @@ public static class ApplicationProfileInstancePersonService
             objectSpace,
             trackedApplication,
             trackedPerson);
+
+        CaseWorkPermitLocationCopy.AcceptOnJoin(objectSpace, trackedApplication, trackedPerson);
+        CaseBorderZoneLocationCopy.AcceptOnJoin(objectSpace, trackedApplication, trackedPerson);
 
         return true;
     }

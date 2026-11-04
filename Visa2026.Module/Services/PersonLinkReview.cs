@@ -14,10 +14,17 @@ public sealed class PersonLinkReviewLine
 {
     public ApplicationProfileInstancePersonLinkKind Kind { get; init; }
     public string Label { get; init; } = string.Empty;
+    /// <summary>Gear/overview tab id. Defaults to <see cref="Kind"/> when empty.</summary>
+    public string TabKey { get; init; } = string.Empty;
+    /// <summary>Overview-only row (e.g. Work permit location); skipped by LinkSelected.</summary>
+    public bool OmitFromJoin { get; init; }
     public string Summary { get; set; } = "—";
     public Guid ObjectId { get; set; }
     public IReadOnlyList<PersonLinkReviewChoice> Choices { get; set; } = Array.Empty<PersonLinkReviewChoice>();
     public IReadOnlyList<PersonLinkReviewField> Fields { get; set; } = Array.Empty<PersonLinkReviewField>();
+
+    public string ResolveTabKey() =>
+        string.IsNullOrWhiteSpace(TabKey) ? Kind.ToString() : TabKey;
 }
 
 public sealed class PersonLinkReviewChoice
@@ -104,6 +111,18 @@ public static class PersonLinkReview
             lines.Add(definition.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
                 ? AddressLine(objectSpace, application, person, definition.Label)
                 : Line(objectSpace, definition.Kind, definition.Label, person));
+
+            if (definition.Kind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
+                && CaseWorkPermitLocationCopy.ShowInLinkReview(application))
+            {
+                lines.Add(WorkPermitLocationLine(objectSpace, application, person));
+            }
+
+            if (definition.Kind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem
+                && CaseBorderZoneLocationCopy.ShowInLinkReview(application))
+            {
+                lines.Add(BorderZoneLocationLine(objectSpace, application, person));
+            }
         }
 
         return lines;
@@ -253,6 +272,9 @@ public static class PersonLinkReview
     {
         foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
         {
+            if (line.OmitFromJoin)
+                continue;
+
             if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && line.ObjectId == Guid.Empty)
             {
                 InvitationStayAddressCopy.AcceptOnJoin(objectSpace, application, person);
@@ -261,6 +283,33 @@ public static class PersonLinkReview
 
             if (line.ObjectId != Guid.Empty)
                 LinkSelected(objectSpace, application, person, line.Kind, line.ObjectId);
+        }
+
+        CaseWorkPermitLocationCopy.AcceptOnJoin(objectSpace, application, person);
+        CaseBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
+
+        foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
+        {
+            if (!line.OmitFromJoin)
+                continue;
+            if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal))
+            {
+                CaseWorkPermitLocationCopy.TryApplyEditedLocations(
+                    objectSpace,
+                    application,
+                    person,
+                    line.ObjectId,
+                    line.Summary);
+            }
+            else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
+            {
+                CaseBorderZoneLocationCopy.TryApplyEditedLocations(
+                    objectSpace,
+                    application,
+                    person,
+                    line.ObjectId,
+                    line.Summary);
+            }
         }
     }
 
@@ -290,6 +339,124 @@ public static class PersonLinkReview
         _ => null,
     };
 
+    private static PersonLinkReviewLine WorkPermitLocationLine(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        var item = ResolveLinkedWorkPermitItem(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
+        var caseLocations = CaseWorkPermitLocationCopy.ResolveCaseLocations(application);
+        var itemLocations = item?.WorkPermittedLocations?.Trim();
+        var summary = !string.IsNullOrWhiteSpace(itemLocations)
+            ? itemLocations
+            : (!string.IsNullOrWhiteSpace(caseLocations) ? caseLocations! : "—");
+
+        var line = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            TabKey = "WorkPermitLocation",
+            OmitFromJoin = true,
+            Label = "Work permit location",
+            Summary = summary,
+            ObjectId = item?.ID ?? Guid.Empty,
+        };
+
+        var fields = new List<PersonLinkReviewField>
+        {
+            Field(ApplicationProfileLocalization.Field("WorkPermitLocation"), summary, true, false),
+        };
+        if (!string.IsNullOrWhiteSpace(caseLocations)
+            && !string.Equals(itemLocations, caseLocations, StringComparison.Ordinal))
+        {
+            fields.Add(Field(T("CaseSummary"), caseLocations, false, false));
+        }
+
+        line.Fields = fields;
+        line.Choices = Array.Empty<PersonLinkReviewChoice>();
+        return line;
+    }
+
+    private static WorkPermitItem? ResolveLinkedWorkPermitItem(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
+            return null;
+
+        var linkedId = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(link => link.ApplicationProfileInstanceId == application.ID
+                && link.PersonId == person.ID
+                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
+                && link.LinkedObjectId != null
+                && link.LinkedObjectId != Guid.Empty)
+            .Select(link => link.LinkedObjectId)
+            .FirstOrDefault();
+        if (linkedId is not Guid id || id == Guid.Empty)
+            return null;
+
+        return objectSpace.GetObjectByKey<WorkPermitItem>(id);
+    }
+    private static PersonLinkReviewLine BorderZoneLocationLine(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        var item = ResolveLinkedBorderZoneItem(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItem(objectSpace, person);
+        var caseLocations = CaseBorderZoneLocationCopy.ResolveCaseLocations(application);
+        var itemLocations = item?.BorderZoneLocation?.Trim();
+        var summary = !string.IsNullOrWhiteSpace(itemLocations)
+            ? itemLocations
+            : (!string.IsNullOrWhiteSpace(caseLocations) ? caseLocations! : "—");
+
+        var line = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.BorderZoneItem,
+            TabKey = "BorderZoneLocation",
+            OmitFromJoin = true,
+            Label = "Border zone location",
+            Summary = summary,
+            ObjectId = item?.ID ?? Guid.Empty,
+        };
+
+        var fields = new List<PersonLinkReviewField>
+        {
+            Field(ApplicationProfileLocalization.Field("BorderZone"), summary, true, false),
+        };
+        if (!string.IsNullOrWhiteSpace(caseLocations)
+            && !string.Equals(itemLocations, caseLocations, StringComparison.Ordinal))
+        {
+            fields.Add(Field(T("CaseSummary"), caseLocations, false, false));
+        }
+
+        line.Fields = fields;
+        line.Choices = Array.Empty<PersonLinkReviewChoice>();
+        return line;
+    }
+
+    private static BorderZoneItem? ResolveLinkedBorderZoneItem(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
+            return null;
+
+        var linkedId = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(link => link.ApplicationProfileInstanceId == application.ID
+                && link.PersonId == person.ID
+                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem
+                && link.LinkedObjectId != null
+                && link.LinkedObjectId != Guid.Empty)
+            .Select(link => link.LinkedObjectId)
+            .FirstOrDefault();
+        if (linkedId is not Guid id || id == Guid.Empty)
+            return null;
+
+        return objectSpace.GetObjectByKey<BorderZoneItem>(id);
+    }
     private static PersonLinkReviewLine AddressLine(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,

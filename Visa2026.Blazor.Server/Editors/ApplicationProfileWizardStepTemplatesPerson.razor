@@ -50,7 +50,7 @@
                 }
             </div>
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonWorkPermitItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.WorkPermitItem")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonWorkPermitItem" disabled="@Disabled" @bind:after="OnWorkPermitItemChanged" /> @Msg("ApplicationProfile.Person.WorkPermitItem")</label>
                 @if (Profile.RequirePersonWorkPermitItem)
                 {
                     <select class="ap-wizard__last-n" @bind="Profile.PersonWorkPermitItemLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
@@ -60,8 +60,12 @@
                     </select>
                 }
             </div>
+            @if (ShowWorkPermitLocationToggle)
+            {
+                <label class="ap-wizard__choice"><input type="checkbox" checked="@Profile.RequireWorkPermitLocation" disabled="@(Disabled || Profile.ProduceWorkPermit)" @onchange="OnWorkPermitLocationChanged" /> @Field("WorkPermitLocation")</label>
+            }
             <div class="ap-wizard__choice-cluster">
-            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonBorderZoneItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.BorderZoneItem")</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonBorderZoneItem" disabled="@Disabled" @bind:after="OnBorderZoneItemChanged" /> @Msg("ApplicationProfile.Person.BorderZoneItem")</label>
                 @if (Profile.RequirePersonBorderZoneItem)
                 {
                     <select class="ap-wizard__last-n" @bind="Profile.PersonBorderZoneItemLastCount" disabled="@Disabled" title="@Msg("ApplicationProfile.Person.LastNTitle")">
@@ -71,6 +75,10 @@
                     </select>
                 }
             </div>
+            @if (ShowBorderZoneToggle)
+            {
+                <label class="ap-wizard__choice"><input type="checkbox" checked="@Profile.RequireBorderZone" disabled="@(Disabled || Profile.ProduceInvitation || Profile.ProduceVisa)" @onchange="OnBorderZoneChanged" /> @Field("BorderZone")</label>
+            }
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonSalary" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Salary")</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonMedical" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.Medical")</label>
             <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.RequirePersonRejectionItem" disabled="@Disabled" /> @Msg("ApplicationProfile.Person.RejectionItem")</label>
@@ -92,6 +100,10 @@
             Profile.RequirePersonTravelHistory = false;
         if (!ShowEducationToggle && Profile.RequirePersonEducation)
             Profile.RequirePersonEducation = false;
+        if (ShowWorkPermitLocationToggle)
+            Profile.RequireWorkPermitLocation = true;
+        if (ShowBorderZoneToggle)
+            Profile.RequireBorderZone = true;
     }
 
     private bool ShowTravelHistoryToggle =>
@@ -100,5 +112,44 @@
     private bool ShowEducationToggle =>
         ApplicationProfileEducationPolicy.AllowsPersonEducation(Profile);
 
+    private bool ShowWorkPermitLocationToggle =>
+        Profile.ProduceWorkPermit && Profile.RequirePersonWorkPermitItem;
+
+    private void OnWorkPermitItemChanged()
+    {
+        if (ShowWorkPermitLocationToggle)
+            Profile.RequireWorkPermitLocation = true;
+    }
+
+    private void OnWorkPermitLocationChanged(ChangeEventArgs e)
+    {
+        if (Disabled || Profile.ProduceWorkPermit)
+            return;
+        Profile.RequireWorkPermitLocation = e.Value is bool b && b
+            || string.Equals(e.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(e.Value?.ToString(), "on", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool ShowBorderZoneToggle =>
+        Profile.RequirePersonBorderZoneItem
+        && ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(Profile);
+
+    private void OnBorderZoneItemChanged()
+    {
+        if (ShowBorderZoneToggle)
+            Profile.RequireBorderZone = true;
+    }
+
+    private void OnBorderZoneChanged(ChangeEventArgs e)
+    {
+        if (Disabled || Profile.ProduceInvitation || Profile.ProduceVisa)
+            return;
+        Profile.RequireBorderZone = e.Value is bool b && b
+            || string.Equals(e.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(e.Value?.ToString(), "on", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string Msg(string key) => VisaUiMessages.Get(key);
+
+    private static string Field(string key) => ApplicationProfileLocalization.Field(key);
 }

@@ -3693,7 +3693,14 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bölüm",
             ["ru-RU"] = "Отдел",
         },
-        ["ApplicationProfileInstance.LinkReview.Edit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        
+        ["ApplicationProfileInstance.LinkReview.CaseSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Case summary",
+            ["tr-TR"] = "Dava özeti",
+            ["tk-TM"] = "Ýüztutmanyň gysgaçasy",
+            ["ru-RU"] = "Сводка дела"
+        },["ApplicationProfileInstance.LinkReview.Edit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Edit",
             ["tr-TR"] = "Düzenle",
@@ -5211,6 +5218,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "✎ Düzenle",
             ["tk-TM"] = "✎ Üytget",
             ["ru-RU"] = "✎ Изменить",
+        },
+        
+        ["ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copy case summary work permit location",
+            ["tr-TR"] = "Dava özeti çalışma izni yerini kopyala",
+            ["tk-TM"] = "Ýüztutmanyň iş rugsady ýerini göçür",
+            ["ru-RU"] = "Копировать место разрешения на работу из сводки дела"
+        },
+        ["ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocationHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This work permit location differs from Case summary. Tick overwrites the location on the same linked work permit item.",
+            ["tr-TR"] = "Bu çalışma izni yeri dava özetinden farklı. Onay işareti aynı bağlı çalışma izni kalemindeki yeri üzerine yazar.",
+            ["tk-TM"] = "Bu iş rugsady ýeri ýüztutmanyň gysgaçasyndan tapawutly. Bellik şol baglanan iş rugsady setirindäki ýeri täzeleýär.",
+            ["ru-RU"] = "Место разрешения на работу отличается от сводки дела. Галочка перезаписывает место в той же связанной позиции разрешения."
+        },["ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copy case summary border zone location",
+            ["tr-TR"] = "Dava özeti serhat bölgesi yerini kopyala",
+            ["tk-TM"] = "Ýüztutmanyň serhet ýaka ýerini göçür",
+            ["ru-RU"] = "Копировать приграничную зону из сводки дела"
+        },
+        ["ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocationHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This border zone location differs from Case summary. Tick overwrites the location on the same linked border zone item.",
+            ["tr-TR"] = "Bu serhat bölgesi yeri dava özetinden farklı. Onay işareti aynı bağlı serhat bölgesi kalemindeki yeri üzerine yazar.",
+            ["tk-TM"] = "Bu serhet ýaka ýeri ýüztutmanyň gysgaçasyndan tapawutly. Bellik şol baglanan serhet ýaka setirindäki ýeri täzeleýär.",
+            ["ru-RU"] = "Приграничная зона отличается от сводки дела. Галочка перезаписывает место в той же связанной позиции."
         },
         ["ApplicationProfileInstance.Workspace.EditAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

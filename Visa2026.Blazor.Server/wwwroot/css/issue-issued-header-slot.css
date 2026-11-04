@@ -37,13 +37,17 @@
   flex-direction: column;
   gap: 0.85rem;
   padding: 1rem 1.1rem 1.1rem;
-  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e5e7eb));
   border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--bs-body-bg, #fff) 92%, var(--bs-tertiary-bg, #f8f9fa));
+  background: var(--dxds-color-surface-neutral-default-rest, var(--bs-tertiary-bg, var(--bs-body-bg, #fff)));
+  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
 }
 
 .issue-issued-header-slot__section--add {
-  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 82%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa)) 82%,
+    transparent);
 }
 
 .issue-issued-header-slot__section--add .issue-issued-header-slot__section-title {
@@ -283,8 +287,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--bs-secondary-color, #6c757d);
-  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 88%, #fff);
+  color: var(--dxds-color-content-neutral-secondary-rest, var(--bs-secondary-color, #6c757d));
+  background: var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa));
 }
 
 .issue-issued-header-slot__table tbody tr:last-child td {
@@ -317,18 +321,18 @@
 }
 
 .issue-issued-header-slot__status--ready {
-  background: color-mix(in srgb, #28a745 16%, transparent);
-  color: #146c2e;
+  background: color-mix(in srgb, var(--dxds-color-content-success-default-rest, #28a745) 22%, transparent);
+  color: var(--dxds-color-content-success-default-rest, #146c2e);
 }
 
 .issue-issued-header-slot__status--warn {
-  background: color-mix(in srgb, #dc3545 14%, transparent);
-  color: #a71d2a;
+  background: color-mix(in srgb, var(--dxds-color-content-danger-default-rest, #dc3545) 18%, transparent);
+  color: var(--dxds-color-content-danger-default-rest, #a71d2a);
 }
 
 .issue-issued-header-slot__status--muted {
-  background: color-mix(in srgb, #6c757d 14%, transparent);
-  color: #495057;
+  background: color-mix(in srgb, var(--dxds-color-content-neutral-secondary-rest, #6c757d) 18%, transparent);
+  color: var(--dxds-color-content-neutral-secondary-rest, #495057);
 }
 
 .issue-issued-header-slot__actions {
@@ -341,9 +345,9 @@
 
 .issue-issued-header-slot__btn {
   appearance: none;
-  border: 1px solid var(--bs-border-color, #ced4da);
-  background: var(--bs-body-bg, #fff);
-  color: var(--bs-body-color, #212529);
+  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #ced4da));
+  background: var(--dxds-color-surface-neutral-default-rest, var(--dxbl-body-bg, var(--bs-body-bg, #fff)));
+  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
   border-radius: 0.4rem;
   padding: 0.55rem 1rem;
   font: inherit;
@@ -354,7 +358,9 @@
 }
 
 .issue-issued-header-slot__btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 80%, #fff);
+  background: var(--dxds-color-surface-neutral-default-hovered,
+    var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa)));
+  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
 }
 
 .issue-issued-header-slot__btn:disabled {
@@ -363,43 +369,51 @@
 }
 
 .issue-issued-header-slot__btn--primary {
-  background: var(--bs-primary, #0d6efd);
-  border-color: var(--bs-primary, #0d6efd);
-  color: #fff;
+  background: var(--dxds-color-surface-primary-default-rest, var(--bs-primary, #0d6efd));
+  border-color: var(--dxds-color-surface-primary-default-rest, var(--bs-primary, #0d6efd));
+  color: var(--dxds-color-content-on-surface-primary-default-rest, #fff);
 }
 
 .issue-issued-header-slot__btn--primary:hover:not(:disabled) {
-  filter: brightness(0.96);
-  background: var(--bs-primary, #0d6efd);
+  filter: brightness(1.05);
+  background: var(--dxds-color-surface-primary-default-hovered,
+    var(--dxds-color-surface-primary-default-rest, var(--bs-primary, #0d6efd)));
+  color: var(--dxds-color-content-on-surface-primary-default-rest, #fff);
 }
 
 .issue-issued-header-slot__btn--danger {
   margin-right: auto;
-  color: #b91c1c;
-  border-color: #fecaca;
-  background: var(--bs-body-bg, #fff);
+  color: var(--dxds-color-content-danger-default-rest, #b91c1c);
+  border-color: color-mix(in srgb, var(--dxds-color-content-danger-default-rest, #b91c1c) 35%, transparent);
+  background: var(--dxds-color-surface-neutral-default-rest, var(--dxbl-body-bg, var(--bs-body-bg, #fff)));
 }
 
 .issue-issued-header-slot__btn--danger:hover:not(:disabled) {
-  background: #fef2f2;
+  background: color-mix(in srgb, var(--dxds-color-content-danger-default-rest, #b91c1c) 14%, transparent);
+  color: var(--dxds-color-content-danger-default-rest, #b91c1c);
 }
 
 .issue-issued-header-slot__upload {
   position: relative;
   display: block;
-  border: 1px solid var(--bs-border-color, #ced4da);
+  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #ced4da));
   border-radius: 0.4rem;
   padding: 0.7rem 1rem;
   text-align: center;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--bs-body-color, #212529);
-  background: var(--bs-body-bg, #fff);
+  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
+  background: var(--dxds-color-surface-neutral-default-rest, var(--dxbl-body-bg, var(--bs-body-bg, #fff)));
 }
 
 .issue-issued-header-slot__upload:hover {
-  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 80%, #fff);
+  /* Keep theme ink; do not mix #fff (Fluent Dark hover was white-on-white). */
+  background: var(--dxds-color-surface-neutral-default-hovered,
+    var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa)));
+  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
+  border-color: var(--dxds-color-border-neutral-default-hovered,
+    var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #ced4da)));
 }
 
 .issue-issued-header-slot__upload input[type="file"] {

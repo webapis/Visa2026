@@ -37,8 +37,10 @@ internal static class ApplicationWorkspaceTabBuilder
             EducationTab(application, people, linksByPerson, linkedEntities),
             AddressTab(application, people, linksByPerson, linkedEntities),
             WorkPermitTab(application, people, linksByPerson, linkedEntities),
+            WorkPermitLocationTab(application, people, linksByPerson, linkedEntities),
             InvitationTab(application, people, linksByPerson, linkedEntities),
             BorderZoneTab(application, people, linksByPerson, linkedEntities),
+            BorderZoneLocationTab(application, people, linksByPerson, linkedEntities),
             PositionTab(application, people, linksByPerson, linkedEntities),
             WorkDutyTab(application, people, linksByPerson, linkedEntities),
             SalaryTab(application, people, linksByPerson, linkedEntities),
@@ -268,8 +270,24 @@ internal static class ApplicationWorkspaceTabBuilder
                 wp.WorkPermitNumber ?? "—",
                 wp.WorkPermittedLocations ?? "—",
                 Fmt(wp.ExpirationDate),
-            ]),
+            ],
+            wp => CaseWorkPermitLocationCopy.OfferTick(application, wp)),
             emptyMessage: "No work permit item linked.");
+
+    private static ApplicationWorkspaceTab WorkPermitLocationTab(
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
+        Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
+        Tab("wp-location", "Work permit location", CaseWorkPermitLocationCopy.ShowInLinkReview(application),
+            ["Person", "Location"],
+            RowsForKind<WorkPermitItem>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.WorkPermitItem, (person, wp) =>
+            [
+                PersonName(person),
+                string.IsNullOrWhiteSpace(wp.WorkPermittedLocations) ? "—" : wp.WorkPermittedLocations!,
+            ],
+            wp => CaseWorkPermitLocationCopy.OfferTick(application, wp)),
+            emptyMessage: "No work permit location linked.");
 
     private static ApplicationWorkspaceTab InvitationTab(
         ApplicationProfileInstance application,
@@ -292,14 +310,31 @@ internal static class ApplicationWorkspaceTabBuilder
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
         Tab("bz", "Border zone", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.BorderZoneItem),
-            ["Person", "Border zone item", "Number"],
+            ["Person", "Border zone item", "Location", "Number"],
             RowsForKind<BorderZoneItem>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.BorderZoneItem, (person, bz) =>
             [
                 PersonName(person),
                 bz.BorderZone?.BorderZoneNumber ?? bz.ID.ToString(),
+                bz.BorderZoneLocation ?? "—",
                 bz.BorderZone?.BorderZoneNumber ?? "—",
-            ]),
+            ],
+            bz => CaseBorderZoneLocationCopy.OfferTick(application, bz)),
             emptyMessage: "No border zone item linked.");
+
+    private static ApplicationWorkspaceTab BorderZoneLocationTab(
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
+        Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
+        Tab("bz-location", "Border zone location", CaseBorderZoneLocationCopy.ShowInLinkReview(application),
+            ["Person", "Location"],
+            RowsForKind<BorderZoneItem>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.BorderZoneItem, (person, bz) =>
+            [
+                PersonName(person),
+                string.IsNullOrWhiteSpace(bz.BorderZoneLocation) ? "—" : bz.BorderZoneLocation!,
+            ],
+            bz => CaseBorderZoneLocationCopy.OfferTick(application, bz)),
+            emptyMessage: "No border zone location linked.");
 
     private static ApplicationWorkspaceTab PositionTab(
         ApplicationProfileInstance application,

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using System.Linq;
@@ -10,6 +11,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 
@@ -41,6 +43,14 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
+
+        [MaxLength(500)]
+        [VisibleInListView(true)]
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(BorderZoneName),
+            NoneValue = CommaSeparatedSelectionHelper.NoneValue)]
+        public virtual string BorderZoneLocation { get; set; }
 
         [NotMapped]
         [ModelDefault("AllowEdit", "False")]
