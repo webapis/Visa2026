@@ -3248,7 +3248,8 @@
 
     private static bool IsBorderZoneLocationReviewLine(PersonLinkReviewLine line) =>
         line.OmitFromJoin
-        && string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal);
+        && (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal)
+            || string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal));
 
     private void OnWorkPermitLocationReviewChanged(PersonLinkReviewLine line, string? value)
     {
@@ -3291,19 +3292,27 @@
         WorkspaceActions.NotifyWorkspaceChanged();
         await Task.CompletedTask;
     }
-    private async Task UseCaseBorderZoneLocationAsync(Guid personId, Guid borderZoneItemId)
+    private async Task UseCaseBorderZoneLocationAsync(Guid personId, Guid linkedObjectId)
     {
         _addressActionError = null;
-        if (Snapshot == null || personId == Guid.Empty || borderZoneItemId == Guid.Empty)
+        if (Snapshot == null || personId == Guid.Empty || linkedObjectId == Guid.Empty)
             return;
 
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        if (!CaseBorderZoneLocationCopy.TryOverwriteFromCase(
+        string? error;
+        var ok = CaseVisaBorderZoneLocationCopy.TryOverwriteFromCase(
                 objectSpace,
                 Snapshot.ApplicationProfileInstanceId,
                 personId,
-                borderZoneItemId,
-                out var error))
+                linkedObjectId,
+                out error)
+            || CaseBorderZoneLocationCopy.TryOverwriteFromCase(
+                objectSpace,
+                Snapshot.ApplicationProfileInstanceId,
+                personId,
+                linkedObjectId,
+                out error);
+        if (!ok)
         {
             _addressActionError = error;
             return;

@@ -173,7 +173,7 @@ public static class ApplicationProfileLocalization
             "Invitation" => Msg("ApplicationProfile.Doc.Invitation"),
             "Work permit" => Msg("ApplicationProfile.Doc.WorkPermit"),
             "Work permit location" => Field("WorkPermitLocation"),
-            "Border zone location" => Field("BorderZone"),
+            "Border zone location" => Field("BorderZoneLocation"),
             "Border zone" => Msg("ApplicationProfile.Doc.BorderZone"),
             "Salary" => Msg("ApplicationProfile.Person.Salary"),
             "Medical" => Msg("ApplicationProfile.Person.Medical"),

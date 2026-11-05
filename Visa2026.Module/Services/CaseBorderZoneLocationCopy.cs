@@ -10,7 +10,7 @@ namespace Visa2026.Module.Services;
 /// Copies Case summary border-zone locations onto linked
 /// <see cref="BorderZoneItem.BorderZoneLocation"/>. Fill empty on Join;
 /// tick overwrites the same linked item when Case summary differs.
-/// Dual gate: <c>RequirePersonBorderZoneItem</c> + <c>EffectiveRequireBorderZone</c>.
+/// Dual gate: <c>ProduceBorderZone</c> + <c>RequirePersonBorderZoneItem</c> + <c>EffectiveRequireBorderZone</c>.
 /// </summary>
 public static class CaseBorderZoneLocationCopy
 {
@@ -19,20 +19,21 @@ public static class CaseBorderZoneLocationCopy
         var profile = application?.ApplicationProfile;
         if (profile == null)
             return false;
-        if (!profile.RequirePersonBorderZoneItem)
+        if (!profile.ProduceBorderZone || !profile.RequirePersonBorderZoneItem)
             return false;
         return ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile);
     }
 
     /// <summary>
-    /// Link-review overview row / tiles: Case requires border zone and the
-    /// Border zone person tile is configured.
+    /// Link-review overview row / tiles: profile produces border zone, Case requires
+    /// border zone, and the Border zone person tile is configured.
     /// </summary>
     public static bool ShowInLinkReview(ApplicationProfileInstance? application)
     {
-        if (application == null)
+        var profile = application?.ApplicationProfile;
+        if (profile == null || !profile.ProduceBorderZone)
             return false;
-        if (!ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(application.ApplicationProfile))
+        if (!ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile))
             return false;
         return ApplicationProfileConfigurationResolver.RequirePersonBorderZoneItem(application);
     }

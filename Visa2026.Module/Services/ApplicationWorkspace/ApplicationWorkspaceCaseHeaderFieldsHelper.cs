@@ -445,6 +445,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 if (!SetBorderZone(value, application, out error))
                     return false;
                 CaseBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
+                CaseVisaBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
                 return true;
             case EntryCheckPoint:
                 if (!Visible(profile, p => p.RequireEntryCheckPoint, ApplicationProfileConfigurationResolver.ShowEntryCheckPoint, application))

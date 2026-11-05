@@ -443,12 +443,12 @@
         <Member Name="People" Caption="Adamlar" />
         <Member Name="ProcessNumber" Caption="Proses belgisi" />
         <Member Name="ProgressSlaStatement" Caption="Tassyklama möhleti" />
-        <Member Name="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <Member Name="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <Member Name="ProjectContract" Caption="Taslama belgisi" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Wekil" />
         <Member Name="ResultCoverageDisplay" Caption="Ýüztutmanyň netijesi" />
+        <Member Name="TargetApplicationProfileInstance" Caption="Nyşanlanan ýüztutma" />
         <Member Name="ToCity" Caption="Baryş şäheri" />
         <Member Name="ToRegion" Caption="Baryş welaýaty" />
         <Member Name="TotalPersonCount" Caption="Adam sany" />
@@ -2532,12 +2532,12 @@
         <ColumnInfo Id="IsManualEntry" Caption="El bilen giriş" />
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
-        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
@@ -2559,12 +2559,12 @@
         <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
-        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
@@ -2589,12 +2589,12 @@
         <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
-        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
@@ -2646,10 +2646,10 @@
         <ColumnInfo Id="ApplicationProfile" Caption="Ýüztutma profili" />
         <ColumnInfo Id="CompletionPercentage" Caption="Tamamlanma göterimi" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
+        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
-        <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="VisaCategory" Caption="Wiza kategoriýasy" />

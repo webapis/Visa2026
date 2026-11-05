@@ -344,6 +344,33 @@ internal static class ApplicationWorkspaceCaseBuilder
                 }
             }
 
+            if (CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application)
+                && !tiles.Any(t => string.Equals(t.TabKey, "visa-bz-location", StringComparison.OrdinalIgnoreCase)))
+            {
+                var locExpected = people.Sum(p =>
+                {
+                    var record = p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, "visa-bz-location", StringComparison.OrdinalIgnoreCase));
+                    return record?.ExpectedCount ?? 0;
+                });
+                var locCount = people.Sum(p =>
+                {
+                    var record = p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, "visa-bz-location", StringComparison.OrdinalIgnoreCase));
+                    return record?.Count ?? 0;
+                });
+                if (locExpected == 0 && people.Count == 0)
+                    locExpected = 1;
+                tiles.Add(new ApplicationWorkspaceCaseLinkedTile
+                {
+                    TabKey = "visa-bz-location",
+                    Label = "Border zone location",
+                    Count = locCount,
+                    ExpectedCount = locExpected,
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    Glyph = "📍",
+                });
+            }
             return tiles;
         }
 
@@ -1109,6 +1136,31 @@ internal static class ApplicationWorkspaceCaseBuilder
                 });
                 toneIndex++;
             }
+
+        }
+
+        if (CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application)
+            && !records.Any(r => string.Equals(r.Key, "visa-bz-location", StringComparison.OrdinalIgnoreCase)))
+        {
+            var locationText = FirstCellForPerson(tabs, "visa-bz-location", personName, 1);
+            if (string.IsNullOrWhiteSpace(locationText) || string.Equals(locationText, "—", StringComparison.Ordinal))
+                locationText = FirstCellForPerson(tabs, "visa", personName, 3);
+            var hasLocation = !string.IsNullOrWhiteSpace(locationText)
+                && !string.Equals(locationText, "—", StringComparison.Ordinal);
+            var visaCount = personId != Guid.Empty
+                ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, personId, ApplicationProfileInstancePersonLinkKind.Visa)
+                : 0;
+            var locationExpected = visaCount > 0 ? 1 : 0;
+            records.Add(new ApplicationWorkspaceCasePersonRecord
+            {
+                Key = "visa-bz-location",
+                Label = "Border zone location",
+                Count = hasLocation ? 1 : 0,
+                ExpectedCount = locationExpected,
+                State = locationExpected == 0 || hasLocation ? "valid" : "empty",
+                Glyph = "📍",
+                Tone = LinkedTones[toneIndex % LinkedTones.Length],
+            });
         }
 
         return records;

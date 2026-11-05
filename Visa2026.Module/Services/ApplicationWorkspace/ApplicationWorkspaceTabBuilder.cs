@@ -34,6 +34,7 @@ internal static class ApplicationWorkspaceTabBuilder
             PersonTab(people),
             PassportTab(application, people, linksByPerson, linkedEntities),
             VisaTab(application, people, linksByPerson, linkedEntities),
+            VisaBorderZoneLocationTab(application, people, linksByPerson, linkedEntities),
             EducationTab(application, people, linksByPerson, linkedEntities),
             AddressTab(application, people, linksByPerson, linkedEntities),
             WorkPermitTab(application, people, linksByPerson, linkedEntities),
@@ -213,15 +214,32 @@ internal static class ApplicationWorkspaceTabBuilder
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
         Tab("visa", "Visa", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.Visa),
-            ["Person", "Visa №", "Type", "Valid to"],
+            ["Person", "Visa №", "Type", "Location", "Valid to"],
             RowsForKind<Visa>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.Visa, (person, visa) =>
             [
                 PersonName(person),
                 visa.VisaNumber ?? "—",
                 visa.VisaType?.LocalizedDisplayName ?? visa.VisaType?.NameTm ?? "—",
+                visa.BorderZoneLocation ?? "—",
                 Fmt(visa.ExpirationDate),
-            ]),
+            ],
+            visa => CaseVisaBorderZoneLocationCopy.OfferTick(application, visa)),
             emptyMessage: "No valid visa linked.");
+
+    private static ApplicationWorkspaceTab VisaBorderZoneLocationTab(
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
+        Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
+        Tab("visa-bz-location", "Border zone location", CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application),
+            ["Person", "Location"],
+            RowsForKind<Visa>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.Visa, (person, visa) =>
+            [
+                PersonName(person),
+                string.IsNullOrWhiteSpace(visa.BorderZoneLocation) ? "—" : visa.BorderZoneLocation!,
+            ],
+            visa => CaseVisaBorderZoneLocationCopy.OfferTick(application, visa)),
+            emptyMessage: "No border zone location linked.");
 
     private static ApplicationWorkspaceTab EducationTab(
         ApplicationProfileInstance application,

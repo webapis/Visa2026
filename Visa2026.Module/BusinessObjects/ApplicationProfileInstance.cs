@@ -1089,7 +1089,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("MovementPermitLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowMovementPermitLocation", Context = "DetailView")]
         [VisibleInListView(false)]
-        [XafDisplayName("Work permit location")]
+        [XafDisplayName("Requested work permit location")]
         [MaxLength(500)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [CommaSeparatedMultiSelect(

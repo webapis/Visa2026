@@ -118,11 +118,23 @@ public static class PersonLinkReview
                 lines.Add(WorkPermitLocationLine(objectSpace, application, person));
             }
 
+            if (definition.Kind == ApplicationProfileInstancePersonLinkKind.Visa
+                && CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application))
+            {
+                lines.Add(VisaBorderZoneLocationLine(objectSpace, application, person));
+            }
+
             if (definition.Kind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem
                 && CaseBorderZoneLocationCopy.ShowInLinkReview(application))
             {
-                lines.Add(BorderZoneLocationLine(objectSpace, application, person));
+                lines.Add(BorderZoneItemLocationLine(objectSpace, application, person));
             }
+        }
+
+        if (CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application)
+            && !lines.Any(line => string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal)))
+        {
+            lines.Add(VisaBorderZoneLocationLine(objectSpace, application, person));
         }
 
         return lines;
@@ -287,6 +299,7 @@ public static class PersonLinkReview
 
         CaseWorkPermitLocationCopy.AcceptOnJoin(objectSpace, application, person);
         CaseBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
+        CaseVisaBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
 
         foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
         {
@@ -304,6 +317,15 @@ public static class PersonLinkReview
             else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
             {
                 CaseBorderZoneLocationCopy.TryApplyEditedLocations(
+                    objectSpace,
+                    application,
+                    person,
+                    line.ObjectId,
+                    line.Summary);
+            }
+            else if (string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal))
+            {
+                CaseVisaBorderZoneLocationCopy.TryApplyEditedLocations(
                     objectSpace,
                     application,
                     person,
@@ -398,7 +420,64 @@ public static class PersonLinkReview
 
         return objectSpace.GetObjectByKey<WorkPermitItem>(id);
     }
-    private static PersonLinkReviewLine BorderZoneLocationLine(
+    private static PersonLinkReviewLine VisaBorderZoneLocationLine(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        var visa = ResolveLinkedVisa(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
+        var caseLocations = CaseVisaBorderZoneLocationCopy.ResolveCaseLocations(application);
+        var visaLocations = visa?.BorderZoneLocation?.Trim();
+        var summary = CaseVisaBorderZoneLocationCopy.ResolveDisplaySummary(visaLocations, caseLocations);
+
+        var line = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.Visa,
+            TabKey = "VisaBorderZoneLocation",
+            OmitFromJoin = true,
+            Label = "Border zone location",
+            Summary = summary,
+            ObjectId = visa?.ID ?? Guid.Empty,
+        };
+
+        var fields = new List<PersonLinkReviewField>
+        {
+            Field(ApplicationProfileLocalization.Field("BorderZoneLocation"), summary, true, false),
+        };
+        if (!string.IsNullOrWhiteSpace(caseLocations)
+            && !string.Equals(visaLocations, caseLocations, StringComparison.Ordinal))
+        {
+            fields.Add(Field(T("CaseSummary"), caseLocations, false, false));
+        }
+
+        line.Fields = fields;
+        line.Choices = Array.Empty<PersonLinkReviewChoice>();
+        return line;
+    }
+
+    private static Visa? ResolveLinkedVisa(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
+            return null;
+
+        var linkedId = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
+            .Where(link => link.ApplicationProfileInstanceId == application.ID
+                && link.PersonId == person.ID
+                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.Visa
+                && link.LinkedObjectId != null
+                && link.LinkedObjectId != Guid.Empty)
+            .Select(link => link.LinkedObjectId)
+            .FirstOrDefault();
+        if (linkedId is not Guid id || id == Guid.Empty)
+            return null;
+
+        return objectSpace.GetObjectByKey<Visa>(id);
+    }
+    private static PersonLinkReviewLine BorderZoneItemLocationLine(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         Person person)
@@ -423,7 +502,7 @@ public static class PersonLinkReview
 
         var fields = new List<PersonLinkReviewField>
         {
-            Field(ApplicationProfileLocalization.Field("BorderZone"), summary, true, false),
+            Field(ApplicationProfileLocalization.Field("BorderZoneLocation"), summary, true, false),
         };
         if (!string.IsNullOrWhiteSpace(caseLocations)
             && !string.Equals(itemLocations, caseLocations, StringComparison.Ordinal))
