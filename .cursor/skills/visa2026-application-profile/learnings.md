@@ -1,3 +1,10 @@
+### 2026-11-05 — Case summary Recently used panel
+
+- **Need**: On create Case summary, right-side recent list (Project-first) fills the form from prior creates.
+- **Fix**: `ApplicationProfilePickerCaseSummaryRecentHelper` + browser `localStorage` (`case-summary-recent.js`); panel in `ApplicationProfilePickerComponent`; load/apply/save in PropertyEditor on Case summary / Create. Cap 6 per user. Prototype `docs/prototypes/application-profile-instance-create-case-summary-recently-used-prototype.jpg`.
+- **Officer**: Rebuild/F5. New → profile → Case summary — use form, Create; reopen create — right panel shows Project / Company / visa·period / time; click fills form.
+- **Prevent**: Do not require a DB table for this UX cache; do not hide empty state (show “No recent cases yet”).
+- **Cross-skill**: —
 ### 2026-11-04 — Gulluk Pasporty Çakylyk create defaults
 
 - **Need**: New instance for **Gulluk Pasporty Üçin Çakylyk Almak** should default like the Case summary screenshot: OF-Gulluk, bir gezeklik, 30 gün, Adaty tertipde, Serhet Ýok; leave Tastama / invitation place / address empty.
@@ -4133,3 +4140,19 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - Linked records **Border zone** row is gated by `RequirePersonBorderZoneItem` (not Case summary border zone alone).
 - Calik seed: set `RequirePersonBorderZoneItem: true` for every profile with `ProduceVisa` or `ProduceBorderZone` (plus existing `cancel_borderzone`). `get_invitation_wp` and other visa issuers now show Border zone (+ location when dual gate opens).
 - Restart / catalog sync required for already-seeded DBs to pick up the JSON flip.
+
+## 2026-11-05 — Visa vs BorderZoneItem border zone location
+
+- **Visa-only** (`ProduceVisa` && !`ProduceBorderZone`): Linked records show **Border zone location** on `Visa.BorderZoneLocation` (label `Field("BorderZoneLocation")`). No `BorderZoneItem` required. Join keeps non-empty visa location; empty visa fills from Case when Case has a value (incl. `Ýok`). Helper: `CaseVisaBorderZoneLocationCopy`.
+- **ProduceBorderZone**: `RequirePersonBorderZoneItem` + `CaseBorderZoneLocationCopy` onto `BorderZoneItem.BorderZoneLocation`; item row + location row with distinct location label.
+- Calik seed: Person BZ item only for `get_border_zone` / `cancel_borderzone` — not for visa-issuing templates.
+
+## 2026-11-05 — Visa BorderZoneLocation Ýok blocked Case fill
+
+- Symptom: Case Border zone = Serhetabat etraby; Linked records Border zone location showed Ýok.
+- Cause: Visas often store default `Ýok`; fill-empty treated that as set and preview preferred visa over Case.
+- Fix: `ShouldFillFromCase` / `ResolveDisplaySummary` — blank or Ýok fills from Case when Case has a non-none zone; real visa zones still kept on Join.
+
+## 2026-11-05 — Requested location labels
+
+- Case summary + Linked records/tiles: `WorkPermitLocation` / `BorderZone` / `BorderZoneLocation` Field strings → **Requested work permit location** / **Requested border zone location** (en/tr/tk/ru).

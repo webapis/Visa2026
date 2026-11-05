@@ -491,6 +491,10 @@
 }
 
 .ap-picker__summary {
+    display: grid;
+    grid-template-columns: minmax(16rem, 28rem) minmax(14rem, 1fr);
+    gap: 1.25rem 1.5rem;
+    align-items: start;
     margin: 0 0 14px;
 }
 
@@ -752,4 +756,96 @@
 }
 .ap-picker__list[aria-busy="true"] .ap-picker__item:not(.is-advancing) {
     opacity: 0.55;
+}
+
+.ap-picker__recent {
+    min-width: 0;
+    max-width: 22rem;
+    padding: 12px 12px 10px;
+    border: 1px solid var(--ap-line);
+    border-radius: 12px;
+    background: var(--ap-sunken);
+}
+
+.ap-picker__recent-head { margin-bottom: 10px; }
+.ap-picker__recent-title {
+    margin: 0 0 2px;
+    font-size: 0.98rem;
+    font-weight: 650;
+    color: var(--ap-ink);
+}
+.ap-picker__recent-sub {
+    margin: 0;
+    color: var(--ap-muted);
+    font-size: 0.8rem;
+}
+.ap-picker__recent-empty {
+    padding: 18px 10px;
+    text-align: center;
+    color: var(--ap-muted);
+    font-size: 0.86rem;
+    border: 1px dashed var(--ap-line);
+    border-radius: 10px;
+}
+.ap-picker__recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: min(58vh, 34rem);
+    overflow: auto;
+    padding-right: 2px;
+}
+.ap-picker__recent-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px 10px 14px;
+    border: 1px solid var(--ap-line);
+    border-radius: 10px;
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.ap-picker__recent-card:hover:not(:disabled) {
+    background: var(--ap-hover);
+    border-color: color-mix(in srgb, var(--ap-accent) 45%, var(--ap-line));
+}
+.ap-picker__recent-card.is-selected {
+    background: var(--ap-accent-soft);
+    border-color: var(--ap-accent);
+    box-shadow: inset 3px 0 0 var(--ap-accent);
+}
+.ap-picker__recent-card:disabled { opacity: 0.65; cursor: default; }
+.ap-picker__recent-project {
+    font-weight: 650;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    color: var(--ap-ink);
+}
+.ap-picker__recent-company {
+    font-size: 0.82rem;
+    color: var(--ap-muted);
+}
+.ap-picker__recent-meta {
+    font-size: 0.78rem;
+    color: var(--ap-muted);
+    margin-top: 2px;
+}
+.ap-picker__recent-time {
+    font-size: 0.74rem;
+    color: var(--ap-muted);
+    margin-top: 4px;
+}
+
+@media (max-width: 1100px) {
+    .ap-picker__summary {
+        grid-template-columns: 1fr;
+    }
+    .ap-picker__recent {
+        max-width: none;
+    }
 }

@@ -287,12 +287,17 @@
     "ru-RU": "Срочность"
   },
   "ApplicationProfile.Field.BorderZone": {
-    "en-US": "Border zone",
-    "tr-TR": "Sınır bölgesi",
-    "tk-TM": "Serhet sebiti",
-    "ru-RU": "Пограничная зона"
+    "en-US": "Requested border zone location",
+    "tr-TR": "Talep edilen sınır bölgesi yeri",
+    "tk-TM": "Soralýan serhet sebiti ýeri",
+    "ru-RU": "Запрашиваемая пограничная зона"
   },
-  "ApplicationProfile.Field.MigrationService": {
+    "ApplicationProfile.Field.BorderZoneLocation": {
+    "en-US": "Requested border zone location",
+    "tr-TR": "Talep edilen sınır bölgesi yeri",
+    "tk-TM": "Soralýan serhet sebiti ýeri",
+    "ru-RU": "Запрашиваемая пограничная зона"
+  },"ApplicationProfile.Field.MigrationService": {
     "en-US": "Migration service",
     "tr-TR": "Göç dairesi",
     "tk-TM": "Migrasiýa gullugy",
@@ -437,10 +442,10 @@
     "ru-RU": "Цель"
   },
   "ApplicationProfile.Field.WorkPermitLocation": {
-    "en-US": "Work permit location",
-    "tr-TR": "İş izni yeri",
-    "tk-TM": "Iş rugsady ýeri",
-    "ru-RU": "Место разрешения на работу"
+    "en-US": "Requested work permit location",
+    "tr-TR": "Talep edilen iş izni yeri",
+    "tk-TM": "Soralýan iş rugsady ýeri",
+    "ru-RU": "Запрашиваемое место разрешения на работу"
   },
   "ApplicationProfile.Field.EntryDate": {
     "en-US": "Entry date",
@@ -1539,6 +1544,66 @@
     "tr-TR": "Bu profilde zorunlu başvuru profili örneği alanı yok.",
     "tk-TM": "Bu profilde hökmany ýüztutma profiliniň ýüzlemesi meýdany ýok.",
     "ru-RU": "В этом профиле нет обязательных полей экземпляра."
+  },
+  "ApplicationProfileInstance.Picker.Recent.Title": {
+    "en-US": "Recently used",
+    "tr-TR": "Son kullanılanlar",
+    "tk-TM": "Soňky ulanylanlar",
+    "ru-RU": "Недавние"
+  },
+  "ApplicationProfileInstance.Picker.Recent.Sub": {
+    "en-US": "Click a case to fill this form",
+    "tr-TR": "Formu doldurmak için bir kayda tıklayın",
+    "tk-TM": "Formany doldurmak üçin birini basyň",
+    "ru-RU": "Нажмите запись, чтобы заполнить форму"
+  },
+  "ApplicationProfileInstance.Picker.Recent.Empty": {
+    "en-US": "No recent cases yet",
+    "tr-TR": "Henüz son dava yok",
+    "tk-TM": "Entäk soňky ýüztutma ýok",
+    "ru-RU": "Недавних дел пока нет"
+  },
+  "ApplicationProfileInstance.Picker.Recent.Untitled": {
+    "en-US": "Case without project",
+    "tr-TR": "Projesiz dava",
+    "tk-TM": "Taslamasyz ýüztutma",
+    "ru-RU": "Дело без проекта"
+  },
+  "ApplicationProfileInstance.Picker.Recent.JustNow": {
+    "en-US": "Just now",
+    "tr-TR": "Az önce",
+    "tk-TM": "Ýaňy-ýakynda",
+    "ru-RU": "Только что"
+  },
+  "ApplicationProfileInstance.Picker.Recent.MinutesAgo": {
+    "en-US": "{0} minutes ago",
+    "tr-TR": "{0} dakika önce",
+    "tk-TM": "{0} minut öň",
+    "ru-RU": "{0} мин назад"
+  },
+  "ApplicationProfileInstance.Picker.Recent.HoursAgo": {
+    "en-US": "{0} hours ago",
+    "tr-TR": "{0} saat önce",
+    "tk-TM": "{0} sagat öň",
+    "ru-RU": "{0} ч назад"
+  },
+  "ApplicationProfileInstance.Picker.Recent.Yesterday": {
+    "en-US": "Yesterday",
+    "tr-TR": "Dün",
+    "tk-TM": "Düýn",
+    "ru-RU": "Вчера"
+  },
+  "ApplicationProfileInstance.Picker.Recent.DaysAgo": {
+    "en-US": "{0} days ago",
+    "tr-TR": "{0} gün önce",
+    "tk-TM": "{0} gün öň",
+    "ru-RU": "{0} дн. назад"
+  },
+  "ApplicationProfileInstance.Picker.Recent.WeeksAgo": {
+    "en-US": "{0} weeks ago",
+    "tr-TR": "{0} hafta önce",
+    "tk-TM": "{0} hepde öň",
+    "ru-RU": "{0} нед. назад"
   },
   "ApplicationProfileInstance.Picker.CaseSummarySub": {
     "en-US": "Same Use fields as the case Overview. Profile defaults are already filled. Set the rest now so you do not need to Edit after create. Changing these does not change the Application Profile template.",

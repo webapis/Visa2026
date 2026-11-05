@@ -10,6 +10,8 @@ using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
@@ -71,6 +73,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         OpenApprovalLegCatalogRequested = EventCallback.Factory.Create(this, OpenApprovalLegCatalog),
         MakeDefaultApprovalLegRequested = EventCallback.Factory.Create<Guid>(this, SetDefaultApprovalLeg),
         CaseSummaryFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, OnCaseSummaryFieldChanged),
+        CaseSummaryRecentSelected = EventCallback.Factory.Create<Guid>(this, OnCaseSummaryRecentSelectedAsync),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
         MoveToShelfRequested = EventCallback.Factory.Create<(Guid ProfileId, Guid? ShelfId)>(this, MoveToShelfAsync),
@@ -388,12 +391,13 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         {
             EnsureOrganizationSelection(model);
             LoadCaseSummaryDraft(model);
+            await LoadCaseSummaryRecentAsync(model);
             if (ApplicationProfilePickerCaseSummaryDraft.ShouldSkipStep(model.CaseSummaryFields))
             {
                 // Empty Case summary (no Use fields): create immediately — no empty step.
                 model.StatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.Picker.Creating");
                 await Task.Delay(48);
-                ExecuteCreateCore(model);
+                await ExecuteCreateCoreAsync(model);
                 return;
             }
 
@@ -447,7 +451,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         try
         {
-            ExecuteCreateCore(model);
+            await ExecuteCreateCoreAsync(model);
         }
         finally
         {
@@ -455,7 +459,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         }
     }
 
-    private void ExecuteCreateCore(ApplicationProfilePickerModel model)
+    private async Task ExecuteCreateCoreAsync(ApplicationProfilePickerModel model)
     {
         if (_application == null)
             return;
@@ -482,6 +486,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
 
         model.StatusMessage = null;
         model.IsStatusError = false;
+        await RememberCaseSummaryRecentAsync(model);
         // Workspace opened in a new MDI tab; close the picker so Create does not leave a dead tab.
         View?.Close();
     }
@@ -903,5 +908,105 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         var step = model.Step;
         await LoadAsync(showLoading: false);
         model.Step = step;
+    }
+
+    private async Task OnCaseSummaryRecentSelectedAsync(Guid recentId)
+    {
+        var model = ComponentModel;
+        if (model == null || recentId == Guid.Empty)
+            return;
+
+        var entry = model.CaseSummaryRecentEntries.FirstOrDefault(e => e.Id == recentId);
+        if (entry == null)
+            return;
+
+        _caseSummaryUpdates = entry.Updates?.ToList()
+            ?? new List<ApplicationWorkspaceCaseHeaderFieldUpdate>();
+        LoadCaseSummaryDraft(model);
+        model.SelectedCaseSummaryRecentId = recentId;
+        model.Step = 4;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task LoadCaseSummaryRecentAsync(ApplicationProfilePickerModel model)
+    {
+        model.CaseSummaryRecentEntries = Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
+        model.SelectedCaseSummaryRecentId = Guid.Empty;
+
+        var js = _application?.ServiceProvider?.GetService<IJSRuntime>();
+        if (js == null)
+            return;
+
+        try
+        {
+            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(CurrentUserStorageKey());
+            var json = await js.InvokeAsync<string>("visaCaseSummaryRecent.load", key);
+            model.CaseSummaryRecentEntries =
+                ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(json);
+        }
+        catch (JSException)
+        {
+            model.CaseSummaryRecentEntries = Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
+        }
+        catch (JSDisconnectedException)
+        {
+            model.CaseSummaryRecentEntries = Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
+        }
+    }
+
+    private async Task RememberCaseSummaryRecentAsync(ApplicationProfilePickerModel model)
+    {
+        var js = _application?.ServiceProvider?.GetService<IJSRuntime>();
+        if (js == null)
+            return;
+
+        var companyLabel = model.Companies
+            .FirstOrDefault(c => c.Id == model.SelectedCompanyId)
+            ?.DisplayName;
+        var entry = ApplicationProfilePickerCaseSummaryRecentHelper.CreateFromFields(
+            model.CaseSummaryFields,
+            companyLabel);
+        if (entry.Updates.Count == 0
+            && string.IsNullOrWhiteSpace(entry.ProjectLabel)
+            && string.IsNullOrWhiteSpace(entry.VisaTypeLabel))
+            return;
+
+        var next = ApplicationProfilePickerCaseSummaryRecentHelper.Push(
+            model.CaseSummaryRecentEntries,
+            entry);
+        model.CaseSummaryRecentEntries = next;
+        model.SelectedCaseSummaryRecentId = entry.Id;
+
+        try
+        {
+            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(CurrentUserStorageKey());
+            var json = ApplicationProfilePickerCaseSummaryRecentHelper.Serialize(next);
+            await js.InvokeAsync<bool>("visaCaseSummaryRecent.save", key, json);
+        }
+        catch (JSException)
+        {
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+
+    private static string CurrentUserStorageKey()
+    {
+        try
+        {
+            var id = SecuritySystem.CurrentUserId;
+            if (id is Guid guid && guid != Guid.Empty)
+                return guid.ToString("D");
+            if (id != null)
+                return Convert.ToString(id) ?? "anon";
+        }
+        catch
+        {
+        }
+
+        return "anon";
     }
 }

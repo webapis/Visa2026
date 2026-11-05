@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using Microsoft.AspNetCore.Components;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -235,6 +236,25 @@ public sealed class ApplicationProfilePickerModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+
+    public IReadOnlyList<ApplicationProfilePickerCaseSummaryRecentEntry> CaseSummaryRecentEntries
+    {
+        get => GetPropertyValue<IReadOnlyList<ApplicationProfilePickerCaseSummaryRecentEntry>>()
+            ?? Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
+        set => SetPropertyValue(value);
+    }
+
+    public Guid SelectedCaseSummaryRecentId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> CaseSummaryRecentSelected
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
     public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> CaseSummaryFields
     {
         get => GetPropertyValue<IReadOnlyList<ApplicationWorkspaceCaseHeaderField>>()

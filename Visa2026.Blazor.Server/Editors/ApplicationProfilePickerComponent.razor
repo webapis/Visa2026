@@ -166,6 +166,45 @@
                         @RenderSummaryField(field)
                     }
                 </div>
+                <aside class="ap-picker__recent" aria-label="@Msg("ApplicationProfileInstance.Picker.Recent.Title")">
+                    <div class="ap-picker__recent-head">
+                        <h2 class="ap-picker__recent-title">@Msg("ApplicationProfileInstance.Picker.Recent.Title")</h2>
+                        <p class="ap-picker__recent-sub">@Msg("ApplicationProfileInstance.Picker.Recent.Sub")</p>
+                    </div>
+                    @if (CaseSummaryRecentEntries.Count == 0)
+                    {
+                        <div class="ap-picker__recent-empty" role="status">
+                            @Msg("ApplicationProfileInstance.Picker.Recent.Empty")
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ap-picker__recent-list">
+                            @foreach (var recent in CaseSummaryRecentEntries)
+                            {
+                                var selected = recent.Id == SelectedCaseSummaryRecentId;
+                                <button type="button"
+                                        class="ap-picker__recent-card @(selected ? "is-selected" : null)"
+                                        disabled="@IsAdvancing"
+                                        @onclick="() => OnCaseSummaryRecentSelected(recent.Id)">
+                                    <span class="ap-picker__recent-project">@ApplicationProfilePickerCaseSummaryRecentHelper.PrimaryLabel(recent)</span>
+                                    @if (!string.IsNullOrWhiteSpace(recent.CompanyLabel))
+                                    {
+                                        <span class="ap-picker__recent-company">@recent.CompanyLabel</span>
+                                    }
+                                    @{
+                                        var meta = ApplicationProfilePickerCaseSummaryRecentHelper.MetaLine(recent);
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(meta))
+                                    {
+                                        <span class="ap-picker__recent-meta">@meta</span>
+                                    }
+                                    <span class="ap-picker__recent-time">@ApplicationProfilePickerCaseSummaryRecentHelper.FormatRelativeTime(recent.UsedAtUtc)</span>
+                                </button>
+                            }
+                        </div>
+                    }
+                </aside>
             </div>
         }
 
@@ -378,6 +417,10 @@
     [Parameter] public EventCallback<Guid> MakeDefaultApprovalLegRequested { get; set; }
     [Parameter] public IReadOnlyList<ApplicationWorkspaceCaseHeaderField> CaseSummaryFields { get; set; } = Array.Empty<ApplicationWorkspaceCaseHeaderField>();
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> CaseSummaryFieldChanged { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfilePickerCaseSummaryRecentEntry> CaseSummaryRecentEntries { get; set; }
+        = Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
+    [Parameter] public Guid SelectedCaseSummaryRecentId { get; set; }
+    [Parameter] public EventCallback<Guid> CaseSummaryRecentSelected { get; set; }
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
 
     [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
@@ -788,6 +831,13 @@
 
     private Task OnCaseSummaryDateChanged(string key, DateTime? value) =>
         OnCaseSummaryFieldChanged(key, ApplicationWorkspaceCaseHeaderField.FormatEditorDate(value));
+
+    private Task OnCaseSummaryRecentSelected(Guid recentId)
+    {
+        if (!CaseSummaryRecentSelected.HasDelegate || recentId == Guid.Empty)
+            return Task.CompletedTask;
+        return CaseSummaryRecentSelected.InvokeAsync(recentId);
+    }
 
     private Task OnCaseSummaryFieldChanged(string key, string? value)
     {
