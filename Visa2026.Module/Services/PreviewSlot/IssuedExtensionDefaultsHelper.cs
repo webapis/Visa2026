@@ -42,8 +42,8 @@ public static class IssuedExtensionDefaultsHelper
     }
 
     /// <summary>
-    /// Start = linked end (clamped to issue/today if earlier); End = linked end + period when still after Start,
-    /// otherwise clamped Start + period.
+    /// Start = linked end + 1 day (clamped to issue/today if earlier).
+    /// End = linked end + case period when still after Start; otherwise clamped Start + period.
     /// </summary>
     public static bool TryComputeExtensionDates(
         DateTime? linkedEnd,
@@ -65,11 +65,12 @@ public static class IssuedExtensionDefaultsHelper
 
         var linkedDate = linked.Date;
         var issue = issueOrToday.Date;
-        start = linkedDate < issue ? issue : linkedDate;
+        var dayAfterLinkedEnd = linkedDate.AddDays(1);
+        start = dayAfterLinkedEnd < issue ? issue : dayAfterLinkedEnd;
 
         if (!TryAddVisaPeriod(linkedDate, period, out var fromLinked))
         {
-            note = $"Start from linked end {linkedDate:dd MMM yyyy}; case period missing or not computable — enter End.";
+            note = $"Start day after linked end {linkedDate:dd MMM yyyy}; case period missing or not computable — enter End.";
             return true;
         }
 
@@ -83,8 +84,8 @@ public static class IssuedExtensionDefaultsHelper
         }
 
         note = end.HasValue
-            ? $"Start/End from linked end {linkedDate:dd MMM yyyy} + case period."
-            : $"Start from linked end {linkedDate:dd MMM yyyy}; enter End.";
+            ? $"Start day after linked end {linkedDate:dd MMM yyyy}; End = linked end + case period."
+            : $"Start day after linked end {linkedDate:dd MMM yyyy}; enter End.";
         return true;
     }
 

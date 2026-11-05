@@ -1,3 +1,10 @@
+### 2026-11-05 — Extension start date is day after linked end
+
+- **Need**: Auto start for issued visa/WP was same calendar day as linked end; officers need day after.
+- **Fix**: `TryComputeExtensionDates` Start = linked end + 1 day (still clamp to issue/today); End remains linked end + case VisaPeriod.
+- **Officer**: Rebuild + F5; + Add issued visa/WP on extension — Start is one day after linked end, End unchanged.
+- **Prevent**: Do not move End when adjusting Start +1; End stays anchored on linked end + period.
+- **Cross-skill**: —
 ### 2026-11-05 — Recently used scoped by Application Profile
 
 - **Need**: Invitation Case summary must not show Visa+WP / extension recent cards.

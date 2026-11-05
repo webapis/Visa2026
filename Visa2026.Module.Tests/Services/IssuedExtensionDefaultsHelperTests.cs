@@ -47,7 +47,7 @@ public class IssuedExtensionDefaultsHelperTests
     }
 
     [Fact]
-    public void TryComputeExtensionDates_UsesLinkedEndPlusPeriod()
+    public void TryComputeExtensionDates_UsesDayAfterLinkedEnd_EndFromLinkedPlusPeriod()
     {
         var period = new VisaPeriod { PdfForm__Code = "AY", PdfForm_Count = 6 };
         var linkedEnd = new DateTime(2024, 11, 4);
@@ -56,7 +56,7 @@ public class IssuedExtensionDefaultsHelperTests
         Assert.True(IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
             linkedEnd, issue, period, out var start, out var end, out var note));
 
-        Assert.Equal(linkedEnd, start);
+        Assert.Equal(new DateTime(2024, 11, 5), start);
         Assert.Equal(new DateTime(2025, 5, 4), end);
         Assert.Contains("linked end", note, StringComparison.OrdinalIgnoreCase);
     }
@@ -71,6 +71,7 @@ public class IssuedExtensionDefaultsHelperTests
         Assert.True(IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
             linkedEnd, issue, period, out var start, out var end, out _));
 
+        // day after linked end (02 Oct) is still before issue → clamp start; end stays linked+period
         Assert.Equal(issue, start);
         Assert.Equal(new DateTime(2025, 4, 1), end);
     }

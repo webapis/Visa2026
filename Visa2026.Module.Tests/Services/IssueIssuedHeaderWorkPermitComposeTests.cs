@@ -71,7 +71,7 @@ public class IssueIssuedHeaderWorkPermitComposeTests
             out var end,
             out _));
 
-        Assert.Equal(linkedEnd, start);
+        Assert.Equal(new DateTime(2025, 1, 22), start);
         Assert.Equal(new DateTime(2025, 7, 21), end);
     }
 }
