@@ -167,8 +167,18 @@ public static class IssueIssuedVisaComposeService
                     ExpirationDate = expiration,
                     BorderZoneLocation = already
                         ? existingVisa?.BorderZoneLocation?.Trim()
-                            ?? BorderZoneSelectionHelper.ResolveForIssuedVisa(invitation, instance)
-                        : BorderZoneSelectionHelper.ResolveForIssuedVisa(invitation, instance),
+                            ?? CasePersonRequestedLocation.ResolveForPrefill(
+                                objectSpace,
+                                applicationId,
+                                item.Person.ID,
+                                ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                                BorderZoneSelectionHelper.ResolveForIssuedVisa(invitation, instance))
+                        : CasePersonRequestedLocation.ResolveForPrefill(
+                            objectSpace,
+                            applicationId,
+                            item.Person.ID,
+                            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                            BorderZoneSelectionHelper.ResolveForIssuedVisa(invitation, instance)),
                     Documents = already && existingVisa != null
                         ? ListDocuments(objectSpace, existingVisa.ID).ToList()
                         : [],
@@ -332,8 +342,19 @@ public static class IssueIssuedVisaComposeService
                 StartDate = startDate,
                 ExpirationDate = expiration,
                 BorderZoneLocation = already
-                    ? existingVisa?.BorderZoneLocation?.Trim() ?? defaultBorderZone
-                    : defaultBorderZone,
+                    ? existingVisa?.BorderZoneLocation?.Trim()
+                        ?? CasePersonRequestedLocation.ResolveForPrefill(
+                            objectSpace,
+                            applicationId,
+                            person.ID,
+                            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                            defaultBorderZone)
+                    : CasePersonRequestedLocation.ResolveForPrefill(
+                        objectSpace,
+                        applicationId,
+                        person.ID,
+                        ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                        defaultBorderZone),
                 Documents = already && existingVisa != null
                     ? ListDocuments(objectSpace, existingVisa.ID).ToList()
                     : [],
@@ -571,7 +592,12 @@ public static class IssueIssuedVisaComposeService
                 visa.StartDate = ResolveStartDate(row).Date;
                 visa.ExpirationDate = row.ExpirationDate?.Date;
                 visa.BorderZoneLocation = string.IsNullOrWhiteSpace(row.BorderZoneLocation)
-                    ? BorderZoneSelectionHelper.ResolveForIssuedVisa(item.Invitation, instance)
+                    ? CasePersonRequestedLocation.ResolveForPrefill(
+                        objectSpace,
+                        instance.ID,
+                        row.PersonId,
+                        ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                        BorderZoneSelectionHelper.ResolveForIssuedVisa(item.Invitation, instance))
                     : row.BorderZoneLocation.Trim();
                 BorderZoneSelectionHelper.ApplyDefaultIfEmpty(visa);
 
@@ -714,7 +740,12 @@ public static class IssueIssuedVisaComposeService
             visa.StartDate = ResolveStartDate(row).Date;
             visa.ExpirationDate = row.ExpirationDate?.Date;
             visa.BorderZoneLocation = string.IsNullOrWhiteSpace(row.BorderZoneLocation)
-                ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
+                ? CasePersonRequestedLocation.ResolveForPrefill(
+                    objectSpace,
+                    instance.ID,
+                    row.PersonId,
+                    ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                    BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance))
                 : row.BorderZoneLocation.Trim();
             BorderZoneSelectionHelper.ApplyDefaultIfEmpty(visa);
 
@@ -813,7 +844,12 @@ public static class IssueIssuedVisaComposeService
             visa.StartDate = ResolveStartDate(row).Date;
             visa.ExpirationDate = row.ExpirationDate?.Date;
             visa.BorderZoneLocation = string.IsNullOrWhiteSpace(row.BorderZoneLocation)
-                ? BorderZoneSelectionHelper.ResolveForIssuedVisa(visa.IssuingInvitationItem?.Invitation, instance)
+                ? CasePersonRequestedLocation.ResolveForPrefill(
+                    objectSpace,
+                    instance.ID,
+                    row.PersonId,
+                    ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+                    BorderZoneSelectionHelper.ResolveForIssuedVisa(visa.IssuingInvitationItem?.Invitation, instance))
                 : row.BorderZoneLocation.Trim();
             BorderZoneSelectionHelper.ApplyDefaultIfEmpty(visa);
 

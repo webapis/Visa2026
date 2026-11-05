@@ -63,6 +63,8 @@ public sealed class ApplicationListViewCompletionPercentageController : ViewCont
     {
         if (View?.Editor is not DxGridListEditor gridListEditor)
             return;
+        if (gridListEditor.GridModel == null)
+            return;
 
         foreach (var columnModel in gridListEditor.GridDataColumnModels)
         {

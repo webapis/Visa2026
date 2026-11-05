@@ -3,6 +3,19 @@
 .issue-issued-visa-slot-panel.resminamalar-slot-panel {
   --issue-issued-pad-x: 1.25rem;
   --issue-issued-pad-y: 1rem;
+  --issue-panel: var(--DS-color-surface-neutral-default-rest, var(--dxds-color-surface-neutral-default-rest, var(--bs-body-bg, #fff)));
+  --issue-ink: var(--DS-color-content-neutral-default-rest, var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529))));
+  --issue-muted: var(--DS-color-content-neutral-subdued-rest, var(--dxds-color-content-neutral-secondary-rest, color-mix(in srgb, var(--issue-ink) 62%, var(--issue-panel))));
+  --issue-line: var(--DS-color-border-neutral-default-rest, var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e5e7eb)));
+  --issue-sunken: var(--DS-color-surface-neutral-subdued-rest, var(--dxds-color-surface-neutral-subdued-rest, color-mix(in srgb, var(--issue-ink) 8%, var(--issue-panel))));
+  --issue-hover: var(--DS-color-surface-neutral-default-hovered, var(--dxds-color-surface-neutral-default-hovered, color-mix(in srgb, var(--issue-ink) 10%, var(--issue-panel))));
+  --issue-accent: var(--DS-color-content-primary-default-rest, var(--dxds-color-content-primary-default-rest, var(--bs-primary, #0d6efd)));
+  color: var(--issue-ink);
+  color-scheme: inherit;
+}
+
+.dxbl-theme-fluent-mode-dark .issue-issued-visa-slot-panel.resminamalar-slot-panel {
+  color-scheme: dark;
 }
 
 .issue-issued-visa-slot {
@@ -59,11 +72,11 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.9rem 1rem 1rem;
-  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e5e7eb));
+  border: 1px solid var(--issue-line, var(--DS-color-border-neutral-default-rest, var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e5e7eb))));
   border-radius: 0.5rem;
-  /* Theme surface + ink — never force #fff (breaks Fluent Dark: light card + light text). */
-  background: var(--dxds-color-surface-neutral-default-rest, var(--bs-tertiary-bg, var(--bs-body-bg, #fff)));
-  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
+  /* Prefer Fluent --DS-*; --bs-body-bg stays light in this host. */
+  background: var(--issue-sunken, var(--DS-color-surface-neutral-subdued-rest, var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa))));
+  color: var(--issue-ink, var(--DS-color-content-neutral-default-rest, var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)))));
 }
 
 .issue-issued-visa-slot__card--issued {
@@ -194,4 +207,32 @@
   .issue-issued-visa-slot__readonly-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.issue-issued-visa-slot-panel .officer-date-edit,
+.issue-issued-visa-slot-panel .dxbl-date-edit,
+.issue-issued-visa-slot-panel .dxbl-text-edit {
+  --dxbl-text-edit-bg: var(--issue-sunken);
+  --dxbl-text-edit-color: var(--issue-ink);
+  --dxbl-text-edit-border-color: var(--issue-line);
+  background: var(--issue-sunken) !important;
+  color: var(--issue-ink) !important;
+  border-color: var(--issue-line) !important;
+}
+
+.issue-issued-visa-slot-panel .dxbl-text-edit-input,
+.issue-issued-visa-slot-panel .dxbl-date-edit-input,
+.issue-issued-visa-slot-panel input.dxbl-text-edit-input {
+  color: var(--issue-ink) !important;
+  -webkit-text-fill-color: var(--issue-ink) !important;
+  background: transparent !important;
+}
+
+.issue-issued-visa-slot-panel .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-visa-slot-panel .cs-multi-select-inline .dxbl-text-edit-input {
+  --dxbl-text-edit-bg: var(--issue-sunken);
+  background: var(--issue-sunken) !important;
+  color: var(--issue-ink) !important;
+  -webkit-text-fill-color: var(--issue-ink) !important;
+  border-color: var(--issue-line) !important;
 }

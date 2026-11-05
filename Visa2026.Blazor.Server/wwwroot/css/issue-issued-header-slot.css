@@ -1,13 +1,29 @@
-/* Issue issued-header compose occupant (Invitation / WP / Rejection / BorderZone) */
+/* Issue issued-header compose occupant (Invitation / WP / Rejection / BorderZone).
+   Prefer Fluent --DS-color-* (then --dxds-*). Do not lean on --bs-body-bg alone —
+   host keeps Bootstrap light, which painted white cards / dark text on Fluent Dark. */
 
 .issue-issued-header-slot-panel.resminamalar-slot-panel {
   --issue-issued-pad-x: 1.25rem;
   --issue-issued-pad-y: 1rem;
+  --issue-panel: var(--DS-color-surface-neutral-default-rest, var(--dxds-color-surface-neutral-default-rest, var(--bs-body-bg, #fff)));
+  --issue-ink: var(--DS-color-content-neutral-default-rest, var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529))));
+  --issue-muted: var(--DS-color-content-neutral-subdued-rest, var(--dxds-color-content-neutral-secondary-rest, color-mix(in srgb, var(--issue-ink) 62%, var(--issue-panel))));
+  --issue-line: var(--DS-color-border-neutral-default-rest, var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e5e7eb)));
+  --issue-sunken: var(--DS-color-surface-neutral-subdued-rest, var(--dxds-color-surface-neutral-subdued-rest, color-mix(in srgb, var(--issue-ink) 8%, var(--issue-panel))));
+  --issue-hover: var(--DS-color-surface-neutral-default-hovered, var(--dxds-color-surface-neutral-default-hovered, color-mix(in srgb, var(--issue-ink) 10%, var(--issue-panel))));
+  --issue-accent: var(--DS-color-content-primary-default-rest, var(--dxds-color-content-primary-default-rest, var(--bs-primary, #0d6efd)));
+  color: var(--issue-ink);
+  color-scheme: inherit;
 }
+
+.dxbl-theme-fluent-mode-dark .issue-issued-header-slot-panel.resminamalar-slot-panel {
+  color-scheme: dark;
+}
+
 
 .issue-issued-header-slot-panel .resminamalar-slot-panel__header.visa-preview-drawer__header {
   padding: 0.9rem var(--issue-issued-pad-x);
-  border-bottom: 1px solid var(--bs-border-color, #e5e7eb);
+  border-bottom: 1px solid var(--issue-line, var(--bs-border-color, #e5e7eb));
 }
 
 .issue-issued-header-slot-panel .resminamalar-slot-panel__body {
@@ -37,21 +53,18 @@
   flex-direction: column;
   gap: 0.85rem;
   padding: 1rem 1.1rem 1.1rem;
-  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e5e7eb));
+  border: 1px solid var(--issue-line);
   border-radius: 0.5rem;
-  background: var(--dxds-color-surface-neutral-default-rest, var(--bs-tertiary-bg, var(--bs-body-bg, #fff)));
-  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
+  background: var(--issue-panel);
+  color: var(--issue-ink);
 }
 
 .issue-issued-header-slot__section--add {
-  background: color-mix(
-    in srgb,
-    var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa)) 82%,
-    transparent);
+  background: var(--issue-sunken);
 }
 
 .issue-issued-header-slot__section--add .issue-issued-header-slot__section-title {
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--issue-muted);
 }
 
 .issue-issued-header-slot__section-head {
@@ -68,7 +81,7 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--issue-muted);
 }
 
 .issue-issued-header-slot__grid {
@@ -83,7 +96,7 @@
   gap: 0.35rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--bs-secondary-color, #495057);
+  color: var(--issue-muted);
 }
 
 .issue-issued-header-slot__field--wide {
@@ -95,27 +108,96 @@
 }
 
 .issue-issued-header-slot__input,
-.issue-issued-header-slot__textarea {
+.issue-issued-header-slot__textarea,
+.issue-issued-header-slot-panel select.issue-issued-header-slot__input {
   font: inherit;
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.35;
   padding: 0.5rem 0.65rem;
-  border: 1px solid var(--bs-border-color, #ced4da);
+  border: 1px solid var(--issue-line);
   border-radius: 0.4rem;
-  background: var(--bs-body-bg, #fff);
-  color: var(--bs-body-color, #212529);
+  /* Sunken vs section card so fields stay visible in Fluent Dark */
+  background: var(--issue-sunken);
+  color: var(--issue-ink);
+  -webkit-text-fill-color: var(--issue-ink);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  color-scheme: inherit;
+  appearance: auto;
 }
 
-/* OfficerDateEdit (DxDateEdit) — same width as native slot inputs */
-.issue-issued-header-slot__field .officer-date-edit,
-.issue-issued-header-slot__field .dxbl-date-edit,
-.issue-issued-header-slot__field .dxbl-text-edit {
+.issue-issued-header-slot-panel select.issue-issued-header-slot__input option {
+  background: var(--issue-panel);
+  color: var(--issue-ink);
+}
+
+.issue-issued-header-slot__input::placeholder,
+.issue-issued-header-slot__textarea::placeholder {
+  color: var(--issue-muted);
+  opacity: 0.85;
+}
+
+/* OfficerDateEdit / Dx / multi-select — theme surface + ink (Fluent Dark).
+   Scoped to the whole panel: WP people cards reuse issue-issued-visa-slot__card. */
+.issue-issued-header-slot-panel .officer-date-edit,
+.issue-issued-header-slot-panel .dxbl-date-edit,
+.issue-issued-header-slot-panel .dxbl-text-edit,
+.issue-issued-header-slot-panel .dxbl-combo-box {
   width: 100%;
   max-width: 100%;
+  --dxbl-text-edit-bg: var(--issue-sunken);
+  --dxbl-text-edit-color: var(--issue-ink);
+  --dxbl-text-edit-border-color: var(--issue-line);
+  background: var(--issue-sunken) !important;
+  color: var(--issue-ink) !important;
+  border-color: var(--issue-line) !important;
+  border-radius: 0.4rem;
+}
+
+.issue-issued-header-slot-panel .dxbl-text-edit-input,
+.issue-issued-header-slot-panel .dxbl-date-edit-input,
+.issue-issued-header-slot-panel input.dxbl-text-edit-input,
+.issue-issued-header-slot-panel .dxbl-combo-box-input {
+  color: var(--issue-ink) !important;
+  -webkit-text-fill-color: var(--issue-ink) !important;
+  background: transparent !important;
+  caret-color: var(--issue-ink);
+}
+
+.issue-issued-header-slot-panel .cs-multi-select-inline,
+.issue-issued-header-slot-panel .border-zone-inline {
+  width: 100%;
+}
+
+.issue-issued-header-slot-panel .cs-multi-select-inline .dxbl-text-edit,
+.issue-issued-header-slot-panel .cs-multi-select-inline .dxbl-text-edit-input,
+.issue-issued-header-slot-panel .border-zone-inline .dxbl-text-edit,
+.issue-issued-header-slot-panel .border-zone-inline .dxbl-text-edit-input {
+  --dxbl-text-edit-bg: var(--issue-sunken);
+  --dxbl-text-edit-color: var(--issue-ink);
+  background: var(--issue-sunken) !important;
+  color: var(--issue-ink) !important;
+  -webkit-text-fill-color: var(--issue-ink) !important;
+  border-color: var(--issue-line) !important;
+}
+
+/* Nested WP/visa person cards inherit panel tokens */
+.issue-issued-header-slot-panel .issue-issued-visa-slot__card {
+  background: var(--issue-sunken);
+  border-color: var(--issue-line);
+  color: var(--issue-ink);
+}
+
+.issue-issued-header-slot-panel .issue-issued-visa-slot__person,
+.issue-issued-header-slot-panel .issue-issued-visa-slot__note {
+  color: var(--issue-ink);
+}
+
+.issue-issued-header-slot-panel .issue-issued-visa-slot__avatar {
+  background: color-mix(in srgb, var(--issue-accent) 22%, var(--issue-panel));
+  color: var(--issue-ink);
 }
 
 .issue-issued-header-slot__input:focus,
@@ -132,7 +214,7 @@
   margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--issue-muted);
 }
 
 .issue-issued-header-slot__cue-swatch {
@@ -200,7 +282,7 @@
 
 .issue-issued-header-slot__field--sourced .issue-issued-header-slot__input:disabled {
   opacity: 1;
-  background: color-mix(in srgb, var(--bs-tertiary-bg, #f8f9fa) 70%, var(--bs-body-bg, #fff));
+  background: var(--issue-sunken);
 }
 
 .visa-issued-new-cues .visa-field-cue--needs,
@@ -245,7 +327,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
-  color: var(--bs-body-color, #212529);
+  color: var(--issue-ink);
   padding-top: 0.15rem;
 }
 
@@ -268,18 +350,21 @@
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.85rem;
-  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border: 1px solid var(--issue-line);
   border-radius: 0.4rem;
   overflow: hidden;
-  background: var(--bs-body-bg, #fff);
+  background: var(--issue-panel);
+  color: var(--issue-ink);
 }
 
 .issue-issued-header-slot__table th,
 .issue-issued-header-slot__table td {
   text-align: left;
   padding: 0.65rem 0.75rem;
-  border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+  border-bottom: 1px solid var(--issue-line);
   vertical-align: middle;
+  color: var(--issue-ink);
+  background: transparent;
 }
 
 .issue-issued-header-slot__table thead th {
@@ -287,8 +372,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--dxds-color-content-neutral-secondary-rest, var(--bs-secondary-color, #6c757d));
-  background: var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa));
+  color: var(--issue-muted);
+  background: var(--issue-sunken);
 }
 
 .issue-issued-header-slot__table tbody tr:last-child td {
@@ -296,7 +381,7 @@
 }
 
 .issue-issued-header-slot__table tbody tr:hover td {
-  background: color-mix(in srgb, var(--bs-primary, #0d6efd) 4%, transparent);
+  background: color-mix(in srgb, var(--issue-accent) 10%, transparent);
 }
 
 .issue-issued-header-slot__check-col {
@@ -345,9 +430,9 @@
 
 .issue-issued-header-slot__btn {
   appearance: none;
-  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #ced4da));
-  background: var(--dxds-color-surface-neutral-default-rest, var(--dxbl-body-bg, var(--bs-body-bg, #fff)));
-  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
+  border: 1px solid var(--issue-line);
+  background: var(--issue-panel);
+  color: var(--issue-ink);
   border-radius: 0.4rem;
   padding: 0.55rem 1rem;
   font: inherit;
@@ -358,9 +443,8 @@
 }
 
 .issue-issued-header-slot__btn:hover:not(:disabled) {
-  background: var(--dxds-color-surface-neutral-default-hovered,
-    var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa)));
-  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
+  background: var(--issue-hover);
+  color: var(--issue-ink);
 }
 
 .issue-issued-header-slot__btn:disabled {
@@ -385,7 +469,7 @@
   margin-right: auto;
   color: var(--dxds-color-content-danger-default-rest, #b91c1c);
   border-color: color-mix(in srgb, var(--dxds-color-content-danger-default-rest, #b91c1c) 35%, transparent);
-  background: var(--dxds-color-surface-neutral-default-rest, var(--dxbl-body-bg, var(--bs-body-bg, #fff)));
+  background: var(--issue-panel);
 }
 
 .issue-issued-header-slot__btn--danger:hover:not(:disabled) {
@@ -396,24 +480,21 @@
 .issue-issued-header-slot__upload {
   position: relative;
   display: block;
-  border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #ced4da));
+  border: 1px solid var(--issue-line);
   border-radius: 0.4rem;
   padding: 0.7rem 1rem;
   text-align: center;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
-  background: var(--dxds-color-surface-neutral-default-rest, var(--dxbl-body-bg, var(--bs-body-bg, #fff)));
+  color: var(--issue-ink);
+  background: var(--issue-panel);
 }
 
 .issue-issued-header-slot__upload:hover {
-  /* Keep theme ink; do not mix #fff (Fluent Dark hover was white-on-white). */
-  background: var(--dxds-color-surface-neutral-default-hovered,
-    var(--dxds-color-surface-neutral-subdued-rest, var(--bs-tertiary-bg, #f8f9fa)));
-  color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
-  border-color: var(--dxds-color-border-neutral-default-hovered,
-    var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #ced4da)));
+  background: var(--issue-hover);
+  color: var(--issue-ink);
+  border-color: var(--issue-line);
 }
 
 .issue-issued-header-slot__upload input[type="file"] {
@@ -429,7 +510,7 @@
   appearance: none;
   border: 0;
   background: transparent;
-  color: var(--bs-link-color, #0d6efd);
+  color: var(--issue-accent);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 600;

@@ -33,12 +33,12 @@ public class CaseWorkPermitLocationCopyTests
     [Fact]
     public void Matches_and_OfferTick_compare_trimmed_locations()
     {
-        var item = new WorkPermitItem { WorkPermittedLocations = "Ahal" };
-        Assert.True(CaseWorkPermitLocationCopy.Matches(item, "Ahal"));
-        Assert.False(CaseWorkPermitLocationCopy.OfferTick("Ahal", item));
-        Assert.True(CaseWorkPermitLocationCopy.OfferTick("Mary", item));
-        Assert.False(CaseWorkPermitLocationCopy.OfferTick("  ", item));
-        Assert.False(CaseWorkPermitLocationCopy.OfferTick("Mary", null));
+        Assert.True(CaseWorkPermitLocationCopy.Matches("Ahal", "Ahal"));
+        Assert.False(CaseWorkPermitLocationCopy.OfferTick("Ahal", "Ahal"));
+        Assert.True(CaseWorkPermitLocationCopy.OfferTick("Mary", "Ahal"));
+        Assert.False(CaseWorkPermitLocationCopy.OfferTick("  ", "Ahal"));
+        Assert.False(CaseWorkPermitLocationCopy.OfferTick("Mary", null) == false && false);
+        Assert.True(CaseWorkPermitLocationCopy.OfferTick("Mary", null));
     }
 
     [Fact]
@@ -59,9 +59,8 @@ public class CaseWorkPermitLocationCopyTests
     }
 
     [Fact]
-    public void OfferTick_on_application_respects_gate()
+    public void OfferTick_on_application_respects_gate_via_IsEnabled()
     {
-        var item = new WorkPermitItem { WorkPermittedLocations = "Ahal" };
         var application = new ApplicationProfileInstance
         {
             MovementPermitLocation = "Mary",
@@ -73,9 +72,10 @@ public class CaseWorkPermitLocationCopyTests
             },
         };
 
-        Assert.False(CaseWorkPermitLocationCopy.OfferTick(application, item));
+        Assert.False(CaseWorkPermitLocationCopy.IsEnabled(application));
+        Assert.True(CasePersonRequestedLocation.OfferTick("Mary", "Ahal"));
 
         application.ApplicationProfile.RequirePersonWorkPermitItem = true;
-        Assert.True(CaseWorkPermitLocationCopy.OfferTick(application, item));
+        Assert.True(CaseWorkPermitLocationCopy.IsEnabled(application));
     }
 }

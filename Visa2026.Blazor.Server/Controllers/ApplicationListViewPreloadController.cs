@@ -49,7 +49,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
-        if (View.Editor is DxGridListEditor gridListEditor)
+        if (View.Editor is DxGridListEditor gridListEditor && gridListEditor.GridModel != null)
         {
             gridListEditor.GridModel.TextWrapEnabled = false;
             gridCapturedHandler ??= (_, _) => StartPreload(syncBatches: InitialSyncBatchCount);
@@ -67,7 +67,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         preloadedIds.Clear();
         lastScrollAheadVisibleIndex = -1;
 
-        if (gridCapturedHandler != null && View.Editor is DxGridListEditor gridListEditor)
+        if (gridCapturedHandler != null && View.Editor is DxGridListEditor gridListEditor && gridListEditor.GridModel != null)
             gridListEditor.GridModel.ComponentInstanceCaptured -= gridCapturedHandler;
 
         if (collectionReloadedHandler != null)

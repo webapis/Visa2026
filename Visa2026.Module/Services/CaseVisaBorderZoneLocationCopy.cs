@@ -7,10 +7,10 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// Copies Case summary border-zone locations onto linked
-/// <see cref="Visa.BorderZoneLocation"/> for visa-producing profiles that do not
-/// produce a border-zone permit. Keep a real visa location; fill blank/Ýok from Case
-/// when Case has a value. Tick overwrites the same linked visa.
+/// Case summary border-zone locations → case↔person
+/// <see cref="ApplicationProfileInstancePersonRequestedLocation"/> (Kind BorderZone)
+/// for visa-producing profiles that do not produce a border-zone permit.
+/// Join / tick never mutate <see cref="Visa.BorderZoneLocation"/>.
 /// </summary>
 public static class CaseVisaBorderZoneLocationCopy
 {
@@ -60,29 +60,29 @@ public static class CaseVisaBorderZoneLocationCopy
         return "—";
     }
 
-    public static bool Matches(Visa? visa, string? caseLocations)
-    {
-        if (visa == null || !IsComplete(caseLocations))
-            return false;
-        return string.Equals(
-            visa.BorderZoneLocation?.Trim(),
-            caseLocations!.Trim(),
-            StringComparison.Ordinal);
-    }
+    public static bool Matches(string? stored, string? caseLocations) =>
+        CasePersonRequestedLocation.Matches(stored, caseLocations);
 
-    public static bool OfferTick(string? caseLocations, Visa? visa) =>
-        IsComplete(caseLocations) && visa != null && !Matches(visa, caseLocations);
+    public static bool OfferTick(string? caseLocations, string? stored) =>
+        CasePersonRequestedLocation.OfferTick(caseLocations, stored);
 
-    public static bool OfferTick(ApplicationProfileInstance? application, Visa? visa)
+    public static bool OfferTick(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance? application,
+        Guid personId)
     {
-        if (!IsEnabled(application))
+        if (objectSpace == null || application == null || personId == Guid.Empty || !IsEnabled(application))
             return false;
-        return OfferTick(ResolveCaseLocations(application), visa);
+        var stored = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            personId,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
+        return OfferTick(ResolveCaseLocations(application), stored);
     }
 
     /// <summary>
-    /// Join: keep a real <see cref="Visa.BorderZoneLocation"/>; if blank or Ýok,
-    /// copy Case when Case has a (non-empty) value.
+    /// Join: fill empty requested border-zone location from Case (visa-only profiles).
     /// </summary>
     public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
@@ -91,29 +91,17 @@ public static class CaseVisaBorderZoneLocationCopy
         if (!IsEnabled(application))
             return false;
 
-        var caseLocations = ResolveCaseLocations(application);
-        if (!IsComplete(caseLocations))
-            return false;
-
-        var changed = false;
-        foreach (var visa in VisasForPerson(objectSpace, application, person))
-        {
-            if (!ShouldFillFromCase(visa.BorderZoneLocation, caseLocations))
-                continue;
-            visa.BorderZoneLocation = caseLocations;
-            changed = true;
-        }
-
-        return changed;
+        return CasePersonRequestedLocation.UpsertIfEmpty(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            ResolveCaseLocations(application));
     }
 
     public static void EnsureForPeopleWithEmptyLocations(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
         if (objectSpace == null || application == null || !IsEnabled(application))
-            return;
-
-        var caseLocations = ResolveCaseLocations(application);
-        if (!IsComplete(caseLocations))
             return;
 
         foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))
@@ -127,23 +115,18 @@ public static class CaseVisaBorderZoneLocationCopy
         Guid visaId,
         string? locations)
     {
+        _ = visaId;
         if (objectSpace == null || application == null || person == null)
             return false;
         if (!ShowInLinkReview(application))
             return false;
 
-        var visa = visaId != Guid.Empty
-            ? objectSpace.GetObjectByKey<Visa>(visaId)
-            : null;
-        visa ??= VisasForPerson(objectSpace, application, person).FirstOrDefault();
-        if (visa == null)
-            return false;
-
-        var trimmed = string.IsNullOrWhiteSpace(locations) || locations.Trim() == "—"
-            ? null
-            : locations.Trim();
-        visa.BorderZoneLocation = trimmed;
-        return true;
+        return CasePersonRequestedLocation.Upsert(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            locations);
     }
 
     public static bool TryOverwriteFromCase(
@@ -153,8 +136,9 @@ public static class CaseVisaBorderZoneLocationCopy
         Guid visaId,
         out string? error)
     {
+        _ = visaId;
         error = null;
-        if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty || visaId == Guid.Empty)
+        if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty)
         {
             error = "Missing visa link.";
             return false;
@@ -188,55 +172,12 @@ public static class CaseVisaBorderZoneLocationCopy
             return false;
         }
 
-        var linked = VisasForPerson(objectSpace, application, person)
-            .FirstOrDefault(v => v.ID == visaId);
-        if (linked == null)
-        {
-            error = "Visa is not linked to this person on the case.";
-            return false;
-        }
-
-        linked.BorderZoneLocation = caseLocations;
+        CasePersonRequestedLocation.Upsert(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            caseLocations);
         return true;
-    }
-
-    private static System.Collections.Generic.IEnumerable<Visa> VisasForPerson(
-        IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
-        Person person)
-    {
-        var seen = new System.Collections.Generic.HashSet<Guid>();
-        foreach (var visa in LinkedVisas(objectSpace, application, person.ID))
-        {
-            if (seen.Add(visa.ID))
-                yield return visa;
-        }
-
-        var fallback = ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
-        if (fallback != null && seen.Add(fallback.ID))
-            yield return fallback;
-    }
-
-    private static System.Collections.Generic.IEnumerable<Visa> LinkedVisas(
-        IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
-        Guid personId)
-    {
-        var ids = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
-            .Where(link => link.ApplicationProfileInstanceId == application.ID
-                && link.PersonId == personId
-                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.Visa
-                && link.LinkedObjectId != null
-                && link.LinkedObjectId != Guid.Empty)
-            .Select(link => link.LinkedObjectId!.Value)
-            .Distinct()
-            .ToList();
-
-        foreach (var id in ids)
-        {
-            var visa = objectSpace.GetObjectByKey<Visa>(id);
-            if (visa != null)
-                yield return visa;
-        }
     }
 }

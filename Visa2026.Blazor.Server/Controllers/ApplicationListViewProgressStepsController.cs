@@ -145,7 +145,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
     internal void RestoreProgressColumnWidth()
     {
         SuppressWidthSave();
-        if (View?.Editor is not DxGridListEditor editor || View.Model == null)
+        if (View?.Editor is not DxGridListEditor editor || View.Model == null || editor.GridModel == null)
             return;
 
         foreach (var column in editor.GridDataColumnModels)
@@ -197,6 +197,12 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
     {
         if (View?.Editor is not DxGridListEditor gridListEditor)
             return;
+        // GridModel is not always ready on first OnViewControlsCreated / deferred apply.
+        if (gridListEditor.GridModel == null)
+        {
+            ScheduleDeferredApply();
+            return;
+        }
 
         SuppressWidthSave();
         if (View.Editor is DxGridListEditor listEditor)

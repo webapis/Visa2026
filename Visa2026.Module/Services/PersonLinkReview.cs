@@ -22,6 +22,8 @@ public sealed class PersonLinkReviewLine
     public Guid ObjectId { get; set; }
     public IReadOnlyList<PersonLinkReviewChoice> Choices { get; set; } = Array.Empty<PersonLinkReviewChoice>();
     public IReadOnlyList<PersonLinkReviewField> Fields { get; set; } = Array.Empty<PersonLinkReviewField>();
+    /// <summary>Source-tagged location chips for requested WP/BZ location rows. Mutable Hidden for this Join.</summary>
+    public List<PersonLinkReviewLocationChip> LocationChips { get; set; } = new();
 
     public string ResolveTabKey() =>
         string.IsNullOrWhiteSpace(TabKey) ? Kind.ToString() : TabKey;
@@ -305,32 +307,30 @@ public static class PersonLinkReview
         {
             if (!line.OmitFromJoin)
                 continue;
-            if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal))
+            if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal)
+                || string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal)
+                || string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal))
             {
-                CaseWorkPermitLocationCopy.TryApplyEditedLocations(
-                    objectSpace,
-                    application,
-                    person,
-                    line.ObjectId,
-                    line.Summary);
-            }
-            else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
-            {
-                CaseBorderZoneLocationCopy.TryApplyEditedLocations(
-                    objectSpace,
-                    application,
-                    person,
-                    line.ObjectId,
-                    line.Summary);
-            }
-            else if (string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal))
-            {
-                CaseVisaBorderZoneLocationCopy.TryApplyEditedLocations(
-                    objectSpace,
-                    application,
-                    person,
-                    line.ObjectId,
-                    line.Summary);
+                var merged = line.LocationChips.Count > 0
+                    ? LinkReviewLocationChips.JoinVisible(line.LocationChips)
+                    : (line.Summary == "—" ? null : line.Summary);
+                line.Summary = string.IsNullOrWhiteSpace(merged) ? "—" : merged;
+
+                if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal))
+                {
+                    CaseWorkPermitLocationCopy.TryApplyEditedLocations(
+                        objectSpace, application, person, line.ObjectId, merged);
+                }
+                else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
+                {
+                    CaseBorderZoneLocationCopy.TryApplyEditedLocations(
+                        objectSpace, application, person, line.ObjectId, merged);
+                }
+                else
+                {
+                    CaseVisaBorderZoneLocationCopy.TryApplyEditedLocations(
+                        objectSpace, application, person, line.ObjectId, merged);
+                }
             }
         }
     }
@@ -368,11 +368,20 @@ public static class PersonLinkReview
     {
         var item = ResolveLinkedWorkPermitItem(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
+        var visa = ResolveLinkedVisa(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
         var caseLocations = CaseWorkPermitLocationCopy.ResolveCaseLocations(application);
+        var joinedLocations = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit);
         var itemLocations = item?.WorkPermittedLocations?.Trim();
-        var summary = !string.IsNullOrWhiteSpace(itemLocations)
-            ? itemLocations
-            : (!string.IsNullOrWhiteSpace(caseLocations) ? caseLocations! : "—");
+        var visaLocations = BorderZoneSelectionHelper.IsNoneValue(visa?.BorderZoneLocation)
+            ? null
+            : visa?.BorderZoneLocation?.Trim();
+        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, visaLocations, itemLocations).ToList();
+        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
 
         var line = new PersonLinkReviewLine
         {
@@ -382,19 +391,13 @@ public static class PersonLinkReview
             Label = "Work permit location",
             Summary = summary,
             ObjectId = item?.ID ?? Guid.Empty,
+            LocationChips = chips,
         };
 
-        var fields = new List<PersonLinkReviewField>
+        line.Fields = new List<PersonLinkReviewField>
         {
             Field(ApplicationProfileLocalization.Field("WorkPermitLocation"), summary, true, false),
         };
-        if (!string.IsNullOrWhiteSpace(caseLocations)
-            && !string.Equals(itemLocations, caseLocations, StringComparison.Ordinal))
-        {
-            fields.Add(Field(T("CaseSummary"), caseLocations, false, false));
-        }
-
-        line.Fields = fields;
         line.Choices = Array.Empty<PersonLinkReviewChoice>();
         return line;
     }
@@ -427,9 +430,20 @@ public static class PersonLinkReview
     {
         var visa = ResolveLinkedVisa(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
+        var wpItem = ResolveLinkedWorkPermitItem(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
         var caseLocations = CaseVisaBorderZoneLocationCopy.ResolveCaseLocations(application);
-        var visaLocations = visa?.BorderZoneLocation?.Trim();
-        var summary = CaseVisaBorderZoneLocationCopy.ResolveDisplaySummary(visaLocations, caseLocations);
+        var joinedLocations = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
+        var visaLocations = BorderZoneSelectionHelper.IsNoneValue(visa?.BorderZoneLocation)
+            ? null
+            : visa?.BorderZoneLocation?.Trim();
+        var wpLocations = wpItem?.WorkPermittedLocations?.Trim();
+        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, visaLocations, wpLocations).ToList();
+        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
 
         var line = new PersonLinkReviewLine
         {
@@ -439,19 +453,13 @@ public static class PersonLinkReview
             Label = "Border zone location",
             Summary = summary,
             ObjectId = visa?.ID ?? Guid.Empty,
+            LocationChips = chips,
         };
 
-        var fields = new List<PersonLinkReviewField>
+        line.Fields = new List<PersonLinkReviewField>
         {
             Field(ApplicationProfileLocalization.Field("BorderZoneLocation"), summary, true, false),
         };
-        if (!string.IsNullOrWhiteSpace(caseLocations)
-            && !string.Equals(visaLocations, caseLocations, StringComparison.Ordinal))
-        {
-            fields.Add(Field(T("CaseSummary"), caseLocations, false, false));
-        }
-
-        line.Fields = fields;
         line.Choices = Array.Empty<PersonLinkReviewChoice>();
         return line;
     }
@@ -484,11 +492,38 @@ public static class PersonLinkReview
     {
         var item = ResolveLinkedBorderZoneItem(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItem(objectSpace, person);
+        var visa = ResolveLinkedVisa(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
+        var wpItem = ResolveLinkedWorkPermitItem(objectSpace, application, person)
+            ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
         var caseLocations = CaseBorderZoneLocationCopy.ResolveCaseLocations(application);
-        var itemLocations = item?.BorderZoneLocation?.Trim();
-        var summary = !string.IsNullOrWhiteSpace(itemLocations)
-            ? itemLocations
-            : (!string.IsNullOrWhiteSpace(caseLocations) ? caseLocations! : "—");
+        var joinedLocations = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
+        var visaLocations = BorderZoneSelectionHelper.IsNoneValue(visa?.BorderZoneLocation)
+            ? null
+            : visa?.BorderZoneLocation?.Trim();
+        var itemLocations = BorderZoneSelectionHelper.IsNoneValue(item?.BorderZoneLocation)
+            ? null
+            : item?.BorderZoneLocation?.Trim();
+        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, visaLocations, itemLocations).ToList();
+        // Only suggest WP tokens before the first Join; after Join chips are the persisted row only.
+        if (string.IsNullOrWhiteSpace(joinedLocations))
+        {
+            foreach (var token in SplitLocationTokens(wpItem?.WorkPermittedLocations))
+            {
+                if (chips.Any(c => string.Equals(c.Value, token, StringComparison.Ordinal)))
+                    continue;
+                chips.Add(new PersonLinkReviewLocationChip
+                {
+                    Value = token,
+                    Source = LinkReviewLocationChipSource.WorkPermitItem,
+                });
+            }
+        }
+        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
 
         var line = new PersonLinkReviewLine
         {
@@ -498,21 +533,26 @@ public static class PersonLinkReview
             Label = "Border zone location",
             Summary = summary,
             ObjectId = item?.ID ?? Guid.Empty,
+            LocationChips = chips,
         };
 
-        var fields = new List<PersonLinkReviewField>
+        line.Fields = new List<PersonLinkReviewField>
         {
             Field(ApplicationProfileLocalization.Field("BorderZoneLocation"), summary, true, false),
         };
-        if (!string.IsNullOrWhiteSpace(caseLocations)
-            && !string.Equals(itemLocations, caseLocations, StringComparison.Ordinal))
-        {
-            fields.Add(Field(T("CaseSummary"), caseLocations, false, false));
-        }
-
-        line.Fields = fields;
         line.Choices = Array.Empty<PersonLinkReviewChoice>();
         return line;
+    }
+
+    private static IEnumerable<string> SplitLocationTokens(string? stored)
+    {
+        if (string.IsNullOrWhiteSpace(stored) || stored.Trim() == "—")
+            yield break;
+        foreach (var part in stored.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (!string.IsNullOrWhiteSpace(part))
+                yield return part.Trim();
+        }
     }
 
     private static BorderZoneItem? ResolveLinkedBorderZoneItem(

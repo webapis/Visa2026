@@ -5,6 +5,20 @@
 - **Officer**: Rebuild + F5; + Add issued visa/WP on extension — Start is one day after linked end, End unchanged.
 - **Prevent**: Do not move End when adjusting Start +1; End stays anchored on linked end + period.
 - **Cross-skill**: —
+### 2026-11-05 — Application result prefill from requested locations
+
+- **Need**: + Add invitation / issued visa / work permit should default border/WP locations from Linked Joined requested rows, not Case first.
+- **Fix**: `CasePersonRequestedLocation.ResolveForPrefill` / `ResolveBorderZoneForInvitationHeader` (requested → Case/invitation fallback). Wired in IssueIssuedHeaderComposeService + IssueIssuedVisaComposeService.
+- **Officer**: Join requested locations, then Application result → Add invitation/visa/WP — prefilled from Joined; empty Joined falls back to Case.
+- **Prevent**: Do not prefer Case MovementPermitLocation / BorderZoneLocation over person requested rows when composing issued docs.
+- **Cross-skill**: —
+### 2026-11-05 — Requested WP/BZ location on case↔person BO (Join does not mutate docs)
+
+- **Need**: Linked-records Join must not write Visa.BorderZoneLocation / BorderZoneItem.BorderZoneLocation / WorkPermitItem.WorkPermittedLocations; store requested locations separately; tile shows joined value first.
+- **Fix**: `ApplicationProfileInstancePersonRequestedLocation` (Kind WP|BZ, upsert one row per person×kind). `CasePersonRequestedLocation` + Case*LocationCopy AcceptOnJoin/TryApply/tick write that BO only. Chips add Joined source; DisplayPreferJoined for summary. TabBuilder location tabs read BO. Schema heal in ApplicationWorkspaceSchemaSql.
+- **Officer**: Rebuild/F5 (table create on startup). Linked records → edit chips → Join — Requested location persists; Visa/WP/BZ item locations unchanged. Tick overwrites requested row from Case.
+- **Prevent**: Do not Treat Join chip union as a write to issued/linked document BOs.
+- **Cross-skill**: —
 ### 2026-11-05 — Recently used scoped by Application Profile
 
 - **Need**: Invitation Case summary must not show Visa+WP / extension recent cards.
@@ -4170,3 +4184,8 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 ## 2026-11-05 — Requested location labels
 
 - Case summary + Linked records/tiles: `WorkPermitLocation` / `BorderZone` / `BorderZoneLocation` Field strings → **Requested work permit location** / **Requested border zone location** (en/tr/tk/ru).
+
+## 2026-11-05 — Linked records location chips
+
+- Requested WP / border zone location rows use source-colored removable chips (Case teal, Visa amber, Work permit blue, Manual purple outline). Remove hides for this Join only; Join writes comma-separated union of visible chips to Visa / WorkPermitItem / BorderZoneItem.
+- Prototype: `docs/prototypes/linked-records-requested-location-chips-prototype.jpg`. Helper: `LinkReviewLocationChips`.

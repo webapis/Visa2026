@@ -3160,7 +3160,7 @@
     "ru-RU": "Копировать место разрешения на работу из сводки дела"
   },
   "ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocationHint": {
-    "en-US": "This work permit location differs from Case summary. Tick overwrites the location on the same linked work permit item.",
+    "en-US": "This requested work permit location differs from Case summary. Tick overwrites the case↔person requested location (not WorkPermitItem).",
     "tr-TR": "Bu çalışma izni yeri dava özetinden farklı. Onay işareti aynı bağlı çalışma izni kalemindeki yeri üzerine yazar.",
     "tk-TM": "Bu iş rugsady ýeri ýüztutmanyň gysgaçasyndan tapawutly. Bellik şol baglanan iş rugsady setirindäki ýeri täzeleýär.",
     "ru-RU": "Место разрешения на работу отличается от сводки дела. Галочка перезаписывает место в той же связанной позиции разрешения."
@@ -3170,8 +3170,49 @@
     "tk-TM": "Ýüztutmanyň serhet ýaka ýerini göçür",
     "ru-RU": "Копировать приграничную зону из сводки дела"
   },
-  "ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocationHint": {
-    "en-US": "This border zone location differs from Case summary. Tick overwrites the location on the same linked border zone item.",
+    "ApplicationProfileInstance.LinkReview.RemoveLocationChip": {
+    "en-US": "Remove for this join",
+    "tr-TR": "Bu birleştirmeden kaldır",
+    "tk-TM": "Bu birikdirmeden aýyr",
+    "ru-RU": "Убрать для этого присоединения"
+  },
+  "ApplicationProfileInstance.LinkReview.LocationSource.Joined": {
+    "en-US": "Joined (this case)",
+    "tr-TR": "Birleştirildi (bu dava)",
+    "tk-TM": "Birikdirilen (şu ýüztutma)",
+    "ru-RU": "Присоединено (это дело)"
+  },
+  "ApplicationProfileInstance.LinkReview.LocationSource.Case": {
+    "en-US": "From Case summary",
+    "tr-TR": "Dava özetinden",
+    "tk-TM": "Ýüztutma gysgaçasyndan",
+    "ru-RU": "Из сводки дела"
+  },
+  "ApplicationProfileInstance.LinkReview.LocationSource.Visa": {
+    "en-US": "From current visa",
+    "tr-TR": "Mevcut vizadan",
+    "tk-TM": "Häzirki wizadan",
+    "ru-RU": "Из текущей визы"
+  },
+  "ApplicationProfileInstance.LinkReview.LocationSource.WorkPermitItem": {
+    "en-US": "From work permit",
+    "tr-TR": "Çalışma izninden",
+    "tk-TM": "Iş rugsadyndan",
+    "ru-RU": "Из разрешения на работу"
+  },
+  "ApplicationProfileInstance.LinkReview.LocationSource.Manual": {
+    "en-US": "Added on this dialog",
+    "tr-TR": "Bu pencerede eklendi",
+    "tk-TM": "Bu dialogda goşuldy",
+    "ru-RU": "Добавлено в этом диалоге"
+  },
+  "ApplicationProfileInstance.LinkReview.LocationChipLegend": {
+    "en-US": "Chip colors: Joined · Case · Visa · Work permit · Manual",
+    "tr-TR": "Renkler: Birleştirildi · Dava · Vize · Çalışma izni · Elle",
+    "tk-TM": "Reňkler: Birikdirilen · Ýüztutma · Wiza · Iş rugsady · El bilen",
+    "ru-RU": "Цвета: Присоединено · Дело · Виза · Разрешение · Вручную"
+  },"ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocationHint": {
+    "en-US": "This requested border zone location differs from Case summary. Tick overwrites the case↔person requested location (not Visa / BorderZoneItem).",
     "tr-TR": "Bu serhat bölgesi yeri dava özetinden farklı. Onay işareti aynı bağlı serhat bölgesi kalemindeki yeri üzerine yazar.",
     "tk-TM": "Bu serhet ýaka ýeri ýüztutmanyň gysgaçasyndan tapawutly. Bellik şol baglanan serhet ýaka setirindäki ýeri täzeleýär.",
     "ru-RU": "Приграничная зона отличается от сводки дела. Галочка перезаписывает место в той же связанной позиции."

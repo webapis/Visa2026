@@ -139,6 +139,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
         public DbSet<ApplicationProfileProgressStateSetting> ApplicationProfileProgressStateSettings { get; set; }
         public DbSet<ApplicationProfileInstancePersonResolvedLink> ApplicationProfileInstancePersonResolvedLinks { get; set; }
+        public DbSet<ApplicationProfileInstancePersonRequestedLocation> ApplicationProfileInstancePersonRequestedLocations { get; set; }
         public DbSet<ApplicationProfileInstanceExclusion> ApplicationProfileInstanceExclusions { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionPerson> ApplicationProfileInstanceExclusionPeople { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionTemplate> ApplicationProfileInstanceExclusionTemplates { get; set; }
@@ -1125,6 +1126,22 @@ namespace Visa2026.Module.BusinessObjects
                     .HasDatabaseName("IX_ApplicationProfileInstancePersonResolvedLinks_Instance_Person_Kind_Object");
             });
 
+
+            modelBuilder.Entity<ApplicationProfileInstancePersonRequestedLocation>(b =>
+            {
+                b.HasOne(l => l.ApplicationProfileInstance)
+                    .WithMany(a => a.PersonRequestedLocations)
+                    .HasForeignKey(l => l.ApplicationProfileInstanceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.Person)
+                    .WithMany()
+                    .HasForeignKey(l => l.PersonId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasIndex(l => new { l.ApplicationProfileInstanceId, l.PersonId, l.Kind })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"))
+                    .HasDatabaseName("IX_ApplicationProfileInstancePersonRequestedLocations_Instance_Person_Kind");
+            });
             modelBuilder.Entity<ApplicationProfileInstanceExclusion>(b =>
             {
                 b.HasOne(e => e.ApplicationProfileInstance)

@@ -50,6 +50,27 @@ public static class ApplicationWorkspaceSchemaSql
                 ON "ApplicationProfileInstancePersonResolvedLinks" ("ApplicationProfileInstanceId", "PersonId", "LinkKind", "LinkedObjectId")
                 WHERE "GCRecord" IS NULL;
           END IF;
+          IF to_regclass('public."ApplicationProfileInstancePersonRequestedLocations"') IS NULL
+             AND to_regclass('public."ApplicationProfileInstances"') IS NOT NULL
+             AND to_regclass('public."People"') IS NOT NULL THEN
+            CREATE TABLE "ApplicationProfileInstancePersonRequestedLocations" (
+                "ID" uuid NOT NULL,
+                "GCRecord" integer NOT NULL DEFAULT 0,
+                "OptimisticLockField" integer NOT NULL DEFAULT 0,
+                "ApplicationProfileInstanceId" uuid NOT NULL,
+                "PersonId" uuid NOT NULL,
+                "Kind" integer NOT NULL DEFAULT 0,
+                "Locations" character varying(500) NULL,
+                CONSTRAINT "PK_ApplicationProfileInstancePersonRequestedLocations" PRIMARY KEY ("ID"),
+                CONSTRAINT "FK_ApplicationProfileInstancePersonRequestedLocations_ApplicationProfileInstances_ApplicationProfileInstanceId"
+                    FOREIGN KEY ("ApplicationProfileInstanceId") REFERENCES "ApplicationProfileInstances" ("ID") ON DELETE CASCADE,
+                CONSTRAINT "FK_ApplicationProfileInstancePersonRequestedLocations_People_PersonId"
+                    FOREIGN KEY ("PersonId") REFERENCES "People" ("ID") ON DELETE RESTRICT
+            );
+            CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonRequestedLocations_Instance_Person_Kind"
+                ON "ApplicationProfileInstancePersonRequestedLocations" ("ApplicationProfileInstanceId", "PersonId", "Kind")
+                WHERE "GCRecord" IS NULL;
+          END IF;
         END $$;
         """;
 
@@ -92,6 +113,27 @@ public static class ApplicationWorkspaceSchemaSql
                 ON dbo.ApplicationProfileInstancePersonResolvedLinks (ApplicationProfileInstanceId, PersonId, LinkKind, LinkedObjectId)
                 WHERE [GCRecord] IS NULL;
         END;
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstancePersonRequestedLocations', N'U') IS NULL
+           AND OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND OBJECT_ID(N'dbo.People', N'U') IS NOT NULL
+        BEGIN
+            CREATE TABLE dbo.ApplicationProfileInstancePersonRequestedLocations (
+                ID uniqueidentifier NOT NULL CONSTRAINT PK_ApplicationProfileInstancePersonRequestedLocations PRIMARY KEY,
+                GCRecord int NOT NULL CONSTRAINT DF_ApplicationProfileInstancePersonRequestedLocations_GCRecord DEFAULT (0),
+                OptimisticLockField int NOT NULL CONSTRAINT DF_ApplicationProfileInstancePersonRequestedLocations_OLF DEFAULT (0),
+                ApplicationProfileInstanceId uniqueidentifier NOT NULL,
+                PersonId uniqueidentifier NOT NULL,
+                Kind int NOT NULL CONSTRAINT DF_ApplicationProfileInstancePersonRequestedLocations_Kind DEFAULT (0),
+                Locations nvarchar(500) NULL,
+                CONSTRAINT FK_ApplicationProfileInstancePersonRequestedLocations_ApplicationProfileInstances_ApplicationProfileInstanceId
+                    FOREIGN KEY (ApplicationProfileInstanceId) REFERENCES dbo.ApplicationProfileInstances(ID) ON DELETE CASCADE,
+                CONSTRAINT FK_ApplicationProfileInstancePersonRequestedLocations_People_PersonId
+                    FOREIGN KEY (PersonId) REFERENCES dbo.People(ID)
+            );
+            CREATE UNIQUE INDEX IX_ApplicationProfileInstancePersonRequestedLocations_Instance_Person_Kind
+                ON dbo.ApplicationProfileInstancePersonRequestedLocations (ApplicationProfileInstanceId, PersonId, Kind)
+                WHERE [GCRecord] IS NULL;
+        END;
         """;
 
     /// <summary>
@@ -115,6 +157,28 @@ public static class ApplicationWorkspaceSchemaSql
         END $$;
         """;
 
+
+    /// <summary>
+    /// XAF omits GCRecord on insert; nullable columns store NULL and Npgsql RETURNING
+    /// throws InvalidCastException ("Column 'GCRecord' is null").
+    /// </summary>
+    internal const string HealRequestedLocationsGcRecordPostgres = """
+        DO $$
+        BEGIN
+          IF to_regclass('public."ApplicationProfileInstancePersonRequestedLocations"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          UPDATE "ApplicationProfileInstancePersonRequestedLocations" SET "GCRecord" = 0 WHERE "GCRecord" IS NULL;
+          UPDATE "ApplicationProfileInstancePersonRequestedLocations" SET "OptimisticLockField" = 0 WHERE "OptimisticLockField" IS NULL;
+
+          ALTER TABLE "ApplicationProfileInstancePersonRequestedLocations"
+            ALTER COLUMN "GCRecord" SET DEFAULT 0,
+            ALTER COLUMN "GCRecord" SET NOT NULL,
+            ALTER COLUMN "OptimisticLockField" SET DEFAULT 0,
+            ALTER COLUMN "OptimisticLockField" SET NOT NULL;
+        END $$;
+        """;
     public static void ApplyIfMissing(string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
@@ -127,6 +191,7 @@ public static class ApplicationWorkspaceSchemaSql
             connection.Open();
             Execute(connection, EnsureSchemaPostgres);
             Execute(connection, HealResolvedLinksUniqueIndexPostgres);
+            Execute(connection, HealRequestedLocationsGcRecordPostgres);
             return;
         }
 

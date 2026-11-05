@@ -7,9 +7,9 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// Copies Case summary border-zone locations onto linked
-/// <see cref="BorderZoneItem.BorderZoneLocation"/>. Fill empty on Join;
-/// tick overwrites the same linked item when Case summary differs.
+/// Case summary border-zone locations → case↔person
+/// <see cref="ApplicationProfileInstancePersonRequestedLocation"/> (Kind BorderZone)
+/// when ProduceBorderZone. Join / tick never mutate <see cref="BorderZoneItem.BorderZoneLocation"/>.
 /// Dual gate: <c>ProduceBorderZone</c> + <c>RequirePersonBorderZoneItem</c> + <c>EffectiveRequireBorderZone</c>.
 /// </summary>
 public static class CaseBorderZoneLocationCopy
@@ -54,29 +54,29 @@ public static class CaseBorderZoneLocationCopy
         return string.IsNullOrWhiteSpace(fallback) ? null : fallback.Trim();
     }
 
-    public static bool Matches(BorderZoneItem? item, string? caseLocations)
-    {
-        if (item == null || !IsComplete(caseLocations))
-            return false;
-        return string.Equals(
-            item.BorderZoneLocation?.Trim(),
-            caseLocations!.Trim(),
-            StringComparison.Ordinal);
-    }
+    public static bool Matches(string? stored, string? caseLocations) =>
+        CasePersonRequestedLocation.Matches(stored, caseLocations);
 
-    public static bool OfferTick(string? caseLocations, BorderZoneItem? item) =>
-        IsComplete(caseLocations) && item != null && !Matches(item, caseLocations);
+    public static bool OfferTick(string? caseLocations, string? stored) =>
+        CasePersonRequestedLocation.OfferTick(caseLocations, stored);
 
-    public static bool OfferTick(ApplicationProfileInstance? application, BorderZoneItem? item)
+    public static bool OfferTick(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance? application,
+        Guid personId)
     {
-        if (!IsEnabled(application))
+        if (objectSpace == null || application == null || personId == Guid.Empty || !IsEnabled(application))
             return false;
-        return OfferTick(ResolveCaseLocations(application), item);
+        var stored = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            personId,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
+        return OfferTick(ResolveCaseLocations(application), stored);
     }
 
     /// <summary>
-    /// Join / Relink: fill empty locations on linked BorderZoneItem rows for this person.
-    /// Does not overwrite a non-empty value (including <c>Ýok</c>).
+    /// Join / Relink: fill empty requested border-zone location from Case summary.
     /// </summary>
     public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
@@ -85,33 +85,17 @@ public static class CaseBorderZoneLocationCopy
         if (!IsEnabled(application))
             return false;
 
-        var caseLocations = ResolveCaseLocations(application);
-        if (!IsComplete(caseLocations))
-            return false;
-
-        var changed = false;
-        foreach (var item in LinkedBorderZoneItems(objectSpace, application, person.ID))
-        {
-            if (!string.IsNullOrWhiteSpace(item.BorderZoneLocation))
-                continue;
-            item.BorderZoneLocation = caseLocations;
-            changed = true;
-        }
-
-        return changed;
+        return CasePersonRequestedLocation.UpsertIfEmpty(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            ResolveCaseLocations(application));
     }
 
-    /// <summary>
-    /// After Case summary border zone is saved: fill empty linked BorderZoneItem locations
-    /// for every person on the case.
-    /// </summary>
     public static void EnsureForPeopleWithEmptyLocations(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
         if (objectSpace == null || application == null || !IsEnabled(application))
-            return;
-
-        var caseLocations = ResolveCaseLocations(application);
-        if (!IsComplete(caseLocations))
             return;
 
         foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))
@@ -119,7 +103,7 @@ public static class CaseBorderZoneLocationCopy
     }
 
     /// <summary>
-    /// Join/Save: write the officer's Border zone location multi-select onto the linked item.
+    /// Join/Save: write chip union onto case↔person requested border-zone location.
     /// </summary>
     public static bool TryApplyEditedLocations(
         IObjectSpace objectSpace,
@@ -128,27 +112,22 @@ public static class CaseBorderZoneLocationCopy
         Guid borderZoneItemId,
         string? locations)
     {
+        _ = borderZoneItemId;
         if (objectSpace == null || application == null || person == null)
             return false;
         if (!ShowInLinkReview(application))
             return false;
 
-        var item = borderZoneItemId != Guid.Empty
-            ? objectSpace.GetObjectByKey<BorderZoneItem>(borderZoneItemId)
-            : null;
-        item ??= LinkedBorderZoneItems(objectSpace, application, person.ID).FirstOrDefault();
-        if (item == null)
-            return false;
-
-        var trimmed = string.IsNullOrWhiteSpace(locations) || locations.Trim() == "—"
-            ? null
-            : locations.Trim();
-        item.BorderZoneLocation = trimmed;
-        return true;
+        return CasePersonRequestedLocation.Upsert(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            locations);
     }
 
     /// <summary>
-    /// Tick: overwrite BorderZoneLocation on the same linked BorderZoneItem.
+    /// Tick: overwrite requested border-zone location from Case (does not mutate BorderZoneItem).
     /// </summary>
     public static bool TryOverwriteFromCase(
         IObjectSpace objectSpace,
@@ -157,8 +136,9 @@ public static class CaseBorderZoneLocationCopy
         Guid borderZoneItemId,
         out string? error)
     {
+        _ = borderZoneItemId;
         error = null;
-        if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty || borderZoneItemId == Guid.Empty)
+        if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty)
         {
             error = "Missing border zone link.";
             return false;
@@ -185,38 +165,19 @@ public static class CaseBorderZoneLocationCopy
             return false;
         }
 
-        var linked = LinkedBorderZoneItems(objectSpace, application, personId)
-            .FirstOrDefault(item => item.ID == borderZoneItemId);
-        if (linked == null)
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (person == null)
         {
-            error = "Border zone item is not linked to this person on the case.";
+            error = "Person not found.";
             return false;
         }
 
-        linked.BorderZoneLocation = caseLocations;
+        CasePersonRequestedLocation.Upsert(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            caseLocations);
         return true;
-    }
-
-    private static System.Collections.Generic.IEnumerable<BorderZoneItem> LinkedBorderZoneItems(
-        IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
-        Guid personId)
-    {
-        var ids = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
-            .Where(link => link.ApplicationProfileInstanceId == application.ID
-                && link.PersonId == personId
-                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem
-                && link.LinkedObjectId != null
-                && link.LinkedObjectId != Guid.Empty)
-            .Select(link => link.LinkedObjectId!.Value)
-            .Distinct()
-            .ToList();
-
-        foreach (var id in ids)
-        {
-            var item = objectSpace.GetObjectByKey<BorderZoneItem>(id);
-            if (item != null)
-                yield return item;
-        }
     }
 }

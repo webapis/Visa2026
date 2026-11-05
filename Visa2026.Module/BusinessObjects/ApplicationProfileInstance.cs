@@ -104,6 +104,7 @@ namespace Visa2026.Module.BusinessObjects
             BorderZoneItems = new ObservableCollection<BorderZoneItem>();
             TravelHistories = new ObservableCollection<TravelHistory>();
             PersonResolvedLinks = new ObservableCollection<ApplicationProfileInstancePersonResolvedLink>();
+            PersonRequestedLocations = new ObservableCollection<ApplicationProfileInstancePersonRequestedLocation>();
             Invitations = new ObservableCollection<Invitation>();
             Rejections = new ObservableCollection<Rejection>();
             IssuedVisas = new ObservableCollection<Visa>();
@@ -1613,6 +1614,13 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInDetailView(false)]
         public virtual IList<ApplicationProfileInstancePersonResolvedLink> PersonResolvedLinks { get; set; }
+
+        /// <summary>Case↔person requested WP/BZ locations (Join upsert; not Visa/WP/BZ item fields).</summary>
+        [Browsable(false)]
+        [Aggregated]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        public virtual IList<ApplicationProfileInstancePersonRequestedLocation> PersonRequestedLocations { get; set; }
 
         /// <summary>Invitations this case may produce (1:N via <see cref="Invitation.ApplicationProfileInstance"/>). Visible when the profile <c>May produce invitation</c> is on.</summary>
         [Aggregated]

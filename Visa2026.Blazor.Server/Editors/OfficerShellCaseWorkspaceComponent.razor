@@ -2344,35 +2344,52 @@
                     @if (_reviewTab == "overview")
                     {
                         <div class="os-link-review" role="tabpanel" aria-label="@Msg("ApplicationProfileInstance.Workspace.Overview")">
-                            @foreach (var line in PersonLinkReviewLines)
+                            
+                            @if (PersonLinkReviewLines.Any(IsRequestedLocationReviewLine))
+                            {
+                                <div class="os-loc-chips-legend" aria-label="@Msg("ApplicationProfileInstance.LinkReview.LocationChipLegend")">
+                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-joined"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Joined")</span>
+                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-case"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Case")</span>
+                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-visa"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Visa")</span>
+                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-wp"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.WorkPermitItem")</span>
+                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-manual"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Manual")</span>
+                                </div>
+                            }@foreach (var line in PersonLinkReviewLines)
                             {
                                 <div class="os-link-review__row">
                                     <span class="os-link-review__label">@ApplicationProfileLocalization.LinkedRecordLabel(line.Label)</span>
-                                    @if (IsWorkPermitLocationReviewLine(line) && _reviewGearOn)
+                                    @if (IsRequestedLocationReviewLine(line))
                                     {
-                                        <div class="os-link-review__value os-link-review__value--multiselect">
-                                            <BorderZoneLocationField Value="@(line.Summary == "—" ? null : line.Summary)"
-                                                                     EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
-                                                                     ReadOnly="false"
-                                                                     ValueChanged="value => OnWorkPermitLocationReviewChanged(line, value)" />
+                                        <div class="os-link-review__value os-link-review__value--chips">
+                                            <div class="os-loc-chips" role="list">
+                                                @foreach (var chip in line.LocationChips.Where(c => !c.Hidden))
+                                                {
+                                                    <span class="os-loc-chip @LinkReviewLocationChips.SourceCssClass(chip.Source)"
+                                                          role="listitem"
+                                                          title="@LocationChipSourceTitle(chip.Source)">
+                                                        <span class="os-loc-chip__text">@chip.Value</span>
+                                                        <button type="button"
+                                                                class="os-loc-chip__remove"
+                                                                title="@Msg("ApplicationProfileInstance.LinkReview.RemoveLocationChip")"
+                                                                @onclick="() => HideLocationChip(line, chip)">×</button>
+                                                    </span>
+                                                }
+                                                @if (!line.LocationChips.Any(c => !c.Hidden))
+                                                {
+                                                    <span class="os-link-review__value">—</span>
+                                                }
+                                            </div>
+                                            @if (_reviewGearOn)
+                                            {
+                                                <div class="os-link-review__value--multiselect os-loc-chips__add">
+                                                    <BorderZoneLocationField @key="_locationChipAddNonce"
+                                                                             Value="@null"
+                                                                             EditorAlias="@(IsWorkPermitLocationReviewLine(line) ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation : CommaSeparatedMultiSelectEditorAliases.BorderZone)"
+                                                                             ReadOnly="false"
+                                                                             ValueChanged="value => AddManualLocationChips(line, value)" />
+                                                </div>
+                                            }
                                         </div>
-                                    }
-                                    else if (IsWorkPermitLocationReviewLine(line))
-                                    {
-                                        <span class="os-link-review__value">@line.Summary</span>
-                                    }
-                                    else if (IsBorderZoneLocationReviewLine(line) && _reviewGearOn)
-                                    {
-                                        <div class="os-link-review__value os-link-review__value--multiselect">
-                                            <BorderZoneLocationField Value="@(line.Summary == "—" ? null : line.Summary)"
-                                                                     EditorAlias="@CommaSeparatedMultiSelectEditorAliases.BorderZone"
-                                                                     ReadOnly="false"
-                                                                     ValueChanged="value => OnBorderZoneLocationReviewChanged(line, value)" />
-                                        </div>
-                                    }
-                                    else if (IsBorderZoneLocationReviewLine(line))
-                                    {
-                                        <span class="os-link-review__value">@line.Summary</span>
                                     }
                                     else if (_reviewGearOn && line.Choices.Count > 0)
                                     {
@@ -3251,19 +3268,38 @@
         && (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal)
             || string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal));
 
-    private void OnWorkPermitLocationReviewChanged(PersonLinkReviewLine line, string? value)
+    private static bool IsRequestedLocationReviewLine(PersonLinkReviewLine line) =>
+        IsWorkPermitLocationReviewLine(line) || IsBorderZoneLocationReviewLine(line);
+
+    private void HideLocationChip(PersonLinkReviewLine line, PersonLinkReviewLocationChip chip)
     {
-        line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+        LinkReviewLocationChips.Hide(chip);
+        line.Summary = LinkReviewLocationChips.DisplaySummary(line.LocationChips);
+        StateHasChanged();
     }
 
-    private void OnBorderZoneLocationReviewChanged(PersonLinkReviewLine line, string? value)
+    private void AddManualLocationChips(PersonLinkReviewLine line, string? value)
     {
-        line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+        LinkReviewLocationChips.AddManual(line.LocationChips, value);
+        line.Summary = LinkReviewLocationChips.DisplaySummary(line.LocationChips);
+        _locationChipAddNonce++;
+        StateHasChanged();
     }
+
+    private static string LocationChipSourceTitle(LinkReviewLocationChipSource source) => source switch
+    {
+        LinkReviewLocationChipSource.Joined => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Joined"),
+        LinkReviewLocationChipSource.Case => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Case"),
+        LinkReviewLocationChipSource.Visa => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Visa"),
+        LinkReviewLocationChipSource.WorkPermitItem => Msg("ApplicationProfileInstance.LinkReview.LocationSource.WorkPermitItem"),
+        _ => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Manual"),
+    };
     private async Task UseCaseWorkPermitLocationAsync(Guid personId, Guid workPermitItemId)
     {
         _addressActionError = null;
-        if (Snapshot == null || personId == Guid.Empty || workPermitItemId == Guid.Empty)
+        if (Snapshot == null || personId == Guid.Empty)
             return;
 
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
@@ -3295,7 +3331,7 @@
     private async Task UseCaseBorderZoneLocationAsync(Guid personId, Guid linkedObjectId)
     {
         _addressActionError = null;
-        if (Snapshot == null || personId == Guid.Empty || linkedObjectId == Guid.Empty)
+        if (Snapshot == null || personId == Guid.Empty)
             return;
 
         using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
@@ -3399,6 +3435,7 @@
 
     private bool _reviewWasOpen;
     private bool _reviewGearOn;
+    private int _locationChipAddNonce;
     private bool _reviewCreating;
     private bool _reviewCreateSaving;
     private string _reviewTab = "overview";

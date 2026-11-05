@@ -634,7 +634,10 @@ public static class IssueIssuedHeaderComposeService
                 CommaSeparatedSelectionHelper.NoneValue)
             : Array.Empty<string>();
         var defaultBorderZone = kind == IssueIssuedHeaderKind.Invitation
-            ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
+            ? CasePersonRequestedLocation.ResolveBorderZoneForInvitationHeader(
+                objectSpace,
+                instance,
+                BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance))
             : string.Empty;
         DateTime? expirationDate = kind == IssueIssuedHeaderKind.Invitation
             ? Invitation.ExpirationFromIssued(DateTime.Today)
@@ -1092,7 +1095,10 @@ public static class IssueIssuedHeaderComposeService
             invitation.VisaPeriod = objectSpace.GetObjectByKey<VisaPeriod>(periodId);
 
         invitation.BorderZoneLocation = string.IsNullOrWhiteSpace(draft.BorderZoneLocation)
-            ? BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance)
+            ? CasePersonRequestedLocation.ResolveBorderZoneForInvitationHeader(
+                objectSpace,
+                instance,
+                BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance))
             : draft.BorderZoneLocation.Trim();
         BorderZoneSelectionHelper.ApplyDefaultIfEmpty(invitation);
 
@@ -1171,7 +1177,7 @@ public static class IssueIssuedHeaderComposeService
             var item = objectSpace.CreateObject<WorkPermitItem>();
             item.WorkPermit = workPermit;
             item.Person = person;
-            ApplyWorkPermitItemFields(objectSpace, item, row, defaultLocations);
+            ApplyWorkPermitItemFields(objectSpace, instance, item, row, defaultLocations);
             workPermit.WorkPermitItems.Add(item);
         }
 
@@ -1711,7 +1717,8 @@ public static class IssueIssuedHeaderComposeService
         if (workPermit.WorkPermitItems == null)
             workPermit.WorkPermitItems = new System.Collections.ObjectModel.ObservableCollection<WorkPermitItem>();
 
-        var defaultLocations = workPermit.ApplicationProfileInstance?.MovementPermitLocation?.Trim() ?? string.Empty;
+        var instance = workPermit.ApplicationProfileInstance;
+        var defaultLocations = instance?.MovementPermitLocation?.Trim() ?? string.Empty;
         foreach (var row in selected)
         {
             var person = objectSpace.GetObjectByKey<Person>(row.PersonId);
@@ -1727,7 +1734,9 @@ public static class IssueIssuedHeaderComposeService
                 workPermit.WorkPermitItems.Add(item);
             }
 
-            ApplyWorkPermitItemFields(objectSpace, item, row, defaultLocations);
+            if (instance == null)
+                continue;
+            ApplyWorkPermitItemFields(objectSpace, instance, item, row, defaultLocations);
         }
 
         objectSpace.CommitChanges();
@@ -2062,7 +2071,13 @@ public static class IssueIssuedHeaderComposeService
             line.DatePrefillNote = note;
         }
 
-        line.WorkPermittedLocations = IssuedExtensionDefaultsHelper.ResolveWorkPermitLocations(linked, defaultLocations);
+        line.WorkPermittedLocations = CasePersonRequestedLocation.ResolveForPrefill(
+            objectSpace,
+            instance.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+            IssuedExtensionDefaultsHelper.ResolveWorkPermitLocations(linked, defaultLocations));
+
         ApplyInstanceProcessNumberToWorkPermitCard(line, instance);
     }
 
@@ -2121,6 +2136,7 @@ public static class IssueIssuedHeaderComposeService
 
     private static void ApplyWorkPermitItemFields(
         IObjectSpace objectSpace,
+        ApplicationProfileInstance instance,
         WorkPermitItem item,
         IssueIssuedHeaderPersonLineDraft row,
         string defaultLocations)
@@ -2136,7 +2152,12 @@ public static class IssueIssuedHeaderComposeService
         item.StartDate = row.ItemStartDate?.Date ?? default;
         item.ExpirationDate = row.ItemExpirationDate?.Date ?? default;
         item.WorkPermittedLocations = string.IsNullOrWhiteSpace(row.WorkPermittedLocations)
-            ? defaultLocations
+            ? CasePersonRequestedLocation.ResolveForPrefill(
+                objectSpace,
+                instance.ID,
+                row.PersonId,
+                ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+                defaultLocations)
             : row.WorkPermittedLocations.Trim();
     }
 

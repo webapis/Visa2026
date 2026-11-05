@@ -7,9 +7,9 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// Copies Case summary work-permit locations onto linked
-/// <see cref="WorkPermitItem.WorkPermittedLocations"/>. Fill empty on Join;
-/// tick overwrites the same linked item when Case summary differs.
+/// Case summary work-permit locations → case↔person
+/// <see cref="ApplicationProfileInstancePersonRequestedLocation"/> (Kind WorkPermit).
+/// Join / tick never mutate <see cref="WorkPermitItem.WorkPermittedLocations"/>.
 /// </summary>
 public static class CaseWorkPermitLocationCopy
 {
@@ -54,29 +54,29 @@ public static class CaseWorkPermitLocationCopy
         return string.IsNullOrWhiteSpace(fallback) ? null : fallback.Trim();
     }
 
-    public static bool Matches(WorkPermitItem? item, string? caseLocations)
-    {
-        if (item == null || !IsComplete(caseLocations))
-            return false;
-        return string.Equals(
-            item.WorkPermittedLocations?.Trim(),
-            caseLocations!.Trim(),
-            StringComparison.Ordinal);
-    }
+    public static bool Matches(string? stored, string? caseLocations) =>
+        CasePersonRequestedLocation.Matches(stored, caseLocations);
 
-    public static bool OfferTick(string? caseLocations, WorkPermitItem? item) =>
-        IsComplete(caseLocations) && item != null && !Matches(item, caseLocations);
+    public static bool OfferTick(string? caseLocations, string? stored) =>
+        CasePersonRequestedLocation.OfferTick(caseLocations, stored);
 
-    public static bool OfferTick(ApplicationProfileInstance? application, WorkPermitItem? item)
+    public static bool OfferTick(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance? application,
+        Guid personId)
     {
-        if (!IsEnabled(application))
+        if (objectSpace == null || application == null || personId == Guid.Empty || !IsEnabled(application))
             return false;
-        return OfferTick(ResolveCaseLocations(application), item);
+        var stored = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            personId,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit);
+        return OfferTick(ResolveCaseLocations(application), stored);
     }
 
     /// <summary>
-    /// Join / Relink: fill empty locations on linked WorkPermitItem rows for this person.
-    /// Does not overwrite a non-empty value.
+    /// Join / Relink: fill empty requested WP location from Case summary.
     /// </summary>
     public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
@@ -85,33 +85,20 @@ public static class CaseWorkPermitLocationCopy
         if (!IsEnabled(application))
             return false;
 
-        var caseLocations = ResolveCaseLocations(application);
-        if (!IsComplete(caseLocations))
-            return false;
-
-        var changed = false;
-        foreach (var item in LinkedWorkPermitItems(objectSpace, application, person.ID))
-        {
-            if (!string.IsNullOrWhiteSpace(item.WorkPermittedLocations))
-                continue;
-            item.WorkPermittedLocations = caseLocations;
-            changed = true;
-        }
-
-        return changed;
+        return CasePersonRequestedLocation.UpsertIfEmpty(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+            ResolveCaseLocations(application));
     }
 
     /// <summary>
-    /// After Case summary location is saved: fill empty linked WorkPermitItem locations
-    /// for every person on the case.
+    /// After Case summary location is saved: fill empty requested WP locations for every person.
     /// </summary>
     public static void EnsureForPeopleWithEmptyLocations(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
         if (objectSpace == null || application == null || !IsEnabled(application))
-            return;
-
-        var caseLocations = ResolveCaseLocations(application);
-        if (!IsComplete(caseLocations))
             return;
 
         foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))
@@ -119,10 +106,7 @@ public static class CaseWorkPermitLocationCopy
     }
 
     /// <summary>
-    /// Tick: overwrite WorkPermittedLocations on the same linked WorkPermitItem.
-    /// </summary>
-    /// <summary>
-    /// Join/Save: write the officer's Work permit location multi-select onto the linked item.
+    /// Join/Save: write the officer's chip union onto the case↔person requested WP location.
     /// </summary>
     public static bool TryApplyEditedLocations(
         IObjectSpace objectSpace,
@@ -131,24 +115,23 @@ public static class CaseWorkPermitLocationCopy
         Guid workPermitItemId,
         string? locations)
     {
+        _ = workPermitItemId;
         if (objectSpace == null || application == null || person == null)
             return false;
         if (!ShowInLinkReview(application))
             return false;
 
-        var item = workPermitItemId != Guid.Empty
-            ? objectSpace.GetObjectByKey<WorkPermitItem>(workPermitItemId)
-            : null;
-        item ??= LinkedWorkPermitItems(objectSpace, application, person.ID).FirstOrDefault();
-        if (item == null)
-            return false;
-
-        var trimmed = string.IsNullOrWhiteSpace(locations) || locations.Trim() == "—"
-            ? null
-            : locations.Trim();
-        item.WorkPermittedLocations = trimmed;
-        return true;
+        return CasePersonRequestedLocation.Upsert(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+            locations);
     }
+
+    /// <summary>
+    /// Tick: overwrite requested WP location from Case summary (does not mutate WorkPermitItem).
+    /// </summary>
     public static bool TryOverwriteFromCase(
         IObjectSpace objectSpace,
         Guid applicationId,
@@ -156,8 +139,9 @@ public static class CaseWorkPermitLocationCopy
         Guid workPermitItemId,
         out string? error)
     {
+        _ = workPermitItemId;
         error = null;
-        if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty || workPermitItemId == Guid.Empty)
+        if (objectSpace == null || applicationId == Guid.Empty || personId == Guid.Empty)
         {
             error = "Missing work permit link.";
             return false;
@@ -184,38 +168,19 @@ public static class CaseWorkPermitLocationCopy
             return false;
         }
 
-        var linked = LinkedWorkPermitItems(objectSpace, application, personId)
-            .FirstOrDefault(item => item.ID == workPermitItemId);
-        if (linked == null)
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (person == null)
         {
-            error = "Work permit item is not linked to this person on the case.";
+            error = "Person not found.";
             return false;
         }
 
-        linked.WorkPermittedLocations = caseLocations;
+        CasePersonRequestedLocation.Upsert(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+            caseLocations);
         return true;
-    }
-
-    private static System.Collections.Generic.IEnumerable<WorkPermitItem> LinkedWorkPermitItems(
-        IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
-        Guid personId)
-    {
-        var ids = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
-            .Where(link => link.ApplicationProfileInstanceId == application.ID
-                && link.PersonId == personId
-                && link.LinkKind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
-                && link.LinkedObjectId != null
-                && link.LinkedObjectId != Guid.Empty)
-            .Select(link => link.LinkedObjectId!.Value)
-            .Distinct()
-            .ToList();
-
-        foreach (var id in ids)
-        {
-            var item = objectSpace.GetObjectByKey<WorkPermitItem>(id);
-            if (item != null)
-                yield return item;
-        }
     }
 }

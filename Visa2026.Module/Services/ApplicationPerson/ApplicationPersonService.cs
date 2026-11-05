@@ -179,6 +179,8 @@ public static class ApplicationProfileInstancePersonService
         foreach (var link in leftoverLinks)
             objectSpace.Delete(link);
 
+        CasePersonRequestedLocation.DeleteForPerson(objectSpace, personId);
+
         // Delete person-owned issued lines before Person FK is nulled — otherwise Save validation
         // fires ("Person"/"Adam"/"Häzirki wezipesi" required) on orphaned modified rows.
         foreach (var item in objectSpace.GetObjectsQuery<WorkPermitItem>()
@@ -244,6 +246,8 @@ public static class ApplicationProfileInstancePersonService
             application.PersonResolvedLinks?.Remove(link);
             objectSpace.Delete(link);
         }
+
+        CasePersonRequestedLocation.DeleteForPersonOnCase(objectSpace, applicationId, personId);
     }
 
     public static void RefreshApplication(IObjectSpace objectSpace, ApplicationProfileInstance? application)
