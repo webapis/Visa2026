@@ -939,12 +939,23 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (js == null)
             return;
 
+        var userKey = CurrentUserStorageKey();
         try
         {
-            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(CurrentUserStorageKey());
+            // Drop pre-profile-scope cache so Invitation cannot see WP / extension cards.
+            await js.InvokeAsync<bool>(
+                "visaCaseSummaryRecent.save",
+                ApplicationProfilePickerCaseSummaryRecentHelper.LegacyStorageKey(userKey),
+                null);
+
+            if (model.SelectedProfileId == Guid.Empty)
+                return;
+
+            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(userKey);
             var json = await js.InvokeAsync<string>("visaCaseSummaryRecent.load", key);
+            var all = ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(json);
             model.CaseSummaryRecentEntries =
-                ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(json);
+                ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(all, model.SelectedProfileId);
         }
         catch (JSException)
         {
@@ -959,13 +970,14 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
     private async Task RememberCaseSummaryRecentAsync(ApplicationProfilePickerModel model)
     {
         var js = _application?.ServiceProvider?.GetService<IJSRuntime>();
-        if (js == null)
+        if (js == null || model.SelectedProfileId == Guid.Empty)
             return;
 
         var companyLabel = model.Companies
             .FirstOrDefault(c => c.Id == model.SelectedCompanyId)
             ?.DisplayName;
         var entry = ApplicationProfilePickerCaseSummaryRecentHelper.CreateFromFields(
+            model.SelectedProfileId,
             model.CaseSummaryFields,
             companyLabel);
         if (entry.Updates.Count == 0
@@ -973,17 +985,19 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             && string.IsNullOrWhiteSpace(entry.VisaTypeLabel))
             return;
 
-        var next = ApplicationProfilePickerCaseSummaryRecentHelper.Push(
-            model.CaseSummaryRecentEntries,
-            entry);
-        model.CaseSummaryRecentEntries = next;
-        model.SelectedCaseSummaryRecentId = entry.Id;
+        var userKey = CurrentUserStorageKey();
+        var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(userKey);
 
         try
         {
-            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(CurrentUserStorageKey());
-            var json = ApplicationProfilePickerCaseSummaryRecentHelper.Serialize(next);
+            var existingJson = await js.InvokeAsync<string>("visaCaseSummaryRecent.load", key);
+            var all = ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(existingJson);
+            var nextAll = ApplicationProfilePickerCaseSummaryRecentHelper.Push(all, entry);
+            var json = ApplicationProfilePickerCaseSummaryRecentHelper.Serialize(nextAll);
             await js.InvokeAsync<bool>("visaCaseSummaryRecent.save", key, json);
+            model.CaseSummaryRecentEntries =
+                ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(nextAll, model.SelectedProfileId);
+            model.SelectedCaseSummaryRecentId = entry.Id;
         }
         catch (JSException)
         {

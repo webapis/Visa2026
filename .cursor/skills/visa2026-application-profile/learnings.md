@@ -1,3 +1,10 @@
+### 2026-11-05 — Recently used scoped by Application Profile
+
+- **Need**: Invitation Case summary must not show Visa+WP / extension recent cards.
+- **Fix**: Store `ProfileId` on each entry; UI `ForProfile`; Push caps per profile and keeps other profiles; localStorage key `v2`; clear legacy `v1` on load.
+- **Officer**: F5. Create under Invitation — recent only Invitation. Switch to WP profile — different recent list.
+- **Prevent**: Do not push onto the filtered list alone (would wipe other profiles on save). Do not keep unscoped v1 entries.
+- **Cross-skill**: —
 ### 2026-11-05 — Case summary Recently used panel
 
 - **Need**: On create Case summary, right-side recent list (Project-first) fills the form from prior creates.

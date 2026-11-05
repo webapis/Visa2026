@@ -11,12 +11,17 @@ namespace Visa2026.Module.Services.ApplicationProfilePicker;
 
 /// <summary>
 /// Create-picker Case summary "Recently used" cache: snapshot + cap + relative time.
-/// Persistence is host-side (browser localStorage); this type stays pure for tests.
+/// Scoped by Application Profile. Persistence is host-side (browser localStorage).
 /// </summary>
 public static class ApplicationProfilePickerCaseSummaryRecentHelper
 {
     public const int Cap = 6;
-    public const string StorageKeyPrefix = "visa2026.caseSummaryRecent.v1.";
+
+    /// <summary>v2 requires <see cref="ApplicationProfilePickerCaseSummaryRecentEntry.ProfileId"/>.</summary>
+    public const string StorageKeyPrefix = "visa2026.caseSummaryRecent.v2.";
+
+    /// <summary>Pre-profile-scope cache; cleared on load so Invitation does not see WP recents.</summary>
+    public const string LegacyStorageKeyPrefix = "visa2026.caseSummaryRecent.v1.";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -30,7 +35,14 @@ public static class ApplicationProfilePickerCaseSummaryRecentHelper
         return StorageKeyPrefix + key;
     }
 
+    public static string LegacyStorageKey(string? userKey)
+    {
+        var key = string.IsNullOrWhiteSpace(userKey) ? "anon" : userKey.Trim();
+        return LegacyStorageKeyPrefix + key;
+    }
+
     public static ApplicationProfilePickerCaseSummaryRecentEntry CreateFromFields(
+        Guid profileId,
         IEnumerable<ApplicationWorkspaceCaseHeaderField>? fields,
         string? companyLabel,
         DateTime? usedAtUtc = null)
@@ -39,6 +51,7 @@ public static class ApplicationProfilePickerCaseSummaryRecentHelper
         return new ApplicationProfilePickerCaseSummaryRecentEntry
         {
             Id = Guid.NewGuid(),
+            ProfileId = profileId,
             UsedAtUtc = usedAtUtc ?? DateTime.UtcNow,
             ProjectLabel = DisplayLabel(list, ApplicationWorkspaceCaseHeaderFieldsHelper.Project),
             CompanyLabel = string.IsNullOrWhiteSpace(companyLabel) ? string.Empty : companyLabel.Trim(),
@@ -70,29 +83,63 @@ public static class ApplicationProfilePickerCaseSummaryRecentHelper
         return updates;
     }
 
+    /// <summary>
+    /// Inserts <paramref name="incoming"/> at the front of its profile bucket (cap per profile).
+    /// Other profiles' entries are kept.
+    /// </summary>
     public static IReadOnlyList<ApplicationProfilePickerCaseSummaryRecentEntry> Push(
         IEnumerable<ApplicationProfilePickerCaseSummaryRecentEntry>? current,
         ApplicationProfilePickerCaseSummaryRecentEntry incoming,
         int cap = Cap)
     {
         ArgumentNullException.ThrowIfNull(incoming);
+        if (incoming.ProfileId == Guid.Empty)
+            throw new ArgumentException("ProfileId is required.", nameof(incoming));
         if (cap < 1)
             cap = Cap;
 
-        var fingerprint = Fingerprint(incoming.Updates);
-        var list = (current ?? Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>())
-            .Where(e => e != null && !string.Equals(Fingerprint(e.Updates), fingerprint, StringComparison.Ordinal))
+        var all = (current ?? Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>())
+            .Where(e => e != null && e.ProfileId != Guid.Empty)
             .ToList();
 
-        list.Insert(0, incoming);
-        if (list.Count > cap)
-            list = list.Take(cap).ToList();
-        return list;
+        var others = all.Where(e => e.ProfileId != incoming.ProfileId).ToList();
+        var fingerprint = Fingerprint(incoming.Updates);
+        var sameProfile = all
+            .Where(e => e.ProfileId == incoming.ProfileId
+                && !string.Equals(Fingerprint(e.Updates), fingerprint, StringComparison.Ordinal))
+            .ToList();
+        sameProfile.Insert(0, incoming);
+        if (sameProfile.Count > cap)
+            sameProfile = sameProfile.Take(cap).ToList();
+
+        return others
+            .Concat(sameProfile)
+            .OrderByDescending(e => e.UsedAtUtc)
+            .ToList();
+    }
+
+    public static IReadOnlyList<ApplicationProfilePickerCaseSummaryRecentEntry> ForProfile(
+        IEnumerable<ApplicationProfilePickerCaseSummaryRecentEntry>? entries,
+        Guid profileId,
+        int cap = Cap)
+    {
+        if (profileId == Guid.Empty || entries == null)
+            return Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
+        if (cap < 1)
+            cap = Cap;
+
+        return entries
+            .Where(e => e != null && e.ProfileId == profileId)
+            .OrderByDescending(e => e.UsedAtUtc)
+            .Take(cap)
+            .ToList();
     }
 
     public static string Serialize(IEnumerable<ApplicationProfilePickerCaseSummaryRecentEntry>? entries) =>
         JsonSerializer.Serialize(
-            (entries ?? Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>()).ToList(),
+            (entries ?? Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>())
+                .Where(e => e != null && e.ProfileId != Guid.Empty)
+                .ToList(),
             JsonOptions);
 
     public static IReadOnlyList<ApplicationProfilePickerCaseSummaryRecentEntry> Deserialize(string? json)
@@ -106,10 +153,10 @@ public static class ApplicationProfilePickerCaseSummaryRecentHelper
             if (parsed == null || parsed.Count == 0)
                 return Array.Empty<ApplicationProfilePickerCaseSummaryRecentEntry>();
 
+            // Drop unscoped v1-shaped rows if any were written into v2 by mistake.
             return parsed
-                .Where(e => e != null && e.Id != Guid.Empty)
+                .Where(e => e != null && e.Id != Guid.Empty && e.ProfileId != Guid.Empty)
                 .OrderByDescending(e => e.UsedAtUtc)
-                .Take(Cap)
                 .ToList();
         }
         catch (JsonException)
@@ -208,6 +255,8 @@ public static class ApplicationProfilePickerCaseSummaryRecentHelper
 public sealed class ApplicationProfilePickerCaseSummaryRecentEntry
 {
     public Guid Id { get; init; }
+
+    public Guid ProfileId { get; init; }
 
     public DateTime UsedAtUtc { get; init; }
 
