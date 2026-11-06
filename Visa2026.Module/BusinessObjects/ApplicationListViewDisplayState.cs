@@ -27,7 +27,9 @@ internal readonly struct ApplicationListViewDisplayState
         var progressSlaCode = progressSla.AppearanceStateCode ?? string.Empty;
         var migrationSlaCode = migrationSla.AppearanceStateCode ?? string.Empty;
         var slaAppearanceCode = !string.IsNullOrEmpty(progressSlaCode) ? progressSlaCode : migrationSlaCode;
-        var listRowAppearance = !string.IsNullOrEmpty(slaAppearanceCode) ? slaAppearanceCode : primaryStateCode;
+        var listRowAppearance = !string.IsNullOrEmpty(slaAppearanceCode)
+            ? slaAppearanceCode
+            : CompletedRouteAppearance(application, primaryStateCode);
         var listRowCssClass = ResolveListRowCssClass(listRowAppearance);
 
         return new ApplicationListViewDisplayState
@@ -44,6 +46,19 @@ internal readonly struct ApplicationListViewDisplayState
             ListRowCssClass = listRowCssClass,
             ProgressListSortKey = ApplicationProfileInstanceProgressListSort.Compose(listRowAppearance, primaryStateCode),
         };
+    }
+
+    /// <summary>
+    /// A finished route uses the same green as Issued, including a short route such as
+    /// Seretmezlik that ends at hand-in instead of an AS number or Issued step.
+    /// </summary>
+    private static string CompletedRouteAppearance(ApplicationProfileInstance application, string stateCode)
+    {
+        if (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(stateCode, application)
+            && ApplicationMigrationSubmission.IsState(stateCode))
+            return ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+
+        return stateCode;
     }
 
     private static string ResolveListRowCssClass(string stateCode)
