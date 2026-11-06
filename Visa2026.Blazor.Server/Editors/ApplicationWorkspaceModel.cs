@@ -422,6 +422,18 @@ public sealed class ApplicationWorkspaceModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>> HeaderFieldsSaved
+    {
+        get => GetPropertyValue<EventCallback<IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>>>();
+        set => SetPropertyValue(value);
+    }
+
+    public ApplicationWorkspaceStagedHeaderSelection? StagedHeaderSelection
+    {
+        get => GetPropertyValue<ApplicationWorkspaceStagedHeaderSelection?>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback AlternativeAddressCreateRequested
     {
         get => GetPropertyValue<EventCallback>();

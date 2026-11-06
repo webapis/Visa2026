@@ -16,7 +16,7 @@ public static class InvitationSiteCatalogOpenHelper
         XafApplication application,
         string? fieldKey,
         Guid cityId,
-        Action<Guid>? onSaved = null)
+        Action<Guid, string>? onSaved = null)
     {
         if (application == null || cityId == Guid.Empty)
             return false;
@@ -43,7 +43,7 @@ public static class InvitationSiteCatalogOpenHelper
             objectSpace.Committed += (_, _) =>
             {
                 if (saved.ID != Guid.Empty)
-                    onSaved(saved.ID);
+                    onSaved(saved.ID, DisplayName(target));
             };
         }
 
@@ -52,6 +52,16 @@ public static class InvitationSiteCatalogOpenHelper
             new ShowViewSource(application.MainWindow, null));
         return true;
     }
+
+    private static string DisplayName(object target) =>
+        target switch
+        {
+            Lodging lodging => lodging.FullAddress ?? string.Empty,
+            Hotel hotel => hotel.Name ?? string.Empty,
+            Hospital hospital => hospital.Name ?? string.Empty,
+            OtherSite other => other.FullAddress ?? string.Empty,
+            _ => string.Empty,
+        };
 
     internal static Type? ResolveType(string? fieldKey) =>
         fieldKey switch

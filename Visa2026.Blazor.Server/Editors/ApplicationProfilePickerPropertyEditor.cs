@@ -706,7 +706,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (_application == null)
             return;
 
-        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, savedId =>
+        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, (savedId, _) =>
         {
             if (savedId == Guid.Empty)
                 return;
@@ -731,7 +731,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (cityId is not Guid id || id == Guid.Empty)
             return;
 
-        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, savedId =>
+        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, (savedId, _) =>
         {
             if (savedId == Guid.Empty)
                 return;

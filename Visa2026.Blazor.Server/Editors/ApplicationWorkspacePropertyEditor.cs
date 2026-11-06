@@ -93,6 +93,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         CreatePersonLinkReviewRequested = EventCallback.Factory.Create<PersonLinkReviewLine>(this, CreatePersonLinkReviewAsync),
         SavePersonLinkReviewCreateRequested = EventCallback.Factory.Create<PersonLinkReviewCreateForm>(this, SavePersonLinkReviewCreateAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
+        HeaderFieldsSaved = EventCallback.Factory.Create<IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>>(this, SaveHeaderFieldsAsync),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
         OrganizationLetterheadChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SaveOrganizationLetterheadAsync),
@@ -235,10 +236,13 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         await LoadAsync();
     }
 
-    private async Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update)
+    private Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update) =>
+        SaveHeaderFieldsAsync(new[] { update });
+
+    private async Task SaveHeaderFieldsAsync(IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate> updates)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || update == null)
+        if (model == null || _application == null || updates == null || updates.Count == 0)
             return;
 
         var applicationId = ResolveApplicationProfileInstanceId();
@@ -250,11 +254,17 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (application == null)
             return;
 
-        if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out var error))
+        foreach (var update in updates)
         {
-            model.HeaderFieldStatusMessage = error;
-            model.HeaderFieldStatusIsError = true;
-            return;
+            if (update == null || string.IsNullOrWhiteSpace(update.Key))
+                continue;
+
+            if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out var error))
+            {
+                model.HeaderFieldStatusMessage = error;
+                model.HeaderFieldStatusIsError = true;
+                return;
+            }
         }
 
         if (objectSpace.IsModified)
@@ -262,7 +272,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
         model.HeaderFieldStatusMessage = null;
         model.HeaderFieldStatusIsError = false;
-        await LoadAsync();
+        model.StagedHeaderSelection = null;
+        await LoadAsync(showLoading: false);
     }
 
     private void OpenNewAlternativeAddress()
@@ -270,16 +281,15 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (_application == null)
             return;
 
-        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, savedId =>
+        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, (savedId, displayName) =>
         {
             if (savedId == Guid.Empty)
                 return;
 
-            _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
-            {
-                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
-                Value = savedId.ToString("D"),
-            });
+            StageHeaderSelection(
+                ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+                savedId,
+                displayName);
         });
     }
 
@@ -295,17 +305,28 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (cityId is not Guid id || id == Guid.Empty)
             return;
 
-        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, savedId =>
+        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, (savedId, displayName) =>
         {
             if (savedId == Guid.Empty)
                 return;
 
-            _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
-            {
-                Key = fieldKey,
-                Value = savedId.ToString("D"),
-            });
+            StageHeaderSelection(fieldKey, savedId, displayName);
         });
+    }
+
+    private void StageHeaderSelection(string key, Guid id, string? displayName)
+    {
+        var model = ComponentModel;
+        if (model == null || id == Guid.Empty || string.IsNullOrWhiteSpace(key))
+            return;
+
+        model.StagedHeaderSelection = new ApplicationWorkspaceStagedHeaderSelection
+        {
+            Token = (model.StagedHeaderSelection?.Token ?? 0) + 1,
+            Key = key,
+            Value = id.ToString("D"),
+            DisplayName = displayName ?? string.Empty,
+        };
     }
 
     private async Task SaveOrganizationLetterheadAsync(ApplicationWorkspaceOrganizationLetterheadUpdate update)

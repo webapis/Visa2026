@@ -296,6 +296,22 @@ button.cw-person:focus-visible {
   border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 650; cursor: pointer;
 }
 .cw-summary-mode-btn:hover { border-color: var(--os-line); background: var(--os-surface); color: var(--os-ink); }
+.cw-summary-mode-btn.is-busy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: progress;
+}
+.cw-summary-mode-btn.is-busy:disabled { opacity: 1; cursor: progress; }
+.cw-summary-spin {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: cw-advance-spin 0.7s linear infinite;
+  flex: 0 0 auto;
+}
 .cw-summary-empty, .cw-summary-foot, .cw-summary-status { margin: 0 0 8px; font-size: 0.8rem; color: var(--os-muted); }
 .cw-summary-status.is-error { color: #b91c1c; }
 .cw-summary-gate { margin: 0 0 12px; }

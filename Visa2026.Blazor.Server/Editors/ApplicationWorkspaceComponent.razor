@@ -69,6 +69,8 @@
                                         HeaderFieldStatusMessage="@HeaderFieldStatusMessage"
                                         HeaderFieldStatusIsError="@HeaderFieldStatusIsError"
                                         HeaderFieldChanged="@HeaderFieldChanged"
+                                        HeaderFieldsSaved="@HeaderFieldsSaved"
+                                        StagedHeaderSelection="@StagedHeaderSelection"
                                         AlternativeAddressCreateRequested="@AlternativeAddressCreateRequested"
                                         InvitationSiteCreateRequested="@InvitationSiteCreateRequested"
                                         OrganizationStatusMessage="@OrganizationStatusMessage"
@@ -144,6 +146,8 @@
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>> HeaderFieldsSaved { get; set; }
+    [Parameter] public ApplicationWorkspaceStagedHeaderSelection? StagedHeaderSelection { get; set; }
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
     [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
     [Parameter] public string? OrganizationStatusMessage { get; set; }

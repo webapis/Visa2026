@@ -11,7 +11,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// </summary>
 public static class AlternativeAddressCatalogOpenHelper
 {
-    public static bool TryOpenNew(XafApplication application, Action<Guid>? onSaved = null)
+    public static bool TryOpenNew(XafApplication application, Action<Guid, string>? onSaved = null)
     {
         if (application == null)
             return false;
@@ -26,7 +26,7 @@ public static class AlternativeAddressCatalogOpenHelper
             objectSpace.Committed += (_, _) =>
             {
                 if (target.ID != Guid.Empty)
-                    onSaved(target.ID);
+                    onSaved(target.ID, target.AddressLine ?? string.Empty);
             };
         }
 

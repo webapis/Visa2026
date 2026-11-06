@@ -136,6 +136,8 @@ public partial class ApplicationProfileInstance
     public bool CfgShowBorderZones =>
         ApplicationProfileConfigurationResolver.ShowBorderZones(this);
 
+    [Browsable(false)]
+    [NotMapped]
     public bool CfgShowWorkPermitLocationGrants =>
         ApplicationProfileConfigurationResolver.ShowWorkPermitLocationGrants(this);
 

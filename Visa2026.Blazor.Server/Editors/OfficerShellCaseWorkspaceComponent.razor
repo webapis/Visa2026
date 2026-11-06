@@ -517,6 +517,8 @@
     [Parameter] public string? HeaderFieldStatusMessage { get; set; }
     [Parameter] public bool HeaderFieldStatusIsError { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceCaseHeaderFieldUpdate> HeaderFieldChanged { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>> HeaderFieldsSaved { get; set; }
+    [Parameter] public ApplicationWorkspaceStagedHeaderSelection? StagedHeaderSelection { get; set; }
     [Parameter] public EventCallback AlternativeAddressCreateRequested { get; set; }
 
     [Parameter] public EventCallback<string> InvitationSiteCreateRequested { get; set; }
@@ -532,7 +534,12 @@
     private int? _peopleRecordPersonIndex;
     private string? _appliedPeopleFocusKey;
     private bool _caseSummaryEditing;
+    private bool _summarySaving;
     private Guid _caseSummaryInstanceId;
+    private int _seenStageToken;
+    private IReadOnlyList<ApplicationWorkspaceCaseHeaderField>? _boundHeaderFields;
+    private Dictionary<string, HeaderOriginal>? _headerOriginals;
+    private readonly Dictionary<string, PendingHeader> _pendingHeaders = new(StringComparer.Ordinal);
     private bool _organizationEditing;
 
     private bool IsCaseSummaryEditing =>
@@ -669,6 +676,10 @@
         {
             _caseSummaryInstanceId = instanceId;
             _caseSummaryEditing = false;
+            _summarySaving = false;
+            _pendingHeaders.Clear();
+            _headerOriginals = null;
+            _boundHeaderFields = null;
             _organizationEditing = false;
             _documentCopiesCompletenessKey = null;
             _documentCopiesNavReady = false;
@@ -678,10 +689,22 @@
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
 
-        // Save reloads CaseView without dropdown catalogs. Reload them while Edit is open
-        // so Visa type / Project / etc. keep a matching <option> and stay visible.
+        // Dropdown catalogs load when Edit opens. Later saves must not replace the page.
         if (_caseSummaryEditing)
+        {
             EnsureHeaderLookupCatalogs();
+            ReapplyPendingHeaderFields();
+            ApplyStagedHeaderSelection();
+        }
+        else
+        {
+            _boundHeaderFields = Snapshot?.CaseView.HeaderFields;
+        }
+
+        if (_caseSummaryEditing
+            && !_summarySaving
+            && !string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase))
+            DiscardCaseSummaryDraft();
         if (_organizationEditing)
             EnsureOrganizationCatalogOptions();
 
@@ -791,6 +814,8 @@
     private void StartCaseSummaryEdit()
     {
         EnsureHeaderLookupCatalogs();
+        if (!_caseSummaryEditing)
+            _boundHeaderFields = null;
         _caseSummaryEditing = true;
     }
 
@@ -826,12 +851,45 @@
 
     private async Task FinishCaseSummaryEdit()
     {
-        // Mouse-down must not move focus. A field blur would save and refresh the case
-        // before mouse-up, so the click never reached this button. Read the focused
-        // value first, then leave edit mode on this same press.
+        if (_summarySaving)
+            return;
+
+        // Mouse-down must not move focus. Read the focused value before the click ends,
+        // then save every edited field once. Leaving the case without Done discards them.
         var focused = await ReadFocusedSummaryFieldAsync();
-        _caseSummaryEditing = false;
-        await CommitFocusedSummaryFieldAsync(focused);
+        ApplyFocusedSummaryField(focused);
+        var updates = _pendingHeaders
+            .Select(item => new ApplicationWorkspaceCaseHeaderFieldUpdate
+            {
+                Key = item.Key,
+                Value = item.Value.Value,
+            })
+            .ToList();
+        if (updates.Count == 0 || !HeaderFieldsSaved.HasDelegate)
+        {
+            _caseSummaryEditing = false;
+            _pendingHeaders.Clear();
+            _headerOriginals = null;
+            return;
+        }
+
+        _summarySaving = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        try
+        {
+            await HeaderFieldsSaved.InvokeAsync(updates);
+            if (HeaderFieldStatusIsError)
+                return;
+
+            _pendingHeaders.Clear();
+            _headerOriginals = null;
+            _caseSummaryEditing = false;
+        }
+        finally
+        {
+            _summarySaving = false;
+        }
     }
 
     private async Task<FocusedSummaryField?> ReadFocusedSummaryFieldAsync()
@@ -854,7 +912,7 @@
         }
     }
 
-    private async Task CommitFocusedSummaryFieldAsync(FocusedSummaryField? focused)
+    private void ApplyFocusedSummaryField(FocusedSummaryField? focused)
     {
         if (focused == null || string.IsNullOrWhiteSpace(focused.Key))
             return;
@@ -868,10 +926,7 @@
         if (value == null)
             return;
 
-        if (string.Equals(field.Value ?? string.Empty, value, StringComparison.Ordinal))
-            return;
-
-        await OnHeaderFieldChanged(field.Key, value);
+        ApplyHeaderDraft(field.Key, value, null);
     }
 
     private static string? NormalizeFocusedSummaryValue(ApplicationWorkspaceCaseHeaderField field, string? raw)
@@ -1130,15 +1185,136 @@
 
     private Task OnHeaderFieldChanged(string key, string? value)
     {
-        if (!HeaderFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
-            return Task.CompletedTask;
-
-        return HeaderFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
-        {
-            Key = key,
-            Value = value,
-        });
+        ApplyHeaderDraft(key, value, null);
+        return Task.CompletedTask;
     }
+
+    private void ApplyStagedHeaderSelection()
+    {
+        var staged = StagedHeaderSelection;
+        if (staged == null || staged.Token == _seenStageToken || string.IsNullOrWhiteSpace(staged.Key))
+            return;
+
+        _seenStageToken = staged.Token;
+        ApplyHeaderDraft(staged.Key, staged.Value, staged.DisplayName);
+    }
+
+    private void ReapplyPendingHeaderFields()
+    {
+        var fields = Snapshot?.CaseView.HeaderFields;
+        if (fields == null || ReferenceEquals(fields, _boundHeaderFields) || _pendingHeaders.Count == 0)
+        {
+            _boundHeaderFields = fields;
+            return;
+        }
+
+        var pending = _pendingHeaders
+            .Select(item => (item.Key, item.Value.Value, item.Value.DisplayName))
+            .ToList();
+        _headerOriginals = null;
+        _boundHeaderFields = fields;
+        foreach (var item in pending)
+            ApplyHeaderDraft(item.Key, item.Value, item.DisplayName);
+    }
+
+    private void ApplyHeaderDraft(string key, string? value, string? displayName)
+    {
+        if (_summarySaving || string.IsNullOrWhiteSpace(key))
+            return;
+
+        var field = Snapshot?.CaseView.HeaderFields.FirstOrDefault(item =>
+            string.Equals(item.Key, key, StringComparison.Ordinal));
+        if (field == null || field.ReadOnly)
+            return;
+
+        RememberHeaderOriginal(field);
+        var text = value ?? string.Empty;
+        field.Value = text;
+        if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
+        {
+            field.SelectedId = Guid.TryParse(text, out var selected) && selected != Guid.Empty
+                ? selected
+                : null;
+            var match = field.Options.FirstOrDefault(option =>
+                string.Equals(OptionValue(option), text, StringComparison.OrdinalIgnoreCase));
+            if (match == null
+                && !string.IsNullOrWhiteSpace(displayName)
+                && field.SelectedId is Guid added)
+            {
+                match = new ApplicationWorkspaceLookupOption
+                {
+                    Id = added,
+                    DisplayName = displayName,
+                };
+                field.Options = field.Options.Append(match).ToList();
+            }
+
+            field.DisplayValue = match?.DisplayName
+                ?? (string.IsNullOrWhiteSpace(text) ? "—" : text);
+        }
+        else if (string.IsNullOrWhiteSpace(text))
+        {
+            field.DisplayValue = "—";
+        }
+        else
+        {
+            field.DisplayValue = text;
+        }
+
+        var original = _headerOriginals![field.Key];
+        if (string.Equals(text, original.Value, StringComparison.Ordinal))
+            _pendingHeaders.Remove(field.Key);
+        else
+            _pendingHeaders[field.Key] = new PendingHeader(text, displayName);
+    }
+
+    private void RememberHeaderOriginal(ApplicationWorkspaceCaseHeaderField field)
+    {
+        _headerOriginals ??= new Dictionary<string, HeaderOriginal>(StringComparer.Ordinal);
+        if (_headerOriginals.ContainsKey(field.Key))
+            return;
+
+        _headerOriginals[field.Key] = new HeaderOriginal(
+            field.Value ?? string.Empty,
+            field.DisplayValue ?? "—",
+            field.SelectedId,
+            field.Options);
+    }
+
+    private void DiscardCaseSummaryDraft()
+    {
+        var fields = Snapshot?.CaseView.HeaderFields;
+        if (fields != null && _headerOriginals != null)
+        {
+            foreach (var field in fields)
+            {
+                if (!_headerOriginals.TryGetValue(field.Key, out var original))
+                    continue;
+
+                field.Value = original.Value;
+                field.DisplayValue = original.DisplayValue;
+                field.SelectedId = original.SelectedId;
+                field.Options = original.Options;
+            }
+        }
+
+        _pendingHeaders.Clear();
+        _headerOriginals = null;
+        _caseSummaryEditing = false;
+    }
+
+    private static string OptionValue(ApplicationWorkspaceLookupOption option) =>
+        !string.IsNullOrWhiteSpace(option.SearchText)
+            ? option.SearchText
+            : option.Id.ToString("D");
+
+    private sealed record HeaderOriginal(
+        string Value,
+        string DisplayValue,
+        Guid? SelectedId,
+        IReadOnlyList<ApplicationWorkspaceLookupOption> Options);
+
+    private sealed record PendingHeader(string Value, string? DisplayName);
 
     private void SyncPeopleRecordFocus()
     {
@@ -1743,9 +1919,17 @@
                         @if (IsCaseSummaryEditing)
                         {
                             <button type="button"
-                                    class="cw-summary-mode-btn"
+                                    class="cw-summary-mode-btn @(_summarySaving ? "is-busy" : null)"
+                                    disabled="@_summarySaving"
+                                    aria-busy="@_summarySaving"
                                     @onmousedown:preventDefault="true"
-                                    @onclick="FinishCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Done")</button>
+                                    @onclick="FinishCaseSummaryEdit">
+                                @if (_summarySaving)
+                                {
+                                    <span class="cw-summary-spin" aria-hidden="true"></span>
+                                }
+                                @Msg("ApplicationProfileInstance.Workspace.Done")
+                            </button>
                         }
                         else
                         {
@@ -3060,7 +3244,7 @@
 
     private async Task SelectTab(string key)
     {
-        if (string.IsNullOrWhiteSpace(key) || _tabSwitching)
+        if (string.IsNullOrWhiteSpace(key) || _tabSwitching || _summarySaving)
             return;
         if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, key))
         {
@@ -3073,6 +3257,8 @@
             await InvokeAsync(StateHasChanged);
             return;
         }
+        if (_caseSummaryEditing && !string.Equals(key, "overview", StringComparison.OrdinalIgnoreCase))
+            DiscardCaseSummaryDraft();
         if (!_keepBlockedSectionLabel)
             _blockedSectionLabel = null;
         if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)

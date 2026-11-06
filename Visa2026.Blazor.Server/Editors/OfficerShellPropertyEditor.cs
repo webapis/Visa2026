@@ -131,6 +131,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         CreatePersonLinkReviewRequested = EventCallback.Factory.Create<PersonLinkReviewLine>(this, CreatePersonLinkReviewAsync),
         SavePersonLinkReviewCreateRequested = EventCallback.Factory.Create<PersonLinkReviewCreateForm>(this, SavePersonLinkReviewCreateAsync),
         HeaderFieldChanged = EventCallback.Factory.Create<ApplicationWorkspaceCaseHeaderFieldUpdate>(this, SaveHeaderFieldAsync),
+        HeaderFieldsSaved = EventCallback.Factory.Create<IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>>(this, SaveHeaderFieldsAsync),
         AlternativeAddressCreateRequested = EventCallback.Factory.Create(this, OpenNewAlternativeAddress),
         InvitationSiteCreateRequested = EventCallback.Factory.Create<string>(this, OpenNewInvitationSite),
         OrganizationLetterheadChanged = EventCallback.Factory.Create<ApplicationWorkspaceOrganizationLetterheadUpdate>(this, SaveOrganizationLetterheadAsync),
@@ -824,10 +825,13 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         return Task.CompletedTask;
     }
 
-    private async Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update)
+    private Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update) =>
+        SaveHeaderFieldsAsync(new[] { update });
+
+    private async Task SaveHeaderFieldsAsync(IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate> updates)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || update == null)
+        if (model == null || _application == null || updates == null || updates.Count == 0)
             return;
 
         if (model.CaseApplicationProfileInstanceId == Guid.Empty)
@@ -838,11 +842,17 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (application == null)
             return;
 
-        if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out var error))
+        foreach (var update in updates)
         {
-            model.HeaderFieldStatusMessage = error;
-            model.HeaderFieldStatusIsError = true;
-            return;
+            if (update == null || string.IsNullOrWhiteSpace(update.Key))
+                continue;
+
+            if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out var error))
+            {
+                model.HeaderFieldStatusMessage = error;
+                model.HeaderFieldStatusIsError = true;
+                return;
+            }
         }
 
         if (objectSpace.IsModified)
@@ -850,8 +860,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
         model.HeaderFieldStatusMessage = null;
         model.HeaderFieldStatusIsError = false;
-        // Keep Done on the page. The opening skeleton removes it between mouse-down and
-        // mouse-up, so the first click never switches the button back to Edit.
+        model.StagedHeaderSelection = null;
+        // Keep the open case. The opening skeleton replaces the page.
         await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
     }
 
@@ -860,16 +870,15 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (_application == null)
             return;
 
-        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, savedId =>
+        AlternativeAddressCatalogOpenHelper.TryOpenNew(_application, (savedId, displayName) =>
         {
             if (savedId == Guid.Empty)
                 return;
 
-            _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
-            {
-                Key = ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
-                Value = savedId.ToString("D"),
-            });
+            StageHeaderSelection(
+                ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress,
+                savedId,
+                displayName);
         });
     }
 
@@ -885,17 +894,28 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (cityId is not Guid id || id == Guid.Empty)
             return;
 
-        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, savedId =>
+        InvitationSiteCatalogOpenHelper.TryOpenNew(_application, fieldKey, id, (savedId, displayName) =>
         {
             if (savedId == Guid.Empty)
                 return;
 
-            _ = SaveHeaderFieldAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
-            {
-                Key = fieldKey,
-                Value = savedId.ToString("D"),
-            });
+            StageHeaderSelection(fieldKey, savedId, displayName);
         });
+    }
+
+    private void StageHeaderSelection(string key, Guid id, string? displayName)
+    {
+        var model = ComponentModel;
+        if (model == null || id == Guid.Empty || string.IsNullOrWhiteSpace(key))
+            return;
+
+        model.StagedHeaderSelection = new ApplicationWorkspaceStagedHeaderSelection
+        {
+            Token = (model.StagedHeaderSelection?.Token ?? 0) + 1,
+            Key = key,
+            Value = id.ToString("D"),
+            DisplayName = displayName ?? string.Empty,
+        };
     }
 
     private async Task SaveOrganizationLetterheadAsync(ApplicationWorkspaceOrganizationLetterheadUpdate update)

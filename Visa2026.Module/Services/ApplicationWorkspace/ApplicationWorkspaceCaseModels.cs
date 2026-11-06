@@ -125,17 +125,17 @@ public sealed class ApplicationWorkspaceCaseHeaderField
 
     public string Glyph { get; init; } = "•";
 
-    public Guid? SelectedId { get; init; }
+    public Guid? SelectedId { get; set; }
 
-    public string Value { get; init; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
 
-    public string DisplayValue { get; init; } = "—";
+    public string DisplayValue { get; set; } = "—";
 
     public bool ReadOnly { get; init; }
 
     public int? MaxLength { get; init; }
 
-    public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; init; }
+    public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; set; }
         = Array.Empty<ApplicationWorkspaceLookupOption>();
 
     /// <summary>Catalog labels for <see cref="CommaSeparatedMultiSelect"/> fields (e.g. border zone names).</summary>
@@ -162,6 +162,18 @@ public sealed class ApplicationWorkspaceCaseHeaderFieldUpdate
     public string Key { get; init; } = string.Empty;
 
     public string? Value { get; init; }
+}
+
+/// <summary>A + New catalog row chosen on Case summary. It stays on screen until Done.</summary>
+public sealed class ApplicationWorkspaceStagedHeaderSelection
+{
+    public int Token { get; init; }
+
+    public string Key { get; init; } = string.Empty;
+
+    public string Value { get; init; } = string.Empty;
+
+    public string DisplayName { get; init; } = string.Empty;
 }
 
 public sealed class ApplicationWorkspaceOrganizationLetterheadUpdate
