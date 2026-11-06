@@ -33,6 +33,9 @@ public static class ApplicationTypeCapabilities
     public static bool CanIssueBorderZone(ApplicationProfileInstance? application) =>
         ApplicationProfileConfigurationResolver.CanIssueBorderZone(application);
 
+    public static bool CanIssueWorkPermitLocationGrant(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant(application);
+
     public static bool CanIssueRejection(ApplicationProfileInstance? application) =>
         ApplicationProfileConfigurationResolver.CanIssueRejection(application);
 

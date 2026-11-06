@@ -501,6 +501,26 @@ internal static class ApplicationWorkspaceCaseBuilder
                         .ToList(),
                     zones.SelectMany(z => z.Documents ?? Array.Empty<BorderZoneDocument>()));
                 return ExpandBorderZoneRows(application, objectSpace, zones, zoneCopyIds);
+            case ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant:
+                var grants = objectSpace != null
+                    ? objectSpace.GetObjectsQuery<WorkPermitLocationGrant>()
+                        .Where(g => g.ApplicationProfileInstance != null
+                            && g.ApplicationProfileInstance.ID == application.ID)
+                        .ToList()
+                    : application.WorkPermitLocationGrants?.ToList() ?? [];
+                if (grants.Count == 0)
+                    return [];
+                var grantCopyIds = HeaderIdsWithCopies(
+                    objectSpace,
+                    () => objectSpace!.GetObjectsQuery<WorkPermitLocationGrantDocument>()
+                        .Where(d => d.Grant != null
+                            && d.Grant.ApplicationProfileInstance != null
+                            && d.Grant.ApplicationProfileInstance.ID == application.ID
+                            && d.File != null)
+                        .Select(d => d.Grant.ID)
+                        .ToList(),
+                    grants.SelectMany(g => g.Documents ?? Array.Empty<WorkPermitLocationGrantDocument>()));
+                return ExpandWorkPermitLocationGrantRows(application, objectSpace, grants, grantCopyIds);
             case ApplicationWorkspaceIssuedRecordsCatalog.Rejection:
                 var rejections = objectSpace != null
                     ? objectSpace.GetObjectsQuery<Rejection>()
@@ -575,6 +595,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         ApplicationWorkspaceIssuedRecordsCatalog.Invitation => IssuedInvitationColumnKeys,
         ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit => IssuedWorkPermitColumnKeys,
         ApplicationWorkspaceIssuedRecordsCatalog.BorderZone => IssuedBorderZoneColumnKeys,
+        ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant => IssuedWorkPermitLocationGrantColumnKeys,
         ApplicationWorkspaceIssuedRecordsCatalog.Rejection => IssuedRejectionColumnKeys,
         ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa => IssuedVisaColumnKeys,
         _ => [],
@@ -604,6 +625,14 @@ internal static class ApplicationWorkspaceCaseBuilder
         "ApplicationProfileInstance.Issued.BorderZoneNumber",
         "ApplicationProfileInstance.Issued.Start",
         "ApplicationProfileInstance.Issued.Expiration",
+        "ApplicationProfileInstance.Issued.PersonCount",
+        "ApplicationProfileInstance.Issued.CopyAvailable",
+    ];
+    private static readonly string[] IssuedWorkPermitLocationGrantColumnKeys =
+    [
+        "ApplicationProfileInstance.Issued.GrantNumber",
+        "ApplicationProfileInstance.Issued.IssuedDate",
+        "ApplicationProfileInstance.Issued.SourceWorkPermit",
         "ApplicationProfileInstance.Issued.PersonCount",
         "ApplicationProfileInstance.Issued.CopyAvailable",
     ];
@@ -711,7 +740,48 @@ internal static class ApplicationWorkspaceCaseBuilder
             .ToList();
     }
 
-    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandBorderZoneRows(
+    
+    private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandWorkPermitLocationGrantRows(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        IReadOnlyList<WorkPermitLocationGrant> grants,
+        HashSet<Guid> copyIds)
+    {
+        var peopleByHeader = CountPeopleByHeader(
+            objectSpace != null && application.ID != Guid.Empty
+                ? objectSpace.GetObjectsQuery<WorkPermitLocationGrantItem>()
+                    .Where(i => i.Grant != null
+                        && i.Grant.ApplicationProfileInstance != null
+                        && i.Grant.ApplicationProfileInstance.ID == application.ID)
+                    .Select(i => new { HeaderId = i.Grant!.ID, PersonId = i.Person != null ? i.Person.ID : Guid.Empty })
+                    .ToList()
+                    .Select(x => (x.HeaderId, x.PersonId))
+                : grants.SelectMany(h => (h.Items ?? Array.Empty<WorkPermitLocationGrantItem>())
+                    .Select(i => (h.ID, i.Person?.ID ?? Guid.Empty))));
+
+        return grants
+            .OrderByDescending(g => g.IssuedDate)
+            .ThenBy(g => g.GrantNumber)
+            .Select(g =>
+            {
+                var hasCopy = copyIds.Contains(g.ID);
+                var people = peopleByHeader.GetValueOrDefault(g.ID);
+                var sourceWp = g.SourceWorkPermit?.WorkPermitNumber?.Trim() ?? string.Empty;
+                return Row(
+                    g.ID,
+                    g.GrantNumber,
+                    FormatIssuedDate(g.IssuedDate),
+                    hasCopy,
+                    [
+                        Cell(g.GrantNumber),
+                        Cell(FormatIssuedDate(g.IssuedDate)),
+                        Cell(string.IsNullOrWhiteSpace(sourceWp) ? "—" : sourceWp),
+                        people.ToString(CultureInfo.CurrentUICulture),
+                        CopyAvailableCell(hasCopy),
+                    ]);
+            })
+            .ToList();
+    }private static IReadOnlyList<ApplicationWorkspaceCaseIssuedRow> ExpandBorderZoneRows(
         ApplicationProfileInstance application,
         IObjectSpace? objectSpace,
         IReadOnlyList<BorderZone> zones,

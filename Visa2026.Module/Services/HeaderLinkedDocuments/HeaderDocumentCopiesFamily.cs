@@ -7,4 +7,5 @@ public enum HeaderDocumentCopiesFamily
     Rejection = 2,
     BorderZone = 3,
     Visa = 4,
+    WorkPermitLocationGrant = 5,
 }

@@ -102,6 +102,8 @@ public static class ApplicationWorkspaceIssuedResultOverview
             return CountDistinct(VisaPersonIds(application, objectSpace), rosterIds);
         if (string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.BorderZone, StringComparison.OrdinalIgnoreCase))
             return CountDistinct(BorderZonePersonIds(application, objectSpace), rosterIds);
+        if (string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant, StringComparison.OrdinalIgnoreCase))
+            return CountDistinct(WorkPermitLocationGrantPersonIds(application, objectSpace), rosterIds);
 
         return headerFallback;
     }
@@ -245,5 +247,25 @@ public static class ApplicationWorkspaceIssuedResultOverview
         return (application.BorderZones ?? [])
             .SelectMany(h => h.BorderZoneItems ?? Array.Empty<BorderZoneItem>())
             .Select(i => i.Person?.ID ?? Guid.Empty);
+    }
+    private static IEnumerable<Guid> WorkPermitLocationGrantPersonIds(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace)
+    {
+        if (CanQuery(application, objectSpace))
+        {
+            return objectSpace!.GetObjectsQuery<WorkPermitLocationGrantItem>()
+                .Where(i => i.Grant != null
+                    && i.Grant.ApplicationProfileInstance != null
+                    && i.Grant.ApplicationProfileInstance.ID == application.ID
+                    && i.Person != null)
+                .Select(i => i.Person!.ID)
+                .ToList();
+        }
+
+        return (application.WorkPermitLocationGrants ?? Array.Empty<WorkPermitLocationGrant>())
+            .SelectMany(g => g.Items ?? Array.Empty<WorkPermitLocationGrantItem>())
+            .Where(i => i.Person != null)
+            .Select(i => i.Person!.ID);
     }
 }

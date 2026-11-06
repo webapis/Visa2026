@@ -1328,12 +1328,20 @@
         var appId = Snapshot.ApplicationProfileInstanceId;
         var headerId = existingHeaderId is Guid id && id != Guid.Empty ? id : (Guid?)null;
         var existingText = headerId is Guid h ? h.ToString("D") : string.Empty;
+        Guid? sourceVisaId = null;
+        if (kind == IssueIssuedHeaderKind.BorderZone && headerId == null)
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            sourceVisaId = IssueIssuedHeaderComposeService.TryResolveNextUngrantedSourceVisaId(objectSpace, appId);
+        }
+
         var request = new IssueIssuedHeaderSlotRequest
         {
             ApplicationProfileInstanceId = appId,
             Kind = kind,
             CatalogKey = catalog,
             ExistingHeaderId = headerId,
+            SourceVisaId = sourceVisaId,
         };
 
         // DI first so same-circuit Host StateChanged always sees the new header id.

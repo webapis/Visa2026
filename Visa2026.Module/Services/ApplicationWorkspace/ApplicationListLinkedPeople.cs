@@ -9,11 +9,11 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// <summary>
 /// People stacked on an application list row, each with one mark per result
 /// that application produces. Green means that person's document exists.
-/// Gray, like a disabled button, means a visa, invitation, work permit, or border zone is not issued yet. Pink
-/// means an issued one is expired. An issued invitation keeps one circle:
-/// the letters stay Çak and the fill is that person's later life. A rejection
-/// mark appears only for a person who has one, in the same red as the
-/// application result chip.
+/// Gray, like a disabled button, means a visa, invitation, work permit, border zone,
+/// or work-permit location grant (WPL) is not issued yet. Pink means an issued one is
+/// expired. An issued invitation keeps one circle: the letters stay Çak and the fill
+/// is that person's later life. A rejection mark appears only for a person who has one,
+/// in the same red as the application result chip.
 /// </summary>
 public static class ApplicationListLinkedPeople
 {
@@ -24,12 +24,14 @@ public static class ApplicationListLinkedPeople
     /// <param name="State">Later life of an issued invitation, or expiry of an issued visa or work permit.</param>
     /// <param name="DocumentId">Header of the issued copy. Empty when the circle is not a link.</param>
     /// <param name="Replacement">The issued invitation that replaced a changed one. Shown beside that circle.</param>
+    /// <param name="Detail">Secondary caption under the circle (e.g. granted WPL locations).</param>
     public readonly record struct Mark(
         string Key,
         string Tone,
         string? State = null,
         Guid DocumentId = default,
-        InvitationReplacement? Replacement = null);
+        InvitationReplacement? Replacement = null,
+        string? Detail = null);
 
     /// <summary>New invitation issued by a completed change, for one person.</summary>
     public sealed record InvitationReplacement(
@@ -99,11 +101,15 @@ public static class ApplicationListLinkedPeople
         IReadOnlyDictionary<Guid, Guid>? borderZoneDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null,
         IReadOnlyDictionary<Guid, InvitationReplacement>? invitationReplacements = null,
-        IReadOnlyDictionary<Guid, ApplicationProfileInstanceExcludedPerson>? exclusions = null)
+        IReadOnlyDictionary<Guid, ApplicationProfileInstanceExcludedPerson>? exclusions = null,
+        IReadOnlySet<Guid>? locationGrant = null,
+        IReadOnlyDictionary<Guid, Guid>? locationGrantDocuments = null,
+        IReadOnlyDictionary<Guid, string>? locationGrantDetails = null)
     {
         if (application == null || roster == null || roster.Count == 0)
             return Array.Empty<Row>();
 
+        var locationGrantHolders = locationGrant ?? Empty;
         var kinds = VisibleKinds(application);
         var rows = new List<Row>(roster.Count);
         foreach (var personId in roster.OrderBy(id => NameOf(names, id), StringComparer.CurrentCultureIgnoreCase))
@@ -122,7 +128,7 @@ public static class ApplicationListLinkedPeople
             var marks = new List<Mark>(kinds.Count + 1);
             foreach (var kind in kinds)
             {
-                var holders = Holders(kind, invitation, workPermit, visa, borderZone);
+                var holders = Holders(kind, invitation, workPermit, visa, borderZone, locationGrantHolders);
                 var issued = holders.Contains(personId);
                 var tone = issued ? ToneDone : ToneMissing;
                 string? state = null;
@@ -141,11 +147,27 @@ public static class ApplicationListLinkedPeople
                     tone = IssuedResultExpiry.Tone;
                 }
 
-                var mark = new Mark(
-                    kind,
-                    tone,
-                    state,
-                    issued ? DocumentOf(kind, personId, invitationDocuments, workPermitDocuments, visaDocuments, borderZoneDocuments) : Guid.Empty);
+                var documentId = issued
+                    ? DocumentOf(
+                        kind,
+                        personId,
+                        invitationDocuments,
+                        workPermitDocuments,
+                        visaDocuments,
+                        borderZoneDocuments,
+                        locationGrantDocuments: locationGrantDocuments)
+                    : Guid.Empty;
+                string? detail = null;
+                if (issued
+                    && string.Equals(kind, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant, StringComparison.Ordinal)
+                    && locationGrantDetails != null
+                    && locationGrantDetails.TryGetValue(personId, out var grantedLocations)
+                    && !string.IsNullOrWhiteSpace(grantedLocations))
+                {
+                    detail = grantedLocations.Trim();
+                }
+
+                var mark = new Mark(kind, tone, state, documentId, Detail: detail);
                 if (issued
                     && string.Equals(state, InvitationLaterLife.Changed, StringComparison.Ordinal)
                     && invitationReplacements != null
@@ -188,6 +210,8 @@ public static class ApplicationListLinkedPeople
             VisaUiMessages.Get("ApplicationProfile.Doc.Visa"),
         ApplicationWorkspaceIssuedRecordsCatalog.BorderZone =>
             VisaUiMessages.Get("ApplicationProfile.Doc.BorderZone"),
+        ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant =>
+            VisaUiMessages.Get("ApplicationProfile.Doc.LocationPermission"),
         ApplicationWorkspaceIssuedRecordsCatalog.Rejection =>
             VisaUiMessages.Get("ApplicationProfile.Doc.Rejection"),
         IssuedResultExpiry.WorkPermit or IssuedResultExpiry.Visa =>
@@ -272,7 +296,11 @@ public static class ApplicationListLinkedPeople
                 VisaUiMessages.Get("ApplicationProfileInstance.List.Mark.NotIssuedTitle"));
         }
 
-        return JoinNameAndState(document, StateWord(mark.State));
+        var titled = JoinNameAndState(document, StateWord(mark.State));
+        if (!string.IsNullOrWhiteSpace(mark.Detail))
+            return titled + " · " + mark.Detail.Trim();
+
+        return titled;
     }
 
     /// <summary>Hover on the invitation that replaced a changed one: "Täze çakylyk güýjünde".</summary>
@@ -346,12 +374,14 @@ public static class ApplicationListLinkedPeople
         IReadOnlySet<Guid> invitation,
         IReadOnlySet<Guid> workPermit,
         IReadOnlySet<Guid> visa,
-        IReadOnlySet<Guid> borderZone) => key switch
+        IReadOnlySet<Guid> borderZone,
+        IReadOnlySet<Guid> locationGrant) => key switch
     {
         ApplicationWorkspaceIssuedRecordsCatalog.Invitation => invitation,
         ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit => workPermit,
         ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa => visa,
         ApplicationWorkspaceIssuedRecordsCatalog.BorderZone => borderZone,
+        ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant => locationGrant,
         _ => Empty,
     };
 
@@ -368,6 +398,8 @@ public static class ApplicationListLinkedPeople
             "ApplicationProfileInstance.List.Mark.Visa",
         ApplicationWorkspaceIssuedRecordsCatalog.BorderZone =>
             "ApplicationProfileInstance.List.Mark.BorderZone",
+        ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant =>
+            "ApplicationProfileInstance.List.Mark.WorkPermitLocationGrant",
         ApplicationWorkspaceIssuedRecordsCatalog.Rejection =>
             "ApplicationProfileInstance.List.Mark.Rejection",
         IssuedResultExpiry.WorkPermit or IssuedResultExpiry.Visa =>
@@ -409,7 +441,8 @@ public static class ApplicationListLinkedPeople
         IReadOnlyDictionary<Guid, Guid>? workPermitDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? visaDocuments = null,
         IReadOnlyDictionary<Guid, Guid>? borderZoneDocuments = null,
-        IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null)
+        IReadOnlyDictionary<Guid, Guid>? rejectionDocuments = null,
+        IReadOnlyDictionary<Guid, Guid>? locationGrantDocuments = null)
     {
         var documents = key switch
         {
@@ -418,6 +451,7 @@ public static class ApplicationListLinkedPeople
             ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa => visaDocuments,
             ApplicationWorkspaceIssuedRecordsCatalog.BorderZone => borderZoneDocuments,
             ApplicationWorkspaceIssuedRecordsCatalog.Rejection => rejectionDocuments,
+            ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant => locationGrantDocuments,
             _ => null,
         };
         return documents != null && documents.TryGetValue(personId, out var documentId) ? documentId : Guid.Empty;

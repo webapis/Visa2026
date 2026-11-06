@@ -26,9 +26,9 @@ propertyGaps:
     - column: ChooseBorderZoneType
       disposition: drop
   targetOnly:
-    - property: ExpirationDate
-      disposition: computed_on_save
-      notes: StartDate + ValidityDuration.NumberOfDays
+    - property: SourceVisa
+      disposition: best_effort
+      notes: Persist when visa id-map available; otherwise null on import
     - property: Documents
       disposition: file_wave
 
@@ -50,12 +50,11 @@ fields:
     missingBehavior: skip_row
 
   - source: Application.BorderZonePeriod
-    target: ValidityDuration
-    transform: closest_day_span_to_validity_duration
+    target: ExpirationDate
+    transform: start_plus_closest_day_span
     candidates: [90, 180, 365]
-    lookupCatalog: ValidityDuration
     missingBehavior: use_closest
-    notes: VisaPeriod.CountMonth → closest Month3/Month6/Year1
+    notes: VisaPeriod.CountMonth → StartDate + closest 90/180/365 days (ValidityDuration removed)
 
   - source: Application.Oid
     target: ApplicationProfileInstance

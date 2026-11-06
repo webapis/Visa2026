@@ -8,7 +8,48 @@
 @using Visa2026.Blazor.Server.Controllers
 @implements IAsyncDisposable
 
-@if (_state.Mode == VisaPreviewSlotMode.File)
+<div class="visa-preview-slot__host">
+@if (_state.Tabs.Count > 1)
+{
+    <div class="visa-preview-slot__tabs" role="tablist" aria-label="Preview tabs">
+        @foreach (var tab in _state.Tabs)
+        {
+            <div class="visa-preview-slot__tab @(tab.IsActive ? "visa-preview-slot__tab--active" : null)" role="presentation">
+                <button type="button"
+                        class="visa-preview-slot__tab-btn"
+                        role="tab"
+                        aria-selected="@tab.IsActive"
+                        title="@tab.Title"
+                        @onclick="() => ActivateTabAsync(tab.Key)">
+                    <span class="visa-preview-slot__tab-title">@tab.Title</span>
+                </button>
+                <button type="button"
+                        class="visa-preview-slot__tab-close"
+                        title="Close tab"
+                        aria-label="Close @tab.Title"
+                        @onclick="() => CloseTabAsync(tab.Key)">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        }
+    </div>
+}
+
+<div class="visa-preview-slot__body">
+@if (_state.Occupants.Count > 0)
+{
+    @foreach (var occupant in _state.Occupants)
+    {
+        <div class="visa-preview-slot__occupant @(occupant.IsActive ? "visa-preview-slot__occupant--active" : "visa-preview-slot__occupant--hidden")"
+             @key="occupant.Key"
+             data-occupant-key="@occupant.Key">
+            @RenderOccupant(occupant)
+        </div>
+    }
+}
+else if (_state.Mode == VisaPreviewSlotMode.File)
 {
     <VisaFilePreviewDrawer @key="_state.Version"
                            @ref="_fileDrawer"
@@ -26,7 +67,6 @@ else if (_state.Mode == VisaPreviewSlotMode.DocumentCopies && _state.DocumentCop
                              Request="_state.DocumentCopies"
                              CloseRequested="CloseFromPanelAsync" />
 }
-
 else if (_state.Mode == VisaPreviewSlotMode.ProgressLetters && _state.ProgressLetters != null)
 {
     <ProgressLettersSlotPanel @key="_state.Version"
@@ -69,6 +109,8 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
                                  Request="_state.ApprovalLegCatalog"
                                  CloseRequested="CloseFromPanelAsync" />
 }
+</div>
+</div>
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
@@ -78,8 +120,10 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
 
     private VisaPreviewSlotState _state = new();
     private VisaFilePreviewDrawer? _fileDrawer;
+    private readonly Dictionary<string, VisaFilePreviewDrawer> _fileDrawersByKey = new(StringComparer.Ordinal);
     private DotNetObjectReference<VisaPreviewSlotHost>? _dotNetRef;
     private int _lastFileOpenVersion;
+    private string? _lastFileOccupantKey;
 
     protected override void OnInitialized()
     {
@@ -107,10 +151,91 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
         }
     }
 
+    private RenderFragment RenderOccupant(VisaPreviewSlotOccupantSnapshot occupant) => builder =>
+    {
+        switch (occupant.Mode)
+        {
+            case VisaPreviewSlotMode.File:
+                builder.OpenComponent<VisaFilePreviewDrawer>(0);
+                builder.AddAttribute(1, "HostManaged", true);
+                builder.AddComponentReferenceCapture(2, inst =>
+                {
+                    if (inst is VisaFilePreviewDrawer drawer)
+                        _fileDrawersByKey[occupant.Key] = drawer;
+                });
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.Resminamalar when occupant.Resminamalar != null:
+                builder.OpenComponent<ResminamalarSlotPanel>(10);
+                builder.AddAttribute(11, "Request", occupant.Resminamalar);
+                builder.AddAttribute(12, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.DocumentCopies when occupant.DocumentCopies != null:
+                builder.OpenComponent<DocumentCopiesSlotPanel>(20);
+                builder.AddAttribute(21, "Request", occupant.DocumentCopies);
+                builder.AddAttribute(22, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.ProgressLetters when occupant.ProgressLetters != null:
+                builder.OpenComponent<ProgressLettersSlotPanel>(30);
+                builder.AddAttribute(31, "Request", occupant.ProgressLetters);
+                builder.AddAttribute(32, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.PersonDocumentCopies when occupant.PersonDocumentCopies != null:
+                builder.OpenComponent<PersonDocumentCopiesSlotPanel>(40);
+                builder.AddAttribute(41, "Request", occupant.PersonDocumentCopies);
+                builder.AddAttribute(42, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.HeaderDocumentCopies when occupant.HeaderDocumentCopies != null:
+                builder.OpenComponent<HeaderDocumentCopiesSlotPanel>(50);
+                builder.AddAttribute(51, "Request", occupant.HeaderDocumentCopies);
+                builder.AddAttribute(52, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.PlaceholderManual:
+                builder.OpenComponent<PlaceholderManualSlotPanel>(60);
+                builder.AddAttribute(61, "Request", occupant.PlaceholderManual);
+                builder.AddAttribute(62, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.IssueIssuedHeader when occupant.IssueIssuedHeader != null:
+                builder.OpenComponent<IssueIssuedHeaderSlotPanel>(70);
+                builder.AddAttribute(71, "Request", occupant.IssueIssuedHeader);
+                builder.AddAttribute(72, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.IssueIssuedVisa when occupant.IssueIssuedVisa != null:
+                builder.OpenComponent<IssueIssuedVisaSlotPanel>(80);
+                builder.AddAttribute(81, "Request", occupant.IssueIssuedVisa);
+                builder.AddAttribute(82, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+            case VisaPreviewSlotMode.ApprovalLegCatalog:
+                builder.OpenComponent<ApprovalLegProfileSlotPanel>(90);
+                builder.AddAttribute(91, "Request", occupant.ApprovalLegCatalog);
+                builder.AddAttribute(92, "CloseRequested", EventCallback.Factory.Create(this, CloseFromPanelAsync));
+                builder.CloseComponent();
+                break;
+        }
+    };
+
     private void OnSlotStateChanged()
     {
         _state = SlotService.State;
+        PruneFileDrawerRefs();
         _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void PruneFileDrawerRefs()
+    {
+        var liveKeys = new HashSet<string>(
+            _state.Occupants.Where(o => o.Mode == VisaPreviewSlotMode.File).Select(o => o.Key),
+            StringComparer.Ordinal);
+        foreach (var key in _fileDrawersByKey.Keys.Where(k => !liveKeys.Contains(k)).ToList())
+            _fileDrawersByKey.Remove(key);
     }
 
     private async Task ApplyStateAsync()
@@ -122,17 +247,27 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
         }
         catch (JSDisconnectedException) { }
 
-        if (_state.Mode == VisaPreviewSlotMode.File
-            && !string.IsNullOrWhiteSpace(_state.FileSourceType)
-            && _state.FileObjectId != Guid.Empty
-            && _state.Version != _lastFileOpenVersion)
-        {
-            if (_fileDrawer == null)
-                return;
+        if (_state.Mode != VisaPreviewSlotMode.File
+            || string.IsNullOrWhiteSpace(_state.FileSourceType)
+            || _state.FileObjectId == Guid.Empty)
+            return;
 
-            _lastFileOpenVersion = _state.Version;
-            await _fileDrawer.OpenFilePreviewAsync(_state.FileSourceType, _state.FileObjectId);
-        }
+        var versionChanged = _state.Version != _lastFileOpenVersion;
+        var keyChanged = !string.Equals(_state.OccupantKey, _lastFileOccupantKey, StringComparison.Ordinal);
+        if (!versionChanged && !keyChanged)
+            return;
+
+        VisaFilePreviewDrawer? drawer = _fileDrawer;
+        if (!string.IsNullOrWhiteSpace(_state.OccupantKey)
+            && _fileDrawersByKey.TryGetValue(_state.OccupantKey, out var stacked))
+            drawer = stacked;
+
+        if (drawer == null)
+            return;
+
+        _lastFileOpenVersion = _state.Version;
+        _lastFileOccupantKey = _state.OccupantKey;
+        await drawer.OpenFilePreviewAsync(_state.FileSourceType, _state.FileObjectId);
     }
 
     [JSInvokable]
@@ -416,7 +551,17 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
     [JSInvokable]
     public Task CloseFromJsAsync() => SlotService.CloseAsync();
 
-    private Task CloseFromPanelAsync() => SlotService.CloseAsync();
+    private Task ActivateTabAsync(string key) => SlotService.ActivateTabAsync(key);
+
+    private Task CloseTabAsync(string key) => SlotService.CloseTabAsync(key);
+
+    private Task CloseFromPanelAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(_state.OccupantKey) && _state.Tabs.Count > 1)
+            return SlotService.CloseTabAsync(_state.OccupantKey);
+
+        return SlotService.CloseAsync();
+    }
 
     public async ValueTask DisposeAsync()
     {

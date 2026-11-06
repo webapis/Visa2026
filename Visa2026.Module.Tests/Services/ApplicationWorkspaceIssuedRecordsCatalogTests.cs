@@ -262,6 +262,15 @@ public class ApplicationWorkspaceIssuedRecordsCatalogTests
     }
 
     [Fact]
+    public void TryGetDocumentCopiesFamily_MapsLocationGrantToOwnFamily()
+    {
+        Assert.True(ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(
+            ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant,
+            out var family));
+        Assert.Equal(HeaderDocumentCopiesFamily.WorkPermitLocationGrant, family);
+    }
+
+    [Fact]
     public void TryGetDocumentCopiesFamily_MapsIssuedVisaToVisaCopies()
     {
         Assert.True(ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(

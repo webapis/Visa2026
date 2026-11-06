@@ -104,6 +104,27 @@ public sealed class ApplicationWorkspaceListProgressMigrationGateTests
     }
 
     [Fact]
+    public void ShouldShowResultChips_WhenOnlyWorkPermitLocationGrantProduced()
+    {
+        var steps = new[]
+        {
+            new ApplicationWorkspaceListProgressSteps.Step("office", "Office", "done", "ok", "1 Aug", ""),
+            new ApplicationWorkspaceListProgressSteps.Step("migration", "Migration", "done", "ok", "2 Aug", ""),
+        };
+        var chips = new[]
+        {
+            new ApplicationWorkspaceIssuedResultListCoverage.Chip(
+                ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant,
+                "Location permission",
+                1,
+                1,
+                false),
+        };
+
+        Assert.True(ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(steps, chips));
+    }
+
+    [Fact]
     public void ShouldShowResultChips_False_ForRegistrationRejectionOnly()
     {
         var steps = new[]

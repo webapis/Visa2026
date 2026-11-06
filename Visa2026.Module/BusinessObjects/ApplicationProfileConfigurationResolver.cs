@@ -206,8 +206,7 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowMovementPermitLocation(ApplicationProfileInstance? application) =>
         Resolve(
             application,
-            p => RequireWorkPermitLocationWhenProducingWorkPermit(
-                p.ProduceWorkPermit, p.RequireWorkPermitLocation),
+            p => p.ProduceWorkLocation || RequireWorkPermitLocationWhenProducingWorkPermit(p.ProduceWorkPermit, p.RequireWorkPermitLocation),
             t => t.ShowMovementPermitLocation || t.ShowWorkPermittedLocations || t.CanIssueWorkPermit);
 
     public static bool ShowWorkPermittedLocations(ApplicationProfileInstance? application) =>
@@ -364,6 +363,12 @@ public static class ApplicationProfileConfigurationResolver
 
     public static bool ShowBorderZones(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.ProduceBorderZone, t => t.ShowBorderZoneLocation);
+
+    public static bool CanIssueWorkPermitLocationGrant(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.ProduceWorkLocation, _ => false);
+
+    public static bool ShowWorkPermitLocationGrants(ApplicationProfileInstance? application) =>
+        Resolve(application, p => p.ProduceWorkLocation, _ => false);
 
     public static bool ShowIssuedVisas(ApplicationProfileInstance? application) =>
         CanIssueVisa(application);

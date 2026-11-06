@@ -523,6 +523,7 @@ public static class PersonDossierResolver
         var usedInvitationIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
             objectSpace,
             invitationItems.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+        var locationGrantItemsByApp = LoadLocationGrantItemsByApplication(objectSpace, personId);
 
         var records = apps
             .Select(app =>
@@ -545,6 +546,7 @@ public static class PersonDossierResolver
                     coverageChips)
                     ? coverageChips
                     : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+                locationGrantItemsByApp.TryGetValue(app.ID, out var locationGrantItem);
                 return new PersonDossierRecord
                 {
                     RecordKey = $"Application:{app.ID}",
@@ -567,7 +569,8 @@ public static class PersonDossierResolver
                         timeline,
                         invitationItems.FirstOrDefault(item => item.Invitation?.ApplicationProfileInstance?.ID == app.ID),
                         Safe(person.RejectionItems).FirstOrDefault(item => item.Rejection?.ApplicationProfileInstance?.ID == app.ID),
-                        usedInvitationIds),
+                        usedInvitationIds,
+                        locationGrantItem),
                 };
             })
             .ToList();
@@ -726,14 +729,15 @@ public static class PersonDossierResolver
     }
 
     /// <summary>
-    /// Invitation or rejection for this person, shown only after Migration service is finished.
-    /// A rejection on that step replaces the invitation.
+    /// Invitation, location grant (WPL), or rejection for this person — only after Migration service is finished.
+    /// A rejection on that step replaces the invitation / grant.
     /// </summary>
     internal static PersonDossierIssuedOutcome? ResolveIssuedOutcome(
         IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? timeline,
         InvitationItem? invitationItem,
         RejectionItem? rejectionItem,
-        IReadOnlySet<Guid>? usedInvitationItemIds = null)
+        IReadOnlySet<Guid>? usedInvitationItemIds = null,
+        WorkPermitLocationGrantItem? locationGrantItem = null)
     {
         var migration = timeline?.FirstOrDefault(step =>
             string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase));
@@ -747,6 +751,7 @@ public static class PersonDossierResolver
             return BuildRejectionOutcome(rejectionItem);
 
         return BuildInvitationOutcome(invitationItem, usedInvitationItemIds)
+            ?? BuildLocationGrantOutcome(locationGrantItem)
             ?? BuildRejectionOutcome(rejectionItem);
     }
 
@@ -771,6 +776,27 @@ public static class PersonDossierResolver
         };
     }
 
+    private static PersonDossierIssuedOutcome? BuildLocationGrantOutcome(WorkPermitLocationGrantItem? item)
+    {
+        var grant = item?.Grant;
+        var number = grant?.GrantNumber?.Trim();
+        if (grant == null || string.IsNullOrWhiteSpace(number))
+            return null;
+
+        var hasCopy = grant.ID != Guid.Empty
+            && Safe(grant.Documents).Any(document => document.File != null);
+        var grantedLocations = item?.GrantedLocations?.Trim() ?? string.Empty;
+        return new PersonDossierIssuedOutcome
+        {
+            Number = number,
+            StatusLabel = ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued"),
+            StatusCssClass = "st-approved",
+            Detail = grantedLocations,
+            PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.WorkPermitLocationGrant : null,
+            PreviewParentId = hasCopy ? grant.ID : null,
+        };
+    }
+
     private static PersonDossierIssuedOutcome? BuildRejectionOutcome(RejectionItem? item)
     {
         var rejection = item?.Rejection;
@@ -788,6 +814,33 @@ public static class PersonDossierResolver
             PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Rejection : null,
             PreviewParentId = hasCopy ? rejection.ID : null,
         };
+    }
+
+    private static Dictionary<Guid, WorkPermitLocationGrantItem> LoadLocationGrantItemsByApplication(
+        IObjectSpace objectSpace,
+        Guid personId)
+    {
+        var map = new Dictionary<Guid, WorkPermitLocationGrantItem>();
+        if (personId == Guid.Empty)
+            return map;
+
+        var rows = objectSpace.GetObjectsQuery<WorkPermitLocationGrantItem>()
+            .Where(i => i.Person != null
+                && i.Person.ID == personId
+                && i.Grant != null
+                && i.Grant.ApplicationProfileInstance != null)
+            .OrderByDescending(i => i.Grant!.IssuedDate)
+            .ToList();
+
+        foreach (var row in rows)
+        {
+            var appId = row.Grant?.ApplicationProfileInstance?.ID ?? Guid.Empty;
+            if (appId == Guid.Empty)
+                continue;
+            map.TryAdd(appId, row);
+        }
+
+        return map;
     }
 
     private static PersonDossierSection BuildRejections(Person person)

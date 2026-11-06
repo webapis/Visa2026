@@ -117,6 +117,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | **WorkPermitItem** | stored `IsCancelled` | Removed | Same derived lifecycle. `IsChanged`/`IsExtended` already dropped | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
 | **BorderZone** / **BorderZoneItem** | stored `IsCancelled` | Removed | Header cancelled iff any item is cancelled | Dropped by `IssuedDocumentStatusColumnsCleanupUpdater` |
 | **Invitation** | `StartDate` (property name), `ValidityDuration` | Renamed / removed | `IssuedDate` (same DB column `StartDate`); `VisaPeriod` + `VisaCategory`; `ExpirationDate` stored directly | `InvitationLegacyShapeSchemaUpdater` drops `ValidityDurationID` |
+| **BorderZone** | `ValidityDuration` | Removed | Editable `ExpirationDate` + `SourceVisa` | `BorderZoneSourceVisaSchemaUpdater` drops `ValidityDurationID` |
 | **WorkPermitItem** | `IsChanged`, `IsExtended` | Removed | Change family on Application Profile; item `IsCancelled` now also derived | Dropped by `WorkPermitItemStatusColumnsCleanupUpdater` |
 | **WorkPermit** | `IsApplicationNotRequired`, `IsCancelled` | Removed | Optional `Application` via gear toggle (same as `Invitation`) | Dropped by `WorkPermitApplicationNotRequiredColumnCleanupUpdater` |
 | **Visa** | `HasInvitation`, `HistoricalImport` | Removed | Optional `InvitationItem` / `IssuingApplicationItem` via gear toggle | Dropped by `VisaVisibilityToggleColumnsCleanupUpdater` |
@@ -149,6 +150,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 | `WorkPermitItems.IsCancelled` | `IssuedDocumentStatusColumnsCleanupUpdater` | Same derived lifecycle |
 | `BorderZones.IsCancelled`, `BorderZoneItems.IsCancelled` | `IssuedDocumentStatusColumnsCleanupUpdater` | Same; header from any item |
 | `Invitations.ValidityDurationID` | `InvitationLegacyShapeSchemaUpdater` | `VisaPeriod` + editable `ExpirationDate` |
+| `BorderZones.ValidityDurationID` | `BorderZoneSourceVisaSchemaUpdater` | Editable `ExpirationDate` + `SourceVisa` |
 | `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | Change family + derived item `IsCancelled` |
 | `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 | `Visas.HasInvitation`, `Visas.HistoricalImport` | `VisaVisibilityToggleColumnsCleanupUpdater` | Optional `IssuingApplicationItem` / `InvitationItem` + gear on detail view |

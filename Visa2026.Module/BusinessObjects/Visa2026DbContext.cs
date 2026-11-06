@@ -116,6 +116,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<BorderZone> BorderZones { get; set; }
         public DbSet<BorderZoneItem> BorderZoneItems { get; set; }
         public DbSet<BorderZoneDocument> BorderZoneDocuments { get; set; }
+        public DbSet<WorkPermitLocationGrant> WorkPermitLocationGrants { get; set; }
+        public DbSet<WorkPermitLocationGrantItem> WorkPermitLocationGrantItems { get; set; }
+        public DbSet<WorkPermitLocationGrantDocument> WorkPermitLocationGrantDocuments { get; set; }
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
         public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }
@@ -1099,6 +1102,46 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("ApplicationProfileInstanceID")
                     .IsRequired()
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(x => x.SourceVisa)
+                    .WithMany()
+                    .HasForeignKey("SourceVisaID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+            modelBuilder.Entity<WorkPermitLocationGrant>(b =>
+            {
+                b.HasOne(x => x.ApplicationProfileInstance)
+                    .WithMany(a => a.WorkPermitLocationGrants)
+                    .HasForeignKey("ApplicationProfileInstanceID")
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(x => x.SourceWorkPermit)
+                    .WithMany()
+                    .HasForeignKey("SourceWorkPermitID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<WorkPermitLocationGrantItem>(b =>
+            {
+                b.Property(i => i.GrantedLocations).HasMaxLength(500);
+                b.HasOne(i => i.Grant)
+                    .WithMany(g => g.Items)
+                    .HasForeignKey("GrantID")
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(i => i.SourceWorkPermitItem)
+                    .WithMany()
+                    .HasForeignKey("SourceWorkPermitItemID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<WorkPermitLocationGrantDocument>(b =>
+            {
+                b.HasOne(d => d.Grant)
+                    .WithMany(g => g.Documents)
+                    .HasForeignKey("GrantID")
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Rejection>(b =>

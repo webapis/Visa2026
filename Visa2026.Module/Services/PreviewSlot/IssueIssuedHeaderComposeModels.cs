@@ -9,6 +9,7 @@ public enum IssueIssuedHeaderKind
     WorkPermit = 1,
     Rejection = 2,
     BorderZone = 3,
+    WorkPermitLocationGrant = 4,
 }
 
 public sealed class IssueIssuedHeaderSlotRequest
@@ -22,6 +23,9 @@ public sealed class IssueIssuedHeaderSlotRequest
 
     /// <summary>When set, slot opens existing issued header in edit mode.</summary>
     public Guid? ExistingHeaderId { get; init; }
+
+    /// <summary>Border zone create: visa this grant belongs to (one grant per visa).</summary>
+    public Guid? SourceVisaId { get; init; }
 }
 
 public sealed class IssueIssuedHeaderLookupOption
@@ -75,6 +79,21 @@ public sealed class IssueIssuedHeaderPersonLineDraft
 
     public string WorkPermittedLocations { get; set; } = string.Empty;
 
+    /// <summary>Linked source work permit shown on location-grant compose (read-only).</summary>
+    public string SourceWorkPermitCaption { get; set; } = string.Empty;
+
+    /// <summary>WorkPermit header id for document-copies preview.</summary>
+    public Guid? SourceWorkPermitId { get; set; }
+
+    /// <summary>WorkPermitItem id for document-copies context.</summary>
+    public Guid? SourceWorkPermitItemId { get; set; }
+
+    /// <summary>Linked source visa caption on border-zone compose (read-only).</summary>
+    public string SourceVisaCaption { get; set; } = string.Empty;
+
+    /// <summary>Visa id for document-copies preview (beside passport).</summary>
+    public Guid? SourceVisaId { get; set; }
+
     public string DatePrefillNote { get; set; } = string.Empty;
 }
 
@@ -101,6 +120,14 @@ public sealed class IssueIssuedHeaderComposeDraft
     public string BorderZoneLocation { get; set; } = string.Empty;
 
     public Guid? ValidityDurationId { get; set; }
+
+    /// <summary>Border zone: persisted SourceVisa.</summary>
+    public Guid? SourceVisaId { get; set; }
+
+    public string SourceVisaCaption { get; set; } = string.Empty;
+
+    /// <summary>Visa end date used to prefill / warn against End date.</summary>
+    public DateTime? SourceVisaEndDate { get; set; }
 
     public string Reason { get; set; } = string.Empty;
 

@@ -49,9 +49,60 @@ public sealed class PlaceholderManualSlotRequest
     public UserReportBoType? FilterRootBoType { get; init; }
 }
 
+public sealed class VisaPreviewSlotTab
+{
+    public string Key { get; init; } = string.Empty;
+
+    public string Title { get; init; } = string.Empty;
+
+    public bool IsActive { get; init; }
+}
+
+/// <summary>One stacked occupant kept alive while inactive so compose drafts survive tab switches.</summary>
+public sealed class VisaPreviewSlotOccupantSnapshot
+{
+    public string Key { get; init; } = string.Empty;
+
+    public string Title { get; init; } = string.Empty;
+
+    public bool IsActive { get; init; }
+
+    public VisaPreviewSlotMode Mode { get; init; }
+
+    public string? OwnerViewId { get; init; }
+
+    public string? FileSourceType { get; init; }
+
+    public Guid FileObjectId { get; init; }
+
+    public ResminamalarSlotRequest? Resminamalar { get; init; }
+
+    public DocumentCopiesSlotRequest? DocumentCopies { get; init; }
+
+    public ProgressLettersSlotRequest? ProgressLetters { get; init; }
+
+    public PersonDocumentCopiesSlotRequest? PersonDocumentCopies { get; init; }
+
+    public HeaderDocumentCopiesSlotRequest? HeaderDocumentCopies { get; init; }
+
+    public PlaceholderManualSlotRequest? PlaceholderManual { get; init; }
+
+    public IssueIssuedHeaderSlotRequest? IssueIssuedHeader { get; init; }
+
+    public IssueIssuedVisaSlotRequest? IssueIssuedVisa { get; init; }
+
+    public ApprovalLegCatalogSlotRequest? ApprovalLegCatalog { get; init; }
+}
+
 public sealed class VisaPreviewSlotState
 {
     public VisaPreviewSlotMode Mode { get; init; } = VisaPreviewSlotMode.Closed;
+
+    /// <summary>Open occupants when more than one preview is stacked; empty when closed or single without strip.</summary>
+    public IReadOnlyList<VisaPreviewSlotTab> Tabs { get; init; } = Array.Empty<VisaPreviewSlotTab>();
+
+    /// <summary>All stacked occupants (active + hidden). Empty when closed.</summary>
+    public IReadOnlyList<VisaPreviewSlotOccupantSnapshot> Occupants { get; init; } = Array.Empty<VisaPreviewSlotOccupantSnapshot>();
 
     /// <summary>Stable key for the current slot occupant (Resminamalar scope, file source, etc.).</summary>
     public string? OccupantKey { get; init; }
@@ -215,9 +266,9 @@ public interface IVisaPreviewSlotService
 
     Task OpenProgressLettersAsync(ProgressLettersSlotRequest request, string? ownerViewId = null);
 
-    Task OpenPersonDocumentCopiesAsync(PersonDocumentCopiesSlotRequest request, string? ownerViewId = null);
+    Task OpenPersonDocumentCopiesAsync(PersonDocumentCopiesSlotRequest request, string? ownerViewId = null, bool stackWithCurrent = false);
 
-    Task OpenHeaderDocumentCopiesAsync(HeaderDocumentCopiesSlotRequest request, string? ownerViewId = null);
+    Task OpenHeaderDocumentCopiesAsync(HeaderDocumentCopiesSlotRequest request, string? ownerViewId = null, bool stackWithCurrent = false);
 
     Task OpenPlaceholderManualAsync(PlaceholderManualSlotRequest? request = null, string? ownerViewId = null);
 
@@ -230,6 +281,10 @@ public interface IVisaPreviewSlotService
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 
     Task CloseAsync();
+
+    Task ActivateTabAsync(string occupantKey);
+
+    Task CloseTabAsync(string occupantKey);
 }
 
 public sealed class ReportPackagePreviewRequest

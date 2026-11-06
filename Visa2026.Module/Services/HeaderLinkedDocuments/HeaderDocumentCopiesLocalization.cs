@@ -12,6 +12,7 @@ public static class HeaderDocumentCopiesLocalization
             HeaderDocumentCopiesFamily.Rejection => "RejectionDocumentCopies.Title",
             HeaderDocumentCopiesFamily.BorderZone => "BorderZoneDocumentCopies.Title",
             HeaderDocumentCopiesFamily.Visa => "Visa.Tab.DocumentCopies",
+            HeaderDocumentCopiesFamily.WorkPermitLocationGrant => "WorkPermitLocationGrantDocumentCopies.Title",
             _ => "HeaderDocumentCopies.Title",
         };
 
@@ -28,6 +29,7 @@ public static class HeaderDocumentCopiesLocalization
             HeaderDocumentCopiesFamily.Invitation => "InvitationDocumentCopies.List.SelectOne",
             HeaderDocumentCopiesFamily.Rejection => "RejectionDocumentCopies.List.SelectOne",
             HeaderDocumentCopiesFamily.BorderZone => "BorderZoneDocumentCopies.List.SelectOne",
+            HeaderDocumentCopiesFamily.WorkPermitLocationGrant => "WorkPermitLocationGrantDocumentCopies.List.SelectOne",
             _ => "HeaderDocumentCopies.List.SelectOne",
         };
 
@@ -38,6 +40,7 @@ public static class HeaderDocumentCopiesLocalization
             HeaderDocumentCopiesFamily.Invitation => "InvitationDocumentCopies.List.ColumnLink",
             HeaderDocumentCopiesFamily.Rejection => "RejectionDocumentCopies.List.ColumnLink",
             HeaderDocumentCopiesFamily.BorderZone => "BorderZoneDocumentCopies.List.ColumnLink",
+            HeaderDocumentCopiesFamily.WorkPermitLocationGrant => "WorkPermitLocationGrantDocumentCopies.List.ColumnLink",
             _ => "HeaderDocumentCopies.List.ColumnLink",
         };
 }

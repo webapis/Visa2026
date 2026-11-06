@@ -186,6 +186,13 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
     {
         var title = ApplicationListLinkedPeople.Title(mark);
         var letters = ApplicationListLinkedPeople.Letters(mark.Key);
+        var hasDetail = !string.IsNullOrWhiteSpace(mark.Detail);
+        if (hasDetail)
+        {
+            builder.OpenElement(seq++, "span");
+            builder.AddAttribute(seq++, "class", "lv-person-mark-stack");
+        }
+
         if (!ApplicationListLinkedPeople.CanPreview(mark)
             || !ApplicationWorkspaceIssuedRecordsCatalog.TryGetDocumentCopiesFamily(mark.Key, out var family))
         {
@@ -194,26 +201,38 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
             builder.AddAttribute(seq++, "title", title);
             builder.AddContent(seq++, letters);
             builder.CloseElement();
-            return;
         }
-
-        builder.OpenElement(seq++, "button");
-        builder.AddAttribute(seq++, "type", "button");
-        builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--hit lv-person-mark--" + mark.Tone);
-        builder.AddAttribute(seq++, "title", title);
-        builder.AddAttribute(seq++, "aria-label", string.IsNullOrWhiteSpace(personName) ? title : title + " — " + personName);
-        builder.AddAttribute(seq++, "data-doc-family", family.ToString());
-        builder.AddAttribute(seq++, "data-doc-parent-id", mark.DocumentId.ToString("D"));
-        builder.AddAttribute(seq++, "data-doc-life", ApplicationListLinkedPeople.InvitationLife(mark));
-        if (personId != Guid.Empty
-            && string.Equals(mark.Key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal))
+        else
         {
-            builder.AddAttribute(seq++, "data-doc-person-id", personId.ToString("D"));
+            builder.OpenElement(seq++, "button");
+            builder.AddAttribute(seq++, "type", "button");
+            builder.AddAttribute(seq++, "class", "lv-person-mark lv-person-mark--hit lv-person-mark--" + mark.Tone);
+            builder.AddAttribute(seq++, "title", title);
+            builder.AddAttribute(seq++, "aria-label", string.IsNullOrWhiteSpace(personName) ? title : title + " — " + personName);
+            builder.AddAttribute(seq++, "data-doc-family", family.ToString());
+            builder.AddAttribute(seq++, "data-doc-parent-id", mark.DocumentId.ToString("D"));
+            builder.AddAttribute(seq++, "data-doc-life", ApplicationListLinkedPeople.InvitationLife(mark));
+            if (personId != Guid.Empty
+                && (string.Equals(mark.Key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation, StringComparison.Ordinal)
+                    || string.Equals(mark.Key, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant, StringComparison.Ordinal)))
+            {
+                builder.AddAttribute(seq++, "data-doc-person-id", personId.ToString("D"));
+            }
+
+            builder.AddAttribute(seq++, "data-owner-view-id", ownerViewId);
+            builder.AddContent(seq++, letters);
+            builder.CloseElement();
         }
 
-        builder.AddAttribute(seq++, "data-owner-view-id", ownerViewId);
-        builder.AddContent(seq++, letters);
-        builder.CloseElement();
+        if (hasDetail)
+        {
+            builder.OpenElement(seq++, "span");
+            builder.AddAttribute(seq++, "class", "lv-person-mark__detail");
+            builder.AddAttribute(seq++, "title", mark.Detail);
+            builder.AddContent(seq++, mark.Detail);
+            builder.CloseElement();
+            builder.CloseElement();
+        }
     }
 
     private static void RenderReplacement(

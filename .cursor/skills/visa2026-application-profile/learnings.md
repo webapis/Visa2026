@@ -1,3 +1,62 @@
+### 2026-11-05 — Dossier Issued shows granted WPL locations
+
+- **Need**: Person dossier Applications Issued showed grant number only; officers need granted places (e.g. Mary şäheri) like ListView People mark detail.
+- **Fix**: `PersonDossierIssuedOutcome.Detail` from `WorkPermitLocationGrantItem.GrantedLocations`; screen + paper HTML chip under number/status.
+- **Officer**: Rebuild/F5. Open dossier → Work permits → Issued column shows CD… + Issued + location chip.
+- **Prevent**: Do not put granted locations only on ListView marks — keep dossier IssuedOutcome.Detail in sync.
+- **Cross-skill**: visa2026-person-dossier
+### 2026-11-05 — WPL preview empty + location caption contrast
+
+- **Need**: Preview of location-permission copies said “No copy attached” while edit showed PDFs; granted location under People mark was hard to read on tinted ListView rows.
+- **Cause**: `HeaderDocumentCopiesSlotPanel.CreateObjectSpace` had no `WorkPermitLocationGrant` arm → null OS → empty snapshot. Detail CSS used muted `#9ca3af` on green/olive rows.
+- **Fix**: Create ObjectSpace for grant family in the slot panel; detail caption uses high-contrast chip (light text + dark translucent background).
+- **Officer**: Rebuild/F5. Preview WPL / Result Preview → PDFs. People column shows `Mary şäheri` clearly under WPL.
+- **Prevent**: Any new `HeaderDocumentCopiesFamily` must be added to SlotPanel CreateObjectSpace (not only FileAccess/PdfMerger).
+- **Cross-skill**: visa2026-preview-slot
+### 2026-11-05 — WPL mark clickable + location under circle
+
+- **Need**: Issued WPL People mark must use hand cursor, open document-copy preview, and show granted locations under the circle (prototype).
+- **Fix**: `HeaderDocumentCopiesFamily.WorkPermitLocationGrant` + resolver/file access; ListCoverage loads grant DocumentId + GrantedLocations; Mark.Detail under circle; CanPreview uses grant family (not WorkPermit id).
+- **Officer**: Rebuild/F5. Hover WPL → pointer; click → location permission copies slot; `Mary şäheri` (etc.) under the circle.
+- **Prevent**: Do not map WPL catalog key to WorkPermit document-copies family — grant GUIDs are not WorkPermit keys.
+- **Cross-skill**: visa2026-preview-slot, visa2026-person-dossier
+### 2026-11-05 — People column WPL mark (not catalog key)
+
+- **Need**: After WPL 1/1 progress chip, People still showed grey raw `workPermitLocationGrant` text instead of a short circle like Inv/WP.
+- **Cause**: `ApplicationListLinkedPeople` VisibleKinds already listed location grants, but Holders/MarkKey/Title ignored them (holders empty → missing tone; Letters fell through to catalog key).
+- **Fix**: Pass location-grant holders from ListCoverage ApplyTo; Mark letters **WPL**; Title uses Location permission. Preview DocumentId left empty until grant copies family exists.
+- **Officer**: Rebuild/F5. Goşmaça issued row People shows green **WPL** beside the name (not the long key).
+- **Prevent**: New issued catalog keys need Letters MarkKey + Holders + ApplyTo people sets, not only result chips.
+- **Cross-skill**: —
+### 2026-11-05 — WPL chips gated out of ListView/dossier
+
+- **Need**: Goşmaça case 11/-005 issued location grant; ListView progress still had no result chip after coverage load.
+- **Cause**: `ShouldShowResultChips` → `IncludesIssuedDocument` listed Invitation/WP/Visa/BorderZone only — WPL-only profiles never passed the gate.
+- **Fix**: Include `WorkPermitLocationGrant` in `IncludesIssuedDocument` (+ unit test).
+- **Officer**: Rebuild/F5. Issued goşmaça row shows **WPL 1/1** after migration; dossier Result chips use the same gate.
+- **Prevent**: When adding a May-produce issued type, update coverage ApplyTo **and** IncludesIssuedDocument.
+- **Cross-skill**: visa2026-person-dossier
+### 2026-11-05 — WPL issued on ListView / dossier + localize
+
+- **Need**: Issued WorkPermitLocationGrant showed in case Result but not on Application Profile Instance ListView progress chips or Person dossier Issued; column/chip strings were unlocalized. Compact chip = **WPL**.
+- **Fix**: `ApplicationWorkspaceIssuedResultListCoverage.ApplyTo` loads grant person pairs; dossier `ResolveIssuedOutcome` falls back to grant number; localization maps Location permission / GrantNumber / SourceWorkPermit; chip caption `ApplicationProfile.Doc.WPL`.
+- **Officer**: Stop F5, rebuild, Ctrl+F5. Open goşmaça case `11/-005` — ListView shows **WPL 1/1**; dossier Applications Issued shows grant number (e.g. CD000034).
+- **Prevent**: Do not omit WorkPermitLocationGrant from ListView coverage batch when adding new issued types. Chip stays WPL; full tile label stays Location permission.
+- **Cross-skill**: visa2026-person-dossier
+### 2026-11-05 — Gulluk May produce Visa after Invitation
+
+- **Need**: **Gulluk Pasporty Üçin Çakylyk Almak** already May produce Invitation (+ Ret); officers also issue **Visa** after invitation, but seed had `ProduceVisa` false so Issued visa tile/compose stayed hidden.
+- **Fix**: Tenant catalog `application-profile.calik-energi.json` `get_invitation_service_passport` / `App_Sevice_Passport`: `ProduceVisa` **true**. Keep Invitation + Rejection on; WP / border / work-location off. Leave `RequirePersonVisa` **false** (no prior-visa People link). Defaults OF / Single / Day30 unchanged.
+- **Officer**: Next image/deploy runs tenant profile sync (locked config still updated from seed). Configure → Berip biler: Çakylyk + Wiza + Ret. Issued visa tile appears; invitation compose path can issue visa after invitation.
+- **Prevent**: Do not turn on `RequirePersonVisa` for this profile unless product asks. Do not clear Invitation/Rejection. Prior learning (2026-10-31) said avoid ProduceVisa here — superseded for issued-visa after invitation.
+- **Cross-skill**: —
+### 2026-11-05 — WorkPermitLocationGrant for goşmaça barjak ýeri
+
+- **Need**: Iş Rugsatnama goşmaça barjak ýeri must use Requested WP location as linked data and issue a **separate** location permission document — never mutate `WorkPermitItem.WorkPermittedLocations`. Serhet Ýaka keeps BorderZone result + Requested BZ location.
+- **Fix**: `WorkPermitLocationGrant` / Item / Document BOs + schema heal; seed `change_workpermit` `ProduceWorkPermit=false` `ProduceWorkLocation=true`; issued catalog + compose/prefill; Maglumat-3 prefers grant rows (legacy MovementPermitLocation fallback). Prototypes + `docs/WORK_PERMIT_LOCATION_GRANT.md`.
+- **Officer**: Rebuild/F5 (heal creates grant tables). Goşmaça case → Linked Requested WP location → Result **+ Add location permission**. Source WP locations unchanged.
+- **Prevent**: Do not set ProduceWorkPermit on change_workpermit; do not Join-write onto WorkPermitItem locations for this profile.
+- **Cross-skill**: visa2026-report-dashboard (Maglumat-3)
 ### 2026-11-05 — Extension start date is day after linked end
 
 - **Need**: Auto start for issued visa/WP was same calendar day as linked end; officers need day after.

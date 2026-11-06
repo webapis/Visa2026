@@ -72,7 +72,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.BorderZone.StartDate),
                 nameof(BusinessObjects.BorderZone.ExpirationDate),
                 nameof(BusinessObjects.BorderZone.DaysRemaining),
-                nameof(BusinessObjects.BorderZone.ValidityDuration),
+                nameof(BusinessObjects.BorderZone.SourceVisa),
                 nameof(BusinessObjects.BorderZone.ApplicationProfileInstance),
             ],
             [110, 48, 100, 100, 72, 120, 140]

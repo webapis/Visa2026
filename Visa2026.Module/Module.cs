@@ -109,6 +109,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmailDocumentCopiesSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.BorderZoneSourceVisaSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressResultNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressSubmissionDocumentSchemaUpdater(objectSpace, versionFromDB),

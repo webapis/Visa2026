@@ -365,22 +365,30 @@
                                                 <td class="person-dossier__col-issued">
                                                     @if (record.IssuedOutcome is { } outcome)
                                                     {
-                                                        @if (outcome.HasPreview)
-                                                        {
-                                                            <button type="button"
-                                                                    class="person-dossier__app-link"
-                                                                    @onclick="() => OnPreviewIssuedOutcome(outcome)">
-                                                                @outcome.Number
-                                                            </button>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>@outcome.Number</span>
-                                                        }
-                                                        @if (!string.IsNullOrWhiteSpace(outcome.StatusLabel))
-                                                        {
-                                                            <span class="person-dossier__pill @outcome.StatusCssClass">@outcome.StatusLabel</span>
-                                                        }
+                                                        <div class="person-dossier__issued-stack">
+                                                            <div class="person-dossier__issued-primary">
+                                                                @if (outcome.HasPreview)
+                                                                {
+                                                                    <button type="button"
+                                                                            class="person-dossier__app-link"
+                                                                            @onclick="() => OnPreviewIssuedOutcome(outcome)">
+                                                                        @outcome.Number
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span>@outcome.Number</span>
+                                                                }
+                                                                @if (!string.IsNullOrWhiteSpace(outcome.StatusLabel))
+                                                                {
+                                                                    <span class="person-dossier__pill @outcome.StatusCssClass">@outcome.StatusLabel</span>
+                                                                }
+                                                            </div>
+                                                            @if (outcome.HasDetail)
+                                                            {
+                                                                <div class="person-dossier__issued-detail" title="@outcome.Detail">@outcome.Detail</div>
+                                                            }
+                                                        </div>
                                                     }
                                                     else
                                                     {

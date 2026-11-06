@@ -65,6 +65,38 @@ public class ApplicationWorkspaceIssuedResultListCoverageTests
     }
 
     [Fact]
+    public void Build_includes_work_permit_location_grant_when_ProduceWorkLocation()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceWorkLocation = true,
+                ProduceWorkPermit = false,
+                ProduceInvitation = false,
+                ProduceVisa = false,
+                ProduceRejection = false,
+            },
+        };
+
+        var chips = ApplicationWorkspaceIssuedResultListCoverage.Build(
+            application,
+            rosterCount: 1,
+            coverageByKey: new Dictionary<string, int>
+            {
+                [ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant] = 1,
+            });
+
+        var chip = Assert.Single(chips);
+        Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant, chip.Key);
+        Assert.Equal("Location permission", chip.CatalogLabel);
+        Assert.Equal(1, chip.CoverageCount);
+        Assert.Equal(1, chip.ExpectedCount);
+        Assert.Equal("done", ApplicationWorkspaceIssuedResultListCoverage.Tone(chip));
+        Assert.Equal("WPL", ApplicationWorkspaceIssuedResultListCoverage.Caption(chip));
+    }
+
+    [Fact]
     public void RatioText_optional_is_count_only()
     {
         var optional = new ApplicationWorkspaceIssuedResultListCoverage.Chip(

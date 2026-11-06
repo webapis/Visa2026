@@ -34,7 +34,7 @@ internal static class Visa2014BorderZoneODataImporter
         if (objectSpaceFactory == null && !dryRun)
         {
             throw new InvalidOperationException(
-                "BorderZone import requires a live headless session (INonSecuredObjectSpaceFactory) for ValidityDuration resolution — use --inprocess.");
+                "BorderZone import requires a live headless session (INonSecuredObjectSpaceFactory) — use --inprocess.");
         }
 
         var batch = Visa2014BorderZoneTransform.PrepareImportBatch(
@@ -181,13 +181,13 @@ internal static class Visa2014BorderZoneODataImporter
         if (!TryReadInt(row.GetValueOrDefault("ValidityDurationDays"), out var days))
             return null;
 
-        var durationId = Visa2014ValidityDurationHelper.ResolveValidityDurationIdByDays(objectSpaceFactory, days);
+        var expiration = DateTime.SpecifyKind(startDate.Date.AddDays(days), DateTimeKind.Utc);
 
         return new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["BorderZoneNumber"] = number.Trim(),
             ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
-            ["ValidityDuration"] = new Dictionary<string, object?> { ["ID"] = durationId },
+            ["ExpirationDate"] = expiration,
             ["ApplicationProfileInstance"] = new Dictionary<string, object?> { ["ID"] = applicationId },
         };
     }

@@ -255,7 +255,7 @@ public sealed class PersonDossierProgressStep
         && string.IsNullOrWhiteSpace(LetterFileName);
 }
 
-/// <summary>Invitation or rejection shown after the progress track for this person only.</summary>
+/// <summary>Invitation, location grant, or rejection shown after the progress track for this person only.</summary>
 public sealed class PersonDossierIssuedOutcome
 {
     public string Number { get; init; } = string.Empty;
@@ -264,12 +264,17 @@ public sealed class PersonDossierIssuedOutcome
 
     public string StatusCssClass { get; init; } = string.Empty;
 
+    /// <summary>Extra line under the number (e.g. granted WPL locations), same idea as ListView People mark detail.</summary>
+    public string Detail { get; init; } = string.Empty;
+
     public HeaderDocumentCopiesFamily? PreviewFamily { get; init; }
 
     public Guid? PreviewParentId { get; init; }
 
     public bool HasPreview =>
         PreviewFamily != null && PreviewParentId is { } id && id != Guid.Empty;
+
+    public bool HasDetail => !string.IsNullOrWhiteSpace(Detail);
 }
 
 /// <summary>One Applications filter button (Çakylyklar, Wizalar, …).</summary>

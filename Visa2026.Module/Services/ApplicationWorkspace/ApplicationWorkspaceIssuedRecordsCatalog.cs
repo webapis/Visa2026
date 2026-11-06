@@ -20,6 +20,7 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
     public const string BorderZone = "borderZone";
     public const string Rejection = "rejection";
     public const string IssuedVisa = "issuedVisa";
+    public const string WorkPermitLocationGrant = "workPermitLocationGrant";
 
     public sealed record Definition(
         string Key,
@@ -50,6 +51,11 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
             "Border-zone permits produced by this case",
             "No border-zone permit yet. New border zone will be linked to this application.",
             ApplicationProfileConfigurationResolver.ShowBorderZones),
+        new(WorkPermitLocationGrant, "Location permission", "📍", "indigo",
+            "+ Add location permission", "New location permission",
+            "Additional work-permit places granted by this case",
+            "No location permission yet. New grant will be linked to this application.",
+            ApplicationProfileConfigurationResolver.ShowWorkPermitLocationGrants),
         new(Rejection, "Rejection", "⛔", "orange",
             "+ Add rejection", "New rejection",
             "Rejections produced by this case",
@@ -80,6 +86,7 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
         Invitation => typeof(Invitation),
         WorkPermit => typeof(WorkPermit),
         BorderZone => typeof(BorderZone),
+        WorkPermitLocationGrant => typeof(WorkPermitLocationGrant),
         Rejection => typeof(Rejection),
         IssuedVisa => typeof(Visa),
         _ => null,
@@ -97,6 +104,12 @@ public static class ApplicationWorkspaceIssuedRecordsCatalog
         if (string.Equals(key, WorkPermit, StringComparison.OrdinalIgnoreCase))
         {
             family = HeaderDocumentCopiesFamily.WorkPermit;
+            return true;
+        }
+
+        if (string.Equals(key, WorkPermitLocationGrant, StringComparison.OrdinalIgnoreCase))
+        {
+            family = HeaderDocumentCopiesFamily.WorkPermitLocationGrant;
             return true;
         }
 

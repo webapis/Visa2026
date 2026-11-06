@@ -110,6 +110,7 @@ namespace Visa2026.Module.BusinessObjects
             IssuedVisas = new ObservableCollection<Visa>();
             WorkPermits = new ObservableCollection<WorkPermit>();
             BorderZones = new ObservableCollection<BorderZone>();
+            WorkPermitLocationGrants = new ObservableCollection<WorkPermitLocationGrant>();
             ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>();
             ApprovalLegSnapshots = new ObservableCollection<ApplicationProfileInstanceApprovalLegSnapshot>();
             Exclusions = new ObservableCollection<ApplicationProfileInstanceExclusion>();
@@ -1658,6 +1659,14 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [XafDisplayName("Border zone permits")]
         public virtual IList<BorderZone> BorderZones { get; set; }
+
+        /// <summary>Additional work-permit location grants (1:N). Visible when the profile <c>May produce work location</c> is on.</summary>
+        [Aggregated]
+        [InverseProperty(nameof(WorkPermitLocationGrant.ApplicationProfileInstance))]
+        [Appearance("WorkPermitLocationGrantsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowWorkPermitLocationGrants", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Work permit location grants")]
+        public virtual IList<WorkPermitLocationGrant> WorkPermitLocationGrants { get; set; }
 
         // [RuleRequiredField]
         // [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]

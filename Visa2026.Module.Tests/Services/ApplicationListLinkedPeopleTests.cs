@@ -517,6 +517,47 @@ public class ApplicationListLinkedPeopleTests
         ApplicationListLinkedPeople.Title(new ApplicationListLinkedPeople.Mark(key, tone, state));
 
     [Fact]
+    public void Build_marks_work_permit_location_grant_as_WPL_when_issued()
+    {
+        var personId = Guid.NewGuid();
+        var grantId = Guid.NewGuid();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceWorkLocation = true,
+                ProduceWorkPermit = false,
+                ProduceInvitation = false,
+                ProduceVisa = false,
+                ProduceRejection = false,
+            },
+        };
+
+        var rows = ApplicationListLinkedPeople.Build(
+            application,
+            [personId],
+            new Dictionary<Guid, string> { [personId] = "Serdar Nuri" },
+            invitation: new HashSet<Guid>(),
+            workPermit: new HashSet<Guid>(),
+            visa: new HashSet<Guid>(),
+            borderZone: new HashSet<Guid>(),
+            rejection: new HashSet<Guid>(),
+            locationGrant: new HashSet<Guid> { personId },
+            locationGrantDocuments: new Dictionary<Guid, Guid> { [personId] = grantId },
+            locationGrantDetails: new Dictionary<Guid, string> { [personId] = "Mary şäheri" });
+
+        var row = Assert.Single(rows);
+        var mark = Assert.Single(row.Marks);
+        Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant, mark.Key);
+        Assert.Equal(ApplicationListLinkedPeople.ToneDone, mark.Tone);
+        Assert.Equal("WPL", ApplicationListLinkedPeople.Letters(mark.Key));
+        Assert.Equal(grantId, mark.DocumentId);
+        Assert.Equal("Mary şäheri", mark.Detail);
+        Assert.True(ApplicationListLinkedPeople.CanPreview(mark));
+        Assert.Contains("Mary şäheri", ApplicationListLinkedPeople.Title(mark), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void FormatName_uses_first_middle_last()
     {
         Assert.Equal("Ali Gurban Berdiyev", ApplicationListLinkedPeople.FormatName("Ali", "Gurban", "Berdiyev"));

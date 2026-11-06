@@ -232,6 +232,13 @@ public static class PersonDossierDocumentHtmlBuilder
                 html.Append("<br />");
                 AppendPill(html, outcome.StatusLabel, outcome.StatusCssClass);
             }
+
+            if (outcome.HasDetail)
+            {
+                html.Append("<br />");
+                html.Append(CultureInfo.InvariantCulture,
+                    $"<span style=\"display:inline-block;margin-top:2pt;padding:1pt 4pt;border-radius:3pt;border:1px solid #64748b;background:#0f172a;color:#f8fafc;font-size:7.5pt;font-weight:600;\">{Enc(outcome.Detail)}</span>");
+            }
         }
 
         html.Append("</td>");

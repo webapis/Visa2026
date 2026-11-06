@@ -137,6 +137,7 @@ public sealed class HeaderDocumentFileAccess
             HeaderDocumentCopiesFamily.Rejection => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Rejection>(),
             HeaderDocumentCopiesFamily.BorderZone => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<BorderZone>(),
             HeaderDocumentCopiesFamily.Visa => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<Visa>(),
+            HeaderDocumentCopiesFamily.WorkPermitLocationGrant => nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<WorkPermitLocationGrant>(),
             _ => null,
         };
 }

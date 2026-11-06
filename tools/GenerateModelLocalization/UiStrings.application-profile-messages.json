@@ -489,6 +489,12 @@
     "tk-TM": "Ser",
     "ru-RU": "ПЗ"
   },
+  "ApplicationProfileInstance.List.Mark.WorkPermitLocationGrant": {
+    "en-US": "WPL",
+    "tr-TR": "WPL",
+    "tk-TM": "WPL",
+    "ru-RU": "WPL"
+  },
   "ApplicationProfileInstance.List.Mark.Rejection": {
     "en-US": "Rej",
     "tr-TR": "Ret",
@@ -596,6 +602,24 @@
     "tr-TR": "Çalışma yeri",
     "tk-TM": "Iş ýeri",
     "ru-RU": "Место работы"
+  },
+  "ApplicationProfile.Doc.LocationPermission": {
+    "en-US": "Location permission",
+    "tr-TR": "Yer izni",
+    "tk-TM": "Ýer rugsady",
+    "ru-RU": "Разрешение на место"
+  },
+  "ApplicationProfile.Doc.LocationPermissions": {
+    "en-US": "Location permission(s)",
+    "tr-TR": "Yer izni(-leri)",
+    "tk-TM": "Ýer rugsady(-lary)",
+    "ru-RU": "Разрешение(-я) на место"
+  },
+  "ApplicationProfile.Doc.WPL": {
+    "en-US": "WPL",
+    "tr-TR": "WPL",
+    "tk-TM": "WPL",
+    "ru-RU": "WPL"
   },
   "ApplicationProfile.Doc.Application": {
     "en-US": "Application",
@@ -3552,6 +3576,18 @@
     "tk-TM": "Serhet sebiti belgisi",
     "ru-RU": "Номер пограничной зоны"
   },
+  "ApplicationProfileInstance.Issued.GrantNumber": {
+    "en-US": "Grant number",
+    "tr-TR": "İzin numarası",
+    "tk-TM": "Rugsat belgisi",
+    "ru-RU": "Номер разрешения"
+  },
+  "ApplicationProfileInstance.Issued.SourceWorkPermit": {
+    "en-US": "Source work permit",
+    "tr-TR": "Kaynak çalışma izni",
+    "tk-TM": "Çeşmeli iş rugsady",
+    "ru-RU": "Исходное разрешение на работу"
+  },
   "ApplicationProfileInstance.Issued.IssuedDate": {
     "en-US": "Issued date",
     "tr-TR": "Düzenleme tarihi",
@@ -3701,6 +3737,12 @@
     "tr-TR": "Bu sınır bölgesindeki kişiler",
     "tk-TM": "Bu serhet sebitindäki adamlar",
     "ru-RU": "Люди в этой пограничной зоне"
+  },
+  "ApplicationProfileInstance.Issued.PeopleLocationPermission": {
+    "en-US": "People on this location permission",
+    "tr-TR": "Bu yer iznindeki kişiler",
+    "tk-TM": "Bu ýer rugsadynyň adamlary",
+    "ru-RU": "Люди в этом разрешении на место"
   },
   "ApplicationProfileInstance.Issued.ReadyOf": {
     "en-US": "{0} ready of {1} selected",
@@ -3929,6 +3971,12 @@
     "tr-TR": "Bu sınır bölgesinde",
     "tk-TM": "Bu serhet sebitinde",
     "ru-RU": "В этой пограничной зоне"
+  },
+  "ApplicationProfileInstance.Issued.StatusOnLocationPermission": {
+    "en-US": "On this location permission",
+    "tr-TR": "Bu yer izninde",
+    "tk-TM": "Bu ýer rugsadynda",
+    "ru-RU": "В этом разрешении на место"
   },
   "ApplicationProfileInstance.Issued.StatusVisaIssued": {
     "en-US": "Visa issued",

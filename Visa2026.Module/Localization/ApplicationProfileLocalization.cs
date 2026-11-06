@@ -194,17 +194,21 @@ public static class ApplicationProfileLocalization
             "Invitation" => Msg("ApplicationProfile.Doc.Invitation"),
             "Work permit" => Msg("ApplicationProfile.Doc.WorkPermit"),
             "Border zone" => Msg("ApplicationProfile.Doc.BorderZone"),
+            "Location permission" => Msg("ApplicationProfile.Doc.LocationPermission"),
             "Rejection" => Msg("ApplicationProfile.Doc.Rejection"),
             "Issued visa" => Msg("ApplicationProfileInstance.Issued.Visa"),
             _ => LinkedRecordLabel(label),
         };
     }
 
-    /// <summary>Compact ListView chip caption. Visa uses <c>Wiza</c>, not "Issued visa".</summary>
+    /// <summary>Compact ListView chip caption. Visa uses <c>Wiza</c>; location grant uses <c>WPL</c>.</summary>
     public static string IssuedResultChipLabel(string? label)
     {
-        if (string.Equals(label?.Trim(), "Issued visa", StringComparison.Ordinal))
+        var trimmed = label?.Trim();
+        if (string.Equals(trimmed, "Issued visa", StringComparison.Ordinal))
             return Msg("ApplicationProfile.Doc.Visa");
+        if (string.Equals(trimmed, "Location permission", StringComparison.Ordinal))
+            return Msg("ApplicationProfile.Doc.WPL");
 
         return IssuedRecordLabel(label);
     }
@@ -214,6 +218,7 @@ public static class ApplicationProfileLocalization
         "+ Add invitation" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfile.Doc.Invitation")),
         "+ Add work permit" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfile.Doc.WorkPermit")),
         "+ Add border zone" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfile.Doc.BorderZone")),
+        "+ Add location permission" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfile.Doc.LocationPermission")),
         "+ Add rejection" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfile.Doc.Rejection")),
         "+ Add issued visa" => Format("ApplicationProfileInstance.Issued.Add", Msg("ApplicationProfileInstance.Issued.Visa")),
         _ => IssuedRecordLabel(caption),
@@ -229,6 +234,8 @@ public static class ApplicationProfileLocalization
             Format("ApplicationProfileInstance.Issued.Panel", Msg("ApplicationProfile.Doc.WorkPermits")),
         "Border-zone permits produced by this case" =>
             Format("ApplicationProfileInstance.Issued.Panel", Msg("ApplicationProfile.Doc.BorderZonePermits")),
+        "Additional work-permit places granted by this case" =>
+            Format("ApplicationProfileInstance.Issued.Panel", Msg("ApplicationProfile.Doc.LocationPermissions")),
         "Rejections produced by this case" =>
             Format("ApplicationProfileInstance.Issued.Panel", Msg("ApplicationProfile.Doc.Rejections")),
         "Visas issued by this case" =>
@@ -264,15 +271,18 @@ public static class ApplicationProfileLocalization
             "New work permit" => Format("ApplicationProfileInstance.Issued.New", Msg("ApplicationProfile.Doc.WorkPermit")),
             "New rejection" => Format("ApplicationProfileInstance.Issued.New", Msg("ApplicationProfile.Doc.Rejection")),
             "New border zone" => Format("ApplicationProfileInstance.Issued.New", Msg("ApplicationProfile.Doc.BorderZone")),
+            "New location permission" => Format("ApplicationProfileInstance.Issued.New", Msg("ApplicationProfile.Doc.LocationPermission")),
             "New issued record" => Format("ApplicationProfileInstance.Issued.New", Msg("ApplicationProfileInstance.Issued.Record")),
             "New issued visa" => Format("ApplicationProfileInstance.Issued.New", Msg("ApplicationProfileInstance.Issued.Visa")),
             "Edit invitation" => Format("ApplicationProfileInstance.Issued.TitleEdit", Msg("ApplicationProfile.Doc.Invitation")),
             "Edit work permit" => Format("ApplicationProfileInstance.Issued.TitleEdit", Msg("ApplicationProfile.Doc.WorkPermit")),
             "Edit rejection" => Format("ApplicationProfileInstance.Issued.TitleEdit", Msg("ApplicationProfile.Doc.Rejection")),
             "Edit border zone" => Format("ApplicationProfileInstance.Issued.TitleEdit", Msg("ApplicationProfile.Doc.BorderZone")),
+            "Edit location permission" => Format("ApplicationProfileInstance.Issued.TitleEdit", Msg("ApplicationProfile.Doc.LocationPermission")),
             "Issued visa" => Msg("ApplicationProfileInstance.Issued.Visa"),
             "Issued visas" => Msg("ApplicationProfile.Doc.Visas"),
             "Issued record" => Msg("ApplicationProfileInstance.Issued.Record"),
+            "Location permission" => Msg("ApplicationProfile.Doc.LocationPermission"),
             _ => trimmed,
         };
     }
@@ -288,6 +298,7 @@ public static class ApplicationProfileLocalization
         "On this invitation" => Msg("ApplicationProfileInstance.Issued.StatusOnInvitation"),
         "On this invitation (visa issued/closed)" => Msg("ApplicationProfileInstance.Issued.StatusOnInvitationClosed"),
         "On this border zone" => Msg("ApplicationProfileInstance.Issued.StatusOnBorderZone"),
+        "On this location permission" => Msg("ApplicationProfileInstance.Issued.StatusOnLocationPermission"),
         "Visa issued" => Msg("ApplicationProfileInstance.Issued.StatusVisaIssued"),
         "Issued" => Msg("ApplicationProfileInstance.Workspace.Issued"),
         _ => caption ?? string.Empty,

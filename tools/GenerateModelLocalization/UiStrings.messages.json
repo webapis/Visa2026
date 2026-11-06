@@ -5987,6 +5987,30 @@
     "tk-TM": "Iş rugsady resminama nusgalary",
     "ru-RU": "Копии документов РНТ"
   },
+  "WorkPermitLocationGrantDocumentCopies.Title": {
+    "en": "Location permission document copies",
+    "tr-TR": "Yer izni belge kopyaları",
+    "tk-TM": "Ýer rugsady resminama nusgalary",
+    "ru-RU": "Копии разрешения на место"
+  },
+  "WorkPermitLocationGrantDocumentCopies.Subtitle.FromItem": {
+    "en": "{0} · {1}",
+    "tr-TR": "{0} · {1}",
+    "tk-TM": "{0} · {1}",
+    "ru-RU": "{0} · {1}"
+  },
+  "WorkPermitLocationGrantDocumentCopies.List.SelectOne": {
+    "en": "Select exactly one location permission line to view document copies.",
+    "tr-TR": "Belge kopyalarını görmek için tam olarak bir yer izni satırı seçin.",
+    "tk-TM": "Resminama nusgalaryny görmek üçin diňe bir ýer rugsady setirini saýlaň.",
+    "ru-RU": "Выберите ровно одну строку разрешения на место для просмотра копий."
+  },
+  "WorkPermitLocationGrantDocumentCopies.List.ColumnLink": {
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
+  },
   "InvitationDocumentCopies.Title": {
     "en": "Invitation document copies",
     "tr-TR": "Davet belge kopyaları",

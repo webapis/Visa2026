@@ -130,43 +130,82 @@ LEFT JOIN LATERAL (
     ) AS "Additional"
     FROM "WorkPermitItems" v
     LEFT JOIN LATERAL (
-        -- additional-application-lines: chr(31) separates id, number, date, places; chr(29) separates applications.
-        SELECT COALESCE(string_agg(
-            concat_ws(
-                E'\n',
-                NULLIF(BTRIM(COALESCE(NULLIF(BTRIM(api."FullApplicationNumber"), ''), NULLIF(BTRIM(api."ApplicationNumber"), ''))), ''),
+        -- Additional places: prefer WorkPermitLocationGrantItem for this source item;
+        -- legacy fallback: issued change_workpermit case MovementPermitLocation.
+        SELECT COALESCE(NULLIF(grant_extra."Text", ''), legacy_extra."Text", '') AS "Text",
+               COALESCE(NULLIF(grant_extra."Encoded", ''), legacy_extra."Encoded", '') AS "Encoded"
+        FROM (SELECT 1) seed
+        LEFT JOIN LATERAL (
+            SELECT COALESCE(string_agg(
+                concat_ws(
+                    E'\n',
+                    NULLIF(BTRIM(g."GrantNumber"), ''),
+                    CASE
+                        WHEN (g."IssuedDate")::date > DATE '1900-01-01'
+                            THEN to_char(g."IssuedDate", 'DD.MM.YYYY')
+                        ELSE NULL
+                    END,
+                    NULLIF(replace(replace(replace(COALESCE(BTRIM(gi."GrantedLocations"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '), '')
+                ),
+                E'\n\n'
+                ORDER BY g."IssuedDate" DESC NULLS LAST, g."ID" DESC
+            ), '') AS "Text",
+            COALESCE(string_agg(
+                g."ID"::text || chr(31) ||
+                replace(replace(replace(replace(COALESCE(BTRIM(g."GrantNumber"), ''), chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' ') || chr(31) ||
+                CASE
+                    WHEN (g."IssuedDate")::date > DATE '1900-01-01'
+                        THEN to_char(g."IssuedDate", 'DD.MM.YYYY')
+                    ELSE ''
+                END || chr(31) ||
+                replace(replace(replace(replace(COALESCE(BTRIM(gi."GrantedLocations"), ''), chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' '),
+                chr(29)
+                ORDER BY g."IssuedDate" DESC NULLS LAST, g."ID" DESC
+            ), '') AS "Encoded"
+            FROM "WorkPermitLocationGrantItems" gi
+            INNER JOIN "WorkPermitLocationGrants" g ON g."ID" = gi."GrantID"
+            WHERE gi."SourceWorkPermitItemID" = v."ID"
+              AND COALESCE(gi."GCRecord", 0) = 0
+              AND COALESCE(g."GCRecord", 0) = 0
+        ) grant_extra ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT COALESCE(string_agg(
+                concat_ws(
+                    E'\n',
+                    NULLIF(BTRIM(COALESCE(NULLIF(BTRIM(api."FullApplicationNumber"), ''), NULLIF(BTRIM(api."ApplicationNumber"), ''))), ''),
+                    CASE
+                        WHEN api."ApplicationDate" IS NOT NULL AND (api."ApplicationDate")::date > DATE '1900-01-01'
+                            THEN to_char(api."ApplicationDate", 'DD.MM.YYYY')
+                        ELSE NULL
+                    END,
+                    NULLIF(replace(replace(replace(COALESCE(BTRIM(api."MovementPermitLocation"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '), '')
+                ),
+                E'\n\n'
+                ORDER BY api."ApplicationDate" DESC NULLS LAST, api."ID" DESC
+            ), '') AS "Text",
+            COALESCE(string_agg(
+                api."ID"::text || chr(31) ||
+                replace(replace(replace(replace(
+                    COALESCE(NULLIF(BTRIM(api."FullApplicationNumber"), ''), NULLIF(BTRIM(api."ApplicationNumber"), ''), ''),
+                    chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' ') || chr(31) ||
                 CASE
                     WHEN api."ApplicationDate" IS NOT NULL AND (api."ApplicationDate")::date > DATE '1900-01-01'
                         THEN to_char(api."ApplicationDate", 'DD.MM.YYYY')
-                    ELSE NULL
-                END,
-                NULLIF(replace(replace(replace(COALESCE(BTRIM(api."MovementPermitLocation"), ''), E'\x1e', ' '), E'\n', ' '), E'\r', ' '), '')
-            ),
-            E'\n\n'
-            ORDER BY api."ApplicationDate" DESC NULLS LAST, api."ID" DESC
-        ), '') AS "Text",
-        COALESCE(string_agg(
-            api."ID"::text || chr(31) ||
-            replace(replace(replace(replace(
-                COALESCE(NULLIF(BTRIM(api."FullApplicationNumber"), ''), NULLIF(BTRIM(api."ApplicationNumber"), ''), ''),
-                chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' ') || chr(31) ||
-            CASE
-                WHEN api."ApplicationDate" IS NOT NULL AND (api."ApplicationDate")::date > DATE '1900-01-01'
-                    THEN to_char(api."ApplicationDate", 'DD.MM.YYYY')
-                ELSE ''
-            END || chr(31) ||
-            replace(replace(replace(replace(COALESCE(BTRIM(api."MovementPermitLocation"), ''), chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' '),
-            chr(29)
-            ORDER BY api."ApplicationDate" DESC NULLS LAST, api."ID" DESC
-        ), '') AS "Encoded"
-        FROM "ApplicationProfileInstanceWorkPermitItems" j
-        INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
-        INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
-        WHERE j."WorkPermitItemId" = v."ID"
-          AND COALESCE(api."GCRecord", 0) = 0
-          AND COALESCE(ap."GCRecord", 0) = 0
-          AND lower(BTRIM(COALESCE(ap."Code", ''))) = 'change_workpermit'
-          AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED'
+                    ELSE ''
+                END || chr(31) ||
+                replace(replace(replace(replace(COALESCE(BTRIM(api."MovementPermitLocation"), ''), chr(30), ' '), chr(31), ' '), chr(29), ' '), E'\n', ' '),
+                chr(29)
+                ORDER BY api."ApplicationDate" DESC NULLS LAST, api."ID" DESC
+            ), '') AS "Encoded"
+            FROM "ApplicationProfileInstanceWorkPermitItems" j
+            INNER JOIN "ApplicationProfileInstances" api ON api."ID" = j."ApplicationProfileInstanceId"
+            INNER JOIN "ApplicationProfiles" ap ON ap."ID" = api."ApplicationProfileID"
+            WHERE j."WorkPermitItemId" = v."ID"
+              AND COALESCE(api."GCRecord", 0) = 0
+              AND COALESCE(ap."GCRecord", 0) = 0
+              AND lower(BTRIM(COALESCE(ap."Code", ''))) = 'change_workpermit'
+              AND BTRIM(COALESCE(api."LatestPrimaryStateCode", '')) = 'PROCESS_ISSUED'
+        ) legacy_extra ON TRUE
     ) extra ON TRUE
     WHERE v."PersonID" = picked."PersonID"
       AND COALESCE(v."GCRecord", 0) = 0

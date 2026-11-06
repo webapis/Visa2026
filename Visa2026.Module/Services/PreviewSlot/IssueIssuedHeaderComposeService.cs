@@ -15,7 +15,7 @@ namespace Visa2026.Module.Services.PreviewSlot;
 /// Builds and persists issued headers (Invitation / WorkPermit / Rejection / BorderZone)
 /// from the case workspace preview-slot compose UI.
 /// </summary>
-public static class IssueIssuedHeaderComposeService
+public static partial class IssueIssuedHeaderComposeService
 {
     public static bool TryResolveKind(string catalogKey, out IssueIssuedHeaderKind kind)
     {
@@ -44,6 +44,12 @@ public static class IssueIssuedHeaderComposeService
             return true;
         }
 
+        if (string.Equals(catalogKey, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant, StringComparison.OrdinalIgnoreCase))
+        {
+            kind = IssueIssuedHeaderKind.WorkPermitLocationGrant;
+            return true;
+        }
+
         return false;
     }
 
@@ -53,6 +59,7 @@ public static class IssueIssuedHeaderComposeService
         IssueIssuedHeaderKind.WorkPermit => ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit,
         IssueIssuedHeaderKind.Rejection => ApplicationWorkspaceIssuedRecordsCatalog.Rejection,
         IssueIssuedHeaderKind.BorderZone => ApplicationWorkspaceIssuedRecordsCatalog.BorderZone,
+        IssueIssuedHeaderKind.WorkPermitLocationGrant => ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant,
         _ => string.Empty,
     };
 
@@ -79,6 +86,7 @@ public static class IssueIssuedHeaderComposeService
                 IssueIssuedHeaderKind.WorkPermit => DeleteWorkPermit(objectSpace, applicationProfileInstanceId, headerId),
                 IssueIssuedHeaderKind.Rejection => DeleteRejection(objectSpace, applicationProfileInstanceId, headerId),
                 IssueIssuedHeaderKind.BorderZone => DeleteBorderZone(objectSpace, applicationProfileInstanceId, headerId),
+                IssueIssuedHeaderKind.WorkPermitLocationGrant => DeleteWorkPermitLocationGrant(objectSpace, applicationProfileInstanceId, headerId),
                 _ => new IssueIssuedHeaderCreateResult { Succeeded = false, ErrorMessage = "Unknown header kind." },
             };
         }
@@ -216,6 +224,31 @@ public static class IssueIssuedHeaderComposeService
         return new IssueIssuedHeaderCreateResult { Succeeded = true, HeaderCaption = caption };
     }
 
+    private static IssueIssuedHeaderCreateResult DeleteWorkPermitLocationGrant(
+        IObjectSpace objectSpace,
+        Guid applicationProfileInstanceId,
+        Guid headerId)
+    {
+        var grant = objectSpace.GetObjectByKey<WorkPermitLocationGrant>(headerId);
+        if (grant == null)
+            return new IssueIssuedHeaderCreateResult { Succeeded = false, ErrorMessage = "Location permission was not found." };
+        if (grant.ApplicationProfileInstance == null
+            || grant.ApplicationProfileInstance.ID != applicationProfileInstanceId)
+        {
+            return new IssueIssuedHeaderCreateResult
+            {
+                Succeeded = false,
+                ErrorMessage = "This location permission does not belong to this application.",
+            };
+        }
+
+        foreach (var item in (grant.Items ?? Array.Empty<WorkPermitLocationGrantItem>()).ToList())
+            objectSpace.Delete(item);
+        var caption = grant.GrantNumber?.Trim() ?? string.Empty;
+        objectSpace.Delete(grant);
+        objectSpace.CommitChanges();
+        return new IssueIssuedHeaderCreateResult { Succeeded = true, HeaderCaption = caption };
+    }
     public static string? ValidateDocumentBytes(IObjectSpace objectSpace, string fileName, byte[] content)
     {
         if (content == null || content.Length == 0)
@@ -328,6 +361,16 @@ public static class IssueIssuedHeaderComposeService
                     borderZone.Documents.Add(doc);
                     break;
                 }
+                case IssueIssuedHeaderKind.WorkPermitLocationGrant:
+                {
+                    var grantDocHost = objectSpace.GetObjectByKey<WorkPermitLocationGrant>(headerId);
+                    var grantDoc = objectSpace.CreateObject<WorkPermitLocationGrantDocument>();
+                    grantDoc.Grant = grantDocHost;
+                    grantDoc.File = file;
+                    grantDocHost!.Documents ??= new System.Collections.ObjectModel.ObservableCollection<WorkPermitLocationGrantDocument>();
+                    grantDocHost.Documents.Add(grantDoc);
+                    break;
+                }
                 default:
                     objectSpace.Delete(file);
                     return new IssueIssuedHeaderCreateResult
@@ -415,6 +458,14 @@ public static class IssueIssuedHeaderComposeService
                     objectSpace.Delete(doc);
                     break;
                 }
+                case IssueIssuedHeaderKind.WorkPermitLocationGrant:
+                {
+                    var doc = objectSpace.GetObjectByKey<WorkPermitLocationGrantDocument>(documentId);
+                    if (doc?.Grant == null || doc.Grant.ID != headerId)
+                        return new IssueIssuedHeaderCreateResult { Succeeded = false, ErrorMessage = "Document was not found." };
+                    objectSpace.Delete(doc);
+                    break;
+                }
                 default:
                     return new IssueIssuedHeaderCreateResult { Succeeded = false, ErrorMessage = "Unknown header kind." };
             }
@@ -444,6 +495,8 @@ public static class IssueIssuedHeaderComposeService
                 is Rejection rj && rj.ApplicationProfileInstance?.ID == applicationProfileInstanceId,
             IssueIssuedHeaderKind.BorderZone => objectSpace.GetObjectByKey<BorderZone>(headerId)
                 is BorderZone bz && bz.ApplicationProfileInstance?.ID == applicationProfileInstanceId,
+            IssueIssuedHeaderKind.WorkPermitLocationGrant => objectSpace.GetObjectByKey<WorkPermitLocationGrant>(headerId)
+                is WorkPermitLocationGrant g && g.ApplicationProfileInstance?.ID == applicationProfileInstanceId,
             _ => false,
         };
     }
@@ -503,6 +556,13 @@ public static class IssueIssuedHeaderComposeService
                 .Where(r => r != null)
                 .Select(r => r!)
                 .ToList(),
+            IssueIssuedHeaderKind.WorkPermitLocationGrant => objectSpace.GetObjectsQuery<WorkPermitLocationGrantDocument>()
+                .Where(d => d.Grant != null && d.Grant.ID == headerId)
+                .ToList()
+                .Select(ToDocumentRow)
+                .Where(r => r != null)
+                .Select(r => r!)
+                .ToList(),
             _ => Array.Empty<IssueIssuedHeaderDocumentRow>(),
         };
     }
@@ -522,7 +582,7 @@ public static class IssueIssuedHeaderComposeService
         };
     }
 
-    public static IssueIssuedHeaderComposeDraft? LoadDraft(IObjectSpace objectSpace, Guid applicationId, IssueIssuedHeaderKind kind, Guid? excludeInvitationIdFromOccupancy = null)
+    public static IssueIssuedHeaderComposeDraft? LoadDraft(IObjectSpace objectSpace, Guid applicationId, IssueIssuedHeaderKind kind, Guid? excludeInvitationIdFromOccupancy = null, Guid? sourceVisaId = null)
     {
         if (objectSpace == null || applicationId == Guid.Empty)
             return null;
@@ -552,7 +612,7 @@ public static class IssueIssuedHeaderComposeService
             .Where(p =>
                 !IssueIssuedSeretmezlikGate.IsExcluded(p!.ID, excluded)
                 || (retainOnHeader != null && retainOnHeader.Contains(p.ID)))
-            .Where(p => kind != IssueIssuedHeaderKind.WorkPermit || p!.IsEmployee)
+            .Where(p => (kind != IssueIssuedHeaderKind.WorkPermit && kind != IssueIssuedHeaderKind.WorkPermitLocationGrant) || p!.IsEmployee)
             .OrderBy(p => p!.LastName)
             .ThenBy(p => p!.FirstName)
             .Select(p =>
@@ -564,6 +624,7 @@ public static class IssueIssuedHeaderComposeService
                 {
                     IssueIssuedHeaderKind.Invitation => ready && !onOther,
                     IssueIssuedHeaderKind.WorkPermit => p.IsEmployee && ready,
+                    IssueIssuedHeaderKind.WorkPermitLocationGrant => p.IsEmployee && ready,
                     _ => true,
                 };
                 var status = !ready
@@ -586,6 +647,8 @@ public static class IssueIssuedHeaderComposeService
                 };
                 if (kind == IssueIssuedHeaderKind.WorkPermit)
                     ApplyWorkPermitCardDefaults(objectSpace, p, line, defaultWpLocations, instance);
+                else if (kind == IssueIssuedHeaderKind.WorkPermitLocationGrant)
+                    ApplyWorkPermitLocationGrantCardDefaults(objectSpace, p, line, defaultWpLocations, instance);
                 return line;
             })
             .Where(line => kind != IssueIssuedHeaderKind.Invitation || !line.IncludeLocked)
@@ -603,12 +666,7 @@ public static class IssueIssuedHeaderComposeService
                 .Select(c => new IssueIssuedHeaderLookupOption { Id = c.ID, Caption = c.NameTm ?? c.Code ?? c.ID.ToString("N") })
                 .ToList()
             : new List<IssueIssuedHeaderLookupOption>();
-        var validityDurations = kind == IssueIssuedHeaderKind.BorderZone
-            ? objectSpace.GetObjectsQuery<ValidityDuration>()
-                .OrderBy(c => c.NameTm)
-                .Select(c => new IssueIssuedHeaderLookupOption { Id = c.ID, Caption = c.NameTm ?? c.Code ?? c.ID.ToString("N") })
-                .ToList()
-            : new List<IssueIssuedHeaderLookupOption>();
+        var validityDurations = new List<IssueIssuedHeaderLookupOption>();
 
         Guid? defaultCategoryId = kind == IssueIssuedHeaderKind.Invitation
             ? FirstAssignedId(
@@ -622,10 +680,7 @@ public static class IssueIssuedHeaderComposeService
                 objectSpace.GetObjectsQuery<VisaPeriod>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault(),
                 visaPeriods.FirstOrDefault()?.Id)
             : null;
-        Guid? defaultDurationId = kind == IssueIssuedHeaderKind.BorderZone
-            ? objectSpace.GetObjectsQuery<ValidityDuration>().Where(c => c.IsDefault).Select(c => (Guid?)c.ID).FirstOrDefault()
-                ?? validityDurations.FirstOrDefault()?.Id
-            : null;
+        Guid? defaultDurationId = null;
 
         var borderZoneNames = kind == IssueIssuedHeaderKind.Invitation
             ? CommaSeparatedCatalogHelper.LoadCatalogNames(
@@ -655,7 +710,7 @@ public static class IssueIssuedHeaderComposeService
                 ref defaultBorderZone);
         }
 
-        return new IssueIssuedHeaderComposeDraft
+        var draft = new IssueIssuedHeaderComposeDraft
         {
             Kind = kind,
             ApplicationProfileInstanceId = applicationId,
@@ -668,6 +723,7 @@ public static class IssueIssuedHeaderComposeService
                 IssueIssuedHeaderKind.WorkPermit => "New work permit",
                 IssueIssuedHeaderKind.Rejection => "New rejection",
                 IssueIssuedHeaderKind.BorderZone => "New border zone",
+                IssueIssuedHeaderKind.WorkPermitLocationGrant => "New location permission",
                 _ => "New issued record",
             },
             HeaderNumber = string.Empty,
@@ -683,6 +739,17 @@ public static class IssueIssuedHeaderComposeService
             ValidityDurations = validityDurations,
             People = people,
         };
+
+        if (kind == IssueIssuedHeaderKind.BorderZone && excludeInvitationIdFromOccupancy == null)
+        {
+            var resolvedVisaId = sourceVisaId is Guid sid && sid != Guid.Empty
+                ? sid
+                : TryResolveNextUngrantedSourceVisaId(objectSpace, applicationId);
+            if (resolvedVisaId is Guid visaId && visaId != Guid.Empty)
+                ApplyBorderZoneSourceVisaToDraft(objectSpace, instance, draft, visaId);
+        }
+
+        return draft;
     }
 
     /// <summary>
@@ -796,7 +863,7 @@ public static class IssueIssuedHeaderComposeService
 
         var selected = draft.Kind == IssueIssuedHeaderKind.Invitation
             ? SanitizeInvitationPersonSelection(draft)
-            : draft.Kind == IssueIssuedHeaderKind.WorkPermit
+            : draft.Kind == IssueIssuedHeaderKind.WorkPermit || draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant
                 ? draft.People.Where(p => p.Include && p.IsEmployee).ToList()
                 : draft.People.Where(p => p.Include).ToList();
         if (selected.Count == 0)
@@ -829,6 +896,7 @@ public static class IssueIssuedHeaderComposeService
                     IssueIssuedHeaderKind.WorkPermit => "Work permit number is required.",
                     IssueIssuedHeaderKind.Rejection => "Rejected document number is required.",
                     IssueIssuedHeaderKind.BorderZone => "Border zone number is required.",
+                    IssueIssuedHeaderKind.WorkPermitLocationGrant => "Grant number is required.",
                     _ => "Number is required.",
                 },
             };
@@ -865,6 +933,19 @@ public static class IssueIssuedHeaderComposeService
                 Succeeded = false,
                 ErrorMessage = processNumberError,
             };
+        }
+
+        if (draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant)
+        {
+            var grantError = ValidateWorkPermitLocationGrantCards(selected);
+            if (grantError != null)
+            {
+                return new IssueIssuedHeaderCreateResult
+                {
+                    Succeeded = false,
+                    ErrorMessage = grantError,
+                };
+            }
         }
 
         if (draft.Kind == IssueIssuedHeaderKind.WorkPermit)
@@ -913,6 +994,7 @@ public static class IssueIssuedHeaderComposeService
                 IssueIssuedHeaderKind.WorkPermit => CreateWorkPermit(objectSpace, instance, draft, selected),
                 IssueIssuedHeaderKind.Rejection => CreateRejection(objectSpace, instance, draft, selected),
                 IssueIssuedHeaderKind.BorderZone => CreateBorderZone(objectSpace, instance, draft, selected),
+                IssueIssuedHeaderKind.WorkPermitLocationGrant => CreateWorkPermitLocationGrant(objectSpace, instance, draft, selected),
                 _ => new IssueIssuedHeaderCreateResult { Succeeded = false, ErrorMessage = "Unknown header kind." },
             };
         }
@@ -980,6 +1062,10 @@ public static class IssueIssuedHeaderComposeService
                 .ToHashSet(),
             IssueIssuedHeaderKind.BorderZone => objectSpace.GetObjectsQuery<BorderZoneItem>()
                 .Where(i => i.BorderZone != null && i.BorderZone.ID == headerId && i.Person != null)
+                .Select(i => i.Person!.ID)
+                .ToHashSet(),
+            IssueIssuedHeaderKind.WorkPermitLocationGrant => objectSpace.GetObjectsQuery<WorkPermitLocationGrantItem>()
+                .Where(i => i.Grant != null && i.Grant.ID == headerId && i.Person != null)
                 .Select(i => i.Person!.ID)
                 .ToHashSet(),
             _ => new HashSet<Guid>(),
@@ -1243,12 +1329,31 @@ public static class IssueIssuedHeaderComposeService
         IssueIssuedHeaderComposeDraft draft,
         List<IssueIssuedHeaderPersonLineDraft> selected)
     {
-        if (draft.ValidityDurationId is not Guid durationId || durationId == Guid.Empty)
+        if (draft.SourceVisaId is not Guid sourceVisaId || sourceVisaId == Guid.Empty)
         {
             return new IssueIssuedHeaderCreateResult
             {
                 Succeeded = false,
-                ErrorMessage = "Validity duration is required.",
+                ErrorMessage = "Source visa is required — open Border zone for a linked visa.",
+            };
+        }
+
+        if (draft.ExpirationDate is not DateTime endDate || endDate == default)
+        {
+            return new IssueIssuedHeaderCreateResult
+            {
+                Succeeded = false,
+                ErrorMessage = "End date is required.",
+            };
+        }
+
+        var sourceVisa = objectSpace.GetObjectByKey<Visa>(sourceVisaId);
+        if (sourceVisa == null)
+        {
+            return new IssueIssuedHeaderCreateResult
+            {
+                Succeeded = false,
+                ErrorMessage = "Source visa was not found.",
             };
         }
 
@@ -1256,7 +1361,8 @@ public static class IssueIssuedHeaderComposeService
         borderZone.ApplicationProfileInstance = instance;
         borderZone.BorderZoneNumber = draft.HeaderNumber.Trim();
         borderZone.StartDate = draft.PrimaryDate.Date;
-        borderZone.ValidityDuration = objectSpace.GetObjectByKey<ValidityDuration>(durationId);
+        borderZone.ExpirationDate = endDate.Date;
+        borderZone.SourceVisa = sourceVisa;
         if (borderZone.BorderZoneItems == null) borderZone.BorderZoneItems = new System.Collections.ObjectModel.ObservableCollection<BorderZoneItem>();
 
         foreach (var row in selected)
@@ -1463,8 +1569,17 @@ public static class IssueIssuedHeaderComposeService
                 draft.Title = "Edit border zone";
                 draft.HeaderNumber = borderZone.BorderZoneNumber?.Trim() ?? string.Empty;
                 draft.PrimaryDate = borderZone.StartDate == default ? DateTime.Today : borderZone.StartDate.Date;
-                draft.ValidityDurationId = borderZone.ValidityDuration?.ID;
                 draft.ExpirationDate = borderZone.ExpirationDate?.Date;
+                if (borderZone.SourceVisa != null)
+                {
+                    draft.SourceVisaId = borderZone.SourceVisa.ID;
+                    draft.SourceVisaCaption = FormatSourceVisaCaption(borderZone.SourceVisa);
+                    draft.SourceVisaEndDate = borderZone.SourceVisa.ExpirationDate?.Date;
+                    var bzInstance = objectSpace.GetObjectByKey<ApplicationProfileInstance>(draft.ApplicationProfileInstanceId)
+                        ?? borderZone.ApplicationProfileInstance;
+                    if (bzInstance != null)
+                        ApplyBorderZoneVisaCaptionsToPeople(objectSpace, bzInstance, draft);
+                }
 
                 var items = borderZone.BorderZoneItems?.Where(i => i != null).ToList()
                     ?? new List<BorderZoneItem>();
@@ -1489,6 +1604,8 @@ public static class IssueIssuedHeaderComposeService
                 BindDocuments(objectSpace, draft, kind, headerId);
                 return draft;
             }
+            case IssueIssuedHeaderKind.WorkPermitLocationGrant:
+                return BindExistingWorkPermitLocationGrant(objectSpace, draft, headerId);
             default:
                 return null;
         }
@@ -1508,7 +1625,7 @@ public static class IssueIssuedHeaderComposeService
         var syncPeople = draft.SyncPeopleOnSave;
         var selected = draft.Kind == IssueIssuedHeaderKind.Invitation
             ? SanitizeInvitationPersonSelection(draft)
-            : draft.Kind == IssueIssuedHeaderKind.WorkPermit
+            : draft.Kind == IssueIssuedHeaderKind.WorkPermit || draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant
                 ? draft.People.Where(p => p.Include && p.IsEmployee).ToList()
                 : draft.People.Where(p => p.Include).ToList();
 
@@ -1542,6 +1659,19 @@ public static class IssueIssuedHeaderComposeService
                     {
                         Succeeded = false,
                         ErrorMessage = wpError,
+                    };
+                }
+            }
+
+            if (draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant)
+            {
+                var grantError = ValidateWorkPermitLocationGrantCards(selected);
+                if (grantError != null)
+                {
+                    return new IssueIssuedHeaderCreateResult
+                    {
+                        Succeeded = false,
+                        ErrorMessage = grantError,
                     };
                 }
             }
@@ -1581,6 +1711,7 @@ public static class IssueIssuedHeaderComposeService
                 IssueIssuedHeaderKind.WorkPermit => UpdateWorkPermit(objectSpace, draft, headerId, selected),
                 IssueIssuedHeaderKind.Rejection => UpdateRejection(objectSpace, draft, headerId, selected),
                 IssueIssuedHeaderKind.BorderZone => UpdateBorderZone(objectSpace, draft, headerId, selected),
+                IssueIssuedHeaderKind.WorkPermitLocationGrant => UpdateWorkPermitLocationGrant(objectSpace, draft, headerId, selected),
                 _ => new IssueIssuedHeaderCreateResult { Succeeded = false, ErrorMessage = "Unknown header kind." },
             };
         }
@@ -1808,12 +1939,12 @@ public static class IssueIssuedHeaderComposeService
         Guid headerId,
         List<IssueIssuedHeaderPersonLineDraft> selected)
     {
-        if (draft.ValidityDurationId is not Guid durationId || durationId == Guid.Empty)
+        if (draft.ExpirationDate is not DateTime endDate || endDate == default)
         {
             return new IssueIssuedHeaderCreateResult
             {
                 Succeeded = false,
-                ErrorMessage = "Validity duration is required.",
+                ErrorMessage = "End date is required.",
             };
         }
 
@@ -1823,7 +1954,9 @@ public static class IssueIssuedHeaderComposeService
 
         borderZone.BorderZoneNumber = draft.HeaderNumber.Trim();
         borderZone.StartDate = draft.PrimaryDate.Date;
-        borderZone.ValidityDuration = objectSpace.GetObjectByKey<ValidityDuration>(durationId);
+        borderZone.ExpirationDate = endDate.Date;
+        if (draft.SourceVisaId is Guid sourceVisaId && sourceVisaId != Guid.Empty)
+            borderZone.SourceVisa = objectSpace.GetObjectByKey<Visa>(sourceVisaId);
 
         if (borderZone.BorderZoneItems == null)
             borderZone.BorderZoneItems = new System.Collections.ObjectModel.ObservableCollection<BorderZoneItem>();
@@ -1962,6 +2095,8 @@ public static class IssueIssuedHeaderComposeService
                         .ToList(),
                 };
             }
+            case IssueIssuedHeaderKind.WorkPermitLocationGrant:
+                return SnapshotWorkPermitLocationGrant(objectSpace, headerId);
             default:
                 return null;
         }
@@ -2019,6 +2154,59 @@ public static class IssueIssuedHeaderComposeService
         }
 
         return null;
+    }
+    public static bool IsWorkPermitLocationGrantCardComplete(IssueIssuedHeaderPersonLineDraft row) =>
+        row != null
+        && row.PassportId is Guid pid && pid != Guid.Empty
+        && !string.IsNullOrWhiteSpace(row.WorkPermittedLocations);
+
+    private static string? ValidateWorkPermitLocationGrantCards(List<IssueIssuedHeaderPersonLineDraft> selected)
+    {
+        foreach (var row in selected)
+        {
+            if (row.PassportId is null || row.PassportId == Guid.Empty)
+                return $"{row.PersonName}: passport is required.";
+            if (string.IsNullOrWhiteSpace(row.WorkPermittedLocations))
+                return $"{row.PersonName}: granted locations are required.";
+        }
+
+        return null;
+    }
+
+    private static void ApplyWorkPermitLocationGrantCardDefaults(
+        IObjectSpace objectSpace,
+        Person person,
+        IssueIssuedHeaderPersonLineDraft line,
+        string defaultLocations,
+        ApplicationProfileInstance instance)
+    {
+        if (line.PassportId is null || line.PassportId == Guid.Empty)
+        {
+            line.IsReady = false;
+            line.StatusCaption = "Missing passport";
+            line.Include = false;
+        }
+        else
+        {
+            line.IsReady = true;
+            line.StatusCaption = "Ready";
+            line.Include = true;
+        }
+
+        line.WorkPermittedLocations = CasePersonRequestedLocation.ResolveForPrefill(
+            objectSpace,
+            instance.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+            defaultLocations);
+        var linkedWp = ResolveLinkedWorkPermitItem(objectSpace, instance, person.ID);
+        ApplySourceWorkPermitPreview(line, linkedWp);
+        if (string.IsNullOrWhiteSpace(line.SourceWorkPermitCaption) || line.SourceWorkPermitId is null)
+        {
+            line.IsReady = false;
+            line.StatusCaption = "Missing linked work permit";
+            line.Include = false;
+        }
     }
 
     private static void ApplyWorkPermitCardDefaults(

@@ -104,6 +104,39 @@ public class PersonDossierProgressTrackTests
     }
 
     [Fact]
+    public void Finished_migration_shows_location_grant_when_no_invitation()
+    {
+        var grantItem = new WorkPermitLocationGrantItem
+        {
+            GrantedLocations = "Mary şäheri",
+            Grant = new WorkPermitLocationGrant
+            {
+                GrantNumber = "CD000034",
+                IssuedDate = new DateTime(2025, 11, 5),
+            },
+        };
+        var done = new[]
+        {
+            new ApplicationWorkspaceCaseProgressStep { Key = "migration", State = "done", OutcomeKind = "issued" },
+        };
+
+        var outcome = PersonDossierResolver.ResolveIssuedOutcome(
+            done,
+            invitationItem: null,
+            rejectionItem: null,
+            usedInvitationItemIds: null,
+            locationGrantItem: grantItem);
+
+        Assert.NotNull(outcome);
+        Assert.Equal("CD000034", outcome!.Number);
+        Assert.Equal(
+            VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Issued"),
+            outcome.StatusLabel);
+        Assert.Equal("Mary şäheri", outcome.Detail);
+        Assert.True(outcome.HasDetail);
+    }
+
+    [Fact]
     public void Finished_office_step_without_a_file_is_missing()
     {
         var steps = OfficeSteps(withFile: false);

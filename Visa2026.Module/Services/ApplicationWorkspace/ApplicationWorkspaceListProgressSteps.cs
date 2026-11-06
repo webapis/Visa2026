@@ -211,7 +211,7 @@ public static class ApplicationWorkspaceListProgressSteps
 
     /// <summary>
     /// Chips show after the last process step when the profile produces invitation, visa,
-    /// work permit, or border zone. Rejection-only coverage does not.
+    /// work permit, border zone, or work-permit location grant (WPL). Rejection-only coverage does not.
     /// </summary>
     public static bool ShouldShowResultChips(
         IReadOnlyList<Step>? steps,
@@ -282,7 +282,8 @@ public static class ApplicationWorkspaceListProgressSteps
             if (IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.Invitation)
                 || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit)
                 || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa)
-                || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.BorderZone))
+                || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.BorderZone)
+                || IsKey(key, ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant))
                 return true;
         }
 

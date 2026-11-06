@@ -136,6 +136,9 @@ public partial class ApplicationProfileInstance
     public bool CfgShowBorderZones =>
         ApplicationProfileConfigurationResolver.ShowBorderZones(this);
 
+    public bool CfgShowWorkPermitLocationGrants =>
+        ApplicationProfileConfigurationResolver.ShowWorkPermitLocationGrants(this);
+
     [Browsable(false)]
     [NotMapped]
     public bool CfgShowPreviousPassport =>

@@ -111,6 +111,7 @@ public static class VisaPreviewSlotOccupantKeys
             HeaderDocumentCopiesFamily.Rejection => "rejection-document-copies:rejection",
             HeaderDocumentCopiesFamily.BorderZone => "border-zone-document-copies:border-zone",
             HeaderDocumentCopiesFamily.Visa => "visa-document-copies:visa",
+            HeaderDocumentCopiesFamily.WorkPermitLocationGrant => "work-permit-location-grant-document-copies:grant",
             _ => "header-document-copies:unknown",
         };
 
@@ -152,6 +153,8 @@ public static class VisaPreviewSlotOccupantKeys
         var baseKey = $"issue-issued-header:{kind}:{request.ApplicationProfileInstanceId:N}";
         if (request.ExistingHeaderId is Guid existing && existing != Guid.Empty)
             return $"{baseKey}|header:{existing:N}";
+        if (request.SourceVisaId is Guid sourceVisa && sourceVisa != Guid.Empty)
+            return $"{baseKey}|sourceVisa:{sourceVisa:N}";
         return baseKey;
     }
 

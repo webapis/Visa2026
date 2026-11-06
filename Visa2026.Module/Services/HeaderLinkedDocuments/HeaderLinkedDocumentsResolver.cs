@@ -38,8 +38,63 @@ public static class HeaderLinkedDocumentsResolver
             HeaderDocumentCopiesFamily.Rejection => ResolveRejection(objectSpace, parentId, contextItemId),
             HeaderDocumentCopiesFamily.BorderZone => ResolveBorderZone(objectSpace, parentId, contextItemId),
             HeaderDocumentCopiesFamily.Visa => ResolveVisa(objectSpace, parentId, contextItemId),
+            HeaderDocumentCopiesFamily.WorkPermitLocationGrant => ResolveWorkPermitLocationGrant(objectSpace, parentId, contextItemId),
             _ => throw new ArgumentOutOfRangeException(nameof(family), family, null),
         };
+    }
+
+    private static HeaderLinkedDocumentsSnapshot ResolveWorkPermitLocationGrant(
+        IObjectSpace os,
+        Guid parentId,
+        Guid? contextItemId)
+    {
+        var grant = os.GetObjectByKey<WorkPermitLocationGrant>(parentId);
+        if (grant == null)
+        {
+            return new HeaderLinkedDocumentsSnapshot
+            {
+                Family = HeaderDocumentCopiesFamily.WorkPermitLocationGrant,
+                ParentId = parentId,
+                ContextItemId = contextItemId,
+            };
+        }
+
+        grant = os.GetObject(grant);
+        var itemCount = grant.Items?.Count(i => i != null) ?? 0;
+
+        return new HeaderLinkedDocumentsSnapshot
+        {
+            Family = HeaderDocumentCopiesFamily.WorkPermitLocationGrant,
+            ParentId = grant.ID,
+            ContextItemId = contextItemId,
+            HeaderTitle = grant.GrantNumber ?? string.Empty,
+            Subtitle = BuildWorkPermitLocationGrantSubtitle(os, grant, contextItemId),
+            ShowSharedScansHint = itemCount > 1,
+            Records = LoadDocumentRecords<WorkPermitLocationGrantDocument>(
+                os,
+                d => d.Grant.ID == grant.ID,
+                doc => $"WorkPermitLocationGrantDocument:{doc.ID:N}"),
+        };
+    }
+
+    private static string? BuildWorkPermitLocationGrantSubtitle(
+        IObjectSpace os,
+        WorkPermitLocationGrant grant,
+        Guid? contextItemId)
+    {
+        if (contextItemId is Guid itemId && itemId != Guid.Empty)
+        {
+            var item = os.GetObjectByKey<WorkPermitLocationGrantItem>(itemId);
+            if (item?.Person != null)
+            {
+                return VisaUiMessages.Format(
+                    "WorkPermitLocationGrantDocumentCopies.Subtitle.FromItem",
+                    item.Person.FullName,
+                    grant.GrantNumber ?? string.Empty);
+            }
+        }
+
+        return BuildApplicationSubtitle(grant.ApplicationProfileInstance);
     }
 
     private static HeaderLinkedDocumentsSnapshot ResolveWorkPermit(

@@ -18,7 +18,11 @@ public static class CaseWorkPermitLocationCopy
         var profile = application?.ApplicationProfile;
         if (profile == null)
             return false;
-        if (!profile.ProduceWorkPermit || !profile.RequirePersonWorkPermitItem)
+        if (!profile.RequirePersonWorkPermitItem)
+            return false;
+        if (profile.ProduceWorkLocation && profile.RequireWorkPermitLocation)
+            return true;
+        if (!profile.ProduceWorkPermit)
             return false;
         return ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
             profile.ProduceWorkPermit,
@@ -32,11 +36,13 @@ public static class CaseWorkPermitLocationCopy
     public static bool ShowInLinkReview(ApplicationProfileInstance? application)
     {
         var profile = application?.ApplicationProfile;
-        if (profile == null || !profile.ProduceWorkPermit)
+        if (profile == null)
             return false;
-        if (!ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
+        var locationConfigured = profile.ProduceWorkLocation && profile.RequireWorkPermitLocation
+            || ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
                 profile.ProduceWorkPermit,
-                profile.RequireWorkPermitLocation))
+                profile.RequireWorkPermitLocation);
+        if (!locationConfigured)
             return false;
         return ApplicationProfileConfigurationResolver.ShowCurrentWorkPermitItem(application);
     }

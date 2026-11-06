@@ -130,11 +130,14 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var rejectionIndex = IndexIssuedDocuments(LoadRejectionPairs(objectSpace, ids));
         var visaIndex = IndexIssuedDocuments(LoadVisaPairs(objectSpace, ids));
         var borderZoneIndex = IndexIssuedDocuments(LoadBorderZonePairs(objectSpace, ids));
+        var locationGrantIndex = IndexIssuedDocuments(LoadWorkPermitLocationGrantPairs(objectSpace, ids));
+        var locationGrantDetailsByInstance = LoadWorkPermitLocationGrantDetails(objectSpace, ids);
         var invitation = invitationIndex.People;
         var workPermit = workPermitIndex.People;
         var rejection = rejectionIndex.People;
         var visa = visaIndex.People;
         var borderZone = borderZoneIndex.People;
+        var locationGrant = locationGrantIndex.People;
         var names = ApplicationListLinkedPeople.LoadNames(objectSpace, roster);
         var invitationLaterLife = LoadInvitationLaterLife(objectSpace, ids);
         var invitationReplacements = LoadInvitationReplacements(objectSpace, ids);
@@ -159,6 +162,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 [ApplicationWorkspaceIssuedRecordsCatalog.Rejection] = CountOnRoster(rejection, application.ID, activeRoster),
                 [ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa] = CountOnRoster(visa, application.ID, activeRoster),
                 [ApplicationWorkspaceIssuedRecordsCatalog.BorderZone] = CountOnRoster(borderZone, application.ID, activeRoster),
+                [ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant] = CountOnRoster(locationGrant, application.ID, activeRoster),
             };
             application.SetListViewResultCoverage(Build(application, rosterCount, coverage));
             // Full roster so excluded people still appear with the case Excluded badge (no Inv/Visa/WP marks).
@@ -180,9 +184,20 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 DocumentsFor(borderZoneIndex.Documents, application.ID),
                 DocumentsFor(rejectionIndex.Documents, application.ID),
                 ReplacementsFor(invitationReplacements, application.ID),
-                exclusions));
+                exclusions,
+                Holders(locationGrant, application.ID),
+                DocumentsFor(locationGrantIndex.Documents, application.ID),
+                DetailsFor(locationGrantDetailsByInstance, application.ID)));
         }
     }
+
+    private static IReadOnlyDictionary<Guid, string> DetailsFor(
+        IReadOnlyDictionary<Guid, Dictionary<Guid, string>> byInstance,
+        Guid applicationId) =>
+        byInstance.TryGetValue(applicationId, out var details) ? details : EmptyDetails;
+
+    private static readonly IReadOnlyDictionary<Guid, string> EmptyDetails =
+        new Dictionary<Guid, string>();
 
     private static IReadOnlyDictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement> ReplacementsFor(
         IReadOnlyDictionary<Guid, Dictionary<Guid, ApplicationListLinkedPeople.InvitationReplacement>> byInstance,
@@ -747,5 +762,71 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
             })
             .ToList()
             .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
+    }
+
+    private static IEnumerable<(Guid InstanceId, Guid PersonId, Guid DocumentId)> LoadWorkPermitLocationGrantPairs(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        if (objectSpace == null || ids.Count == 0)
+            return [];
+
+        return objectSpace.GetObjectsQuery<WorkPermitLocationGrantItem>()
+            .Where(i => i.Grant != null
+                && i.Grant.ApplicationProfileInstance != null
+                && ids.Contains(i.Grant.ApplicationProfileInstance.ID)
+                && i.Person != null)
+            .Select(i => new
+            {
+                InstanceId = i.Grant.ApplicationProfileInstance.ID,
+                PersonId = i.Person!.ID,
+                DocumentId = i.Grant.ID,
+            })
+            .ToList()
+            .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
+    }
+
+    private static Dictionary<Guid, Dictionary<Guid, string>> LoadWorkPermitLocationGrantDetails(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, string>>();
+        if (objectSpace == null || ids.Count == 0)
+            return result;
+
+        var rows = objectSpace.GetObjectsQuery<WorkPermitLocationGrantItem>()
+            .Where(i => i.Grant != null
+                && i.Grant.ApplicationProfileInstance != null
+                && ids.Contains(i.Grant.ApplicationProfileInstance.ID)
+                && i.Person != null)
+            .Select(i => new
+            {
+                InstanceId = i.Grant!.ApplicationProfileInstance!.ID,
+                PersonId = i.Person!.ID,
+                IssuedDate = i.Grant.IssuedDate,
+                Locations = i.GrantedLocations,
+            })
+            .ToList()
+            .OrderByDescending(x => x.IssuedDate);
+
+        foreach (var row in rows)
+        {
+            if (row.InstanceId == Guid.Empty || row.PersonId == Guid.Empty)
+                continue;
+            if (!result.TryGetValue(row.InstanceId, out var byPerson))
+            {
+                byPerson = new Dictionary<Guid, string>();
+                result[row.InstanceId] = byPerson;
+            }
+
+            if (byPerson.ContainsKey(row.PersonId))
+                continue;
+
+            var locations = row.Locations?.Trim() ?? string.Empty;
+            if (locations.Length > 0)
+                byPerson[row.PersonId] = locations;
+        }
+
+        return result;
     }
 }

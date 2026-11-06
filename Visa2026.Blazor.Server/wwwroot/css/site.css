@@ -3103,6 +3103,128 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     background: color-mix(in srgb, var(--dxbl-primary, #2563eb) 55%, transparent);
 }
 
+
+/* Preview slot stacked tabs (compose + source WP copies, etc.) */
+.visa-preview-slot__host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.visa-preview-slot__tabs {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.25rem;
+    box-sizing: border-box;
+    min-height: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.4rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-bottom: 1px solid var(--dxbl-border-color, color-mix(in srgb, currentColor 14%, transparent));
+    background: color-mix(in srgb, var(--dxbl-body-bg, var(--bs-body-bg, transparent)) 88%, currentColor);
+}
+
+.visa-preview-slot__tab {
+    display: inline-flex;
+    align-items: center;
+    max-width: 14rem;
+    min-width: 0;
+    height: 2rem;
+    border: 1px solid transparent;
+    border-radius: 0.35rem 0.35rem 0 0;
+    background: transparent;
+}
+
+.visa-preview-slot__tab--active {
+    border-color: var(--dxbl-border-color, color-mix(in srgb, currentColor 18%, transparent));
+    border-bottom-color: transparent;
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, transparent)));
+}
+
+.visa-preview-slot__tab-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 0 0.55rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.visa-preview-slot__tab-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.visa-preview-slot__tab-close {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.55;
+    cursor: pointer;
+    padding: 0;
+}
+
+.visa-preview-slot__tab-close:hover {
+    opacity: 1;
+}
+
+.visa-preview-slot__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.visa-preview-slot__occupant {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.visa-preview-slot__occupant--hidden {
+    display: none !important;
+}
+
+.issue-issued-header-slot__source-wp-link {
+    text-align: left;
+    cursor: pointer;
+    color: var(--dxbl-primary, #2563eb);
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    background: color-mix(in srgb, var(--dxbl-primary, #2563eb) 6%, transparent);
+}
+
+.issue-issued-header-slot__source-wp-link:hover {
+    background: color-mix(in srgb, var(--dxbl-primary, #2563eb) 12%, transparent);
+}
+
 #visa-preview-slot > * {
     position: relative;
     z-index: 1;
@@ -4366,6 +4488,33 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     flex: 0 0 auto;
     align-items: center;
     gap: 3px;
+}
+
+.lv-person-mark-stack {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    max-width: 7.5rem;
+    vertical-align: middle;
+}
+
+.lv-person-mark__detail {
+    box-sizing: border-box;
+    max-width: 8.5rem;
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(15, 23, 42, 0.72);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #f8fafc;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
 }
 
 .lv-person-mark {
