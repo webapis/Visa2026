@@ -20,13 +20,6 @@
 
     <h2 class="ct-page__title">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress")</h2>
     <p class="ct-page__sub">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProgressSubtitle", view.Chrome.TemplateFamilyLabel, LocalizedCurrentStepHeading)</p>
-    @{
-        var progressChips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(
-            ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles));
-        var progressResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(view.ProgressSteps, progressChips)
-            ? progressChips
-            : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
-    }
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
@@ -47,8 +40,6 @@
             var letterName = step.MinistryLetterFileName;
             var hasStepFiles = step.Files.Count > 0 || !string.IsNullOrWhiteSpace(letterName);
             var stepFilesProgressId = step.ProgressId ?? step.DateProgressId;
-            var showResultBeside = progressResultChips.Count > 0
-                && ApplicationWorkspaceListProgressSteps.IsResultChipAnchor(view.ProgressSteps, step);
             var isPending = string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase);
             var isOpen = IsAccordionOpen(step);
             var showRailDate = !isCurrent
@@ -77,8 +68,8 @@
                     <span class="ct-prog-v__line"></span>
                 </div>
                 <div class="ct-prog-v__body">
-                    <div class="@(showResultBeside ? "ct-prog-v__body-row" : null)">
-                    <div class="@(showResultBeside ? "ct-prog-v__body-main" : null)">
+                    <div>
+                    <div>
                     @if (!isPending)
                     {
                         <button type="button"
@@ -414,44 +405,16 @@
                     </div>
                     }
                     </div>
-                    @if (showResultBeside)
-                    {
-                        <div class="ct-prog-v__result-chips lv-result-stems">
-                        <div class="lv-result-chips lv-result-chips--stack"
-                             aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApplicationResult")">
-                            @foreach (var chip in progressResultChips)
-                            {
-                                <span class="lv-result-chip lv-result-chip--@ApplicationWorkspaceIssuedResultListCoverage.Tone(chip)">
-                                    @ApplicationWorkspaceIssuedResultListCoverage.Caption(chip)
-                                    <strong>@ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip)</strong>
-                                </span>
-                            }
-                        </div>
-                        </div>
-                    }
                     </div>
                 </div>
             </div>
         }
     </div>
-
-    @if (ProgressHistory.Count > 0)
-    {
-        <h3 class="ct-page__title" style="margin-top:24px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.History")</h3>
-        <ul class="cw-timeline">
-            @foreach (var row in ProgressHistory)
-            {
-                <li><strong>@StepText(row.State)</strong><span>@row.Date</span></li>
-            }
-        </ul>
-    }
 </div>
 
 @code {
     [Parameter] public Guid ApplicationProfileInstanceId { get; set; }
     [Parameter] public ApplicationWorkspaceCaseView View { get; set; } = new();
-    [Parameter] public IReadOnlyList<ApplicationWorkspaceProgressRow> ProgressHistory { get; set; }
-        = Array.Empty<ApplicationWorkspaceProgressRow>();
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
     [Parameter] public int CorrectionSavedRevision { get; set; }

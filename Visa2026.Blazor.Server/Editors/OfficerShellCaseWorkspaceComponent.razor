@@ -202,7 +202,7 @@
             </div>
         </header>
 
-        <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null)">
+        <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null) @(HidesCaseRail(DisplayedTab) ? "cw-layout--no-rail" : null)">
             <nav class="cw-nav" aria-label="@Msg("ApplicationProfileInstance.Workspace.SectionsAria")">
                 @{
                     var peopleNav = ApplicationWorkspacePeopleLinksCompleteness.Resolve(view);
@@ -345,7 +345,6 @@
                             <OfficerShellCaseProgressTab @ref="_progressTab"
                                                          ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
                                                          View="view"
-                                                         ProgressHistory="Snapshot.ProgressHistory"
                                                          StatusMessage="@ProgressStatusMessage"
                                                          IsStatusError="@ProgressStatusIsError"
                                                          CorrectionSavedRevision="@ProgressCorrectionRevision"
@@ -387,7 +386,7 @@
                 }
             </div>
 
-            @if (!IsWideTab(DisplayedTab))
+            @if (!IsWideTab(DisplayedTab) && !HidesCaseRail(DisplayedTab))
             {
                 <aside class="cw-rail">
                     @RenderRail(view)
@@ -554,6 +553,8 @@
             : _selectedDocumentPersonIds.ToList();
 
     private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "organization";
+
+    private static bool HidesCaseRail(string tab) => tab is "overview" or "result";
 
     private static string ExcludedTitle(ApplicationWorkspaceCasePerson person) =>
         ApplicationListLinkedPeople.FormatExcludedTitle(person.ExcludedLetterNumber, person.ExcludedLetterDate);
@@ -769,8 +770,6 @@
     private string SummaryGateBannerMessage =>
         ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(MissingSummaryFields);
 
-    private string SummaryGateReadinessSuffix =>
-        ApplicationWorkspaceCaseSummaryCompletenessGate.FormatReadinessMissingSuffix(MissingSummaryFields);
 
     private string? TabBlockedTitle(string tabKey) =>
         ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, tabKey)
@@ -2116,33 +2115,6 @@
                 }
                 </div>
             </section>
-            <section class="cw-card">
-                <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")</h2>
-                @if (view.Chrome.ResolvedLinksLocked)
-                {
-                    <p class="cw-linked-lock">🔒 @Msg("ApplicationProfileInstance.Workspace.LinksLockedProcess")</p>
-                }
-                @if (view.LinkedRecordTiles.Count == 0)
-                {
-                    <p class="cw-linked-empty">@Msg("ApplicationProfileInstance.Workspace.NoLinkedRecords")</p>
-                }
-                else
-                {
-                    <div class="cw-link-row">
-                        @foreach (var tile in view.LinkedRecordTiles)
-                        {
-                            <button type="button"
-                                    class="cw-link-tile cw-link-tile--@tile.Tone @(ApplicationWorkspacePeopleLinksCompleteness.IsCountShort(tile.Count, tile.ExpectedCount, view.Chrome.ResolvedLinksLocked) ? "is-empty" : null)"
-                                    @onclick="() => OpenLinkedRecordTile(tile.TabKey)">
-                                <span class="cw-link-tile__icon">@tile.Glyph</span>
-                                <span class="cw-link-tile__label">@ApplicationProfileLocalization.LinkedRecordLabel(tile.Label)</span>
-                                <strong class="cw-link-tile__count">@FormatLinkedCount(tile.Count, tile.ExpectedCount)</strong>
-                                <span class="cw-link-tile__chev">›</span>
-                            </button>
-                        }
-                    </div>
-                }
-            </section>
             <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
         </div>;
     };
@@ -3081,39 +3053,6 @@
     {
         @switch (ActiveTab)
         {
-            case "overview":
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.Readiness")</h4>
-                    <ul class="cw-checklist">
-                        @if (MissingSummaryFields.Count == 0)
-                        {
-                            <li>✓ @Msg("ApplicationProfileInstance.Workspace.RequiredDataComplete")</li>
-                        }
-                        else
-                        {
-                            <li class="is-incomplete">○ @Msg("ApplicationProfileInstance.Workspace.RequiredDataComplete")@SummaryGateReadinessSuffix</li>
-                        }
-                        <li>✓ @Msg("ApplicationProfileInstance.Workspace.BoStatesValid")</li>
-                    </ul>
-                </section>
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
-                    @AdvanceActionButton("cw-rail-btn cw-rail-btn--primary")
-                    @if (CanRevertFromRail)
-                    {
-                        <button type="button" class="cw-rail-btn" disabled="@(_progressUpdating || _ignoreAdvanceClick)" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
-                    }
-                </section>
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.Activity")</h4>
-                    <ul class="cw-timeline">
-                        @foreach (var item in view.Activities)
-                        {
-                            <li><strong>@ApplicationProfileLocalization.ActivityTitle(item.Title)</strong><span>@ApplicationProfileLocalization.ActivitySubtitle(item.Subtitle)</span></li>
-                        }
-                    </ul>
-                </section>
-                break;
             case "people":
                 <section class="cw-rail-block">
                     <h4>People summary</h4>
@@ -3135,52 +3074,11 @@
                 </section>
                 break;
             case "progress":
-                var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
-                var daysLeft = current?.SlaDaysRemaining;
-                var railComplete = view.Sla.IsTerminal;
-                var ringPct = railComplete ? 100 : SlaRemainingPercent(daysLeft, Math.Max(daysLeft ?? 0, 14));
-                var railRingClass = railComplete ? "ct-sla-ring--ok ct-sla-ring--done" : SlaRingTone(daysLeft);
-                var railValue = railComplete ? Msg("ApplicationProfileInstance.Workspace.Done") : (daysLeft?.ToString() ?? "—");
-                var railCaption = railComplete ? Msg("ApplicationProfileInstance.Workspace.Complete") : Msg("ApplicationProfileInstance.Workspace.DaysLeft");
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.SlaCurrentStep")</h4>
-                    <div class="ct-sla-gauge">
-                        <div class="ct-sla-ring @railRingClass" style="--ct-pct:@ringPct%" role="img" aria-label="@railCaption">
-                            <strong>@railValue</strong>
-                        </div>
-                        <span class="ct-sla-gauge__caption">@railCaption</span>
-                    </div>
-                    @if (current != null)
-                    {
-                        <ul class="ct-summary-list" style="margin-top:10px">
-                            <li><span>@Msg("ApplicationProfileInstance.Workspace.TargetDate")</span><strong>@(string.IsNullOrWhiteSpace(current.SlaTargetDate) ? "—" : current.SlaTargetDate)</strong></li>
-                        </ul>
-                    }
-                </section>
                 <section class="cw-rail-block">
                     @AdvanceActionButton("os-btn os-btn--primary", "width:100%;margin-bottom:8px")
                     @if (CanRevertFromRail)
                     {
                         <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" disabled="@(_progressUpdating || _ignoreAdvanceClick)" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
-                    }
-                </section>
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.History")</h4>
-                    <ul class="cw-timeline">
-                        @foreach (var row in Snapshot!.ProgressHistory)
-                        {
-                            <li><strong>@ApplicationProfileLocalization.ProgressStepLabel(row.State)</strong><span>@row.Date</span></li>
-                        }
-                    </ul>
-                </section>
-                break;
-            case "result":
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
-                    @AdvanceActionButton("cw-rail-btn cw-rail-btn--primary")
-                    @if (CanRevertFromRail)
-                    {
-                        <button type="button" class="cw-rail-btn" disabled="@(_progressUpdating || _ignoreAdvanceClick)" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
                     }
                 </section>
                 break;
@@ -3305,26 +3203,6 @@
 
     private static bool IsIssuedPersonItem(string? key) =>
         key is "inv" or "wp" or "bz" or "rejection";
-
-    private async Task OpenLinkedRecordTile(string tabKey)
-    {
-        if (_tabSwitching)
-            return;
-
-        await PaintTabSwitchAsync("people");
-        try
-        {
-            if (LinkedRecordTileClicked.HasDelegate)
-                await LinkedRecordTileClicked.InvokeAsync(tabKey);
-            else if (CaseTabChanged.HasDelegate)
-                await CaseTabChanged.InvokeAsync("people");
-        }
-        finally
-        {
-            _tabContentReady = true;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
 
     private bool IsPersonRecordSelected(int personIndex, string? recordKey)
     {
