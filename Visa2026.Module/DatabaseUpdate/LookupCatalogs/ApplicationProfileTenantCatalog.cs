@@ -194,6 +194,9 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public string? ProfileCatalogKey { get; set; }
 
+    /// <summary>Every progress step, with visibility for this profile. Missing keys keep today's route default.</summary>
+    public List<ApplicationProfileProgressStepVisibility.Step>? ProgressSteps { get; set; }
+
     public static ApplicationProfileTenantCatalogRow FromProfile(
         ApplicationProfile profile,
         string applicationTypeName,
@@ -317,6 +320,7 @@ public sealed class ApplicationProfileTenantCatalogRow
                 granularity == ApplicationProfileCatalogGranularity.TypeAndContract
                     ? projectContractCode
                     : null),
+            ProgressSteps = ApplicationProfileProgressStepVisibility.Read(profile.ProgressStepVisibility).ToList(),
         };
     }
 
@@ -444,10 +448,21 @@ internal static class ApplicationProfileTenantCatalogSync
             ApplyRow(objectSpace, profile, row, contracts);
         }
 
-        if (created > 0 || updated > 0 || skipped > 0)
+        var retired = 0;
+        foreach (var profile in existingProfiles)
+        {
+            if (profile == null || !profile.IsActive)
+                continue;
+            if (!ApplicationProfileRetiredCatalog.IsRetiredProfileCode(profile.Code))
+                continue;
+            profile.IsActive = false;
+            retired++;
+        }
+
+        if (created > 0 || updated > 0 || skipped > 0 || retired > 0)
         {
             Tracing.Tracer.LogText(
-                $"ApplicationProfileTenantCatalogSync: created={created}, updated={updated}, skipped={skipped}.");
+                $"ApplicationProfileTenantCatalogSync: created={created}, updated={updated}, skipped={skipped}, retired={retired}.");
         }
 
         return new Result(created, updated, skipped);
@@ -633,6 +648,7 @@ internal static class ApplicationProfileTenantCatalogSync
         ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
 
         profile.IsActive = row.IsActive;
+        profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(profile, row.ProgressSteps);
     }
 
     private static ProjectContract? ResolveProjectContract(

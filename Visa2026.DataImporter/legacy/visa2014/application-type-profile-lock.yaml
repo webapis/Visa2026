@@ -189,12 +189,12 @@ rows:
     applicationProfileCode: cancel_application
     applicationProfileName: Ýüztutmany Ýatyrmak
   - sourceComposites: []
-    sourceLabel: Visa2026-only / no Çalik composite yet
+    sourceLabel: Retired 2026-11-06. Use Seretmezlik. Do not import.
     targetApplicationTypeName: App_Cancel_Visa_Ext
     applicationProfileCode: cancel_visa_ext
     applicationProfileName: Wizany Uzaltmak Barada Ýüztutmany Ýatyrmak
   - sourceComposites: []
-    sourceLabel: Visa2026-only / no Çalik composite yet
+    sourceLabel: Retired 2026-11-06. Use Seretmezlik. Do not import.
     targetApplicationTypeName: App_Cancel_Visa_and_WP_Ext
     applicationProfileCode: cancel_visa_wp_ext
     applicationProfileName: Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak

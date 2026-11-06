@@ -40,6 +40,35 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
     }
 
     [Fact]
+    public void ThreeLegProfile_HidesIssuedWhenTheTemplateTurnsThatStepOff()
+    {
+        var app = BuildThreeLegApplication();
+        app.ApplicationProfile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            app.ApplicationProfile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued,
+                    false),
+            ]);
+
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessRejected));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
+    }
+
+    [Fact]
     public void DirectMigration_IssuanceChange_LeavesOfficeThenSubmittedThenIssued()
     {
         var app = BuildDirectApplication(ApplicationProfileActionFamily.Change);
@@ -62,10 +91,42 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
         Assert.True(IsAllowed(app,
             ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
             ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessRejected));
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressStateCodes.ProcessCancelled));
 
         Assert.Equal(
             ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
             ApplicationProfileInstanceProgressRouteHelper.GetSuggestedNextStateAfterOfficePreparation(app));
+    }
+
+    [Fact]
+    public void DirectCancellation_InvitationVisaWorkPermit_EndsWithIssuedCompletion()
+    {
+        var app = BuildDirectApplication(ApplicationProfileActionFamily.Cancellation);
+        app.ApplicationProfile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            app.ApplicationProfile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued,
+                    true),
+            ]);
+
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1),
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration));
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.False(ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            app));
     }
 
     [Fact]

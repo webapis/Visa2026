@@ -34,6 +34,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
 
         return ApplicationProfileOfficerCatalogSelector
             .SelectDistinctTemplates(objectSpace.GetObjectsQuery<ApplicationProfile>().AsEnumerable())
+            .Where(p => !ApplicationProfileRetiredCatalog.IsRetiredProfileCode(p.Code))
             .Select(p =>
             {
                 usage.TryGetValue(p.ID, out var counts);

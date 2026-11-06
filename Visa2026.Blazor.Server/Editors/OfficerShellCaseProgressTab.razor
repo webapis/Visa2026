@@ -49,32 +49,79 @@
             var stepFilesProgressId = step.ProgressId ?? step.DateProgressId;
             var showResultBeside = progressResultChips.Count > 0
                 && ApplicationWorkspaceListProgressSteps.IsResultChipAnchor(view.ProgressSteps, step);
+            var isPending = string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase);
+            var isOpen = IsAccordionOpen(step);
+            var showRailDate = !isCurrent
+                && !isPending
+                && !string.IsNullOrWhiteSpace(step.Date)
+                && step.Date != "—"
+                && step.Date != "-";
+            var showResultHint = isCurrent && step.CanAdvance && step.ResultOptions.Count > 0;
             var icon = isCurrent
-                ? "✎"
+                ? ""
                 : tone switch
                 {
                     "rejected" => "✕",
                     "cancelled" => "–",
                     "issued" or "ok" => "✓",
-                    _ => "○",
+                    "pending" => "",
+                    _ => isPending ? "" : "○",
                 };
-            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone @(IsMigrationStep(step) ? "ct-prog-v--migration" : null)">
-                <div class="ct-prog-v__rail">
-                    <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
+            <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone @(IsMigrationStep(step) ? "ct-prog-v--migration" : null) @(isOpen ? "is-open" : null) @(isPending ? "ct-prog-v--locked" : null)">
+                <div class="ct-prog-v__rail" aria-hidden="true">
+                    @if (showRailDate)
+                    {
+                        <span class="ct-prog-v__date">@step.Date</span>
+                    }
                     <span class="ct-prog-v__dot">@icon</span>
                     <span class="ct-prog-v__line"></span>
                 </div>
                 <div class="ct-prog-v__body">
                     <div class="@(showResultBeside ? "ct-prog-v__body-row" : null)">
                     <div class="@(showResultBeside ? "ct-prog-v__body-main" : null)">
-                    <div class="ct-prog-v__head">
-                        <strong>@StepText(step.Label)</strong>
-                        @if (!string.IsNullOrWhiteSpace(badge))
-                        {
-                            <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
-                        }
-                        @if (CanOfferPen(step))
-                        {
+                    @if (!isPending)
+                    {
+                        <button type="button"
+                                class="ct-prog-acc__head"
+                                aria-expanded="@isOpen"
+                                disabled="@_busy"
+                                @onclick="() => ToggleAccordion(step)">
+                            <strong>@StepText(step.Label)</strong>
+                            @if (!string.IsNullOrWhiteSpace(badge))
+                            {
+                                <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+                            {
+                                <span class="ct-prog-v__result-number">@step.ResultNumber</span>
+                            }
+                            @if (step.MissingMinistryLetter)
+                            {
+                                <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
+                            }
+                            @if (showResultHint && !isOpen)
+                            {
+                                <span class="ct-prog-acc__hint">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNeeded")</span>
+                            }
+                            <span class="ct-prog-acc__chevron" aria-hidden="true"></span>
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="ct-prog-acc__head ct-prog-acc__head--locked">
+                            <strong>@StepText(step.Label)</strong>
+                            @if (!string.IsNullOrWhiteSpace(badge))
+                            {
+                                <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                            }
+                        </div>
+                    }
+                    @if (isOpen)
+                    {
+                    <div class="ct-prog-acc__panel">
+                    @if (CanOfferPen(step))
+                    {
+                        <div class="ct-prog-acc__tools">
                             <button type="button"
                                     class="ct-step-pen @(IsEditing(step) ? "is-open" : null)"
                                     title="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.EditStep")"
@@ -86,8 +133,8 @@
                                     <path fill="currentColor" d="M12.1 1.3a1.5 1.5 0 0 1 2.1 2.1l-8.4 8.4-2.8.7.7-2.8 8.4-8.4zM2 13.2h12v1.3H2z" />
                                 </svg>
                             </button>
-                        }
-                    </div>
+                        </div>
+                    }
                     @if (!IsEditing(step) && !string.IsNullOrWhiteSpace(step.ResultNumber))
                     {
                         <p class="ct-prog-v__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</p>
@@ -288,11 +335,20 @@
                                         </label>
                                     }
                                     <button type="button"
-                                            class="os-btn os-btn--primary"
+                                            class="os-btn os-btn--primary @(_advancing ? "is-busy" : null)"
                                             style="margin-top:10px"
                                             disabled="@(_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))"
+                                            aria-busy="@_advancing"
                                             @onclick="AdvanceAsync">
-                                        ▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")
+                                        @if (_advancing)
+                                        {
+                                            <span class="cw-advance-spin" aria-hidden="true"></span>
+                                            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvancingProgress")
+                                        }
+                                        else
+                                        {
+                                            <text>▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")</text>
+                                        }
                                     </button>
                                     @if (step.ShowCancelProgress && !string.IsNullOrWhiteSpace(step.CancelStateCode))
                                     {
@@ -356,6 +412,8 @@
                         </div>
                     }
                     </div>
+                    }
+                    </div>
                     @if (showResultBeside)
                     {
                         <div class="ct-prog-v__result-chips lv-result-stems">
@@ -408,10 +466,13 @@
     [Parameter] public string PreviewSlotOwnerViewId { get; set; } = OfficerShellViewIds.DetailView;
 
     private string _selectedAdvanceStateCode = string.Empty;
+    private string _advanceFormStepKey = string.Empty;
+    private string? _openStepKey;
     private string _processNumber = string.Empty;
     private string _resultNumber = string.Empty;
     private DateTime? _advanceDate = DateTime.Today;
     private bool _busy;
+    private bool _advancing;
     private string? _editingStepKey;
     private int _seenCorrectionRevision;
     private string _pendingLetterStepKey = string.Empty;
@@ -555,7 +616,12 @@
         if (IsStatusError)
         {
             if (!_wasStatusError)
+            {
                 _focusInvalidAdvanceField = true;
+                var errorStep = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+                if (errorStep != null)
+                    _openStepKey = errorStep.Key;
+            }
             _advanceFieldErrors = true;
             _localAdvanceError = null;
         }
@@ -572,7 +638,29 @@
 
         var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
         if (current == null)
+        {
+            _advanceFormStepKey = string.Empty;
             return;
+        }
+
+        if (!string.IsNullOrEmpty(_advanceFormStepKey)
+            && !string.Equals(_advanceFormStepKey, current.Key, StringComparison.OrdinalIgnoreCase))
+        {
+            _advanceDate = DateTime.Today;
+            _resultNumber = string.Empty;
+            _submissionDocumentNumber = string.Empty;
+            _selectedAdvanceStateCode = string.Empty;
+            _pendingLetterStepKey = string.Empty;
+            _pendingFiles.Clear();
+            _advanceFieldErrors = false;
+            _localAdvanceError = null;
+            _backfillDate = null;
+            _backfillNumber = string.Empty;
+            _backfillFileName = null;
+            _backfillFileContent = null;
+        }
+
+        _advanceFormStepKey = current.Key;
 
         if (!string.Equals(_pendingLetterStepKey, current.Key, StringComparison.OrdinalIgnoreCase))
         {
@@ -644,6 +732,18 @@
     private bool IsEditing(ApplicationWorkspaceCaseProgressStep step) =>
         CanOfferPen(step)
         && string.Equals(_editingStepKey, step.Key, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsAccordionOpen(ApplicationWorkspaceCaseProgressStep step) =>
+        !string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(_openStepKey, step.Key, StringComparison.OrdinalIgnoreCase);
+
+    private void ToggleAccordion(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (_busy || string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _openStepKey = IsAccordionOpen(step) ? null : step.Key;
+    }
 
     private void ToggleStepEdit(ApplicationWorkspaceCaseProgressStep step)
     {
@@ -769,10 +869,14 @@
             _advanceFieldErrors = true;
             _localAdvanceError = validationError;
             _focusInvalidAdvanceField = true;
+            if (current != null)
+                _openStepKey = current.Key;
             return;
         }
 
         _busy = true;
+        _advancing = true;
+        await InvokeAsync(StateHasChanged);
         try
         {
             await AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
@@ -790,6 +894,7 @@
         finally
         {
             _busy = false;
+            _advancing = false;
         }
     }
 

@@ -773,7 +773,7 @@ public class ApplicationWorkspaceProgressTimelineTests
         var rejected = ApplicationWorkspaceProgressTimeline.Build(rejectedApp, profile, default, objectSpace: null);
         Assert.Equal("ok", rejected[1].OutcomeKind);
         Assert.Equal(ApplicationMigrationSubmission.TimelineKey, rejected[4].Key);
-        Assert.Equal("rejected", rejected[5].OutcomeKind);
+        Assert.DoesNotContain(rejected, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
 
         var cancelledApp = new ApplicationProfileInstance
         {
@@ -833,9 +833,115 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
         Assert.Equal("Processing", migration.CurrentStateLabel);
         Assert.Equal("7/4047", migration.ProcessNumber);
-        Assert.Contains(migration.AdvanceOptions, o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued
-            || o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessRejected
-            || o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+        Assert.Contains(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+        Assert.DoesNotContain(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessRejected
+                || o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessCancelled);
+    }
+
+    [Fact]
+    public void Build_Cancellation_ShowsIssuedCompletionWithoutAnAsNumber()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            ActionFamily = ApplicationProfileActionFamily.Cancellation,
+        };
+        profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            profile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued,
+                    true),
+            ]);
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+            SubmissionDocumentNumber = "7/1",
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        var completion = Assert.Single(steps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("current", completion.State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.IssuedCompletionLabel, completion.Label);
+        Assert.True(completion.CanAdvance);
+        Assert.False(completion.RequireProcessNumberOnAdvance);
+        Assert.Empty(completion.ResultOptions);
+        Assert.Contains(
+            completion.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+    }
+
+    [Fact]
+    public void Build_ViaMinistry_HiddenIssued_KeepsAsNumberUntilThatResultIsSaved()
+    {
+        var profile = ThreeLegProfile();
+        profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            profile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued,
+                    false),
+            ]);
+
+        var waiting = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        waiting.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = waiting,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
+            ProcessNumber = "7/4047",
+        });
+
+        var waitingSteps = ApplicationWorkspaceProgressTimeline.Build(waiting, profile, default, objectSpace: null);
+        var migration = Assert.Single(waitingSteps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+        Assert.Equal("done", migration.State);
+        Assert.Equal("ok", migration.OutcomeKind);
+        Assert.False(migration.CanAdvance);
+        Assert.Equal("Processing", migration.CurrentStateLabel);
+        Assert.DoesNotContain(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+
+        var issued = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        issued.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = issued,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessIssued },
+        });
+
+        var issuedSteps = ApplicationWorkspaceProgressTimeline.Build(issued, profile, default, objectSpace: null);
+        Assert.DoesNotContain(issuedSteps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+        Assert.Contains(issuedSteps, s => s.Key == ApplicationMigrationSubmission.TimelineKey);
     }
 
     [Fact]

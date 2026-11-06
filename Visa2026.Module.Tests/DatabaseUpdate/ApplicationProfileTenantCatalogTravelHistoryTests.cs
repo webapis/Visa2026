@@ -28,7 +28,8 @@ public class ApplicationProfileTenantCatalogTravelHistoryTests
         Assert.Contains(rows, r => r.Code == "extend_visa_wp" && !r.RequirePersonTravelHistory);
         Assert.Contains(rows, r => r.Code == "get_invitation" && !r.RequirePersonTravelHistory);
         Assert.Contains(rows, r => r.Code == "cancel_visa" && !r.RequirePersonTravelHistory);
-        Assert.Contains(rows, r => r.Code == "cancel_visa_ext" && !r.RequirePersonTravelHistory);
+        Assert.DoesNotContain(rows, r => r.Code == "cancel_visa_ext");
+        Assert.DoesNotContain(rows, r => r.Code == "cancel_visa_wp_ext");
     }
 
     [Fact]

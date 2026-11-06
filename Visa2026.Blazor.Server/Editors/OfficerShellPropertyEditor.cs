@@ -43,6 +43,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private IApplicationProfileInstancePersonLinkQueryService? _personLinkQueryService;
     private IApplicationWorkspacePersonUiActions? _personUiActions;
     private IReadOnlyList<ApplicationProfileCatalogRow> _allCatalogRows = Array.Empty<ApplicationProfileCatalogRow>();
+    private bool _advanceInFlight;
 
     public OfficerShellPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -227,6 +228,10 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             model.WorkspaceLoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
             await Task.Delay(16);
         }
+        else
+        {
+            await Task.Yield();
+        }
 
         try
         {
@@ -238,7 +243,10 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 ? service.Load(objectSpace, applicationId)
                 : new ApplicationWorkspaceMockQueryService().Load(objectSpace, applicationId);
 
-            model.SelectedPersonRowIndex = -1;
+            var personCount = model.WorkspaceSnapshot?.Tabs
+                .FirstOrDefault(t => t.Key == "person")?.RowPersonIds.Count ?? 0;
+            if (showLoading || model.SelectedPersonRowIndex >= personCount)
+                model.SelectedPersonRowIndex = -1;
             UpdateCaseActionState(model);
         }
         finally
@@ -1211,9 +1219,10 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private async Task AdvanceCaseProgressAsync(OfficerShellCaseProgressAdvanceRequest request)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty || _advanceInFlight)
             return;
 
+        _advanceInFlight = true;
         try
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -1240,22 +1249,26 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not advance progress.";
                 model.ProgressStatusIsError = true;
-                await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
                 return;
             }
 
             objectSpace.CommitChanges();
-            model.ProgressStatusMessage = "Progress advanced.";
+            model.ProgressStatusMessage = null;
             model.ProgressStatusIsError = false;
             model.ShowProgressRevertToHere = false;
             model.CaseTab = "progress";
-            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+            // Keep the open section, scroll, and form. The opening skeleton replaces the workspace.
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
+            model.ProgressStatusMessage = "Progress advanced.";
         }
         catch (Exception ex)
         {
             model.ProgressStatusMessage = ex.Message;
             model.ProgressStatusIsError = true;
-            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        }
+        finally
+        {
+            _advanceInFlight = false;
         }
     }
 

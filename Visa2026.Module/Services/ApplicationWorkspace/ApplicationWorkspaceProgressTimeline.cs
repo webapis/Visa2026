@@ -22,6 +22,8 @@ internal static class ApplicationWorkspaceProgressTimeline
     public const string AwaitingAsCoNumberLabel = "Awaiting AS (CO) number";
     public const string AsNumberReceivedLabel = "AS number received";
     public const string IssuedLabel = "Issued";
+    /// <summary>Cancellation last step. Displayed as Işlendi. Date only, no AS number.</summary>
+    public const string IssuedCompletionLabel = "Completion";
 
     public static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> Build(
         ApplicationProfileInstance application,
@@ -97,9 +99,25 @@ internal static class ApplicationWorkspaceProgressTimeline
         var atOffice = slotAnchor == null;
         var cancelledOnCurrent = IsProcessCancelled(latestCode);
 
-        var steps = new List<ApplicationWorkspaceCaseProgressStep>
+        var showOffice = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.Office);
+        var showMinistry = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.Ministry);
+        var showSubmission = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.Submission);
+        var showAsNumber = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.AsNumber);
+        var showIssued = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.Issued);
+        var showRejected = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.Rejected);
+        var showCancelled = ApplicationProfileProgressStepVisibility.IsVisible(
+            liveProfile, ApplicationProfileProgressStepVisibility.Cancelled);
+
+        var steps = new List<ApplicationWorkspaceCaseProgressStep>();
+        if (showOffice)
         {
-            BuildOfficeStep(
+            steps.Add(BuildOfficeStep(
                 application,
                 isCurrent: atOffice,
                 currentSla,
@@ -107,9 +125,11 @@ internal static class ApplicationWorkspaceProgressTimeline
                 advanceBlockedReason,
                 advanceOptions,
                 history,
-                latest),
-        };
+                latest));
+        }
 
+        if (showMinistry)
+        {
         foreach (var leg in legs)
         {
             var row = LatestRowForLeg(history, leg.Sequence);
@@ -131,9 +151,10 @@ internal static class ApplicationWorkspaceProgressTimeline
                 history,
                 latest));
         }
+        }
 
         // Via ministry: after last approval. Direct: after Office (same timeline label).
-        if (legs.Count > 0 || isDirect)
+        if (showSubmission && (legs.Count > 0 || isDirect))
         {
             var submissionRow = LatestSubmissionRow(history);
             var submissionState = ResolveSubmissionSlotState(
@@ -175,15 +196,28 @@ internal static class ApplicationWorkspaceProgressTimeline
         }
 
         // Direct Registration/Cancellation/Business trip ends at hand-in — no AS/Issued node.
-        if (!directEndsAtSubmission)
+        // A hidden last-step result (Issued, Rejected, Cancelled) drops the node once that result is saved.
+        if (!directEndsAtSubmission && showAsNumber)
         {
             var migrationRow = LatestMigrationRow(history);
+            if (!IsHiddenSavedLastStep(migrationRow?.State?.Code, showIssued, showRejected, showCancelled))
+            {
             var migrationState = ResolveMigrationSlotState(
                 atOffice,
                 latestOnMigration,
                 slotCode,
                 submissionRecorded,
                 cancelledOnCurrent);
+            // Via ministry: AS number received is the last step. Once the number is saved, close it.
+            if (string.Equals(migrationState, "current", StringComparison.OrdinalIgnoreCase)
+                && !showIssued
+                && !showRejected
+                && !showCancelled
+                && string.Equals(
+                    migrationRow?.State?.Code,
+                    ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+                    StringComparison.OrdinalIgnoreCase))
+                migrationState = "done";
             var migrationCurrent = migrationState == "current";
             if (cancelledOnCurrent && migrationCurrent)
                 migrationRow = latest;
@@ -215,10 +249,57 @@ internal static class ApplicationWorkspaceProgressTimeline
                 suppressResultDropdown: directFinalAdvance,
                 requireProcessNumberOnAdvance: directFinalAdvance,
                 showOptionalOutcomeFiles: directFinalAdvance));
+            }
+        }
+
+        // Cancellation templates: last step is Işlendi. Date and Advance, no AS number.
+        if (directEndsAtSubmission && showIssued)
+        {
+            var issuedRow = history.LastOrDefault(p =>
+                string.Equals(
+                    p.State?.Code,
+                    ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                    StringComparison.OrdinalIgnoreCase));
+            var issuedState = atOffice || !submissionRecorded
+                ? "pending"
+                : issuedRow != null
+                    ? "done"
+                    : "current";
+            var issuedCurrent = issuedState == "current";
+            steps.Add(BuildFilledStep(
+                MigrationKey,
+                IssuedCompletionLabel,
+                issuedRow,
+                issuedState,
+                issuedCurrent ? currentSla : default,
+                issuedCurrent && canAdvance,
+                issuedCurrent ? advanceBlockedReason : string.Empty,
+                issuedCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+                null,
+                history,
+                latest,
+                stateLabelOverride: string.Empty,
+                suppressResultDropdown: true,
+                requireProcessNumberOnAdvance: false));
         }
 
         ApplyDateBounds(steps);
         return steps;
+    }
+
+    private static bool IsHiddenSavedLastStep(
+        string? stateCode,
+        bool showIssued,
+        bool showRejected,
+        bool showCancelled)
+    {
+        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
+            return !showIssued;
+        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
+            return !showRejected;
+        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
+            return !showCancelled;
+        return false;
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> FilterDirectHandInAdvanceOptions(

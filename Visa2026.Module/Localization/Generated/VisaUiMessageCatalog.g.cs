@@ -4982,6 +4982,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýagdaýy Ilerletmek",
             ["ru-RU"] = "Продвинуть прогресс",
         },
+        ["ApplicationProfileInstance.Workspace.AdvancingProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Advancing…",
+            ["tr-TR"] = "İlerletiliyor…",
+            ["tk-TM"] = "Ilerledilýär…",
+            ["ru-RU"] = "Продвижение…",
+        },
         ["ApplicationProfileInstance.Workspace.ApplicationResult"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application result",
@@ -6059,6 +6066,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Sonuç",
             ["tk-TM"] = "Netije",
             ["ru-RU"] = "Результат",
+        },
+        ["ApplicationProfileInstance.Workspace.ResultNeeded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Result needed",
+            ["tr-TR"] = "Sonuç gerekli",
+            ["tk-TM"] = "Netije gerek",
+            ["ru-RU"] = "Нужен результат",
         },
         ["ApplicationProfileInstance.Workspace.ResultNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

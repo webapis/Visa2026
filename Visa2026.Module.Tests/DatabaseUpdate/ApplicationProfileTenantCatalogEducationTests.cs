@@ -24,7 +24,8 @@ public class ApplicationProfileTenantCatalogEducationTests
 
         Assert.Contains(rows, r => r.Code == "cancel_visa" && !r.RequirePersonEducation);
         Assert.Contains(rows, r => r.Code == "cancel_visa_wp" && !r.RequirePersonEducation);
-        Assert.Contains(rows, r => r.Code == "cancel_visa_ext" && r.RequirePersonEducation);
+        Assert.DoesNotContain(rows, r => r.Code == "cancel_visa_ext");
+        Assert.DoesNotContain(rows, r => r.Code == "cancel_visa_wp_ext");
         Assert.Contains(rows, r => r.Code == "get_invitation" && r.RequirePersonEducation);
     }
 

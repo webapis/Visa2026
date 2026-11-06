@@ -80,6 +80,7 @@ public static class ApplicationProfileLocalization
             "Awaiting AS (CO) number" => Msg("ApplicationProfileInstance.Workspace.AwaitingAsCoNumber"),
             "AS number received" => Msg("ApplicationProfileInstance.Workspace.AsNumberReceived"),
             "Issued" => Msg("ApplicationProfileInstance.Workspace.ProcessIssued"),
+            "Completion" => Msg("ApplicationProfileInstance.Workspace.Issued"),
             "Processing" => Msg("ApplicationProfileInstance.Workspace.Processing"),
             "Process issued" => Msg("ApplicationProfileInstance.Workspace.ProcessIssued"),
             "Process rejected" => Msg("ApplicationProfileInstance.Workspace.ProcessRejected"),

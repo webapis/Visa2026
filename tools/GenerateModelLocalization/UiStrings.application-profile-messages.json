@@ -2871,6 +2871,12 @@
     "tk-TM": "Netije",
     "ru-RU": "Результат"
   },
+  "ApplicationProfileInstance.Workspace.ResultNeeded": {
+    "en-US": "Result needed",
+    "tr-TR": "Sonuç gerekli",
+    "tk-TM": "Netije gerek",
+    "ru-RU": "Нужен результат"
+  },
   "ApplicationProfileInstance.Workspace.ResultNumber": {
     "en-US": "Result number",
     "tr-TR": "Sonuç numarası",
@@ -3455,6 +3461,12 @@
     "tr-TR": "Durumu ilerlet",
     "tk-TM": "Ýagdaýy Ilerletmek",
     "ru-RU": "Продвинуть прогресс"
+  },
+  "ApplicationProfileInstance.Workspace.AdvancingProgress": {
+    "en-US": "Advancing…",
+    "tr-TR": "İlerletiliyor…",
+    "tk-TM": "Ilerledilýär…",
+    "ru-RU": "Продвижение…"
   },
   "ApplicationProfileInstance.Workspace.RevertProgress": {
     "en-US": "Revert progress",

@@ -474,7 +474,7 @@ bands:
         generatesInvitation: false
         generatesWorkPermit: false
         generatesVisa: false
-        notes: Skip empty 2026-09-05. No live Çalik composites in the profile lock.
+        notes: Retired 2026-11-06. Officers use Seretmezlik. Do not import. Saved Visa2026 cases stay on the inactive template.
       - name: App_Cancel_Visa_and_WP_Ext
         status: skip
         sourceComposites: []
@@ -483,7 +483,7 @@ bands:
         generatesInvitation: false
         generatesWorkPermit: false
         generatesVisa: false
-        notes: Skip empty 2026-09-05. No live Çalik composites in the profile lock.
+        notes: Retired 2026-11-06. Officers use Seretmezlik. Do not import. Saved Visa2026 cases stay on the inactive template.
       - name: App_Cancel_Inv
         status: skip
         sourceComposites: []

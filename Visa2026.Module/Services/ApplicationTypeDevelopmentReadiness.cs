@@ -59,8 +59,6 @@ public static class ApplicationTypeDevelopmentReadiness
         // Ýatyrmak (800)
         "App_Cancel_BZ",
         "App_Cancel_App",
-        "App_Cancel_Visa_and_WP_Ext",
-        "App_Cancel_Visa_Ext",
         "App_Cancel_Inv",
         "App_Cancel_Inv_WP",
         "App_Cancel_Visa",
@@ -99,8 +97,6 @@ public static class ApplicationTypeDevelopmentReadiness
         "708",
         "801",
         "802",
-        "803",
-        "804",
         "805",
         "806",
         "807",
@@ -121,11 +117,16 @@ public static class ApplicationTypeDevelopmentReadiness
     public static readonly HashSet<string> HiddenFromTypeCodePickerByName = new(StringComparer.OrdinalIgnoreCase)
     {
         "App_Visa_Ext",
+        // Replaced by Seretmezlik. Saved cases keep the type row.
+        "App_Cancel_Visa_Ext",
+        "App_Cancel_Visa_and_WP_Ext",
     };
 
     public static readonly HashSet<string> HiddenFromTypeCodePickerBySelectionCode = new(StringComparer.OrdinalIgnoreCase)
     {
         "702",
+        "803",
+        "804",
     };
 
     public static bool IsHiddenFromTypeCodePicker(string? name, string? selectionCode) =>

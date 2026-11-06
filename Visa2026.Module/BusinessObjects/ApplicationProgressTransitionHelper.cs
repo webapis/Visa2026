@@ -51,9 +51,13 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
             || ApplicationProfileInstanceProgressLegCodes.IsReviewRejectedStateCode(trimmed))
             return true;
 
-        // Direct Registration/Cancellation/Business trip: hand-in ends the process.
+        // Direct Registration/Cancellation/Business trip: hand-in ends the process,
+        // unless the template turns on the Işlendi completion step.
         return ApplicationMigrationSubmission.IsState(trimmed)
-            && ApplicationProfileConfigurationResolver.DirectEndsAtMigrationSubmission(application);
+            && ApplicationProfileConfigurationResolver.DirectEndsAtMigrationSubmission(application)
+            && !ApplicationProfileProgressStepVisibility.IsVisible(
+                application?.ApplicationProfile,
+                ApplicationProfileProgressStepVisibility.Issued);
     }
 
     public static IReadOnlyList<string> GetAllowedNextStateCodes(
@@ -381,17 +385,34 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
 
             if (ApplicationProfileConfigurationResolver.DirectFinalStepRequiresAsNumber(application))
             {
-                var processIssued = Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
-                // Issuance/Change: hand-in → AS number received (PROCESS_ISSUED).
-                edges.Add(new ProgressTransition(submittedToMigration, processIssued));
-                // Legacy mid-flight: cases already at PROCESS_STARTED can still finish.
-                edges.Add(new ProgressTransition(processStarted, processIssued));
-                edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));
-                AddCancellationFromActiveSteps(edges, leftOffice, submittedToMigration, processStarted, processIssued);
+                var includeIssued = IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Issued);
+                var includeRejected = IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Rejected);
+                var includeCancelled = IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Cancelled);
+                if (includeIssued)
+                {
+                    var processIssued = Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+                    // Issuance/Change: hand-in → AS number received (PROCESS_ISSUED).
+                    edges.Add(new ProgressTransition(submittedToMigration, processIssued));
+                    // Legacy mid-flight: cases already at PROCESS_STARTED can still finish.
+                    edges.Add(new ProgressTransition(processStarted, processIssued));
+                }
+
+                if (includeRejected)
+                    edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));
+
+                var directCancelFrom = new List<ProgressStep> { leftOffice, submittedToMigration };
+                if (includeCancelled)
+                    directCancelFrom.Add(processStarted);
+                if (includeIssued && includeCancelled)
+                    directCancelFrom.Add(Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+                AddCancellationFromActiveSteps(edges, directCancelFrom.ToArray());
             }
             else
             {
-                // Registration/Cancellation/Business trip: SUBMITTED_MIGRATION is terminal.
+                // Registration/Cancellation/Business trip: hand-in is the last step,
+                // except cancellation templates that enable Işlendi (date only, no AS number).
+                if (IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Issued))
+                    edges.Add(new ProgressTransition(submittedToMigration, Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued)));
                 // Cancelled only from office (not on the final hand-in step).
                 AddCancellationFromActiveSteps(edges, leftOffice);
             }
@@ -426,18 +447,33 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         edges.Add(new ProgressTransition(lastApproved, submittedToMigration));
         edges.Add(new ProgressTransition(submittedToMigration, processStarted));
 
-        AddProcessOutcomes(edges, processStarted);
-        var cancellationFrom = new List<ProgressStep> { started1, submittedToMigration, processStarted };
+        AddProcessOutcomes(
+            edges,
+            processStarted,
+            IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Issued),
+            IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Rejected));
+        var cancellationFrom = new List<ProgressStep> { started1, submittedToMigration };
+        if (IncludeLastStep(application, ApplicationProfileProgressStepVisibility.Cancelled))
+            cancellationFrom.Add(processStarted);
         cancellationFrom.AddRange(approvedSteps);
         AddCancellationFromActiveSteps(edges, cancellationFrom.ToArray());
 
         return edges;
     }
 
-    private static void AddProcessOutcomes(List<ProgressTransition> edges, ProgressStep processStarted)
+    private static bool IncludeLastStep(ApplicationProfileInstance? application, string key) =>
+        ApplicationProfileProgressStepVisibility.IsVisible(application?.ApplicationProfile, key);
+
+    private static void AddProcessOutcomes(
+        List<ProgressTransition> edges,
+        ProgressStep processStarted,
+        bool includeIssued,
+        bool includeRejected)
     {
-        edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued)));
-        edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));
+        if (includeIssued)
+            edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessIssued)));
+        if (includeRejected)
+            edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));
     }
 
     private static void AddCancellationFromActiveSteps(List<ProgressTransition> edges, params ProgressStep[] fromSteps)

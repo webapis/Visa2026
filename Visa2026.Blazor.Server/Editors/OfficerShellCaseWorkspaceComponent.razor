@@ -351,7 +351,7 @@
                                                          CorrectionSavedRevision="@ProgressCorrectionRevision"
                                                          SaveNotesRequested="@SaveProgressNotesRequested"
                                                          UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
-                                                         AdvanceProgressRequested="@AdvanceProgressRequested"
+                                                         AdvanceProgressRequested="OnAdvanceProgressRequested"
                                                          SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
                                                          RevertProgressRequested="@RevertProgressRequested"
                                                          SaveStepRequested="@SaveStepRequested"
@@ -420,6 +420,8 @@
         ["#7c3aed", "#0f9d58", "#ea580c", "#2563eb", "#db2777"];
 
     private OfficerShellCaseProgressTab? _progressTab;
+    private bool _progressUpdating;
+    private bool _ignoreAdvanceClick;
     private string? _pendingTab;
     private string? _blockedSectionLabel;
     private bool _keepBlockedSectionLabel;
@@ -2912,14 +2914,10 @@
                 </section>
                 <section class="cw-rail-block">
                     <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
-                    <button type="button"
-                            class="cw-rail-btn cw-rail-btn--primary"
-                            disabled="@(!CanAdvanceFromRail)"
-                            title="@AdvanceBlockedTitle"
-                            @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    @AdvanceActionButton("cw-rail-btn cw-rail-btn--primary")
                     @if (CanRevertFromRail)
                     {
-                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
+                        <button type="button" class="cw-rail-btn" disabled="@(_progressUpdating || _ignoreAdvanceClick)" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
                     }
                 </section>
                 <section class="cw-rail-block">
@@ -2976,15 +2974,10 @@
                     }
                 </section>
                 <section class="cw-rail-block">
-                    <button type="button"
-                            class="os-btn os-btn--primary"
-                            style="width:100%;margin-bottom:8px"
-                            disabled="@(!CanAdvanceFromRail)"
-                            title="@AdvanceBlockedTitle"
-                            @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    @AdvanceActionButton("os-btn os-btn--primary", "width:100%;margin-bottom:8px")
                     @if (CanRevertFromRail)
                     {
-                        <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
+                        <button type="button" class="os-btn os-btn--ghost" style="width:100%;margin-bottom:8px" disabled="@(_progressUpdating || _ignoreAdvanceClick)" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
                     }
                 </section>
                 <section class="cw-rail-block">
@@ -3000,14 +2993,10 @@
             case "result":
                 <section class="cw-rail-block">
                     <h4>@Msg("ApplicationProfileInstance.Workspace.QuickActions")</h4>
-                    <button type="button"
-                            class="cw-rail-btn cw-rail-btn--primary"
-                            disabled="@(!CanAdvanceFromRail)"
-                            title="@AdvanceBlockedTitle"
-                            @onclick="AdvanceProgressAsync">▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</button>
+                    @AdvanceActionButton("cw-rail-btn cw-rail-btn--primary")
                     @if (CanRevertFromRail)
                     {
-                        <button type="button" class="cw-rail-btn" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
+                        <button type="button" class="cw-rail-btn" disabled="@(_progressUpdating || _ignoreAdvanceClick)" @onclick="RevertProgressAsync">◀ @Msg("ApplicationProfileInstance.Workspace.RevertProgress")</button>
                     }
                 </section>
                 break;
@@ -3586,9 +3575,57 @@
         }
     }
 
+    private RenderFragment AdvanceActionButton(string cssClass, string? style = null) => __builder =>
+    {
+        <button type="button"
+                class="@($"{cssClass}{(_progressUpdating ? " is-busy" : "")}")"
+                style="@style"
+                disabled="@(_progressUpdating || _ignoreAdvanceClick || !CanAdvanceFromRail)"
+                aria-busy="@_progressUpdating"
+                title="@AdvanceBlockedTitle"
+                @onclick="AdvanceProgressAsync">
+            @if (_progressUpdating)
+            {
+                <span class="cw-advance-spin" aria-hidden="true"></span>
+                @Msg("ApplicationProfileInstance.Workspace.AdvancingProgress")
+            }
+            else
+            {
+                <text>▶ @Msg("ApplicationProfileInstance.Workspace.AdvanceProgress")</text>
+            }
+        </button>
+    };
+
+    private async Task OnAdvanceProgressRequested(OfficerShellCaseProgressAdvanceRequest request)
+    {
+        if (_progressUpdating || _ignoreAdvanceClick)
+            return;
+
+        _progressUpdating = true;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            await AdvanceProgressRequested.InvokeAsync(request);
+        }
+        finally
+        {
+            _progressUpdating = false;
+            // A second click queued during the save must not advance the next step.
+            _ignoreAdvanceClick = true;
+            _ = ReleaseAdvanceClickAsync();
+        }
+    }
+
+    private async Task ReleaseAdvanceClickAsync()
+    {
+        await Task.Delay(400);
+        _ignoreAdvanceClick = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
     private Task AdvanceProgressAsync()
     {
-        if (!CanAdvanceFromRail)
+        if (_progressUpdating || _ignoreAdvanceClick || !CanAdvanceFromRail)
             return Task.CompletedTask;
 
         if (TryBlockIncompleteProcessWork())
@@ -3605,7 +3642,7 @@
         if (_progressTab != null)
             return _progressTab.AdvanceFromRailAsync();
 
-        return AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
+        return OnAdvanceProgressRequested(new OfficerShellCaseProgressAdvanceRequest
         {
             StateCode = ApplicationWorkspaceProgressAdvancePreview.PreferredAdvanceCode(
                 current.Key,

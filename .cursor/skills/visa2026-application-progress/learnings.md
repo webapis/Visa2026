@@ -6,6 +6,14 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-06 — Advance progress keeps the case on screen
+
+- **Need**: Advance progress replaced the case workspace with the opening skeleton, so the officer lost the section and form for a few seconds. The button also gave no sign that the save was still running.
+- **Fix**: Advance reloads the snapshot with `showLoading: false` and leaves the workspace mounted. While the save runs, the form button and the rail button switch to **Advancing…** with a spinner and a moving bar (`is-busy`). A second click queued during the save is ignored.
+- **Officer**: Stop F5, rebuild, hard-refresh. Advance from the progress form or the right rail. The case stays put; the button reads Advancing… until the next step appears.
+- **Prevent**: Do not set `IsLoading` / `WorkspaceLoading` after Advance. Do not leave the Advance button looking idle while the save is in flight.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-11-03 — Dual-list Seretmezlik Via create lost ministry route
 
 - **Need**: Via-created Seretmezlik must use ministry progress graph (TNGIZ etc.), not Direct "Submitted to migration service".

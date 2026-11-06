@@ -72,6 +72,7 @@ public static class ApplicationProfileSchemaSql
             "RequireWorkPermitLocation" boolean NOT NULL DEFAULT false,
             "DefaultWorkPermitLocation" character varying(500) NULL,
             "RequireProcessNumber" boolean NOT NULL DEFAULT false,
+            "ProgressStepVisibility" text NULL,
             "RequireEntryDate" boolean NOT NULL DEFAULT false,
             "RequireEntryCheckPoint" boolean NOT NULL DEFAULT false,
             "DefaultEntryCheckPointId" uuid NULL,
@@ -247,6 +248,7 @@ public static class ApplicationProfileSchemaSql
                 DefaultUrgencyId uniqueidentifier NULL,
                 RequireWorkPermitLocation bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireWorkPermitLocation DEFAULT (0),
                 RequireProcessNumber bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0),
+                ProgressStepVisibility nvarchar(max) NULL,
                 DefaultWorkPermitLocation nvarchar(500) NULL,
                 RequireEntryDate bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEntryDate DEFAULT (0),
                 RequireEntryCheckPoint bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireEntryCheckPoint DEFAULT (0),
@@ -724,6 +726,9 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureRequireProcessNumberPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireProcessNumber" boolean NOT NULL DEFAULT false;""";
 
+    internal const string EnsureProgressStepVisibilityPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "ProgressStepVisibility" text NULL;""";
+
     internal const string EnsureRequireTargetApplicationProfileInstancePostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireTargetApplicationProfileInstance" boolean NOT NULL DEFAULT false;""";
 
@@ -953,6 +958,7 @@ public static class ApplicationProfileSchemaSql
         EnsureDefaultWorkPermitLocationPostgres,
         EnsureBorderZoneItemBorderZoneLocationPostgres,
         EnsureRequireProcessNumberPostgres,
+        EnsureProgressStepVisibilityPostgres,
         EnsureRequireTargetApplicationProfileInstancePostgres,
         EnsureRequireSubmitToOrganizationPostgres,
         EnsureInstanceTargetApplicationProfileInstanceIdPostgres,
@@ -1138,6 +1144,10 @@ public static class ApplicationProfileSchemaSql
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireProcessNumber') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD RequireProcessNumber bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'ProgressStepVisibility') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD ProgressStepVisibility nvarchar(max) NULL;
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireTargetApplicationProfileInstance') IS NULL

@@ -59,6 +59,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Inv_And_WP"
     },
     {
@@ -120,6 +129,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Inv_FM"
     },
     {
@@ -182,6 +200,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Inv"
     },
     {
@@ -243,6 +270,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Sevice_Passport"
     },
     {
@@ -304,6 +340,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Inv_According_to_WP"
     },
     {
@@ -370,6 +415,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": true },
+        { "Key": "process-cancelled", "Visible": true }
+      ],
       "ProfileCatalogKey": "App_Change_Inv"
     },
     {
@@ -430,6 +484,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancel_Inv"
     },
     {
@@ -491,6 +554,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancel_Inv_WP"
     },
     {
@@ -550,6 +622,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancel_BZ"
     },
     {
@@ -609,125 +690,16 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancel_App"
-    },
-    {
-      "ApplicationTypeName": "App_Cancel_Visa_and_WP_Ext",
-      "Code": "cancel_visa_wp_ext",
-      "Name": "Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak",
-      "ProgressRoute": "DirectToMigrationService",
-      "ActionFamily": "Cancellation",
-      "ForEmployee": true,
-      "ForFamilyMember": false,
-      "ForTemporaryVisitor": false,
-      "ProduceInvitation": false,
-      "ProduceWorkPermit": false,
-      "ProduceVisa": false,
-      "ProduceBorderZone": false,
-      "ProduceWorkLocation": false,
-      "ProduceRejection": false,
-      "CancelInvitations": false,
-      "CancelWorkPermits": false,
-      "CancelVisas": false,
-      "CancelBorderZonePermits": false,
-      "CancelApplicationProfileInstances": true,
-      "MinistrySlaDays": 4,
-      "MigrationSlaDays": 3,
-      "RequireVisaType": false,
-      "DefaultVisaTypeLocalizationKey": null,
-      "RequireVisaCategory": false,
-      "DefaultVisaCategoryLocalizationKey": null,
-      "RequireVisaPeriod": false,
-      "DefaultVisaPeriodLocalizationKey": null,
-      "RequireBorderZone": false,
-      "RequireMigrationService": false,
-      "RequireStartDate": false,
-      "RequireEndDate": false,
-      "RequireRegion": false,
-      "RequireCity": false,
-      "RequireRegionCity": false,
-      "RequireBusinessTripAddress": false,
-      "RequireProject": false,
-      "RequireUrgency": false,
-      "DefaultUrgencyLocalizationKey": null,
-      "RequireWorkPermitLocation": false,
-      "RequireEntryDate": false,
-      "RequireEntryCheckPoint": false,
-      "RequirePersonPassport": true,
-      "RequirePersonEducation": true,
-      "RequirePersonPosition": true,
-      "RequirePersonAddressOfResidence": true,
-      "RequirePersonVisa": true,
-      "RequirePersonInvitationItem": false,
-      "RequirePersonWorkPermitItem": true,
-      "RequirePersonBorderZoneItem": false,
-      "RequirePersonSalary": false,
-      "RequirePersonMedical": false,
-      "RequirePersonRejectionItem": false,
-      "RequirePersonTravelHistory": false,
-      "IsActive": true,
-      "SignOff": "",
-      "DefaultProjectContractCode": null,
-      "ProfileCatalogKey": "App_Cancel_Visa_and_WP_Ext"
-    },
-    {
-      "ApplicationTypeName": "App_Cancel_Visa_Ext",
-      "Code": "cancel_visa_ext",
-      "Name": "Wizany Uzaltmak Barada Ýüztutmany Ýatyrmak",
-      "ProgressRoute": "DirectToMigrationService",
-      "ActionFamily": "Cancellation",
-      "ForEmployee": true,
-      "ForFamilyMember": true,
-      "ForTemporaryVisitor": true,
-      "ProduceInvitation": false,
-      "ProduceWorkPermit": false,
-      "ProduceVisa": false,
-      "ProduceBorderZone": false,
-      "ProduceWorkLocation": false,
-      "ProduceRejection": false,
-      "CancelInvitations": false,
-      "CancelWorkPermits": false,
-      "CancelVisas": false,
-      "CancelBorderZonePermits": false,
-      "CancelApplicationProfileInstances": true,
-      "MinistrySlaDays": 4,
-      "MigrationSlaDays": 3,
-      "RequireVisaType": false,
-      "DefaultVisaTypeLocalizationKey": null,
-      "RequireVisaCategory": false,
-      "DefaultVisaCategoryLocalizationKey": null,
-      "RequireVisaPeriod": false,
-      "DefaultVisaPeriodLocalizationKey": null,
-      "RequireBorderZone": false,
-      "RequireMigrationService": false,
-      "RequireStartDate": false,
-      "RequireEndDate": false,
-      "RequireRegion": false,
-      "RequireCity": false,
-      "RequireRegionCity": false,
-      "RequireBusinessTripAddress": false,
-      "RequireProject": false,
-      "RequireUrgency": false,
-      "DefaultUrgencyLocalizationKey": null,
-      "RequireWorkPermitLocation": false,
-      "RequireEntryDate": false,
-      "RequireEntryCheckPoint": false,
-      "RequirePersonPassport": true,
-      "RequirePersonEducation": true,
-      "RequirePersonPosition": true,
-      "RequirePersonAddressOfResidence": true,
-      "RequirePersonVisa": true,
-      "RequirePersonInvitationItem": false,
-      "RequirePersonWorkPermitItem": false,
-      "RequirePersonBorderZoneItem": false,
-      "RequirePersonSalary": false,
-      "RequirePersonMedical": false,
-      "RequirePersonRejectionItem": false,
-      "RequirePersonTravelHistory": false,
-      "IsActive": true,
-      "SignOff": "",
-      "DefaultProjectContractCode": null,
-      "ProfileCatalogKey": "App_Cancel_Visa_Ext"
     },
     {
       "ApplicationTypeName": "App_Cancel_Visa",
@@ -787,6 +759,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancel_Visa"
     },
     {
@@ -848,6 +829,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancel_Visa_and_WP"
     },
     {
@@ -908,6 +898,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Cancell_WP"
     },
     {
@@ -968,6 +967,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Check_In"
     },
     {
@@ -1032,6 +1040,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Check_In_Internal"
     },
     {
@@ -1092,6 +1109,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Info_Change_Passport"
     },
     {
@@ -1152,6 +1178,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Info_Change_Visa"
     },
     {
@@ -1212,6 +1247,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Info_Change_Address"
     },
     {
@@ -1272,6 +1316,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Check_Out"
     },
     {
@@ -1336,6 +1389,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_Check_Out_Internal"
     },
     {
@@ -1396,6 +1458,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Reg_ext"
     },
     {
@@ -1460,6 +1531,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Business_Trip_Departure"
     },
     {
@@ -1524,6 +1604,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Business_Trip_Arrival"
     },
     {
@@ -1583,6 +1672,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Visa_Ext_According_to_WP"
     },
     {
@@ -1642,6 +1740,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Visa_Ext"
     },
     {
@@ -1701,6 +1808,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Exit_Visa"
     },
     {
@@ -1765,6 +1881,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": true },
+        { "Key": "process-cancelled", "Visible": true }
+      ],
       "ProfileCatalogKey": "App_Change_Visa_Category"
     },
     {
@@ -1830,6 +1955,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": true },
+        { "Key": "process-rejected", "Visible": true },
+        { "Key": "process-cancelled", "Visible": true }
+      ],
       "ProfileCatalogKey": "App_Change_Passport"
     },
     {
@@ -1889,6 +2023,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Visa_Ext_FM"
     },
     {
@@ -1948,6 +2091,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Visa_For_New_Born_FM"
     },
     {
@@ -2007,6 +2159,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Visa_and_WP_Ext"
     },
     {
@@ -2066,6 +2227,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_WP_Ext"
     },
     {
@@ -2125,6 +2295,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Border_Zone_Permission"
     },
     {
@@ -2184,6 +2363,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": true },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": true },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Additional_WP_location"
     },
     {
@@ -2248,6 +2436,15 @@
       "IsActive": true,
       "SignOff": "",
       "DefaultProjectContractCode": null,
+      "ProgressSteps": [
+        { "Key": "office", "Visible": true },
+        { "Key": "ministry", "Visible": false },
+        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration", "Visible": false },
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
+      ],
       "ProfileCatalogKey": "App_Seretmezlik"
     }
   ]

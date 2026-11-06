@@ -78,8 +78,6 @@ Use exact `Name` values from `ApplicationTypeSelectionCodeSeed.cs`:
 | App_Visa_and_WP_Ext | 708 |
 | App_Cancel_BZ | 801 |
 | App_Cancel_App | 802 |
-| App_Cancel_Visa_and_WP_Ext | 803 |
-| App_Cancel_Visa_Ext | 804 |
 | App_Cancel_Inv | 805 |
 | App_Cancel_Inv_WP | 806 |
 | App_Cancel_Visa | 807 |

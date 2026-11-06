@@ -5,7 +5,6 @@ namespace Visa2026.Module.BusinessObjects;
 /// <summary>
 /// Education is not required on visa-cancellation templates
 /// (<c>cancel_visa</c> / Wizany Yatyrmak, <c>cancel_visa_wp</c>).
-/// Extension-request cancels (<c>cancel_visa_ext</c>) keep the catalog flag.
 /// </summary>
 public static class ApplicationProfileEducationPolicy
 {

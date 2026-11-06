@@ -1,4 +1,4 @@
-# One stakeholder demo scenario per ApplicationType.Name (36 types + Shared).
+# One stakeholder demo scenario per ApplicationType.Name (34 types + Shared).
 # ApplicationType Show* flags: Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json
 version: 1
 shared: 00-shared.yaml
@@ -6,8 +6,6 @@ byApplicationType:
   App_Border_Zone_Permission: 23-borderzonepermission.yaml
   App_Cancel_BZ: 27-app-cancel-bz.yaml
   App_Cancel_App: 28-app-cancel-app.yaml
-  App_Cancel_Visa_and_WP_Ext: 29-app-cancel-visa-and-wp-ext.yaml
-  App_Cancel_Visa_Ext: 30-app-cancel-visa-ext.yaml
   App_Inv: 01-invitationemployee.yaml
   App_Inv_FM: 17-invitationfm.yaml
   App_Sevice_Passport: 31-app-service-passport.yaml

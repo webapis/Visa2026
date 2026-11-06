@@ -34,6 +34,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
     private IApplicationWorkspacePersonUiActions? _personUiActions;
     private IOfficerShellCaseProgressService? _caseProgressService;
     private IApplicationProfileInstancePersonLinkQueryService? _personLinkQueryService;
+    private bool _advanceInFlight;
 
     public ApplicationWorkspacePropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
@@ -56,7 +57,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         IsLoading = true,
         LoadingProgressPercent = -1,
         LoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening"),
-        InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
+        InitialLoadRequested = EventCallback.Factory.Create(this, () => LoadAsync()),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
         UnlinkPersonRequested = EventCallback.Factory.Create<Guid>(this, UnlinkPersonAsync),
         OpenPersonDetailRequested = EventCallback.Factory.Create(this, OpenPersonDetailAsync),
@@ -130,16 +131,26 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         _ = LoadAsync();
     }
 
-    private async Task LoadAsync()
+    private Task LoadAsync() => LoadAsync(showLoading: true);
+
+    private async Task LoadAsync(bool showLoading)
     {
         var model = ComponentModel;
         if (model == null)
             return;
 
-        model.IsLoading = true;
-        model.LoadingProgressPercent = -1;
-        model.LoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
-        await Task.Delay(16);
+        if (showLoading)
+        {
+            model.IsLoading = true;
+            model.LoadingProgressPercent = -1;
+            model.LoadingMessage = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Opening");
+            await Task.Delay(16);
+        }
+        else
+        {
+            // Paint the disabled Advance button before the snapshot read.
+            await Task.Yield();
+        }
 
         try
         {
@@ -166,8 +177,12 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         }
         finally
         {
-            model.IsLoading = false;
-            model.LoadingMessage = string.Empty;
+            if (showLoading)
+            {
+                model.IsLoading = false;
+                model.LoadingMessage = string.Empty;
+            }
+
             UpdateActionState(model);
         }
     }
@@ -794,9 +809,10 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
     {
         var model = ComponentModel;
         var applicationId = ResolveApplicationProfileInstanceId();
-        if (model == null || _application == null || applicationId == Guid.Empty)
+        if (model == null || _application == null || applicationId == Guid.Empty || _advanceInFlight)
             return;
 
+        _advanceInFlight = true;
         try
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -823,22 +839,26 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not advance progress.";
                 model.ProgressStatusIsError = true;
-                await LoadAsync();
                 return;
             }
 
             objectSpace.CommitChanges();
-            model.ProgressStatusMessage = "Progress advanced.";
+            model.ProgressStatusMessage = null;
             model.ProgressStatusIsError = false;
             model.ShowProgressRevertToHere = false;
             model.CaseTab = "progress";
-            await LoadAsync();
+            // Keep the open section, scroll, and form. The opening skeleton replaces the workspace.
+            await LoadAsync(showLoading: false);
+            model.ProgressStatusMessage = "Progress advanced.";
         }
         catch (Exception ex)
         {
             model.ProgressStatusMessage = ex.Message;
             model.ProgressStatusIsError = true;
-            await LoadAsync();
+        }
+        finally
+        {
+            _advanceInFlight = false;
         }
     }
 

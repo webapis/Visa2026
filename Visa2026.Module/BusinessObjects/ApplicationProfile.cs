@@ -381,6 +381,14 @@ public class ApplicationProfile : BaseObject
     [XafDisplayName("Progress state settings")]
     public virtual IList<ApplicationProfileProgressStateSetting> ProgressStateSettings { get; set; }
 
+    /// <summary>
+    /// JSON list of every progress step (<see cref="ApplicationProfileProgressStepVisibility.AllKeys"/>)
+    /// and whether this profile shows it. Empty keeps today's route rules.
+    /// </summary>
+    [FieldSize(FieldSizeAttribute.Unlimited)]
+    [Browsable(false)]
+    public virtual string? ProgressStepVisibility { get; set; }
+
     /// <summary>Freeform XAF criteria filtering when this profile appears in pickers.</summary>
     [FieldSize(FieldSizeAttribute.Unlimited)]
     [XafDisplayName("Applicability criteria")]
@@ -667,7 +675,7 @@ public enum ApplicationProfileProgressStateTrack
 
 /// <summary>
 /// Per-profile inclusion and SLA tracking for a progress state (legacy wizard checklist).
-/// Not used by instance progress. Instance steps follow Directed to, Approval legs, and the fixed transition graph.
+/// Not used by instance progress. Timeline visibility is <see cref="ApplicationProfile.ProgressStepVisibility"/>.
 /// SLA days live on <see cref="ApplicationProfile.MinistrySlaDays"/> / <see cref="ApplicationProfile.MigrationSlaDays"/>.
 /// </summary>
 [DefaultClassOptions]
@@ -1124,5 +1132,6 @@ public static class ApplicationProfileLockHelper
         || original.PersonInvitationItemLastCount != current.PersonInvitationItemLastCount
         || original.PersonWorkPermitItemLastCount != current.PersonWorkPermitItemLastCount
         || original.PersonBorderZoneItemLastCount != current.PersonBorderZoneItemLastCount
+        || !string.Equals(original.ProgressStepVisibility, current.ProgressStepVisibility, StringComparison.Ordinal)
         || !string.Equals(original.ApplicabilityCriteria, current.ApplicabilityCriteria, StringComparison.Ordinal);
 }
