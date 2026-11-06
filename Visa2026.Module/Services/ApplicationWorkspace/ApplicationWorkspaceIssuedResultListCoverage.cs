@@ -132,6 +132,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var borderZoneIndex = IndexIssuedDocuments(LoadBorderZonePairs(objectSpace, ids));
         var locationGrantIndex = IndexIssuedDocuments(LoadWorkPermitLocationGrantPairs(objectSpace, ids));
         var locationGrantDetailsByInstance = LoadWorkPermitLocationGrantDetails(objectSpace, ids);
+        var borderZoneDetailsByInstance = LoadBorderZoneDetails(objectSpace, ids);
         var invitation = invitationIndex.People;
         var workPermit = workPermitIndex.People;
         var rejection = rejectionIndex.People;
@@ -187,7 +188,8 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 exclusions,
                 Holders(locationGrant, application.ID),
                 DocumentsFor(locationGrantIndex.Documents, application.ID),
-                DetailsFor(locationGrantDetailsByInstance, application.ID)));
+                DetailsFor(locationGrantDetailsByInstance, application.ID),
+                DetailsFor(borderZoneDetailsByInstance, application.ID)));
         }
     }
 
@@ -786,6 +788,117 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
             .Select(x => (x.InstanceId, x.PersonId, x.DocumentId));
     }
 
+
+    private static Dictionary<Guid, Dictionary<Guid, string>> LoadBorderZoneDetails(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, string>>();
+        if (objectSpace == null || ids.Count == 0)
+            return result;
+
+        var rows = objectSpace.GetObjectsQuery<BorderZoneItem>()
+            .Where(i => i.BorderZone != null
+                && i.BorderZone.ApplicationProfileInstance != null
+                && ids.Contains(i.BorderZone.ApplicationProfileInstance.ID)
+                && i.Person != null)
+            .Select(i => new
+            {
+                InstanceId = i.BorderZone!.ApplicationProfileInstance!.ID,
+                PersonId = i.Person!.ID,
+                StartDate = i.BorderZone.StartDate,
+                Locations = i.BorderZoneLocation,
+            })
+            .ToList()
+            .OrderByDescending(x => x.StartDate);
+
+        foreach (var row in rows)
+        {
+            if (row.InstanceId == Guid.Empty || row.PersonId == Guid.Empty)
+                continue;
+            if (!result.TryGetValue(row.InstanceId, out var byPerson))
+            {
+                byPerson = new Dictionary<Guid, string>();
+                result[row.InstanceId] = byPerson;
+            }
+
+            if (byPerson.ContainsKey(row.PersonId))
+                continue;
+
+            byPerson[row.PersonId] = MeaningfulBorderZoneLocations(row.Locations) ?? string.Empty;
+        }
+
+        FillBorderZoneLocationsFromCase(objectSpace, ids, result);
+        return result;
+    }
+
+    /// <summary>
+    /// Granted border-zone places live on the case person row (and the case summary), not on
+    /// <see cref="BorderZoneItem.BorderZoneLocation"/>.
+    /// </summary>
+    private static void FillBorderZoneLocationsFromCase(
+        IObjectSpace objectSpace,
+        IReadOnlyCollection<Guid> ids,
+        Dictionary<Guid, Dictionary<Guid, string>> result)
+    {
+        if (result.Count == 0)
+            return;
+
+        var requested = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonRequestedLocation>()
+            .Where(r => ids.Contains(r.ApplicationProfileInstanceId)
+                && r.Kind == ApplicationProfileInstancePersonRequestedLocationKind.BorderZone)
+            .Select(r => new
+            {
+                r.ApplicationProfileInstanceId,
+                r.PersonId,
+                r.Locations,
+            })
+            .ToList();
+
+        foreach (var row in requested)
+        {
+            var locations = MeaningfulBorderZoneLocations(row.Locations);
+            if (locations == null
+                || row.PersonId == Guid.Empty
+                || row.ApplicationProfileInstanceId == Guid.Empty
+                || !result.TryGetValue(row.ApplicationProfileInstanceId, out var byPerson)
+                || !byPerson.TryGetValue(row.PersonId, out var existing)
+                || !string.IsNullOrWhiteSpace(existing))
+                continue;
+
+            byPerson[row.PersonId] = locations;
+        }
+
+        var caseRows = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => ids.Contains(a.ID))
+            .Select(a => new { a.ID, a.BorderZoneLocation })
+            .ToList();
+        foreach (var app in caseRows)
+        {
+            var locations = MeaningfulBorderZoneLocations(app.BorderZoneLocation);
+            if (locations == null || !result.TryGetValue(app.ID, out var byPerson))
+                continue;
+            foreach (var personId in byPerson.Keys.ToList())
+            {
+                if (string.IsNullOrWhiteSpace(byPerson[personId]))
+                    byPerson[personId] = locations;
+            }
+        }
+
+        foreach (var byPerson in result.Values)
+        {
+            foreach (var personId in byPerson.Keys.Where(id => string.IsNullOrWhiteSpace(byPerson[id])).ToList())
+                byPerson.Remove(personId);
+        }
+    }
+
+    private static string? MeaningfulBorderZoneLocations(string? stored)
+    {
+        var trimmed = stored?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed) || BorderZoneSelectionHelper.IsNoneValue(trimmed))
+            return null;
+        return trimmed;
+    }
     private static Dictionary<Guid, Dictionary<Guid, string>> LoadWorkPermitLocationGrantDetails(
         IObjectSpace? objectSpace,
         IReadOnlyCollection<Guid> ids)

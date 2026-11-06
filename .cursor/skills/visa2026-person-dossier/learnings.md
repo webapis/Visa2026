@@ -198,3 +198,18 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 - **Fix**: Screen keeps the first five rows. **Show more** opens the rest and shows the hidden count. **Show less** returns that section to five. Applications apply the limit inside the selected group. Paper and the director PDF still list every row.
 - **Verified**: Officer confirmed the live dossier. Blazor host Debug build had 0 errors before the commit; the commit itself was not rebuilt.
 - **Prevent**: Do not cap Paper or the director PDF. Do not reveal another five on each click.
+
+### 2026-11-06 — Screen dossier sizes to its content
+
+- **Ask**: The screen dossier had become too wide. Sections and identity fields stretched across the pane with empty gaps. Size each block only to its content.
+- **Cause**: `width: max-content` together with `min-width: 100%` on the screen column, every section, and every table, plus `1fr` identity and tile tracks. The widest row stretched every other block.
+- **Fix**: Screen column, identity, tiles, and sections use `width: fit-content` and `max-width: 100%`. Tables stay `width: max-content` and scroll inside the section when a progress track is wider than the pane. The detail host no longer uses `max-width: none`.
+- **Verified**: The running host on `https://127.0.0.1:5001` serves the updated `person-dossier.css`. The live dossier was not opened in the browser in this session.
+- **Prevent**: Do not put `min-width: 100%` back on `.person-dossier__table` or `.person-dossier__section`. Do not let the detail host grow with `max-width: none`.
+
+### 2026-11-06 — Sections share the width of the widest one
+
+- **Ask**: After shrink-to-content, the cards were different widths. Match every section to the widest so the dossier looks aligned.
+- **Fix**: `.person-dossier__sections` is a one-column grid sized to the widest table. Each section and its table stretch to that width. Identity, tiles, and the toolbar use `width: 0; min-width: 100%` so they follow that width and do not make the column wider. The column still stops at the pane.
+- **Verified**: Stylesheet only. The live dossier was not opened in this session.
+- **Prevent**: Do not set `width: fit-content` on `.person-dossier__section`. That makes each card only as wide as its own rows.

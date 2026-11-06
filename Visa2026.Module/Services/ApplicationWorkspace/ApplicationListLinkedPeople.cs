@@ -104,7 +104,8 @@ public static class ApplicationListLinkedPeople
         IReadOnlyDictionary<Guid, ApplicationProfileInstanceExcludedPerson>? exclusions = null,
         IReadOnlySet<Guid>? locationGrant = null,
         IReadOnlyDictionary<Guid, Guid>? locationGrantDocuments = null,
-        IReadOnlyDictionary<Guid, string>? locationGrantDetails = null)
+        IReadOnlyDictionary<Guid, string>? locationGrantDetails = null,
+        IReadOnlyDictionary<Guid, string>? borderZoneDetails = null)
     {
         if (application == null || roster == null || roster.Count == 0)
             return Array.Empty<Row>();
@@ -165,6 +166,14 @@ public static class ApplicationListLinkedPeople
                     && !string.IsNullOrWhiteSpace(grantedLocations))
                 {
                     detail = grantedLocations.Trim();
+                }
+                else if (issued
+                    && string.Equals(kind, ApplicationWorkspaceIssuedRecordsCatalog.BorderZone, StringComparison.Ordinal)
+                    && borderZoneDetails != null
+                    && borderZoneDetails.TryGetValue(personId, out var borderLocations)
+                    && !string.IsNullOrWhiteSpace(borderLocations))
+                {
+                    detail = borderLocations.Trim();
                 }
 
                 var mark = new Mark(kind, tone, state, documentId, Detail: detail);

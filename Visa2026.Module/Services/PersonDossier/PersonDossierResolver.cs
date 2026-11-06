@@ -524,6 +524,7 @@ public static class PersonDossierResolver
             objectSpace,
             invitationItems.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
         var locationGrantItemsByApp = LoadLocationGrantItemsByApplication(objectSpace, personId);
+        var borderZoneItemsByApp = LoadBorderZoneItemsByApplication(objectSpace, personId);
 
         var records = apps
             .Select(app =>
@@ -547,6 +548,10 @@ public static class PersonDossierResolver
                     ? coverageChips
                     : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
                 locationGrantItemsByApp.TryGetValue(app.ID, out var locationGrantItem);
+                borderZoneItemsByApp.TryGetValue(app.ID, out var borderZoneItem);
+                var borderZoneLocations = borderZoneItem == null
+                    ? null
+                    : ResolveGrantedBorderZoneLocations(objectSpace, app, personId, borderZoneItem);
                 return new PersonDossierRecord
                 {
                     RecordKey = $"Application:{app.ID}",
@@ -570,7 +575,9 @@ public static class PersonDossierResolver
                         invitationItems.FirstOrDefault(item => item.Invitation?.ApplicationProfileInstance?.ID == app.ID),
                         Safe(person.RejectionItems).FirstOrDefault(item => item.Rejection?.ApplicationProfileInstance?.ID == app.ID),
                         usedInvitationIds,
-                        locationGrantItem),
+                        locationGrantItem,
+                        borderZoneItem,
+                        borderZoneLocations),
                 };
             })
             .ToList();
@@ -729,7 +736,7 @@ public static class PersonDossierResolver
     }
 
     /// <summary>
-    /// Invitation, location grant (WPL), or rejection for this person — only after Migration service is finished.
+    /// Invitation, location grant (WPL), border zone, or rejection for this person — only after Migration service is finished.
     /// A rejection on that step replaces the invitation / grant.
     /// </summary>
     internal static PersonDossierIssuedOutcome? ResolveIssuedOutcome(
@@ -737,7 +744,9 @@ public static class PersonDossierResolver
         InvitationItem? invitationItem,
         RejectionItem? rejectionItem,
         IReadOnlySet<Guid>? usedInvitationItemIds = null,
-        WorkPermitLocationGrantItem? locationGrantItem = null)
+        WorkPermitLocationGrantItem? locationGrantItem = null,
+        BorderZoneItem? borderZoneItem = null,
+        string? borderZoneLocations = null)
     {
         var migration = timeline?.FirstOrDefault(step =>
             string.Equals(step.Key, ApplicationWorkspaceProgressTimeline.MigrationKey, StringComparison.OrdinalIgnoreCase));
@@ -752,6 +761,7 @@ public static class PersonDossierResolver
 
         return BuildInvitationOutcome(invitationItem, usedInvitationItemIds)
             ?? BuildLocationGrantOutcome(locationGrantItem)
+            ?? BuildBorderZoneOutcome(borderZoneItem, borderZoneLocations)
             ?? BuildRejectionOutcome(rejectionItem);
     }
 
@@ -776,6 +786,88 @@ public static class PersonDossierResolver
         };
     }
 
+    /// <summary>
+    /// Places granted on this border zone. The item column is often empty: Join stores the
+    /// person's zones on the case requested-location row, and the case summary is the fallback.
+    /// </summary>
+    private static string? ResolveGrantedBorderZoneLocations(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance app,
+        Guid personId,
+        BorderZoneItem item)
+    {
+        var onItem = MeaningfulBorderZoneLocations(item.BorderZoneLocation);
+        if (onItem != null)
+            return onItem;
+
+        var requested = CasePersonRequestedLocation.ResolveForPrefill(
+            objectSpace,
+            app.ID,
+            personId,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            app.BorderZoneLocation);
+        return MeaningfulBorderZoneLocations(requested);
+    }
+
+    private static string? MeaningfulBorderZoneLocations(string? stored)
+    {
+        var trimmed = stored?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed) || BorderZoneSelectionHelper.IsNoneValue(trimmed))
+            return null;
+        return trimmed;
+    }
+
+    private static PersonDossierIssuedOutcome? BuildBorderZoneOutcome(
+        BorderZoneItem? item,
+        string? grantedLocations = null)
+    {
+        var zone = item?.BorderZone;
+        var number = zone?.BorderZoneNumber?.Trim();
+        if (zone == null || string.IsNullOrWhiteSpace(number))
+            return null;
+
+        var hasCopy = zone.ID != Guid.Empty
+            && Safe(zone.Documents).Any(document => document.File != null);
+        var locations = MeaningfulBorderZoneLocations(item?.BorderZoneLocation)
+            ?? MeaningfulBorderZoneLocations(grantedLocations)
+            ?? string.Empty;
+        return new PersonDossierIssuedOutcome
+        {
+            Number = number,
+            StatusLabel = ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued"),
+            StatusCssClass = "st-approved",
+            Detail = locations,
+            PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.BorderZone : null,
+            PreviewParentId = hasCopy ? zone.ID : null,
+        };
+    }
+
+    private static Dictionary<Guid, BorderZoneItem> LoadBorderZoneItemsByApplication(
+        IObjectSpace objectSpace,
+        Guid personId)
+    {
+        var map = new Dictionary<Guid, BorderZoneItem>();
+        if (personId == Guid.Empty)
+            return map;
+
+        var rows = objectSpace.GetObjectsQuery<BorderZoneItem>()
+            .Where(i => i.Person != null
+                && i.Person.ID == personId
+                && i.BorderZone != null
+                && i.BorderZone.ApplicationProfileInstance != null)
+            .OrderByDescending(i => i.BorderZone!.StartDate)
+            .ToList();
+
+        foreach (var row in rows)
+        {
+            var appId = row.BorderZone?.ApplicationProfileInstance?.ID ?? Guid.Empty;
+            if (appId == Guid.Empty)
+                continue;
+            map.TryAdd(appId, row);
+        }
+
+        return map;
+    }
     private static PersonDossierIssuedOutcome? BuildLocationGrantOutcome(WorkPermitLocationGrantItem? item)
     {
         var grant = item?.Grant;

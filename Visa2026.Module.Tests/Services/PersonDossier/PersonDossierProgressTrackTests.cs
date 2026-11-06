@@ -137,6 +137,68 @@ public class PersonDossierProgressTrackTests
     }
 
     [Fact]
+    public void Finished_migration_shows_border_zone_when_no_invitation_or_grant()
+    {
+        var item = new BorderZoneItem
+        {
+            BorderZoneLocation = "Serhet yaka",
+            BorderZone = new BorderZone
+            {
+                BorderZoneNumber = "BZ-11",
+                StartDate = new DateTime(2025, 11, 5),
+                ExpirationDate = new DateTime(2026, 11, 5),
+            },
+        };
+        var done = new[]
+        {
+            new ApplicationWorkspaceCaseProgressStep { Key = "migration", State = "done", OutcomeKind = "issued" },
+        };
+
+        var outcome = PersonDossierResolver.ResolveIssuedOutcome(
+            done,
+            invitationItem: null,
+            rejectionItem: null,
+            usedInvitationItemIds: null,
+            locationGrantItem: null,
+            borderZoneItem: item);
+
+        Assert.NotNull(outcome);
+        Assert.Equal("BZ-11", outcome!.Number);
+        Assert.Equal(
+            VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Issued"),
+            outcome.StatusLabel);
+        Assert.Equal("Serhet yaka", outcome.Detail);
+        Assert.True(outcome.HasDetail);
+    }
+
+    [Fact]
+    public void Finished_migration_shows_case_border_zone_when_the_item_has_no_location()
+    {
+        var item = new BorderZoneItem
+        {
+            BorderZoneLocation = "Ýok",
+            BorderZone = new BorderZone { BorderZoneNumber = "COOOSD" },
+        };
+        var done = new[]
+        {
+            new ApplicationWorkspaceCaseProgressStep { Key = "migration", State = "done", OutcomeKind = "issued" },
+        };
+
+        var outcome = PersonDossierResolver.ResolveIssuedOutcome(
+            done,
+            invitationItem: null,
+            rejectionItem: null,
+            usedInvitationItemIds: null,
+            locationGrantItem: null,
+            borderZoneItem: item,
+            borderZoneLocations: "Serhetabat etr, Sarahs etrabyna");
+
+        Assert.NotNull(outcome);
+        Assert.Equal("COOOSD", outcome!.Number);
+        Assert.Equal("Serhetabat etr, Sarahs etrabyna", outcome.Detail);
+    }
+
+    [Fact]
     public void Finished_office_step_without_a_file_is_missing()
     {
         var steps = OfficeSteps(withFile: false);

@@ -34,7 +34,7 @@
 
   color: var(--pd-text);
   color-scheme: inherit;
-  /* Soft desk behind centered Screen column (Word-like side gutters). */
+  /* Soft desk behind the Screen column. The column grows to its content. */
   background: color-mix(in srgb, var(--pd-surface) 90%, var(--pd-text));
   padding: 0;
   display: flex;
@@ -170,6 +170,10 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+  box-sizing: border-box;
+  width: 0;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 .person-dossier__toolbar-title {
@@ -220,21 +224,31 @@
 }
 
 /* -------------------------------------------------------------- screen column
-   Centered reading column with side gutters (like Word workspace padding).
-   Wider than A4 (~1120px) so section tables fit without horizontal scroll. */
+   The column is as wide as its widest section, and never past the pane.
+   Identity, tiles, and every section stretch to that same width. */
+
+.person-dossier:not(.person-dossier--paper) {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
 
 .person-dossier__screen-stage {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 16px clamp(20px, 5vw, 72px) 28px;
   box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .person-dossier__screen-column {
-  width: 100%;
-  max-width: 1120px;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -335,6 +349,10 @@
   display: flex;
   gap: 16px;
   padding: 14px;
+  box-sizing: border-box;
+  width: 0;
+  min-width: 100%;
+  max-width: 100%;
   background: var(--pd-card);
   border: 1px solid var(--pd-border);
   border-radius: var(--pd-radius);
@@ -372,6 +390,8 @@
 
 .person-dossier__identity-body {
   flex: 1 1 auto;
+  width: auto;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -411,19 +431,24 @@
 }
 
 .person-dossier__fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 4px 20px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .person-dossier__field {
   display: flex;
   gap: 8px;
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
   min-width: 0;
 }
 
 .person-dossier__field-label {
-  flex: 0 0 42%;
+  flex: 0 0 auto;
   color: var(--pd-muted);
 }
 
@@ -436,12 +461,20 @@
 /* -------------------------------------------------------------- status tiles */
 
 .person-dossier__tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  box-sizing: border-box;
+  width: 0;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 .person-dossier__tile {
+  flex: 1 1 0;
+  width: auto;
+  min-width: max-content;
+  max-width: 100%;
   padding: 10px 12px;
   background: var(--pd-card);
   border: 1px solid var(--pd-border);
@@ -467,9 +500,13 @@
 /* ----------------------------------------------------------------- sections */
 
 .person-dossier__sections {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, max-content);
+  justify-items: stretch;
   gap: 10px;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .person-dossier__section {
@@ -477,7 +514,11 @@
   border: 1px solid var(--pd-border);
   border-radius: var(--pd-radius);
   box-shadow: var(--pd-shadow);
-  overflow: hidden;
+  overflow: visible;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .person-dossier__section-head {
@@ -583,12 +624,15 @@
 }
 
 .person-dossier__table-scroll {
-  overflow-x: visible;
+  overflow-x: auto;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .person-dossier__table {
   width: 100%;
+  min-width: max-content;
   table-layout: auto;
   border-collapse: collapse;
 }
@@ -671,9 +715,22 @@
 }
 
 .person-dossier__col-progress {
-  width: 48%;
-  min-width: 220px;
+  width: auto;
+  min-width: max-content;
   vertical-align: top;
+  white-space: nowrap;
+}
+
+.person-dossier__table td.person-dossier__col-progress {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  width: auto;
+}
+
+.person-dossier__table td.person-dossier__col-issued {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  width: auto;
 }
 
 .person-dossier__cell-detail,
@@ -709,7 +766,8 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  max-width: 11rem;
+  max-width: none;
+  width: max-content;
 }
 
 .person-dossier__issued-primary {
@@ -721,7 +779,7 @@
 
 .person-dossier__issued-detail {
   box-sizing: border-box;
-  max-width: 100%;
+  max-width: 18rem;
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.28);
@@ -730,19 +788,20 @@
   font-size: 11px;
   font-weight: 600;
   line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
 }
 
 .person-dossier .lv-progress-stepper {
-  width: 100%;
-  max-width: 100%;
+  width: max-content;
+  max-width: none;
 }
 
 .person-dossier .lv-progress-with-result {
-  width: 100%;
+  width: max-content;
+  min-width: max-content;
 }
 
 .person-dossier .lv-progress-stepper--with-stems {
@@ -869,4 +928,14 @@
 .app-person-dossier-link:hover {
   filter: brightness(0.97);
   text-decoration: none !important;
+}
+
+/* Stay inside the detail pane. A wide track scrolls in its section, not the host. */
+.dxbl-fl-item:has(.person-dossier),
+.dxbl-layout-item:has(.person-dossier),
+.dxbl-form-group:has(.person-dossier),
+.dxbl-form-group-item:has(.person-dossier) {
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
 }

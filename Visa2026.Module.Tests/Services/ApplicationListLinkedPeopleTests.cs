@@ -571,4 +571,42 @@ public class ApplicationListLinkedPeopleTests
             marks.Add((mark.Key, mark.Tone));
         return marks;
     }
+
+    [Fact]
+    public void Build_marks_border_zone_locations_under_the_person()
+    {
+        var personId = Guid.NewGuid();
+        var zoneId = Guid.NewGuid();
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceBorderZone = true,
+                ProduceInvitation = false,
+                ProduceVisa = false,
+                ProduceWorkPermit = false,
+                ProduceRejection = false,
+            },
+        };
+
+        var rows = ApplicationListLinkedPeople.Build(
+            application,
+            [personId],
+            new Dictionary<Guid, string> { [personId] = "Serdar Nuri" },
+            invitation: new HashSet<Guid>(),
+            workPermit: new HashSet<Guid>(),
+            visa: new HashSet<Guid>(),
+            borderZone: new HashSet<Guid> { personId },
+            rejection: new HashSet<Guid>(),
+            borderZoneDocuments: new Dictionary<Guid, Guid> { [personId] = zoneId },
+            borderZoneDetails: new Dictionary<Guid, string> { [personId] = "Serhet yaka" });
+
+        var row = Assert.Single(rows);
+        var mark = Assert.Single(row.Marks);
+        Assert.Equal(ApplicationWorkspaceIssuedRecordsCatalog.BorderZone, mark.Key);
+        Assert.Equal(ApplicationListLinkedPeople.ToneDone, mark.Tone);
+        Assert.Equal(zoneId, mark.DocumentId);
+        Assert.Equal("Serhet yaka", mark.Detail);
+        Assert.Contains("Serhet yaka", ApplicationListLinkedPeople.Title(mark), StringComparison.Ordinal);
+    }
 }
