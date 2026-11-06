@@ -1,7 +1,15 @@
 /* Seretmezlik (roster exclusion letters) — case workspace tab. Prototype: docs/prototypes/application-profile-instance-seretmezlik-prototype.html */
 
 .cw-nav__badge--excluded { background: #db2777; color: #fff; }
-.cw-person.is-excluded { opacity: .55; text-decoration: line-through; background: #fef2f2; border-color: #fecaca; cursor: default; }
+.cw-person.is-excluded {
+  opacity: 1;
+  text-decoration: line-through;
+  background: color-mix(in srgb, var(--os-bad) 18%, var(--os-panel));
+  border-color: var(--os-bad);
+  color: var(--os-ink);
+  cursor: default;
+}
+.cw-person.is-excluded .cw-person__avatar { text-decoration: none; opacity: 1; }
 .os-table tr.is-excluded td { color: #94a3b8; }
 .os-table tr.is-excluded td .ct-link { text-decoration: line-through; }
 .cw-excluded-badge { display: inline-flex; gap: 5px; align-items: center; margin-left: 8px; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: #fecaca; color: #991b1b; white-space: nowrap; text-decoration: none; }
