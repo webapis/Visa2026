@@ -4219,9 +4219,9 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 }
 
 .lv-progress-stepper--via-ministry .lv-progress-stepper__lead > .lv-progress-step {
-    flex: 1 1 0;
+    flex: 1 1 5.4rem;
     width: auto;
-    min-width: 0;
+    min-width: 5.4rem;
     max-width: none;
 }
 
@@ -4794,8 +4794,8 @@ button.lv-person-mark-follow__app {
 .lv-progress-step:last-child {
     display: flex;
     flex-direction: column;
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 1 1 5.4rem;
+    min-width: 5.4rem;
     max-width: none;
 }
 
@@ -4876,7 +4876,8 @@ button.lv-person-mark-follow__app {
     color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
     line-height: 1.25;
     white-space: normal !important;
-    overflow-wrap: break-word;
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 .lv-progress-step__date,
@@ -4890,7 +4891,8 @@ button.lv-person-mark-follow__app {
     font-weight: 500;
     color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
     white-space: normal !important;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    word-break: normal;
 }
 
 .lv-progress-step__status-no {
