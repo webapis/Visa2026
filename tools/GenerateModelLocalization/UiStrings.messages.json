@@ -4715,6 +4715,12 @@
     "tk-TM": "Diplom nusgalary",
     "ru-RU": "Копии диплома"
   },
+  "EmployeePositionHistory.Tab.DocumentCopies": {
+    "en": "Order for assignment",
+    "tr-TR": "Atama emri",
+    "tk-TM": "Bellik buýrugy",
+    "ru-RU": "Приказ о назначении"
+  },
   "Visa.Tab.DocumentCopies": {
     "en": "Visa copies",
     "tr-TR": "Vize kopyaları",
@@ -5849,6 +5855,12 @@
     "tk-TM": "Bilim",
     "ru-RU": "Образование"
   },
+  "PersonDocumentCopies.Section.Positions": {
+    "en": "Positions",
+    "tr-TR": "Pozisyonlar",
+    "tk-TM": "Wezipeler",
+    "ru-RU": "Должности"
+  },
   "PersonDocumentCopies.Section.MedicalRecords": {
     "en": "Medical records",
     "tr-TR": "Sağlık kayıtları",
@@ -5908,6 +5920,12 @@
     "tr-TR": "Eğitim {0}",
     "tk-TM": "Bilim {0}",
     "ru-RU": "Образование {0}"
+  },
+  "PersonDocumentCopies.Record.Position": {
+    "en": "Position {0}",
+    "tr-TR": "Pozisyon {0}",
+    "tk-TM": "Wezipe {0}",
+    "ru-RU": "Должность {0}"
   },
   "PersonDocumentCopies.Record.MedicalRecord": {
     "en": "Medical record {0}",

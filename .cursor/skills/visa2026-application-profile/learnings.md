@@ -1,3 +1,26 @@
+## 2026-11-07 — Join/Bagla DbUpdateConcurrencyException (requested locations)
+
+- **Symptom**: Production Bagla on Linked records: "expected to affect 1 row(s), but actually affected 0" (optimistic concurrency).
+- **Cause**: `ApplyJoinLinks` treated empty location chips + summary "—" as clear → `CasePersonRequestedLocation.Upsert(null)` deleted rows just filled by `AcceptOnJoin` / existing Joined locations. Stale or NULL `OptimisticLockField` on delete made SaveChanges fail.
+- **Fix**: Only `TryApplyEditedLocations` when `LocationChips.Count > 0` (real chip edits). Empty chips = leave AcceptOnJoin alone. `Upsert` clear path reloads concurrency token before delete. `LinkSelected` skips remove/replace when id already pinned; reloads sticky row before replace.
+- **Officer**: Deploy Module; retry Bagla on the same person — should save without the yellow concurrency banner.
+- **Prevent**: Do not map overview "—" / empty chip list to location clear on Join.
+
+## 2026-11-07 — Linked records Last-N: two Visa + two Work permit rows
+
+- **Symptom**: cancel_visa_wp Linked records showed one Visa and one WP while person had two valid of each; Join only pinned one.
+- **Cause**: `PersonLinkReview.Build` emitted one line per kind (`ResolveVisa` / `ResolveWorkPermitItem`); `LinkSelected` replaced the first ResolvedLink of that kind.
+- **Fix**: Last-N expansion (`PersonLinkReview.LastN.cs`) with `SlotIndex`/`SlotCount` ("1 of 2"); `PreferCaseLinks` maps all pinned ids; `ApplyJoinLinks` → `SyncResolvedLinksForKind`. People list `JoinCellsForPerson` stacks Visa/WP numbers; Work permit column added.
+- **Officer**: F5; open Linked records for Ali on cancel visa+WP → two Visa + two WP rows; Join pins both; People & links shows both numbers.
+- **Verify**: Module + Blazor build succeeded.
+
+## 2026-11-07 — Valid visas/WPs include future StartDate; WP report visa = closest date span
+
+- **Symptom**: Profiles with PersonVisaLastCount=2 only auto-linked the started visa; a second Valid visa with future StartDate was missing from Linked records. WorkPermitItem report Visa_* fields used GetCurrentVisa (person “current”), not the WP date span.
+- **Cause**: CanLinkVisa / ResolveVisas / active counts / Person ListView active lists required StartDate <= today (except CancelVisas). GetCurrentVisa used VisaIsEffectiveOn (started only).
+- **Fix**: Linkable = not cancelled/changed + expiration ≥ today, **including future StartDate**. Same for Person ListView active visa/WP lists. ResolveVisas / Last-N active counts always include not-yet-started. WorkPermitItem Visa_* + person-change seed use GetVisaClosestToWorkPermit (max overlap, else nearest gap). GetCurrentVisa prefers in-force among linkable, else earliest future. Invitation rules unchanged (not cancelled/changed/expired/used).
+- **Verify**: Module build (analyzers off) succeeded; 28 tests ApplicationProfileInstancePersonValidItemsTests + PersonCurrentItemsVisaMatchTests passed.
+
 ### 2026-11-05 — Dossier Issued shows granted WPL locations
 
 - **Need**: Person dossier Applications Issued showed grant number only; officers need granted places (e.g. Mary şäheri) like ListView People mark detail.

@@ -1177,7 +1177,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (line == null)
             return Task.CompletedTask;
 
-        PersonLinkReview.ApplyChoice(line, request.ObjectId);
+        PersonLinkReview.ApplyChoice(line, request.ObjectId, View?.ObjectSpace);
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
         {
             model.PersonLinkReviewDeclineCaseSummaryAddress = line.ObjectId != Guid.Empty;

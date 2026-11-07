@@ -2004,6 +2004,16 @@ select.cw-summary-field__input option {
 }
 .ct-address-editor__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 .ct-address-editor__error { color: var(--os-bad, #dc2626); }
+/* DxWindow portals to body — keep it under the preview column so scroll/wheel reach the PDF. */
+.dxbl-window.os-link-review-popup--beside-preview {
+  max-width: min(520px, 45vw) !important;
+  z-index: 1050 !important;
+}
+#visa-app-shell.visa-app-shell--preview-open #visa-preview-slot.visa-preview-slot--open {
+  position: relative;
+  z-index: 1200;
+  pointer-events: auto;
+}
 .os-link-review-popup {
   --os-panel: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
   --os-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #142033));
@@ -2096,8 +2106,8 @@ select.cw-summary-field__input option {
 .os-link-review { display: flex; flex-direction: column; gap: 8px; }
 .os-link-review__row {
   display: grid;
-  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr) auto;
-  gap: 12px;
+  grid-template-columns: minmax(140px, 220px) 1.25rem minmax(0, 1fr) auto;
+  gap: 8px 12px;
   align-items: center;
   padding: 10px 12px;
   border: 1px solid var(--os-line);
@@ -2106,6 +2116,45 @@ select.cw-summary-field__input option {
   color: var(--os-ink);
 }
 .os-link-review__label { color: var(--os-muted, var(--os-ink)); }
+.os-link-review__eye {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+  opacity: 1;
+  cursor: pointer;
+  line-height: 1;
+}
+.os-link-review__eye:hover:not(:disabled),
+.os-link-review__eye:focus-visible:not(:disabled) {
+  opacity: 1;
+  outline: none;
+  color: #fff;
+}
+.os-link-review__eye.is-disabled,
+.os-link-review__eye:disabled {
+  color: var(--os-muted, var(--os-ink));
+  opacity: 0.28;
+  cursor: default;
+}
+.os-link-review__eye-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+.os-link-review__eye-spacer {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+}
 .os-link-review__value { min-width: 0; word-break: break-word; }
 .os-link-review__actions { display: flex; justify-content: flex-start; gap: 8px; width: 100%; }
 .os-link-review-popup .os-btn:not(.os-btn--primary) {
@@ -2176,3 +2225,14 @@ select.cw-summary-field__input option {
 .os-loc-chips-legend__swatch.is-visa { background: #b45309; }
 .os-loc-chips-legend__swatch.is-wp { background: #1d4ed8; }
 .os-loc-chips-legend__swatch.is-manual { background: transparent; border-color: #a78bfa; }
+.os-link-review__slot {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--os-muted);
+}
+.os-people-doc {
+  white-space: pre-line;
+  line-height: 1.35;
+}

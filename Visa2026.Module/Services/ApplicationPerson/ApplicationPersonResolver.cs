@@ -404,6 +404,61 @@ public static class ApplicationProfileInstancePersonResolver
         return EnsureResolvedLinkDecision.Create;
     }
 
+    /// <summary>
+    /// Pin exactly <paramref name="desiredLinkedObjectIds"/> for a Last-N kind (Join / Relink review).
+    /// Removes extras of that kind when links are unlocked; never exceeds profile Last-N.
+    /// </summary>
+    public static void SyncResolvedLinksForKind(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person,
+        ApplicationProfileInstancePersonLinkKind kind,
+        IReadOnlyList<Guid> desiredLinkedObjectIds)
+    {
+        if (objectSpace == null || application == null || person == null)
+            return;
+
+        var trackedPerson = person.ID != Guid.Empty
+            ? objectSpace.GetObject(person) ?? person
+            : person;
+        var trackedApplication = application.ID != Guid.Empty
+            ? objectSpace.GetObject(application) ?? application
+            : application;
+        if (trackedPerson == null || trackedApplication == null)
+            return;
+
+        var lastCount = ApplicationProfilePersonLastCount.For(trackedApplication, kind);
+        if (lastCount <= 0)
+            return;
+
+        var desired = (desiredLinkedObjectIds ?? Array.Empty<Guid>())
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .Take(lastCount)
+            .ToList();
+
+        var existing = LoadLinks(objectSpace, trackedApplication, trackedPerson.ID)
+            .Where(link => link?.LinkKind == kind)
+            .ToList();
+
+        if (!ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
+        {
+            foreach (var link in existing)
+            {
+                if (link.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
+                    continue;
+                if (desired.Contains(linkedId))
+                    continue;
+
+                trackedApplication.PersonResolvedLinks?.Remove(link);
+                ApplicationProfileInstanceChildMembership.Remove(trackedApplication, kind, linkedId, objectSpace);
+                objectSpace.Delete(link);
+            }
+        }
+
+        foreach (var id in desired)
+            EnsureResolvedLink(objectSpace, trackedApplication, trackedPerson, kind, id);
+    }
     public static void EnsureResolvedLink(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
@@ -470,8 +525,7 @@ public static class ApplicationProfileInstancePersonResolver
                 objectSpace,
                 person,
                 ApplicationProfilePersonLastCount.For(application, ApplicationProfileInstancePersonLinkKind.Visa),
-                includeExpired: ApplicationProfileInstancePersonValidItems.LinksLastIssuedVisaIncludingExpired(application),
-                includeNotYetStarted: application?.ApplicationProfile?.CancelVisas == true));
+                includeExpired: ApplicationProfileInstancePersonValidItems.LinksLastIssuedVisaIncludingExpired(application)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.Education, ApplicationProfileInstancePersonValidItems.ResolveEducation(person)));
         rows.Add((ApplicationProfileInstancePersonLinkKind.AddressOfResidence, ApplicationProfileInstancePersonValidItems.ResolveAddress(person)));
         if (person.IsEmployee)

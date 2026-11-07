@@ -18,6 +18,10 @@ Join does not insert when that stay already matches the person's last `AddressOf
 
 If the person has no address, or the last address differs, Join creates the new row.
 
+## Document copy eye preview (planned)
+
+See [linked-records-eye-preview-README.md](./linked-records-eye-preview-README.md) — per-row eye → #visa-preview-slot, multi-tab when several properties are opened.
+
 ## Screens
 
 | File | State |

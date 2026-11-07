@@ -104,6 +104,7 @@ Stable **`RecordKey`** strings for preview merge and future export:
 | Passports | `Person.Passports` | `PassportDocument` | `Passport:{passportId}` |
 | Visas | `Passport.Visas` | `VisaDocument` | `Passport:{passportId}/Visa:{visaId}` |
 | Education | `Person.Educations` | `EducationDocument` | `Education:{educationId}` |
+| Positions (employees) | `Person.PositionHistory` | `EmployeePositionHistoryDocument` (order for assignment) | `EmployeePositionHistory:{id}` |
 | Medical | `Person.MedicalRecords` | `MedicalRecordDocument` | `MedicalRecord:{id}` |
 | Address | `Person.AddressesOfResidence` | `AddressOfResidenceDocument`, `LodgingDocument` | `AddressOfResidence:{id}` |
 | Work permit | `Person.WorkPermitItems` → parent `WorkPermit` | `WorkPermitDocument` | `WorkPermitItem:{itemId}` |

@@ -97,5 +97,11 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual IList<ApplicationProfileInstance> ApplicationProfileInstances { get; set; } = new ObservableCollection<ApplicationProfileInstance>();
 
+        /// <summary>Order-for-assignment scans (detail tab Documents); each row is an <see cref="EmployeePositionHistoryDocument"/>.</summary>
+        [InverseProperty(nameof(EmployeePositionHistoryDocument.EmployeePositionHistory))]
+        [Aggregated]
+        [XafDisplayName("Order for assignment")]
+        public virtual IList<EmployeePositionHistoryDocument> Documents { get; set; } = new ObservableCollection<EmployeePositionHistoryDocument>();
+
     }
 }

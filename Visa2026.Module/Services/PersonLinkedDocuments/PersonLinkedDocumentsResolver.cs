@@ -38,6 +38,7 @@ public static class PersonLinkedDocumentsResolver
 
         if (person.IsEmployee)
         {
+            sections.Add(BuildPositionSection(objectSpace, person));
             sections.Add(BuildWorkPermitSection(objectSpace, person));
             sections.Add(BuildInvitationSection(objectSpace, person));
             sections.Add(BuildPersonDocumentsSection(objectSpace, person));
@@ -121,6 +122,39 @@ public static class PersonLinkedDocumentsResolver
         };
     }
 
+
+    private static PersonLinkedDocumentSection BuildPositionSection(IObjectSpace os, Person person)
+    {
+        var current = PersonCurrentItems.GetCurrentPositionHistory(person);
+        var records = (person.PositionHistory?
+            .Where(h => h != null)
+            .OrderByDescending(h => h.StartDate)
+            .ThenByDescending(h => h.ID)
+            .Select(history =>
+            {
+                history = os.GetObject(history);
+                var caption = history.Position?.NameTm ?? history.ActualPosition?.Name;
+                return new PersonLinkedDocumentRecord
+                {
+                    RecordKey = $"EmployeePositionHistory:{history.ID:N}",
+                    RecordLabel = PersonDocumentCopiesLocalization.FormatPositionRecord(caption),
+                    SourceCaption = caption,
+                    SourceObjectType = typeof(EmployeePositionHistory),
+                    SourceObjectId = history.ID,
+                    IsCurrent = current?.ID == history.ID,
+                    Files = LoadDocumentFiles<EmployeePositionHistoryDocument>(os, d => d.EmployeePositionHistory.ID == history.ID)
+                };
+            })
+            .ToList()) ?? new List<PersonLinkedDocumentRecord>();
+
+        return new PersonLinkedDocumentSection
+        {
+            SectionId = "Positions",
+            SectionLabel = VisaUiMessages.Get("PersonDocumentCopies.Section.Positions"),
+            SortOrder = 25,
+            Records = records
+        };
+    }
     private static PersonLinkedDocumentSection BuildEducationSection(IObjectSpace os, Person person)
     {
         var current = PersonCurrentItems.GetCurrentEducation(person);

@@ -4110,6 +4110,18 @@
     "tk-TM": "Başga ýazgy saýla",
     "ru-RU": "Выбрать другую запись"
   },
+  "ApplicationProfileInstance.LinkReview.NoCopy": {
+    "en": "No copy",
+    "tr-TR": "Kopya yok",
+    "tk-TM": "Nusga ýok",
+    "ru-RU": "Нет копии"
+  },
+  "ApplicationProfileInstance.LinkReview.PreviewCopy": {
+    "en": "Preview copy",
+    "tr-TR": "Kopyayı önizle",
+    "tk-TM": "Nusgany gör",
+    "ru-RU": "Просмотр копии"
+  },
   "ApplicationProfileInstance.LinkReview.Join": {
     "en-US": "Join",
     "tr-TR": "Bağla",

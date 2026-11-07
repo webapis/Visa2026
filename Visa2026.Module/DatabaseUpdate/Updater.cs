@@ -323,6 +323,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Position / salary / duty / travel are person aggregates the dialog links. Left nav stays denied.
         userRole.AddTypePermissionsRecursively<EmployeePositionHistory>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<EmployeePositionHistoryDocument>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<EmployeeSalary>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkDuty>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<TravelHistory>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
@@ -488,6 +489,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
         // Explicitly DENY everything else in Default group (screenshot 3)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/AddressOfResidenceDocument", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/EmployeePositionHistoryDocument", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BorderZoneItem", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BusinessTripAddress", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BusinessTripPlan", SecurityPermissionState.Deny);
@@ -582,6 +584,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureFullAccessRecursivePermission<Passport>(userRole);
     EnsureFullAccessRecursivePermission<Visa>(userRole);
     EnsureFullAccessRecursivePermission<EmployeePositionHistory>(userRole);
+    EnsureFullAccessRecursivePermission<EmployeePositionHistoryDocument>(userRole);
     EnsureFullAccessRecursivePermission<EmployeeSalary>(userRole);
     EnsureFullAccessRecursivePermission<WorkDuty>(userRole);
     EnsureFullAccessRecursivePermission<TravelHistory>(userRole);
@@ -736,6 +739,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/AddressOfResidenceDocument", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/EmployeePositionHistoryDocument", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/BorderZoneItem", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/BusinessTripAddress", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/BusinessTripPlan", SecurityPermissionState.Deny);
@@ -798,6 +802,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<Subcontractor>(role);
             EnsureReadOnlyPermission<AddressOfResidence>(role);
             EnsureReadOnlyPermission<AddressOfResidenceDocument>(role);
+            EnsureReadOnlyPermission<EmployeePositionHistoryDocument>(role);
             EnsureReadOnlyPermission<EmployeePositionHistory>(role);
             EnsureReadOnlyPermission<EmployeeSalary>(role);
             EnsureReadOnlyPermission<WorkDuty>(role);

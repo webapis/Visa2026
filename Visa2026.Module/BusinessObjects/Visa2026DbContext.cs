@@ -72,6 +72,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkPermitItem> WorkPermitItems { get; set; }
         public DbSet<FamilyMemberImage> FamilyMemberImages { get; set; }
         public DbSet<EmployeePositionHistory> EmployeePositionHistories { get; set; }
+        public DbSet<EmployeePositionHistoryDocument> EmployeePositionHistoryDocuments { get; set; }
         public DbSet<Education> Educations { get; set; }
         public DbSet<MedicalRecord> MedicalRecords { get; set; }
         public DbSet<EducationLevel> EducationLevels { get; set; }

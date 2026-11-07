@@ -12,6 +12,9 @@ public static class PersonDocumentCopiesLocalization
     public static string FormatEducationRecord(string? caption) =>
         FormatRecord("PersonDocumentCopies.Record.Education", caption);
 
+    public static string FormatPositionRecord(string? caption) =>
+        FormatRecord("PersonDocumentCopies.Record.Position", caption);
+
     public static string FormatMedicalRecord(string? documentNumber) =>
         FormatRecord("PersonDocumentCopies.Record.MedicalRecord", documentNumber);
 

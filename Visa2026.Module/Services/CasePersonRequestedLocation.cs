@@ -108,7 +108,11 @@ public static class CasePersonRequestedLocation
         var existing = Find(objectSpace, application, application.ID, person.ID, kind);
         if (trimmed == null)
         {
-            if (existing == null)
+            if (existing == null || objectSpace.IsDeletedObject(existing))
+                return false;
+            if (!objectSpace.IsNewObject(existing))
+                objectSpace.ReloadObject(existing);
+            if (objectSpace.IsDeletedObject(existing))
                 return false;
             application.PersonRequestedLocations?.Remove(existing);
             objectSpace.Delete(existing);

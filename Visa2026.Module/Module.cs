@@ -107,6 +107,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.AuthorizedSignatoryPassportExpirationDateSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonPreviousWorkplacesInTurkmenistanSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.EmployeePositionHistoryDocumentSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmailDocumentCopiesSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.BorderZoneSourceVisaSchemaUpdater(objectSpace, versionFromDB),

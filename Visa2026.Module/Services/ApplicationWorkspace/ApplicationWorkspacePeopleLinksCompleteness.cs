@@ -13,6 +13,7 @@ public static class ApplicationWorkspacePeopleLinksCompleteness
 {
     public const string PassportKey = "passport";
     public const string VisaKey = "visa";
+    public const string WorkPermitKey = "wp";
 
     public enum NavStatus
     {

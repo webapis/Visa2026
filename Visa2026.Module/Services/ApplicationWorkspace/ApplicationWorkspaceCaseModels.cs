@@ -384,6 +384,8 @@ public sealed class ApplicationWorkspaceCasePerson
 
     public string VisaNumber { get; init; } = string.Empty;
 
+    public string WorkPermitNumber { get; init; } = string.Empty;
+
     /// <summary>May be rewritten when Seretmezlik exclusion strips Inv/Visa/WP tiles.</summary>
     public IReadOnlyList<ApplicationWorkspaceCasePersonRecord> Records { get; set; }
         = Array.Empty<ApplicationWorkspaceCasePersonRecord>();

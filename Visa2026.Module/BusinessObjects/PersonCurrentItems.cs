@@ -60,26 +60,54 @@ namespace Visa2026.Module.BusinessObjects
                 return null;
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
-            return person.Passports
-                .Where(p => p != null)
-                .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
-                .Where(v => VisaIsEffectiveOn(v, asOfDate))
-                .OrderByDescending(v => v.StartDate.Date)
-                .ThenByDescending(v => v.IssueDate.Date)
-                .FirstOrDefault();
+            return PickPreferredVisa(
+                person.Passports
+                    .Where(p => p != null)
+                    .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
+                    .Where(v => VisaIsLinkableActiveOn(v, asOfDate)),
+                asOfDate);
         }
 
         public static Visa GetCurrentVisa(Passport passport, DateTime? asOf = null)
         {
-            if (passport == null )
+            if (passport == null)
                 return null;
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
-            return passport.Visas?
-                .Where(v => VisaIsSelectable(v))
-                .Where(v => VisaIsEffectiveOn(v, asOfDate))
-                .OrderByDescending(v => v.StartDate.Date)
+            return PickPreferredVisa(
+                passport.Visas?.Where(v => VisaIsLinkableActiveOn(v, asOfDate)),
+                asOfDate);
+        }
+
+        /// <summary>
+        /// Visa whose validity span best matches <paramref name="workPermit"/> dates:
+        /// largest overlap first; if none overlap, nearest span gap. Linkable pool includes future StartDate.
+        /// </summary>
+        public static Visa GetVisaClosestToWorkPermit(Person person, WorkPermitItem workPermit, DateTime? asOf = null)
+        {
+            if (person?.Passports == null || workPermit == null)
+                return GetCurrentVisa(person, asOf);
+
+            var asOfDate = (asOf ?? DateTime.Today).Date;
+            var spanStart = workPermit.StartDate == default ? asOfDate : workPermit.StartDate.Date;
+            var spanEnd = workPermit.ExpirationDate == default
+                ? DateTime.MaxValue.Date
+                : workPermit.ExpirationDate.Date;
+
+            var candidates = person.Passports
+                .Where(p => p != null)
+                .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
+                .Where(v => VisaIsLinkableActiveOn(v, asOfDate))
+                .ToList();
+            if (candidates.Count == 0)
+                return null;
+
+            return candidates
+                .OrderByDescending(v => DateSpanOverlapDays(v.StartDate.Date, VisaEndDate(v), spanStart, spanEnd))
+                .ThenBy(v => DateSpanGapDays(v.StartDate.Date, VisaEndDate(v), spanStart, spanEnd))
+                .ThenByDescending(v => v.StartDate.Date)
                 .ThenByDescending(v => v.IssueDate.Date)
+                .ThenByDescending(v => v.ID)
                 .FirstOrDefault();
         }
 
@@ -153,12 +181,32 @@ namespace Visa2026.Module.BusinessObjects
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
 
-        public static WorkPermitItem GetCurrentWorkPermitItem(Person person) =>
-            person?.WorkPermitItems?
-                .Where(w => w != null && w.StartDate != default)
-                .OrderByDescending(w => w.StartDate.Date)
+        public static WorkPermitItem GetCurrentWorkPermitItem(Person person, DateTime? asOf = null)
+        {
+            if (person?.WorkPermitItems == null)
+                return null;
+
+            var asOfDate = (asOf ?? DateTime.Today).Date;
+            var candidates = person.WorkPermitItems
+                .Where(w => WorkPermitIsLinkableActiveOn(w, asOfDate))
+                .ToList();
+            if (candidates.Count == 0)
+                return null;
+
+            var inForce = candidates.Where(w => w.StartDate.Date <= asOfDate).ToList();
+            if (inForce.Count > 0)
+            {
+                return inForce
+                    .OrderByDescending(w => w.StartDate.Date)
+                    .ThenByDescending(w => w.ID)
+                    .FirstOrDefault();
+            }
+
+            return candidates
+                .OrderBy(w => w.StartDate.Date)
                 .ThenByDescending(w => w.ID)
                 .FirstOrDefault();
+        }
 
         public static EmployeePositionHistory GetCurrentPositionHistory(Person person) =>
             GetCurrentOpenPeriodItem(
@@ -303,7 +351,7 @@ namespace Visa2026.Module.BusinessObjects
             var numbers = person.Passports
                 .Where(p => p != null)
                 .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
-                .Where(v => VisaIsInForceOn(v, asOfDate))
+                .Where(v => VisaIsLinkableActiveOn(v, asOfDate))
                 .OrderByDescending(v => v.StartDate.Date)
                 .ThenByDescending(v => v.IssueDate.Date)
                 .ThenByDescending(v => v.ID)
@@ -324,7 +372,7 @@ namespace Visa2026.Module.BusinessObjects
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
             var numbers = person.WorkPermitItems
-                .Where(w => WorkPermitIsInForceOn(w, asOfDate))
+                .Where(w => WorkPermitIsLinkableActiveOn(w, asOfDate))
                 .OrderByDescending(w => w.StartDate.Date)
                 .ThenByDescending(w => w.ID)
                 .Select(w => w.WorkPermitNumber?.Trim())
@@ -348,7 +396,7 @@ namespace Visa2026.Module.BusinessObjects
                     .Distinct(StringComparer.OrdinalIgnoreCase));
         }
 
-        /// <summary>In-force visas, latest start first. Each line is number, visa type, and start–expiration.</summary>
+        /// <summary>Active (linkable) visas including future StartDate, latest start first.</summary>
         public static IReadOnlyList<PersonListActiveDocument> ListActiveVisas(Person person, DateTime? asOf = null)
         {
             if (person?.Passports == null)
@@ -369,7 +417,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (passport.Visas == null)
                     continue;
 
-                foreach (var visa in passport.Visas.Where(visa => VisaIsInForceOn(visa, asOfDate, closedIds)))
+                foreach (var visa in passport.Visas.Where(visa => VisaIsLinkableActiveOn(visa, asOfDate, closedIds)))
                 {
                     var number = visa.VisaNumber?.Trim() ?? string.Empty;
                     rows.Add((
@@ -408,7 +456,7 @@ namespace Visa2026.Module.BusinessObjects
                 items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
 
             return items
-                .Where(item => WorkPermitIsInForceOn(item, asOfDate, closedIds))
+                .Where(item => WorkPermitIsLinkableActiveOn(item, asOfDate, closedIds))
                 .OrderByDescending(item => item.StartDate.Date)
                 .ThenByDescending(item => item.ID)
                 .Select(item =>
@@ -678,12 +726,16 @@ namespace Visa2026.Module.BusinessObjects
         private static bool VisaIsEffectiveOn(Visa v, DateTime asOfDate) =>
             VisaIsSelectable(v) && v.StartDate.Date <= asOfDate.Date;
 
-        private static bool VisaIsInForceOn(Visa v, DateTime asOfDate, IReadOnlySet<Guid> closedIds = null) =>
+        /// <summary>Not cancelled/changed and not expired — StartDate may be in the future.</summary>
+        private static bool VisaIsLinkableActiveOn(Visa v, DateTime asOfDate, IReadOnlySet<Guid> closedIds = null) =>
             VisaIsSelectable(v, closedIds)
-            && v.StartDate.Date <= asOfDate
             && (!v.ExpirationDate.HasValue || v.ExpirationDate.Value.Date >= asOfDate);
 
-        private static bool WorkPermitIsInForceOn(
+        private static bool VisaIsInForceOn(Visa v, DateTime asOfDate, IReadOnlySet<Guid> closedIds = null) =>
+            VisaIsLinkableActiveOn(v, asOfDate, closedIds)
+            && v.StartDate.Date <= asOfDate;
+
+        private static bool WorkPermitIsLinkableActiveOn(
             WorkPermitItem w,
             DateTime asOfDate,
             IReadOnlySet<Guid> closedIds = null) =>
@@ -692,9 +744,59 @@ namespace Visa2026.Module.BusinessObjects
                 || IssuedDocumentLifecycle.IsCancelled(w)
                 || IssuedDocumentLifecycle.IsChanged(w))
             && w.StartDate != default
-            && w.StartDate.Date <= asOfDate
             && w.ExpirationDate != default
             && w.ExpirationDate.Date >= asOfDate;
+
+        private static bool WorkPermitIsInForceOn(
+            WorkPermitItem w,
+            DateTime asOfDate,
+            IReadOnlySet<Guid> closedIds = null) =>
+            WorkPermitIsLinkableActiveOn(w, asOfDate, closedIds)
+            && w.StartDate.Date <= asOfDate;
+
+        private static Visa PickPreferredVisa(IEnumerable<Visa> candidates, DateTime asOfDate)
+        {
+            var list = candidates?.Where(v => v != null).ToList();
+            if (list == null || list.Count == 0)
+                return null;
+
+            var started = list.Where(v => v.StartDate.Date <= asOfDate).ToList();
+            if (started.Count > 0)
+            {
+                return started
+                    .OrderByDescending(v => v.StartDate.Date)
+                    .ThenByDescending(v => v.IssueDate.Date)
+                    .ThenByDescending(v => v.ID)
+                    .FirstOrDefault();
+            }
+
+            return list
+                .OrderBy(v => v.StartDate.Date)
+                .ThenByDescending(v => v.IssueDate.Date)
+                .ThenByDescending(v => v.ID)
+                .FirstOrDefault();
+        }
+
+        private static DateTime VisaEndDate(Visa visa) =>
+            visa?.ExpirationDate is DateTime end && end != default ? end.Date : DateTime.MaxValue.Date;
+
+        private static long DateSpanOverlapDays(DateTime aStart, DateTime aEnd, DateTime bStart, DateTime bEnd)
+        {
+            var start = aStart > bStart ? aStart : bStart;
+            var end = aEnd < bEnd ? aEnd : bEnd;
+            if (end < start)
+                return 0;
+            return (end - start).Days + 1;
+        }
+
+        private static long DateSpanGapDays(DateTime aStart, DateTime aEnd, DateTime bStart, DateTime bEnd)
+        {
+            if (DateSpanOverlapDays(aStart, aEnd, bStart, bEnd) > 0)
+                return 0;
+            if (aEnd < bStart)
+                return (bStart - aEnd).Days;
+            return (aStart - bEnd).Days;
+        }
 
         /// <summary>
         /// Active for Person ListView / current-item: issued from an Application Profile instance,

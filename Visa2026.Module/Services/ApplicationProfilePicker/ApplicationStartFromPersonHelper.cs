@@ -196,8 +196,7 @@ public static class ApplicationStartFromPersonHelper
                 profile.PersonVisaLastCount,
                 ApplicationProfileInstancePersonValidItems.ResolveVisas(
                     person,
-                    profile.PersonVisaLastCount,
-                    includeNotYetStarted: profile.CancelVisas).Count))
+                    profile.PersonVisaLastCount).Count))
             return true;
         if (profile.RequirePersonEducation
             && !ChildDependentEducationCaption.Applies(person)

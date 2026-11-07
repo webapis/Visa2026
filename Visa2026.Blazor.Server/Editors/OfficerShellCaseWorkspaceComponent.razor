@@ -499,6 +499,7 @@
     [Parameter] public bool ShowPersonLinkReview { get; set; }
     [Parameter] public bool PersonLinkReviewExisting { get; set; }
     [Parameter] public EventCallback<Guid> OpenExistingPersonLinkReviewRequested { get; set; }
+    [Parameter] public Guid PersonLinkReviewPersonId { get; set; }
     [Parameter] public string? PersonLinkReviewPersonName { get; set; }
     [Parameter] public string? PersonLinkReviewPhotoDataUri { get; set; }
     [Parameter] public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines { get; set; } = Array.Empty<PersonLinkReviewLine>();
@@ -562,6 +563,9 @@
 
     private VisaPreviewSlotMode _previewSlotMode;
     private bool _caseNavHeld;
+    private bool _linkReviewUserPositioned;
+    private int? _linkReviewPosX;
+    private int? _linkReviewPosY;
 
     protected override void OnInitialized()
     {
@@ -605,11 +609,13 @@
 
         // Resminamalar preview lives in #visa-preview-slot. Re-rendering the case workspace
         // rebuilds the 17-row catalog on the same circuit and makes open/close feel stuck.
-        if (mode == VisaPreviewSlotMode.Resminamalar)
+        // Still refresh when Linked records is open so the dialog can shift beside the slot.
+        if (mode == VisaPreviewSlotMode.Resminamalar && !ShowPersonLinkReview)
             return;
-        if (mode == VisaPreviewSlotMode.Closed && previous == VisaPreviewSlotMode.Resminamalar)
+        if (mode == VisaPreviewSlotMode.Closed && previous == VisaPreviewSlotMode.Resminamalar && !ShowPersonLinkReview)
             return;
 
+        EnsureLinkReviewBesidePreview();
         _ = InvokeAsync(StateHasChanged);
     }
 
@@ -664,6 +670,10 @@
             _reviewGearOn = false;
             _reviewTab = "overview";
             _reviewCreating = false;
+            _linkReviewUserPositioned = false;
+            _linkReviewPosX = null;
+            _linkReviewPosY = null;
+            EnsureLinkReviewBesidePreview();
         }
 
         _reviewWasOpen = ShowPersonLinkReview;
@@ -2459,14 +2469,19 @@
                                                    SearchRequested="@PersonLinkSearchRequested"
                                                    LinkRequested="@LinkPersonFromPickerRequested"
                                                    CloseRequested="@ClosePersonLinkPickerRequested" />
-            <DxPopup Visible="@ShowPersonLinkReview"
-                     VisibleChanged="OnPersonLinkReviewVisibleChanged"
-                     HeaderText="@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")"
-                     ShowFooter="@(_reviewTab == "overview" && !_reviewCreating)"
-                     ShowCloseButton="true"
-                     CloseOnOutsideClick="false"
-                     Width="min(960px, 96vw)"
-                     CssClass="os-link-review-popup">
+            <DxWindow Visible="@ShowPersonLinkReview"
+                      VisibleChanged="OnPersonLinkReviewVisibleChanged"
+                      HeaderText="@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")"
+                      ShowFooter="@(_reviewTab == "overview" && !_reviewCreating)"
+                      ShowCloseButton="true"
+                      CloseOnEscape="true"
+                      AllowDrag="true"
+                      AllowDragByHeaderOnly="true"
+                      PositionX="@LinkReviewPositionX"
+                      PositionY="@LinkReviewPositionY"
+                      DragCompleted="OnLinkReviewDragCompleted"
+                      Width="@LinkReviewPopupWidth"
+                      CssClass="@LinkReviewPopupCssClass">
                 <BodyContentTemplate>
                     <div class="os-link-review-person">
                         @if (!string.IsNullOrEmpty(PersonLinkReviewPhotoDataUri))
@@ -2499,7 +2514,7 @@
                                         class="os-link-review-tabs__tab @(_reviewTab == tabKey ? "is-active" : null)"
                                         role="tab"
                                         aria-selected="@(_reviewTab == tabKey)"
-                                        @onclick="() => SelectReviewTab(tabKey)">@ApplicationProfileLocalization.LinkedRecordLabel(tab.Label)</button>
+                                        @onclick="() => SelectReviewTab(tabKey)">@ApplicationProfileLocalization.LinkedRecordLabel(tab.Label)@(tab.SlotCount > 1 ? $" ({tab.SlotIndex}/{tab.SlotCount})" : null)</button>
                             }
                         </div>
                     }
@@ -2519,7 +2534,30 @@
                             }@foreach (var line in PersonLinkReviewLines)
                             {
                                 <div class="os-link-review__row">
-                                    <span class="os-link-review__label">@ApplicationProfileLocalization.LinkedRecordLabel(line.Label)</span>
+                                    <span class="os-link-review__label">
+                                        @ApplicationProfileLocalization.LinkedRecordLabel(line.Label)
+                                        @if (line.SlotCount > 1)
+                                        {
+                                            <span class="os-link-review__slot">@($"{line.SlotIndex} of {line.SlotCount}")</span>
+                                        }
+                                    </span>
+                                    @if (line.SupportsDocumentCopy)
+                                    {
+                                        <button type="button"
+                                                class="os-link-review__eye @(line.HasDocumentCopy ? null : "is-disabled")"
+                                                disabled="@(!line.HasDocumentCopy)"
+                                                title="@(line.HasDocumentCopy ? Msg("ApplicationProfileInstance.LinkReview.PreviewCopy") : Msg("ApplicationProfileInstance.LinkReview.NoCopy"))"
+                                                aria-label="@(line.HasDocumentCopy ? Msg("ApplicationProfileInstance.LinkReview.PreviewCopy") : Msg("ApplicationProfileInstance.LinkReview.NoCopy"))"
+                                                @onclick="() => PreviewLinkReviewDocumentAsync(line)">
+                                            <svg class="os-link-review__eye-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path fill="currentColor" d="M12 5c-5 0-9.27 3.11-11 7.5C2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+                                            </svg>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="os-link-review__eye-spacer" aria-hidden="true"></span>
+                                    }
                                     @if (IsRequestedLocationReviewLine(line))
                                     {
                                         <div class="os-link-review__value os-link-review__value--chips">
@@ -2678,11 +2716,21 @@
                 </BodyContentTemplate>
                 <FooterContentTemplate>
                     <div class="os-link-review__actions">
-                        <button type="button" class="os-btn os-btn--primary" disabled="@PersonLinkIsLinking" @onclick="JoinPersonLinkReviewAsync">@(PersonLinkReviewExisting ? Msg("ApplicationProfileInstance.Issued.Save") : Msg("ApplicationProfileInstance.LinkReview.Join"))</button>
+                        <button type="button"
+                                class="os-btn os-btn--primary @(PersonLinkIsLinking ? "is-busy" : null)"
+                                disabled="@PersonLinkIsLinking"
+                                aria-busy="@PersonLinkIsLinking"
+                                @onclick="JoinPersonLinkReviewAsync">
+                            @if (PersonLinkIsLinking)
+                            {
+                                <span class="cw-advance-spin" aria-hidden="true"></span>
+                            }
+                            @(PersonLinkReviewExisting ? Msg("ApplicationProfileInstance.Issued.Save") : Msg("ApplicationProfileInstance.LinkReview.Join"))
+                        </button>
                         <button type="button" class="os-btn" disabled="@PersonLinkIsLinking" @onclick="CancelPersonLinkReviewAsync">@Msg("ApplicationProfileInstance.Issued.Cancel")</button>
                     </div>
                 </FooterContentTemplate>
-            </DxPopup>
+            </DxWindow>
             @if (view.People.Count == 0)
             {
                 <p class="os-empty">No people linked.</p>
@@ -2692,7 +2740,7 @@
                 <div class="os-panel" style="margin-bottom:16px">
                     <table class="os-table">
                         <thead>
-                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th></th><th></th><th></th></tr>
+                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th>Work permit</th><th></th><th></th><th></th></tr>
                         </thead>
                         <tbody>
                             @foreach (var person in view.People)
@@ -2711,8 +2759,9 @@
                                         }
                                     </td>
                                     <td>@person.RoleLabel</td>
-                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
-                                    <td><code class="@(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
+                                    <td><code class="os-people-doc @(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
+                                    <td><code class="os-people-doc @(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
+                                    <td><code class="os-people-doc @(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.WorkPermitKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.WorkPermitNumber</code></td>
                                     <td>
                                         <button type="button"
                                                 class="os-btn os-btn--primary ct-btn-sm"
@@ -3488,6 +3537,80 @@
         await OpenExistingPersonLinkReviewAsync(person.PersonId);
     }
 
+    private bool IsPreviewSlotOpen => PreviewSlotService.State.Mode != VisaPreviewSlotMode.Closed;
+
+    private string LinkReviewPopupCssClass =>
+        IsPreviewSlotOpen
+            ? "os-link-review-popup os-link-review-popup--beside-preview"
+            : "os-link-review-popup";
+
+    private string LinkReviewPopupWidth =>
+        IsPreviewSlotOpen
+            ? "min(520px, 45vw)"
+            : "min(720px, 92vw)";
+
+    private int? LinkReviewPositionX => _linkReviewPosX;
+
+    private int? LinkReviewPositionY => _linkReviewPosY;
+
+    private void EnsureLinkReviewBesidePreview()
+    {
+        if (!ShowPersonLinkReview || _linkReviewUserPositioned || !IsPreviewSlotOpen)
+            return;
+
+        // First time the slot opens while the dialog is up — pin left; stay there after slot closes.
+        if (_linkReviewPosX == null)
+            _linkReviewPosX = 24;
+    }
+
+    private void OnLinkReviewDragCompleted(WindowDragCompletedEventArgs args)
+    {
+        _linkReviewUserPositioned = true;
+        _linkReviewPosX = args.End.X;
+        _linkReviewPosY = args.End.Y;
+    }
+    private async Task PreviewLinkReviewDocumentAsync(PersonLinkReviewLine line)
+    {
+        if (line == null || !line.SupportsDocumentCopy || !line.HasDocumentCopy || PersonLinkReviewPersonId == Guid.Empty)
+            return;
+
+        if (line.Kind == ApplicationProfileInstancePersonLinkKind.BorderZoneItem && line.ObjectId != Guid.Empty)
+        {
+            using var os = ObjectSpaceFactory.CreateNonSecuredObjectSpace<BorderZoneItem>();
+            var item = os.GetObjectByKey<BorderZoneItem>(line.ObjectId);
+            var borderZoneId = item?.BorderZone?.ID ?? Guid.Empty;
+            if (borderZoneId == Guid.Empty)
+                return;
+
+            await PreviewSlotService.OpenHeaderDocumentCopiesAsync(
+                new HeaderDocumentCopiesSlotRequest
+                {
+                    Family = HeaderDocumentCopiesFamily.BorderZone,
+                    ParentId = borderZoneId,
+                    ContextItemId = line.ObjectId,
+                    OpenPreviewOnly = true,
+                    PreviewAllCopies = true,
+                    FocusDisplayName = ApplicationProfileLocalization.LinkedRecordLabel(line.Label),
+                },
+                ownerViewId: null,
+                stackWithCurrent: true);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(line.DocumentCopyRecordKey))
+            return;
+
+        await PreviewSlotService.OpenPersonDocumentCopiesAsync(
+            new PersonDocumentCopiesSlotRequest
+            {
+                PersonIds = new[] { PersonLinkReviewPersonId },
+                FocusRecordKey = line.DocumentCopyRecordKey,
+                FocusDisplayName = ApplicationProfileLocalization.LinkedRecordLabel(line.Label),
+                OpenPreviewOnly = true,
+            },
+            ownerViewId: null,
+            stackWithCurrent: true);
+    }
     private Task JoinPersonLinkReviewAsync() => JoinPersonLinkReviewRequested.InvokeAsync();
 
     private bool _reviewWasOpen;

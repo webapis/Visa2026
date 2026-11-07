@@ -80,6 +80,7 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
             return result;
 
         var asOf = DateTime.Today;
+        _ = includeNotYetStartedVisas; // future StartDate is active when not expired
 
         var visaPersonIds = IssuedDocumentLifecycle.WhereVisaNotChanged(
                 IssuedDocumentLifecycle.WhereVisaNotCancelled(
@@ -87,7 +88,7 @@ public sealed class ApplicationWorkspaceLinkableActiveCounts
                         .Where(v => v.Passport != null
                             && v.Passport.Person != null
                             && ids.Contains(v.Passport.Person.ID))))
-            .Where(v => v.StartDate != default && (includeNotYetStartedVisas || v.StartDate <= asOf))
+            .Where(v => v.StartDate != default)
             .Select(v => new { PersonId = v.Passport.Person.ID, v.ExpirationDate })
             .ToList();
         foreach (var row in visaPersonIds)

@@ -78,12 +78,14 @@ namespace Visa2026.Module.BusinessObjects
             Passport = PersonCurrentItems.GetCurrentPassport(p);
             CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
 
-            var visa = PersonCurrentItems.GetCurrentVisa(p);
+            var visa = StartDate != default && ExpirationDate != default
+                ? PersonCurrentItems.GetVisaClosestToWorkPermit(p, this)
+                : PersonCurrentItems.GetCurrentVisa(p);
             if (visa != null && visa.ExpirationDate.HasValue && visa.ExpirationDate.Value.Date >= DateTime.Today)
             {
                 if (StartDate == default)
                     StartDate = visa.StartDate;
-                if (ExpirationDate == default || ExpirationDate == null)
+                if (ExpirationDate == default)
                     ExpirationDate = visa.ExpirationDate.Value;
             }
         }
@@ -234,13 +236,18 @@ namespace Visa2026.Module.BusinessObjects
         public string WP_ExpirationDateText => ExpirationDate.ToString("dd.MM.yyyy");
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Visa_Number => PersonCurrentItems.GetCurrentVisa(Person)?.VisaNumber;
+        public string Visa_Number => MatchedVisa()?.VisaNumber;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Visa_StartDateText => PersonCurrentItems.GetCurrentVisa(Person)?.StartDate is DateTime vs ? vs.ToString("dd.MM.yyyy") : string.Empty;
+        public string Visa_StartDateText => MatchedVisa()?.StartDate is DateTime vs ? vs.ToString("dd.MM.yyyy") : string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Visa_ExpirationDateText => PersonCurrentItems.GetCurrentVisa(Person)?.ExpirationDate is DateTime ve ? ve.ToString("dd.MM.yyyy") : string.Empty;
+        public string Visa_ExpirationDateText => MatchedVisa()?.ExpirationDate is DateTime ve ? ve.ToString("dd.MM.yyyy") : string.Empty;
+
+        private Visa MatchedVisa() =>
+            Person == null
+                ? null
+                : PersonCurrentItems.GetVisaClosestToWorkPermit(Person, this);
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Name =>

@@ -75,7 +75,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(
             objectSpace,
             rosterPeople,
-            includeNotYetStartedVisas: application?.ApplicationProfile?.CancelVisas == true);
+            includeNotYetStartedVisas: true);
         var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
         if (application != null)
             ApplySeretmezlikExclusions(people, application, objectSpace);
@@ -1011,8 +1011,9 @@ internal static class ApplicationWorkspaceCaseBuilder
                     : Guid.Empty,
                 Name = name,
                 RoleLabel = FormatRoleLabel(role),
-                PassportNumber = FirstCellForPerson(tabs, "passport", name, 1),
-                VisaNumber = FirstCellForPerson(tabs, "visa", name, 1),
+                PassportNumber = JoinCellsForPerson(tabs, "passport", name, 1),
+                VisaNumber = JoinCellsForPerson(tabs, "visa", name, 1),
+                WorkPermitNumber = JoinCellsForPerson(tabs, "wp", name, 1),
                 Records = BuildPersonRecords(
                     application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
             });
@@ -1059,11 +1060,28 @@ internal static class ApplicationWorkspaceCaseBuilder
         string personName,
         int columnIndex)
     {
+        var joined = JoinCellsForPerson(tabs, tabKey, personName, columnIndex);
+        var first = joined.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        return string.IsNullOrWhiteSpace(first) ? "—" : first;
+    }
+
+    /// <summary>All linked values for a person on a tab (newline-separated for stacked cells).</summary>
+    private static string JoinCellsForPerson(
+        IReadOnlyDictionary<string, ApplicationWorkspaceTab> tabs,
+        string tabKey,
+        string personName,
+        int columnIndex)
+    {
         if (!tabs.TryGetValue(tabKey, out var tab))
             return "—";
 
-        var match = tab.Rows.FirstOrDefault(r => r.Count > 0 && string.Equals(r[0], personName, StringComparison.Ordinal));
-        return match != null && match.Count > columnIndex ? match[columnIndex] : "—";
+        var values = tab.Rows
+            .Where(r => r.Count > columnIndex && string.Equals(r[0], personName, StringComparison.Ordinal))
+            .Select(r => r[columnIndex]?.Trim())
+            .Where(v => !string.IsNullOrWhiteSpace(v) && v != "—")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        return values.Count == 0 ? "—" : string.Join("\n", values);
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCasePersonRecord> BuildPersonRecords(

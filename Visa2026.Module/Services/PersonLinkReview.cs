@@ -25,8 +25,29 @@ public sealed class PersonLinkReviewLine
     /// <summary>Source-tagged location chips for requested WP/BZ location rows. Mutable Hidden for this Join.</summary>
     public List<PersonLinkReviewLocationChip> LocationChips { get; set; } = new();
 
-    public string ResolveTabKey() =>
-        string.IsNullOrWhiteSpace(TabKey) ? Kind.ToString() : TabKey;
+    /// <summary>True when this kind stores document scans (eye shown on Overview).</summary>
+    public bool SupportsDocumentCopy { get; set; }
+
+    /// <summary>True when the selected record has at least one non-empty scan file.</summary>
+    public bool HasDocumentCopy { get; set; }
+
+    /// <summary>Person / header document-copies <c>RecordKey</c> for the selected object.</summary>
+    public string? DocumentCopyRecordKey { get; set; }
+
+    /// <summary>1-based slot when Last-N expands this kind (0 = single row).</summary>
+    public int SlotIndex { get; set; }
+
+    /// <summary>How many slots of this kind are shown (0/1 = no "n of m" caption).</summary>
+    public int SlotCount { get; set; }
+
+    public string ResolveTabKey()
+    {
+        if (!string.IsNullOrWhiteSpace(TabKey))
+            return TabKey;
+        if (SlotCount > 1 && SlotIndex > 0)
+            return Kind.ToString() + ":" + SlotIndex.ToString(CultureInfo.InvariantCulture);
+        return Kind.ToString();
+    }
 }
 
 public sealed class PersonLinkReviewChoice
@@ -89,7 +110,7 @@ public sealed class PersonLinkReviewCreateForm
 /// <summary>
 /// Overview shown before Join commits a person onto an Application Profile instance.
 /// </summary>
-public static class PersonLinkReview
+public static partial class PersonLinkReview
 {
     private static string T(string key) => VisaUiMessages.Get("ApplicationProfileInstance.LinkReview." + key);
 
@@ -110,9 +131,18 @@ public static class PersonLinkReview
             if (!definition.IsConfigured(application))
                 continue;
 
-            lines.Add(definition.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
-                ? AddressLine(objectSpace, application, person, definition.Label)
-                : Line(objectSpace, definition.Kind, definition.Label, person));
+            if (definition.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            {
+                lines.Add(AddressLine(objectSpace, application, person, definition.Label));
+            }
+            else if (ApplicationProfilePersonLastCount.SupportsLastCount(definition.Kind))
+            {
+                lines.AddRange(LastNLines(objectSpace, application, person, definition.Kind, definition.Label));
+            }
+            else
+            {
+                lines.Add(Line(objectSpace, definition.Kind, definition.Label, person));
+            }
 
             if (definition.Kind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
                 && CaseWorkPermitLocationCopy.ShowInLinkReview(application))
@@ -139,6 +169,7 @@ public static class PersonLinkReview
             lines.Add(VisaBorderZoneLocationLine(objectSpace, application, person));
         }
 
+        PersonLinkReviewDocumentCopy.RefreshAll(objectSpace, lines);
         return lines;
     }
 
@@ -168,7 +199,7 @@ public static class PersonLinkReview
         return InvitationStayAddressCopy.CreateFromStay(objectSpace, person, stay!)?.ID ?? Guid.Empty;
     }
 
-    public static void ApplyChoice(PersonLinkReviewLine line, Guid objectId)
+    public static void ApplyChoice(PersonLinkReviewLine line, Guid objectId, IObjectSpace? objectSpace = null)
     {
         if (line == null)
             return;
@@ -180,6 +211,8 @@ public static class PersonLinkReview
         line.ObjectId = choice.ObjectId;
         line.Summary = string.IsNullOrWhiteSpace(choice.Label) ? "—" : choice.Label;
         line.Fields = choice.Fields;
+        if (objectSpace != null)
+            PersonLinkReviewDocumentCopy.Refresh(objectSpace, line);
     }
 
     /// <summary>
@@ -207,7 +240,7 @@ public static class PersonLinkReview
             choices.Add(extra);
 
         line.Choices = choices;
-        ApplyChoice(line, savedId);
+        ApplyChoice(line, savedId, objectSpace);
     }
 
     /// <summary>
@@ -227,20 +260,30 @@ public static class PersonLinkReview
         if (type == null || objectSpace.GetObjectByKey(type, objectId) == null)
             return;
 
-        var link = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
-            .Where(row => row.ApplicationProfileInstanceId == application.ID
-                && row.PersonId == person.ID
-                && row.LinkKind == kind
-                && row.LinkedObjectId != null
-                && row.LinkedObjectId != Guid.Empty)
-            .FirstOrDefault();
+        var links = ApplicationProfileInstancePersonResolver.LoadLinks(objectSpace, application, person.ID)
+            .Where(row => row.LinkKind == kind
+                && row.LinkedObjectId is Guid linkedId
+                && linkedId != Guid.Empty)
+            .ToList();
 
-        if (link?.LinkedObjectId is not Guid previous || previous == Guid.Empty || previous == objectId)
+        if (links.Any(row => row.LinkedObjectId == objectId))
         {
             ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
                 objectSpace, application, person, kind, objectId);
             return;
         }
+
+        var link = links.FirstOrDefault();
+        if (link?.LinkedObjectId is not Guid previous || previous == Guid.Empty)
+        {
+            ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
+                objectSpace, application, person, kind, objectId);
+            return;
+        }
+
+        // Single sticky slot replace — refresh concurrency token before mutating.
+        if (!objectSpace.IsNewObject(link))
+            objectSpace.ReloadObject(link);
 
         ApplicationProfileInstanceChildMembership.Remove(application, kind, previous, objectSpace);
         link.LinkedObjectId = objectId;
@@ -262,19 +305,32 @@ public static class PersonLinkReview
         var pinned = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonResolvedLink>()
             .Where(link => link.ApplicationProfileInstanceId == application.ID && link.PersonId == person.ID)
             .ToList();
-        foreach (var line in lines)
+
+        foreach (var group in lines.Where(line => !line.OmitFromJoin).GroupBy(line => line.Kind))
         {
-            var linkedId = pinned.FirstOrDefault(link => link.LinkKind == line.Kind)?.LinkedObjectId;
-            if (linkedId is not Guid objectId || objectId == Guid.Empty)
+            var kind = group.Key;
+            var kindLines = group.OrderBy(line => line.SlotIndex).ToList();
+            var pinnedIds = pinned
+                .Where(link => link.LinkKind == kind && link.LinkedObjectId is Guid id && id != Guid.Empty)
+                .Select(link => link.LinkedObjectId!.Value)
+                .Distinct()
+                .ToList();
+            if (pinnedIds.Count == 0)
                 continue;
 
-            var choices = line.Choices.ToList();
-            if (choices.All(choice => choice.ObjectId != objectId)
-                && ChoiceForObject(objectSpace, line.Kind, line.Label, objectId) is { } extra)
-                choices.Add(extra);
+            var orderedIds = OrderPinnedLikeResolve(objectSpace, application, person, kind, pinnedIds);
+            for (var i = 0; i < kindLines.Count && i < orderedIds.Count; i++)
+            {
+                var objectId = orderedIds[i];
+                var line = kindLines[i];
+                var choices = line.Choices.ToList();
+                if (choices.All(choice => choice.ObjectId != objectId)
+                    && ChoiceForObject(objectSpace, kind, line.Label, objectId) is { } extra)
+                    choices.Add(extra);
 
-            line.Choices = choices;
-            ApplyChoice(line, objectId);
+                line.Choices = choices;
+                ApplyChoice(line, objectId, objectSpace);
+            }
         }
     }
 
@@ -284,53 +340,80 @@ public static class PersonLinkReview
         Person person,
         IReadOnlyList<PersonLinkReviewLine> lines)
     {
-        foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
+        foreach (var group in (lines ?? Array.Empty<PersonLinkReviewLine>()).Where(line => !line.OmitFromJoin).GroupBy(line => line.Kind))
         {
-            if (line.OmitFromJoin)
-                continue;
-
-            if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && line.ObjectId == Guid.Empty)
+            if (group.Key == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
             {
-                InvitationStayAddressCopy.AcceptOnJoin(objectSpace, application, person);
+                foreach (var line in group)
+                {
+                    if (line.ObjectId == Guid.Empty)
+                        InvitationStayAddressCopy.AcceptOnJoin(objectSpace, application, person);
+                    else
+                        LinkSelected(objectSpace, application, person, line.Kind, line.ObjectId);
+                }
+
                 continue;
             }
 
-            if (line.ObjectId != Guid.Empty)
-                LinkSelected(objectSpace, application, person, line.Kind, line.ObjectId);
+            var ids = group
+                .OrderBy(line => line.SlotIndex)
+                .Select(line => line.ObjectId)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList();
+            if (ids.Count == 0)
+                continue;
+
+            if (ApplicationProfilePersonLastCount.SupportsLastCount(group.Key)
+                && ApplicationProfilePersonLastCount.For(application, group.Key) > 1)
+            {
+                ApplicationProfileInstancePersonResolver.SyncResolvedLinksForKind(
+                    objectSpace, application, person, group.Key, ids);
+            }
+            else
+            {
+                LinkSelected(objectSpace, application, person, group.Key, ids[0]);
+            }
         }
 
         CaseWorkPermitLocationCopy.AcceptOnJoin(objectSpace, application, person);
         CaseBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
         CaseVisaBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
 
+        // Only push chip edits. An empty chip list means "no officer edits" — not "clear
+        // locations". Treating "—" as clear deleted AcceptOnJoin rows and tripped
+        // OptimisticLockField (expected 1 row, affected 0) on Join/Bagla.
         foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
         {
             if (!line.OmitFromJoin)
                 continue;
-            if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal)
-                || string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal)
-                || string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal))
+            if (!string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal)
+                && !string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal)
+                && !string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal))
             {
-                var merged = line.LocationChips.Count > 0
-                    ? LinkReviewLocationChips.JoinVisible(line.LocationChips)
-                    : (line.Summary == "—" ? null : line.Summary);
-                line.Summary = string.IsNullOrWhiteSpace(merged) ? "—" : merged;
+                continue;
+            }
 
-                if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal))
-                {
-                    CaseWorkPermitLocationCopy.TryApplyEditedLocations(
-                        objectSpace, application, person, line.ObjectId, merged);
-                }
-                else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
-                {
-                    CaseBorderZoneLocationCopy.TryApplyEditedLocations(
-                        objectSpace, application, person, line.ObjectId, merged);
-                }
-                else
-                {
-                    CaseVisaBorderZoneLocationCopy.TryApplyEditedLocations(
-                        objectSpace, application, person, line.ObjectId, merged);
-                }
+            if (line.LocationChips == null || line.LocationChips.Count == 0)
+                continue;
+
+            var merged = LinkReviewLocationChips.JoinVisible(line.LocationChips);
+            line.Summary = string.IsNullOrWhiteSpace(merged) ? "—" : merged;
+
+            if (string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal))
+            {
+                CaseWorkPermitLocationCopy.TryApplyEditedLocations(
+                    objectSpace, application, person, line.ObjectId, merged);
+            }
+            else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
+            {
+                CaseBorderZoneLocationCopy.TryApplyEditedLocations(
+                    objectSpace, application, person, line.ObjectId, merged);
+            }
+            else
+            {
+                CaseVisaBorderZoneLocationCopy.TryApplyEditedLocations(
+                    objectSpace, application, person, line.ObjectId, merged);
             }
         }
     }
@@ -875,7 +958,11 @@ public static class PersonLinkReview
         (JoinParts(position?.Position?.NameTm, position?.Department?.NameTm, DateText(position?.StartDate)), position?.ID);
 
     private static (string Summary, Guid? Id) VisaSummary(Visa? visa) =>
-        (JoinParts(visa?.VisaNumber, visa?.VisaType?.NameTm, DateText(visa?.ExpirationDate)), visa?.ID);
+        (JoinParts(
+            visa?.VisaNumber,
+            visa?.VisaType?.NameTm,
+            visa?.VisaCategory?.NameTm,
+            DateRangeText(visa?.StartDate, visa?.ExpirationDate)), visa?.ID);
 
     private static (string Summary, Guid? Id) TextId(string? text, Guid? id) => (text ?? string.Empty, id);
 
@@ -920,6 +1007,19 @@ public static class PersonLinkReview
 
     private static string? DateText(DateTime date) =>
         date == default ? null : date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+
+    private static string? DateRangeText(DateTime? start, DateTime? end)
+    {
+        var startText = DateText(start);
+        var endText = DateText(end);
+        if (string.IsNullOrEmpty(startText) && string.IsNullOrEmpty(endText))
+            return null;
+        if (string.IsNullOrEmpty(startText))
+            return endText;
+        if (string.IsNullOrEmpty(endText))
+            return startText;
+        return startText + " – " + endText;
+    }
 
     public static PersonLinkReviewCreateForm BuildCreateForm(
         IObjectSpace objectSpace,

@@ -687,7 +687,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (line == null)
             return Task.CompletedTask;
 
-        PersonLinkReview.ApplyChoice(line, request.ObjectId);
+        PersonLinkReview.ApplyChoice(line, request.ObjectId, View?.ObjectSpace);
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
         {
             model.PersonLinkReviewDeclineCaseSummaryAddress = line.ObjectId != Guid.Empty;

@@ -122,6 +122,7 @@
                                                                 ShowPersonLinkReview="@ShowPersonLinkReview"
                                                                 PersonLinkReviewExisting="@PersonLinkReviewExisting"
                                                                 OpenExistingPersonLinkReviewRequested="@OpenExistingPersonLinkReviewRequested"
+                                                                PersonLinkReviewPersonId="@PersonLinkReviewPersonId"
                                                                 PersonLinkReviewPersonName="@PersonLinkReviewPersonName"
                                                                 PersonLinkReviewPhotoDataUri="@PersonLinkReviewPhotoDataUri"
                                                                 PersonLinkReviewLines="@PersonLinkReviewLines"
@@ -256,6 +257,7 @@
     [Parameter] public bool ShowPersonLinkReview { get; set; }
     [Parameter] public bool PersonLinkReviewExisting { get; set; }
     [Parameter] public EventCallback<Guid> OpenExistingPersonLinkReviewRequested { get; set; }
+    [Parameter] public Guid PersonLinkReviewPersonId { get; set; }
     [Parameter] public string? PersonLinkReviewPersonName { get; set; }
     [Parameter] public string? PersonLinkReviewPhotoDataUri { get; set; }
     [Parameter] public IReadOnlyList<PersonLinkReviewLine> PersonLinkReviewLines { get; set; } = Array.Empty<PersonLinkReviewLine>();

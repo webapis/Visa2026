@@ -92,7 +92,7 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
-    public void CanLinkVisa_FalseWhenExpiredCancelledChangedOrNotStarted()
+    public void CanLinkVisa_FalseWhenExpiredCancelledOrChanged_AllowsNotYetStarted()
     {
         Assert.False(ApplicationProfileInstancePersonValidItems.CanLinkVisa(CreateVisa(
             start: Today.AddDays(-10),
@@ -105,7 +105,7 @@ public class ApplicationProfileInstancePersonValidItemsTests
             start: Today.AddDays(-10),
             expiration: Today.AddYears(1),
             changed: true)));
-        Assert.False(ApplicationProfileInstancePersonValidItems.CanLinkVisa(CreateVisa(
+        Assert.True(ApplicationProfileInstancePersonValidItems.CanLinkVisa(CreateVisa(
             start: Today.AddDays(5),
             expiration: Today.AddYears(1))));
     }
@@ -286,7 +286,7 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
-    public void ResolveVisas_NotYetStarted_IncludedOnlyWhenRequested()
+    public void ResolveVisas_IncludesNotYetStartedAmongLastN()
     {
         var person = new Person();
         var passport = new Passport { Person = person };
@@ -300,29 +300,20 @@ public class ApplicationProfileInstancePersonValidItemsTests
         next.VisaNumber = "A1734741";
         passport.Visas.Add(next);
 
-        var startedOnly = ApplicationProfileInstancePersonValidItems.ResolveVisas(person, 2);
-        Assert.Single(startedOnly);
-        Assert.Same(current, startedOnly[0]);
-
-        var forCancellation = ApplicationProfileInstancePersonValidItems.ResolveVisas(
-            person, 2, includeNotYetStarted: true);
-        Assert.Equal(2, forCancellation.Count);
-        Assert.Contains(forCancellation, v => v.VisaNumber == "A1734741");
-        Assert.Contains(forCancellation, v => v.VisaNumber == "A1675723");
+        var resolved = ApplicationProfileInstancePersonValidItems.ResolveVisas(person, 2);
+        Assert.Equal(2, resolved.Count);
+        Assert.Contains(resolved, v => v.VisaNumber == "A1734741");
+        Assert.Contains(resolved, v => v.VisaNumber == "A1675723");
     }
 
     [Fact]
-    public void CanAutoLink_CancelVisas_AllowsIssuedVisaThatHasNotStarted()
+    public void CanAutoLink_AllowsIssuedVisaThatHasNotStarted()
     {
-        var application = new ApplicationProfileInstance
-        {
-            ApplicationProfile = new ApplicationProfile { CancelVisas = true },
-        };
         var next = CreateVisa(Today.AddDays(20), Today.AddMonths(8));
 
-        Assert.False(ApplicationProfileInstancePersonValidItems.CanLinkVisa(next));
+        Assert.True(ApplicationProfileInstancePersonValidItems.CanLinkVisa(next));
         Assert.True(ApplicationProfileInstancePersonValidItems.CanAutoLink(
-            application,
+            new ApplicationProfileInstance(),
             ApplicationProfileInstancePersonLinkKind.Visa,
             next));
     }

@@ -18,6 +18,7 @@ public static class DocumentCollectionTabCaptionHelper
             [PersonDetailViewIds.Default] = "Person.Tab.CvAndPersonalFiles",
             ["Passport_DetailView"] = "Passport.Tab.DocumentCopies",
             ["Education_DetailView"] = "Education.Tab.DocumentCopies",
+            ["EmployeePositionHistory_DetailView"] = "EmployeePositionHistory.Tab.DocumentCopies",
             ["Visa_DetailView"] = "Visa.Tab.DocumentCopies",
             ["WorkPermit_DetailView"] = "WorkPermit.Tab.DocumentCopies",
             ["Invitation_DetailView"] = "Invitation.Tab.DocumentCopies",
