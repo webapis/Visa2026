@@ -1,6 +1,7 @@
 @using System.Collections.Generic
 @using System.Linq
 @using System.IO
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.ApplicationWorkspace
@@ -10,7 +11,7 @@
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.PreviewSlot
 
-<div class="ct-page">
+<div class="ct-page ct-page--progress">
     @if (!string.IsNullOrWhiteSpace(DisplayStatusMessage))
     {
         <div class="os-banner @(DisplayStatusIsError ? "os-banner--error" : "os-banner--ok")"
@@ -137,8 +138,10 @@
                                                             OwnerViewId="@PreviewSlotOwnerViewId"
                                                             Busy="_busy"
                                                             MaxUploadMb="MaxUploadMb"
+                                                            ShowRevertToHere="@(ShowRevertToHere && step.CanRevertToHere)"
                                                             SaveRequested="SaveStepAsync"
-                                                            FileChangeRequested="ChangeFileAsync" />
+                                                            FileChangeRequested="ChangeFileAsync"
+                                                            RevertRequested="EventCallback.Factory.Create(this, () => RevertAsync(step))" />
                     }
                     else if (CanOfferPen(step))
                     {
@@ -162,7 +165,7 @@
                                                                OwnerViewId="@PreviewSlotOwnerViewId" />
                         </p>
                     }
-                    @if (step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
+                    @if (!IsEditing(step) && step.State != "current" && ShowRevertToHere && step.CanRevertToHere)
                     {
                         <p style="margin:6px 0 0">
                             <button type="button"
@@ -235,6 +238,10 @@
                                                      @bind-Date="_advanceDate"
                                                      CssClass="@AdvanceDateCssClass"
                                                      Enabled="@(!_busy)" />
+                                    @if (IsDateInvalid && !string.IsNullOrWhiteSpace(AdvanceDateError))
+                                    {
+                                        <p class="ct-field-error" role="alert">@AdvanceDateError</p>
+                                    }
                                     @if (step.ResultOptions.Count > 0)
                                     {
                                         <label class="ct-label @(IsResultInvalid ? "ct-label--error" : null)" for="advance-state-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Result")</label>
@@ -501,7 +508,31 @@
 
     private bool IsAdvanceFieldErrorMode => _advanceFieldErrors || IsStatusError;
 
-    private bool IsDateInvalid => IsAdvanceFieldErrorMode && IsMissingAdvanceDate(_advanceDate);
+    private bool IsDateInvalid =>
+        !string.IsNullOrWhiteSpace(AdvanceDateError)
+        && (IsAdvanceFieldErrorMode || IsAdvanceDateOrderBroken);
+
+    private bool IsAdvanceDateOrderBroken
+    {
+        get
+        {
+            if (IsMissingAdvanceDate(_advanceDate))
+                return false;
+            return !TryGetAdvanceDateError(_advanceDate, out _);
+        }
+    }
+
+    private string? AdvanceDateError
+    {
+        get
+        {
+            if (IsMissingAdvanceDate(_advanceDate))
+                return IsAdvanceFieldErrorMode
+                    ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired")
+                    : null;
+            return TryGetAdvanceDateError(_advanceDate, out var error) ? null : error;
+        }
+    }
 
     private bool IsResultInvalid
     {
@@ -660,6 +691,36 @@
 
     private static bool IsMigrationStep(ApplicationWorkspaceCaseProgressStep step) =>
         string.Equals(step.Key, "migration", StringComparison.OrdinalIgnoreCase);
+
+    private bool TryGetAdvanceDateError(DateTime? value, out string? error)
+    {
+        error = null;
+        if (value is not DateTime date || date == default)
+            return true;
+
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        if (current == null)
+            return true;
+
+        ApplicationProfileInstanceProgressStepDates.ResolveAdvanceBounds(
+            current.EarliestDate,
+            current.PrecedingStepLabel,
+            current.DateValue,
+            current.Label,
+            current.LatestDate,
+            current.FollowingStepLabel,
+            out var earliest,
+            out var latest,
+            out var precedingLabel,
+            out var followingLabel);
+        return ApplicationProfileInstanceProgressStepDates.TryValidate(
+            date,
+            earliest,
+            latest,
+            precedingLabel,
+            followingLabel,
+            out error);
+    }
 
     private static string FileUploadLabel(ApplicationWorkspaceCaseProgressStep step) =>
         string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
@@ -867,6 +928,12 @@
         if (IsMissingAdvanceDate(_advanceDate))
         {
             error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired");
+            return false;
+        }
+
+        if (!TryGetAdvanceDateError(_advanceDate, out var dateOrderError))
+        {
+            error = dateOrderError;
             return false;
         }
 

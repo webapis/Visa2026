@@ -649,6 +649,8 @@ public static partial class IssueIssuedHeaderComposeService
                     ApplyWorkPermitCardDefaults(objectSpace, p, line, defaultWpLocations, instance);
                 else if (kind == IssueIssuedHeaderKind.WorkPermitLocationGrant)
                     ApplyWorkPermitLocationGrantCardDefaults(objectSpace, p, line, defaultWpLocations, instance);
+                else if (kind == IssueIssuedHeaderKind.BorderZone)
+                    ApplyBorderZoneCardDefaults(objectSpace, p, line, instance);
                 return line;
             })
             .Where(line => kind != IssueIssuedHeaderKind.Invitation || !line.IncludeLocked)
@@ -944,6 +946,19 @@ public static partial class IssueIssuedHeaderComposeService
                 {
                     Succeeded = false,
                     ErrorMessage = grantError,
+                };
+            }
+        }
+
+        if (draft.Kind == IssueIssuedHeaderKind.BorderZone)
+        {
+            var borderZoneError = ValidateBorderZoneCards(selected);
+            if (borderZoneError != null)
+            {
+                return new IssueIssuedHeaderCreateResult
+                {
+                    Succeeded = false,
+                    ErrorMessage = borderZoneError,
                 };
             }
         }
@@ -1377,6 +1392,7 @@ public static partial class IssueIssuedHeaderComposeService
             item.Passport = row.PassportId is Guid pid
                 ? objectSpace.GetObjectByKey<Passport>(pid)
                 : ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
+            item.BorderZoneLocation = ResolveBorderZoneItemLocations(objectSpace, instance, row);
             borderZone.BorderZoneItems.Add(item);
         }
 
@@ -1393,6 +1409,7 @@ public static partial class IssueIssuedHeaderComposeService
                 PersonId = i.Person?.ID ?? Guid.Empty,
                 PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
                 PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
+                LocationsCaption = i.BorderZoneLocation?.Trim() ?? string.Empty,
             }).ToList(),
         };
     }
@@ -1592,6 +1609,8 @@ public static partial class IssueIssuedHeaderComposeService
                         person.ExistingLineId = item.ID;
                         person.IncludeLocked = true;
                         person.StatusCaption = "On this border zone";
+                        person.WorkPermittedLocations = MeaningfulBorderZoneLocations(item.BorderZoneLocation)
+                            ?? person.WorkPermittedLocations;
                         if (item.Passport != null)
                         {
                             person.PassportId = item.Passport.ID;
@@ -1672,6 +1691,19 @@ public static partial class IssueIssuedHeaderComposeService
                     {
                         Succeeded = false,
                         ErrorMessage = grantError,
+                    };
+                }
+            }
+
+            if (draft.Kind == IssueIssuedHeaderKind.BorderZone)
+            {
+                var borderZoneError = ValidateBorderZoneCards(selected);
+                if (borderZoneError != null)
+                {
+                    return new IssueIssuedHeaderCreateResult
+                    {
+                        Succeeded = false,
+                        ErrorMessage = borderZoneError,
                     };
                 }
             }
@@ -1961,10 +1993,18 @@ public static partial class IssueIssuedHeaderComposeService
         if (borderZone.BorderZoneItems == null)
             borderZone.BorderZoneItems = new System.Collections.ObjectModel.ObservableCollection<BorderZoneItem>();
 
+        var instance = borderZone.ApplicationProfileInstance;
         foreach (var row in selected)
         {
-            if (borderZone.BorderZoneItems.Any(i => i.Person != null && i.Person.ID == row.PersonId))
+            var existing = borderZone.BorderZoneItems.FirstOrDefault(i => i.Person != null && i.Person.ID == row.PersonId);
+            if (existing != null)
+            {
+                if (MeaningfulBorderZoneLocations(row.WorkPermittedLocations) != null)
+                    existing.BorderZoneLocation = row.WorkPermittedLocations.Trim();
+                else if (instance != null)
+                    existing.BorderZoneLocation = ResolveBorderZoneItemLocations(objectSpace, instance, row);
                 continue;
+            }
 
             var person = objectSpace.GetObjectByKey<Person>(row.PersonId);
             if (person == null)
@@ -1976,6 +2016,9 @@ public static partial class IssueIssuedHeaderComposeService
             item.Passport = row.PassportId is Guid pid
                 ? objectSpace.GetObjectByKey<Passport>(pid)
                 : ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
+            item.BorderZoneLocation = instance == null
+                ? (row.WorkPermittedLocations?.Trim() ?? string.Empty)
+                : ResolveBorderZoneItemLocations(objectSpace, instance, row);
             borderZone.BorderZoneItems.Add(item);
         }
 
@@ -1992,6 +2035,7 @@ public static partial class IssueIssuedHeaderComposeService
                 PersonId = i.Person?.ID ?? Guid.Empty,
                 PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
                 PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
+                LocationsCaption = i.BorderZoneLocation?.Trim() ?? string.Empty,
             }).ToList(),
         };
     }
@@ -2091,6 +2135,7 @@ public static partial class IssueIssuedHeaderComposeService
                             PersonId = i.Person?.ID ?? Guid.Empty,
                             PersonName = i.Person?.FullName?.Trim() ?? string.Empty,
                             PassportNumber = i.Passport?.PassportNumber?.Trim() ?? string.Empty,
+                            LocationsCaption = i.BorderZoneLocation?.Trim() ?? string.Empty,
                         })
                         .ToList(),
                 };
@@ -2160,6 +2205,11 @@ public static partial class IssueIssuedHeaderComposeService
         && row.PassportId is Guid pid && pid != Guid.Empty
         && !string.IsNullOrWhiteSpace(row.WorkPermittedLocations);
 
+    public static bool IsBorderZoneCardComplete(IssueIssuedHeaderPersonLineDraft row) =>
+        row != null
+        && row.PassportId is Guid pid && pid != Guid.Empty
+        && MeaningfulBorderZoneLocations(row.WorkPermittedLocations) != null;
+
     private static string? ValidateWorkPermitLocationGrantCards(List<IssueIssuedHeaderPersonLineDraft> selected)
     {
         foreach (var row in selected)
@@ -2171,6 +2221,58 @@ public static partial class IssueIssuedHeaderComposeService
         }
 
         return null;
+    }
+
+    private static string? ValidateBorderZoneCards(List<IssueIssuedHeaderPersonLineDraft> selected)
+    {
+        foreach (var row in selected)
+        {
+            if (row.PassportId is null || row.PassportId == Guid.Empty)
+                return $"{row.PersonName}: passport is required.";
+            if (MeaningfulBorderZoneLocations(row.WorkPermittedLocations) == null)
+                return $"{row.PersonName}: granted border-zone locations are required.";
+        }
+
+        return null;
+    }
+
+    private static void ApplyBorderZoneCardDefaults(
+        IObjectSpace objectSpace,
+        Person person,
+        IssueIssuedHeaderPersonLineDraft line,
+        ApplicationProfileInstance instance)
+    {
+        line.WorkPermittedLocations = CasePersonRequestedLocation.ResolveForPrefill(
+            objectSpace,
+            instance.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            instance.BorderZoneLocation);
+    }
+
+    private static string ResolveBorderZoneItemLocations(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance instance,
+        IssueIssuedHeaderPersonLineDraft row)
+    {
+        var onRow = MeaningfulBorderZoneLocations(row.WorkPermittedLocations);
+        if (onRow != null)
+            return onRow;
+
+        return CasePersonRequestedLocation.ResolveForPrefill(
+            objectSpace,
+            instance.ID,
+            row.PersonId,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
+            instance.BorderZoneLocation)?.Trim() ?? string.Empty;
+    }
+
+    private static string? MeaningfulBorderZoneLocations(string? stored)
+    {
+        var trimmed = stored?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed) || BorderZoneSelectionHelper.IsNoneValue(trimmed))
+            return null;
+        return trimmed;
     }
 
     private static void ApplyWorkPermitLocationGrantCardDefaults(

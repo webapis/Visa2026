@@ -755,7 +755,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 request.ProgressId,
                 request.Date,
                 request.SubmissionDocumentNumber,
-                request.ResultNumber);
+                request.ResultNumber,
+                request.ProcessNumber);
             if (!result.Success)
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save this step.";

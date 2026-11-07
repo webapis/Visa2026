@@ -369,7 +369,9 @@
                                             </label>
                                             }
                                             <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
-                                                <span>@(_draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant ? "Granted locations" : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermittedLocations"))</span>
+                                                <span>@(_draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant
+                                                    ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.GrantedLocations")
+                                                    : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermittedLocations"))</span>
                                                 <BorderZoneLocationField EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
                                                                          Value="@person.WorkPermittedLocations"
                                                                          ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
@@ -379,6 +381,92 @@
                                         {
                                             <p class="issue-issued-visa-slot__note">@person.DatePrefillNote</p>
                                         }
+                                    }
+                                </article>
+                            }
+                        }
+                    </section>
+                }
+                else if (_draft.Kind == IssueIssuedHeaderKind.BorderZone)
+                {
+                    <section class="issue-issued-header-slot__section">
+                        <div class="issue-issued-header-slot__section-head">
+                            <h3 class="issue-issued-header-slot__section-title">@PeopleOnRecordTitle</h3>
+                            <span class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.ReadyOf", SelectedReadyCount, SelectedCount)</span>
+                        </div>
+                        <div class="issue-issued-header-slot__people-actions">
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectAllReady">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.SelectAllReady")</button>
+                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="SelectNone">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.SelectNone")</button>
+                        </div>
+                        @if (_draft.People.Count == 0)
+                        {
+                            <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.NoPeopleRoster")</p>
+                        }
+                        else
+                        {
+                            @foreach (var person in _draft.People)
+                            {
+                                var cardClass = !person.Include
+                                    ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--off"
+                                    : "issue-issued-visa-slot__card";
+                                <article class="@cardClass" @key="@($"{_boundOccupantKey}:bz:{person.PersonId:N}")">
+                                    <div class="issue-issued-visa-slot__card-head">
+                                        <input type="checkbox"
+                                               disabled="@person.IncludeLocked"
+                                               checked="@person.Include"
+                                               @onchange="e => ToggleInclude(person, e)" />
+                                        <span class="issue-issued-visa-slot__avatar">@Initials(person.PersonName)</span>
+                                        <span class="issue-issued-visa-slot__person">@person.PersonName</span>
+                                        @if (!person.IsReady)
+                                        {
+                                            <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@ApplicationProfileLocalization.IssuedStatus(person.StatusCaption)</span>
+                                        }
+                                        else if (person.Include && !_draft.IsEditMode && !person.IncludeLocked)
+                                        {
+                                            <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => SetInclude(person, false)">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")</button>
+                                        }
+                                    </div>
+                                    @if (person.Include)
+                                    {
+                                        <div class="issue-issued-header-slot__grid">
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "passport", false, IssueComposeFieldCue.HasText(person.PassportNumber), true))">
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
+                                                @if (person.PassportId is Guid passportId && passportId != Guid.Empty)
+                                                {
+                                                    <button type="button"
+                                                            class="issue-issued-header-slot__input issue-issued-header-slot__source-wp-link"
+                                                            title="Preview passport"
+                                                            @onclick="() => PreviewPassportAsync(person)">
+                                                        @(string.IsNullOrWhiteSpace(person.PassportNumber) ? "Passport" : person.PassportNumber)
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <input class="issue-issued-header-slot__input" value="—" disabled />
+                                                }
+                                            </label>
+                                            <label class="issue-issued-header-slot__field @(WpCueClass(person, "visa", false, IssueComposeFieldCue.HasText(person.SourceVisaCaption), true))">
+                                                <span>Visa</span>
+                                                @if (person.SourceVisaId is Guid personVisaId && personVisaId != Guid.Empty)
+                                                {
+                                                    <button type="button"
+                                                            class="issue-issued-header-slot__input issue-issued-header-slot__source-wp-link"
+                                                            title="Preview visa copy (with passport)"
+                                                            @onclick="() => PreviewSourceVisaAsync(personVisaId)">
+                                                        @(string.IsNullOrWhiteSpace(person.SourceVisaCaption) ? personVisaId.ToString("D") : person.SourceVisaCaption)
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <input class="issue-issued-header-slot__input" value="—" disabled />
+                                                }
+                                            </label>
+                                            <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
+                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.GrantedBorderZoneLocations")</span>
+                                                <BorderZoneLocationField Value="@person.WorkPermittedLocations"
+                                                                         ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
+                                            </div>
+                                        </div>
                                     }
                                 </article>
                             }
@@ -408,10 +496,6 @@
                                     <th class="issue-issued-header-slot__check-col"></th>
                                     <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Person")</th>
                                     <th>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Passport")</th>
-                                    @if (_draft.Kind == IssueIssuedHeaderKind.BorderZone)
-                                    {
-                                        <th>Visa</th>
-                                    }
                                     <th>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Status")</th>
                                 </tr>
                             </thead>
@@ -432,38 +516,8 @@
                                             @person.PersonName
                                         </td>
                                         <td>
-                                            @if (_draft.Kind == IssueIssuedHeaderKind.BorderZone && person.PassportId is Guid passportId && passportId != Guid.Empty)
-                                            {
-                                                <button type="button"
-                                                        class="issue-issued-header-slot__link-btn"
-                                                        title="Preview passport"
-                                                        @onclick="() => PreviewPassportAsync(person)">
-                                                    @(string.IsNullOrWhiteSpace(person.PassportNumber) ? "Passport" : person.PassportNumber)
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                @(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)
-                                            }
+                                            @(string.IsNullOrWhiteSpace(person.PassportNumber) ? "—" : person.PassportNumber)
                                         </td>
-                                        @if (_draft.Kind == IssueIssuedHeaderKind.BorderZone)
-                                        {
-                                            <td>
-                                                @if (person.SourceVisaId is Guid personVisaId && personVisaId != Guid.Empty)
-                                                {
-                                                    <button type="button"
-                                                            class="issue-issued-header-slot__link-btn"
-                                                            title="Preview visa copy (with passport)"
-                                                            @onclick="() => PreviewSourceVisaAsync(personVisaId)">
-                                                        @(string.IsNullOrWhiteSpace(person.SourceVisaCaption) ? "Visa" : person.SourceVisaCaption)
-                                                    </button>
-                                                }
-                                                else
-                                                {
-                                                    <span>—</span>
-                                                }
-                                            </td>
-                                        }
                                         <td>
                                             <span class="issue-issued-header-slot__status @PersonStatusCss(person)">
                                                 @ApplicationProfileLocalization.IssuedStatus(person.StatusCaption)
@@ -698,7 +752,8 @@
         && SelectedReadyCount == SelectedCount
         && (_draft.Kind != IssueIssuedHeaderKind.BorderZone
             || (_expirationDate.HasValue
-                && _draft.SourceVisaId is Guid bzVisa && bzVisa != Guid.Empty))
+                && _draft.SourceVisaId is Guid bzVisa && bzVisa != Guid.Empty
+                && BorderZoneCardsComplete))
         && (_draft.Kind != IssueIssuedHeaderKind.Invitation
             || !_visaWindowDefined
             || (_visaStartDate.HasValue && _visaEndDate.HasValue))
@@ -710,6 +765,10 @@
             _draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant
                 ? IssueIssuedHeaderComposeService.IsWorkPermitLocationGrantCardComplete(p)
                 : IssueIssuedHeaderComposeService.IsWorkPermitCardComplete(p));
+
+    private bool BorderZoneCardsComplete =>
+        _draft != null
+        && _draft.People.Where(p => p.Include).All(IssueIssuedHeaderComposeService.IsBorderZoneCardComplete);
 
     /// <summary>
     /// Edit: Save only when modified (XAF ObjectSpace.IsModified style).
@@ -975,7 +1034,9 @@
 
     private string WorkPermitFingerprint()
     {
-        if (_draft?.Kind != IssueIssuedHeaderKind.WorkPermit && _draft?.Kind != IssueIssuedHeaderKind.WorkPermitLocationGrant)
+        if (_draft?.Kind != IssueIssuedHeaderKind.WorkPermit
+            && _draft?.Kind != IssueIssuedHeaderKind.WorkPermitLocationGrant
+            && _draft?.Kind != IssueIssuedHeaderKind.BorderZone)
             return string.Empty;
 
         return string.Join(";",

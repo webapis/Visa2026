@@ -54,4 +54,28 @@ public class BorderZoneSourceVisaComposeTests
         Assert.Equal(IssueIssuedHeaderKind.BorderZone, kind);
         Assert.Equal("borderZone", IssueIssuedHeaderComposeService.CatalogKeyFor(kind));
     }
+
+    [Fact]
+    public void BorderZone_card_requires_real_granted_locations()
+    {
+        var ready = new IssueIssuedHeaderPersonLineDraft
+        {
+            PassportId = Guid.NewGuid(),
+            WorkPermittedLocations = "Serhetabat şäheri, Garabogaz şäheri",
+        };
+        var none = new IssueIssuedHeaderPersonLineDraft
+        {
+            PassportId = Guid.NewGuid(),
+            WorkPermittedLocations = "Ýok",
+        };
+        var empty = new IssueIssuedHeaderPersonLineDraft
+        {
+            PassportId = Guid.NewGuid(),
+            WorkPermittedLocations = "  ",
+        };
+
+        Assert.True(IssueIssuedHeaderComposeService.IsBorderZoneCardComplete(ready));
+        Assert.False(IssueIssuedHeaderComposeService.IsBorderZoneCardComplete(none));
+        Assert.False(IssueIssuedHeaderComposeService.IsBorderZoneCardComplete(empty));
+    }
 }

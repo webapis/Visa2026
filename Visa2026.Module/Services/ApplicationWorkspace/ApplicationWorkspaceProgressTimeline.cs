@@ -113,6 +113,8 @@ internal static class ApplicationWorkspaceProgressTimeline
             liveProfile, ApplicationProfileProgressStepVisibility.Rejected);
         var showCancelled = ApplicationProfileProgressStepVisibility.IsVisible(
             liveProfile, ApplicationProfileProgressStepVisibility.Cancelled);
+        var allowProcessNumberCorrection =
+            ApplicationProfileConfigurationResolver.ShowProcessNumber(application);
 
         var steps = new List<ApplicationWorkspaceCaseProgressStep>();
         if (showOffice)
@@ -263,7 +265,8 @@ internal static class ApplicationWorkspaceProgressTimeline
                 processNumber: ResolveMigrationProcessNumber(application, history, migrationRow, migrationState),
                 suppressResultDropdown: suppressResult,
                 requireProcessNumberOnAdvance: requireCoNumber,
-                showOptionalOutcomeFiles: requireCoNumber));
+                showOptionalOutcomeFiles: requireCoNumber,
+                allowProcessNumberCorrection: allowProcessNumberCorrection));
             }
         }
 
@@ -624,27 +627,33 @@ internal static class ApplicationWorkspaceProgressTimeline
             steps[i].CanEditFiles = true;
 
             DateTime? previous = null;
+            var previousLabel = string.Empty;
             for (var j = i - 1; j >= 0; j--)
             {
                 if (steps[j].DateValue is DateTime earlier)
                 {
                     previous = earlier;
+                    previousLabel = steps[j].Label ?? string.Empty;
                     break;
                 }
             }
 
             DateTime? next = null;
+            var nextLabel = string.Empty;
             for (var j = i + 1; j < steps.Count; j++)
             {
                 if (steps[j].DateValue is DateTime later)
                 {
                     next = later;
+                    nextLabel = steps[j].Label ?? string.Empty;
                     break;
                 }
             }
 
             steps[i].EarliestDate = previous;
+            steps[i].PrecedingStepLabel = previousLabel;
             steps[i].LatestDate = next;
+            steps[i].FollowingStepLabel = nextLabel;
         }
     }
 
@@ -676,7 +685,8 @@ internal static class ApplicationWorkspaceProgressTimeline
         string? processNumber = null,
         bool suppressResultDropdown = false,
         bool requireProcessNumberOnAdvance = false,
-        bool showOptionalOutcomeFiles = false)
+        bool showOptionalOutcomeFiles = false,
+        bool allowProcessNumberCorrection = false)
     {
         var isCurrent = slotState == "current";
         var stateLabel = stateLabelOverride
@@ -741,6 +751,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             CanEditFiles = canCorrect,
             CanEditSubmissionNumber = canCorrect && submissionStep,
             CanEditResultNumber = canCorrect && decisionRow != null,
+            CanEditProcessNumber = canCorrect && isMigration && allowProcessNumberCorrection,
             Files = storedFiles,
             FileSlot = fileSlot,
             State = slotState,

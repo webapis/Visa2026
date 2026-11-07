@@ -318,6 +318,12 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public DateTime? LatestDate { get; set; }
 
+    /// <summary>Localized-ready English label of the timeline step that sets <see cref="EarliestDate"/>.</summary>
+    public string PrecedingStepLabel { get; set; } = string.Empty;
+
+    /// <summary>Localized-ready English label of the timeline step that sets <see cref="LatestDate"/>.</summary>
+    public string FollowingStepLabel { get; set; } = string.Empty;
+
     /// <summary>Add, replace, and remove files on this finished step.</summary>
     public bool CanEditFiles { get; set; }
 
@@ -325,6 +331,9 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     /// <summary>Edit ministry approval result number (Netije belgisi) on this finished step.</summary>
     public bool CanEditResultNumber { get; set; }
+
+    /// <summary>Edit CO / process number on the migration AS step.</summary>
+    public bool CanEditProcessNumber { get; set; }
 
     public int FileSlot { get; init; }
 

@@ -6,6 +6,22 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-07 — Progress date must be on/after preceding step
+
+- **Need**: Advance/pen-edit dates earlier than the previous step broke the timeline with no clear field error.
+- **Fix**: Validate against preceding (and following) step bounds; same day allowed. Red border + `DateOnOrAfterPrecedingStep` message naming the previous step. Blocks Advance/Save. Live on Advance when order is broken.
+- **Officer**: Rebuild, hard-refresh. On Türkmenenergo enter a date before Office preparation — red border and message with Office name; Advance stays blocked until fixed.
+- **Prevent**: Do not allow Advance/Save with date before preceding step without field-level feedback.
+- **Cross-skill**: visa2026-application-profile
+
+### 2026-11-07 — Pen-edit Progress form matches Advance shell
+
+- **Need**: Pen-edit on finished steps showed a sparse Result number / Date / Save layout unlike the Advance form (Current state / Started on / SLA / Date / CO / files). Officers found it confusing.
+- **Fix**: `OfficerShellProgressStepCorrection` uses the same `ct-prog-detail` + `ct-prog-advance` shell. Date, Result number, submission number, CO number, and files stay editable; Save + Revert to here stay on pen-edit. `CorrectStep` can update ProcessNumber.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a finished ministry or CO step, click pen — layout matches Advance; Save keeps changes; Revert to here still available.
+- **Prevent**: Do not keep a second sparse correction UI for pen-edit.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-11-07 — Via-ministry CO step for Border Zone / Work Location
 
 - **Need**: Serhet Ýaka (and other AS-step profiles that do not produce Inv/WP/Visa) hid **CO belgesi**. Via-ministry Netije showed when outcome steps were off in ProgressSteps. Subtitle **AS (CO) belgisine garaşylýar** was unwanted.

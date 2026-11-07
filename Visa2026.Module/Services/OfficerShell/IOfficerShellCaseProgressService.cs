@@ -34,7 +34,8 @@ public interface IOfficerShellCaseProgressService
         Guid progressId,
         DateTime stepDate,
         string? submissionDocumentNumber,
-        string? resultNumber = null);
+        string? resultNumber = null,
+        string? processNumber = null);
 
     OfficerShellCaseProgressResult AddProgressFile(
         IObjectSpace objectSpace,

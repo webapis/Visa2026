@@ -106,7 +106,40 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             ? chosen.Date
             : DateTime.Today;
         if (date == default)
-            return OfficerShellCaseProgressResult.Failed("Date is required.");
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
+
+        var timeline = ApplicationWorkspaceProgressTimeline.Build(
+            application,
+            application.ApplicationProfile,
+            default,
+            objectSpace);
+        var currentStep = timeline.FirstOrDefault(s =>
+            string.Equals(s.State, "current", StringComparison.OrdinalIgnoreCase));
+        if (currentStep != null)
+        {
+            ApplicationProfileInstanceProgressStepDates.ResolveAdvanceBounds(
+                currentStep.EarliestDate,
+                currentStep.PrecedingStepLabel,
+                currentStep.DateValue,
+                currentStep.Label,
+                currentStep.LatestDate,
+                currentStep.FollowingStepLabel,
+                out var earliestBound,
+                out var latestBound,
+                out var precedingLabel,
+                out var followingLabel);
+            if (!ApplicationProfileInstanceProgressStepDates.TryValidate(
+                    date,
+                    earliestBound,
+                    latestBound,
+                    precedingLabel,
+                    followingLabel,
+                    out var advanceDateError))
+            {
+                return OfficerShellCaseProgressResult.Failed(
+                    advanceDateError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
+            }
+        }
 
         string? normalizedResultNumber = null;
         if (ApplicationProgressResultNumberHelper.AppliesTo(chosenCode)
@@ -332,7 +365,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         Guid progressId,
         DateTime stepDate,
         string? submissionDocumentNumber,
-        string? resultNumber = null)
+        string? resultNumber = null,
+        string? processNumber = null)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -356,7 +390,13 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         if (step == null)
             return OfficerShellCaseProgressResult.Failed("This step cannot be corrected.");
 
-        if (!ApplicationProfileInstanceProgressStepDates.TryValidate(stepDate, step.EarliestDate, step.LatestDate, out var dateError))
+        if (!ApplicationProfileInstanceProgressStepDates.TryValidate(
+                stepDate,
+                step.EarliestDate,
+                step.LatestDate,
+                step.PrecedingStepLabel,
+                step.FollowingStepLabel,
+                out var dateError))
             return OfficerShellCaseProgressResult.Failed(dateError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
 
         row.Date = stepDate.Date;
@@ -380,6 +420,23 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
             if (!ApplicationMigrationSubmission.TryNormalizeDocumentNumber(submissionDocumentNumber, out var number, out var numberError))
                 return OfficerShellCaseProgressResult.Failed(numberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SubmissionDocumentNumberRequired"));
             row.SubmissionDocumentNumber = number;
+        }
+
+        if (step.CanEditProcessNumber)
+        {
+            if (!ApplicationProcessNumberHelper.TryAssign(
+                    objectSpace,
+                    application,
+                    processNumber,
+                    requireWhenVisible: true,
+                    out var processNumberError))
+            {
+                return OfficerShellCaseProgressResult.Failed(
+                    processNumberError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ProcessNumberRequired"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(application.ProcessNumber))
+                row.ProcessNumber = application.ProcessNumber.Trim();
         }
 
         ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);

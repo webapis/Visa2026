@@ -5299,6 +5299,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Sene {0} ýa-da ondan öň bolmaly.",
             ["ru-RU"] = "Дата должна быть не позже {0}.",
         },
+        ["ApplicationProfileInstance.Workspace.DateOnOrAfterPrecedingStep"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date must be on or after «{0}» ({1}).",
+            ["tr-TR"] = "Tarih «{0}» adımından ({1}) sonra veya aynı gün olmalıdır.",
+            ["tk-TM"] = "Sene «{0}» ädiminiň senesinden soň bolmaly ({1}).",
+            ["ru-RU"] = "Дата должна быть не раньше шага «{0}» ({1}).",
+        },
+        ["ApplicationProfileInstance.Workspace.DateOnOrBeforeFollowingStep"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date must be on or before «{0}» ({1}).",
+            ["tr-TR"] = "Tarih «{0}» adımından ({1}) önce veya aynı gün olmalıdır.",
+            ["tk-TM"] = "Sene «{0}» ädiminiň senesinden öň bolmaly ({1}).",
+            ["ru-RU"] = "Дата должна быть не позже шага «{0}» ({1}).",
+        },
+        ["ApplicationProfileInstance.Workspace.DateBetweenPrecedingSteps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date must be from «{0}» ({1}) to «{2}» ({3}).",
+            ["tr-TR"] = "Tarih «{0}» ({1}) ile «{2}» ({3}) arasında olmalıdır.",
+            ["tk-TM"] = "Sene «{0}» ({1}) bilen «{2}» ({3}) aralygynda bolmaly.",
+            ["ru-RU"] = "Дата должна быть между «{0}» ({1}) и «{2}» ({3}).",
+        },
         ["ApplicationProfileInstance.Workspace.DateRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Date is required.",
