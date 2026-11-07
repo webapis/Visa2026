@@ -1,0 +1,15 @@
+{
+  "PortalFiling": {
+    "ScaffoldOnly": true,
+    "Visa2026": {
+      "BaseUrl": "https://your-visa2026-host/",
+      "UserName": "worker-user",
+      "Password": "set-locally-do-not-commit"
+    },
+    "Portal": {
+      "EdgeUserDataDir": "C:\\PortalFiling\\edge-profile",
+      "ScreenshotDirectory": "C:\\PortalFiling\\screenshots",
+      "Headless": false
+    }
+  }
+}

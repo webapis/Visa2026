@@ -18,6 +18,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Seed-DataYaml.ps1` | Run **`db-updater`** (imports bundled **`data.yaml`** by default, or **`-HostYamlPath`** to bind-mount another file). Requires **app + SQL** up; fresh DB: start **app** once so lookup catalogs sync first. |
 | `Run-DataImporter.ps1` | Interactive launcher for local `dotnet run --project Visa2026.DataImporter` (import / clear / sync / validate / prune) so you don’t need to remember flags. |
 | `Update-LocalDatabase.ps1` | **XAF `--updateDatabase`** on your PC (LocalDB, Docker dev, or custom connection) — **no login**, no browser. |
+| `Publish-PortalFilingWorker.ps1` | Build **sample** Portal Filing Playwright worker **win-x64 zip** (+ optional copy to Blazor `wwwroot/downloads/portal-filing`). Filling PC / RDP install; not IIS. |
 
 **VISA2014 → Visa2026 prod migration** scripts live in **`scripts/visa2014-migration/`** (import waves, catalogs, reimport, restore). **Search that README before adding new scripts** — reuse CLI/orchestrators first. See [visa2014-migration/README.md](visa2014-migration/README.md) and [visa2014-to-visa2026-import](../.cursor/skills/visa2014-to-visa2026-import/SKILL.md).
 
@@ -130,3 +131,4 @@ powershell.exe -ExecutionPolicy Bypass -File .\Install-WslDockerEngine.ps1
 - **`droplet-scripts/`** → *remote Linux host, real deploys, `.env.prod` / `.env.dev` on the server.*
 
 For compose file reference and importer commands, see [docs/ENVIRONMENTS.md](../docs/ENVIRONMENTS.md). For production safety, see [docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md](../docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md).
+

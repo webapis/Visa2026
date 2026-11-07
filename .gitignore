@@ -514,3 +514,9 @@ user-manual/assets/videos/**/*.mp4
 user-manual/assets/videos/**/*.webm
 user-manual/assets/videos/**/*.mov
 deploy/manual/
+
+# Portal filing worker local secrets
+Visa2026.PortalFiling.Worker/appsettings.Local.json
+
+# Portal filing worker download zips (produced by Publish-PortalFilingWorker.ps1)
+Visa2026.Blazor.Server/wwwroot/downloads/portal-filing/*.zip

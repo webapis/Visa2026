@@ -1,0 +1,24 @@
+{
+  "Id": "00000000-0000-0000-0000-000000000001",
+  "Status": "Ready",
+  "Payload": {
+    "ApplicationType": "REGISTRATION",
+    "TypeOfLocation": "REPLACE_WITH_PORTAL_LABEL",
+    "PlaceOfStay": "REPLACE_WITH_PORTAL_LABEL",
+    "AddressDistrict": "REPLACE_WITH_PORTAL_LABEL",
+    "RegistrationDateFrom": "2026-01-01",
+    "RegistrationDateTo": "2026-12-31",
+    "Street": "Sample street",
+    "Building": "1",
+    "Block": "A",
+    "Apartment": "10",
+    "Workplace": "Sample workplace",
+    "LetterNumber": "01/-02",
+    "LetterDate": "2026-01-15",
+    "Note": "",
+    "Citizen": {
+      "FullName": "Sample Person",
+      "PassportNumber": "U1234567"
+    }
+  }
+}
