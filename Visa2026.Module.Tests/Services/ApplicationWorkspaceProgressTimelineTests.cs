@@ -969,13 +969,59 @@ public class ApplicationWorkspaceProgressTimelineTests
 
         Assert.Equal("current", migration.State);
         Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, migration.Label);
-        Assert.Equal(ApplicationWorkspaceProgressTimeline.AwaitingAsCoNumberLabel, migration.CurrentStateLabel);
+        Assert.Equal(string.Empty, migration.CurrentStateLabel);
+        Assert.True(migration.RequireProcessNumberOnAdvance);
         Assert.True(migration.ShowMinistryLetterUpload);
         Assert.False(migration.MissingMinistryLetter);
         Assert.Equal(ApplicationProfileInstanceProgressFiles.MinistryLetter, migration.FileSlot);
         Assert.Equal(
-            "AS number received · Awaiting AS (CO) number",
+            ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel,
             ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
+    }
+
+    [Fact]
+    public void Build_ViaMinistry_HiddenOutcomeSteps_RequiresCoNumber_HidesResult()
+    {
+        var profile = ThreeLegProfile();
+        profile.ProduceBorderZone = true;
+        profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            profile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Rejected, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Cancelled, false),
+            ]);
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(ApprovedLeg(application, 3, null, Guid.NewGuid()));
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 4,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        var migration = steps.Single(s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("current", migration.State);
+        Assert.Empty(migration.ResultOptions);
+        Assert.True(migration.RequireProcessNumberOnAdvance);
+        Assert.Contains(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
+        Assert.DoesNotContain(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
     }
 
     [Fact]

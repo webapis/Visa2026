@@ -1771,10 +1771,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfile.Field.ProcessNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Process number",
-            ["tr-TR"] = "Süreç numarası",
-            ["tk-TM"] = "Proses belgisi",
-            ["ru-RU"] = "Номер процесса",
+            ["en-US"] = "CO number",
+            ["tr-TR"] = "CO numarası",
+            ["tk-TM"] = "CO belgesi",
+            ["ru-RU"] = "Номер CO",
         },
         ["ApplicationProfile.Field.Project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3505,6 +3505,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Rugsat berlen ýerler *",
             ["ru-RU"] = "Разрешённые места *",
         },
+        ["ApplicationProfileInstance.Issued.GrantedLocations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Granted locations *",
+            ["tr-TR"] = "Verilen yerler *",
+            ["tk-TM"] = "Berlen goşmaça iş ýerleri *",
+            ["ru-RU"] = "Выданные места *",
+        },
+        ["ApplicationProfileInstance.Issued.GrantedBorderZoneLocations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Granted border-zone locations *",
+            ["tr-TR"] = "Verilen sınır bölgesi yerleri *",
+            ["tk-TM"] = "Berlen serhet sebiti ýerleri *",
+            ["ru-RU"] = "Выданные места погранзоны *",
+        },
         ["ApplicationProfileInstance.Issued.WpBanner"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "One work permit letter for this case. Employees only. Linked work-permit items are not a source.",
@@ -5112,10 +5126,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Workspace.AsNumberReceived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "AS number received",
-            ["tr-TR"] = "AS numarası alındı",
+            ["en-US"] = "CO number received",
+            ["tr-TR"] = "CO numarası alındı",
             ["tk-TM"] = "CO belgisi alyndy",
-            ["ru-RU"] = "Номер AS получен",
+            ["ru-RU"] = "Номер CO получен",
         },
         ["ApplicationProfileInstance.Workspace.AtMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -5945,24 +5959,24 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Workspace.ProcessNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Process number",
-            ["tr-TR"] = "Süreç numarası",
-            ["tk-TM"] = "Proses belgisi",
-            ["ru-RU"] = "Номер процесса",
+            ["en-US"] = "CO number",
+            ["tr-TR"] = "CO numarası",
+            ["tk-TM"] = "CO belgesi",
+            ["ru-RU"] = "Номер CO",
         },
         ["ApplicationProfileInstance.Workspace.ProcessNumberPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Migration Service number",
-            ["tr-TR"] = "Göç dairesi numarası",
-            ["tk-TM"] = "Migrasiýa gullugynyň belgisi",
-            ["ru-RU"] = "Номер миграционной службы",
+            ["en-US"] = "CO number",
+            ["tr-TR"] = "CO numarası",
+            ["tk-TM"] = "CO belgesi",
+            ["ru-RU"] = "Номер CO",
         },
         ["ApplicationProfileInstance.Workspace.ProcessNumberRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Process number is required when submitting to Migration Service.",
-            ["tr-TR"] = "Göç dairesine teslimde süreç numarası zorunlu.",
-            ["tk-TM"] = "Migrasiýa gullugyna tabşyrylanda proses belgisi hökmany.",
-            ["ru-RU"] = "При подаче в миграционную службу нужен номер процесса.",
+            ["en-US"] = "CO number is required.",
+            ["tr-TR"] = "CO numarası zorunlu.",
+            ["tk-TM"] = "CO belgesi hökmany.",
+            ["ru-RU"] = "Номер CO обязателен.",
         },
         ["ApplicationProfileInstance.Workspace.ProcessRejected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -620,7 +620,12 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequireWorkPermitLocation = ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
             profile.ProduceWorkPermit, row.RequireWorkPermitLocation);
         profile.RequireProcessNumber = ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
-            profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, row.RequireProcessNumber);
+            profile.ProduceInvitation,
+            profile.ProduceWorkPermit,
+            profile.ProduceVisa,
+            row.RequireProcessNumber,
+            profile.ProduceBorderZone,
+            profile.ProduceWorkLocation);
         profile.RequireEntryDate = row.RequireEntryDate;
         profile.RequireEntryCheckPoint = row.RequireEntryCheckPoint;
         profile.RequireTargetApplicationProfileInstance = row.RequireTargetApplicationProfileInstance;

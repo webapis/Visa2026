@@ -263,7 +263,12 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
                 profile.ProduceWorkPermit, profile.RequireWorkPermitLocation));
         Add("Process number", null,
             ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
-                profile.ProduceInvitation, profile.ProduceWorkPermit, profile.ProduceVisa, profile.RequireProcessNumber));
+                profile.ProduceInvitation,
+                profile.ProduceWorkPermit,
+                profile.ProduceVisa,
+                profile.RequireProcessNumber,
+                profile.ProduceBorderZone,
+                profile.ProduceWorkLocation));
         Add("Target application profile instance", null, profile.RequireTargetApplicationProfileInstance);
         Add("Submit to organization", null, profile.RequireSubmitToOrganization);
         Add("Entry date", null, profile.RequireEntryDate);

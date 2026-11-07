@@ -2050,10 +2050,10 @@
     "ru-RU": "Ожидается номер AS (CO)"
   },
   "ApplicationProfileInstance.Workspace.AsNumberReceived": {
-    "en-US": "AS number received",
-    "tr-TR": "AS numarası alındı",
+    "en-US": "CO number received",
+    "tr-TR": "CO numarası alındı",
     "tk-TM": "CO belgisi alyndy",
-    "ru-RU": "Номер AS получен"
+    "ru-RU": "Номер CO получен"
   },
   "ApplicationProfileInstance.Workspace.Processing": {
     "en-US": "Processing",
@@ -3034,16 +3034,16 @@
     "ru-RU": "Номер результата не может быть длиннее 100 символов."
   },
   "ApplicationProfileInstance.Workspace.ProcessNumber": {
-    "en-US": "Process number",
-    "tr-TR": "Süreç numarası",
-    "tk-TM": "Proses belgisi",
-    "ru-RU": "Номер процесса"
+    "en-US": "CO number",
+    "tr-TR": "CO numarası",
+    "tk-TM": "CO belgesi",
+    "ru-RU": "Номер CO"
   },
   "ApplicationProfileInstance.Workspace.ProcessNumberPlaceholder": {
-    "en-US": "Migration Service number",
-    "tr-TR": "Göç dairesi numarası",
-    "tk-TM": "Migrasiýa gullugynyň belgisi",
-    "ru-RU": "Номер миграционной службы"
+    "en-US": "CO number",
+    "tr-TR": "CO numarası",
+    "tk-TM": "CO belgesi",
+    "ru-RU": "Номер CO"
   },
   "ApplicationProfileInstance.Workspace.ApprovalLetter": {
     "en-US": "Approval / disapproval letter",
@@ -3136,10 +3136,10 @@
     "ru-RU": "Для продвижения нужен результат."
   },
   "ApplicationProfileInstance.Workspace.ProcessNumberRequired": {
-    "en-US": "Process number is required when submitting to Migration Service.",
-    "tr-TR": "Göç dairesine teslimde süreç numarası zorunlu.",
-    "tk-TM": "Migrasiýa gullugyna tabşyrylanda proses belgisi hökmany.",
-    "ru-RU": "При подаче в миграционную службу нужен номер процесса."
+    "en-US": "CO number is required.",
+    "tr-TR": "CO numarası zorunlu.",
+    "tk-TM": "CO belgesi hökmany.",
+    "ru-RU": "Номер CO обязателен."
   },
   "ApplicationProfileInstance.Workspace.Disapproved": {
     "en-US": "Disapproved",
@@ -3629,6 +3629,18 @@
     "tr-TR": "İzin verilen yerler *",
     "tk-TM": "Rugsat berlen ýerler *",
     "ru-RU": "Разрешённые места *"
+  },
+  "ApplicationProfileInstance.Issued.GrantedLocations": {
+    "en-US": "Granted locations *",
+    "tr-TR": "Verilen yerler *",
+    "tk-TM": "Berlen goşmaça iş ýerleri *",
+    "ru-RU": "Выданные места *"
+  },
+  "ApplicationProfileInstance.Issued.GrantedBorderZoneLocations": {
+    "en-US": "Granted border-zone locations *",
+    "tr-TR": "Verilen sınır bölgesi yerleri *",
+    "tk-TM": "Berlen serhet sebiti ýerleri *",
+    "ru-RU": "Выданные места погранзоны *"
   },
   "ApplicationProfileInstance.Issued.VisaNumber": {
     "en-US": "Visa number *",

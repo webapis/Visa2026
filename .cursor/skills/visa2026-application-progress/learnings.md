@@ -6,6 +6,14 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-07 — Via-ministry CO step for Border Zone / Work Location
+
+- **Need**: Serhet Ýaka (and other AS-step profiles that do not produce Inv/WP/Visa) hid **CO belgesi**. Via-ministry Netije showed when outcome steps were off in ProgressSteps. Subtitle **AS (CO) belgisine garaşylýar** was unwanted.
+- **Fix**: `ShowProcessNumber` / `RequireProcessNumberWhenProducingIssuedDocuments` include `ProduceBorderZone` and `ProduceWorkLocation`. Via AS step with Issued/Rejected/Cancelled hidden: no Result dropdown, require CO, Advance → `PROCESS_STARTED` then node done. Labels: **CO belgesi** / **CO belgisi alyndy**; drop awaiting subtitle.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Serhet Ýaka at **CO belgisi alyndy**, enter CO, Advance — no Netije. Invitation/WP/Visa unchanged for CO visibility.
+- **Prevent**: Do not gate CO only on ProduceInvitation/WP/Visa. Do not show Result when ProgressSteps hide outcome keys.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-11-06 — Advance progress keeps the case on screen
 
 - **Need**: Advance progress replaced the case workspace with the opening skeleton, so the officer lost the section and form for a few seconds. The button also gave no sign that the save was still running.

@@ -476,16 +476,17 @@
     {
         get
         {
-            if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode)
-                && view.Chrome.ShowProcessNumber)
+            var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+            if (current?.RequireProcessNumberOnAdvance == true
+                && (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode)
+                    || string.Equals(
+                        _selectedAdvanceStateCode,
+                        ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                        StringComparison.OrdinalIgnoreCase)))
                 return true;
 
-            var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
-            return current?.RequireProcessNumberOnAdvance == true
-                && string.Equals(
-                    _selectedAdvanceStateCode,
-                    ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
-                    StringComparison.OrdinalIgnoreCase);
+            return ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(_selectedAdvanceStateCode)
+                && view.Chrome.ShowProcessNumber;
         }
     }
 
@@ -894,13 +895,14 @@
         }
 
         var requireProcessNumber =
-            (view.Chrome.ShowProcessNumber
-                && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code))
-            || (current?.RequireProcessNumberOnAdvance == true
-                && string.Equals(
-                    code,
-                    ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
-                    StringComparison.OrdinalIgnoreCase));
+            (current?.RequireProcessNumberOnAdvance == true
+                && (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code)
+                    || string.Equals(
+                        code,
+                        ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                        StringComparison.OrdinalIgnoreCase)))
+            || (view.Chrome.ShowProcessNumber
+                && ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(code));
         if (requireProcessNumber && string.IsNullOrWhiteSpace(_processNumber))
         {
             error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ProcessNumberRequired");

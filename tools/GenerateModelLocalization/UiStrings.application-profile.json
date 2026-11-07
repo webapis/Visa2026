@@ -83,7 +83,7 @@
         "BusinessTripAddressType": { "en-US": "Business trip address type", "tr-TR": "İş seyahati adres türü", "tk-TM": "Iş sapary salgy görnüşi", "ru-RU": "Тип адреса командировки" },
         "People": { "en-US": "People", "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "TargetApplicationProfileInstance": { "en-US": "Target application", "tr-TR": "Hedef başvuru", "tk-TM": "Nyşanlanan ýüztutma", "ru-RU": "Целевая заявка" },
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama belgisi", "ru-RU": "Контракт проекта" },
         "ProgressStepsDisplay": { "en-US": "Application progress", "tr-TR": "Başvuru ilerlemesi", "tk-TM": "Ýüztutma ýagdaýy we netijesi", "ru-RU": "Прогресс заявки" },

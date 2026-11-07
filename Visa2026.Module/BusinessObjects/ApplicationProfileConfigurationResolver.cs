@@ -213,28 +213,50 @@ public static class ApplicationProfileConfigurationResolver
         ShowMovementPermitLocation(application);
 
     /// <summary>
-    /// Process number is required at Submitted when the profile may produce Visa, Work permit,
-    /// or Invitation. Other templates may opt in via <paramref name="requireProcessNumber"/>.
+    /// Process / CO number is required on the AS step when the profile may produce Visa, Work permit,
+    /// Invitation, Border zone, or Work location. Other templates may opt in via
+    /// <paramref name="requireProcessNumber"/>.
     /// </summary>
     public static bool RequireProcessNumberWhenProducingIssuedDocuments(
         bool produceInvitation,
         bool produceWorkPermit,
         bool produceVisa,
-        bool requireProcessNumber) =>
-        requireProcessNumber || produceInvitation || produceWorkPermit || produceVisa;
+        bool requireProcessNumber,
+        bool produceBorderZone = false,
+        bool produceWorkLocation = false) =>
+        requireProcessNumber
+        || produceInvitation
+        || produceWorkPermit
+        || produceVisa
+        || produceBorderZone
+        || produceWorkLocation;
 
     public static bool ProcessNumberUseLocked(
         bool produceInvitation,
         bool produceWorkPermit,
-        bool produceVisa) =>
-        produceInvitation || produceWorkPermit || produceVisa;
+        bool produceVisa,
+        bool produceBorderZone = false,
+        bool produceWorkLocation = false) =>
+        produceInvitation
+        || produceWorkPermit
+        || produceVisa
+        || produceBorderZone
+        || produceWorkLocation;
 
     public static bool ShowProcessNumber(ApplicationProfileInstance? application) =>
         Resolve(
             application,
             p => RequireProcessNumberWhenProducingIssuedDocuments(
-                p.ProduceInvitation, p.ProduceWorkPermit, p.ProduceVisa, p.RequireProcessNumber),
-            t => t.CanIssueInvitation || t.CanIssueWorkPermit || t.CanIssueVisa);
+                p.ProduceInvitation,
+                p.ProduceWorkPermit,
+                p.ProduceVisa,
+                p.RequireProcessNumber,
+                p.ProduceBorderZone,
+                p.ProduceWorkLocation),
+            t => t.CanIssueInvitation
+                || t.CanIssueWorkPermit
+                || t.CanIssueVisa
+                || t.ShowBorderZoneLocation);
 
     /// <summary>
     /// Direct Issuance/Change: third timeline step (AS number received → PROCESS_ISSUED).

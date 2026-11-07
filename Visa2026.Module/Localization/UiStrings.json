@@ -161,7 +161,7 @@
       "members": {
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
         "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
         "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
@@ -192,7 +192,7 @@
         "ExpirationDate": { "en-US": "Expiration date", "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
         "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "DaysRemaining": { "en-US": "Days remaining", "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
@@ -382,7 +382,7 @@
         "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "TotalPersonCount": {
           "en-US": "Person count",
@@ -462,7 +462,7 @@
         "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "Urgency": { "en-US": "Urgency", "tr-TR": "Aciliyet", "tk-TM": "Gyssaglylyk", "ru-RU": "Срочность" },
         "TotalPersonCount": {
@@ -527,7 +527,7 @@
         "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "TotalPersonCount": {
           "en-US": "Person count",
@@ -585,7 +585,7 @@
         "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ProcessNumber": { "en-US": "Process number", "tr-TR": "Süreç numarası", "tk-TM": "Proses belgisi", "ru-RU": "Номер процесса" },
+        "ProcessNumber": { "en-US": "CO number", "tr-TR": "CO numarası", "tk-TM": "CO belgesi", "ru-RU": "Номер CO" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
         "ApplicationProfile": { "en-US": "Application Profile", "tr-TR": "Başvuru profili", "tk-TM": "Ýüztutma profili", "ru-RU": "Профиль заявки" },
         "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },

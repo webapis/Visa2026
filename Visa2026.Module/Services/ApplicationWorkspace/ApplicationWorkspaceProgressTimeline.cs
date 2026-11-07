@@ -227,28 +227,43 @@ internal static class ApplicationWorkspaceProgressTimeline
             var migrationStatusLabel = isDirect
                 ? ResolveDirectMigrationStatusLabel(migrationRow, migrationState)
                 : ResolveMigrationStatusLabel(migrationRow, migrationState);
-            // Issuance/Change after hand-in: auto Issued (no Result). Legacy PROCESS_STARTED keeps Results.
+            // Direct Issuance/Change after hand-in: auto Issued (no Result).
+            // Via ministry when Issued/Rejected/Cancelled steps are hidden: CO number + date only (no Netije).
             var directFinalAdvance = isDirect
                 && migrationCurrent
                 && canAdvance
                 && ApplicationMigrationSubmission.IsState(slotCode);
+            var viaCoAdvance = !isDirect
+                && migrationCurrent
+                && canAdvance
+                && (
+                    ApplicationMigrationSubmission.IsState(slotCode)
+                    || ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(slotCode));
+            var hideOutcomeResults = !showIssued && !showRejected && !showCancelled;
+            var suppressResult = directFinalAdvance || (viaCoAdvance && hideOutcomeResults);
+            var requireCoNumber = directFinalAdvance || viaCoAdvance;
+            var migrationAdvance = migrationCurrent
+                ? (suppressResult && viaCoAdvance
+                    ? FilterViaCoAdvanceOptions(advanceOptions)
+                    : advanceOptions)
+                : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
             steps.Add(BuildFilledStep(
                 MigrationKey,
                 migrationLabel,
                 migrationRow,
                 migrationState,
                 migrationCurrent ? currentSla : default,
-                migrationCurrent && canAdvance,
+                migrationCurrent && canAdvance && migrationAdvance.Count > 0,
                 migrationCurrent ? advanceBlockedReason : string.Empty,
-                migrationCurrent ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
+                migrationAdvance,
                 letterRow: null,
                 history,
                 latest,
                 stateLabelOverride: migrationStatusLabel,
                 processNumber: ResolveMigrationProcessNumber(application, history, migrationRow, migrationState),
-                suppressResultDropdown: directFinalAdvance,
-                requireProcessNumberOnAdvance: directFinalAdvance,
-                showOptionalOutcomeFiles: directFinalAdvance));
+                suppressResultDropdown: suppressResult,
+                requireProcessNumberOnAdvance: requireCoNumber,
+                showOptionalOutcomeFiles: requireCoNumber));
             }
         }
 
@@ -300,6 +315,31 @@ internal static class ApplicationWorkspaceProgressTimeline
         if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
             return !showCancelled;
         return false;
+    }
+
+    /// <summary>
+    /// Via ministry CO step with outcome timeline steps hidden: Advance saves PROCESS_STARTED
+    /// (CO number + date) and finishes the node — no Issued/Rejected Result picker.
+    /// </summary>
+    private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> FilterViaCoAdvanceOptions(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> options)
+    {
+        if (options == null || options.Count == 0)
+            return Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+
+        var processStarted = options
+            .Where(o => ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(o.StateCode))
+            .ToList();
+        if (processStarted.Count > 0)
+            return processStarted;
+
+        // Legacy mid-flight already on PROCESS_STARTED with Issued still allowed in transitions.
+        return options
+            .Where(o => string.Equals(
+                o.StateCode,
+                ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> FilterDirectHandInAdvanceOptions(
@@ -675,9 +715,8 @@ internal static class ApplicationWorkspaceProgressTimeline
             : (row != null && row.ID != Guid.Empty ? row.ID : (Guid?)null);
         if (isMigration && fileOwner != null && fileOwner.ID != Guid.Empty)
             letterId = fileOwner.ID;
-        var awaitingMigrationDocuments = isMigration
-            && isCurrent
-            && string.Equals(stateLabel, AwaitingAsCoNumberLabel, StringComparison.OrdinalIgnoreCase);
+        // CO step: allow document copies while the officer can still Advance (no awaiting subtitle).
+        var awaitingMigrationDocuments = isMigration && isCurrent && canAdvance;
         var hasLetter = storedFiles.Count > 0 || !string.IsNullOrWhiteSpace(letter?.MinistryLetterFileName);
         var missingLetter = ApplicationWorkspaceProgressLetterCompleteness.ResolveMissing(
             key,
@@ -883,9 +922,8 @@ internal static class ApplicationWorkspaceProgressTimeline
         if (string.Equals(code, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
             return FormatProfileStateLabel(code);
 
-        return string.Equals(slotState, "current", StringComparison.OrdinalIgnoreCase)
-            ? AwaitingAsCoNumberLabel
-            : string.Empty;
+        // Step title is already "CO belgisi alyndy" — no "awaiting" subtitle.
+        return string.Empty;
     }
 
     /// <summary>Direct final node: no "Awaiting AS" sub-status; Issued/Cancelled when done.</summary>
