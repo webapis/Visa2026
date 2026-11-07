@@ -4,21 +4,24 @@
 @*
   Shared officer date field: dd.MM.yyyy + advancing caret (same UX as Passport DetailView
   DateTimeMaskAdvancingController / VisaFamilyMembersTextComponent).
+  Mouse wheel must not change day/month/year (keyboard only).
 *@
-<DxDateEdit @ref="_editor"
-            @bind-Date="Date"
-            @bind-Date:after="NotifyDateChangedAsync"
-            InputId="@InputId"
-            CssClass="@ResolvedCssClass"
-            Mask="dd.MM.yyyy"
-            DisplayFormat="dd.MM.yyyy"
-            PickerDisplayMode="DatePickerDisplayMode.Calendar"
-            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-            Enabled="Enabled"
-            ReadOnly="ReadOnly">
-    <DxDateTimeMaskProperties CaretMode="MaskCaretMode.Advancing"
-                             UpdateNextSectionOnCycleChange="true" />
-</DxDateEdit>
+<div class="officer-date-edit-host" @onwheel:preventDefault @onwheel:stopPropagation>
+    <DxDateEdit @ref="_editor"
+                @bind-Date="Date"
+                @bind-Date:after="NotifyDateChangedAsync"
+                InputId="@InputId"
+                CssClass="@ResolvedCssClass"
+                Mask="dd.MM.yyyy"
+                DisplayFormat="dd.MM.yyyy"
+                PickerDisplayMode="DatePickerDisplayMode.Calendar"
+                ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                Enabled="Enabled"
+                ReadOnly="ReadOnly">
+        <DxDateTimeMaskProperties CaretMode="MaskCaretMode.Advancing"
+                                 UpdateNextSectionOnCycleChange="true" />
+    </DxDateEdit>
+</div>
 
 @code {
     [Parameter] public DateTime? Date { get; set; }

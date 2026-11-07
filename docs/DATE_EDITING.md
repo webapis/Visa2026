@@ -51,6 +51,19 @@ Used by:
 
 **Family-members birth date** in `Visa2026.Blazor.Server/Editors/VisaFamilyMembersTextComponent.razor` uses the same `DxDateEdit` settings directly. That popup was the original pattern; the controller and `OfficerDateEdit` copy it. Domain notes for that editor: [`VISA_FAMILY_MEMBERS_TEXT_EDITOR.md`](VISA_FAMILY_MEMBERS_TEXT_EDITOR.md).
 
+
+## Mouse wheel
+
+Mouse wheel must **not** change date values. Officers change dates by keyboard only (typing and Up/Down arrows). Wheel is blocked on the date input **and** on the open calendar popup (no month scroll via wheel).
+
+Implementation: `Visa2026.Blazor.Server/wwwroot/js/date-edit-no-wheel.js` (loaded from `_Host.cshtml`). It `preventDefault`s `wheel` on `.dxbl-date-edit`, `.officer-date-edit`, and `.dxbl-calendar`. That covers:
+
+- `OfficerDateEdit` (progress, issued slots, case summary, etc.)
+- XAF DetailView dates (`DateTimeMaskAdvancingController` / `DateTimePropertyEditor`)
+- Family-members birth date (`VisaFamilyMembersTextComponent`)
+
+DevExpress `DxDateEdit.AllowMouseWheel` exists from Blazor **26.1**; Visa2026 stays on **25.2**, so the shared script is the project rule until an upgrade.
+
 ## Date and time
 
 Timestamps that include a clock time use a different display format and are not typed with the date-only mask. Example: `UserFeedback.SubmittedAt` and `FixedAt` use `{0:dd.MM.yyyy HH:mm}` and are not officer-edited dates.

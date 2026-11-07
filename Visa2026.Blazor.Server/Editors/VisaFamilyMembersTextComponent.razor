@@ -113,16 +113,18 @@
                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
 
             <label class="visa-family-lines-edit__label">@BirthDateLabel</label>
-            <DxDateEdit @bind-Date="@_editBirthDate"
-                        @bind-Date:after="OnEditFieldChanged"
-                        CssClass="e2e-visa-family-manual-birth-date"
-                        Mask="dd.MM.yyyy"
-                        DisplayFormat="dd.MM.yyyy"
-                        PickerDisplayMode="DatePickerDisplayMode.Calendar"
-                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
-                <DxDateTimeMaskProperties CaretMode="MaskCaretMode.Advancing"
-                                         UpdateNextSectionOnCycleChange="true" />
-            </DxDateEdit>
+            <div class="officer-date-edit-host" @onwheel:preventDefault @onwheel:stopPropagation>
+                <DxDateEdit @bind-Date="@_editBirthDate"
+                            @bind-Date:after="OnEditFieldChanged"
+                            CssClass="e2e-visa-family-manual-birth-date officer-date-edit"
+                            Mask="dd.MM.yyyy"
+                            DisplayFormat="dd.MM.yyyy"
+                            PickerDisplayMode="DatePickerDisplayMode.Calendar"
+                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                    <DxDateTimeMaskProperties CaretMode="MaskCaretMode.Advancing"
+                                             UpdateNextSectionOnCycleChange="true" />
+                </DxDateEdit>
+            </div>
 
             <label class="visa-family-lines-edit__label">@RelationshipLabel</label>
             <DxComboBox Data="@_editRelationshipOptions"
