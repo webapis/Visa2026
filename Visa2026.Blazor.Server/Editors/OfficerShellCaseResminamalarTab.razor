@@ -28,12 +28,6 @@
 else
 {
 <div class="ct-resmi-page">
-    <header class="dc-page__head">
-        <div class="dc-page__head-row">
-            <h2 class="ct-page__title">Report package catalog — Resminamalar</h2>
-        </div>
-        <p class="ct-page__sub">@ResminamalarSubtitle</p>
-    </header>
 
     @if (_applicationId == Guid.Empty)
     {
@@ -116,22 +110,6 @@ else
 
     private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
 
-    private string ResminamalarSubtitle
-    {
-        get
-        {
-            if (_rosterIds.Count == 0)
-                return "Generate a ZIP package of documents from profile nested templates.";
-
-            if (_applicationItemIds.Count == 0)
-                return "Click a person in the header to include them in Resminamalar.";
-
-            if (_applicationItemIds.Count == _rosterIds.Count)
-                return "Preview a template to generate it for the selected people.";
-
-            return $"Showing {_applicationItemIds.Count} of {_rosterIds.Count} people. Click a header chip to include or hide someone.";
-        }
-    }
 
     protected override void OnInitialized()
     {

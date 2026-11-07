@@ -551,7 +551,7 @@
 
     private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "organization";
 
-    private static bool HidesCaseRail(string tab) => tab is "overview" or "result";
+    private static bool HidesCaseRail(string tab) => tab is "overview" or "result" or "people";
 
     private static string ExcludedTitle(ApplicationWorkspaceCasePerson person) =>
         ApplicationListLinkedPeople.FormatExcludedTitle(person.ExcludedLetterNumber, person.ExcludedLetterDate);
@@ -2737,10 +2737,23 @@
             }
             else
             {
+                var peopleLinkColumns = view.People.FirstOrDefault()?.Records
+                    ?? Array.Empty<ApplicationWorkspaceCasePersonRecord>();
                 <div class="os-panel" style="margin-bottom:16px">
-                    <table class="os-table">
+                    <table class="os-table os-table--people-links">
                         <thead>
-                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th>Work permit</th><th></th><th></th><th></th></tr>
+                            <tr>
+                                <th>Person</th>
+                                <th>Role</th>
+                                @foreach (var col in peopleLinkColumns)
+                                {
+                                    <th>@ApplicationProfileLocalization.LinkedRecordLabel(col.Label)</th>
+                                }
+                                <th class="os-people-eye-col" title="@Msg("ApplicationProfileInstance.LinkReview.PreviewCopy")"></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody>
                             @foreach (var person in view.People)
@@ -2759,9 +2772,29 @@
                                         }
                                     </td>
                                     <td>@person.RoleLabel</td>
-                                    <td><code class="os-people-doc @(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.PassportKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.PassportNumber</code></td>
-                                    <td><code class="os-people-doc @(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.VisaKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.VisaNumber</code></td>
-                                    <td><code class="os-people-doc @(ApplicationWorkspacePeopleLinksCompleteness.IsKindShort(person, ApplicationWorkspacePeopleLinksCompleteness.WorkPermitKey, view.Chrome.ResolvedLinksLocked) ? "cw-cell-missing" : null)">@person.WorkPermitNumber</code></td>
+                                    @foreach (var col in peopleLinkColumns)
+                                    {
+                                        var record = person.Records.FirstOrDefault(r =>
+                                            string.Equals(r.Key, col.Key, StringComparison.OrdinalIgnoreCase));
+                                        var missing = record != null
+                                            && ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked);
+                                        <td>
+                                            <span class="os-people-doc @(missing ? "cw-cell-missing" : null)">@FormatPeopleLinkCell(person, record)</span>
+                                        </td>
+                                    }
+                                    <td class="os-people-eye-col">
+                                        <button type="button"
+                                                class="os-link-review__eye @(person.PersonId == Guid.Empty ? "is-disabled" : null)"
+                                                disabled="@(person.PersonId == Guid.Empty)"
+                                                title="@Msg("ApplicationProfileInstance.LinkReview.PreviewCopy")"
+                                                aria-label="@Msg("ApplicationProfileInstance.LinkReview.PreviewCopy")"
+                                                @onclick:stopPropagation="true"
+                                                @onclick="() => PreviewPersonCopiesFromRowAsync(person)">
+                                            <svg class="os-link-review__eye-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path fill="currentColor" d="M12 5c-5 0-9.27 3.11-11 7.5C2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+                                            </svg>
+                                        </button>
+                                    </td>
                                     <td>
                                         <button type="button"
                                                 class="os-btn os-btn--primary ct-btn-sm"
@@ -2787,172 +2820,6 @@
                         </tbody>
                     </table>
                 </div>
-                <h2 class="ct-page__title">@Msg("ApplicationProfileInstance.Workspace.LinkedRecordsByPerson")</h2>
-                @foreach (var person in view.People)
-                {
-                    <section class="ct-person-panel">
-                        <header class="ct-person-panel__head">
-                            <button type="button"
-                                    class="ct-link"
-                                    disabled="@(person.PersonId == Guid.Empty || !CanLinkPerson)"
-                                    @onclick="() => OpenExistingPersonLinkReviewAsync(person.PersonId)">@person.Name</button>
-                            <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
-                        </header>
-                        <div class="cw-link-row ct-person-panel__tiles">
-                            @foreach (var record in person.Records)
-                            {
-                                var isEmpty = ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked);
-                                if (record.IsCaptionOnly)
-                                {
-                                    <div class="cw-link-tile cw-link-tile--caption cw-link-tile--@record.Tone @(isEmpty ? "is-empty" : null)">
-                                        <span class="cw-link-tile__icon">@record.Glyph</span>
-                                        <span class="cw-link-tile__label">@ApplicationProfileLocalization.LinkedRecordLabel(record.Label)</span>
-                                        <span class="cw-link-tile__caption">@record.Caption</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    var isSelected = IsPersonRecordSelected(person.Index, record.Key);
-                                    <button type="button"
-                                            class="cw-link-tile cw-link-tile--@record.Tone @(isEmpty ? "is-empty" : null) @(isSelected ? "is-selected" : null)"
-                                            @onclick="() => TogglePersonRecord(person.Index, record.Key)">
-                                        <span class="cw-link-tile__icon">@record.Glyph</span>
-                                        <span class="cw-link-tile__label">@ApplicationProfileLocalization.LinkedRecordLabel(record.Label)</span>
-                                        <strong class="cw-link-tile__count">@FormatLinkedCount(record.Count, record.ExpectedCount)</strong>
-                                        <span class="cw-link-tile__chev">›</span>
-                                    </button>
-                                }
-                            }
-                        </div>
-                        @if (IsPersonRecordSelected(person.Index, EffectivePeopleRecordKey))
-                        {
-                            var selected = person.Records.FirstOrDefault(r =>
-                                string.Equals(r.Key, EffectivePeopleRecordKey, StringComparison.OrdinalIgnoreCase));
-                            if (selected != null)
-                            {
-                                var tab = FindLinkedTab(selected.Key);
-                                var columns = LinkedRecordColumns(tab);
-                                var linkedRows = PersonLinkedRows(person, selected.Key);
-                                var isAddress = string.Equals(selected.Key, "address", StringComparison.OrdinalIgnoreCase);
-                                var isWorkPermit = string.Equals(selected.Key, "wp", StringComparison.OrdinalIgnoreCase)
-                                    || string.Equals(selected.Key, "wp-location", StringComparison.OrdinalIgnoreCase);
-                                var isBorderZone = string.Equals(selected.Key, "bz", StringComparison.OrdinalIgnoreCase)
-                                    || string.Equals(selected.Key, "bz-location", StringComparison.OrdinalIgnoreCase);
-                                var offerCaseAddress = isAddress && linkedRows.Any(row => row.OfferCaseAddress);
-                                var offerCaseWorkPermitLocation = isWorkPermit && linkedRows.Any(row => row.OfferCaseAddress);
-                                var offerCaseBorderZoneLocation = isBorderZone && linkedRows.Any(row => row.OfferCaseAddress);
-                                var showCaseTickColumn = (isAddress || (isWorkPermit && offerCaseWorkPermitLocation) || (isBorderZone && offerCaseBorderZoneLocation)) && !view.Chrome.ResolvedLinksLocked;
-                                <div class="cw-issued-panel ct-person-panel__records @(isAddress && _addressEditorId != Guid.Empty ? "ct-person-panel__records--editor" : null)">
-                                    <div class="ct-person-panel__records-main">
-                                    <h3 class="cw-issued-panel__title">@selected.Label</h3>
-                                    @if (offerCaseAddress)
-                                    {
-                                        <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseAddressHint")</p>
-                                    }
-                                    @if (offerCaseWorkPermitLocation)
-                                    {
-                                        <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocationHint")</p>
-                                    }
-                                    @if (offerCaseBorderZoneLocation)
-                                    {
-                                        <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocationHint")</p>
-                                    }
-                                    @if (!string.IsNullOrWhiteSpace(_addressActionError) && (isAddress || isWorkPermit || isBorderZone))
-                                    {
-                                        <p class="cw-issued-panel__hint ct-address-editor__error">@_addressActionError</p>
-                                    }
-                                    @if (linkedRows.Count == 0)
-                                    {
-                                        <p class="cw-issued-panel__hint">@(tab?.EmptyMessage ?? $"No {selected.Label.ToLowerInvariant()} linked for {person.Name}.")</p>
-                                    }
-                                    else
-                                    {
-                                        <table class="os-table">
-                                            <thead>
-                                                <tr>
-                                                    @foreach (var column in columns)
-                                                    {
-                                                        <th>@column</th>
-                                                    }
-                                                    @if (showCaseTickColumn || (isAddress && !view.Chrome.ResolvedLinksLocked))
-                                                    {
-                                                        <th></th>
-                                                    }
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var entry in linkedRows)
-                                                {
-                                                    var entryId = entry.LinkedObjectId;
-                                                    var personId = person.PersonId;
-                                                    <tr class="@(isAddress && entryId == _addressEditorId ? "is-selected" : null)">
-                                                        @foreach (var cell in entry.Cells)
-                                                        {
-                                                            <td>@cell</td>
-                                                        }
-                                                        @if (isAddress && !view.Chrome.ResolvedLinksLocked)
-                                                        {
-                                                            <td class="cw-addr-actions">
-                                                                @if (entry.OfferCaseAddress)
-                                                                {
-                                                                    <button type="button"
-                                                                            class="cw-addr-icon cw-addr-icon--tick"
-                                                                            title="@Msg("ApplicationProfileInstance.Workspace.UseCaseAddress")"
-                                                                            @onclick="() => UseCaseAddressAsync(personId, entryId)">✓</button>
-                                                                }
-                                                                <button type="button"
-                                                                        class="cw-addr-icon cw-addr-icon--pen"
-                                                                        title="@Msg("ApplicationProfileInstance.Workspace.EditAddress")"
-                                                                        @onclick="() => OpenAddressEditor(entryId)">✎</button>
-                                                            </td>
-                                                        }
-                                                        else if (isWorkPermit && !view.Chrome.ResolvedLinksLocked && entry.OfferCaseAddress)
-                                                        {
-                                                            <td class="cw-addr-actions">
-                                                                <button type="button"
-                                                                        class="cw-addr-icon cw-addr-icon--tick"
-                                                                        title="@Msg("ApplicationProfileInstance.Workspace.UseCaseWorkPermitLocation")"
-                                                                        @onclick="() => UseCaseWorkPermitLocationAsync(personId, entryId)">✓</button>
-                                                            </td>
-                                                        }
-                                                        else if (isBorderZone && !view.Chrome.ResolvedLinksLocked && entry.OfferCaseAddress)
-                                                        {
-                                                            <td class="cw-addr-actions">
-                                                                <button type="button"
-                                                                        class="cw-addr-icon cw-addr-icon--tick"
-                                                                        title="@Msg("ApplicationProfileInstance.Workspace.UseCaseBorderZoneLocation")"
-                                                                        @onclick="() => UseCaseBorderZoneLocationAsync(personId, entryId)">✓</button>
-                                                            </td>
-                                                        }
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    }
-                                    </div>
-                                    @if (isAddress && _addressEditorId != Guid.Empty && linkedRows.Any(row => row.LinkedObjectId == _addressEditorId))
-                                    {
-                                        <CaseAddressOfResidenceEditor AddressId="_addressEditorId"
-                                                                      Saved="OnAddressEditorSaved"
-                                                                      Closed="CloseAddressEditor" />
-                                    }
-                                    @if (view.Chrome.ResolvedLinksLocked)
-                                    {
-                                        <div class="cw-issued-panel__actions">
-                                            <p class="cw-issued-panel__hint">People and linked records are locked on this case.</p>
-                                        </div>
-                                    }
-                                    else if (IsIssuedPersonItem(selected.Key))
-                                    {
-                                        <div class="cw-issued-panel__actions">
-                                            <p class="cw-issued-panel__hint">@Msg("ApplicationProfileInstance.Workspace.CreateFromApplicationResult")</p>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        }
-                    </section>
-                }
             }
         </div>;
     };
@@ -3099,24 +2966,6 @@
         @switch (ActiveTab)
         {
             case "people":
-                <section class="cw-rail-block">
-                    <h4>People summary</h4>
-                    <ul class="ct-summary-list">
-                        <li><span>Total</span><strong>@view.PeopleSummary.Total</strong></li>
-                        <li><span>Primary</span><strong>@view.PeopleSummary.Primary</strong></li>
-                        <li><span>Dependents</span><strong>@view.PeopleSummary.Dependents</strong></li>
-                        <li><span>Sponsors</span><strong>@view.PeopleSummary.Sponsors</strong></li>
-                    </ul>
-                </section>
-                <section class="cw-rail-block">
-                    <h4>@Msg("ApplicationProfileInstance.Workspace.LinkedRecordsSummary")</h4>
-                    <ul class="ct-summary-list">
-                        @foreach (var pair in view.LinkedRecordsSummary.OrderBy(p => p.Key))
-                        {
-                            <li><span>@ApplicationProfileLocalization.LinkedRecordLabel(pair.Key)</span><strong>@pair.Value</strong></li>
-                        }
-                    </ul>
-                </section>
                 break;
             case "progress":
                 <section class="cw-rail-block">
@@ -3902,9 +3751,48 @@
         await UnlinkPersonRequested.InvokeAsync(personId);
     }
 
-    private static string FormatLinkedCount(int count, int expected) =>
-        expected > 1 ? $"{count}/{expected}" : count.ToString();
+    /// <summary>
+    /// Primary linked value(s) for the people table: first data column from the workspace tab,
+    /// stacked for Last-N (plain text). Empty → —.
+    /// </summary>
+    private string FormatPeopleLinkCell(
+        ApplicationWorkspaceCasePerson person,
+        ApplicationWorkspaceCasePersonRecord? record)
+    {
+        if (record is null)
+            return "—";
+        if (record.IsCaptionOnly)
+            return string.IsNullOrWhiteSpace(record.Caption) ? "—" : record.Caption;
 
+        var rows = PersonLinkedRows(person, record.Key);
+        if (rows.Count == 0)
+            return "—";
+
+        var lines = new List<string>();
+        foreach (var row in rows)
+        {
+            var primary = row.Cells.Count > 0 ? row.Cells[0]?.Trim() : null;
+            if (string.IsNullOrWhiteSpace(primary) || primary == "—")
+                continue;
+            if (!lines.Contains(primary, StringComparer.OrdinalIgnoreCase))
+                lines.Add(primary);
+        }
+
+        return lines.Count == 0 ? "—" : string.Join("\n", lines);
+    }
+
+    private async Task PreviewPersonCopiesFromRowAsync(ApplicationWorkspaceCasePerson person)
+    {
+        if (person.PersonId == Guid.Empty)
+            return;
+
+        await PreviewSlotService.OpenPersonDocumentCopiesAsync(
+            new PersonDocumentCopiesSlotRequest
+            {
+                PersonIds = new[] { person.PersonId },
+            },
+            PreviewSlotOwnerViewId);
+    }
     private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];
 
     private static string Initials(string name)

@@ -11,10 +11,6 @@
 @using Visa2026.Module.Localization
 
 <div class="dc-page">
-    <header class="dc-page__head">
-        <h2>@VisaUiMessages.Get("ApplicationItemDocumentCopies.Title", _uiCultureName)</h2>
-        <p>@DocumentsSubtitle</p>
-    </header>
 
     @if (_rosterIds.Count == 0)
     {
@@ -62,26 +58,6 @@
     private string _uiCultureName = string.Empty;
     private EventCallback _refreshRequested;
 
-    private string DocumentsSubtitle
-    {
-        get
-        {
-            if (_rosterIds.Count == 0)
-                return VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.SubtitleEmpty", _uiCultureName);
-
-            if (_lineIds.Count == 0)
-                return VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.SubtitleSelectPerson", _uiCultureName);
-
-            if (_lineIds.Count == _rosterIds.Count)
-                return VisaUiMessages.Get("ApplicationItemDocumentCopies.Workspace.SubtitleGroupedAll", _uiCultureName);
-
-            return VisaUiMessages.FormatForCulture(
-                _uiCultureName,
-                "ApplicationItemDocumentCopies.Workspace.SubtitleGroupedFiltered",
-                _lineIds.Count,
-                _rosterIds.Count);
-        }
-    }
 
     protected override void OnInitialized()
     {

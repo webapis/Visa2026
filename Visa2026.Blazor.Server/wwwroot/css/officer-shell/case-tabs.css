@@ -23,6 +23,52 @@ button.ct-letter-preview:hover { text-decoration: underline; }
 button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-btn-sm { padding: 5px 10px !important; font-size: 0.78rem !important; }
 .ct-muted { color: var(--os-muted); font-size: 0.82rem; }
+/* Left-stacked case tabs. Right of column stays blank. Progress Advance/Revert stay in .cw-rail. */
+.ct-page--progress {
+  max-width: 560px;
+  width: 100%;
+  margin-inline-end: auto;
+  box-sizing: border-box;
+}
+
+/* Resminamalar + Document copies: wider column; height follows content so package footer
+   sits under the list (no viewport stretch / page scrollbar from empty flex space). */
+.ct-resmi-page,
+.dc-page {
+  max-width: 48rem; /* 768px */
+  width: 100%;
+  margin-inline-end: auto;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.ct-resmi-page .app-report-package.app-item-doc-copies,
+.ct-resmi-page .app-item-doc-copies,
+.dc-page .app-item-doc-copies {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+}
+.ct-resmi-page .app-item-doc-copies__body,
+.dc-page .app-item-doc-copies__body {
+  flex: 0 1 auto;
+  overflow: visible;
+  scrollbar-gutter: stable;
+  padding-right: 0.35rem;
+}
+.ct-resmi-page .app-item-doc-copies__footer,
+.dc-page .app-item-doc-copies__footer {
+  margin-top: 0.75rem;
+}
+.ct-page--progress .ct-prog-v-list,
+.ct-page--progress .ct-prog-acc__panel,
+.ct-page--progress .ct-prog-detail,
+.ct-page--progress .ct-step-correct {
+  max-width: 100%;
+}
+.ct-page--progress .ct-prog-detail__grid {
+  grid-template-columns: 1fr;
+}
+
 
 .ct-person-panel {
   border: 1px solid var(--os-line); border-radius: var(--os-radius);
@@ -250,6 +296,18 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   color: var(--os-ink);
 }
 .ct-prog-advance .ct-label--error { color: var(--os-bad); }
+.ct-prog-advance .ct-field-error {
+  margin: 6px 0 0;
+  color: var(--os-bad);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.ct-prog-advance .ct-prog-date.is-invalid,
+.ct-step-correct .ct-prog-date.is-invalid {
+  border-color: var(--os-bad) !important;
+  box-shadow: 0 0 0 1px var(--os-bad);
+  background: color-mix(in srgb, var(--os-bad) 12%, transparent);
+}
 .ct-prog-advance .os-input.is-invalid {
   border-color: var(--os-bad);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--os-bad) 22%, transparent);
@@ -675,4 +733,13 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 @keyframes os-person-link-progress {
   0% { transform: translateX(-120%); }
   100% { transform: translateX(280%); }
+}
+
+.os-table--people-links .os-people-eye-col {
+  width: 2.25rem;
+  text-align: center;
+  vertical-align: middle;
+}
+.os-table--people-links .os-people-eye-col .os-link-review__eye {
+  margin: 0 auto;
 }
