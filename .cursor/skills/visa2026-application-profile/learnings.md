@@ -4309,3 +4309,11 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Officer**: Open invitation case → Invitation address panel shows region→city→type→site→other places; Visa type/Project stay outside.
 - **Prevent**: Do not interleave invitation address keys into the core multi-column flow.
 - **Verify**: F5 Application tab on Çakylyk / invitation profile.
+
+### 2026-11-10 — Professional case tabs/UI polish (layout locked)
+
+- **Need**: Case workspace look more professional without moving Application/Progress (left) or Templates/SLA/Organization (right) or hybrid People/Invitation strip.
+- **Fix**: CSS in `case-workspace.css` — level-1 underline tabs, flatter `--sub` chips + muted counts, quieter form/identity/delete chrome; people toolbar without emoji; Relink/Unlink ghost, Open person detail secondary. Prototype: `docs/prototypes/case-workspace-professional-tabs-ui-prototype.jpg`.
+- **Officer**: Open case → same tab places; thinner underlines; quieter People actions.
+- **Prevent**: Do not relocate right-anchored utilities or hybrid record tabs when polishing visuals.
+- **Verify**: Hard-refresh case workspace (CSS); switch Application/Progress and People tabs.

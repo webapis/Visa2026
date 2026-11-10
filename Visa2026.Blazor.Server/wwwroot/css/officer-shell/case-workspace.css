@@ -8,7 +8,7 @@
 .cw-head__top { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
 .cw-head__title-block { display: flex; gap: 12px; align-items: flex-start; }
 .cw-head__accent { width: 4px; border-radius: 4px; background: #f59e0b; align-self: stretch; min-height: 48px; }
-.cw-head h1 { margin: 0; font-size: 1.7rem; font-weight: 750; letter-spacing: -0.02em; line-height: 1.2; color: var(--os-ink); }
+.cw-head h1 { margin: 0; font-size: 1.55rem; font-weight: 650; letter-spacing: -0.015em; line-height: 1.25; color: var(--os-ink); }
 .cw-head__sub { margin: 4px 0 0; color: var(--os-muted); font-size: 0.88rem; }
 .cw-head__badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .cw-head-badge {
@@ -37,14 +37,14 @@
   color: var(--os-ink);
 }
 .cw-head__delete {
-  border: 1px solid var(--os-bad);
+  border: 1px solid color-mix(in srgb, var(--os-bad) 55%, var(--os-line));
   background: transparent;
   color: var(--os-bad);
   font-size: 0.8rem;
-  font-weight: 650;
-  padding: 5px 12px;
+  font-weight: 600;
+  padding: 5px 11px;
   margin-inline-end: 3rem;
-  border-radius: 999px;
+  border-radius: 6px;
   cursor: pointer;
 }
 .cw-head__delete:hover:not(:disabled) {
@@ -137,25 +137,63 @@ button.cw-person:focus-visible {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 16px;
-  margin-bottom: 2px;
+  gap: 4px 20px;
+  margin-bottom: 6px;
+  padding-bottom: 0;
+  border-bottom: 1px solid var(--os-line);
 }
 .cw-case-level1__left,
 .cw-case-level1__right {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
+  gap: 2px 4px;
+  align-items: stretch;
 }
 .cw-case-level1__right {
   margin-left: auto;
 }
-.cw-hybrid__tab--right.is-active {
-  color: #fff;
-  border-color: #7c3aed;
-  background: #7c3aed;
+/* Level-1: quiet text + thin underline (keep left/right placement). */
+.cw-case-level1 .cw-hybrid__tab {
+  border: none;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
-  border-radius: 8px;
+  padding: 9px 12px 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--os-muted);
+  position: relative;
+}
+.cw-case-level1 .cw-hybrid__tab:hover:not(:disabled):not(.is-active) {
+  background: transparent;
+  color: var(--os-ink);
+}
+.cw-case-level1 .cw-hybrid__tab.is-active {
+  color: var(--os-ink);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.cw-case-level1 .cw-hybrid__tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 1px;
+  background: #7c3aed;
+}
+.cw-case-level1__right .cw-hybrid__tab {
+  font-weight: 500;
+  font-size: 0.84rem;
+}
+.cw-hybrid__tab--right.is-active {
+  color: var(--os-ink);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
 }
 .cw-case-right {
   display: flex;
@@ -425,21 +463,22 @@ button.cw-person:focus-visible {
 .cw-hybrid__level2 {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 .cw-hybrid__level2 {
-  padding-top: 2px;
+  padding-top: 8px;
+  margin-top: 2px;
   border-top: 1px solid var(--os-line);
 }
 .cw-hybrid__tab {
   border: 1px solid transparent;
   background: transparent;
   color: var(--os-muted);
-  border-radius: 8px 8px 0 0;
-  padding: 8px 12px;
+  border-radius: 6px;
+  padding: 7px 11px;
   font-size: 0.86rem;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -451,21 +490,25 @@ button.cw-person:focus-visible {
 }
 .cw-hybrid__tab.is-active {
   color: var(--os-ink);
-  border-color: var(--os-line);
-  border-bottom-color: var(--os-panel);
-  background: var(--os-panel);
+  border-color: transparent;
+  background: transparent;
   box-shadow: inset 0 -2px 0 0 #7c3aed;
 }
 .cw-hybrid__tab--sub {
   font-size: 0.8rem;
-  font-weight: 600;
-  border-radius: 999px;
-  border: 1px solid var(--os-line);
+  font-weight: 550;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 6px 10px;
+}
+.cw-hybrid__tab--sub:hover:not(:disabled):not(.is-active) {
+  border-color: var(--os-line);
   background: var(--os-surface);
 }
 .cw-hybrid__tab--sub.is-active {
-  border-color: #7c3aed;
-  background: color-mix(in srgb, #7c3aed 16%, var(--os-panel));
+  border-color: color-mix(in srgb, #7c3aed 40%, var(--os-line));
+  background: color-mix(in srgb, #7c3aed 12%, var(--os-panel));
   box-shadow: none;
   color: var(--os-ink);
 }
@@ -634,8 +677,8 @@ button.cw-person:focus-visible {
 }
 .cw-card {
   border: 1px solid var(--os-line);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border-radius: 8px;
+  padding: 12px 14px;
   background: var(--os-panel);
   color: var(--os-ink);
 }
@@ -689,12 +732,12 @@ button.cw-person:focus-visible {
 .cw-summary-body--identity-only { justify-content: flex-end; }
 .cw-summary-main { flex: 1 1 auto; min-width: 0; align-self: flex-start; }
 .cw-summary-identity {
-  width: min(280px, 100%);
+  width: min(268px, 100%);
   flex-shrink: 0;
   border: 1px solid var(--os-line, #e2e8f0);
-  border-radius: 12px;
-  padding: 10px;
-  background: var(--os-surface, var(--os-panel, #f8fafc));
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: transparent;
   color: var(--os-ink);
   box-shadow: none;
   --dxbl-text-edit-bg: var(--os-panel);
@@ -780,15 +823,18 @@ button.cw-person:focus-visible {
 }
 .cw-summary-field--plain {
   background: transparent;
-  padding: 4px 0;
+  padding: 5px 0;
   border-radius: 0;
+  gap: 8px;
 }
 .cw-summary-field--plain .cw-summary-field__input,
 .cw-summary-field--plain .cw-summary-date .dxbl-text-edit,
 .cw-summary-field--plain .cs-multi-select-inline .dxbl-text-edit {
-  border-color: var(--os-line);
+  border-color: color-mix(in srgb, var(--os-line) 85%, transparent);
   box-shadow: none;
   background: var(--os-panel);
+  border-radius: 6px;
+  min-height: 32px;
 }
 .cw-summary-field.is-readonly .cw-summary-field__input,
 .cw-summary-field.is-readonly .cw-summary-field__input:disabled,
@@ -1440,7 +1486,17 @@ select.cw-summary-field__input option {
 .cw-issued-panel__error {
   margin: 0 0 10px; font-size: 0.82rem; color: #b91c1c; line-height: 1.45;
 }
-.cw-head-badge--locked { background: var(--os-warn-soft); color: #9a3412; border: 1px solid #fed7aa; }
+.cw-head-badge--locked {
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #f59e0b 55%, var(--os-line));
+  color: #b45309;
+  font-weight: 600;
+}
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-head-badge--locked {
+  border-color: color-mix(in srgb, #fbbf24 45%, var(--os-line));
+  color: #fbbf24;
+}
 
 .cw-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .cw-checklist li { display: flex; gap: 8px; align-items: center; font-size: 0.84rem; }
@@ -2927,10 +2983,47 @@ select.cw-summary-field__input option {
 
 /* Hybrid issued tabs: coverage on tab + XAF-like toolbar (VISA2014 feel). */
 .cw-hybrid__tab-count {
-  margin-left: 6px;
+  margin-left: 4px;
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  opacity: 0.88;
+  font-weight: 600;
+  font-size: 0.78em;
+  opacity: 0.62;
+  letter-spacing: 0.01em;
+}
+.cw-hybrid__tab--sub.is-active .cw-hybrid__tab-count {
+  opacity: 0.78;
+}
+
+/* People toolbar / row actions — quieter secondary chrome. */
+.ct-page__title--quiet {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--os-muted);
+}
+.cw-people-toolbar {
+  gap: 8px;
+  align-items: center;
+}
+.cw-people-toolbar .os-btn.os-btn--primary {
+  border-radius: 6px;
+  font-weight: 600;
+}
+.cw-people-toolbar__report {
+  border-radius: 6px;
+  font-weight: 550;
+}
+.officer-case-workspace .os-people-actions .os-btn.ct-btn-sm {
+  border-radius: 6px;
+  font-weight: 550;
+  min-height: 28px;
+  padding: 2px 10px;
+}
+.officer-case-workspace .os-people-actions .os-btn.ct-btn-sm:not(.os-btn--ghost) {
+  /* Open person detail — secondary filled, not purple primary */
+  background: var(--os-surface);
+  border-color: var(--os-line);
+  color: var(--os-ink);
 }
 .cw-hybrid-issued {
   display: flex;

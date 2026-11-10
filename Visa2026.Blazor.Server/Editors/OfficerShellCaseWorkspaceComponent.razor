@@ -2586,7 +2586,7 @@
         var allPeopleSelected = AreAllDocumentPeopleSelected(selectablePeople);
         var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
         <div class="ct-page">
-            <h2 class="ct-page__title">People on this case</h2>
+            <h2 class="ct-page__title ct-page__title--quiet">People on this case</h2>
             <div class="os-toolbar cw-people-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                 <DxTextBox @bind-Text="_peopleSearchText"
                            BindValueMode="BindValueMode.OnInput"
@@ -2608,7 +2608,7 @@
                             {
                                 <span class="cw-summary-spin" aria-hidden="true"></span>
                             }
-                            📄 Preview document copies ▾
+                            Preview document copies ▾
                         </button>
                         @if (_peopleDocMenuOpen)
                         {
@@ -2654,7 +2654,7 @@
                             {
                                 <span class="cw-summary-spin" aria-hidden="true"></span>
                             }
-                            📦 Preview Resminamalar ▾
+                            Preview Resminamalar ▾
                         </button>
                         @if (_peopleResmiMenuOpen)
                         {
@@ -3078,25 +3078,25 @@
                                             </div>
                                         </td>
                                     }
-                                    <td>
+                                    <td class="os-people-actions">
                                         <button type="button"
-                                                class="os-btn os-btn--primary ct-btn-sm"
+                                                class="os-btn os-btn--ghost ct-btn-sm"
                                                 disabled="@(!CanLinkPerson || person.PersonId == Guid.Empty || IsRelinking)"
                                                 @onclick:stopPropagation="true"
                                                 @onclick="() => RelinkPersonById(person.PersonId)">
                                             @(person.PersonId == _relinkingPersonId ? "Relinking…" : "Relink")
                                         </button>
                                     </td>
-                                    <td>
+                                    <td class="os-people-actions">
                                         <button type="button"
-                                                class="os-btn ct-btn-sm"
+                                                class="os-btn os-btn--ghost ct-btn-sm"
                                                 disabled="@(!CanUnlinkPerson || person.PersonId == Guid.Empty || IsRelinking || person.IsExcluded)"
                                                 title="@(person.IsExcluded ? VisaUiMessages.Get("ApplicationProfileInstance.People.ExcludedStayOnRoster") : null)"
                                                 @onclick:stopPropagation="true"
                                                 @onclick="() => UnlinkPersonById(person.PersonId)">Unlink</button>
                                     </td>
-                                    <td>
-                                        <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
+                                    <td class="os-people-actions">
+                                        <button type="button" class="os-btn ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
                                     </td>
                                 </tr>
                             }
