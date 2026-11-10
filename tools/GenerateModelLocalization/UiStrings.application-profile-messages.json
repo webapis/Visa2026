@@ -1480,10 +1480,10 @@
     "ru-RU": "Выберите организацию"
   },
   "ApplicationProfileInstance.Picker.CaseSummary": {
-    "en-US": "Case summary",
-    "tr-TR": "Dava özeti",
-    "tk-TM": "Ýüztutma gysgaçasy",
-    "ru-RU": "Сводка дела"
+    "en-US": "Application",
+    "tr-TR": "Başvuru",
+    "tk-TM": "Ýüztutma",
+    "ru-RU": "Заявка"
   },
   "ApplicationProfileInstance.Picker.Create": {
     "en-US": "Create application",
@@ -1696,10 +1696,10 @@
     "ru-RU": "Копии документов"
   },
   "ApplicationProfileInstance.Workspace.Resminamalar": {
-    "en-US": "Resminamalar",
-    "tr-TR": "Resminamalar",
-    "tk-TM": "Resminamalar",
-    "ru-RU": "Resminamalar"
+    "en-US": "Templates",
+    "tr-TR": "Şablonlar",
+    "tk-TM": "Nusgalar",
+    "ru-RU": "Шаблоны"
   },
   "ApplicationProfileInstance.Workspace.Sla": {
     "en-US": "SLA & deadlines",
@@ -1905,11 +1905,23 @@
     "tk-TM": "{0} açylýar…",
     "ru-RU": "Открытие: {0}…"
   },
+  "ApplicationProfileInstance.Workspace.InvitationAddressGroupHint": {
+    "en-US": "Fill in order — city depends on region; lodging depends on address type.",
+    "tr-TR": "Sırayla doldurun — şehir bölgeye, konaklama adres türüne bağlıdır.",
+    "tk-TM": "Tertip bilen dolduryň — şäher welaýata, ýaşaýyş salgysy görnüşine bagly.",
+    "ru-RU": "Заполняйте по порядку — город зависит от региона; проживание зависит от типа адреса."
+  },
   "ApplicationProfileInstance.Workspace.Close": {
     "en-US": "Close",
     "tr-TR": "Kapat",
     "tk-TM": "Ýap",
     "ru-RU": "Закрыть"
+  },
+  "ApplicationProfileInstance.Workspace.ResizePanel": {
+    "en-US": "Resize panel",
+    "tr-TR": "Paneli yeniden boyutlandır",
+    "tk-TM": "Paneliň ölçegini üýtget",
+    "ru-RU": "Изменить ширину панели"
   },
   "ApplicationProfileInstance.Workspace.CloseAria": {
     "en-US": "Close case workspace",
@@ -1958,6 +1970,12 @@
     "tr-TR": "Zorunlu belge kopyaları tamam",
     "tk-TM": "Hökmany resminama nusgalary taýýar",
     "ru-RU": "Обязательные копии документов заполнены"
+  },
+  "ApplicationProfileInstance.Workspace.NoPeopleMatchSearch": {
+    "en-US": "No people match this search.",
+    "tr-TR": "Bu aramayla eşleşen kişi yok.",
+    "tk-TM": "Bu gözlege gabat gelýän adam ýok.",
+    "ru-RU": "Нет людей, подходящих под поиск."
   },
   "ApplicationProfileInstance.Workspace.NoPeople": {
     "en-US": "No people linked",

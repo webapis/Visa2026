@@ -1005,6 +1005,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (model == null || _application == null || applicationId == Guid.Empty || personId == Guid.Empty)
             return;
 
+        // Close search dialog as soon as Link is clicked; reopen only if linking fails.
+        model.ShowPersonLinkPicker = false;
+
         try
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -1014,6 +1017,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             {
                 model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.PersonOrApplicationNotFound");
                 model.PersonLinkStatusIsError = true;
+                model.ShowPersonLinkPicker = true;
                 return;
             }
 
@@ -1021,6 +1025,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             {
                 model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstancePerson.RosterLockedWhenWorkflowTerminal");
                 model.PersonLinkStatusIsError = true;
+                model.ShowPersonLinkPicker = true;
                 return;
             }
 
@@ -1028,6 +1033,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             {
                 model.PersonLinkStatusMessage = passportBlock;
                 model.PersonLinkStatusIsError = true;
+                model.ShowPersonLinkPicker = true;
                 return;
             }
 
@@ -1045,6 +1051,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         {
             model.PersonLinkStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
             model.PersonLinkStatusIsError = true;
+            model.ShowPersonLinkPicker = true;
         }
 
         await Task.CompletedTask;

@@ -4146,10 +4146,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Picker.CaseSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Case summary",
-            ["tr-TR"] = "Dava özeti",
-            ["tk-TM"] = "Ýüztutma gysgaçasy",
-            ["ru-RU"] = "Сводка дела",
+            ["en-US"] = "Application",
+            ["tr-TR"] = "Başvuru",
+            ["tk-TM"] = "Ýüztutma",
+            ["ru-RU"] = "Заявка",
         },
         ["ApplicationProfileInstance.Picker.CaseSummarySub"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -5173,12 +5173,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüztutma",
             ["ru-RU"] = "Рабочее место дела",
         },
+        ["ApplicationProfileInstance.Workspace.InvitationAddressGroupHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Fill in order — city depends on region; lodging depends on address type.",
+            ["tr-TR"] = "Sırayla doldurun — şehir bölgeye, konaklama adres türüne bağlıdır.",
+            ["tk-TM"] = "Tertip bilen dolduryň — şäher welaýata, ýaşaýyş salgysy görnüşine bagly.",
+            ["ru-RU"] = "Заполняйте по порядку — город зависит от региона; проживание зависит от типа адреса.",
+        },
         ["ApplicationProfileInstance.Workspace.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Close",
             ["tr-TR"] = "Kapat",
             ["tk-TM"] = "Ýap",
             ["ru-RU"] = "Закрыть",
+        },
+        ["ApplicationProfileInstance.Workspace.ResizePanel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Resize panel",
+            ["tr-TR"] = "Paneli yeniden boyutlandır",
+            ["tk-TM"] = "Paneliň ölçegini üýtget",
+            ["ru-RU"] = "Изменить ширину панели",
         },
         ["ApplicationProfileInstance.Workspace.CloseAria"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -5754,6 +5768,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Açyk möhlet ýok",
             ["ru-RU"] = "Открытого срока нет",
         },
+        ["ApplicationProfileInstance.Workspace.NoPeopleMatchSearch"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No people match this search.",
+            ["tr-TR"] = "Bu aramayla eşleşen kişi yok.",
+            ["tk-TM"] = "Bu gözlege gabat gelýän adam ýok.",
+            ["ru-RU"] = "Нет людей, подходящих под поиск.",
+        },
         ["ApplicationProfileInstance.Workspace.NoPeople"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No people linked",
@@ -5816,6 +5837,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Belge kopyalarını aç",
             ["tk-TM"] = "Resminama nusgalaryny aç",
             ["ru-RU"] = "Открыть копии документов",
+        },
+        ["ApplicationProfileInstance.Workspace.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open",
+            ["tr-TR"] = "Aç",
+            ["tk-TM"] = "Aç",
+            ["ru-RU"] = "Открыть",
         },
         ["ApplicationProfileInstance.Workspace.OpenInApp"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -6106,10 +6134,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Workspace.Resminamalar"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Resminamalar",
-            ["tr-TR"] = "Resminamalar",
-            ["tk-TM"] = "Resminamalar",
-            ["ru-RU"] = "Resminamalar",
+            ["en-US"] = "Templates",
+            ["tr-TR"] = "Şablonlar",
+            ["tk-TM"] = "Nusgalar",
+            ["ru-RU"] = "Шаблоны",
         },
         ["ApplicationProfileInstance.Workspace.Result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

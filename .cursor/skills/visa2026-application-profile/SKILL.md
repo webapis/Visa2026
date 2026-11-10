@@ -150,6 +150,7 @@ flowchart LR
 | Section switch shows a light “Opening …” pane | `.cw-tab-loading` veil is `rgba(248, 250, 252, 0.78)` | `case-workspace.css`; veil is the theme panel, track is `--os-line` |
 | First open of a case shows white skeleton bars | `.cw-loading` bars use `#e2e8f0` / `#f8fafc` | `case-workspace.css`; bars shimmer between `--os-line` and the panel |
 | Organization letterhead fields stay white | Disabled `.cw-summary-field__input` is `#f8fafc` | `case-workspace.css`; Organization inputs use `--os-panel` |
+| Case summary right-side number/date card stays white | `.cw-summary-identity` is `#f8fafc` | `case-workspace.css`; the card uses `--os-surface`, fields use `--os-panel` |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config. Create picker does not ask either | Case Organization edits the tenant Default rows applied at create |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |

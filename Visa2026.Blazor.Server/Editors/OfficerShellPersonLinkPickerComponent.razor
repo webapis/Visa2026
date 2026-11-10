@@ -3,14 +3,21 @@
 
 @if (IsOpen)
 {
-    <section class="os-person-link-picker @(IsBusyLinking ? "is-linking" : null)" aria-label="Link existing person" aria-busy="@(IsBusyLinking ? "true" : "false")">
-        <header class="os-person-link-picker__head">
-            <div>
-                <h3 class="os-person-link-picker__title">Link existing person</h3>
-                <p class="os-person-link-picker__sub">Search by name, personal number, or passport number.</p>
-            </div>
-            <button type="button" class="os-btn os-btn--ghost" disabled="@IsBusy" @onclick="CloseAsync">Cancel</button>
-        </header>
+    <section class="os-person-link-picker @(EmbeddedInDialog ? "os-person-link-picker--dialog" : null) @(IsBusyLinking ? "is-linking" : null)" aria-label="Link existing person" aria-busy="@(IsBusyLinking ? "true" : "false")">
+        @if (EmbeddedInDialog)
+        {
+            <p class="os-person-link-picker__sub">Search by name, personal number, or passport number.</p>
+        }
+        else
+        {
+            <header class="os-person-link-picker__head">
+                <div>
+                    <h3 class="os-person-link-picker__title">Link existing person</h3>
+                    <p class="os-person-link-picker__sub">Search by name, personal number, or passport number.</p>
+                </div>
+                <button type="button" class="os-btn os-btn--ghost" disabled="@IsBusy" @onclick="CloseAsync">Cancel</button>
+            </header>
+        }
 
         @if (!string.IsNullOrWhiteSpace(StatusMessage))
         {
@@ -92,6 +99,8 @@
 
 @code {
     [Parameter] public bool IsOpen { get; set; }
+    /// <summary>When true, chrome is provided by the host DxWindow (no duplicate title/Cancel).</summary>
+    [Parameter] public bool EmbeddedInDialog { get; set; }
     [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> Candidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
     [Parameter] public bool IsSearching { get; set; }
     [Parameter] public bool IsLinking { get; set; }

@@ -743,3 +743,24 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .os-table--people-links .os-people-eye-col .os-link-review__eye {
   margin: 0 auto;
 }
+
+/* Link-existing picker as DxWindow (not inline). */
+.os-person-link-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background: rgba(0, 0, 0, 0.45);
+}
+.os-person-link-picker-popup {
+  z-index: 1050 !important;
+}
+.os-person-link-picker--dialog {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+}
+.os-person-link-picker--dialog .os-person-link-picker__list {
+  max-height: min(50vh, 420px);
+}

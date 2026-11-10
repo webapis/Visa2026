@@ -3,6 +3,7 @@
 @using System.Linq
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.JSInterop
+@using DevExpress.Blazor
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.BusinessObjects.OfficerShell
@@ -106,13 +107,6 @@
                                 : Snapshot!.Profile.Title;
                         }
                         <h1>@(string.IsNullOrWhiteSpace(profileName) ? $"№ {chrome.DisplayNumber}" : profileName)</h1>
-                        <p class="cw-head__sub">
-                            @if (!string.IsNullOrWhiteSpace(profileName) && !string.IsNullOrWhiteSpace(chrome.DisplayNumber))
-                            {
-                                <text>№ @chrome.DisplayNumber · </text>
-                            }
-                            @chrome.TemplateFamilyLabel · @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.Started", string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)
-                        </p>
                     </div>
                 </div>
                 <div class="cw-head__badges">
@@ -158,161 +152,13 @@
             {
                 <p class="cw-head__error" role="alert">@DeleteCaseErrorMessage</p>
             }
-            <div class="cw-head__people">
-                @if (view.People.Count > 0)
-                {
-                    @foreach (var person in view.People)
-                    {
-                        var selected = IsDocumentPersonSelected(person.PersonId);
-                        var personName = ApplicationItemDocumentCopiesPersonCatalog.DisplayPersonName(person.Name);
-                        if (person.IsExcluded)
-                        {
-                            <span class="cw-person is-excluded" title="@ExcludedTitle(person)">
-                                <span class="cw-person__avatar" style="background:@PersonColor(person.Index)">@Initials(personName)</span>
-                                @personName
-                            </span>
-                            continue;
-                        }
-                        <button type="button"
-                                class="cw-person @(selected ? "is-selected" : "is-muted")"
-                                aria-pressed="@selected"
-                                title="@(selected
-                                    ? Msg("ApplicationProfileInstance.Workspace.HidePerson")
-                                    : Msg("ApplicationProfileInstance.Workspace.ShowPerson"))"
-                                @onclick="() => ToggleDocumentPersonFilter(person.PersonId)">
-                            <span class="cw-person__avatar" style="background:@PersonColor(person.Index)">@Initials(personName)</span>
-                            @personName
-                        </button>
-                    }
-                }
-                else
-                {
-                    @foreach (var (name, index) in chrome.PeopleNames.Select((n, i) => (n, i)))
-                    {
-                        <span class="cw-person">
-                            <span class="cw-person__avatar" style="background:@PersonColor(index)">@Initials(name)</span>
-                            @name
-                        </span>
-                    }
-                }
-                @if (chrome.MergedFromCount is int merged && merged > 1)
-                {
-                    <span class="cw-merge">⊞ @VisaUiMessages.Format("ApplicationProfileInstance.Workspace.MergedFrom", merged)</span>
-                }
-            </div>
+
         </header>
 
-        <div class="cw-layout @(IsWideTab(DisplayedTab) ? "cw-layout--wide" : null) @(HidesCaseRail(DisplayedTab) ? "cw-layout--no-rail" : null)">
-            <nav class="cw-nav" aria-label="@Msg("ApplicationProfileInstance.Workspace.SectionsAria")">
-                @{
-                    var peopleNav = ApplicationWorkspacePeopleLinksCompleteness.Resolve(view);
-                    var peopleGaps = ApplicationWorkspacePeopleLinksCompleteness.PeopleWithGaps(view);
-                    var overviewNav = ApplicationWorkspaceCaseSummaryCompletenessGate.ResolveOverviewNav(view);
-                    var overviewMissing = ApplicationWorkspaceCaseSummaryCompletenessGate.MissingRequiredCount(view);
-                    var documentsNav = _documentCopiesNav;
-                    var documentsMissing = _documentCopiesMissing;
-                    var documentsNavReady = _documentCopiesNavReady;
-                    var progressLetterMissing = ApplicationWorkspaceProgressLetterCompleteness.MissingCount(view);
-                    var resultTotals = ApplicationWorkspaceIssuedResultOverview.Sum(view.IssuedRecordTiles);
-                }
-                @foreach (var tab in CaseTabs)
-                {
-                    <button type="button"
-                            class="cw-nav__item @(DisplayedTab == tab.Key ? "is-active" : null)"
-                            disabled="@_tabSwitching"
-                            title="@TabBlockedTitle(tab.Key)"
-                            @onclick="() => SelectTab(tab.Key)">
-                        <span aria-hidden="true">@tab.Glyph</span>
-                        <span>@tab.Label</span>
-                        @if (tab.Key == "overview")
-                        {
-                            @if (overviewNav == ApplicationWorkspaceCaseSummaryCompletenessGate.OverviewNavStatus.Incomplete)
-                            {
-                                <span class="cw-nav__badge cw-nav__badge--missing"
-                                      title="@(overviewMissing == 1 ? "1 required Case summary field is empty" : overviewMissing + " required Case summary fields are empty")"
-                                      aria-label="@(overviewMissing == 1 ? "1 required Case summary field is empty" : overviewMissing + " required Case summary fields are empty")">@overviewMissing</span>
-                            }
-                            else
-                            {
-                                <span class="cw-nav__badge cw-nav__badge--ok"
-                                      title="@Msg("ApplicationProfileInstance.Workspace.CompleteCaseSummary")"
-                                      aria-label="@Msg("ApplicationProfileInstance.Workspace.CompleteCaseSummary")">✓</span>
-                            }
-                        }
-                        else if (tab.Key == "people")
-                        {
-                            @switch (peopleNav)
-                            {
-                                case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.EmptyRoster:
-                                    <span class="cw-nav__badge cw-nav__badge--missing"
-                                          title="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"
-                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"></span>
-                                    break;
-                                case ApplicationWorkspacePeopleLinksCompleteness.NavStatus.Incomplete:
-                                    <span class="cw-nav__badge cw-nav__badge--missing"
-                                          title="@(peopleGaps == 1 ? "1 person missing required linked records" : peopleGaps + " people missing required linked records")"
-                                          aria-label="@(peopleGaps == 1 ? "1 person missing required linked records" : peopleGaps + " people missing required linked records")">@peopleGaps</span>
-                                    break;
-                                default:
-                                    <span class="cw-nav__badge cw-nav__badge--ok"
-                                          title="@Msg("ApplicationProfileInstance.Workspace.CompletePeople")"
-                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.CompletePeople")">✓</span>
-                                    break;
-                            }
-                        }
-                        else if (tab.Key == "result" && view.IssuedRecordTiles.Count > 0)
-                        {
-                            @if (resultTotals.Missing > 0)
-                            {
-                                <span class="cw-nav__badge cw-nav__badge--missing"
-                                      title="@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing", resultTotals.Issued, resultTotals.Missing)"
-                                      aria-label="@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ApplicationResultIssuedMissing", resultTotals.Issued, resultTotals.Missing)">@resultTotals.Missing</span>
-                            }
-                            else
-                            {
-                                <span class="cw-nav__badge cw-nav__badge--ok"
-                                      title="@Msg("ApplicationProfileInstance.Workspace.CompleteApplicationResult")"
-                                      aria-label="@Msg("ApplicationProfileInstance.Workspace.CompleteApplicationResult")">✓</span>
-                            }
-                        }
-                        else if (tab.Key == "progress" && progressLetterMissing > 0)
-                        {
-                            <span class="cw-nav__badge cw-nav__badge--warn"
-                                  title="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")"
-                                  aria-label="@(progressLetterMissing == 1 ? "1 approval letter is missing" : progressLetterMissing + " approval letters are missing")">@progressLetterMissing</span>
-                        }
-                        else if (tab.Key == "seretmezlik" && view.ExcludedPeopleCount > 0)
-                        {
-                            <span class="cw-nav__badge cw-nav__badge--excluded"
-                                  title="@(view.ExcludedPeopleCount == 1 ? "1 person excluded" : view.ExcludedPeopleCount + " people excluded")"
-                                  aria-label="@(view.ExcludedPeopleCount == 1 ? "1 person excluded" : view.ExcludedPeopleCount + " people excluded")">@view.ExcludedPeopleCount</span>
-                        }
-                        else if (tab.Key == "documents" && documentsNavReady)
-                        {
-                            @switch (documentsNav)
-                            {
-                                case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.EmptyRoster:
-                                    <span class="cw-nav__badge cw-nav__badge--warn"
-                                          title="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"
-                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.NoPeople")"></span>
-                                    break;
-                                case ApplicationWorkspaceDocumentCopiesCompleteness.NavStatus.Incomplete:
-                                    <span class="cw-nav__badge cw-nav__badge--warn"
-                                          title="@(documentsMissing == 1 ? "1 required document copy is missing" : documentsMissing + " required document copies are missing")"
-                                          aria-label="@(documentsMissing == 1 ? "1 required document copy is missing" : documentsMissing + " required document copies are missing")">@documentsMissing</span>
-                                    break;
-                                default:
-                                    <span class="cw-nav__badge cw-nav__badge--ok"
-                                          title="@Msg("ApplicationProfileInstance.Workspace.CompleteDocuments")"
-                                          aria-label="@Msg("ApplicationProfileInstance.Workspace.CompleteDocuments")">✓</span>
-                                    break;
-                            }
-                        }
-                    </button>
-                }
-            </nav>
+        <div class="cw-layout cw-layout--no-nav @(HasRightCasePanel ? "cw-layout--right-case" : null)">
+            @RenderCaseLevel1Tabs(view)
 
-            <div class="cw-main @(IsWideTab(DisplayedTab) ? "cw-main--full" : null) @(_tabSwitching ? "cw-main--switching" : null)">
+            <div class="cw-main @(_tabSwitching ? "cw-main--switching" : null)">
                 @if (_tabSwitching)
                 {
                     <div class="cw-tab-loading" role="status" aria-live="polite" aria-busy="true">
@@ -330,46 +176,50 @@
                 }
                 @if (_tabContentReady)
                 {
-                    @switch (ActiveTab)
+                    @if (IsHybridWorkspaceTab(ActiveTab) || IsRightCaseTab(ActiveTab))
                     {
-                        case "overview":
-                        case "people":
-                        case "result":
-                        case "progress":
-                            @RenderHybrid(view)
-                            break;
-                        case "documents":
-                            <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                         Snapshot="Snapshot"
-                                                         SelectedPersonIds="SelectedDocumentPersonIds"
-                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId"
-                                                         CatalogReloaded="OnDocumentCopiesCatalogReloaded" />
-                            break;
-                        case "resminamalar":
-                            <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                            Snapshot="Snapshot"
-                                                            SelectedPersonIds="SelectedDocumentPersonIds"
-                                                            InitialCatalogSettled="OnResminamalarCatalogSettled" />
-                            break;
-                        case "seretmezlik":
-                            <OfficerShellCaseSeretmezlikTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                           Snapshot="Snapshot"
-                                                           PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
-                            break;
-                        case "sla":
-                            @RenderSla(view)
-                            break;
-                        case "organization":
-                            @RenderOrganization(view)
-                            break;
+                        @RenderHybrid(view)
+                    }
+                    else
+                    {
+                        @switch (ActiveTab)
+                        {
+                            case "documents":
+                                <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                             Snapshot="Snapshot"
+                                                             SelectedPersonIds="SelectedDocumentPersonIds"
+                                                             PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId"
+                                                             CatalogReloaded="OnDocumentCopiesCatalogReloaded" />
+                                break;
+                            case "seretmezlik":
+                                <OfficerShellCaseSeretmezlikTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
+                                                               Snapshot="Snapshot"
+                                                               PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                                break;
+                        }
                     }
                 }
             </div>
 
-            @if (!IsWideTab(DisplayedTab) && !HidesCaseRail(DisplayedTab))
+            @if (HasRightCasePanel)
             {
-                <aside class="cw-rail">
-                    @RenderRail(view)
+                <aside class="cw-case-right" aria-label="@RightCasePanelTitle">
+                    <div class="cw-case-right__resize"
+                         role="separator"
+                         aria-orientation="vertical"
+                         aria-label="@Msg("ApplicationProfileInstance.Workspace.ResizePanel")"
+                         title="@Msg("ApplicationProfileInstance.Workspace.ResizePanel")"></div>
+                    <div class="cw-case-right__head">
+                        <h2 class="cw-case-right__title">@RightCasePanelTitle</h2>
+                        <button type="button"
+                                class="cw-case-right__close"
+                                @onclick="CloseRightCasePanel">
+                            @Msg("ApplicationProfileInstance.Workspace.Close")
+                        </button>
+                    </div>
+                    <div class="cw-case-right__body">
+                        @RenderRightCasePanel(view)
+                    </div>
                 </aside>
             }
         </div>
@@ -395,10 +245,15 @@
         ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization"), "🏢"),
     ];
 
-    private static readonly string[] PersonColors =
-        ["#7c3aed", "#0f9d58", "#ea580c", "#2563eb", "#db2777"];
+    private static (string Key, string Label)[] RightCaseTabs =>
+    [
+        ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar")),
+        ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla")),
+        ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization")),
+    ];
 
     private OfficerShellCaseProgressTab? _progressTab;
+    private string? _rightCaseTab;
     private bool _progressUpdating;
     private bool _ignoreAdvanceClick;
     private string? _pendingTab;
@@ -533,12 +388,15 @@
             ? Array.Empty<Guid>()
             : _selectedDocumentPersonIds.ToList();
 
-    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar" or "organization";
-
-    private static bool HidesCaseRail(string tab) => tab is "overview" or "result" or "people";
-
     private static bool IsHybridWorkspaceTab(string? tab) =>
         tab is "overview" or "people" or "result" or "progress";
+
+    private static bool IsRightCaseTab(string? tab) =>
+        tab is "resminamalar" or "sla" or "organization";
+
+    private bool HasRightCasePanel => IsRightCaseTab(_rightCaseTab);
+
+    private string RightCasePanelTitle => SectionLabel(_rightCaseTab);
 
     private bool IsHybridProgressPane =>
         string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase);
@@ -723,12 +581,26 @@
         if (!ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksProcessNavigation(Snapshot?.CaseView))
             _blockedSectionLabel = null;
 
-        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, ActiveTab)
+        if (IsRightCaseTab(ActiveTab) && CaseTabChanged.HasDelegate && !_tabSwitching)
+        {
+            _rightCaseTab = ActiveTab;
+            _resminamalarCatalogPending = string.Equals(ActiveTab, "resminamalar", StringComparison.OrdinalIgnoreCase);
+            _ = CaseTabChanged.InvokeAsync("overview");
+        }
+        else if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, ActiveTab)
             && CaseTabChanged.HasDelegate
             && !_tabSwitching)
         {
             RememberBlockedSection(ActiveTab);
             _ = CaseTabChanged.InvokeAsync("overview");
+        }
+
+        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, _rightCaseTab)
+            && HasRightCasePanel)
+        {
+            RememberBlockedSection(_rightCaseTab);
+            _rightCaseTab = null;
+            _resminamalarCatalogPending = false;
         }
     }
 
@@ -766,11 +638,28 @@
             await PlaceOpenPeopleActionMenuAsync();
         }
 
+        if (HasRightCasePanel)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaCaseWorkspaceNav.bindRightPanelResize");
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+            catch (JSException)
+            {
+            }
+            catch (InvalidOperationException)
+            {
+            }
+        }
+
         if (!_tabSwitching || !_tabContentReady)
             return;
 
         if (_resminamalarCatalogPending
-            && string.Equals(ActiveTab, "resminamalar", StringComparison.OrdinalIgnoreCase))
+            && string.Equals(_rightCaseTab, "resminamalar", StringComparison.OrdinalIgnoreCase))
             return;
 
         _tabSwitching = false;
@@ -1145,8 +1034,25 @@
     }
 
     private static List<ApplicationWorkspaceCaseHeaderField> MainHeaderFields(
-        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields) =>
-        fields.Where(field => !ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(field.Key)).ToList();
+        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields)
+    {
+        var core = new List<ApplicationWorkspaceCaseHeaderField>();
+        var invitation = new List<ApplicationWorkspaceCaseHeaderField>();
+        foreach (var field in fields)
+        {
+            if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsIdentityField(field.Key))
+                continue;
+            if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsInvitationAddressGroupField(field.Key))
+                invitation.Add(field);
+            else
+                core.Add(field);
+        }
+
+        // Keep invitation address keys in dependency order, but in the same flat flow (no group chrome).
+        invitation = ApplicationWorkspaceCaseHeaderFieldsHelper.OrderedInvitationAddressGroupFields(invitation);
+        core.AddRange(invitation);
+        return core;
+    }
 
     private static List<ApplicationWorkspaceCaseSummaryTile> IdentityTiles(
         IEnumerable<ApplicationWorkspaceCaseSummaryTile> tiles)
@@ -1393,6 +1299,24 @@
             ? flag
             : string.Equals(Convert.ToString(e.Value), "true", StringComparison.OrdinalIgnoreCase);
         SetAllDocumentPeopleSelected(selected);
+    }
+
+    private void OnSelectAllFilteredPeopleChanged(
+        IReadOnlyList<ApplicationWorkspaceCasePerson> selectablePeople,
+        ChangeEventArgs e)
+    {
+        var selected = e.Value is bool flag
+            ? flag
+            : string.Equals(Convert.ToString(e.Value), "true", StringComparison.OrdinalIgnoreCase);
+        if (!selected)
+        {
+            foreach (var person in selectablePeople)
+                _selectedDocumentPersonIds.Remove(person.PersonId);
+            return;
+        }
+
+        foreach (var person in selectablePeople)
+            _selectedDocumentPersonIds.Add(person.PersonId);
     }
 
     private void OnPersonRowCheckedChanged(Guid personId, ChangeEventArgs e)
@@ -1834,9 +1758,25 @@
         </div>
     };
 
-    private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
+    private RenderFragment RenderSummaryTilePlain(ApplicationWorkspaceCaseSummaryTile field) => __builder =>
     {
-        <label class="cw-summary-field cw-summary-field--fill-@FillCss(field.FillState)"
+        <div class="cw-sum-tile cw-sum-tile--plain">
+            <span class="cw-sum-tile__label">@field.Label</span>
+            <strong class="cw-sum-tile__value">@field.Value</strong>
+        </div>
+    };
+
+    private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) =>
+        RenderSummaryField(field, plain: false, forceReadOnly: false);
+
+    private RenderFragment RenderSummaryField(
+        ApplicationWorkspaceCaseHeaderField field,
+        bool plain,
+        bool forceReadOnly) => __builder =>
+    {
+        var readOnly = forceReadOnly || field.ReadOnly;
+        var fillClass = plain ? null : $"cw-summary-field--fill-{FillCss(field.FillState)}";
+        <label class="cw-summary-field @(plain ? "cw-summary-field--plain" : null) @fillClass @(readOnly ? "is-readonly" : null)"
                data-summary-key="@field.Key"
                data-summary-kind="@field.Kind">
             <span class="cw-summary-field__label">@field.Label</span>
@@ -1845,14 +1785,14 @@
                 <OfficerDateEdit Date="@field.EditorDate"
                                  DateChanged="value => OnHeaderDateChanged(field.Key, value)"
                                  CssClass="cw-summary-date"
-                                 ReadOnly="@field.ReadOnly"
-                                 Enabled="@(!field.ReadOnly)" />
+                                 ReadOnly="@readOnly"
+                                 Enabled="@(!readOnly)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
             {
                 <BorderZoneLocationField Value="@field.Value"
                                          EditorAlias="@EditorAliasFor(field.Key)"
-                                         ReadOnly="@field.ReadOnly"
+                                         ReadOnly="@readOnly"
                                          CatalogItems="@field.MultiSelectOptions"
                                          ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
             }
@@ -1861,7 +1801,7 @@
             {
                 <TargetApplicationSearchField Value="@field.Value"
                                               Options="@field.Options"
-                                              ReadOnly="@field.ReadOnly"
+                                              ReadOnly="@readOnly"
                                               Placeholder="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"
                                               Title="@Msg("ApplicationProfile.Field.TargetApplicationProfileInstance")"
                                               Subtitle="@Msg("ApplicationProfileInstance.Picker.TargetApplicationSearchSub")"
@@ -1876,37 +1816,48 @@
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup)
             {
-                <div class="cw-summary-lookup-row">
-                    <select class="cw-summary-field__input"
-                            value="@field.Value"
-                            disabled="@field.ReadOnly"
-                            @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
-                        <option value="">— Select —</option>
-                        @foreach (var option in field.Options)
+                @if (readOnly)
+                {
+                    @* Catalogs load only on Edit — a disabled <select> with no options shows blank. *@
+                    <input type="text"
+                           class="cw-summary-field__input"
+                           value="@field.DisplayValue"
+                           readonly
+                           disabled />
+                }
+                else
+                {
+                    <div class="cw-summary-lookup-row">
+                        <select class="cw-summary-field__input"
+                                value="@field.Value"
+                                @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">
+                            <option value="">— Select —</option>
+                            @foreach (var option in field.Options)
+                            {
+                                var optionValue = !string.IsNullOrWhiteSpace(option.SearchText)
+                                    ? option.SearchText
+                                    : option.Id.ToString("D");
+                                <option value="@optionValue" selected="@(string.Equals(field.Value, optionValue, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                            }
+                        </select>
+                        @if (CanAddAlternativeAddress(field))
                         {
-                            var optionValue = !string.IsNullOrWhiteSpace(option.SearchText)
-                                ? option.SearchText
-                                : option.Id.ToString("D");
-                            <option value="@optionValue" selected="@(string.Equals(field.Value, optionValue, StringComparison.OrdinalIgnoreCase))">@option.DisplayName</option>
+                            <button type="button"
+                                    class="cw-org-new"
+                                    @onclick="OnNewAlternativeAddress">
+                                @Msg("ApplicationProfileInstance.Picker.New")
+                            </button>
                         }
-                    </select>
-                    @if (CanAddAlternativeAddress(field))
-                    {
-                        <button type="button"
-                                class="cw-org-new"
-                                @onclick="OnNewAlternativeAddress">
-                            @Msg("ApplicationProfileInstance.Picker.New")
-                        </button>
-                    }
-                    @if (CanAddInvitationSite(field))
-                    {
-                        <button type="button"
-                                class="cw-org-new"
-                                @onclick="() => OnNewInvitationSite(field.Key)">
-                            @Msg("ApplicationProfileInstance.Picker.New")
-                        </button>
-                    }
-                </div>
+                        @if (CanAddInvitationSite(field))
+                        {
+                            <button type="button"
+                                    class="cw-org-new"
+                                    @onclick="() => OnNewInvitationSite(field.Key)">
+                                @Msg("ApplicationProfileInstance.Picker.New")
+                            </button>
+                        }
+                    </div>
+                }
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
             {
@@ -1914,7 +1865,7 @@
                        class="cw-summary-field__input"
                        value="@field.Value"
                        maxlength="@(field.MaxLength ?? ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumberMaxLength)"
-                       disabled="@field.ReadOnly"
+                       disabled="@readOnly"
                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
@@ -1922,7 +1873,7 @@
                 <textarea class="cw-summary-field__input cw-summary-field__textarea"
                           maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.PurposeMaxLength"
                           rows="4"
-                          disabled="@field.ReadOnly"
+                          disabled="@readOnly"
                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
             }
             else
@@ -1930,16 +1881,16 @@
                 <input type="text"
                        class="cw-summary-field__input"
                        value="@field.Value"
-                       disabled="@field.ReadOnly"
+                       disabled="@readOnly"
                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
             }
         </label>
     };
 
-    private RenderFragment RenderHybrid(ApplicationWorkspaceCaseView view) => __builder =>
+    private RenderFragment RenderCaseLevel1Tabs(ApplicationWorkspaceCaseView _) => __builder =>
     {
-        <div class="cw-hybrid">
-            <div class="cw-hybrid__level1" role="tablist" aria-label="@Msg("ApplicationProfileInstance.Workspace.Overview")">
+        <div class="cw-case-level1" role="tablist" aria-label="@Msg("ApplicationProfileInstance.Workspace.Overview")">
+            <div class="cw-case-level1__left">
                 <button type="button"
                         class="cw-hybrid__tab @(IsHybridProgressPane ? null : "is-active")"
                         role="tab"
@@ -1958,6 +1909,47 @@
                     @Msg("ApplicationProfileInstance.Workspace.Progress")
                 </button>
             </div>
+            <div class="cw-case-level1__right">
+                @foreach (var tab in RightCaseTabs)
+                {
+                    var rightKey = tab.Key;
+                    var rightActive = string.Equals(_rightCaseTab, rightKey, StringComparison.OrdinalIgnoreCase);
+                    <button type="button"
+                            class="cw-hybrid__tab cw-hybrid__tab--right @(rightActive ? "is-active" : null)"
+                            role="tab"
+                            aria-selected="@rightActive"
+                            disabled="@_tabSwitching"
+                            title="@TabBlockedTitle(rightKey)"
+                            @onclick="() => SelectRightCaseTabAsync(rightKey)">
+                        @tab.Label
+                    </button>
+                }
+            </div>
+        </div>;
+    };
+
+    private RenderFragment RenderRightCasePanel(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        @switch (_rightCaseTab)
+        {
+            case "resminamalar":
+                <OfficerShellCaseResminamalarTab ApplicationProfileInstanceId="Snapshot!.ApplicationProfileInstanceId"
+                                                Snapshot="Snapshot"
+                                                SelectedPersonIds="SelectedDocumentPersonIds"
+                                                InitialCatalogSettled="OnResminamalarCatalogSettled" />
+                break;
+            case "sla":
+                @RenderSla(view)
+                break;
+            case "organization":
+                @RenderOrganization(view)
+                break;
+        }
+    };
+
+    private RenderFragment RenderHybrid(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="cw-hybrid">
             @if (IsHybridProgressPane)
             {
                 <OfficerShellCaseProgressTab @ref="_progressTab"
@@ -1986,31 +1978,28 @@
                             aria-selected="@IsHybridPeopleSubTab"
                             disabled="@_tabSwitching"
                             @onclick="SelectHybridPeopleAsync">
-                        @Msg("ApplicationProfileInstance.Workspace.PeopleLinks")
+                        <span>@Msg("ApplicationProfileInstance.Workspace.PeopleLinks")</span>
+                        <span class="cw-hybrid__tab-count">@view.People.Count</span>
                     </button>
                     @foreach (var tile in view.IssuedRecordTiles)
                     {
                         var issuedKey = tile.Key;
                         var issuedActive = IsHybridIssuedSubTab
                             && string.Equals(issuedKey, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
-                        var missing = ApplicationWorkspaceIssuedResultOverview.Missing(tile);
                         <button type="button"
                                 class="cw-hybrid__tab cw-hybrid__tab--sub @(issuedActive ? "is-active" : null)"
                                 role="tab"
                                 aria-selected="@issuedActive"
                                 disabled="@_tabSwitching"
                                 @onclick="() => SelectHybridIssuedAsync(issuedKey)">
-                            @ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)
-                            @if (!tile.IsOptional && missing > 0)
-                            {
-                                <span class="cw-hybrid__tab-badge">@missing</span>
-                            }
+                            <span>@ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)</span>
+                            <span class="cw-hybrid__tab-count">@HybridIssuedTabCount(tile)</span>
                         </button>
                     }
                 </div>
                 @if (IsHybridIssuedSubTab)
                 {
-                    @RenderApplicationResult(view)
+                    @RenderHybridIssued(view)
                 }
                 else
                 {
@@ -2024,25 +2013,9 @@
     {
         <div class="cw-overview">
             <section class="cw-card">
-                <div class="cw-card__title-row">
-                    <div>
-                        <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Picker.CaseSummary")</h2>
-                        @{
-                            var summaryProfileName = !string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName)
-                                ? view.Chrome.ProfileTemplateName
-                                : Snapshot!.Profile.Title;
-                        }
-                        <p class="cw-summary-sub">
-                            @if (!string.IsNullOrWhiteSpace(summaryProfileName))
-                            {
-                                <span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", summaryProfileName)</span>
-                                <span> · </span>
-                            }
-                            <span>@Msg("ApplicationProfileInstance.Workspace.UseFieldsOnly")@(IsCaseSummaryEditing ? Msg("ApplicationProfileInstance.Workspace.UseFieldsEditing") : null)</span>
-                        </p>
-                    </div>
-                    @if (view.HeaderFields.Count > 0)
-                    {
+                @if (view.HeaderFields.Count > 0)
+                {
+                    <div class="cw-card__title-row cw-card__title-row--actions-only">
                         @if (IsCaseSummaryEditing)
                         {
                             <button type="button"
@@ -2062,8 +2035,8 @@
                         {
                             <button type="button" class="cw-summary-mode-btn" @onclick="StartCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Edit")</button>
                         }
-                    }
-                </div>
+                    </div>
+                }
                 @if (IsSummaryProcessGateActive)
                 {
                     <div class="os-banner os-banner--error cw-summary-gate" role="alert">
@@ -2092,10 +2065,11 @@
                 {
                     <p class="cw-summary-empty">@Msg("ApplicationProfileInstance.Picker.NoRequiredProps")</p>
                 }
-                else if (IsCaseSummaryEditing && view.HeaderFields.Count > 0)
+                else if (view.HeaderFields.Count > 0)
                 {
                     var identityFields = IdentityHeaderFields(view.HeaderFields);
                     var mainFields = MainHeaderFields(view.HeaderFields);
+                    var summaryReadOnly = !IsCaseSummaryEditing;
                     <div class="cw-summary-body @(mainFields.Count == 0 ? "cw-summary-body--identity-only" : null)">
                         @if (mainFields.Count > 0)
                         {
@@ -2103,7 +2077,7 @@
                                 <div class="cw-summary-form">
                                     @foreach (var field in mainFields)
                                     {
-                                        @RenderSummaryField(field)
+                                        @RenderSummaryField(field, plain: true, forceReadOnly: summaryReadOnly)
                                     }
                                 </div>
                             </div>
@@ -2114,13 +2088,16 @@
                                 <div class="cw-summary-form cw-summary-form--stack">
                                     @foreach (var field in identityFields)
                                     {
-                                        @RenderSummaryField(field)
+                                        @RenderSummaryField(field, plain: true, forceReadOnly: summaryReadOnly)
                                     }
                                 </div>
                             </aside>
                         }
                     </div>
-                    <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.SummaryFoot")</p>
+                    @if (IsCaseSummaryEditing)
+                    {
+                        <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.SummaryFoot")</p>
+                    }
                 }
                 else
                 {
@@ -2134,7 +2111,7 @@
                                 <div class="cw-summary-grid">
                                     @foreach (var field in mainTiles)
                                     {
-                                        @RenderSummaryTile(field)
+                                        @RenderSummaryTilePlain(field)
                                     }
                                 </div>
                             </div>
@@ -2145,7 +2122,7 @@
                                 <div class="cw-summary-grid cw-summary-grid--stack">
                                     @foreach (var field in identityTiles)
                                     {
-                                        @RenderSummaryTile(field)
+                                        @RenderSummaryTilePlain(field)
                                     }
                                 </div>
                             </aside>
@@ -2153,7 +2130,122 @@
                     </div>
                 }
             </section>
-            <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
+        </div>;
+    };
+
+    private RenderFragment RenderHybridIssued(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        var tile = view.IssuedRecordTiles.FirstOrDefault(t =>
+            string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase))
+            ?? view.IssuedRecordTiles.FirstOrDefault();
+        if (tile == null)
+        {
+            <div class="cw-overview">
+                <section class="cw-card">
+                    <p class="cw-summary-empty">@Msg("ApplicationProfileInstance.Workspace.ApplicationResultEmpty")</p>
+                </section>
+            </div>
+            return;
+        }
+
+        var canAdd = ApplicationWorkspaceIssuedResultOverview.CanCreateMore(tile);
+        var addCaption = ApplicationProfileLocalization.IssuedAddCaption(tile.AddCaption);
+        var addTitle = canAdd
+            ? addCaption
+            : VisaUiMessages.Format(
+                "ApplicationProfileInstance.Issued.AddQuotaFull",
+                ApplicationProfileLocalization.IssuedRecordLabel(tile.Label));
+        <div class="cw-overview cw-hybrid-issued">
+            <div class="cw-issued-xaf-toolbar" role="toolbar" aria-label="@ApplicationProfileLocalization.IssuedPanelTitle(tile.PanelTitle)">
+                <button type="button"
+                        class="os-btn os-btn--primary"
+                        title="@addTitle"
+                        disabled="@(!canAdd)"
+                        @onclick="() => AddIssuedHeaderAsync(tile)">
+                    @addCaption
+                </button>
+            </div>
+            <section class="cw-card cw-issued-panel">
+                @if (tile.Count == 0)
+                {
+                    <p class="cw-issued-panel__hint">@IssuedEmptyHint(view, tile)</p>
+                }
+                else
+                {
+                    <ul class="cw-issued-list @(tile.ColumnKeys.Count > 0 ? "cw-issued-list--table" : null)"
+                        style="@(tile.ColumnKeys.Count > 0 ? $"--issued-cols:{tile.ColumnKeys.Count}" : null)">
+                        @if (tile.ColumnKeys.Count > 0)
+                        {
+                            <li class="cw-issued-list__head" aria-hidden="true">
+                                @foreach (var columnKey in tile.ColumnKeys)
+                                {
+                                    <span>@IssuedColumnCaption(columnKey)</span>
+                                }
+                                <span></span>
+                            </li>
+                        }
+                        @foreach (var row in tile.Rows)
+                        {
+                            var issuedRowId = row.Id;
+                            var isSelected = IsIssuedRowOpen(tile.Key, issuedRowId);
+                            var canPreviewIssued = IssueIssuedHeaderComposeService.TryResolveKind(tile.Key, out _)
+                                || string.Equals(tile.Key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase);
+                            @if (row.Cells.Count > 0)
+                            {
+                                <li class="cw-issued-list__row cw-issued-list__row--cols @(isSelected ? "is-selected" : null)"
+                                    @onclick="() => OpenIssuedHeaderAsync(tile.Key, issuedRowId)">
+                                    @foreach (var cell in row.Cells)
+                                    {
+                                        <span>@cell</span>
+                                    }
+                                    @if (canPreviewIssued)
+                                    {
+                                        <button type="button"
+                                                class="cw-issued-list__preview"
+                                                title="@(row.HasCopy ? Msg("ApplicationProfileInstance.Workspace.PreviewCopy") : Msg("ApplicationProfileInstance.Workspace.NoCopy"))"
+                                                disabled="@(!row.HasCopy)"
+                                                @onclick="() => PreviewIssuedHeaderCopyAsync(tile.Key, issuedRowId)"
+                                                @onclick:stopPropagation="true">
+                                            @Msg("ApplicationItemDocumentCopies.Action.Preview")
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span></span>
+                                    }
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="cw-issued-list__row @(isSelected ? "is-selected" : null)">
+                                    <button type="button"
+                                            class="cw-issued-list__item"
+                                            aria-current="@(isSelected ? "true" : null)"
+                                            @onclick="() => OpenIssuedHeaderAsync(tile.Key, issuedRowId)">
+                                        <strong>@row.Title</strong>
+                                        <span>@row.Subtitle</span>
+                                    </button>
+                                    @if (canPreviewIssued)
+                                    {
+                                        <button type="button"
+                                                class="cw-issued-list__preview"
+                                                title="@(row.HasCopy ? Msg("ApplicationProfileInstance.Workspace.PreviewCopy") : Msg("ApplicationProfileInstance.Workspace.NoCopy"))"
+                                                disabled="@(!row.HasCopy)"
+                                                @onclick="() => PreviewIssuedHeaderCopyAsync(tile.Key, issuedRowId)"
+                                                @onclick:stopPropagation="true">
+                                            @Msg("ApplicationItemDocumentCopies.Action.Preview")
+                                        </button>
+                                    }
+                                </li>
+                            }
+                        }
+                    </ul>
+                }
+                @if (!string.IsNullOrWhiteSpace(_issuedDeleteError))
+                {
+                    <p class="cw-issued-panel__error">@_issuedDeleteError</p>
+                }
+            </section>
         </div>;
     };
 
@@ -2485,16 +2577,18 @@
 
     private RenderFragment RenderPeople(ApplicationWorkspaceCaseView view) => __builder =>
     {
-        var selectablePeople = view.ActivePeople.Where(p => p.PersonId != Guid.Empty).ToList();
-        var allPeopleSelected = AreAllDocumentPeopleSelected(view);
+        var filteredPeople = FilterLinkedPeople(view.People).ToList();
+        var selectablePeople = filteredPeople.Where(p => !p.IsExcluded && p.PersonId != Guid.Empty).ToList();
+        var allPeopleSelected = AreAllDocumentPeopleSelected(selectablePeople);
         var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
         <div class="ct-page">
             <h2 class="ct-page__title">People on this case</h2>
-            @if (view.Chrome.ResolvedLinksLocked)
-            {
-                <p class="cw-linked-lock" style="margin-bottom:12px">🔒 People and linked records are locked — this process is complete (issued, rejected, or cancelled).</p>
-            }
             <div class="os-toolbar cw-people-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <DxTextBox @bind-Text="_peopleSearchText"
+                           BindValueMode="BindValueMode.OnInput"
+                           NullText="@Msg("ApplicationProfileInstance.Shell.SearchPlaceholder")"
+                           ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                           CssClass="cw-people-search" />
                 <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || ShowPersonLinkReview || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
                 <span class="cw-people-toolbar__reports" role="group" aria-label="Preview reports">
                     <div class="cw-people-action-menu">
@@ -2592,15 +2686,35 @@
                 </span>
                 <span class="cw-people-toolbar__hint">Checked rows only</span>
             </div>
-            <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
-                                                   Candidates="@PersonLinkCandidates"
-                                                   IsSearching="@PersonLinkIsSearching"
-                                                   IsLinking="@PersonLinkIsLinking"
-                                                   StatusMessage="@PersonLinkStatusMessage"
-                                                   IsStatusError="@PersonLinkStatusIsError"
-                                                   SearchRequested="@PersonLinkSearchRequested"
-                                                   LinkRequested="@LinkPersonFromPickerRequested"
-                                                   CloseRequested="@ClosePersonLinkPickerRequested" />
+            @if (ShowPersonLinkPicker)
+            {
+                <div class="os-person-link-picker-backdrop"
+                     role="presentation"
+                     @onclick="ClosePersonLinkPickerAsync"></div>
+            }
+            <DxWindow Visible="@ShowPersonLinkPicker"
+                      VisibleChanged="OnPersonLinkPickerVisibleChanged"
+                      HeaderText="Link existing person"
+                      ShowFooter="false"
+                      ShowCloseButton="true"
+                      CloseOnEscape="true"
+                      AllowDrag="true"
+                      AllowDragByHeaderOnly="true"
+                      Width="min(640px, 92vw)"
+                      CssClass="os-link-review-popup os-person-link-picker-popup">
+                <BodyContentTemplate>
+                    <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
+                                                           EmbeddedInDialog="true"
+                                                           Candidates="@PersonLinkCandidates"
+                                                           IsSearching="@PersonLinkIsSearching"
+                                                           IsLinking="@PersonLinkIsLinking"
+                                                           StatusMessage="@PersonLinkStatusMessage"
+                                                           IsStatusError="@PersonLinkStatusIsError"
+                                                           SearchRequested="@PersonLinkSearchRequested"
+                                                           LinkRequested="@LinkPersonFromPickerRequested"
+                                                           CloseRequested="@ClosePersonLinkPickerRequested" />
+                </BodyContentTemplate>
+            </DxWindow>
             <DxWindow Visible="@ShowPersonLinkReview"
                       VisibleChanged="OnPersonLinkReviewVisibleChanged"
                       HeaderText="@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")"
@@ -2867,6 +2981,10 @@
             {
                 <p class="os-empty">No people linked.</p>
             }
+            else if (filteredPeople.Count == 0)
+            {
+                <p class="os-empty">@Msg("ApplicationProfileInstance.Workspace.NoPeopleMatchSearch")</p>
+            }
             else
             {
                 var peopleLinkColumns = view.People.FirstOrDefault()?.Records
@@ -2881,7 +2999,7 @@
                                            disabled="@(selectablePeople.Count == 0)"
                                            title="Select all"
                                            aria-label="Select all people"
-                                           @onchange="OnSelectAllPeopleChanged" />
+                                           @onchange="e => OnSelectAllFilteredPeopleChanged(selectablePeople, e)" />
                                 </th>
                                 <th>Person</th>
                                 <th>Role</th>
@@ -2895,7 +3013,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var person in view.People)
+                            @foreach (var person in filteredPeople)
                             {
                                 var personSelected = IsDocumentPersonSelected(person.PersonId);
                                 <tr class="os-person-row @(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.IsExcluded ? "is-excluded" : null)"
@@ -3199,6 +3317,11 @@
     {
         if (string.IsNullOrWhiteSpace(key) || _tabSwitching || _summarySaving)
             return;
+        if (IsRightCaseTab(key))
+        {
+            await SelectRightCaseTabAsync(key);
+            return;
+        }
         if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, key))
         {
             RememberBlockedSection(key);
@@ -3226,7 +3349,7 @@
             return;
         }
 
-        _resminamalarCatalogPending = string.Equals(key, "resminamalar", StringComparison.OrdinalIgnoreCase);
+        _resminamalarCatalogPending = false;
         await PaintTabSwitchAsync(key);
         try
         {
@@ -3238,6 +3361,51 @@
             _tabContentReady = true;
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private async Task SelectRightCaseTabAsync(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key) || _tabSwitching || _summarySaving || !IsRightCaseTab(key))
+            return;
+        if (ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot?.CaseView, key))
+        {
+            RememberBlockedSection(key);
+            _keepBlockedSectionLabel = true;
+            StartCaseSummaryEdit();
+            if (!string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase)
+                && !IsHybridWorkspaceTab(ActiveTab))
+                await SelectTab("overview");
+            _keepBlockedSectionLabel = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (_caseSummaryEditing
+            && !string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(ActiveTab, "people", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(ActiveTab, "result", StringComparison.OrdinalIgnoreCase))
+            DiscardCaseSummaryDraft();
+
+        if (!_keepBlockedSectionLabel)
+            _blockedSectionLabel = null;
+
+        _rightCaseTab = key;
+        _resminamalarCatalogPending = string.Equals(key, "resminamalar", StringComparison.OrdinalIgnoreCase);
+
+        if (!IsHybridWorkspaceTab(ActiveTab))
+        {
+            await SelectTab("overview");
+            return;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task CloseRightCasePanel()
+    {
+        _rightCaseTab = null;
+        _resminamalarCatalogPending = false;
+        return InvokeAsync(StateHasChanged);
     }
 
     private void EnsureHybridIssuedKey(ApplicationWorkspaceCaseView? view)
@@ -3265,6 +3433,16 @@
     private Task SelectHybridProgressAsync() => SelectTab("progress");
 
     private Task SelectHybridPeopleAsync() => SelectTab("people");
+
+    private static string HybridIssuedTabCount(ApplicationWorkspaceCaseIssuedTile tile)
+    {
+        if (tile == null)
+            return string.Empty;
+        return tile.IsOptional
+            ? tile.CoverageCount.ToString()
+            : $"{tile.CoverageCount}/{tile.ExpectedCount}";
+    }
+
 
     private async Task SelectHybridIssuedAsync(string issuedKey)
     {
@@ -3306,6 +3484,47 @@
         var ids = view.ActivePeople.Where(p => p.PersonId != Guid.Empty).Select(p => p.PersonId).ToList();
         return ids.Count > 0 && ids.All(IsDocumentPersonSelected);
     }
+
+    private bool AreAllDocumentPeopleSelected(IEnumerable<ApplicationWorkspaceCasePerson> selectablePeople)
+    {
+        var ids = selectablePeople.Select(p => p.PersonId).Where(id => id != Guid.Empty).ToList();
+        return ids.Count > 0 && ids.All(IsDocumentPersonSelected);
+    }
+
+    private string _peopleSearchText = string.Empty;
+
+    private IEnumerable<ApplicationWorkspaceCasePerson> FilterLinkedPeople(
+        IReadOnlyList<ApplicationWorkspaceCasePerson> people)
+    {
+        if (string.IsNullOrWhiteSpace(_peopleSearchText))
+            return people;
+
+        var q = _peopleSearchText.Trim();
+        return people.Where(person => PersonMatchesSearch(person, q));
+    }
+
+    private static bool PersonMatchesSearch(ApplicationWorkspaceCasePerson person, string query)
+    {
+        if (ContainsIgnoreCase(person.Name, query)
+            || ContainsIgnoreCase(person.RoleLabel, query)
+            || ContainsIgnoreCase(person.PassportNumber, query)
+            || ContainsIgnoreCase(person.VisaNumber, query)
+            || ContainsIgnoreCase(person.WorkPermitNumber, query))
+            return true;
+
+        foreach (var record in person.Records)
+        {
+            if (ContainsIgnoreCase(record.Label, query)
+                || ContainsIgnoreCase(record.Caption, query))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsIgnoreCase(string? value, string query) =>
+        !string.IsNullOrWhiteSpace(value)
+        && value.Contains(query, StringComparison.OrdinalIgnoreCase);
 
     private bool _peopleDocMenuOpen;
     private bool _peopleResmiMenuOpen;
@@ -3598,13 +3817,9 @@
             return Task.CompletedTask;
 
         _resminamalarCatalogPending = false;
-        if (!_tabSwitching
-            || !_tabContentReady
-            || !string.Equals(ActiveTab, "resminamalar", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(_rightCaseTab, "resminamalar", StringComparison.OrdinalIgnoreCase))
             return Task.CompletedTask;
 
-        _tabSwitching = false;
-        _pendingTab = null;
         return InvokeAsync(StateHasChanged);
     }
 
@@ -4098,6 +4313,16 @@
 
         return CancelPersonLinkReviewAsync();
     }
+
+    private Task ClosePersonLinkPickerAsync() => ClosePersonLinkPickerRequested.InvokeAsync();
+
+    private Task OnPersonLinkPickerVisibleChanged(bool visible)
+    {
+        if (visible || !ShowPersonLinkPicker)
+            return Task.CompletedTask;
+
+        return ClosePersonLinkPickerAsync();
+    }
     private bool CanAdvanceFromRail =>
         Snapshot?.CaseView.ProgressSteps.Any(s => s.CanAdvance && s.AdvanceOptions.Count > 0) == true;
 
@@ -4365,13 +4590,6 @@
         return lines.Count == 0 ? "—" : string.Join("\n", lines);
     }
 
-    private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];
-
-    private static string Initials(string name)
-    {
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return string.Concat(parts.Take(2).Select(p => char.ToUpperInvariant(p[0])));
-    }
 
     private static string Msg(string key) => VisaUiMessages.Get(key);
 }

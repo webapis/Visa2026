@@ -1,3 +1,10 @@
+## 2026-11-10 — Case summary right-side property card follows the theme
+
+- **Need**: On Fluent Dark the Application number / date / code card on the right of Case summary stayed a light `#f8fafc` well, and the fields inside it stayed white.
+- **Fix**: `.cw-summary-identity` uses `--os-surface`. Inputs, selects, and the date editor inside it use `--os-panel` and `--os-ink`.
+- **Officer**: Hard-refresh. Open a case. The right-side property card should match the dark Application form. Check light once.
+- **Prevent**: Do not put `#f8fafc` back on `.cw-summary-identity`.
+
 ## 2026-11-09 — Case workspace hybrid Overview (2014 feel)
 
 - **Need**: Officers used to VISA2014 want Case + people + per-type results together; Progress beside Case Summary; Document copies / Resminamalar preview from People like XAF report actions.
@@ -4280,3 +4287,25 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 - Requested WP / border zone location rows use source-colored removable chips (Case teal, Visa amber, Work permit blue, Manual purple outline). Remove hides for this Join only; Join writes comma-separated union of visible chips to Visa / WorkPermitItem / BorderZoneItem.
 - Prototype: `docs/prototypes/linked-records-requested-location-chips-prototype.jpg`. Helper: `LinkReviewLocationChips`.
+
+### 2026-11-10 — Hybrid issued tabs: ratios + XAF toolbar (VISA2014)
+
+- **Need**: Invitation/WP/Visa/etc. on Overview level-2 should feel like VISA2014 — coverage on the tab, actions as native toolbar.
+- **Fix**: `HybridIssuedTabCount` on tabs (`n/m` or optional `n`); `RenderHybridIssued` with New/Edit/Delete/Open toolbar; Result overview cards only on left-nav Application result.
+- **Officer**: Open Overview → Invitation tab shows `0/5`; toolbar New/Edit/Delete/Open; select a row then Edit/Delete/Open.
+- **Prevent**: Do not put Result overview board back under hybrid issued tabs; leave left-nav Application result as the full board.
+- **Verify**: F5 hybrid Overview issued tabs.
+### 2026-11-10 — Right-anchored Resminamalar / SLA / Organization
+
+- **Need**: Case workspace level-1 tabs with Case summary|Progress left and Resminamalar|SLA|Organization right-anchored; those three open a right column only; hide left nav; keep Overview; preview slot further right.
+- **Fix**: Removed `cw-nav`. Full-width `cw-case-level1` with left/right groups. Local `_rightCaseTab` drives `cw-case-right` panel (Close); center stays hybrid. Do not push right-tab keys into parent `ActiveTab` (migrate legacy ActiveTab values to overview + panel). CSS: `cw-layout--no-nav` / `cw-layout--right-case`.
+- **Officer**: Open a case → no left section nav; click Resminamalar → catalog in right column while Case summary stays; Close or switch tabs as needed; preview still docks further right.
+- **Prevent**: Do not restore left-nav items for Resminamalar/SLA/Organization; do not replace the center pane when those tabs open.
+- **Verify**: F5 case workspace; open Resminamalar/SLA/Organization with Overview visible.
+### 2026-11-10 — Invitation address group on Case summary
+
+- **Need**: Dependent invitation address fields ordered and bordered as a group; core fields outside.
+- **Fix**: `InvitationAddressGroupFieldKeys` + `OrderedInvitationAddressGroupFields`; Overview renders `cw-summary-field-group` beside core `cw-summary-form`. Hint key `InvitationAddressGroupHint`.
+- **Officer**: Open invitation case → Invitation address panel shows region→city→type→site→other places; Visa type/Project stay outside.
+- **Prevent**: Do not interleave invitation address keys into the core multi-column flow.
+- **Verify**: F5 Application tab on Çakylyk / invitation profile.

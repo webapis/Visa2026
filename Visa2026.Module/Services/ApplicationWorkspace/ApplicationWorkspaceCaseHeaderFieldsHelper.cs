@@ -68,12 +68,59 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         Urgency,
     ];
 
+    /// <summary>
+    /// Invitation address chain in dependency order (region → city → type → site → alternative).
+    /// </summary>
+    public static readonly string[] InvitationAddressGroupFieldKeys =
+    [
+        InvitationRegion,
+        InvitationCity,
+        InvitationAddressType,
+        InvitationLodging,
+        InvitationHotel,
+        InvitationHospital,
+        InvitationOtherSite,
+        InvitationPrivateHouse,
+        InvitationAlternativeAddress,
+    ];
+
     public static bool IsIdentityField(string? key) =>
         !string.IsNullOrEmpty(key)
         && (string.Equals(key, InstanceNumber, StringComparison.Ordinal)
             || string.Equals(key, InstanceDate, StringComparison.Ordinal)
             || string.Equals(key, ProcessNumber, StringComparison.Ordinal)
             || string.Equals(key, Urgency, StringComparison.Ordinal));
+
+    public static bool IsInvitationAddressGroupField(string? key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return false;
+
+        foreach (var groupKey in InvitationAddressGroupFieldKeys)
+        {
+            if (string.Equals(key, groupKey, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static List<ApplicationWorkspaceCaseHeaderField> OrderedInvitationAddressGroupFields(
+        IEnumerable<ApplicationWorkspaceCaseHeaderField> fields)
+    {
+        var map = fields
+            .Where(field => IsInvitationAddressGroupField(field.Key))
+            .GroupBy(field => field.Key, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var result = new List<ApplicationWorkspaceCaseHeaderField>(InvitationAddressGroupFieldKeys.Length);
+        foreach (var key in InvitationAddressGroupFieldKeys)
+        {
+            if (map.TryGetValue(key, out var field))
+                result.Add(field);
+        }
+
+        return result;
+    }
 
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
         ApplicationProfileInstance application,
