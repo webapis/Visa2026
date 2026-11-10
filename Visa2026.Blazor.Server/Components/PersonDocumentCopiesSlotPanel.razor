@@ -7,6 +7,7 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.PersonLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Blazor.Server.Services
 
 <div class="resminamalar-slot-panel person-document-copies-slot-panel document-copies-slot-panel @(_previewActive ? "resminamalar-slot-panel--preview" : string.Empty)">
     @if (!_previewActive)
@@ -36,7 +37,13 @@
     }
 
     <div class="resminamalar-slot-panel__body">
-        @if (!_previewActive)
+        @if (_uploadMode)
+        {
+            <PersonLinkedDocumentUploadPanel Request="BuildUploadRequest()"
+                                             CloseRequested="OnUploadCloseAsync"
+                                             Saved="OnUploadSavedAsync" />
+        }
+        else if (!_previewActive)
         {
             <div class="resminamalar-slot-panel__catalog">
                 <PersonDocumentCopiesComponent PersonId="_personId"
@@ -51,8 +58,17 @@
         {
             <div class="report-package-inline-preview app-item-doc-copies-preview">
                 <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
-                    <h3 class="app-item-doc-copies-preview__title">@Title</h3>
+                    <h3 class="app-item-doc-copies-preview__title">@_missingSectionLabel</h3>
                     <div class="app-item-doc-copies-preview__header-actions">
+                        @if (CanEnterUploadMode)
+                        {
+                            <button type="button"
+                                    class="visa-preview-drawer__btn"
+                                    title="@Msg("PersonDocumentCopies.Preview.Edit")"
+                                    @onclick="EnterUploadModeAsync">
+                                ✎
+                            </button>
+                        }
                         <button type="button"
                                 class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
                                 @onclick="ClosePanelAsync">
@@ -60,7 +76,25 @@
                         </button>
                     </div>
                 </div>
-                <p class="app-item-doc-copies-preview__state" style="padding:1rem">@Msg("PersonDossier.Copy.None")</p>
+                <div class="person-doc-copies-missing" role="status">
+                    <div class="person-doc-copies-missing__icon" aria-hidden="true">⚠</div>
+                    <h4 class="person-doc-copies-missing__title">@Msg("PersonDocumentCopies.Preview.MissingFile.Title")</h4>
+                    <p class="person-doc-copies-missing__body">@MissingBody</p>
+                    <div class="person-doc-copies-missing__actions">
+                        @if (CanEnterUploadMode)
+                        {
+                            <button type="button" class="os-btn os-btn--primary" @onclick="EnterUploadModeAsync">
+                                @Msg("PersonDocumentCopies.Preview.Edit")
+                            </button>
+                        }
+                        @if (_personId != Guid.Empty)
+                        {
+                            <button type="button" class="os-btn" @onclick="OpenPersonDetailAsync">
+                                @Msg("PersonDocumentCopies.Preview.MissingFile.OpenPerson")
+                            </button>
+                        }
+                    </div>
+                </div>
             </div>
         }
         else
@@ -68,6 +102,8 @@
             <PersonDocumentCopiesInlinePreview @ref="_inlinePreview"
                                                PersonId="_personId"
                                                UiCultureName="_uiCultureName"
+                                               ShowEditButton="CanEnterUploadMode"
+                                               EditRequested="EnterUploadModeAsync"
                                                PreviewClosed="OnPreviewClosedAsync" />
         }
     </div>
@@ -79,6 +115,7 @@
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private XafApplicationHolder AppHolder { get; set; } = null!;
 
     private Guid _personId;
     private PersonLinkedDocumentsSnapshot _snapshot = new();
@@ -86,6 +123,12 @@
     private bool _previewActive;
     private bool _previewOnlyMode;
     private bool _previewOnlyEmpty;
+    private bool _uploadMode;
+    private string _missingSectionId = string.Empty;
+    private string _missingSectionLabel = string.Empty;
+    private ApplicationProfileInstancePersonLinkKind? _missingLinkKind;
+    private Guid _missingSourceObjectId;
+    private bool _missingCanUpload;
     private PersonDocumentCopiesInlinePreview? _inlinePreview;
     private PersonDocumentCopiesInlinePreviewRequest? _pendingPreviewRequest;
     private EventCallback _refreshRequested;
@@ -136,6 +179,7 @@
             _previewActive = false;
             _previewOnlyMode = false;
             _previewOnlyEmpty = false;
+            _uploadMode = false;
             _pendingPreviewRequest = null;
             return;
         }
@@ -148,35 +192,71 @@
         {
             _boundOccupantKey = occupantKey;
             _previewOnlyMode = Request?.OpenPreviewOnly == true;
-            _previewActive = false;
+            _uploadMode = Request?.OpenUpload == true;
+            _previewActive = _uploadMode;
             _previewOnlyEmpty = false;
             _pendingPreviewRequest = null;
         }
 
-        _personId = personIds[0];
+        _personId = Request?.UploadPersonId is Guid up && up != Guid.Empty
+            ? up
+            : personIds[0];
         ReloadSnapshot();
+        CaptureUploadContextFromRequest();
+
+        if (_uploadMode)
+            return;
 
         if (_previewOnlyMode && _pendingPreviewRequest == null && !_previewActive)
         {
-            var record = string.IsNullOrWhiteSpace(Request?.FocusRecordKey)
-                ? null
-                : _snapshot.FindRecord(Request.FocusRecordKey.Trim());
-            if (record != null && record.Files.Any(file => file.HasContent))
+            var sectionId = Request?.FocusSectionId?.Trim();
+            if (!string.IsNullOrWhiteSpace(sectionId))
             {
                 _previewActive = true;
+                var displayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+                    ? PersonDocumentCopiesProfileSectionFilter.PersonSectionLabel(sectionId, _uiCultureName)
+                    : Request.FocusDisplayName!;
+                // Section preview always goes through the PDF merge (present scans + printable
+                // missing-page placeholders). Edit is only for Nusga/No-file (AllowEditFiles).
                 _previewOnlyEmpty = false;
+                _missingSectionId = string.Empty;
+                _missingSectionLabel = string.Empty;
+                _missingLinkKind = null;
                 _pendingPreviewRequest = new PersonDocumentCopiesInlinePreviewRequest
                 {
-                    RecordKey = record.RecordKey,
-                    DisplayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
-                        ? record.RecordLabel
-                        : Request.FocusDisplayName,
+                    DisplayName = displayName,
+                    SectionId = sectionId,
+                    PersonIds = personIds,
                 };
             }
             else
             {
-                _previewActive = true;
-                _previewOnlyEmpty = true;
+                var record = string.IsNullOrWhiteSpace(Request?.FocusRecordKey)
+                    ? null
+                    : _snapshot.FindRecord(Request.FocusRecordKey.Trim());
+                if (record != null && record.Files.Any(file => file.HasContent))
+                {
+                    _previewActive = true;
+                    _previewOnlyEmpty = false;
+                    _pendingPreviewRequest = new PersonDocumentCopiesInlinePreviewRequest
+                    {
+                        RecordKey = record.RecordKey,
+                        DisplayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+                            ? record.RecordLabel
+                            : Request.FocusDisplayName,
+                    };
+                }
+                else
+                {
+                    _previewActive = true;
+                    _previewOnlyEmpty = true;
+                    _pendingPreviewRequest = null;
+                    _missingSectionId = Request?.FocusRecordKey?.Trim() ?? string.Empty;
+                    _missingSectionLabel = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+                        ? _missingSectionId
+                        : Request!.FocusDisplayName!;
+                    CaptureUploadContextFromRequest();
+                }
             }
         }
     }
@@ -228,9 +308,10 @@
 
     private async Task OnPreviewClosedAsync()
     {
-        if (_previewOnlyMode)
+        if (_previewOnlyMode || _uploadMode)
         {
             _previewOnlyMode = false;
+            _uploadMode = false;
             _previewActive = false;
             _previewOnlyEmpty = false;
             await SlotService.CloseAsync();
@@ -242,6 +323,194 @@
     }
 
     private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
+
+    private string MissingBody =>
+        VisaUiMessages.FormatForCulture(
+            _uiCultureName,
+            "PersonDocumentCopies.Preview.MissingFile.Body",
+            string.IsNullOrWhiteSpace(_missingSectionLabel) ? _missingSectionId : _missingSectionLabel);
+
+    private bool SectionHasFiles(IReadOnlyList<Guid> personIds, string sectionId)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        foreach (var personId in personIds)
+        {
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (person == null)
+                continue;
+
+            var snapshot = PersonLinkedDocumentsResolver.Resolve(objectSpace, person);
+            var catalogSectionId = PersonDocumentCopiesProfileSectionFilter.NormalizeCatalogSectionId(sectionId);
+            var section = snapshot.Sections.FirstOrDefault(s =>
+                string.Equals(s.SectionId, catalogSectionId, StringComparison.OrdinalIgnoreCase));
+            if (section?.Records.Any(r => r.Files.Any(f => f.HasContent)) == true)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void ResolveMissingUploadTarget(
+        IReadOnlyList<Guid> personIds,
+        ApplicationProfileInstancePersonLinkKind? linkKind)
+    {
+        _missingCanUpload = false;
+        _missingSourceObjectId = Guid.Empty;
+        if (linkKind == null || !PersonLinkedDocumentUploadService.SupportsLinkKind(linkKind.Value))
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        foreach (var personId in personIds.Where(id => id != Guid.Empty))
+        {
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (person == null)
+                continue;
+
+            var sourceId = PersonLinkedDocumentUploadService.ResolvePreferredSourceObjectId(person, linkKind.Value);
+            if (sourceId is not Guid id || id == Guid.Empty)
+                continue;
+
+            _personId = personId;
+            _missingSourceObjectId = id;
+            _missingCanUpload = true;
+            return;
+        }
+    }
+
+    private bool CanEnterUploadMode =>
+        Request?.AllowEditFiles == true
+        && (_missingCanUpload || (Request?.UploadLinkKind != null && Request.UploadSourceObjectId != Guid.Empty))
+        && (_personId != Guid.Empty || Request?.UploadPersonId != Guid.Empty);
+
+    private void CaptureUploadContextFromRequest()
+    {
+        if (Request?.UploadLinkKind is { } kind
+            && Request.UploadSourceObjectId != Guid.Empty
+            && PersonLinkedDocumentUploadService.SupportsLinkKind(kind))
+        {
+            _missingLinkKind = kind;
+            _missingSourceObjectId = Request.UploadSourceObjectId;
+            _missingCanUpload = true;
+            if (Request.UploadPersonId != Guid.Empty)
+                _personId = Request.UploadPersonId;
+        }
+    }
+
+    private PersonDocumentCopiesSlotRequest BuildUploadRequest()
+    {
+        var kind = Request?.UploadLinkKind ?? _missingLinkKind;
+        var sourceId = Request?.UploadSourceObjectId != Guid.Empty
+            ? Request!.UploadSourceObjectId
+            : _missingSourceObjectId;
+        var personId = Request?.UploadPersonId != Guid.Empty ? Request!.UploadPersonId : _personId;
+        return new PersonDocumentCopiesSlotRequest
+        {
+            PersonIds = new[] { personId },
+            OpenUpload = true,
+            UploadPersonId = personId,
+            UploadLinkKind = kind,
+            UploadSourceObjectId = sourceId,
+            FocusDisplayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+                ? (string.IsNullOrWhiteSpace(_missingSectionLabel) ? _missingSectionId : _missingSectionLabel)
+                : Request!.FocusDisplayName,
+            FocusRecordKey = Request?.FocusRecordKey,
+        };
+    }
+
+    private Task EnterUploadModeAsync()
+    {
+        if (!CanEnterUploadMode)
+            return Task.CompletedTask;
+
+        _uploadMode = true;
+        _previewOnlyEmpty = false;
+        _previewActive = true;
+        _pendingPreviewRequest = null;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnUploadCloseAsync()
+    {
+        // Back to preview (or empty) without closing the slot.
+        _uploadMode = false;
+        ReloadSnapshot();
+        await ReturnToPreviewAfterEditAsync();
+    }
+
+    private async Task OnUploadSavedAsync()
+    {
+        _uploadMode = false;
+        ReloadSnapshot();
+        await ReturnToPreviewAfterEditAsync();
+    }
+
+    private async Task ReturnToPreviewAfterEditAsync()
+    {
+        _previewActive = true;
+        var recordKey = Request?.FocusRecordKey?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(recordKey)
+            && Request?.UploadLinkKind is { } kind
+            && Request.UploadSourceObjectId != Guid.Empty)
+        {
+            recordKey = PersonLinkedDocumentUploadService.BuildRecordKey(kind, Request.UploadSourceObjectId);
+        }
+
+        var displayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+            ? (string.IsNullOrWhiteSpace(_missingSectionLabel) ? recordKey : _missingSectionLabel)
+            : Request!.FocusDisplayName!;
+
+        var record = string.IsNullOrWhiteSpace(recordKey) ? null : _snapshot.FindRecord(recordKey);
+        if (record != null && record.Files.Any(f => f.HasContent))
+        {
+            _previewOnlyEmpty = false;
+            _pendingPreviewRequest = new PersonDocumentCopiesInlinePreviewRequest
+            {
+                RecordKey = record.RecordKey,
+                DisplayName = displayName,
+            };
+        }
+        else if (!string.IsNullOrWhiteSpace(Request?.FocusSectionId)
+                 && SectionHasFiles(Request.PersonIds, Request.FocusSectionId))
+        {
+            _previewOnlyEmpty = false;
+            _pendingPreviewRequest = new PersonDocumentCopiesInlinePreviewRequest
+            {
+                SectionId = Request.FocusSectionId,
+                PersonIds = Request.PersonIds,
+                DisplayName = displayName,
+            };
+        }
+        else
+        {
+            _previewOnlyEmpty = true;
+            _pendingPreviewRequest = null;
+            _missingSectionLabel = displayName;
+            CaptureUploadContextFromRequest();
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task OpenPersonDetailAsync()
+    {
+        if (_personId == Guid.Empty || AppHolder.Application == null)
+            return Task.CompletedTask;
+
+        var application = AppHolder.Application;
+        var objectSpace = application.CreateObjectSpace(typeof(Person));
+        var person = objectSpace.GetObjectByKey(typeof(Person), _personId);
+        if (person == null)
+        {
+            objectSpace.Dispose();
+            return Task.CompletedTask;
+        }
+
+        var detailView = application.CreateDetailView(objectSpace, person, isRoot: true);
+        application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(application.MainWindow, null));
+        return Task.CompletedTask;
+    }
 
     private async Task ClosePanelAsync()
     {

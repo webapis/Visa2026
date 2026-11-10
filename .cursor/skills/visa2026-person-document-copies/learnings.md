@@ -133,3 +133,91 @@ side by side - the `OwnerViewId` = `PersonDossierHost_DetailView` keeps the slot
 - **Fix**: Use `@(section.SectionLabel)` (explicit expression).
 - **Prevent**: Never write `@section.` in `.razor`; use `@(section.… )` or rename the loop variable.
 - **Cross-skill**: person-document-copies | person-dossier
+
+### 2026-11-09 — Passports merge: one passport page per person (no standalone+beside dupe)
+
+- **Symptom**: Multi-person Passports preview showed the same person's passport twice (standalone passport page plus visa-beside-passport page).
+- **Try**: Prefer current passport/visa; when nested visas with files exist, emit only visa records (beside layout already embeds passport); else emit passport alone.
+- **Test**: Module + Blazor Debug build succeeded; retest Passports with two checked people each having passport+visa.
+- **Root cause**: `EnumerateSectionRecordsForMerge` yielded both the passport and each nested visa; visa-beside pages already include the passport scan.
+- **Fix**: In `PersonDocumentCopyPdfMerger.EnumerateSectionRecordsForMerge` for section `Passports`: prefer `IsCurrent` passport/visa; if `visas.Count > 0` yield visas only, else yield passport.
+- **Prevent**: Never emit a standalone passport row when visa-beside pages will be built for that passport.
+- **Cross-skill**: person-document-copies | preview-slot | application-profile
+### 2026-11-10 — Suppress Spire evaluation warning on document-copies preview
+
+- **Symptom**: Passports / visa-beside preview pages showed red `Evaluation Warning : The document was created with Spire.PDF for .NET.` on every page.
+- **Try**: Stop using Spire `SaveToStream` for scan composition; build pages with PdfSharpCore (`XPdfForm` / `XImage`); TIFF fallback via System.Drawing → PNG. Optional `SPIRE_LICENSEKEY` at startup for remaining XFA Spire saves.
+- **Test**: Module Debug build succeeded; Blazor rebuild; F5 Passports preview for checked people — no red evaluation line.
+- **Root cause**: Unlicensed Spire stamps red evaluation text when saving composed PDFs (`TryWriteVisaBesidePassport` / print-layout / raster fallback).
+- **Fix**: `SupportingDocumentsPdfSharpHelper` PdfSharp-only saves; `SpirePdfLicense.ApplyFromEnvironment` in Blazor `Program`.
+- **Prevent**: Do not `SaveToStream` with Spire for document-copies scan pages; keep PdfSharpCore for those outputs.
+- **Cross-skill**: person-document-copies | document-copies | pdf-form-mapping | preview-slot
+### 2026-11-10 — Profile-required Document copies filter + missing preview upload
+
+- **Symptom**: People Preview document copies submenu listed every section with files, not only Application Profile Required person-related data; missing required scans had no clear upload path.
+- **Try**: Allow-list from `RequirePerson*`; submenu shows required ready rows + clickable No file rows; left-nav By-type catalog uses same family allow-list (empty required families kept); missing opens preview empty state with Upload via `LinkedRecordDetailOpenHelper.ShowNewEditor`.
+- **Test**: Module + Blazor Debug build succeeded.
+- **Root cause**: Menu built from resolver sections with files only; no profile filter; Spire/path unrelated.
+- **Fix**: `PersonDocumentCopiesProfileSectionFilter`; `BuildDocumentSectionMenuItems`; `ApplicationItemDocumentCopiesTypeCatalog.Build(..., allowedFamilyKeys)`; missing empty states on Person/AppItem slot panels.
+- **Prevent**: Do not list PersonDocuments/FamilyRelation/BorderZone/Salary/Travel on these filtered surfaces; keep Visa under Passports for Person submenu.
+- **Cross-skill**: person-document-copies | document-copies | application-profile | preview-slot
+
+### 2026-11-10 — People & Links: no No file chip; table Upload + slot multi-file uploader
+
+- **Symptom**: Preview document copies submenu showed **No file** even when some checked people still had scans; missing files had no row-scoped upload into the preview slot.
+- **Try**: Remove submenu No file chip always; empty preview title **File is not uploaded yet**; Upload only when linked Passport/Education/Position/Address(/Medical) BO exists; multi-file PDF/image attach to that BO in `#visa-preview-slot`; People & Links only.
+- **Test**: Module Debug build (Blazor via F5); retest People table Upload + empty section preview Upload.
+- **Root cause**: Section menu readiness chip was global/misleading; missing upload opened BO editor instead of file attach UI.
+- **Fix**: `PersonLinkedDocumentUploadService`; `PersonDocumentCopiesSlotRequest.OpenUpload*`; `PersonLinkedDocumentUploadPanel`; people-table Upload; `PersonDocumentCopiesSlotPanel` empty→upload.
+- **Prevent**: Do not show No file on People submenu; do not create owner BO from this upload flow.
+- **Cross-skill**: person-document-copies | preview-slot | application-profile
+
+### 2026-11-10 — Passports preview error after duplicate-scan guard
+
+- **Symptom**: People Preview document copies → Passports showed **Could not open document preview.**
+- **Try**: Guard that skipped visa files matching the passport FileDataId/bytes left no pages when passport bytes failed to load, or visa-beside failed with no passport fallback.
+- **Test**: F5 Passports for checked people (including issued/locked cases with Upload links).
+- **Root cause**: `sameAsPassport` + `continue` dropped the only renderable bytes; section merge had no passport fallback when visa path returned empty.
+- **Fix**: Only skip duplicate visa half when passport bytes are available; fall through to slice otherwise; passport-alone fallback; section merge falls back to passport record if visa build fails.
+- **Prevent**: Never `continue` on duplicate detection unless a passport-alone page can still be emitted.
+- **Cross-skill**: person-document-copies | preview-slot
+
+### 2026-11-10 — People submenu: Passports vs Passports & visas
+
+- **Symptom**: Officers needed passport-only preview and optional passport|visa beside without auto-guessing validity.
+- **Try**: Two People Preview document copies rows; left-nav Document copies out of scope (deprecated).
+- **Test**: F5 People submenu → Passports (passport pages only) and Passports & visas (each linked visa scan beside passport; passport only when no visa scan).
+- **Root cause**: Single Passports merge always preferred visa-beside when nested visas had files.
+- **Fix**: Menu key `PassportsWithVisas`; `IncludesNestedVisas` / `NormalizeCatalogSectionId`; Enumerate passport-only vs every linked visa with scan.
+- **Prevent**: Do not collapse the two People menu modes into one Passports section id.
+- **Cross-skill**: person-document-copies | preview-slot | application-profile
+
+### 2026-11-10 — People Upload panel: existing files, staged remove, stacked preview
+
+- **Symptom**: Upload opened an empty drop zone only; officers could not see/remove existing scans or preview without losing the editor.
+- **Try**: List BO Documents; stage removals until Save; Preview opens FileData in a stacked slot tab.
+- **Test**: F5 People Upload on a passport with scans — list, Preview (stack), Remove+Save, add files, stay on panel.
+- **Root cause**: Upload panel was add-only.
+- **Fix**: `ListDocuments`/`TryApplyChanges`; `FileDataPreviewSource`; `OpenFileAsync(..., stackWithCurrent)`; panel existing/new lists.
+- **Prevent**: Do not ReplaceStack when previewing from an open upload occupant.
+- **Cross-skill**: person-document-copies | preview-slot
+
+### 2026-11-10 — People Nusga preview + Edit + missing-scan badge
+
+- **Symptom**: Officers needed Copies/Nusga to open scan preview (not upload), Edit on preview, and a missing-scan warning under the link.
+- **Try**: Localized Nusga; open FocusRecordKey preview with upload context; same-slot Edit mode; No file badge when BO has zero scans.
+- **Test**: F5 People cell Nusga (with/without scans), Edit pencil, Save returns to preview; badge under Nusga.
+- **Root cause**: Former Upload link opened the editor immediately.
+- **Fix**: `OpenPeopleDocNusgaAsync`; SlotPanel EnterUploadMode/ReturnToPreview; InlinePreview Edit; `People.Nusga`/`People.NoFile`.
+- **Prevent**: Do not open OpenUpload from the people-table link; keep Edit as same-occupant switch.
+- **Cross-skill**: person-document-copies | preview-slot | application-profile
+
+### 2026-11-10 — Submenu missing copies = printable page (no Edit)
+
+- **Symptom**: Preview document copies submenu showed web empty + Edit when a section scan was missing; mixed people lost present scans when any person lacked files.
+- **Try**: Merge placeholder A4 pages into section PDF; gate Edit behind AllowEditFiles (Nusga only).
+- **Test**: F5 — check 3 people, open Passports; ready scans + missing page with Person + Document type; no Edit. Nusga/No file still Edit.
+- **Root cause**: Section path treated “no files” as empty UI and skipped people without scans in the merge.
+- **Fix**: `TryWriteMissingDocumentCopyPlaceholderPage`; section merge inserts placeholders; `AllowEditFiles`.
+- **Prevent**: Do not offer Edit on submenu section preview; keep placeholders inside the PDF stack.
+- **Cross-skill**: person-document-copies | preview-slot

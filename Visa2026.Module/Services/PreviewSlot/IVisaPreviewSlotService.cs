@@ -206,7 +206,13 @@ public sealed class PersonDocumentCopiesSlotRequest
     /// <summary>When set, the slot auto-opens preview for this person-copies record key.</summary>
     public string? FocusRecordKey { get; init; }
 
-    /// <summary>Display name for <see cref="FocusRecordKey"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
+    /// <summary>
+    /// When set with <see cref="OpenPreviewOnly"/>, merge every file-bearing record in this
+    /// catalog section for all <see cref="PersonIds"/> (e.g. Passports for checked people).
+    /// </summary>
+    public string? FocusSectionId { get; init; }
+
+    /// <summary>Display name for <see cref="FocusRecordKey"/> / <see cref="FocusSectionId"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
     public string? FocusDisplayName { get; init; }
 
     /// <summary>
@@ -214,6 +220,27 @@ public sealed class PersonDocumentCopiesSlotRequest
     /// Used when the officer clicks Preview on a dossier row.
     /// </summary>
     public bool OpenPreviewOnly { get; init; }
+
+    /// <summary>
+    /// When true, the slot shows the multi-file upload UI for an existing linked BO
+    /// (<see cref="UploadLinkKind"/> + <see cref="UploadSourceObjectId"/>) instead of catalog/preview.
+    /// </summary>
+    public bool OpenUpload { get; init; }
+
+    /// <summary>Person whose linked BO receives the uploaded files.</summary>
+    public Guid UploadPersonId { get; init; }
+
+    /// <summary>Link kind for the existing document owner (Passport, Education, …).</summary>
+    public ApplicationProfileInstancePersonLinkKind? UploadLinkKind { get; init; }
+
+    /// <summary>Existing owner BO id (Passport.ID, Education.ID, …). Required when <see cref="OpenUpload"/>.</summary>
+    public Guid UploadSourceObjectId { get; init; }
+
+    /// <summary>
+    /// When true, preview may switch into the same-slot file editor (People Nusga / No file).
+    /// Submenu section preview leaves this false — missing copies become printable placeholder pages.
+    /// </summary>
+    public bool AllowEditFiles { get; init; }
 }
 
 public sealed class HeaderDocumentCopiesSlotRequest
@@ -278,7 +305,7 @@ public interface IVisaPreviewSlotService
 
     Task OpenApprovalLegCatalogAsync(ApprovalLegCatalogSlotRequest? request = null, string? ownerViewId = null);
 
-    Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
+    Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null, bool stackWithCurrent = false);
 
     Task CloseAsync();
 
@@ -338,9 +365,15 @@ public sealed class ProgressLettersInlinePreviewRequest
 
 public sealed class PersonDocumentCopiesInlinePreviewRequest
 {
-    public required string RecordKey { get; init; }
+    /// <summary>Single-record preview (dossier / catalog row). Empty when <see cref="SectionId"/> is set.</summary>
+    public string RecordKey { get; init; } = string.Empty;
 
     public required string DisplayName { get; init; }
+
+    /// <summary>When set, merge that section for all <see cref="PersonIds"/> into one PDF.</summary>
+    public string? SectionId { get; init; }
+
+    public IReadOnlyList<Guid> PersonIds { get; init; } = Array.Empty<Guid>();
 }
 
 public sealed class HeaderDocumentCopiesInlinePreviewRequest

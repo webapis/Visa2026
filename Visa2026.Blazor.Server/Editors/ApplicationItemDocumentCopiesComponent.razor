@@ -42,13 +42,13 @@
                 }
                 @if (GroupByDocumentType)
                 {
-                    @foreach (var typeSection in ApplicationItemDocumentCopiesTypeCatalog.Build(PersonLines))
+                    @foreach (var typeSection in ApplicationItemDocumentCopiesTypeCatalog.Build(PersonLines, AllowedFamilyKeys))
                     {
                         var typeSectionId = ApplicationItemDocumentCopiesTypeCatalog.SectionId(typeSection.FamilyKey);
                         var typeCollapsed = IsSectionCollapsed(typeSectionId);
                         var typePreviewKey = ApplicationItemDocumentCopiesTypeCatalog.FamilyPreviewKey(typeSection.FamilyKey);
                         var typeLoading = IsPreviewLoading(typePreviewKey);
-                        var canPreviewType = typeSection.ReadyCount > 0 && !typeLoading;
+                        var canPreviewType = !typeLoading && !ApplicationItemDocumentCopiesTypeCatalog.IsApplicationFormPreview(null, typeSection.FamilyKey);
 
                         <section class="doc-copies-catalog__section @(typeCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
                                  aria-label="@TypeSectionTitle(typeSection.FamilyKey)">
@@ -66,6 +66,10 @@
                                 <div class="doc-copies-catalog__section-head-main">
                                     <span class="doc-copies-catalog__section-title">@TypeSectionTitle(typeSection.FamilyKey)</span>
                                     <span class="doc-copies-catalog__section-summary">@GetPersonSectionSummary(typeSection.ReadyCount, typeSection.TotalCount)</span>
+                                    @if (typeSection.ReadyCount == 0)
+                                    {
+                                        <span class="cw-people-action-menu__chip">@Msg("PersonDocumentCopies.Menu.NoFile")</span>
+                                    }
                                 </div>
 
                                 <div class="doc-copies-catalog__section-head-actions" @onclick:stopPropagation="true">
@@ -738,6 +742,7 @@
     [Parameter] public IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> PersonLines { get; set; } = Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
     [Parameter] public bool GroupByPerson { get; set; }
     [Parameter] public bool GroupByDocumentType { get; set; }
+    [Parameter] public IReadOnlyCollection<string>? AllowedFamilyKeys { get; set; }
     [Parameter] public EventCallback RefreshRequested { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
     [Parameter] public bool UseInlinePreview { get; set; }
@@ -788,7 +793,7 @@
         if (GroupByDocumentType)
         {
             var first = true;
-            foreach (var typeSection in ApplicationItemDocumentCopiesTypeCatalog.Build(PersonLines))
+            foreach (var typeSection in ApplicationItemDocumentCopiesTypeCatalog.Build(PersonLines, AllowedFamilyKeys))
             {
                 if (first)
                 {
@@ -1381,7 +1386,7 @@
     {
         if (GroupByDocumentType)
         {
-            foreach (var typeSection in ApplicationItemDocumentCopiesTypeCatalog.Build(PersonLines))
+            foreach (var typeSection in ApplicationItemDocumentCopiesTypeCatalog.Build(PersonLines, AllowedFamilyKeys))
                 yield return ApplicationItemDocumentCopiesTypeCatalog.SectionId(typeSection.FamilyKey);
         }
         else if (GroupByPerson)

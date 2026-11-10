@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,41 @@ public sealed class PersonDocumentFileAccess
             return false;
 
         if (!pdfMerger.TryBuildMergedPdf(personId, recordKey, record.RecordLabel, out var content, out var fileName, printLayout)
+            || content == null
+            || content.Length == 0
+            || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        result = new ApplicationItemDocumentFileResult
+        {
+            Content = content,
+            FileName = fileName,
+            ContentType = "application/pdf"
+        };
+        return true;
+    }
+
+    public bool TryGetMergedSectionPdf(
+        IReadOnlyList<Guid> personIds,
+        string sectionId,
+        string sectionLabel,
+        out ApplicationItemDocumentFileResult? result,
+        DocumentCopyPrintLayout? printLayout = null)
+    {
+        result = null;
+        if (personIds == null || personIds.Count == 0 || string.IsNullOrWhiteSpace(sectionId))
+            return false;
+
+        // Section merge applies DefaultFor per record (visas beside their passport).
+        if (!pdfMerger.TryBuildMergedSectionPdf(
+                personIds,
+                sectionId,
+                sectionLabel,
+                out var content,
+                out var fileName,
+                printLayout: null)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))

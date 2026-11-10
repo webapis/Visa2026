@@ -1,0 +1,353 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.PersonLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="report-package-inline-preview app-item-doc-copies-preview person-doc-upload">
+    <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
+        <h3 class="app-item-doc-copies-preview__title">@HeaderTitle</h3>
+        <div class="app-item-doc-copies-preview__header-actions">
+            <button type="button"
+                    class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                    @onclick="CloseAsync">
+                @CloseLabel
+            </button>
+        </div>
+    </div>
+
+    <div class="person-doc-upload__body">
+        @if (!string.IsNullOrWhiteSpace(_personLine))
+        {
+            <p class="person-doc-upload__person">@_personLine</p>
+        }
+        <p class="person-doc-upload__hint">@HintText</p>
+
+        <div class="person-doc-upload__existing">
+            <h4 class="person-doc-upload__subtitle">@ExistingTitle</h4>
+            @if (_existing.Count == 0)
+            {
+                <p class="person-doc-upload__empty" role="status">@NoFilesYet</p>
+            }
+            else
+            {
+                <ul class="person-doc-upload__files person-doc-upload__files--existing">
+                    @foreach (var file in VisibleExisting)
+                    {
+                        var row = file;
+                        <li class="@(IsMarkedRemoved(row.DocumentRowId) ? "is-removed" : null)">
+                            <span class="person-doc-upload__name" title="@row.FileName">@row.FileName</span>
+                            <span class="person-doc-upload__row-actions">
+                                @if (!IsMarkedRemoved(row.DocumentRowId) && row.HasContent && row.FileDataId != Guid.Empty)
+                                {
+                                    <button type="button"
+                                            class="ct-link person-doc-upload__preview"
+                                            disabled="@_busy"
+                                            @onclick="() => PreviewExistingAsync(row)">
+                                        @PreviewLabel
+                                    </button>
+                                }
+                                @if (IsMarkedRemoved(row.DocumentRowId))
+                                {
+                                    <button type="button"
+                                            class="ct-link"
+                                            disabled="@_busy"
+                                            @onclick="() => UndoRemove(row.DocumentRowId)">
+                                        @UndoRemoveLabel
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="person-doc-upload__remove"
+                                            disabled="@_busy"
+                                            title="@RemoveLabel"
+                                            @onclick="() => MarkRemove(row.DocumentRowId)">×</button>
+                                }
+                            </span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <label class="person-doc-upload__drop">
+            <InputFile OnChange="OnFilesSelectedAsync"
+                       accept="@Accept"
+                       multiple
+                       disabled="@_busy" />
+            <span>@DropLabel</span>
+        </label>
+
+        @if (_pending.Count > 0)
+        {
+            <h4 class="person-doc-upload__subtitle">@NewFilesTitle</h4>
+            <ul class="person-doc-upload__files">
+                @foreach (var file in _pending)
+                {
+                    <li>
+                        <span>@file.FileName</span>
+                        <button type="button"
+                                class="person-doc-upload__remove"
+                                disabled="@_busy"
+                                @onclick="() => RemovePending(file)">×</button>
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <p class="person-doc-upload__error" role="alert">@_error</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(_status))
+        {
+            <p class="person-doc-upload__status" role="status">@_status</p>
+        }
+
+        <div class="person-doc-upload__actions">
+            <button type="button"
+                    class="os-btn os-btn--primary"
+                    disabled="@(_busy || !HasPendingChanges || !CanSave)"
+                    @onclick="SaveAsync">
+                @(_busy ? SavingLabel : SaveLabel)
+            </button>
+            <button type="button" class="os-btn" disabled="@_busy" @onclick="CloseAsync">@CloseLabel</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PersonDocumentCopiesSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+    [Parameter] public EventCallback Saved { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+
+    private readonly List<PendingFile> _pending = new();
+    private readonly HashSet<Guid> _removedDocumentIds = new();
+    private List<PersonLinkedDocumentUploadService.ExistingDocument> _existing = new();
+    private string _uiCultureName = string.Empty;
+    private string _personLine = string.Empty;
+    private string? _error;
+    private string? _status;
+    private bool _busy;
+    private Guid _boundSourceId;
+    private ApplicationProfileInstancePersonLinkKind? _boundKind;
+
+    private const long MaxReadBytes = 20L * 1024 * 1024;
+    private static string Accept => string.Join(',', DocumentFileUploadConstraints.AllowedExtensions.OrderBy(x => x));
+
+    private string CloseLabel => Msg("PersonDocumentCopies.Action.Close");
+    private string DropLabel => Msg("PersonDocumentCopies.Upload.Drop");
+    private string HintText => Msg("PersonDocumentCopies.Upload.Hint");
+    private string SaveLabel => Msg("PersonDocumentCopies.Upload.Save");
+    private string SavingLabel => Msg("PersonDocumentCopies.Upload.Saving");
+    private string ExistingTitle => Msg("PersonDocumentCopies.Upload.ExistingTitle");
+    private string NewFilesTitle => Msg("PersonDocumentCopies.Upload.NewFilesTitle");
+    private string NoFilesYet => Msg("PersonDocumentCopies.Upload.NoFilesYet");
+    private string PreviewLabel => Msg("PersonDocumentCopies.Action.Preview");
+    private string RemoveLabel => Msg("PersonDocumentCopies.Upload.Remove");
+    private string UndoRemoveLabel => Msg("PersonDocumentCopies.Upload.UndoRemove");
+    private string HeaderTitle =>
+        string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+            ? Msg("PersonDocumentCopies.Upload.Title")
+            : Request!.FocusDisplayName!;
+
+    private IEnumerable<PersonLinkedDocumentUploadService.ExistingDocument> VisibleExisting => _existing;
+
+    private bool HasPendingChanges => _pending.Count > 0 || _removedDocumentIds.Count > 0;
+
+    private bool CanSave =>
+        Request?.OpenUpload == true
+        && Request.UploadLinkKind is { } kind
+        && PersonLinkedDocumentUploadService.SupportsLinkKind(kind)
+        && Request.UploadSourceObjectId != Guid.Empty;
+
+    protected override void OnInitialized() =>
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+
+    protected override void OnParametersSet()
+    {
+        _personLine = string.Empty;
+        var personId = Request?.UploadPersonId ?? Guid.Empty;
+        if (personId == Guid.Empty && Request?.PersonIds?.Count > 0)
+            personId = Request.PersonIds[0];
+
+        var kind = Request?.UploadLinkKind;
+        var sourceId = Request?.UploadSourceObjectId ?? Guid.Empty;
+        if (kind != _boundKind || sourceId != _boundSourceId)
+        {
+            _boundKind = kind;
+            _boundSourceId = sourceId;
+            _pending.Clear();
+            _removedDocumentIds.Clear();
+            _error = null;
+            _status = null;
+            ReloadExisting();
+        }
+
+        if (personId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (person == null)
+            return;
+
+        _personLine = string.IsNullOrWhiteSpace(person.PersonalNumber)
+            ? VisaUiMessages.FormatForCulture(_uiCultureName, "PersonDocumentCopies.Header.Person", person.FullName)
+            : VisaUiMessages.FormatForCulture(
+                _uiCultureName,
+                "PersonDocumentCopies.Header.PersonWithNumber",
+                person.FullName,
+                person.PersonalNumber);
+    }
+
+    private void ReloadExisting()
+    {
+        _existing = new List<PersonLinkedDocumentUploadService.ExistingDocument>();
+        if (_boundKind is not { } kind || _boundSourceId == Guid.Empty)
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        _existing = PersonLinkedDocumentUploadService.ListDocuments(objectSpace, kind, _boundSourceId).ToList();
+    }
+
+    private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
+
+    private bool IsMarkedRemoved(Guid documentRowId) => _removedDocumentIds.Contains(documentRowId);
+
+    private void MarkRemove(Guid documentRowId)
+    {
+        _removedDocumentIds.Add(documentRowId);
+        _error = null;
+        _status = null;
+    }
+
+    private void UndoRemove(Guid documentRowId)
+    {
+        _removedDocumentIds.Remove(documentRowId);
+        _error = null;
+        _status = null;
+    }
+
+    private async Task PreviewExistingAsync(PersonLinkedDocumentUploadService.ExistingDocument file)
+    {
+        if (file.FileDataId == Guid.Empty)
+            return;
+
+        await SlotService.OpenFileAsync(
+            FileDataPreviewSource.Key,
+            file.FileDataId,
+            ownerViewId: null,
+            stackWithCurrent: true);
+    }
+
+    private async Task OnFilesSelectedAsync(InputFileChangeEventArgs args)
+    {
+        if (_busy || args.FileCount == 0)
+            return;
+
+        _error = null;
+        _status = null;
+        foreach (var browserFile in args.GetMultipleFiles(20))
+        {
+            try
+            {
+                await using var stream = browserFile.OpenReadStream(MaxReadBytes);
+                using var memory = new MemoryStream();
+                await stream.CopyToAsync(memory);
+                var bytes = memory.ToArray();
+                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+                var validation = PersonLinkedDocumentUploadService.ValidateBytes(
+                    objectSpace, browserFile.Name, bytes);
+                if (!string.IsNullOrEmpty(validation))
+                {
+                    _error = validation;
+                    continue;
+                }
+
+                _pending.Add(new PendingFile(browserFile.Name, bytes));
+            }
+            catch (Exception ex)
+            {
+                _error = ex.Message;
+            }
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RemovePending(PendingFile file)
+    {
+        _pending.Remove(file);
+        _error = null;
+        _status = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (!CanSave || !HasPendingChanges || _busy)
+            return;
+
+        _busy = true;
+        _error = null;
+        _status = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+            var ok = PersonLinkedDocumentUploadService.TryApplyChanges(
+                objectSpace,
+                Request!.UploadLinkKind!.Value,
+                Request.UploadSourceObjectId,
+                _pending.Select(p => (p.FileName, p.Content)).ToList(),
+                _removedDocumentIds.ToList(),
+                out var added,
+                out var removed,
+                out var error);
+            if (!ok && added == 0 && removed == 0)
+            {
+                _error = string.IsNullOrWhiteSpace(error)
+                    ? Msg("PersonDocumentCopies.Upload.Failed")
+                    : error;
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(error) && (added > 0 || removed > 0))
+                _status = error;
+            else
+                _status = VisaUiMessages.FormatForCulture(
+                    _uiCultureName,
+                    "PersonDocumentCopies.Upload.SavedSummary",
+                    added,
+                    removed);
+
+            _pending.Clear();
+            _removedDocumentIds.Clear();
+            ReloadExisting();
+            if (Saved.HasDelegate)
+                await Saved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private Task CloseAsync() =>
+        CloseRequested.HasDelegate ? CloseRequested.InvokeAsync() : Task.CompletedTask;
+
+    private sealed record PendingFile(string FileName, byte[] Content);
+}

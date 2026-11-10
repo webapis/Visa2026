@@ -1,24 +1,95 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using Spire.Pdf.Graphics;
 
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// PdfSharpCore (MIT) merge and raster→PDF pages for batch ZIP supporting documents.
-/// PdfSharpCore <see cref="XImage"/> often fails on TIFF and some scans; Spire.PDF (already used for XFA forms)
-/// decodes those rasters as a fallback before the merged PDF is built with PdfSharpCore.
+/// PdfSharpCore (MIT) merge and raster→PDF pages for batch ZIP supporting documents and
+/// document-copies preview. PdfSharpCore <see cref="XImage"/> often fails on TIFF and some
+/// scans; those are decoded via System.Drawing and redrawn with PdfSharpCore so Spire.PDF is
+/// not used to save pages (unlicensed Spire stamps a red evaluation warning on every page).
 /// </summary>
 internal static class SupportingDocumentsPdfSharpHelper
 {
     private const double A4WidthPt = 595;
     private const double A4HeightPt = 842;
     private const double MarginPt = 20;
+
+    /// <summary>
+    /// One A4 printable page used in document-copies section preview when a person has no scan
+    /// for the requested document type. Drawn with PdfSharpCore (no Spire watermark).
+    /// </summary>
+    public static bool TryWriteMissingDocumentCopyPlaceholderPage(
+        Stream output,
+        string personName,
+        string documentTypeLabel,
+        string title,
+        string personCaption,
+        string documentTypeCaption)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+
+        title = string.IsNullOrWhiteSpace(title) ? "File is not uploaded yet" : title.Trim();
+        personCaption = string.IsNullOrWhiteSpace(personCaption) ? "Person" : personCaption.Trim();
+        documentTypeCaption = string.IsNullOrWhiteSpace(documentTypeCaption) ? "Document type" : documentTypeCaption.Trim();
+        personName = string.IsNullOrWhiteSpace(personName) ? "—" : personName.Trim();
+        documentTypeLabel = string.IsNullOrWhiteSpace(documentTypeLabel) ? "—" : documentTypeLabel.Trim();
+
+        try
+        {
+            using var doc = new PdfDocument();
+            PdfPage page = doc.AddPage();
+            page.Width = A4WidthPt;
+            page.Height = A4HeightPt;
+            using (var gfx = XGraphics.FromPdfPage(page))
+            {
+                var titleFont = new XFont("Arial", 20, XFontStyle.Bold);
+                var labelFont = new XFont("Arial", 12, XFontStyle.Regular);
+                var valueFont = new XFont("Arial", 14, XFontStyle.Bold);
+                var warnBrush = new XSolidBrush(XColor.FromArgb(245, 158, 11));
+                var textBrush = new XSolidBrush(XColor.FromArgb(30, 30, 30));
+                var mutedBrush = new XSolidBrush(XColor.FromArgb(90, 90, 90));
+
+                double y = 180;
+
+                // Warning triangle mark
+                gfx.DrawString("!", titleFont, warnBrush,
+                    new XRect(0, y, A4WidthPt, 28), XStringFormats.TopCenter);
+                y += 48;
+
+                gfx.DrawString(title, titleFont, textBrush,
+                    new XRect(MarginPt, y, A4WidthPt - 2 * MarginPt, 36), XStringFormats.TopCenter);
+                y += 64;
+
+                gfx.DrawString(personCaption, labelFont, mutedBrush,
+                    new XRect(MarginPt, y, A4WidthPt - 2 * MarginPt, 20), XStringFormats.TopCenter);
+                y += 22;
+                gfx.DrawString(personName, valueFont, textBrush,
+                    new XRect(MarginPt, y, A4WidthPt - 2 * MarginPt, 24), XStringFormats.TopCenter);
+                y += 40;
+
+                gfx.DrawString(documentTypeCaption, labelFont, mutedBrush,
+                    new XRect(MarginPt, y, A4WidthPt - 2 * MarginPt, 20), XStringFormats.TopCenter);
+                y += 22;
+                gfx.DrawString(documentTypeLabel, valueFont, textBrush,
+                    new XRect(MarginPt, y, A4WidthPt - 2 * MarginPt, 24), XStringFormats.TopCenter);
+            }
+
+            doc.Save(output, false);
+            return output.Length > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     /// <summary>Merges ordered PDF streams into <paramref name="output"/> (stream left open).</summary>
     public static void MergePdfStreams<TStream>(IReadOnlyList<TStream> orderedSources, Stream output)
@@ -124,24 +195,24 @@ internal static class SupportingDocumentsPdfSharpHelper
 
         try
         {
-            using var source = new Spire.Pdf.PdfDocument();
-            source.LoadFromBytes(pdfBytes);
-            if (source.Pages.Count == 0)
+            using var sourceStream = new MemoryStream(pdfBytes, writable: false);
+            using var form = XPdfForm.FromStream(sourceStream);
+            if (form.PageCount == 0)
                 return false;
 
-            using var dest = new Spire.Pdf.PdfDocument();
-            for (int i = 0; i < source.Pages.Count; i++)
+            using var dest = new PdfDocument();
+            for (int pageNumber = 1; pageNumber <= form.PageCount; pageNumber++)
             {
-                Spire.Pdf.PdfPageBase sourcePage = source.Pages[i];
-                var rect = layout.Measure(sourcePage.Size.Width, sourcePage.Size.Height);
-                Spire.Pdf.PdfPageBase page = dest.Pages.Add(
-                    new System.Drawing.SizeF((float)rect.PageWidthPt, (float)rect.PageHeightPt),
-                    new PdfMargins(0));
-                PdfTemplate template = sourcePage.CreateTemplate();
-                DrawSpireTemplate(page, template, rect);
+                form.PageNumber = pageNumber;
+                DocumentCopyDrawRect rect = layout.Measure(form.PointWidth, form.PointHeight);
+                PdfPage page = dest.AddPage();
+                page.Width = XUnit.FromPoint(rect.PageWidthPt);
+                page.Height = XUnit.FromPoint(rect.PageHeightPt);
+                using var gfx = XGraphics.FromPdfPage(page);
+                DrawPdfSharpImage(gfx, form, rect);
             }
 
-            dest.SaveToStream(output, Spire.Pdf.FileFormat.PDF);
+            dest.Save(output, false);
             return true;
         }
         catch (Exception ex)
@@ -156,6 +227,25 @@ internal static class SupportingDocumentsPdfSharpHelper
         double pageWidthPt = landscape ? A4HeightPt : A4WidthPt;
         double pageHeightPt = landscape ? A4WidthPt : A4HeightPt;
 
+        if (TryWriteFitA4RasterCore(imageBytes, output, pageWidthPt, pageHeightPt))
+            return true;
+
+        logger.LogDebug("ZIP packer: PdfSharpCore could not decode raster for merge slice; trying System.Drawing fallback.");
+        if (!TryDecodeRasterToPng(imageBytes, out var png))
+        {
+            logger.LogWarning("ZIP packer: could not rasterize attachment for PDF merge slice.");
+            return false;
+        }
+
+        return TryWriteFitA4RasterCore(png, output, pageWidthPt, pageHeightPt);
+    }
+
+    private static bool TryWriteFitA4RasterCore(
+        byte[] imageBytes,
+        Stream output,
+        double pageWidthPt,
+        double pageHeightPt)
+    {
         try
         {
             using var doc = new PdfDocument();
@@ -180,18 +270,36 @@ internal static class SupportingDocumentsPdfSharpHelper
             doc.Save(output, false);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            logger.LogDebug(ex, "ZIP packer: PdfSharpCore could not decode raster for merge slice; trying Spire fallback.");
+            return false;
         }
-
-        return TryWriteRasterPdfViaSpire(imageBytes, output, logger, landscape, DocumentCopyPrintLayout.FitA4);
     }
 
     private static bool TryWriteDocumentSizedRaster(
         byte[] imageBytes,
         Stream output,
         ILogger logger,
+        DocumentCopyPrintLayout layout)
+    {
+        if (TryWriteDocumentSizedRasterCore(imageBytes, output, layout))
+            return true;
+
+        logger.LogDebug(
+            "Document copies: PdfSharpCore could not place raster at {Size}; trying System.Drawing.",
+            layout.Size);
+        if (!TryDecodeRasterToPng(imageBytes, out var png))
+        {
+            logger.LogWarning("Document copies: could not place raster at {Size}.", layout.Size);
+            return false;
+        }
+
+        return TryWriteDocumentSizedRasterCore(png, output, layout);
+    }
+
+    private static bool TryWriteDocumentSizedRasterCore(
+        byte[] imageBytes,
+        Stream output,
         DocumentCopyPrintLayout layout)
     {
         try
@@ -210,12 +318,32 @@ internal static class SupportingDocumentsPdfSharpHelper
             doc.Save(output, false);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            logger.LogDebug(ex, "Document copies: PdfSharpCore could not place raster at {Size}; trying Spire.", layout.Size);
+            return false;
         }
+    }
 
-        return TryWriteRasterPdfViaSpire(imageBytes, output, logger, landscape: false, layout);
+    /// <summary>
+    /// Decode TIFF/odd rasters via System.Drawing into PNG that PdfSharpCore can place.
+    /// Avoids Spire.PDF SaveToStream, which stamps the evaluation warning when unlicensed.
+    /// </summary>
+    private static bool TryDecodeRasterToPng(byte[] imageBytes, out byte[] png)
+    {
+        png = Array.Empty<byte>();
+        try
+        {
+            using var input = new MemoryStream(imageBytes, writable: false);
+            using var image = Image.FromStream(input);
+            using var output = new MemoryStream();
+            image.Save(output, ImageFormat.Png);
+            png = output.ToArray();
+            return png.Length > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     private static void DrawPdfSharpImage(XGraphics gfx, XImage image, DocumentCopyDrawRect rect)
@@ -230,86 +358,6 @@ internal static class SupportingDocumentsPdfSharpHelper
         double drawH = quarterTurn ? rect.Width : rect.Height;
         gfx.DrawImage(image, -drawW / 2.0, -drawH / 2.0, drawW, drawH);
         gfx.Restore(state);
-    }
-
-    /// <summary>
-    /// Spire-backed raster→PDF (TIFF/JPEG/PNG and similar). Output is normal PDF suitable for <see cref="MergePdfStreams"/>.
-    /// </summary>
-    private static bool TryWriteRasterPdfViaSpire(
-        byte[] imageBytes,
-        Stream output,
-        ILogger logger,
-        bool landscape,
-        DocumentCopyPrintLayout layout)
-    {
-        try
-        {
-            using var imageStream = new MemoryStream(imageBytes, writable: false);
-            using var spireDoc = new Spire.Pdf.PdfDocument();
-            PdfImage img = PdfImage.FromStream(imageStream);
-
-            if (!layout.UsesDocumentSize)
-            {
-                Spire.Pdf.PdfPageBase fitPage = landscape
-                    ? spireDoc.Pages.Add(
-                        new System.Drawing.SizeF((float)A4HeightPt, (float)A4WidthPt),
-                        new PdfMargins((float)MarginPt))
-                    : spireDoc.Pages.Add(Spire.Pdf.PdfPageSize.A4, new PdfMargins((float)MarginPt));
-
-                float pw = fitPage.Canvas.ClientSize.Width;
-                float ph = fitPage.Canvas.ClientSize.Height;
-                float scale = Math.Min(pw / img.Width, ph / img.Height);
-                float dw = img.Width * scale;
-                float dh = img.Height * scale;
-                float x = (pw - dw) / 2f;
-                float y = (ph - dh) / 2f;
-                fitPage.Canvas.DrawImage(img, x, y, dw, dh);
-            }
-            else
-            {
-                DocumentCopyDrawRect rect = layout.Measure(img.Width, img.Height);
-                Spire.Pdf.PdfPageBase page = spireDoc.Pages.Add(
-                    new System.Drawing.SizeF((float)rect.PageWidthPt, (float)rect.PageHeightPt),
-                    new PdfMargins(0));
-                DrawSpireImage(page, img, rect);
-            }
-
-            spireDoc.SaveToStream(output, Spire.Pdf.FileFormat.PDF);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "ZIP packer: Spire could not rasterize attachment for PDF merge slice.");
-            return false;
-        }
-    }
-
-    private static void DrawSpireImage(Spire.Pdf.PdfPageBase page, PdfImage image, DocumentCopyDrawRect rect)
-    {
-        bool quarterTurn = rect.RotationDegrees % 180 != 0;
-        float drawW = (float)(quarterTurn ? rect.Height : rect.Width);
-        float drawH = (float)(quarterTurn ? rect.Width : rect.Height);
-        float centerX = (float)(rect.X + rect.Width / 2.0);
-        float centerY = (float)(rect.Y + rect.Height / 2.0);
-        PdfGraphicsState state = page.Canvas.Save();
-        page.Canvas.TranslateTransform(centerX, centerY);
-        page.Canvas.RotateTransform(rect.RotationDegrees);
-        page.Canvas.DrawImage(image, -drawW / 2f, -drawH / 2f, drawW, drawH);
-        page.Canvas.Restore(state);
-    }
-
-    private static void DrawSpireTemplate(Spire.Pdf.PdfPageBase page, PdfTemplate template, DocumentCopyDrawRect rect)
-    {
-        bool quarterTurn = rect.RotationDegrees % 180 != 0;
-        float drawW = (float)(quarterTurn ? rect.Height : rect.Width);
-        float drawH = (float)(quarterTurn ? rect.Width : rect.Height);
-        float centerX = (float)(rect.X + rect.Width / 2.0);
-        float centerY = (float)(rect.Y + rect.Height / 2.0);
-        PdfGraphicsState state = page.Canvas.Save();
-        page.Canvas.TranslateTransform(centerX, centerY);
-        page.Canvas.RotateTransform(rect.RotationDegrees);
-        page.Canvas.DrawTemplate(template, new System.Drawing.PointF(-drawW / 2f, -drawH / 2f), new System.Drawing.SizeF(drawW, drawH));
-        page.Canvas.Restore(state);
     }
 
     /// <summary>
@@ -342,15 +390,15 @@ internal static class SupportingDocumentsPdfSharpHelper
                 return false;
 
             bool portrait = layout.Orientation == DocumentCopyPageOrientation.Portrait;
-            float pageW = (float)(portrait ? DocumentCopyPrintLayout.A4WidthPt : DocumentCopyPrintLayout.A4HeightPt);
-            float pageH = (float)(portrait ? DocumentCopyPrintLayout.A4HeightPt : DocumentCopyPrintLayout.A4WidthPt);
+            double pageW = portrait ? DocumentCopyPrintLayout.A4WidthPt : DocumentCopyPrintLayout.A4HeightPt;
+            double pageH = portrait ? DocumentCopyPrintLayout.A4HeightPt : DocumentCopyPrintLayout.A4WidthPt;
 
-            using var dest = new Spire.Pdf.PdfDocument();
+            using var dest = new PdfDocument();
             for (int i = 0; i < visa.PageCount; i++)
             {
-                Spire.Pdf.PdfPageBase page = dest.Pages.Add(
-                    new System.Drawing.SizeF(pageW, pageH),
-                    new PdfMargins(0));
+                PdfPage page = dest.AddPage();
+                page.Width = XUnit.FromPoint(pageW);
+                page.Height = XUnit.FromPoint(pageH);
                 SplitHalves(
                     pageW,
                     pageH,
@@ -370,11 +418,12 @@ internal static class SupportingDocumentsPdfSharpHelper
                     leftX, leftY, leftW, leftH, passportW, passportH, layout.RotationDegrees);
                 DocumentCopyDrawRect right = FitInBox(
                     rightX, rightY, rightW, rightH, visaW, visaH, layout.RotationDegrees);
-                passport.Draw(page, 0, left);
-                visa.Draw(page, i, right);
+                using var gfx = XGraphics.FromPdfPage(page);
+                passport.Draw(gfx, 0, left);
+                visa.Draw(gfx, i, right);
             }
 
-            dest.SaveToStream(output, Spire.Pdf.FileFormat.PDF);
+            dest.Save(output, false);
             return true;
         }
         catch (Exception ex)
@@ -419,42 +468,66 @@ internal static class SupportingDocumentsPdfSharpHelper
         {
             if (DocumentFileUploadConstraints.IsLikelyPdf(bytes))
             {
-                var pdf = new Spire.Pdf.PdfDocument();
+                var stream = new MemoryStream(bytes, writable: false);
                 try
                 {
-                    pdf.LoadFromBytes(bytes);
-                    if (pdf.Pages.Count == 0)
+                    var form = XPdfForm.FromStream(stream);
+                    if (form.PageCount == 0)
                     {
-                        pdf.Dispose();
+                        form.Dispose();
+                        stream.Dispose();
                         return false;
                     }
 
-                    handle = ScanHandle.FromPdf(pdf);
+                    handle = ScanHandle.FromPdf(form, stream);
                     return true;
                 }
                 catch
                 {
-                    pdf.Dispose();
+                    stream.Dispose();
                     throw;
                 }
             }
 
-            var stream = new MemoryStream(bytes, writable: false);
-            try
-            {
-                PdfImage image = PdfImage.FromStream(stream);
-                handle = ScanHandle.FromImage(image, stream);
+            if (TryOpenRasterScan(bytes, out handle))
                 return true;
-            }
-            catch
-            {
-                stream.Dispose();
-                throw;
-            }
+
+            return false;
         }
         catch (Exception ex)
         {
             logger.LogDebug(ex, "Document copies: could not open a scan for the visa-and-passport page.");
+            return false;
+        }
+    }
+
+    private static bool TryOpenRasterScan(byte[] bytes, out ScanHandle handle)
+    {
+        handle = null!;
+        try
+        {
+            var stream = new MemoryStream(bytes, writable: false);
+            var image = XImage.FromStream(() => new MemoryStream(bytes, writable: false));
+            handle = ScanHandle.FromImage(image, stream);
+            return true;
+        }
+        catch (Exception)
+        {
+            // fall through to System.Drawing
+        }
+
+        if (!TryDecodeRasterToPng(bytes, out var png))
+            return false;
+
+        try
+        {
+            var stream = new MemoryStream(png, writable: false);
+            var image = XImage.FromStream(() => new MemoryStream(png, writable: false));
+            handle = ScanHandle.FromImage(image, stream);
+            return true;
+        }
+        catch (Exception)
+        {
             return false;
         }
     }
@@ -525,52 +598,54 @@ internal static class SupportingDocumentsPdfSharpHelper
 
     private sealed class ScanHandle : IDisposable
     {
-        private readonly Spire.Pdf.PdfDocument? pdf;
-        private readonly PdfImage? image;
-        private readonly MemoryStream? imageStream;
+        private readonly XPdfForm? form;
+        private readonly XImage? image;
+        private readonly MemoryStream? keepAlive;
 
-        private ScanHandle(Spire.Pdf.PdfDocument? pdf, PdfImage? image, MemoryStream? imageStream)
+        private ScanHandle(XPdfForm? form, XImage? image, MemoryStream? keepAlive)
         {
-            this.pdf = pdf;
+            this.form = form;
             this.image = image;
-            this.imageStream = imageStream;
+            this.keepAlive = keepAlive;
         }
 
-        public static ScanHandle FromPdf(Spire.Pdf.PdfDocument pdf) => new(pdf, null, null);
+        public static ScanHandle FromPdf(XPdfForm form, MemoryStream stream) => new(form, null, stream);
 
-        public static ScanHandle FromImage(PdfImage image, MemoryStream stream) => new(null, image, stream);
+        public static ScanHandle FromImage(XImage image, MemoryStream stream) => new(null, image, stream);
 
-        public int PageCount => pdf?.Pages.Count ?? (image == null ? 0 : 1);
+        public int PageCount => form?.PageCount ?? (image == null ? 0 : 1);
 
         public void NaturalSize(int pageIndex, out double width, out double height)
         {
             if (image != null)
             {
-                width = image.Width;
-                height = image.Height;
+                width = image.PixelWidth * 72.0 / Math.Max(image.HorizontalResolution, 1);
+                height = image.PixelHeight * 72.0 / Math.Max(image.VerticalResolution, 1);
                 return;
             }
 
-            System.Drawing.SizeF size = pdf!.Pages[pageIndex].Size;
-            width = size.Width;
-            height = size.Height;
+            form!.PageNumber = pageIndex + 1;
+            width = form.PointWidth;
+            height = form.PointHeight;
         }
 
-        public void Draw(Spire.Pdf.PdfPageBase page, int pageIndex, DocumentCopyDrawRect rect)
+        public void Draw(XGraphics gfx, int pageIndex, DocumentCopyDrawRect rect)
         {
             if (image != null)
             {
-                DrawSpireImage(page, image, rect);
+                DrawPdfSharpImage(gfx, image, rect);
                 return;
             }
 
-            DrawSpireTemplate(page, pdf!.Pages[pageIndex].CreateTemplate(), rect);
+            form!.PageNumber = pageIndex + 1;
+            DrawPdfSharpImage(gfx, form, rect);
         }
 
         public void Dispose()
         {
-            pdf?.Dispose();
-            imageStream?.Dispose();
+            form?.Dispose();
+            image?.Dispose();
+            keepAlive?.Dispose();
         }
     }
 }

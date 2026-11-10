@@ -132,10 +132,19 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
     }
 
     public static IReadOnlyList<ApplicationItemDocumentCopiesTypeSection> Build(
-        IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot>? lines)
+        IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot>? lines,
+        IReadOnlyCollection<string>? allowedFamilyKeys = null)
     {
         if (lines == null || lines.Count == 0)
             return Array.Empty<ApplicationItemDocumentCopiesTypeSection>();
+
+        HashSet<string>? allowed = null;
+        if (allowedFamilyKeys != null)
+        {
+            allowed = new HashSet<string>(
+                allowedFamilyKeys.Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+        }
 
         var rowsByFamily = new Dictionary<string, List<ApplicationItemDocumentCopiesTypeRow>>(StringComparer.Ordinal);
         foreach (var line in lines)
@@ -148,6 +157,8 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
             {
                 var family = FamilyKey(group.SlotKey);
                 if (family == null)
+                    continue;
+                if (allowed != null && !allowed.Contains(family))
                     continue;
 
                 if (!rowsByFamily.TryGetValue(family, out var rows))
@@ -169,12 +180,17 @@ public static class ApplicationItemDocumentCopiesTypeCatalog
             }
         }
 
-        var sections = FamilyOrder
-            .Where(family => !string.Equals(family, ApplicationFormFamily, StringComparison.Ordinal)
-                && rowsByFamily.ContainsKey(family))
+        IEnumerable<string> familyOrder = FamilyOrder
+            .Where(family => !string.Equals(family, ApplicationFormFamily, StringComparison.Ordinal));
+        familyOrder = allowed != null
+            ? familyOrder.Where(family => allowed.Contains(family))
+            : familyOrder.Where(family => rowsByFamily.ContainsKey(family));
+
+        var sections = familyOrder
             .Select(family =>
             {
-                var rows = rowsByFamily[family];
+                rowsByFamily.TryGetValue(family, out var rows);
+                rows ??= [];
                 return new ApplicationItemDocumentCopiesTypeSection
                 {
                     FamilyKey = family,

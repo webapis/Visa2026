@@ -10,6 +10,8 @@
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.PersonLinkedDocuments
+@using Visa2026.Blazor.Server.Services
 
 <div class="resminamalar-slot-panel document-copies-slot-panel @(_previewActive ? "resminamalar-slot-panel--preview" : string.Empty)">
     @if (!_previewActive)
@@ -45,6 +47,34 @@
                                                         OnInlinePreviewRequested="HandleInlinePreviewAsync" />
             </div>
         }
+        else if (_previewOnlyEmpty)
+        {
+            <div class="report-package-inline-preview app-item-doc-copies-preview">
+                <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
+                    <h3 class="app-item-doc-copies-preview__title">@_missingFamilyLabel</h3>
+                    <div class="app-item-doc-copies-preview__header-actions">
+                        <button type="button"
+                                class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                                @onclick="ClosePanelAsync">
+                            @CloseLabel
+                        </button>
+                    </div>
+                </div>
+                <div class="person-doc-copies-missing" role="status">
+                    <div class="person-doc-copies-missing__icon" aria-hidden="true">⚠</div>
+                    <h4 class="person-doc-copies-missing__title">@VisaUiMessages.Get("PersonDocumentCopies.Preview.MissingFile.Title", _uiCultureName)</h4>
+                    <p class="person-doc-copies-missing__body">@MissingFamilyBody</p>
+                    <div class="person-doc-copies-missing__actions">
+                        @if (_missingLinkKind != null && _lineIds.Count > 0)
+                        {
+                            <button type="button" class="os-btn os-btn--primary" @onclick="UploadMissingFamilyAsync">
+                                @VisaUiMessages.Get("PersonDocumentCopies.Preview.MissingFile.Upload", _uiCultureName)
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
         else
         {
             <DocumentCopiesInlinePreview @ref="_inlinePreview"
@@ -63,6 +93,7 @@
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private XafApplicationHolder AppHolder { get; set; } = null!;
 
     private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
     private Guid _applicationId;
@@ -71,6 +102,10 @@
     private string _uiCultureName = string.Empty;
     private bool _previewActive;
     private bool _previewOnlyMode;
+    private bool _previewOnlyEmpty;
+    private string _missingFamilyKey = string.Empty;
+    private string _missingFamilyLabel = string.Empty;
+    private ApplicationProfileInstancePersonLinkKind? _missingLinkKind;
     private DocumentCopiesInlinePreviewRequest? _pendingPreviewRequest;
     private DocumentCopiesInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
@@ -105,6 +140,9 @@
             return;
         }
 
+        _lineIds = lineIds;
+        ReloadMergedGroups();
+
         var occupantKey = VisaPreviewSlotOccupantKeys.ForDocumentCopies(Request);
 
         var stateKey = Request?.OpenPreviewOnly == true && !string.IsNullOrWhiteSpace(Request.FocusSlotKey)
@@ -118,17 +156,35 @@
             if (_previewOnlyMode)
             {
                 _previewActive = true;
-                _pendingPreviewRequest = BuildPreviewRequest(Request);
+                var focus = Request?.FocusSlotKey?.Trim() ?? string.Empty;
+                var display = string.IsNullOrWhiteSpace(Request?.FocusDisplayName) ? focus : Request!.FocusDisplayName!.Trim();
+                if (ApplicationItemDocumentCopiesTypeCatalog.TryParseFamilyPreviewKey(focus, out var familyKey)
+                    && !FamilyHasFiles(familyKey))
+                {
+                    _previewOnlyEmpty = true;
+                    _pendingPreviewRequest = null;
+                    _missingFamilyKey = familyKey;
+                    _missingFamilyLabel = string.IsNullOrWhiteSpace(display)
+                        ? ApplicationItemDocumentCopiesTypeCatalog.FamilyTitle(familyKey, _uiCultureName)
+                        : display;
+                    _missingLinkKind = PersonDocumentCopiesProfileSectionFilter.TryMapApplicationItemFamilyToLinkKind(familyKey);
+                }
+                else
+                {
+                    _previewOnlyEmpty = false;
+                    _missingFamilyKey = string.Empty;
+                    _missingFamilyLabel = string.Empty;
+                    _missingLinkKind = null;
+                    _pendingPreviewRequest = BuildPreviewRequest(Request);
+                }
             }
             else
             {
                 _previewActive = false;
+                _previewOnlyEmpty = false;
                 _pendingPreviewRequest = null;
             }
         }
-
-        _lineIds = lineIds;
-        ReloadMergedGroups();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -211,10 +267,59 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private string MissingFamilyBody =>
+        VisaUiMessages.FormatForCulture(
+            _uiCultureName,
+            "PersonDocumentCopies.Preview.MissingFile.Body",
+            string.IsNullOrWhiteSpace(_missingFamilyLabel) ? _missingFamilyKey : _missingFamilyLabel);
+
+    private bool FamilyHasFiles(string familyKey)
+    {
+        var files = ApplicationItemDocumentCopiesTypeCatalog.CollectFamilyFiles(
+            // lines not cached; use merged groups fallback via rebuild
+            RebuildLinesForFamilyCheck(),
+            familyKey);
+        return files.Any(f => f.File?.HasContent == true);
+    }
+
+    private IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> RebuildLinesForFamilyCheck()
+    {
+        if (_lineIds.Count == 0 || _applicationId == Guid.Empty)
+            return Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        if (!ApplicationRosterHelper.TryLoadSharedApplicationPeople(
+                objectSpace,
+                _lineIds,
+                _applicationId,
+                out var application,
+                out var people)
+            || application == null)
+        {
+            return Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
+        }
+
+        return ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
+    }
+
+    private Task UploadMissingFamilyAsync()
+    {
+        if (_missingLinkKind == null || _lineIds.Count == 0)
+            return Task.CompletedTask;
+
+        LinkedRecordDetailOpenHelper.ShowNewEditor(
+            AppHolder.Application,
+            _missingLinkKind.Value,
+            _lineIds[0],
+            onSaved: null);
+        return Task.CompletedTask;
+    }
+
     private async Task ClosePanelAsync()
     {
         _previewOnlyMode = false;
         _previewActive = false;
+        _previewOnlyEmpty = false;
         _pendingPreviewRequest = null;
         if (CloseRequested.HasDelegate)
             await CloseRequested.InvokeAsync();

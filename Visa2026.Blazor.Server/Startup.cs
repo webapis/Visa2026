@@ -326,6 +326,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceExclusionTemplatePreviewSource>();
             services.AddScoped<IReportDashboardExcelPreviewStore, ReportDashboardExcelPreviewStore>();
             services.AddScoped<IFilePreviewSource, ReportDashboardExcelFilePreviewSource>();
+            services.AddScoped<IFilePreviewSource, FileDataPreviewSource>();
             services.AddScoped<FilePreviewSourceRegistry>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IApprovalLegCatalogChangeNotifier, Visa2026.Module.Services.PreviewSlot.ApprovalLegCatalogChangeNotifier>();

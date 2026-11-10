@@ -90,12 +90,20 @@ public static class VisaPreviewSlotOccupantKeys
     public static string ForPersonDocumentCopies(PersonDocumentCopiesSlotRequest request)
     {
         var key = ForPersonDocumentCopies(request?.PersonIds ?? Array.Empty<Guid>());
+                if (request?.OpenUpload == true)
+        {
+            var kind = request.UploadLinkKind?.ToString() ?? "unknown";
+            return $"{key}|upload:{kind}:{request.UploadSourceObjectId:N}";
+        }
+
         if (request?.OpenPreviewOnly != true)
             return key;
 
-        var focus = string.IsNullOrWhiteSpace(request.FocusRecordKey)
-            ? "first"
-            : request.FocusRecordKey.Trim();
+        var focus = !string.IsNullOrWhiteSpace(request.FocusSectionId)
+            ? "section:" + request.FocusSectionId.Trim()
+            : string.IsNullOrWhiteSpace(request.FocusRecordKey)
+                ? "first"
+                : request.FocusRecordKey.Trim();
         return $"{key}|preview:{focus}";
     }
 

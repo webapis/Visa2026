@@ -264,3 +264,15 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 - **Fix**: `DocumentCopies.svg` (XAF ImageName), `document-copies-clip.svg` + `document-copies-brand.css`, `DocumentCopiesBrandMark`; wired toolbar actions (Person/Header/AppItem), ListView Copies pills, dossier button, slot titles.
 - **Prevent**: Do not reuse `BO_FileAttachment` for document-copies entry points; use `DocumentCopies` / `.doc-copies-brand*`.
 - **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot | person-dossier
+### 2026-11-10 — Spire evaluation warning on scan preview pages
+
+- **Symptom**: Document copies / Passports preview PDF showed Spire evaluation warning on each page.
+- **Fix**: `SupportingDocumentsPdfSharpHelper` composes passport/visa/raster slices with PdfSharpCore only (no Spire save). Shared by Person / Header / ApplicationItem mergers and ZIP packer.
+- **Prevent**: Do not reintroduce Spire `SaveToStream` for scan layout pages.
+- **Cross-skill**: document-copies | person-document-copies | preview-slot
+### 2026-11-10 — Left-nav Document copies filtered by RequirePerson*
+
+- **Ask**: Same profile Required person-related data filter as People submenu; missing → preview upload.
+- **Fix**: `AllowedFamilyKeys` on `ApplicationItemDocumentCopiesComponent`; `TypeCatalog.Build` includes empty required families; empty family preview empty-state + Upload on `DocumentCopiesSlotPanel`.
+- **Prevent**: Do not drop Application form from By-type catalog when filtering person-related families.
+- **Cross-skill**: document-copies | person-document-copies | application-profile

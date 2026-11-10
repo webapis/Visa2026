@@ -1,3 +1,12 @@
+## 2026-11-09 — Case workspace hybrid Overview (2014 feel)
+
+- **Need**: Officers used to VISA2014 want Case + people + per-type results together; Progress beside Case Summary; Document copies / Resminamalar preview from People like XAF report actions.
+- **Fix**: `OfficerShellCaseWorkspaceComponent` hybrid shell — level-1 Case Summary|Progress; level-2 People & links + one tab per issued type. Sidebar Overview/People/Progress/Result jump into that shell. People table checkboxes (header select-all) + toolbar/row Preview document copies / Preview Resminamalar → `#visa-preview-slot`. Removed Overview progress strip (Progress tab only). Left-nav Document copies / Resminamalar kept.
+- **Officer**: F5 case workspace; open Overview — Case Summary + People tabs; Progress sibling tab; check people and Preview document copies / Resminamalar on the right.
+- **Prevent**: Nested quotes in Razor `@onclick="() => SelectTab("x")"` break compile — use EventCallback methods. Blazor-only incremental build (`BuildProjectReferences=false`) when Module unchanged; stop running F5 app before build (DLL lock hangs MSBuild).
+- **Verify**: `dotnet build Visa2026.Blazor.Server.csproj -c Debug --no-restore -p:BuildProjectReferences=false` succeeded.
+
+
 ## 2026-11-07 — Join/Bagla DbUpdateConcurrencyException (requested locations)
 
 - **Symptom**: Production Bagla on Linked records: "expected to affect 1 row(s), but actually affected 0" (optimistic concurrency).

@@ -5663,6 +5663,48 @@
     "tk-TM": "Bu adam üçin resminama ýazgysy tapylmady.",
     "ru-RU": "Записи документов для этого лица не найдены."
   },
+  "PersonDocumentCopies.Preview.MissingFile.Title": {
+    "en": "File is not uploaded yet",
+    "tr-TR": "Dosya henüz yüklenmedi",
+    "tk-TM": "Faýl entek ýüklenmedi",
+    "ru-RU": "Файл ещё не загружен"
+  },
+  "PersonDocumentCopies.Preview.MissingFile.Person": {
+    "en": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Adam",
+    "ru-RU": "Лицо"
+  },
+  "PersonDocumentCopies.Preview.MissingFile.DocumentType": {
+    "en": "Document type",
+    "tr-TR": "Belge türü",
+    "tk-TM": "Resminama görnüşi",
+    "ru-RU": "Тип документа"
+  },
+  "PersonDocumentCopies.Preview.MissingFile.Body": {
+    "en": "This profile requires a {0} scan for the checked people.",
+    "tr-TR": "Bu profil, seçili kişiler için {0} taraması gerektirir.",
+    "tk-TM": "Bu profil saýlanan adamlar üçin {0} skanyny talap edýär.",
+    "ru-RU": "Этот профиль требует скан «{0}» для выбранных лиц."
+  },
+  "PersonDocumentCopies.Preview.MissingFile.Upload": {
+    "en": "Upload file",
+    "tr-TR": "Dosya yükle",
+    "tk-TM": "Faýl ýükle",
+    "ru-RU": "Загрузить файл"
+  },
+  "PersonDocumentCopies.Preview.MissingFile.OpenPerson": {
+    "en": "Open person detail",
+    "tr-TR": "Kişi ayrıntısını aç",
+    "tk-TM": "Adamyň jikme-jigini aç",
+    "ru-RU": "Открыть карточку лица"
+  },
+  "PersonDocumentCopies.Menu.NoFile": {
+    "en": "No file",
+    "tr-TR": "Dosya yok",
+    "tk-TM": "Faýl ýok",
+    "ru-RU": "Нет файла"
+  },
   "PersonDocumentCopies.Hint.NoFiles": {
     "en": "No scanned copies attached yet.",
     "tr-TR": "Henüz taranmış kopya eklenmedi.",

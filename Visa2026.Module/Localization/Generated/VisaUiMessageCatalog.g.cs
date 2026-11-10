@@ -10011,6 +10011,174 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu bölümdä häzirki ýazgy ýok; iň soňky ýazgy görkezilýär.",
             ["ru-RU"] = "В этом разделе нет текущей записи; показана последняя.",
         },
+        ["PersonDocumentCopies.Menu.NoFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No file",
+            ["tr-TR"] = "Dosya yok",
+            ["tk-TM"] = "Faýl ýok",
+            ["ru-RU"] = "Нет файла",
+        },
+        ["PersonDocumentCopies.Preview.MissingFile.Body"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This profile requires a {0} scan for the checked people.",
+            ["tr-TR"] = "Bu profil, seçili kişiler için {0} taraması gerektirir.",
+            ["tk-TM"] = "Bu profil saýlanan adamlar üçin {0} skanyny talap edýär.",
+            ["ru-RU"] = "Этот профиль требует скан «{0}» для выбранных лиц.",
+        },
+        ["PersonDocumentCopies.Preview.MissingFile.OpenPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open person detail",
+            ["tr-TR"] = "Kişi ayrıntısını aç",
+            ["tk-TM"] = "Adamyň jikme-jigini aç",
+            ["ru-RU"] = "Открыть карточку лица",
+        },
+        ["PersonDocumentCopies.Preview.MissingFile.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File is not uploaded yet",
+            ["tr-TR"] = "Dosya henüz yüklenmedi",
+            ["tk-TM"] = "Faýl entek ýüklenmedi",
+            ["ru-RU"] = "Файл ещё не загружен",
+        },
+        ["PersonDocumentCopies.Preview.MissingFile.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Adam",
+            ["ru-RU"] = "Лицо",
+        },
+        ["PersonDocumentCopies.Preview.MissingFile.DocumentType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document type",
+            ["tr-TR"] = "Belge türü",
+            ["tk-TM"] = "Resminama görnüşi",
+            ["ru-RU"] = "Тип документа",
+        },
+        ["PersonDocumentCopies.Preview.MissingFile.Upload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload file",
+            ["tr-TR"] = "Dosya yükle",
+            ["tk-TM"] = "Faýl ýükle",
+            ["ru-RU"] = "Загрузить файл",
+        },
+        ["PersonDocumentCopies.Upload.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload files",
+            ["tr-TR"] = "Dosya yükle",
+            ["tk-TM"] = "Faýl ýükle",
+            ["ru-RU"] = "Загрузить файлы",
+        },
+        ["PersonDocumentCopies.Upload.ExistingTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Existing files",
+            ["tr-TR"] = "Mevcut dosyalar",
+            ["tk-TM"] = "Bar bolan faýllar",
+            ["ru-RU"] = "Существующие файлы",
+        },
+        ["PersonDocumentCopies.Upload.NewFilesTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New files",
+            ["tr-TR"] = "Yeni dosyalar",
+            ["tk-TM"] = "Täze faýllar",
+            ["ru-RU"] = "Новые файлы",
+        },
+        ["PersonDocumentCopies.Upload.NoFilesYet"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No files yet",
+            ["tr-TR"] = "Henüz dosya yok",
+            ["tk-TM"] = "Entek faýl ýok",
+            ["ru-RU"] = "Файлов пока нет",
+        },
+        ["PersonDocumentCopies.Upload.Remove"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove",
+            ["tr-TR"] = "Kaldır",
+            ["tk-TM"] = "Aýyr",
+            ["ru-RU"] = "Удалить",
+        },
+        ["PersonDocumentCopies.Upload.UndoRemove"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Undo remove",
+            ["tr-TR"] = "Kaldırmayı geri al",
+            ["tk-TM"] = "Aýyrmagy yzyna al",
+            ["ru-RU"] = "Отменить удаление",
+        },
+        ["PersonDocumentCopies.Upload.SavedSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Saved: {0} added, {1} removed.",
+            ["tr-TR"] = "Kaydedildi: {0} eklendi, {1} kaldırıldı.",
+            ["tk-TM"] = "Ýazdyryldy: {0} goşuldy, {1} aýryldy.",
+            ["ru-RU"] = "Сохранено: добавлено {0}, удалено {1}.",
+        },
+        ["PersonDocumentCopies.Upload.Drop"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Drop PDF or image files here, or click to browse",
+            ["tr-TR"] = "PDF veya görüntü dosyalarını buraya bırakın ya da seçin",
+            ["tk-TM"] = "PDF ýa-da surat faýllaryny şu ýere taşlaň ýa-da saýlaň",
+            ["ru-RU"] = "Перетащите PDF или изображения сюда или выберите файлы",
+        },
+        ["PersonDocumentCopies.Upload.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Attach one or more PDF or image scans to this linked record.",
+            ["tr-TR"] = "Bu bağlı kayda bir veya daha fazla PDF/görüntü tarama ekleyin.",
+            ["tk-TM"] = "Bu baglanyşykly ýazga bir ýa-da birnäçe PDF/surat skanyny goşuň.",
+            ["ru-RU"] = "Прикрепите один или несколько PDF/сканов изображений к этой связанной записи.",
+        },
+        ["PersonDocumentCopies.Upload.Save"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save files",
+            ["tr-TR"] = "Dosyaları kaydet",
+            ["tk-TM"] = "Faýllary ýazdyr",
+            ["ru-RU"] = "Сохранить файлы",
+        },
+        ["PersonDocumentCopies.Upload.Saving"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Saving…",
+            ["tr-TR"] = "Kaydediliyor…",
+            ["tk-TM"] = "Ýazdyrylýar…",
+            ["ru-RU"] = "Сохранение…",
+        },
+        ["PersonDocumentCopies.Upload.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload failed.",
+            ["tr-TR"] = "Yükleme başarısız.",
+            ["tk-TM"] = "Ýükleme şowsuz.",
+            ["ru-RU"] = "Загрузка не удалась.",
+        },
+        ["PersonDocumentCopies.Upload.SavedCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} file(s) saved.",
+            ["tr-TR"] = "{0} dosya kaydedildi.",
+            ["tk-TM"] = "{0} faýl ýazdyryldy.",
+            ["ru-RU"] = "Сохранено файлов: {0}.",
+        },
+                ["PersonDocumentCopies.People.Nusga"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copies",
+            ["tr-TR"] = "Nüsha",
+            ["tk-TM"] = "Nusga",
+            ["ru-RU"] = "Копии",
+        },
+        ["PersonDocumentCopies.People.NoFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No file",
+            ["tr-TR"] = "Dosya yok",
+            ["tk-TM"] = "Faýl ýok",
+            ["ru-RU"] = "Нет файла",
+        },
+        ["PersonDocumentCopies.Preview.Edit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit files",
+            ["tr-TR"] = "Dosyaları düzenle",
+            ["tk-TM"] = "Faýllary düzelt",
+            ["ru-RU"] = "Изменить файлы",
+        },
+["PersonDocumentCopies.People.Upload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload",
+            ["tr-TR"] = "Yükle",
+            ["tk-TM"] = "Ýükle",
+            ["ru-RU"] = "Загрузить",
+        },
         ["PersonDocumentCopies.Hint.NoFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No scanned copies attached yet.",
@@ -10208,6 +10376,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Pasaportlar",
             ["tk-TM"] = "Pasportlar",
             ["ru-RU"] = "Паспорта",
+        },
+        ["PersonDocumentCopies.Section.PassportsWithVisas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passports & visas",
+            ["tr-TR"] = "Pasaportlar ve vizeler",
+            ["tk-TM"] = "Pasportlar we wizalar",
+            ["ru-RU"] = "Паспорта и визы",
         },
         ["PersonDocumentCopies.Section.PersonDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

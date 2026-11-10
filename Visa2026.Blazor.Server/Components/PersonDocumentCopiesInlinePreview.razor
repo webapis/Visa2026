@@ -21,6 +21,16 @@
     <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
         <h3 class="app-item-doc-copies-preview__title">@HeaderText</h3>
         <div class="app-item-doc-copies-preview__header-actions">
+            @if (ShowEditButton)
+            {
+                <button type="button"
+                        class="visa-preview-drawer__btn"
+                        title="@ActionEdit"
+                        disabled="@_loading"
+                        @onclick="OnEditClickedAsync">
+                    ✎
+                </button>
+            }
             @if (!_loading && _pdfDownloadContent != null)
             {
                 <DxButton Text="@ActionDownload"
@@ -77,6 +87,8 @@
 @code {
     [Parameter] public Guid PersonId { get; set; }
     [Parameter] public EventCallback PreviewClosed { get; set; }
+    [Parameter] public EventCallback EditRequested { get; set; }
+    [Parameter] public bool ShowEditButton { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
 
     [Inject] private PersonDocumentFileAccess FileAccess { get; set; } = null!;
@@ -94,6 +106,8 @@
     private byte[]? _pdfDownloadContent;
     private string _pdfDownloadFileName = string.Empty;
     private string _activeRecordKey = string.Empty;
+    private string _activeSectionId = string.Empty;
+    private IReadOnlyList<Guid> _activePersonIds = Array.Empty<Guid>();
     private string _previewHeaderLabel = string.Empty;
     private DocumentCopyPrintLayout _printLayout;
     private string _previewLoadingLabel = string.Empty;
@@ -116,6 +130,10 @@
     private string PreviewError => Msg("PersonDocumentCopies.Preview.Error");
     private string ActionClose => Msg("PersonDocumentCopies.Action.Close");
     private string ActionDownload => Msg("PersonDocumentCopies.Action.Download");
+    private string ActionEdit => Msg("PersonDocumentCopies.Preview.Edit");
+
+    private Task OnEditClickedAsync() =>
+        EditRequested.HasDelegate ? EditRequested.InvokeAsync() : Task.CompletedTask;
 
     private bool ShowPrintLayout => DocumentCopyPrintLayout.AppliesTo(_activeRecordKey);
 
@@ -124,14 +142,38 @@
 
     public async Task OpenAsync(PersonDocumentCopiesInlinePreviewRequest request)
     {
-        if (request == null || string.IsNullOrWhiteSpace(request.RecordKey))
+        if (request == null)
             return;
 
-        if (!string.Equals(_activeRecordKey, request.RecordKey, StringComparison.Ordinal))
-            _printLayout = DocumentCopyPrintLayout.DefaultFor(request.RecordKey);
+        var sectionId = request.SectionId?.Trim() ?? string.Empty;
+        var personIds = request.PersonIds?
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList() ?? [];
+        var isSectionPreview = !string.IsNullOrWhiteSpace(sectionId) && personIds.Count > 0;
+        if (!isSectionPreview && string.IsNullOrWhiteSpace(request.RecordKey))
+            return;
 
-        _activeRecordKey = request.RecordKey;
-        _invitationStates = ResolveInvitationStates(request.RecordKey);
+        if (isSectionPreview)
+        {
+            _activeSectionId = sectionId;
+            _activePersonIds = personIds;
+            _activeRecordKey = string.Empty;
+            // Section merge picks per-record layout (visa beside passport for Passports).
+            _printLayout = DocumentCopyPrintLayout.FitA4;
+            _invitationStates = Array.Empty<InvitationPreviewStates.PersonState>();
+        }
+        else
+        {
+            if (!string.Equals(_activeRecordKey, request.RecordKey, StringComparison.Ordinal))
+                _printLayout = DocumentCopyPrintLayout.DefaultFor(request.RecordKey);
+
+            _activeRecordKey = request.RecordKey;
+            _activeSectionId = string.Empty;
+            _activePersonIds = Array.Empty<Guid>();
+            _invitationStates = ResolveInvitationStates(request.RecordKey);
+        }
+
         _previewHeaderLabel = request.DisplayName;
         _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
         await LoadCurrentPdfAsync();
@@ -171,6 +213,22 @@
             _previewHeaderLabel,
             () =>
             {
+                if (!string.IsNullOrWhiteSpace(_activeSectionId) && _activePersonIds.Count > 0)
+                {
+                    if (!FileAccess.TryGetMergedSectionPdf(
+                            _activePersonIds,
+                            _activeSectionId,
+                            _previewHeaderLabel,
+                            out var sectionResult,
+                            _printLayout)
+                        || sectionResult == null)
+                    {
+                        return (null, null, PreviewError);
+                    }
+
+                    return (sectionResult.Content, sectionResult.FileName, null);
+                }
+
                 if (!FileAccess.TryGetMergedRecordPdf(PersonId, _activeRecordKey, out var result, _printLayout) || result == null)
                     return (null, null, PreviewError);
 

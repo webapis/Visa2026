@@ -1,4 +1,5 @@
 @using DevExpress.ExpressApp
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.DependencyInjection
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Localization
@@ -7,6 +8,7 @@
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PersonLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Localization
 
@@ -30,6 +32,7 @@
                                                         PersonLines="_personLines"
                                                         GroupByPerson="false"
                                                         GroupByDocumentType="true"
+                                                        AllowedFamilyKeys="_allowedFamilyKeys"
                                                         UiCultureName="_uiCultureName"
                                                         UseInlinePreview="true"
                                                         RefreshRequested="_refreshRequested"
@@ -53,6 +56,7 @@
     private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
     private IReadOnlyList<ApplicationItemLinkedDocumentsLineSnapshot> _personLines =
         Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
+    private IReadOnlyList<string> _allowedFamilyKeys = Array.Empty<string>();
     private IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> _mergedGroups =
         Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
     private string _uiCultureName = string.Empty;
@@ -87,6 +91,7 @@
         {
             _personLines = Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
             _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            _allowedFamilyKeys = Array.Empty<string>();
             return;
         }
 
@@ -101,12 +106,19 @@
         {
             _personLines = Array.Empty<ApplicationItemLinkedDocumentsLineSnapshot>();
             _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            _allowedFamilyKeys = Array.Empty<string>();
             return;
         }
 
         _lineIds = people.Select(p => p.ID).ToList();
         _personLines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, application, people);
         _mergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(_personLines);
+        var profile = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Include(item => item.ApplicationProfile)
+            .FirstOrDefault(item => item.ID == ApplicationProfileInstanceId)
+            ?.ApplicationProfile
+            ?? application.ApplicationProfile;
+        _allowedFamilyKeys = PersonDocumentCopiesProfileSectionFilter.GetAllowedApplicationItemFamilyKeys(profile);
     }
 
     private async Task ReloadMergedGroupsAsync()

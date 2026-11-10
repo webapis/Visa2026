@@ -72,7 +72,9 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         {
             Mode = VisaPreviewSlotMode.PersonDocumentCopies,
             Key = VisaPreviewSlotOccupantKeys.ForPersonDocumentCopies(request),
-            Title = "Person copies",
+            Title = request.OpenUpload
+                ? (string.IsNullOrWhiteSpace(request.FocusDisplayName) ? "Upload" : request.FocusDisplayName.Trim())
+                : "Person copies",
             OwnerViewId = NormalizeOwnerViewId(ownerViewId),
             PersonDocumentCopies = request,
         };
@@ -173,13 +175,13 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         return Task.CompletedTask;
     }
 
-    public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null)
+    public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null, bool stackWithCurrent = false)
     {
         if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)
             return Task.CompletedTask;
 
         var normalizedSource = sourceType.Trim();
-        ReplaceStack(new OccupantEntry
+        var entry = new OccupantEntry
         {
             Mode = VisaPreviewSlotMode.File,
             Key = VisaPreviewSlotOccupantKeys.ForFile(normalizedSource, objectId),
@@ -187,7 +189,13 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
             OwnerViewId = NormalizeOwnerViewId(ownerViewId),
             FileSourceType = normalizedSource,
             FileObjectId = objectId,
-        });
+        };
+
+        if (stackWithCurrent && _stack.Count > 0)
+            PushOrActivate(entry);
+        else
+            ReplaceStack(entry);
+
         return Task.CompletedTask;
     }
 

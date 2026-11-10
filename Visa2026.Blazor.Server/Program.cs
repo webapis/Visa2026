@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.Utils;
 using Visa2026.Blazor.Server.Services;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Blazor.Server
 {
@@ -21,6 +22,7 @@ namespace Visa2026.Blazor.Server
             // Must be set before any Npgsql type mapping runs (Demo PostgreSQL pilot).
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             EnsureDevExpressOfficeLicensePath();
+            SpirePdfLicense.ApplyFromEnvironment();
 
             if (ContainsArgument(args, "help") || ContainsArgument(args, "h"))
             {

@@ -1,6 +1,7 @@
 @using System.Globalization
 @using System.Collections.Generic
 @using System.Linq
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp
 @using Visa2026.Module.BusinessObjects
@@ -14,6 +15,8 @@
 @using Visa2026.Module.Editors
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.HeaderLinkedDocuments
+@using Visa2026.Module.Services.PersonLinkedDocuments
+@using Visa2026.Module.Services.WordReports
 @using Visa2026.Blazor.Server.Components
 @using Visa2026.Blazor.Server.Services
 @implements IDisposable
@@ -21,6 +24,7 @@
 @inject IVisaPreviewSlotService PreviewSlotService
 @inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
 @inject IApplicationWorkspacePersonUiActions WorkspaceActions
+@inject ApplicationWordReportPackageCatalogService WordReportCatalogService
 
 <div class="officer-case-workspace @(IsLoading || Snapshot == null ? "officer-case-workspace--loading" : null)">
     @if (IsLoading || Snapshot == null)
@@ -329,30 +333,10 @@
                     @switch (ActiveTab)
                     {
                         case "overview":
-                            @RenderOverview(view)
-                            break;
                         case "people":
-                            @RenderPeople(view)
-                            break;
                         case "result":
-                            @RenderApplicationResult(view)
-                            break;
                         case "progress":
-                            <OfficerShellCaseProgressTab @ref="_progressTab"
-                                                         ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                         View="view"
-                                                         StatusMessage="@ProgressStatusMessage"
-                                                         IsStatusError="@ProgressStatusIsError"
-                                                         CorrectionSavedRevision="@ProgressCorrectionRevision"
-                                                         SaveNotesRequested="@SaveProgressNotesRequested"
-                                                         UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
-                                                         AdvanceProgressRequested="OnAdvanceProgressRequested"
-                                                         SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
-                                                         RevertProgressRequested="@RevertProgressRequested"
-                                                         SaveStepRequested="@SaveStepRequested"
-                                                         ChangeFileRequested="@ChangeFileRequested"
-                                                         ShowRevertToHere="@ShowRevertToHere"
-                                                         PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+                            @RenderHybrid(view)
                             break;
                         case "documents":
                             <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
@@ -553,6 +537,19 @@
 
     private static bool HidesCaseRail(string tab) => tab is "overview" or "result" or "people";
 
+    private static bool IsHybridWorkspaceTab(string? tab) =>
+        tab is "overview" or "people" or "result" or "progress";
+
+    private bool IsHybridProgressPane =>
+        string.Equals(ActiveTab, "progress", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsHybridPeopleSubTab =>
+        string.Equals(ActiveTab, "people", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsHybridIssuedSubTab =>
+        string.Equals(ActiveTab, "result", StringComparison.OrdinalIgnoreCase);
+
     private static string ExcludedTitle(ApplicationWorkspaceCasePerson person) =>
         ApplicationListLinkedPeople.FormatExcludedTitle(person.ExcludedLetterNumber, person.ExcludedLetterDate);
 
@@ -577,6 +574,14 @@
     {
         PreviewSlotService.StateChanged -= OnPreviewSlotStateChanged;
         ReleaseCaseNav();
+        try
+        {
+            _ = JS.InvokeVoidAsync("visaPeopleActionMenu.unbindDismiss");
+        }
+        catch (InvalidOperationException) { }
+        catch (JSDisconnectedException) { }
+        _peopleMenuDotNetRef?.Dispose();
+        _peopleMenuDotNetRef = null;
     }
 
     private void ReleaseCaseNav()
@@ -753,6 +758,12 @@
             EnsureDocumentCopiesCompleteness(Snapshot.CaseView);
             if (_documentCopiesNavReady)
                 await InvokeAsync(StateHasChanged);
+        }
+
+        if (_peopleActionMenuNeedsPlace && (_peopleDocMenuOpen || _peopleResmiMenuOpen))
+        {
+            _peopleActionMenuNeedsPlace = false;
+            await PlaceOpenPeopleActionMenuAsync();
         }
 
         if (!_tabSwitching || !_tabContentReady)
@@ -1365,6 +1376,33 @@
             _selectedDocumentPersonIds.Add(personId);
     }
 
+    private void SetDocumentPersonSelected(Guid personId, bool selected)
+    {
+        if (personId == Guid.Empty)
+            return;
+
+        if (selected)
+            _selectedDocumentPersonIds.Add(personId);
+        else
+            _selectedDocumentPersonIds.Remove(personId);
+    }
+
+    private void OnSelectAllPeopleChanged(ChangeEventArgs e)
+    {
+        var selected = e.Value is bool flag
+            ? flag
+            : string.Equals(Convert.ToString(e.Value), "true", StringComparison.OrdinalIgnoreCase);
+        SetAllDocumentPeopleSelected(selected);
+    }
+
+    private void OnPersonRowCheckedChanged(Guid personId, ChangeEventArgs e)
+    {
+        var selected = e.Value is bool flag
+            ? flag
+            : string.Equals(Convert.ToString(e.Value), "true", StringComparison.OrdinalIgnoreCase);
+        SetDocumentPersonSelected(personId, selected);
+    }
+
     private void OnDocumentCopiesCatalogReloaded()
     {
         _documentCopiesCompletenessKey = null;
@@ -1898,6 +1936,90 @@
         </label>
     };
 
+    private RenderFragment RenderHybrid(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="cw-hybrid">
+            <div class="cw-hybrid__level1" role="tablist" aria-label="@Msg("ApplicationProfileInstance.Workspace.Overview")">
+                <button type="button"
+                        class="cw-hybrid__tab @(IsHybridProgressPane ? null : "is-active")"
+                        role="tab"
+                        aria-selected="@(!IsHybridProgressPane)"
+                        disabled="@_tabSwitching"
+                        @onclick="SelectHybridCaseSummaryAsync">
+                    @Msg("ApplicationProfileInstance.Picker.CaseSummary")
+                </button>
+                <button type="button"
+                        class="cw-hybrid__tab @(IsHybridProgressPane ? "is-active" : null)"
+                        role="tab"
+                        aria-selected="@IsHybridProgressPane"
+                        disabled="@_tabSwitching"
+                        title="@TabBlockedTitle("progress")"
+                        @onclick="SelectHybridProgressAsync">
+                    @Msg("ApplicationProfileInstance.Workspace.Progress")
+                </button>
+            </div>
+            @if (IsHybridProgressPane)
+            {
+                <OfficerShellCaseProgressTab @ref="_progressTab"
+                                             ApplicationProfileInstanceId="Snapshot!.ApplicationProfileInstanceId"
+                                             View="view"
+                                             StatusMessage="@ProgressStatusMessage"
+                                             IsStatusError="@ProgressStatusIsError"
+                                             CorrectionSavedRevision="@ProgressCorrectionRevision"
+                                             SaveNotesRequested="@SaveProgressNotesRequested"
+                                             UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
+                                             AdvanceProgressRequested="OnAdvanceProgressRequested"
+                                             SaveMigrationSubmissionRequested="@SaveMigrationSubmissionRequested"
+                                             RevertProgressRequested="@RevertProgressRequested"
+                                             SaveStepRequested="@SaveStepRequested"
+                                             ChangeFileRequested="@ChangeFileRequested"
+                                             ShowRevertToHere="@ShowRevertToHere"
+                                             PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId" />
+            }
+            else
+            {
+                @RenderOverview(view)
+                <div class="cw-hybrid__level2" role="tablist" aria-label="@Msg("ApplicationProfileInstance.Workspace.PeopleLinks")">
+                    <button type="button"
+                            class="cw-hybrid__tab cw-hybrid__tab--sub @(IsHybridPeopleSubTab ? "is-active" : null)"
+                            role="tab"
+                            aria-selected="@IsHybridPeopleSubTab"
+                            disabled="@_tabSwitching"
+                            @onclick="SelectHybridPeopleAsync">
+                        @Msg("ApplicationProfileInstance.Workspace.PeopleLinks")
+                    </button>
+                    @foreach (var tile in view.IssuedRecordTiles)
+                    {
+                        var issuedKey = tile.Key;
+                        var issuedActive = IsHybridIssuedSubTab
+                            && string.Equals(issuedKey, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
+                        var missing = ApplicationWorkspaceIssuedResultOverview.Missing(tile);
+                        <button type="button"
+                                class="cw-hybrid__tab cw-hybrid__tab--sub @(issuedActive ? "is-active" : null)"
+                                role="tab"
+                                aria-selected="@issuedActive"
+                                disabled="@_tabSwitching"
+                                @onclick="() => SelectHybridIssuedAsync(issuedKey)">
+                            @ApplicationProfileLocalization.IssuedRecordLabel(tile.Label)
+                            @if (!tile.IsOptional && missing > 0)
+                            {
+                                <span class="cw-hybrid__tab-badge">@missing</span>
+                            }
+                        </button>
+                    }
+                </div>
+                @if (IsHybridIssuedSubTab)
+                {
+                    @RenderApplicationResult(view)
+                }
+                else
+                {
+                    @RenderPeople(view)
+                }
+            }
+        </div>;
+    };
+
     private RenderFragment RenderOverview(ApplicationWorkspaceCaseView view) => __builder =>
     {
         <div class="cw-overview">
@@ -2031,107 +2153,19 @@
                     </div>
                 }
             </section>
-            <section class="cw-card">
-                <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ProgressTitle")</h2>
-                @{
-                    var overviewChips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(
-                        ApplicationWorkspaceIssuedResultListCoverage.FromIssuedTiles(view.IssuedRecordTiles));
-                    var overviewResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(view.ProgressSteps, overviewChips)
-                        ? overviewChips
-                        : Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
-                }
-                <div class="cw-prog-with-result">
-                <div class="cw-prog-stepper">
-                @for (var i = 0; i < view.ProgressSteps.Count; i++)
-                {
-                    var step = view.ProgressSteps[i];
-                    var currentIdx = view.ProgressSteps.ToList().FindIndex(s => s.State == "current");
-                    var badge = ApplicationWorkspaceListProgressSteps.Badge(step);
-                    var badgeCls = step.OutcomeKind switch
-                    {
-                        "issued" => "issued",
-                        "rejected" => "rejected",
-                        "cancelled" => "cancelled",
-                        "current" => "active",
-                        "pending" => "muted",
-                        _ => "ok",
-                    };
-                    var lineCls = i < view.ProgressSteps.Count - 1
-                        ? i < currentIdx ? "done" : i == currentIdx ? "current" : "pending"
-                        : null;
-                    var dotGlyph = step.OutcomeKind switch
-                    {
-                        "rejected" => "✕",
-                        "cancelled" => "–",
-                        "issued" or "ok" => "✓",
-                        _ => step.State == "done" ? "✓" : (i + 1).ToString(),
-                    };
-                        <div class="cw-prog-step cw-prog-step--@step.State cw-prog-step--tone-@step.OutcomeKind">
-                            <div class="cw-prog-step__track">
-                                <span class="cw-prog-step__dot">@dotGlyph</span>
-                                @if (lineCls != null)
-                                {
-                                    <span class="cw-prog-step__line cw-prog-step__line--@lineCls"></span>
-                                }
-                            </div>
-                            <div class="cw-prog-step__body">
-                                <strong>@ApplicationProfileLocalization.ProgressStepLabel(step.Label)</strong>
-                                @if (!string.IsNullOrWhiteSpace(badge))
-                                {
-                                    <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
-                                }
-                                @if (!string.IsNullOrWhiteSpace(step.Date))
-                                {
-                                    <span class="cw-prog-step__date">@step.Date</span>
-                                }
-                                @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
-                                {
-                                    <span class="cw-prog-step__result-number">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
-                                }
-                                @if ((step.Files.Count > 0 || !string.IsNullOrWhiteSpace(step.MinistryLetterFileName))
-                                    && (step.ProgressId ?? step.DateProgressId) is Guid fileProgressId)
-                                {
-                                    <span class="cw-prog-step__letter">
-                                        <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="Snapshot.ApplicationProfileInstanceId"
-                                                                           ProgressId="fileProgressId"
-                                                                           FileName="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
-                                                                           LinkText="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
-                                                                           PreviewAll="true"
-                                                                           OwnerViewId="@PreviewSlotOwnerViewId" />
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                    }
-                </div>
-                @if (overviewResultChips.Count > 0)
-                {
-                    <div class="lv-result-neck"></div>
-                    <div class="lv-result-stems">
-                    <div class="lv-result-chips lv-result-chips--stack" aria-label="@Msg("ApplicationProfileInstance.Workspace.ApplicationResult")">
-                        @foreach (var chip in overviewResultChips)
-                        {
-                            <span class="lv-result-chip lv-result-chip--@ApplicationWorkspaceIssuedResultListCoverage.Tone(chip)">
-                                @ApplicationWorkspaceIssuedResultListCoverage.Caption(chip)
-                                <strong>@ApplicationWorkspaceIssuedResultListCoverage.RatioText(chip)</strong>
-                            </span>
-                        }
-                    </div>
-                    </div>
-                }
-                </div>
-            </section>
             <p class="cw-foot">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProfileNamed", string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
         </div>;
     };
 
     private RenderFragment RenderApplicationResult(ApplicationWorkspaceCaseView view) => __builder =>
     {
-        var selectedIssued = view.IssuedRecordTiles.FirstOrDefault(t =>
-            string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase));
-        var resultTotals = ApplicationWorkspaceIssuedResultOverview.Sum(view.IssuedRecordTiles);
+        var issuedTiles = HybridIssuedTiles(view);
+        var selectedIssued = issuedTiles.FirstOrDefault(t =>
+            string.Equals(t.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase))
+            ?? issuedTiles.FirstOrDefault();
+        var resultTotals = ApplicationWorkspaceIssuedResultOverview.Sum(issuedTiles);
         <div class="cw-overview">
-            @if (view.IssuedRecordTiles.Count == 0)
+            @if (issuedTiles.Count == 0)
             {
                 <section class="cw-card">
                     <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ApplicationResult")</h2>
@@ -2156,7 +2190,7 @@
                     </span>
                 </header>
                 <div class="cw-result-types">
-                    @foreach (var tile in view.IssuedRecordTiles)
+                    @foreach (var tile in issuedTiles)
                     {
                         var missing = ApplicationWorkspaceIssuedResultOverview.Missing(tile);
                         var typePct = ApplicationWorkspaceIssuedResultOverview.CoveragePercent(tile);
@@ -2191,7 +2225,7 @@
                 <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ApplicationResultActions")</h2>
                 <p class="cw-card__sub">@Msg("ApplicationProfileInstance.Workspace.IssuedSub")</p>
                     <div class="cw-issued-row">
-                        @foreach (var tile in view.IssuedRecordTiles)
+                        @foreach (var tile in issuedTiles)
                         {
                             var isSelected = string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase);
                             var canAdd = ApplicationWorkspaceIssuedResultOverview.CanCreateMore(tile);
@@ -2451,14 +2485,112 @@
 
     private RenderFragment RenderPeople(ApplicationWorkspaceCaseView view) => __builder =>
     {
+        var selectablePeople = view.ActivePeople.Where(p => p.PersonId != Guid.Empty).ToList();
+        var allPeopleSelected = AreAllDocumentPeopleSelected(view);
+        var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
         <div class="ct-page">
             <h2 class="ct-page__title">People on this case</h2>
             @if (view.Chrome.ResolvedLinksLocked)
             {
                 <p class="cw-linked-lock" style="margin-bottom:12px">🔒 People and linked records are locked — this process is complete (issued, rejected, or cancelled).</p>
             }
-            <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+            <div class="os-toolbar cw-people-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                 <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || ShowPersonLinkReview || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
+                <span class="cw-people-toolbar__reports" role="group" aria-label="Preview reports">
+                    <div class="cw-people-action-menu">
+                        <button type="button"
+                                id="cw-people-doc-menu-btn"
+                                class="os-btn cw-people-toolbar__report @(_peopleDocMenuOpen ? "is-open" : null) @(_peopleDocMenuLoading ? "is-busy" : null)"
+                                disabled="@(!anyPeopleSelected)"
+                                aria-haspopup="menu"
+                                aria-expanded="@_peopleDocMenuOpen"
+                                title="Preview document copies for checked rows"
+                                @onclick="TogglePeopleDocumentCopiesMenuAsync">
+                            @if (_peopleDocMenuLoading)
+                            {
+                                <span class="cw-summary-spin" aria-hidden="true"></span>
+                            }
+                            📄 Preview document copies ▾
+                        </button>
+                        @if (_peopleDocMenuOpen)
+                        {
+                            <div id="cw-people-doc-menu-panel" class="cw-people-action-menu__panel" role="menu">
+                                @if (_peopleDocMenuLoading)
+                                {
+                                    <div class="cw-people-action-menu__loading" role="status" aria-live="polite">
+                                        <span class="cw-summary-spin" aria-hidden="true"></span>
+                                        <span>Loading document sections…</span>
+                                    </div>
+                                }
+                                else if (_peopleDocMenuItems.Count == 0)
+                                {
+                                    <div class="cw-people-action-menu__empty">No required document sections for this profile</div>
+                                }
+                                else
+                                {
+                                    @foreach (var item in _peopleDocMenuItems)
+                                    {
+                                        var menuItem = item;
+                                        <button type="button"
+                                                class="cw-people-action-menu__item"
+                                                role="menuitem"
+                                                @onclick="() => PreviewDocumentSectionAsync(menuItem)">
+                                            <span class="cw-people-action-menu__glyph" aria-hidden="true">📄</span>
+                                            <span class="cw-people-action-menu__label">@menuItem.Label</span>
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="cw-people-action-menu">
+                        <button type="button"
+                                id="cw-people-resmi-menu-btn"
+                                class="os-btn cw-people-toolbar__report @(_peopleResmiMenuOpen ? "is-open" : null) @(_peopleResmiMenuLoading ? "is-busy" : null)"
+                                disabled="@(!anyPeopleSelected)"
+                                aria-haspopup="menu"
+                                aria-expanded="@_peopleResmiMenuOpen"
+                                title="Preview Resminamalar for checked rows"
+                                @onclick="TogglePeopleResminamalarMenuAsync">
+                            @if (_peopleResmiMenuLoading)
+                            {
+                                <span class="cw-summary-spin" aria-hidden="true"></span>
+                            }
+                            📦 Preview Resminamalar ▾
+                        </button>
+                        @if (_peopleResmiMenuOpen)
+                        {
+                            <div id="cw-people-resmi-menu-panel" class="cw-people-action-menu__panel" role="menu">
+                                @if (_peopleResmiMenuLoading)
+                                {
+                                    <div class="cw-people-action-menu__loading" role="status" aria-live="polite">
+                                        <span class="cw-summary-spin" aria-hidden="true"></span>
+                                        <span>Loading Resminamalar…</span>
+                                    </div>
+                                }
+                                else if (_peopleResmiMenuItems.Count == 0)
+                                {
+                                    <div class="cw-people-action-menu__empty">No Resminamalar templates</div>
+                                }
+                                else
+                                {
+                                    @foreach (var item in _peopleResmiMenuItems)
+                                    {
+                                        var menuItem = item;
+                                        <button type="button"
+                                                class="cw-people-action-menu__item"
+                                                role="menuitem"
+                                                @onclick="() => PreviewResminamalarEntryAsync(menuItem)">
+                                            <span class="cw-people-action-menu__glyph" aria-hidden="true">📗</span>
+                                            <span class="cw-people-action-menu__label">@menuItem.Label</span>
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                </span>
+                <span class="cw-people-toolbar__hint">Checked rows only</span>
             </div>
             <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
                                                    Candidates="@PersonLinkCandidates"
@@ -2743,13 +2875,20 @@
                     <table class="os-table os-table--people-links">
                         <thead>
                             <tr>
+                                <th class="os-people-check-col">
+                                    <input type="checkbox"
+                                           checked="@allPeopleSelected"
+                                           disabled="@(selectablePeople.Count == 0)"
+                                           title="Select all"
+                                           aria-label="Select all people"
+                                           @onchange="OnSelectAllPeopleChanged" />
+                                </th>
                                 <th>Person</th>
                                 <th>Role</th>
                                 @foreach (var col in peopleLinkColumns)
                                 {
                                     <th>@ApplicationProfileLocalization.LinkedRecordLabel(col.Label)</th>
                                 }
-                                <th class="os-people-eye-col" title="@Msg("ApplicationProfileInstance.LinkReview.PreviewCopy")"></th>
                                 <th></th>
                                 <th></th>
                                 <th></th>
@@ -2758,8 +2897,19 @@
                         <tbody>
                             @foreach (var person in view.People)
                             {
+                                var personSelected = IsDocumentPersonSelected(person.PersonId);
                                 <tr class="os-person-row @(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.IsExcluded ? "is-excluded" : null)"
                                     @onclick="() => OpenPersonReviewFromRowAsync(person)">
+                                    <td class="os-people-check-col" @onclick:stopPropagation="true">
+                                        @if (!person.IsExcluded && person.PersonId != Guid.Empty)
+                                        {
+                                            <input type="checkbox"
+                                                   checked="@personSelected"
+                                                   title="Include in preview"
+                                                   aria-label="@($"Select {person.Name}")"
+                                                   @onchange="e => OnPersonRowCheckedChanged(person.PersonId, e)" />
+                                        }
+                                    </td>
                                     <td>
                                         <button type="button"
                                                 class="ct-link"
@@ -2779,22 +2929,33 @@
                                         var missing = record != null
                                             && ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked);
                                         <td>
-                                            <span class="os-people-doc @(missing ? "cw-cell-missing" : null)">@FormatPeopleLinkCell(person, record)</span>
+                                            <div class="os-people-doc-cell">
+                                                <span class="os-people-doc @(missing ? "cw-cell-missing" : null)">@FormatPeopleLinkCell(person, record)</span>
+                                                @if (TryGetPeopleDocUploadTarget(person, record, out var uploadKind, out var uploadSourceId))
+                                                {
+                                                    var kind = uploadKind;
+                                                    var sourceId = uploadSourceId;
+                                                    var missingScans = !PeopleDocHasScans(kind, sourceId);
+                                                    <button type="button"
+                                                            class="ct-link os-people-doc-nusga"
+                                                            @onclick:stopPropagation="true"
+                                                            @onclick="() => OpenPeopleDocNusgaAsync(person, kind, sourceId, record)">
+                                                        @Msg("PersonDocumentCopies.People.Nusga")
+                                                    </button>
+                                                    @if (missingScans)
+                                                    {
+                                                        <button type="button"
+                                                                class="os-people-doc-missing"
+                                                                @onclick:stopPropagation="true"
+                                                                @onclick="() => OpenPeopleDocNusgaAsync(person, kind, sourceId, record)">
+                                                            <span class="os-people-doc-missing__icon" aria-hidden="true">⚠</span>
+                                                            <span>@Msg("PersonDocumentCopies.People.NoFile")</span>
+                                                        </button>
+                                                    }
+                                                }
+                                            </div>
                                         </td>
                                     }
-                                    <td class="os-people-eye-col">
-                                        <button type="button"
-                                                class="os-link-review__eye @(person.PersonId == Guid.Empty ? "is-disabled" : null)"
-                                                disabled="@(person.PersonId == Guid.Empty)"
-                                                title="@Msg("ApplicationProfileInstance.LinkReview.PreviewCopy")"
-                                                aria-label="@Msg("ApplicationProfileInstance.LinkReview.PreviewCopy")"
-                                                @onclick:stopPropagation="true"
-                                                @onclick="() => PreviewPersonCopiesFromRowAsync(person)">
-                                            <svg class="os-link-review__eye-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path fill="currentColor" d="M12 5c-5 0-9.27 3.11-11 7.5C2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
-                                            </svg>
-                                        </button>
-                                    </td>
                                     <td>
                                         <button type="button"
                                                 class="os-btn os-btn--primary ct-btn-sm"
@@ -3049,12 +3210,21 @@
             await InvokeAsync(StateHasChanged);
             return;
         }
-        if (_caseSummaryEditing && !string.Equals(key, "overview", StringComparison.OrdinalIgnoreCase))
+        if (_caseSummaryEditing
+            && !string.Equals(key, "overview", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(key, "people", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(key, "result", StringComparison.OrdinalIgnoreCase))
             DiscardCaseSummaryDraft();
         if (!_keepBlockedSectionLabel)
             _blockedSectionLabel = null;
+        if (string.Equals(key, "result", StringComparison.OrdinalIgnoreCase))
+            EnsureHybridIssuedKey(Snapshot?.CaseView);
         if (string.Equals(key, ActiveTab, StringComparison.OrdinalIgnoreCase) && _tabContentReady)
+        {
+            if (string.Equals(key, "result", StringComparison.OrdinalIgnoreCase))
+                await InvokeAsync(StateHasChanged);
             return;
+        }
 
         _resminamalarCatalogPending = string.Equals(key, "resminamalar", StringComparison.OrdinalIgnoreCase);
         await PaintTabSwitchAsync(key);
@@ -3068,6 +3238,349 @@
             _tabContentReady = true;
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private void EnsureHybridIssuedKey(ApplicationWorkspaceCaseView? view)
+    {
+        var tiles = view?.IssuedRecordTiles;
+        if (tiles == null || tiles.Count == 0)
+        {
+            _selectedIssuedKey = null;
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_selectedIssuedKey)
+            && tiles.Any(tile => string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        var shortTile = tiles.FirstOrDefault(tile =>
+                !tile.IsOptional && ApplicationWorkspaceIssuedResultOverview.Missing(tile) > 0)
+            ?? tiles[0];
+        _selectedIssuedKey = shortTile.Key;
+    }
+
+    private Task SelectHybridCaseSummaryAsync() =>
+        SelectTab(IsHybridPeopleSubTab || IsHybridIssuedSubTab ? ActiveTab : "overview");
+
+    private Task SelectHybridProgressAsync() => SelectTab("progress");
+
+    private Task SelectHybridPeopleAsync() => SelectTab("people");
+
+    private async Task SelectHybridIssuedAsync(string issuedKey)
+    {
+        if (string.IsNullOrWhiteSpace(issuedKey) || _tabSwitching || _summarySaving)
+            return;
+
+        _selectedIssuedKey = issuedKey;
+        if (string.Equals(ActiveTab, "result", StringComparison.OrdinalIgnoreCase) && _tabContentReady)
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        await SelectTab("result");
+    }
+
+    private IReadOnlyList<ApplicationWorkspaceCaseIssuedTile> HybridIssuedTiles(ApplicationWorkspaceCaseView view)
+    {
+        if (!IsHybridIssuedSubTab || string.IsNullOrWhiteSpace(_selectedIssuedKey))
+            return view.IssuedRecordTiles;
+
+        return view.IssuedRecordTiles
+            .Where(tile => string.Equals(tile.Key, _selectedIssuedKey, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private void SetAllDocumentPeopleSelected(bool selected)
+    {
+        _selectedDocumentPersonIds.Clear();
+        if (!selected || Snapshot?.CaseView == null)
+            return;
+
+        foreach (var person in Snapshot.CaseView.ActivePeople.Where(p => p.PersonId != Guid.Empty))
+            _selectedDocumentPersonIds.Add(person.PersonId);
+    }
+
+    private bool AreAllDocumentPeopleSelected(ApplicationWorkspaceCaseView view)
+    {
+        var ids = view.ActivePeople.Where(p => p.PersonId != Guid.Empty).Select(p => p.PersonId).ToList();
+        return ids.Count > 0 && ids.All(IsDocumentPersonSelected);
+    }
+
+    private bool _peopleDocMenuOpen;
+    private bool _peopleResmiMenuOpen;
+    private bool _peopleDocMenuLoading;
+    private bool _peopleResmiMenuLoading;
+    private bool _peopleActionMenuNeedsPlace;
+    private List<PeoplePreviewMenuItem> _peopleDocMenuItems = [];
+    private List<PeoplePreviewMenuItem> _peopleResmiMenuItems = [];
+
+    private sealed record PeoplePreviewMenuItem(
+        string Key,
+        string Label,
+        Guid PersonId,
+        string? FocusRecordKey = null,
+        string? FocusEntryKey = null,
+        bool HasFiles = true);
+
+    private DotNetObjectReference<OfficerShellCaseWorkspaceComponent>? _peopleMenuDotNetRef;
+
+    private void EnsurePeopleMenuDotNetRef()
+    {
+        _peopleMenuDotNetRef ??= DotNetObjectReference.Create(this);
+    }
+
+    private void ClosePeoplePreviewMenus()
+    {
+        _peopleDocMenuOpen = false;
+        _peopleResmiMenuOpen = false;
+        _peopleDocMenuLoading = false;
+        _peopleResmiMenuLoading = false;
+        _peopleActionMenuNeedsPlace = false;
+        try
+        {
+            _ = JS.InvokeVoidAsync("visaPeopleActionMenu.unbindDismiss");
+        }
+        catch (InvalidOperationException) { }
+        catch (JSDisconnectedException) { }
+    }
+
+    [JSInvokable]
+    public Task ClosePeoplePreviewMenusFromJs()
+    {
+        if (!_peopleDocMenuOpen && !_peopleResmiMenuOpen)
+            return Task.CompletedTask;
+
+        ClosePeoplePreviewMenus();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private static string ToTitleCaseLabel(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return value ?? string.Empty;
+
+        var culture = CultureInfo.CurrentUICulture;
+        var normalized = value.Trim().Replace('_', ' ');
+        while (normalized.Contains("  ", StringComparison.Ordinal))
+            normalized = normalized.Replace("  ", " ", StringComparison.Ordinal);
+        return culture.TextInfo.ToTitleCase(normalized.ToLower(culture));
+    }
+
+    private async Task PlaceOpenPeopleActionMenuAsync()
+    {
+        try
+        {
+            EnsurePeopleMenuDotNetRef();
+            if (_peopleDocMenuOpen)
+            {
+                await JS.InvokeVoidAsync(
+                    "visaPeopleActionMenu.place",
+                    "cw-people-doc-menu-btn",
+                    "cw-people-doc-menu-panel");
+                await JS.InvokeVoidAsync(
+                    "visaPeopleActionMenu.bindDismiss",
+                    _peopleMenuDotNetRef,
+                    new[] { "cw-people-doc-menu-btn", "cw-people-doc-menu-panel" });
+            }
+            else if (_peopleResmiMenuOpen)
+            {
+                await JS.InvokeVoidAsync(
+                    "visaPeopleActionMenu.place",
+                    "cw-people-resmi-menu-btn",
+                    "cw-people-resmi-menu-panel");
+                await JS.InvokeVoidAsync(
+                    "visaPeopleActionMenu.bindDismiss",
+                    _peopleMenuDotNetRef,
+                    new[] { "cw-people-resmi-menu-btn", "cw-people-resmi-menu-panel" });
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (JSException)
+        {
+        }
+    }
+
+    private async Task TogglePeopleDocumentCopiesMenuAsync()
+    {
+        if (_peopleDocMenuOpen)
+        {
+            ClosePeoplePreviewMenus();
+            return;
+        }
+
+        _peopleResmiMenuOpen = false;
+        _peopleResmiMenuLoading = false;
+        _peopleDocMenuItems = [];
+        _peopleDocMenuOpen = true;
+        _peopleDocMenuLoading = true;
+        _peopleActionMenuNeedsPlace = true;
+        await InvokeAsync(StateHasChanged);
+
+        var personIds = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        try
+        {
+            _peopleDocMenuItems = await Task.Run(() => BuildDocumentSectionMenuItems(personIds));
+        }
+        finally
+        {
+            _peopleDocMenuLoading = false;
+            _peopleActionMenuNeedsPlace = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task TogglePeopleResminamalarMenuAsync()
+    {
+        if (_peopleResmiMenuOpen)
+        {
+            ClosePeoplePreviewMenus();
+            return;
+        }
+
+        _peopleDocMenuOpen = false;
+        _peopleDocMenuLoading = false;
+        _peopleResmiMenuItems = [];
+        _peopleResmiMenuOpen = true;
+        _peopleResmiMenuLoading = true;
+        _peopleActionMenuNeedsPlace = true;
+        await InvokeAsync(StateHasChanged);
+
+        var applicationId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        var personIds = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        try
+        {
+            _peopleResmiMenuItems = await Task.Run(() => BuildResminamalarMenuItems(applicationId, personIds));
+        }
+        finally
+        {
+            _peopleResmiMenuLoading = false;
+            _peopleActionMenuNeedsPlace = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private List<PeoplePreviewMenuItem> BuildDocumentSectionMenuItems(IReadOnlyList<Guid> personIds)
+    {
+        if (personIds.Count == 0)
+            return [];
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var applicationId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        var application = applicationId == Guid.Empty
+            ? null
+            : objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                .Include(item => item.ApplicationProfile)
+                .FirstOrDefault(item => item.ID == applicationId);
+        var profile = application?.ApplicationProfile;
+        var allowed = PersonDocumentCopiesProfileSectionFilter.GetAllowedPersonSectionIds(profile);
+        if (allowed.Count == 0)
+            return [];
+
+        var menuIds = PersonDocumentCopiesProfileSectionFilter.ExpandPeopleMenuSectionIds(allowed);
+        var hasFilesByCatalog = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var personId in personIds)
+        {
+            var person = objectSpace.GetObjectByKey<Person>(personId);
+            if (person == null)
+                continue;
+
+            var snapshot = PersonLinkedDocumentsResolver.Resolve(objectSpace, person);
+            foreach (var section in snapshot.Sections.OrderBy(s => s.SortOrder))
+            {
+                if (!PersonDocumentCopiesProfileSectionFilter.IsPersonSectionAllowed(profile, section.SectionId))
+                    continue;
+
+                if (section.Records.Any(r => r.Files.Any(f => f.HasContent)))
+                    hasFilesByCatalog.Add(section.SectionId);
+            }
+        }
+
+        var items = new List<PeoplePreviewMenuItem>();
+        foreach (var menuId in menuIds)
+        {
+            var catalogId = PersonDocumentCopiesProfileSectionFilter.NormalizeCatalogSectionId(menuId);
+            items.Add(new PeoplePreviewMenuItem(
+                menuId,
+                ToTitleCaseLabel(PersonDocumentCopiesProfileSectionFilter.PersonSectionLabel(menuId)),
+                personIds[0],
+                HasFiles: hasFilesByCatalog.Contains(catalogId)));
+        }
+
+        return items;
+    }
+
+    private List<PeoplePreviewMenuItem> BuildResminamalarMenuItems(Guid applicationId, IReadOnlyList<Guid> personIds)
+    {
+        if (applicationId == Guid.Empty || personIds.Count == 0)
+            return [];
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Include(item => item.ProjectContract)
+            .Include(item => item.MigrationService)
+            .Include(item => item.ApplicationProfile)
+            .FirstOrDefault(item => item.ID == applicationId);
+        if (application == null)
+            return [];
+
+        var catalog = WordReportCatalogService.Build(
+            objectSpace,
+            application,
+            WordReportGenerationContext.ForRosterPersons(personIds));
+
+        return catalog.Entries
+            .OrderBy(entry => entry.SortOrder)
+            .ThenBy(entry => entry.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .Select(entry => new PeoplePreviewMenuItem(
+                entry.EntryKey,
+                ToTitleCaseLabel(string.IsNullOrWhiteSpace(entry.DisplayName) ? entry.EntryKey : entry.DisplayName),
+                Guid.Empty,
+                FocusEntryKey: entry.EntryKey))
+            .ToList();
+    }
+
+    private async Task PreviewDocumentSectionAsync(PeoplePreviewMenuItem item)
+    {
+        var ids = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0 || string.IsNullOrWhiteSpace(item.Key))
+            return;
+
+        ClosePeoplePreviewMenus();
+        await PreviewSlotService.OpenPersonDocumentCopiesAsync(
+            new PersonDocumentCopiesSlotRequest
+            {
+                PersonIds = ids,
+                FocusSectionId = item.Key,
+                FocusDisplayName = item.Label,
+                OpenPreviewOnly = true,
+            },
+            PreviewSlotOwnerViewId);
+    }
+
+    private async Task PreviewResminamalarEntryAsync(PeoplePreviewMenuItem item)
+    {
+        if (Snapshot == null || string.IsNullOrWhiteSpace(item.FocusEntryKey))
+            return;
+
+        var ids = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0)
+            return;
+
+        ClosePeoplePreviewMenus();
+        await PreviewSlotService.OpenResminamalarAsync(
+            new ResminamalarSlotRequest
+            {
+                ApplicationProfileInstanceId = Snapshot.ApplicationProfileInstanceId,
+                Scope = WordReportPackageScope.RosterPerson,
+                ApplicationItemIds = ids,
+                FocusEntryKey = item.FocusEntryKey,
+                FocusDisplayName = item.Label,
+                OpenPreviewOnly = true,
+            },
+            PreviewSlotOwnerViewId);
     }
 
     private async Task PaintTabSwitchAsync(string key)
@@ -3755,6 +4268,77 @@
     /// Primary linked value(s) for the people table: first data column from the workspace tab,
     /// stacked for Last-N (plain text). Empty → —.
     /// </summary>
+    private bool TryGetPeopleDocUploadTarget(
+        ApplicationWorkspaceCasePerson person,
+        ApplicationWorkspaceCasePersonRecord? record,
+        out ApplicationProfileInstancePersonLinkKind kind,
+        out Guid sourceObjectId)
+    {
+        kind = default;
+        sourceObjectId = Guid.Empty;
+        if (person.PersonId == Guid.Empty || record == null || record.IsCaptionOnly || record.Count <= 0)
+            return false;
+
+        var mapped = PersonLinkedDocumentUploadService.TryMapPeopleRecordKey(record.Key);
+        if (mapped == null || !PersonLinkedDocumentUploadService.SupportsLinkKind(mapped.Value))
+            return false;
+
+        kind = mapped.Value;
+        var rows = PersonLinkedRows(person, record.Key);
+        sourceObjectId = rows.Select(r => r.LinkedObjectId).FirstOrDefault(id => id != Guid.Empty);
+        if (sourceObjectId == Guid.Empty)
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+            var loaded = objectSpace.GetObjectByKey<Person>(person.PersonId);
+            var resolved = loaded == null
+                ? null
+                : PersonLinkedDocumentUploadService.ResolvePreferredSourceObjectId(loaded, kind);
+            if (resolved is not Guid id || id == Guid.Empty)
+                return false;
+            sourceObjectId = id;
+        }
+
+        return true;
+    }
+
+    private bool PeopleDocHasScans(ApplicationProfileInstancePersonLinkKind kind, Guid sourceObjectId)
+    {
+        if (sourceObjectId == Guid.Empty)
+            return false;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        return PersonLinkedDocumentUploadService.HasScanFiles(objectSpace, kind, sourceObjectId);
+    }
+
+    private async Task OpenPeopleDocNusgaAsync(
+        ApplicationWorkspaceCasePerson person,
+        ApplicationProfileInstancePersonLinkKind kind,
+        Guid sourceObjectId,
+        ApplicationWorkspaceCasePersonRecord? record)
+    {
+        if (person.PersonId == Guid.Empty || sourceObjectId == Guid.Empty)
+            return;
+
+        ClosePeoplePreviewMenus();
+        await InvokeAsync(StateHasChanged);
+
+        var label = record == null
+            ? kind.ToString()
+            : ApplicationProfileLocalization.LinkedRecordLabel(record.Label);
+        var recordKey = PersonLinkedDocumentUploadService.BuildRecordKey(kind, sourceObjectId);
+        await PreviewSlotService.OpenPersonDocumentCopiesAsync(
+            new PersonDocumentCopiesSlotRequest
+            {
+                PersonIds = new[] { person.PersonId },
+                FocusRecordKey = recordKey,
+                FocusDisplayName = label,
+                OpenPreviewOnly = true,
+                AllowEditFiles = true,
+                UploadPersonId = person.PersonId,
+                UploadLinkKind = kind,
+                UploadSourceObjectId = sourceObjectId,
+            },
+            PreviewSlotOwnerViewId);
+    }
     private string FormatPeopleLinkCell(
         ApplicationWorkspaceCasePerson person,
         ApplicationWorkspaceCasePersonRecord? record)
@@ -3781,18 +4365,6 @@
         return lines.Count == 0 ? "—" : string.Join("\n", lines);
     }
 
-    private async Task PreviewPersonCopiesFromRowAsync(ApplicationWorkspaceCasePerson person)
-    {
-        if (person.PersonId == Guid.Empty)
-            return;
-
-        await PreviewSlotService.OpenPersonDocumentCopiesAsync(
-            new PersonDocumentCopiesSlotRequest
-            {
-                PersonIds = new[] { person.PersonId },
-            },
-            PreviewSlotOwnerViewId);
-    }
     private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];
 
     private static string Initials(string name)
