@@ -47,8 +47,12 @@
   border-radius: 999px;
   cursor: pointer;
 }
-.cw-head__delete:hover {
+.cw-head__delete:hover:not(:disabled) {
   background: var(--os-bad-soft);
+}
+.cw-head__delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .cw-head__error {
   margin: 10px 0 0;

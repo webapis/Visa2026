@@ -136,9 +136,13 @@
                     }
                     @if (DeleteCaseRequested.HasDelegate)
                     {
+                        var caseLocked = view.Chrome.ResolvedLinksLocked;
                         <button type="button"
                                 class="cw-head__delete"
-                                title="@Msg("ApplicationProfileInstance.Workspace.DeleteCase")"
+                                disabled="@caseLocked"
+                                title="@(caseLocked
+                                    ? Msg("ApplicationProfileInstance.Workspace.DeleteCaseWhenLocked")
+                                    : Msg("ApplicationProfileInstance.Workspace.DeleteCase"))"
                                 @onclick="DeleteCaseAsync">@Msg("ApplicationProfileInstance.Workspace.DeleteCase")</button>
                     }
                     <button type="button"
@@ -3350,6 +3354,19 @@
         }
 
         _resminamalarCatalogPending = false;
+
+        // Hybrid tabs already have Snapshot in memory — switch instantly (desktop feel).
+        if (IsHybridWorkspaceTab(key) && IsHybridWorkspaceTab(ActiveTab))
+        {
+            _tabSwitching = false;
+            _pendingTab = null;
+            _tabContentReady = true;
+            if (CaseTabChanged.HasDelegate)
+                await CaseTabChanged.InvokeAsync(key);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
         await PaintTabSwitchAsync(key);
         try
         {
@@ -4073,6 +4090,8 @@
     private async Task DeleteCaseAsync()
     {
         if (Snapshot == null || !DeleteCaseRequested.HasDelegate)
+            return;
+        if (Snapshot.CaseView?.Chrome.ResolvedLinksLocked == true)
             return;
 
         var number = Snapshot.CaseView?.Chrome.DisplayNumber;

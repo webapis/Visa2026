@@ -2019,6 +2019,12 @@
     "tk-TM": "{0} pozulsynmy? Yza alyp bolmaýar.",
     "ru-RU": "Удалить {0}? Это нельзя отменить."
   },
+  "ApplicationProfileInstance.Workspace.DeleteCaseWhenLocked": {
+    "en-US": "Cannot delete a locked case.",
+    "tr-TR": "Kilitli dava silinemez.",
+    "tk-TM": "Gulply ýüztutma öçürilip bilinmeýär.",
+    "ru-RU": "Заблокированное дело удалить нельзя."
+  },
   "ApplicationProfileInstance.Workspace.DeleteCase": {
     "en-US": "Delete case",
     "tr-TR": "Başvuruyu sil",

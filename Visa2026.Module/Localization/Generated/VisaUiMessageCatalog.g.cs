@@ -5390,6 +5390,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Poz",
             ["ru-RU"] = "Удалить",
         },
+                ["ApplicationProfileInstance.Workspace.DeleteCaseWhenLocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cannot delete a locked case.",
+            ["tr-TR"] = "Kilitli dava silinemez.",
+            ["tk-TM"] = "Gulply ýüztutma öçürilip bilinmeýär.",
+            ["ru-RU"] = "Заблокированное дело удалить нельзя.",
+        },
         ["ApplicationProfileInstance.Workspace.DeleteCase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Delete case",

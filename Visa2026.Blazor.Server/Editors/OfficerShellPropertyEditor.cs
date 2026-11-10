@@ -657,7 +657,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 ? VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Updated", person.FullName)
                 : VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Linked", person.FullName);
             model.PersonLinkStatusIsError = false;
-            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+            model.CaseTab = "people";
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
         }
         catch (Exception ex)
         {
@@ -1033,7 +1034,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (objectSpace.IsModified)
             objectSpace.CommitChanges();
 
-        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        model.CaseTab = "people";
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
     }
 
     private void SelectPersonRow(int rowIndex)
@@ -1080,7 +1082,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (objectSpace.IsModified)
             objectSpace.CommitChanges();
 
-        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
+        model.CaseTab = "people";
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
     }
 
     private async Task SaveProgressNotesAsync(string notes)

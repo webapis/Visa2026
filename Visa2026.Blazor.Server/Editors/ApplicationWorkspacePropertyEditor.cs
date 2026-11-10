@@ -219,8 +219,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
     private async Task UnlinkPersonAsync(Guid personId)
     {
+        var model = ComponentModel;
         var applicationId = ResolveApplicationProfileInstanceId();
-        if (_application == null || applicationId == Guid.Empty || personId == Guid.Empty)
+        if (model == null || _application == null || applicationId == Guid.Empty || personId == Guid.Empty)
             return;
 
         using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -233,7 +234,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (objectSpace.IsModified)
             objectSpace.CommitChanges();
 
-        await LoadAsync();
+        model.CaseTab = "people";
+        await LoadAsync(showLoading: false);
     }
 
     private Task SaveHeaderFieldAsync(ApplicationWorkspaceCaseHeaderFieldUpdate update) =>
@@ -643,8 +645,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
     private async Task RelinkPersonAsync(Guid personId)
     {
+        var model = ComponentModel;
         var applicationId = ResolveApplicationProfileInstanceId();
-        if (_application == null || applicationId == Guid.Empty || personId == Guid.Empty)
+        if (model == null || _application == null || applicationId == Guid.Empty || personId == Guid.Empty)
             return;
 
         using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
@@ -659,7 +662,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (objectSpace.IsModified)
             objectSpace.CommitChanges();
 
-        await LoadAsync();
+        model.CaseTab = "people";
+        await LoadAsync(showLoading: false);
     }
 
     private async Task SaveProgressNotesAsync(string notes)
@@ -1147,7 +1151,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 ? VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Updated", person.FullName)
                 : VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Linked", person.FullName);
             model.PersonLinkStatusIsError = false;
-            await LoadAsync();
+            model.CaseTab = "people";
+            await LoadAsync(showLoading: false);
         }
         catch (Exception ex)
         {
