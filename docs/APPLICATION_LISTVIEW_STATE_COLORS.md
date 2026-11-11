@@ -111,6 +111,29 @@ Existing date-bound BOs (`Visa`, `Passport`, `WorkPermitItem`) use a **severity 
 
 ---
 
+## 7a. Via Ministries — green when AS/CO received + required issuance
+
+On **ApplicationProfileInstance** ListViews for **Via Ministries** profiles, row tint can become **green** (`PROCESS_ISSUED` / SpringGreen) even though the last progress step is **AS/CO received** (`PROCESS_STARTED`, UI: CO belgisi alyndy) — there is no separate Issued step on that route.
+
+Green only when **both** hold:
+
+1. Latest progress state code is `PROCESS_STARTED`.
+2. Required Application Result chips are fully issued (`CoverageCount >= ExpectedCount`).
+
+| Profile pattern | Required for green |
+|---|---|
+| Invitation-getting | Invitation only (Issued visa chip ignored) |
+| Invitation + work permit | Invitation + Work permit (visa ignored) |
+| Visa-only (e.g. extension) | Issued visa |
+| Visa + work permit extension | Issued visa + Work permit |
+| Work permit only | Work permit |
+| Border zone | Border zone |
+| Work-location grant | Location permission |
+
+Rejection is optional and never blocks green. When the gate passes, green **replaces** the normal `PROCESS_STARTED` blue and any SLA row tint. Direct-migration / cancel / registration lists are out of scope.
+
+Implementation: `ApplicationWorkspaceViaMinistryIssuanceGreenGate` → `ApplicationListViewDisplayState.Resolve`.
+
 ## 7. Out of scope (this requirement)
 
 - SLA / overdue highlighting (`DaysElapsed` > max) — separate **follow-up** signal (notification, badge); may **add** border or icon later, not replace state color.
@@ -125,3 +148,4 @@ Existing date-bound BOs (`Visa`, `Passport`, `WorkPermitItem`) use a **severity 
 | Date | Note |
 |------|------|
 | 2026-06-01 | Requirement captured: Application ListView row color from latest `ApplicationProgress` / `CurrentState`; implementation explicitly deferred |
+| 2026-11-11 | Via Ministries: green when `PROCESS_STARTED` (AS/CO) and required Result issuance complete (visa ignored for invitation-getting) |

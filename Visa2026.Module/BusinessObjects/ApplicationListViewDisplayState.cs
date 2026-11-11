@@ -1,5 +1,6 @@
 using System;
 using Visa2026.Module.Appearance;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -30,6 +31,9 @@ internal readonly struct ApplicationListViewDisplayState
         var listRowAppearance = !string.IsNullOrEmpty(slaAppearanceCode)
             ? slaAppearanceCode
             : CompletedRouteAppearance(application, primaryStateCode);
+        // Via Ministries: AS/CO received + required Result docs → same green as Issued.
+        if (ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(application, primaryStateCode))
+            listRowAppearance = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
         var listRowCssClass = ResolveListRowCssClass(listRowAppearance);
 
         return new ApplicationListViewDisplayState
