@@ -627,7 +627,7 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -695,7 +695,7 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -970,9 +970,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1043,9 +1043,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1112,9 +1112,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1181,9 +1181,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1250,9 +1250,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1319,9 +1319,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1392,9 +1392,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1461,9 +1461,9 @@
       "ProgressSteps": [
         { "Key": "office", "Visible": true },
         { "Key": "ministry", "Visible": false },
-        { "Key": "migration-submitted", "Visible": true },
+        { "Key": "migration-submitted", "Visible": false },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1536,7 +1536,7 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -1609,7 +1609,7 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": false },
-        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-issued", "Visible": true },
         { "Key": "process-rejected", "Visible": false },
         { "Key": "process-cancelled", "Visible": false }
       ],
@@ -2437,7 +2437,7 @@
       "SignOff": "",
       "DefaultProjectContractCode": null,
       "ProgressSteps": [
-        { "Key": "office", "Visible": true },
+        { "Key": "office", "Visible": false },
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": false },
