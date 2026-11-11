@@ -2137,11 +2137,11 @@
         var headers = Panel.TableHeaders;
         var subReport = Panel.SubReport ?? SubReport;
         var label = IsVisaUzatilanlarTable
-            ? "uzatımlar"
+            ? (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "uzatımlar (FM)" : "uzatımlar")
             : IsVisaAktivTable
-            ? "aktiv personeller"
+            ? (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "aktiv aile üyeleri" : "aktiv personeller")
             : IsRegistrationOturumSayisiTable
-            ? "Oturum sayısı"
+            ? (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "Oturum sayısı (FM)" : "Oturum sayısı")
             : IsWorkPermitPersonelSayiTable
             ? "Personel sayi"
             : IsWorkPermitKotaTable
@@ -2162,11 +2162,17 @@
                 objectSpace, Category, subReport, label, headers, DisplayedRows, ShowInvitationChartColumn);
 
         var fileName = IsVisaUzatilanlarTable
-            ? (templateOnly ? "uzatımlar template" : "uzatımlar")
+            ? (templateOnly
+                ? (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "uzatımlar (FM) template" : "uzatımlar template")
+                : (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "uzatımlar (FM)" : "uzatımlar"))
             : IsVisaAktivTable
-            ? (templateOnly ? "aktiv personeller template" : "aktiv personeller")
+            ? (templateOnly
+                ? (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "aktiv aile üyeleri template" : "aktiv personeller template")
+                : (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "aktiv aile üyeleri" : "aktiv personeller"))
             : IsRegistrationOturumSayisiTable
-            ? (templateOnly ? "Oturum sayısı template" : "Oturum sayısı")
+            ? (templateOnly
+                ? (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "Oturum sayısı (FM) template" : "Oturum sayısı template")
+                : (ReportDashboardCatalog.IsFamilySubReport(subReport) ? "Oturum sayısı (FM)" : "Oturum sayısı"))
             : IsWorkPermitPersonelSayiTable
             ? (templateOnly ? "Personel sayi template" : "Personel sayi")
             : IsWorkPermitKotaTable
@@ -2275,11 +2281,11 @@
         && ReportDashboardCatalog.IsInvitationProcessLongSubReport(Panel?.SubReport ?? SubReport);
     private bool IsVisaUzatilanlarTable =>
         Category == ReportDashboardCategory.VisaExtension
-        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
+        && ReportDashboardCatalog.IsVisaUzatilanlarSubReport(Panel?.SubReport ?? SubReport);
 
     private bool IsVisaAktivTable =>
         Category == ReportDashboardCategory.VisaExtension
-        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase);
+        && ReportDashboardCatalog.IsVisaAktivPersonellerSubReport(Panel?.SubReport ?? SubReport);
 
     private bool IsCalismaSheetTable => IsWorkPermitCalismaTable || IsVisaAktivTable;
 
@@ -2297,7 +2303,7 @@
 
     private bool IsRegistrationOturumSayisiTable =>
         Category == ReportDashboardCategory.Registration
-        && string.Equals(Panel?.SubReport ?? SubReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase);
+        && ReportDashboardCatalog.IsRegistrationOturumSayisiSubReport(Panel?.SubReport ?? SubReport);
 
     private bool IsWorkPermitSanawTable =>
         Category == ReportDashboardCategory.WorkPermit

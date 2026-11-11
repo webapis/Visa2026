@@ -17,6 +17,19 @@ Date format: `YYYY-MM-DD`
 **Files:** `ReportDashboardHybridQueryService.cs`, `ReportDashboardMockQueryService.cs`
 
 
+## 2026-11-11 — FM Visa/Registration fill tables missed search+scroll
+
+**Ask:** Family Members subreports should be searchable and scrollable like Invitation employee fill tables.
+
+**Cause:** `IsVisaUzatilanlarTable` / `IsVisaAktivTable` / `IsRegistrationOturumSayisiTable` matched employee keys only, so FM tabs stayed on the paged preview (no table search, no `--fill` scroll). Invitation FM already used `IsInvitation*SubReport` helpers.
+
+**Now:** Those three flags use catalog `Is*SubReport` helpers that include FM keys, so FM Oturum / uzatımlar / aktiv aile get the same officer-fill search + scroll chrome.
+
+**Prevent:** When adding an FM twin of an officer-fill report, wire the Razor table flag through the catalog helper (not a hard-coded employee key).
+
+**Files:** `ReportDashboardComponent.razor`
+
+
 ## 2026-11-11 — Employees / Family Members parent tabs
 
 **Ask:** Separate sub-report chips under parent Employees / Family Members tabs on every category. Default Employees. Work Permit has no Family parent.
