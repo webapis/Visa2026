@@ -1,4 +1,10 @@
-html, body {
+html {
+    height: 100%;
+    /* Default UI type ~17px so rem-based labels/controls read larger than Compact 14px. */
+    font-size: 106.25%;
+}
+
+body {
     height: 100%;
 }
 

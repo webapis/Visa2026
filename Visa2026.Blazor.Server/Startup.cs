@@ -1,3 +1,5 @@
+using DevExpress.Blazor;
+using DevExpress.Blazor.Configuration;
 using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
@@ -78,6 +80,8 @@ namespace Visa2026.Blazor.Server
             services.AddVisaSentry(Configuration);
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
             VisaLocalization.ConfigureServices(services);
+            // Standard (Medium) is the default size for XAF labels/editors; Compact stays available in the theme switcher.
+            services.Configure<GlobalOptions>(options => options.SizeMode = SizeMode.Medium);
             services.AddXaf(Configuration, builder =>
             {
                 builder.UseApplication<Visa2026BlazorApplication>();

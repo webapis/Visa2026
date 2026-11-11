@@ -74,13 +74,13 @@
 }
 .os-search {
   border: 1px solid var(--os-line); border-radius: 8px;
-  padding: 8px 12px; min-width: 200px; background: #f8fafc; font-size: 0.88rem;
+  padding: 8px 12px; min-width: 200px; background: #f8fafc; font-size: 0.94rem;
 }
-.os-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.os-table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
 .os-table th, .os-table td { padding: 11px 14px; border-bottom: 1px solid #eef2f6; text-align: left; }
 .os-table th {
   background: #f8fafc; color: var(--os-muted);
-  font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em;
+  font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em;
 }
 .os-table tbody tr:hover td { background: #f8fbff; }
 .os-table tbody tr.is-clickable { cursor: pointer; }

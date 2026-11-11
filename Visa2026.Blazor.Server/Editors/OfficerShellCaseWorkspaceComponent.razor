@@ -2586,7 +2586,6 @@
         var allPeopleSelected = AreAllDocumentPeopleSelected(selectablePeople);
         var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
         <div class="ct-page">
-            <h2 class="ct-page__title ct-page__title--quiet">People on this case</h2>
             <div class="os-toolbar cw-people-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                 <DxTextBox @bind-Text="_peopleSearchText"
                            BindValueMode="BindValueMode.OnInput"
@@ -2993,7 +2992,11 @@
             {
                 var peopleLinkColumns = view.People.FirstOrDefault()?.Records
                     ?? Array.Empty<ApplicationWorkspaceCasePersonRecord>();
-                <div class="os-panel" style="margin-bottom:16px">
+                <div class="os-panel cw-people-links-panel">
+                    <div class="cw-people-links-scroll"
+                         tabindex="0"
+                         role="region"
+                         aria-label="@Msg("ApplicationProfileInstance.Workspace.PeopleLinks")">
                     <table class="os-table os-table--people-links">
                         <thead>
                             <tr>
@@ -3102,6 +3105,7 @@
                             }
                         </tbody>
                     </table>
+                    </div>
                 </div>
             }
         </div>;

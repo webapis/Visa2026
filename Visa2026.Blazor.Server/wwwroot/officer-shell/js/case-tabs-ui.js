@@ -85,7 +85,6 @@ export function renderCasePeopleTab(c) {
   }).join('');
 
   return `<div class="ct-page">
-    <h2 class="ct-page__title">People on this case</h2>
     <div class="os-panel" style="margin-bottom:16px"><table class="os-table">
       <thead><tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th></th></tr></thead>
       <tbody>${peopleRows}</tbody>
