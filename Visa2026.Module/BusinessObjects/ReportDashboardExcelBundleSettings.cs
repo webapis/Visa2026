@@ -17,9 +17,14 @@ namespace Visa2026.Module.BusinessObjects;
 public class ReportDashboardExcelBundleSettings : BaseObject
 {
     /// <summary>
-    /// JSON array of {"c":categoryInt,"k":"subReportKey"} in sheet order.
+    /// JSON array of {"c":categoryInt,"k":"subReportKey"} in sheet order (Employees bundle).
     /// </summary>
     public virtual string OrderJson { get; set; } = "[]";
+
+    /// <summary>
+    /// JSON array of {"c":categoryInt,"k":"subReportKey"} in sheet order (Family Members bundle).
+    /// </summary>
+    public virtual string FamilyOrderJson { get; set; } = "[]";
 
     public static ReportDashboardExcelBundleSettings? TryGetInstance(IObjectSpace objectSpace) =>
         OrganizationSingletonHelper.TryGet(

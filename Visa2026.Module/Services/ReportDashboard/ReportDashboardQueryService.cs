@@ -220,11 +220,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     && t.TemplateName.Contains(excelHint)
                     && t.TemplateOutputFormat == TemplateOutputFormat.Excel);
 
-        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
+        if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType)
+            && !ReportDashboardCatalog.IsFamilySubReport(subReport))
             return EmptyPanel(personType, category, subReport, excelHint, excelConfigured);
 
-        // Invitation / Work Permit / Registration / Visa Extension: All → Employees.
-        personType = ReportDashboardCatalog.ResolveEffectivePersonType(category, personType);
+        // FM keys → FamilyMembers; employee keys on those categories → Employees.
+        personType = ReportDashboardCatalog.ResolveEffectivePersonType(category, personType, subReport);
         var role = ReportDashboardCatalog.TryGetPersonRole(personType);
         var validVisaPersonIds = ResolveValidVisaPersonIds(objectSpace, category, validVisaPersonsOnly);
 
@@ -515,13 +516,13 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff,
         bool oneLastValidVisaPerPerson = false)
     {
-        if (string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+        if (ReportDashboardCatalog.IsVisaUzatilanlarSubReport(subReport))
         {
             return LoadVisaUzatilanlarFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured);
         }
 
-        if (string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+        if (ReportDashboardCatalog.IsVisaAktivPersonellerSubReport(subReport))
         {
             return LoadVisaAktivPersonellerFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured);
@@ -1001,23 +1002,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         Department = row.DepartmentLabel ?? string.Empty,
                         VisaId = row.VisaOid,
                         VisaNumber = row.VisaNumber ?? string.Empty,
-                        CalismaCells =
-                        [
-                            row.DepartmentLabel ?? string.Empty,
-                            row.SubcontractorLabel ?? string.Empty,
-                            row.PersonName ?? string.Empty,
-                            row.BirthDateLabel ?? string.Empty,
-                            row.PassportNumber ?? string.Empty,
-                            row.PassportEndLabel ?? string.Empty,
-                            row.PositionLabel ?? string.Empty,
-                            row.VisaDurationLabel ?? string.Empty,
-                            row.WorkPermitEndLabel ?? string.Empty,
-                            row.VisaNumber ?? string.Empty,
-                            row.VisaEndLabel ?? string.Empty,
-                            row.VisaDaysRemainingLabel ?? string.Empty,
-                            row.AddressLabel ?? string.Empty,
-                            string.Empty
-                        ],
+                        CalismaCells = BuildAktivPersonellerCalismaCells(row, subReport),
                         Status = x.Status,
                         StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
                     };
@@ -1032,6 +1017,29 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         {
             return EmptyPanel(personType, ReportDashboardCategory.VisaExtension, subReport, excelHint, excelConfigured);
         }
+    }
+
+    private static string[] BuildAktivPersonellerCalismaCells(VwRdVisaAktivPersoneller row, string? subReport)
+    {
+        var cells = new List<string>
+        {
+            row.DepartmentLabel ?? string.Empty,
+            row.SubcontractorLabel ?? string.Empty,
+            row.PersonName ?? string.Empty,
+            row.BirthDateLabel ?? string.Empty,
+            row.PassportNumber ?? string.Empty,
+            row.PassportEndLabel ?? string.Empty,
+            row.PositionLabel ?? string.Empty,
+            row.VisaDurationLabel ?? string.Empty,
+        };
+        if (!string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase))
+            cells.Add(row.WorkPermitEndLabel ?? string.Empty);
+        cells.Add(row.VisaNumber ?? string.Empty);
+        cells.Add(row.VisaEndLabel ?? string.Empty);
+        cells.Add(row.VisaDaysRemainingLabel ?? string.Empty);
+        cells.Add(row.AddressLabel ?? string.Empty);
+        cells.Add(string.Empty);
+        return cells.ToArray();
     }
 
     /// <summary>
@@ -1756,22 +1764,40 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (subReport is "rejected-by-period-category-type")
             subReport = "process-result-by-period-category-type";
 
+        if (ReportDashboardCatalog.IsInvitationProcessSubReport(subReport))
+        {
+            return LoadInvitationInProcessFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
+        if (ReportDashboardCatalog.IsInvitationUsedSubReport(subReport))
+        {
+            return LoadInvitationUsedFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
+        if (ReportDashboardCatalog.IsInvitationExpiredSubReport(subReport))
+        {
+            return LoadInvitationExpiredFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
+        if (ReportDashboardCatalog.IsInvitationCancelledSubReport(subReport))
+        {
+            return LoadInvitationCancelledFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
         return subReport switch
         {
-            "in-process" or "in-process-by-period-category-type" or ReportDashboardCatalog.InvitationInProcessLongKey => LoadInvitationInProcessFromView(
-                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "process-result" or "process-result-by-period-category-type" => LoadInvitationProcessResult(
-                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
-            "used" or "used-by-period-category-type" => LoadInvitationUsedFromView(
-                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
-            "expired-invitation" => LoadInvitationExpiredFromView(
-                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
-            "cancelled-invitation" => LoadInvitationCancelledFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "valid-until" or "expired" => LoadInvitationValidUntilFromView(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             "ready-by-period-category" => LoadInvitationReadyFromView(
                 objectSpace, role, projectKey, personType, "ready-by-period-category", excelHint, excelConfigured, cutoff),
+            ReportDashboardCatalog.InvitationReadyFmKey => LoadInvitationReadyFromView(
+                objectSpace, role, projectKey, personType, ReportDashboardCatalog.InvitationReadyFmKey, excelHint, excelConfigured, cutoff),
             _ => LoadInvitationReadyFromView(
                 objectSpace, role, projectKey, personType, "ready-by-project", excelHint, excelConfigured, cutoff),
         };
@@ -1783,7 +1809,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         var byPeriodCategory = string.Equals(subReport, "ready-by-period-category", StringComparison.OrdinalIgnoreCase);
-        if (!byPeriodCategory)
+        var isFamilyReady = string.Equals(
+            subReport, ReportDashboardCatalog.InvitationReadyFmKey, StringComparison.OrdinalIgnoreCase);
+        if (!byPeriodCategory && !isFamilyReady)
             subReport = "ready-by-project";
 
         if (objectSpace is not EFCoreObjectSpace efOs
@@ -1896,7 +1924,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         _ = cutoff;
-        subReport = "expired-invitation";
+        if (!string.Equals(subReport, ReportDashboardCatalog.InvitationExpiredFmKey, StringComparison.OrdinalIgnoreCase))
+            subReport = "expired-invitation";
 
         if (objectSpace is not EFCoreObjectSpace efOs
             || efOs.DbContext is not Visa2026EFCoreDbContext db)
@@ -1994,7 +2023,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
         _ = cutoff;
-        subReport = "cancelled-invitation";
+        if (!string.Equals(subReport, ReportDashboardCatalog.InvitationCancelledFmKey, StringComparison.OrdinalIgnoreCase))
+            subReport = "cancelled-invitation";
 
         if (objectSpace is not EFCoreObjectSpace efOs
             || efOs.DbContext is not Visa2026EFCoreDbContext db)
@@ -2211,7 +2241,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     {
         var byPeriodCategoryType = string.Equals(
             subReport, "used-by-period-category-type", StringComparison.OrdinalIgnoreCase);
-        if (!byPeriodCategoryType)
+        var isFamilyUsed = string.Equals(
+            subReport, ReportDashboardCatalog.InvitationUsedFmKey, StringComparison.OrdinalIgnoreCase);
+        if (!byPeriodCategoryType && !isFamilyUsed)
             subReport = "used";
 
         // Keep every used invitation, including ones older than the dashboard month window.
@@ -2858,7 +2890,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         var byPeriodCategoryType = string.Equals(
             subReport, "in-process-by-period-category-type", StringComparison.OrdinalIgnoreCase);
         var longTerm = ReportDashboardCatalog.IsInvitationProcessLongSubReport(subReport);
-        if (!byPeriodCategoryType && !longTerm)
+        var isFamilyProcess = string.Equals(
+                subReport, ReportDashboardCatalog.InvitationInProcessFmKey, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                subReport, ReportDashboardCatalog.InvitationInProcessLongFmKey, StringComparison.OrdinalIgnoreCase);
+        if (!byPeriodCategoryType && !longTerm && !isFamilyProcess)
             subReport = "in-process";
 
         if (objectSpace is not EFCoreObjectSpace efOs
@@ -3170,6 +3206,12 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         {
             return LoadRegistrationOnProcess(
                 objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, validVisaPersonIds);
+        }
+
+        if (string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiFmKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadRegistrationOturumSayisiFmFromView(
+                objectSpace, projectKey, personType, excelHint, excelConfigured);
         }
 
         if (string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
@@ -4196,6 +4238,88 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 personType, ReportDashboardCategory.Registration, subReport, rows,
                 excelHint, excelConfigured, AssignCategoricalCss(buckets), list.Sum(r => r.TotalCount),
                 subReportLabel: "Oturum sayısı");
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadRegistrationOturumSayisiFmFromView(
+        IObjectSpace objectSpace,
+        string projectKey,
+        ReportDashboardPersonType personType,
+        string? excelHint,
+        bool excelConfigured)
+    {
+        const string subReport = ReportDashboardCatalog.RegistrationOturumSayisiFmKey;
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+
+        try
+        {
+            IQueryable<VwRdRegistrationOturumSayisiFm> query = db.VwRdRegistrationOturumSayisiFm.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.DepartmentLabel == projectKey);
+            }
+
+            var list = query
+                .OrderBy(r => r.DepartmentLabel)
+                .ToList();
+            var rows = list
+                .Select(r =>
+                {
+                    var excelRow = new ReportDashboardRegistrationOturumSayisiExcel.Row(
+                        r.DepartmentLabel ?? string.Empty,
+                        r.BalkanKampCount,
+                        r.BalkanAdresCount,
+                        r.AsgabatCount,
+                        r.AsgabatKampCount,
+                        r.AsgabatAdresCount,
+                        r.AhalCount,
+                        r.AhalKampCount,
+                        r.AhalAdresCount,
+                        r.LebapCount,
+                        r.LebapKampCount,
+                        r.LebapAdresCount,
+                        r.MaryAdresCount,
+                        r.MaryKampCount);
+                    var notes = ReportDashboardRegistrationOturumSayisiExcel.BuildNotes(excelRow);
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.DepartmentLabel ?? string.Empty,
+                        ColumnA = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.BalkanKampCount),
+                        ColumnB = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.BalkanAdresCount),
+                        ColumnC = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.AsgabatCount),
+                        ColumnD = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.AhalCount),
+                        ColumnE = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.LebapCount),
+                        ColumnF = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.MaryAdresCount),
+                        ColumnG = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.MaryKampCount),
+                        ColumnH = ReportDashboardRegistrationOturumSayisiExcel.FormatCount(r.TotalCount),
+                        ColumnI = notes,
+                        Status = r.StatusLabel ?? r.DepartmentLabel ?? string.Empty,
+                        StatusCssClass = string.IsNullOrWhiteSpace(r.StatusCssClass) ? "st-cat-1" : r.StatusCssClass,
+                    };
+                })
+                .ToList();
+
+            var buckets = list
+                .Select(r => (Label: r.DepartmentLabel ?? "(No department)", Count: r.TotalCount))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            return BuildPanel(
+                personType, ReportDashboardCategory.Registration, subReport, rows,
+                excelHint, excelConfigured, AssignCategoricalCss(buckets), list.Sum(r => r.TotalCount),
+                subReportLabel: "Oturum sayısı (FM)");
         }
         catch (Exception ex) when (IsMissingReportDashboardView(ex))
         {

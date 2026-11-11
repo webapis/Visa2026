@@ -172,6 +172,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdWorkPermitKotaOranimiz> VwRdWorkPermitKotaOranimiz { get; set; }
         public DbSet<VwRdWorkPermitPersonelSayi> VwRdWorkPermitPersonelSayi { get; set; }
         public DbSet<VwRdRegistrationOturumSayisi> VwRdRegistrationOturumSayisi { get; set; }
+        public DbSet<VwRdRegistrationOturumSayisiFm> VwRdRegistrationOturumSayisiFm { get; set; }
         public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
         public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
         public DbSet<VwRdInvitationExpired> VwRdInvitationExpired { get; set; }
@@ -382,6 +383,10 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdRegistrationOturumSayisi>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_registration_oturum_sayisi");
+            });
+            modelBuilder.Entity<VwRdRegistrationOturumSayisiFm>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_registration_oturum_sayisi_fm");
             });
             modelBuilder.Entity<VwRdWorkPermitCalismaIzniListesi>(b => {
                 b.HasKey(t => t.ID);

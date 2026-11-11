@@ -53,11 +53,18 @@ SELECT
         WHEN (cur_pass."ExpirationDate")::date > DATE '1900-01-01' THEN cur_pass."ExpirationDate"
         ELSE NULL
     END                                                                     AS "PassportExpirationDate",
-    COALESCE(
-        NULLIF(BTRIM(visa_pos."NameTm"), ''),
-        NULLIF(BTRIM(visa_pos."Name"), ''),
-        ''
-    )                                                                       AS "PositionLabel",
+    CASE
+        WHEN p."PersonRole" = 1 THEN CONCAT_WS(' · ',
+            NULLIF(BTRIM(CONCAT_WS(' ',
+                NULLIF(BTRIM(sp."FirstName"), ''),
+                NULLIF(BTRIM(sp."MiddleName"), ''),
+                NULLIF(BTRIM(sp."LastName"), '')
+            )), ''),
+            NULLIF(COALESCE(NULLIF(BTRIM(visa_pos."NameTm"), ''), NULLIF(BTRIM(visa_pos."Name"), ''), ''), ''),
+            NULLIF(COALESCE(NULLIF(BTRIM(rel."NameTm"), ''), NULLIF(BTRIM(rel."Name"), ''), ''), '')
+        )
+        ELSE COALESCE(NULLIF(BTRIM(visa_pos."NameTm"), ''), NULLIF(BTRIM(visa_pos."Name"), ''), '')
+    END                                                                     AS "PositionLabel",
     COALESCE(dept."Name", '')                                               AS "DepartmentLabel",
     COALESCE(
         NULLIF(BTRIM(sub."NameTm"), ''),
@@ -87,6 +94,8 @@ SELECT
 FROM open_ranked a
 INNER JOIN "People" p
     ON p."ID" = a."PersonOid" AND COALESCE(p."GCRecord", 0) = 0
+LEFT JOIN "People" sp
+    ON sp."ID" = p."SponsoringEmployeeID" AND COALESCE(sp."GCRecord", 0) = 0
 LEFT JOIN "Visas" vsrc
     ON vsrc."ID" = a."ID" AND COALESCE(vsrc."GCRecord", 0) = 0
 LEFT JOIN "Subcontractors" sub
@@ -121,7 +130,10 @@ LEFT JOIN LATERAL (
 LEFT JOIN LATERAL (
     SELECT eph."PositionID"
     FROM "EmployeePositionHistories" eph
-    WHERE eph."PersonID" = p."ID"
+    WHERE eph."PersonID" = CASE
+            WHEN p."PersonRole" = 1 AND sp."ID" IS NOT NULL THEN sp."ID"
+            ELSE p."ID"
+        END
       AND COALESCE(eph."GCRecord", 0) = 0
     ORDER BY
         CASE
@@ -134,6 +146,8 @@ LEFT JOIN LATERAL (
 ) cur_pos ON TRUE
 LEFT JOIN "Positions" visa_pos
     ON visa_pos."ID" = cur_pos."PositionID" AND COALESCE(visa_pos."GCRecord", 0) = 0
+LEFT JOIN "Relationships" rel
+    ON rel."ID" = p."RelationshipID" AND COALESCE(rel."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT COALESCE(NULLIF(BTRIM(dep."NameTm"), ''), NULLIF(BTRIM(dep."Name"), ''), '') AS "Name"
     FROM "People" dept_person

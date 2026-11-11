@@ -60,8 +60,14 @@
             <button type="button"
                     class="rd-refresh-btn"
                     disabled="@ShowLoading"
-                    @onclick="OpenExcelBundle">
-                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenSelectedInExcel")
+                    @onclick="() => OpenExcelBundle(familyMembers: false)">
+                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenSelectedInExcelEmployees")
+            </button>
+            <button type="button"
+                    class="rd-refresh-btn"
+                    disabled="@ShowLoading"
+                    @onclick="() => OpenExcelBundle(familyMembers: true)">
+                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenSelectedInExcelFamilyMembers")
             </button>
             <button type="button"
                     class="rd-refresh-btn"
@@ -184,23 +190,39 @@
                         </div>
                     </div>
 
-                    @if (ReportDashboardCatalog.SubReports(Category).Count > 1)
-                    {
-                        <div class="rd-sub-tabs-row">
+                    <div class="rd-audience-tabs" role="tablist" aria-label="Person audience">
+                        <button type="button"
+                                class="rd-audience-tab @(ActiveAudience == ReportDashboardPersonType.Employees ? "active" : null)"
+                                disabled="@ShowLoading"
+                                @onclick="() => OnAudience(ReportDashboardPersonType.Employees)">
+                            @ReportDashboardCatalog.PersonTypeLabel(ReportDashboardPersonType.Employees)
+                        </button>
+                        @if (ShowFamilyAudienceParent)
+                        {
+                            <button type="button"
+                                    class="rd-audience-tab @(ActiveAudience == ReportDashboardPersonType.FamilyMembers ? "active" : null)"
+                                    disabled="@ShowLoading"
+                                    @onclick="() => OnAudience(ReportDashboardPersonType.FamilyMembers)">
+                                @ReportDashboardCatalog.PersonTypeLabel(ReportDashboardPersonType.FamilyMembers)
+                            </button>
+                        }
+                    </div>
+                    <div class="rd-sub-tabs-row">
                             <div class="rd-sub-tabs" role="tablist">
-                                @foreach (var sub in ReportDashboardCatalog.OrderedSubReports(Category, SubReportCounts))
+                                @foreach (var sub in AudienceSubReports)
                                 {
                                     var subCount = GetSubReportCount(sub.Key);
+                                    var subLabel = ReportDashboardCatalog.AudienceSubReportLabel(sub, ActiveAudience);
                                     <button type="button"
                                             class="rd-sub-tab @(SubReport == sub.Key ? "active" : null)"
                                             @onclick="() => OnSubReport(sub.Key)">
                                         @if (subCount >= 0)
                                         {
-                                            <text>@sub.Label (@subCount)</text>
+                                            <text>@subLabel (@subCount)</text>
                                         }
                                         else
                                         {
-                                            @sub.Label
+                                            @subLabel
                                         }
                                     </button>
                                 }
@@ -314,117 +336,6 @@
                             </div>
                             }
                         </div>
-                    }
-                    else if (ReportDashboardCatalog.SupportsPersonSearch(Category)
-                          || ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category)
-                          || ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category)
-                          || ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category)
-                          || ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category)
-                          || ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category)
-                          || ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category)
-                          || ReportDashboardCatalog.SupportsCategoryDateRange(Category))
-                    {
-                        <div class="rd-sub-tabs-row">
-                            <div class="rd-sub-tab-filters">
-                                @if (ReportDashboardCatalog.SupportsPersonSearch(Category))
-                                {
-                                    <div class="rd-search-box">
-                                        <input type="search"
-                                               class="rd-search-input"
-                                               placeholder="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchPlaceholder")"
-                                               title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.PersonSearch")"
-                                               disabled="@ShowLoading"
-                                               value="@SearchTerm"
-                                               @onchange="OnSearchTermChange" />
-                                        @if (!string.IsNullOrWhiteSpace(SearchTerm))
-                                        {
-                                            <button type="button"
-                                                    class="rd-search-clear"
-                                                    disabled="@ShowLoading"
-                                                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchClear")"
-                                                    @onclick="OnClearSearch">&times;</button>
-                                        }
-                                    </div>
-                                }
-                                @if (ReportDashboardCatalog.SupportsCategoryDateRange(Category))
-                                {
-                                    <div class="rd-period-select"
-                                         title="@(ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly
-                                             ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa")
-                                             : ReportDashboardLocalization.CategoryDateRangeTitle(Category))">
-                                        <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Last")</span>
-                                        <select class="rd-period-picker"
-                                                disabled="@(ShowLoading || (ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly))"
-                                                @onchange="e => OnCategoryPeriodChange(Category, e)">
-                                            @foreach (var m in PeriodMonthOptions)
-                                            {
-                                                <option value="@m" selected="@(ActiveCategoryDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
-                                            }
-                                        </select>
-                                    </div>
-                                }
-                                @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
-                                {
-                                    <label class="rd-panel-filter"
-                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeCompleted")'>
-                                        <input type="checkbox"
-                                               checked="@IncludeCompletedApplicationProcesses"
-                                               @onchange="OnIncludeCompletedApplicationChanged" />
-                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeCompleted")</span>
-                                    </label>
-                                }
-                                @if (ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
-                                {
-                                    <label class="rd-panel-filter"
-                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeCancelled")'>
-                                        <input type="checkbox"
-                                               checked="@IncludeCancelledApplicationProcesses"
-                                               @onchange="OnIncludeCancelledApplicationChanged" />
-                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeCancelled")</span>
-                                    </label>
-                                }
-                                @if (ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category))
-                                {
-                                    <label class="rd-panel-filter"
-                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.OneLastVisa")'>
-                                        <input type="checkbox"
-                                               checked="@OneLastValidVisaPerPerson"
-                                               @onchange="OnOneLastValidVisaChanged" />
-                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OneLastValidVisa")</span>
-                                    </label>
-                                }
-                                @if (ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category))
-                                {
-                                    <label class="rd-panel-filter"
-                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.OneLastWp")'>
-                                        <input type="checkbox"
-                                               checked="@OneLastValidWorkPermitPerPerson"
-                                               @onchange="OnOneLastValidWorkPermitChanged" />
-                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OneLastValidWorkPermit")</span>
-                                    </label>
-                                }
-                                @if (ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category))
-                                {
-                                    <label class="rd-panel-filter"
-                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.ValidVisaOnly")'>
-                                        <input type="checkbox"
-                                               checked="@ValidVisaPersonsOnly"
-                                               @onchange="OnValidVisaPersonsOnlyChanged" />
-                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ValidVisaOnly")</span>
-                                    </label>
-                                }
-                                @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
-                                {
-                                    <label class="rd-panel-filter" title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeArchived")'>
-                                        <input type="checkbox"
-                                               checked="@IncludeArchivedPersons"
-                                               @onchange="OnIncludeArchivedChanged" />
-                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeArchived")</span>
-                                    </label>
-                                }
-                            </div>
-                        </div>
-                    }
 
                     <div class="rd-chart-block @(ShowChartBody ? null : "rd-chart-block--collapsed")">
                         <div class="rd-chart-toolbar">
@@ -438,12 +349,12 @@
                             }
                             @if (ShowChartBody)
                             {
-                                <span class="rd-chart-toolbar-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.View")</span>
-                                <div class="rd-view-switch">
-                                    <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.PieChart")</button>
-                                    <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.BarChart")</button>
-                                    <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.List")</button>
-                                </div>
+                            <span class="rd-chart-toolbar-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.View")</span>
+                            <div class="rd-view-switch">
+                                <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.PieChart")</button>
+                                <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.BarChart")</button>
+                                <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.List")</button>
+                            </div>
                             }
                         </div>
 
@@ -547,7 +458,7 @@
                                            @oninput="OnInvitationTableSearch" />
                                     @if (!string.IsNullOrWhiteSpace(_invitationTableSearch))
                                     {
-                                        <button type="button"
+                            <button type="button"
                                                 class="rd-search-clear"
                                                 disabled="@ShowLoading"
                                                 title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchClear")"
@@ -633,7 +544,7 @@
                                                 @if (IsWorkPermitMaglumatTable)
                                                 {
                                                     <td class="rd-col-order">@DisplayIndex(row)</td>
-                                                    <td class="rd-cell-name">@row.Name</td>
+                                                <td class="rd-cell-name">@row.Name</td>
                                                     <td class="@($"{ColumnClass(2)} rd-col-stack")">
                                                         <div class="rd-cell-stack">
                                                             @foreach (var line in StackLines(row.ColumnA, row.ColumnB))
@@ -1107,7 +1018,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
+                                                <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
                                                 }
                                                 <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
                                                 <td class="@ColumnClass(3)">@row.ColumnB</td>
@@ -1221,35 +1132,35 @@
                                                 }
                                                 else
                                                 {
-                                                    @if (Panel.TableHeaders.Count >= 6)
-                                                    {
-                                                        <td class="@ColumnClass(4)">@row.ColumnC</td>
-                                                    }
-                                                    @if (Panel.TableHeaders.Count >= 7)
-                                                    {
-                                                        <td class="@ColumnClass(5)">@row.ColumnD</td>
-                                                    }
-                                                    @if (Panel.TableHeaders.Count >= 8)
-                                                    {
-                                                        <td class="@ColumnClass(6)">@row.ColumnE</td>
-                                                    }
-                                                    @if (Panel.TableHeaders.Count >= 9)
-                                                    {
-                                                        <td class="@ColumnClass(7)">@row.ColumnF</td>
-                                                    }
-                                                    @if (Panel.TableHeaders.Count >= 10)
-                                                    {
-                                                        <td class="@ColumnClass(8)">@row.ColumnG</td>
-                                                    }
-                                                    @if (Panel.TableHeaders.Count >= 11)
-                                                    {
-                                                        <td class="@ColumnClass(9)">@row.ColumnH</td>
-                                                    }
+                                                @if (Panel.TableHeaders.Count >= 6)
+                                                {
+                                                    <td class="@ColumnClass(4)">@row.ColumnC</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 7)
+                                                {
+                                                    <td class="@ColumnClass(5)">@row.ColumnD</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 8)
+                                                {
+                                                    <td class="@ColumnClass(6)">@row.ColumnE</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 9)
+                                                {
+                                                    <td class="@ColumnClass(7)">@row.ColumnF</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 10)
+                                                {
+                                                    <td class="@ColumnClass(8)">@row.ColumnG</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 11)
+                                                {
+                                                    <td class="@ColumnClass(9)">@row.ColumnH</td>
+                                                }
                                                     @if (Panel.TableHeaders.Count >= 12)
                                                     {
                                                         <td class="@ColumnClass(10)">@row.ColumnI</td>
                                                     }
-                                                    <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
+                                                <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                                 }
                                                 }
                                                 }
@@ -1818,10 +1729,31 @@
         await Task.Delay(1);
     }
 
+    private ReportDashboardPersonType ActiveAudience =>
+        ReportDashboardCatalog.ResolveAudiencePersonType(PersonType);
+
+    private bool ShowFamilyAudienceParent =>
+        ReportDashboardCatalog.SupportsFamilyAudienceParent(Category);
+
+    private IReadOnlyList<ReportDashboardSubReport> AudienceSubReports =>
+        ReportDashboardCatalog.SubReportsForAudience(Category, ActiveAudience, SubReportCounts);
+
     private async Task OnPersonType(ReportDashboardPersonType personType)
     {
         await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Loading"));
         await PersonTypeChanged.InvokeAsync(personType);
+    }
+
+    private async Task OnAudience(ReportDashboardPersonType audience)
+    {
+        if (ShowLoading)
+            return;
+        if (audience == ReportDashboardPersonType.FamilyMembers
+            && !ReportDashboardCatalog.SupportsFamilyAudienceParent(Category))
+            audience = ReportDashboardPersonType.Employees;
+
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Loading"));
+        await PersonTypeChanged.InvokeAsync(audience);
     }
 
     private async Task OnCategory(ReportDashboardCategory category)
@@ -1853,22 +1785,27 @@
 
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private bool _excelBundleOpen;
+    private bool _excelBundleFamilyMembers;
     private readonly List<ExcelBundleChoice> _excelBundle = [];
     /// <summary>Source index for the active drag. Kept until drop finishes — dragend must not clear it first (Blazor Server).</summary>
     private int _bundleDragFromIndex = -1;
     private int _bundleDragOverIndex = -1;
 
-    private void OpenExcelBundle()
+    private void OpenExcelBundle(bool familyMembers)
     {
         if (ShowLoading)
             return;
 
+        _excelBundleFamilyMembers = familyMembers;
         _excelBundle.Clear();
         _bundleDragFromIndex = -1;
         _bundleDragOverIndex = -1;
         using (var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelBundleSettings>())
         {
-            foreach (var (category, key) in ReportDashboardExcelBundleOrder.ResolveOrderedReports(objectSpace))
+            var ordered = familyMembers
+                ? ReportDashboardExcelBundleOrder.ResolveOrderedFamilyReports(objectSpace)
+                : ReportDashboardExcelBundleOrder.ResolveOrderedReports(objectSpace);
+            foreach (var (category, key) in ordered)
             {
                 _excelBundle.Add(new ExcelBundleChoice
                 {
@@ -1942,9 +1879,11 @@
         try
         {
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelBundleSettings>();
-            ReportDashboardExcelBundleOrder.SaveOrder(
-                objectSpace,
-                _excelBundle.Select(x => (x.Category, x.Key)).ToList());
+            var order = _excelBundle.Select(x => (x.Category, x.Key)).ToList();
+            if (_excelBundleFamilyMembers)
+                ReportDashboardExcelBundleOrder.SaveFamilyOrder(objectSpace, order);
+            else
+                ReportDashboardExcelBundleOrder.SaveOrder(objectSpace, order);
         }
         catch (Exception ex)
         {
@@ -2010,9 +1949,13 @@
 
     private byte[] ExportExcelBundleItem(IObjectSpace objectSpace, ExcelBundleChoice item)
     {
+        var audience = (_excelBundleFamilyMembers
+            || ReportDashboardCatalog.IsFamilySubReport(item.Key))
+            ? ReportDashboardPersonType.FamilyMembers
+            : ReportDashboardPersonType.Employees;
         var panel = ReportQuery.LoadPanel(
             objectSpace,
-            PersonType,
+            audience,
             item.Category,
             ProjectKey,
             ReportDashboardCatalog.DefaultCategoryDateRangeMonths,

@@ -155,7 +155,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
             return Build(personType, category, subReport, [], projectKey);
 
-        personType = ReportDashboardCatalog.ResolveEffectivePersonType(category, personType);
+        personType = ReportDashboardCatalog.ResolveEffectivePersonType(category, personType, subReport);
 
         // Person search has no mock rows — it is real-view only (Hybrid).
         if (searchTerm != null) { /* no-op */ }
@@ -260,6 +260,9 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
                 Build(personType, category, subReport, InvitationUsedByPeriodCategoryType(), projectKey),
             (ReportDashboardCategory.Invitation, "valid-until") => Build(personType, category, subReport, InvitationValidUntil(), projectKey),
             (ReportDashboardCategory.Invitation, "expired") => Build(personType, category, subReport, InvitationValidUntil(), projectKey),
+            (ReportDashboardCategory.Invitation, _) when ReportDashboardCatalog.IsFamilySubReport(subReport)
+                || personType == ReportDashboardPersonType.FamilyMembers =>
+                Build(personType, category, subReport, InvitationReadyByProjectFamily(), projectKey),
             (ReportDashboardCategory.Invitation, _) => Build(personType, category, subReport, InvitationReadyByProject(), projectKey),
             // Registration
             (ReportDashboardCategory.Registration, "check-in-by-project") =>
@@ -667,6 +670,16 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         ActiveInvitation("John Smith", "Seismiki Barlag", "Technician", "Alfa Teknik", "2/010", "Jan 08, 2026", "INV-2026-0062", "Jul 28, 2026", "Mar 01, 2026", "3 months", "Mar 20, 2026 · № 7/26", "Seismiki Barlag", "st-cat-3"),
         ActiveInvitation("Oleg Kovalev", "Seismiki Barlag", "Engineer", "Alfa Teknik", "2/011", "Jan 09, 2026", "INV-2026-0088", "Aug 05, 2026", "Mar 02, 2026", "3 months", "Mar 21, 2026 · № 8/26", "Seismiki Barlag", "st-cat-3"),
         ActiveInvitation("Bayrammyrat Rejepow", "Elektrik Stansia", "Electrical engineer", "Stelara Group", "5/201", "Feb 14, 2026", "INV-2026-0041", "Sep 18, 2026", "Mar 28, 2026", "1 month", "Apr 02, 2026 · № 19/26", "Elektrik Stansia", "st-cat-4"),
+    ];
+
+    /// Family Members Active Invitation — Position = sponsor · position · relationship.
+    private static List<ReportDashboardPreviewRow> InvitationReadyByProjectFamily() =>
+    [
+        ActiveInvitation("Ayse Yilmaz", "Gurlusyk UZT", "Mehmet Yilmaz · Electrical engineer · ayaly", "Stelara Group", "3/477", "Mar 24, 2026", "INV-2026-0171", "Sep 30, 2026", "Oct 12, 2026", "1 month", "Apr 20, 2026 · № 12/26", "Gurlusyk UZT", "st-cat-1"),
+        ActiveInvitation("Elena Petrova", "Gurlusyk UZT", "Viktor Petrov · Site supervisor · ayaly", "Stelara Group", "3/477", "Mar 24, 2026", "INV-2026-0158", "Oct 12, 2026", "Oct 12, 2026", "1 month", "Apr 20, 2026 · № 12/26", "Gurlusyk UZT", "st-cat-1"),
+        ActiveInvitation("Gulnar Geldiyeva", "Gurlusyk UZT", "Serdar Geldiyew · Technician · ayaly", "Alfa Teknik", "4/102", "Feb 02, 2026", "INV-2026-0197", "Sep 01, 2026", "Mar 18, 2026", "1 month", "Apr 15, 2026 · № 88/26", "Gurlusyk UZT", "st-cat-1"),
+        ActiveInvitation("Anna Muller", "Gaz Stansiasy", "Hans Muller · Engineer · ayaly", "Stelara Group", "1/055", "Jan 11, 2026", "INV-2026-0153", "Aug 22, 2026", "Mar 10, 2026", "1 month", "Apr 09, 2026 · № 40/26", "Gaz Stansiasy", "st-cat-2"),
+        ActiveInvitation("Meryem Aydin", "Gaz Stansiasy", "Kemal Aydin · Engineer · gyzy", "Stelara Group", "1/056", "Jan 12, 2026", "INV-2026-0210", "Nov 05, 2026", "Mar 11, 2026", "6 months", "Apr 09, 2026 · № 41/26", "Gaz Stansiasy", "st-cat-2"),
     ];
 
     /// Active Invitation (V): chart Status = VisaPeriod · VisaCategory · VisaType.

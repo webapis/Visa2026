@@ -14,6 +14,7 @@ public static class ReportDashboardExcelBundleSettingsSchemaSql
             CREATE TABLE "ReportDashboardExcelBundleSettings" (
               "ID" uuid NOT NULL CONSTRAINT "PK_ReportDashboardExcelBundleSettings" PRIMARY KEY,
               "OrderJson" text NOT NULL DEFAULT '[]',
+              "FamilyOrderJson" text NOT NULL DEFAULT '[]',
               "GCRecord" integer NOT NULL DEFAULT 0,
               "OptimisticLockField" integer NOT NULL DEFAULT 0
             );
@@ -23,13 +24,27 @@ public static class ReportDashboardExcelBundleSettingsSchemaSql
           UPDATE "ReportDashboardExcelBundleSettings" SET "OptimisticLockField" = 0 WHERE "OptimisticLockField" IS NULL;
           UPDATE "ReportDashboardExcelBundleSettings" SET "OrderJson" = '[]' WHERE "OrderJson" IS NULL;
 
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'ReportDashboardExcelBundleSettings'
+              AND column_name = 'FamilyOrderJson'
+          ) THEN
+            ALTER TABLE "ReportDashboardExcelBundleSettings"
+              ADD COLUMN "FamilyOrderJson" text NOT NULL DEFAULT '[]';
+          END IF;
+
+          UPDATE "ReportDashboardExcelBundleSettings" SET "FamilyOrderJson" = '[]' WHERE "FamilyOrderJson" IS NULL;
+
           ALTER TABLE "ReportDashboardExcelBundleSettings"
             ALTER COLUMN "GCRecord" SET DEFAULT 0,
             ALTER COLUMN "GCRecord" SET NOT NULL,
             ALTER COLUMN "OptimisticLockField" SET DEFAULT 0,
             ALTER COLUMN "OptimisticLockField" SET NOT NULL,
             ALTER COLUMN "OrderJson" SET DEFAULT '[]',
-            ALTER COLUMN "OrderJson" SET NOT NULL;
+            ALTER COLUMN "OrderJson" SET NOT NULL,
+            ALTER COLUMN "FamilyOrderJson" SET DEFAULT '[]',
+            ALTER COLUMN "FamilyOrderJson" SET NOT NULL;
         END $$;
         """;
 

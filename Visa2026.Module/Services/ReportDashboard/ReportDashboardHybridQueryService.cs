@@ -66,9 +66,18 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.Invitation, "used"),
         (ReportDashboardCategory.Invitation, "used-by-period-category-type"),
         (ReportDashboardCategory.Invitation, "valid-until"),
+        // FM keys share employee SQL views + PersonRole = FamilyMember filter.
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationReadyFmKey),
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationExpiredFmKey),
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationCancelledFmKey),
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationInProcessFmKey),
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationInProcessLongFmKey),
+        (ReportDashboardCategory.Invitation, ReportDashboardCatalog.InvitationUsedFmKey),
         (ReportDashboardCategory.VisaExtension, "active-by-project"),
         (ReportDashboardCategory.VisaExtension, ReportDashboardCatalog.VisaAktivPersonellerKey),
         (ReportDashboardCategory.VisaExtension, ReportDashboardCatalog.VisaUzatilanlarKey),
+        (ReportDashboardCategory.VisaExtension, ReportDashboardCatalog.VisaAktivPersonellerFmKey),
+        (ReportDashboardCategory.VisaExtension, ReportDashboardCatalog.VisaUzatilanlarFmKey),
         (ReportDashboardCategory.VisaExtension, "by-period-category-type"),
         (ReportDashboardCategory.VisaExtension, "extension-required"),
         (ReportDashboardCategory.VisaExtension, "on-extension"),
@@ -200,7 +209,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         }
 
         var key = (category, subReport);
-        if (RealSubReports.Contains(key))
+        if (UsesRealPanel(category, subReport))
         {
             return _real.LoadPanel(
                 objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
@@ -247,11 +256,26 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         if (category == ReportDashboardCategory.Invitation && subReport == "rejected-by-period-category-type")
             key = (category, "process-result-by-period-category-type");
 
-        IReportDashboardQueryService service = RealSubReports.Contains(key) ? _real : _mock;
+        IReportDashboardQueryService service = UsesRealPanel(key.Item1, key.Item2) ? _real : _mock;
         return service.LoadPanel(
             objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
             includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
             includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
             validVisaPersonsOnly, searchTerm);
+    }
+
+    /// <summary>
+    /// FM catalog keys reuse the employee SQL view; treat them as real whenever the
+    /// employee counterpart (or the FM key itself) is in <see cref="RealSubReports"/>.
+    /// Otherwise Hybrid falls through to mock and Family tabs show employee mock rows.
+    /// </summary>
+    private static bool UsesRealPanel(ReportDashboardCategory category, string subReport)
+    {
+        if (RealSubReports.Contains((category, subReport)))
+            return true;
+
+        var employeeKey = ReportDashboardCatalog.EmployeeTemplateKeyFor(subReport);
+        return employeeKey != null
+            && RealSubReports.Contains((category, employeeKey));
     }
 }

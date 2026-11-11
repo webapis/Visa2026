@@ -4,6 +4,39 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-11-11 — FM Invitation tabs showed employee mock rows
+
+**Ask:** Family Members Invitation subreports displayed the same employee names/positions as Employees.
+
+**Cause:** Hybrid `RealSubReports` listed employee Invitation/Visa keys only. FM keys (`ready-by-project-fm`, …) fell through to mock, which always returned `InvitationReadyByProject()` employee rows.
+
+**Now:** FM keys are in `RealSubReports`; `UsesRealPanel` also treats an FM key as real when its employee counterpart is promoted. Mock FM Invitation rows use sponsor · position · relationship when mock is still hit.
+
+**Prevent:** When adding a dedicated FM catalog key, promote it (or ensure `EmployeeTemplateKeyFor` + `UsesRealPanel`) — do not leave FM keys on mock while the employee twin is real.
+
+**Files:** `ReportDashboardHybridQueryService.cs`, `ReportDashboardMockQueryService.cs`
+
+
+## 2026-11-11 — Employees / Family Members parent tabs
+
+**Ask:** Separate sub-report chips under parent Employees / Family Members tabs on every category. Default Employees. Work Permit has no Family parent.
+
+**Now:** Audience strip above sub-tabs. Invitation / Registration / Visa Extension filter dedicated FM keys under Family Members (labels drop trailing " (FM)"). Other categories keep the same chips and filter by person role. Work Permit shows Employees only (no Family parent). Opening any category always lands on Employees (does not remember Family).
+
+**Prevent:** Do not show a Family parent on Work Permit. Do not mix employee and FM chips in one strip.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardComponent.razor`, `ReportDashboardPropertyEditor.cs`, `report-dashboard.css`
+
+## 2026-11-11 — Family Member Excel / Preview subreports
+
+**Ask:** Exact employee Invitation / Registration Oturum / Visa Excel subreports for family members (no Work Permit). Separate top button Open selected in Excel (Family Members), separate drag-order, separate FM-named tabs. Position → sponsor full name · sponsor position · relationship. aktiv aile drops Çalışma İzni bitiş. Oturum FM = visa-only (no WP).
+
+**Now:** Nine FM catalog keys under Invitation / Registration / Visa. Dual Excel buttons; `FamilyOrderJson` on `ReportDashboardExcelBundleSettings`. Invitation/visa views reuse `PersonRoleCode` filter; PositionLabel CASE for PersonRole=1. New `vw_rd_registration_oturum_sayisi_fm`. aktiv-personeller-fm is 14 columns. FM Excel reuses employee templates except aktiv aile.
+
+**Prevent:** Do not put Work Permit sheets in the Family bundle. Do not force Employees on FM keys. Temporary Visitors stay suppressed. Do not require WP for Oturum FM.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardComponent.razor`, `ReportDashboardExcelBundle*`, invitation/visa SQL views, `vw_rd_registration_oturum_sayisi_fm.postgres.sql`, `VwRdRegistrationOturumSayisiFm.cs`
+
 ## 2026-11-11 — Invitation Process Şu anki Durumu ministry names
 
 **Ask:** işlemde olanlar kısa/uzun dönem Excel Şu anki Durumu showed `1-NJI MINISTRLIKDE`. Use approval-leg ministry name (uzatımlar style). Migration steps as localized Yabancıların şubesinde.

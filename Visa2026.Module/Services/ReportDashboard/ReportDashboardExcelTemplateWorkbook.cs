@@ -139,11 +139,13 @@ public static class ReportDashboardExcelTemplateWorkbook
                         : BuildInvitationProcessCompanyStarter())
                     : IsWorkPermitCalisma(category, subReport)
                         ? BuildCalismaListesiStarter()
-                        : IsVisaAktivPersoneller(category, subReport)
-                            ? BuildCalismaListesiStarter("aktiv personeller")
-                            : IsVisaUzatilanlar(category, subReport)
-                                ? BuildUzatilanlarStarter()
-                                : BuildStarter(title, headers, SheetName(category, subReport), CompanyFont(category));
+                        : IsVisaAktivAileUyeleri(category, subReport)
+                            ? BuildCalismaListesiStarter("aktiv aile üyeleri", ReportDashboardWorkPermitCalismaExcel.AktivAileUyeleriHeaders)
+                            : IsVisaAktivPersoneller(category, subReport)
+                                ? BuildCalismaListesiStarter("aktiv personeller")
+                                : IsVisaUzatilanlar(category, subReport)
+                                    ? BuildUzatilanlarStarter()
+                                    : BuildStarter(title, headers, SheetName(category, subReport), CompanyFont(category));
 
         var values = new List<IReadOnlyList<string>>(rows.Count);
         for (var index = 0; index < rows.Count; index++)
@@ -171,11 +173,13 @@ public static class ReportDashboardExcelTemplateWorkbook
                 ? headers
                 : null,
             columnWidths: MaglumatColumnWidths(category, subReport),
-            integerColumn: IsVisaAktivPersoneller(category, subReport)
-                ? 13
-                : IsWorkPermitCalisma(category, subReport)
-                    ? 12
-                    : null,
+            integerColumn: IsVisaAktivAileUyeleri(category, subReport)
+                ? 12
+                : IsVisaAktivPersoneller(category, subReport)
+                    ? 13
+                    : IsWorkPermitCalisma(category, subReport)
+                        ? 12
+                        : null,
             sheetName: companyProcess ? ReportDashboardCatalog.InvitationProcessSheetName(subReport) : null);
     }
 
@@ -383,12 +387,13 @@ public static class ReportDashboardExcelTemplateWorkbook
         ApplyCompanyFont(sheet);
         return Save(workbook);
     }
-    public static byte[] BuildCalismaListesiStarter(string? sheetName = null)
+    public static byte[] BuildCalismaListesiStarter(string? sheetName = null, string[]? headerOverride = null)
     {
         var isAktiv = string.Equals(sheetName, "aktiv personeller", StringComparison.OrdinalIgnoreCase);
-        var headers = isAktiv
-            ? ReportDashboardWorkPermitCalismaExcel.AktivPersonellerHeaders
-            : ReportDashboardWorkPermitCalismaExcel.Headers;
+        var headers = headerOverride
+            ?? (isAktiv
+                ? ReportDashboardWorkPermitCalismaExcel.AktivPersonellerHeaders
+                : ReportDashboardWorkPermitCalismaExcel.Headers);
         using var workbook = new XLWorkbook();
         var sheet = workbook.Worksheets.Add(string.IsNullOrWhiteSpace(sheetName) ? "çalışma izni listesi" : sheetName);
         var columnCount = headers.Length;
@@ -517,7 +522,13 @@ public static class ReportDashboardExcelTemplateWorkbook
     {
         if (IsVisaUzatilanlar(category, subReport))
             return ReportDashboardVisaUzatilanlarExcel.Cells(row, rowNumber);
-        if (IsWorkPermitCalisma(category, subReport) || IsVisaAktivPersoneller(category, subReport))
+        if (IsVisaAktivAileUyeleri(category, subReport))
+            return ReportDashboardWorkPermitCalismaExcel.Cells(
+                row, rowNumber, ReportDashboardWorkPermitCalismaExcel.AktivAileUyeleriHeaders.Length);
+        if (IsVisaAktivPersoneller(category, subReport))
+            return ReportDashboardWorkPermitCalismaExcel.Cells(
+                row, rowNumber, ReportDashboardWorkPermitCalismaExcel.AktivPersonellerHeaders.Length);
+        if (IsWorkPermitCalisma(category, subReport))
             return ReportDashboardWorkPermitCalismaExcel.Cells(row, rowNumber);
         if (IsWorkPermitSanaw(category, subReport))
             return ReportDashboardWorkPermitSanawExcel.Cells(row, rowNumber);
@@ -757,11 +768,15 @@ public static class ReportDashboardExcelTemplateWorkbook
 
     private static bool IsVisaUzatilanlar(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.VisaExtension
-        && string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
+        && ReportDashboardCatalog.IsVisaUzatilanlarSubReport(subReport);
 
     private static bool IsVisaAktivPersoneller(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.VisaExtension
-        && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase);
+        && ReportDashboardCatalog.IsVisaAktivPersonellerSubReport(subReport);
+
+    private static bool IsVisaAktivAileUyeleri(ReportDashboardCategory category, string? subReport) =>
+        category == ReportDashboardCategory.VisaExtension
+        && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase);
 
     private static bool IsWorkPermitCalisma(ReportDashboardCategory category, string? subReport) =>
         category == ReportDashboardCategory.WorkPermit
@@ -813,7 +828,11 @@ public static class ReportDashboardExcelTemplateWorkbook
     private static string SheetName(ReportDashboardCategory category, string? subReport)
     {
         if (IsVisaUzatilanlar(category, subReport))
-            return "uzatımlar";
+            return string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarFmKey, StringComparison.OrdinalIgnoreCase)
+                ? "uzatımlar (FM)"
+                : "uzatımlar";
+        if (IsVisaAktivAileUyeleri(category, subReport))
+            return "aktiv aile üyeleri";
         if (IsVisaAktivPersoneller(category, subReport))
             return "aktiv personeller";
         if (IsWorkPermitCalisma(category, subReport))

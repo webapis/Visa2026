@@ -38,12 +38,12 @@ public static class ReportDashboardExcelPrintLayout
             return true;
 
         if (category == ReportDashboardCategory.Registration
-            && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+            && ReportDashboardCatalog.IsRegistrationOturumSayisiSubReport(subReport))
             return true;
 
         if (category == ReportDashboardCategory.VisaExtension
-            && (string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase)))
+            && (ReportDashboardCatalog.IsVisaAktivPersonellerSubReport(subReport)
+                || ReportDashboardCatalog.IsVisaUzatilanlarSubReport(subReport)))
             return true;
 
         if (category == ReportDashboardCategory.Invitation

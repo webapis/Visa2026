@@ -12295,6 +12295,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Saýlananlary Excel-de aç",
             ["ru-RU"] = "Открыть выбранные в Excel",
         },
+        ["ReportDashboard.Chrome.OpenSelectedInExcelEmployees"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open selected in Excel (Employees)",
+            ["tr-TR"] = "Seçilenleri Excel'e aktar (Personel)",
+            ["tk-TM"] = "Saýlananlary Excel-de aç (Işgärler)",
+            ["ru-RU"] = "Открыть выбранные в Excel (Сотрудники)",
+        },
+        ["ReportDashboard.Chrome.OpenSelectedInExcelFamilyMembers"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open selected in Excel (Family Members)",
+            ["tr-TR"] = "Seçilenleri Excel'e aktar (Aile üyeleri)",
+            ["tk-TM"] = "Saýlananlary Excel-de aç (Maşgala agzalary)",
+            ["ru-RU"] = "Открыть выбранные в Excel (Члены семьи)",
+        },
         ["ReportDashboard.Chrome.OpenVisaCopy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Open visa copy",

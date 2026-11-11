@@ -47,15 +47,35 @@ public static class ReportDashboardWorkPermitCalismaExcel
         "NOT",
     ];
 
-    public static List<string> Cells(ReportDashboardPreviewRow row, int rowNumber)
+    /// <summary>aktiv aile üyeleri — same as aktiv personeller without Çalışma İzni bitiş.</summary>
+    public static readonly string[] AktivAileUyeleriHeaders =
+    [
+        "S.No",
+        "PROJECT",
+        "Firması",
+        "Adı Soyadı",
+        "Doğum Tarihi",
+        "Mevcut Pasaport No",
+        "Pasaport döneminin bitiş tarihi",
+        "Mesleki Görevleri",
+        "Vize Süresi",
+        "Vize Numarası",
+        "Vizenin bitiş tarihi",
+        "Vize bitmesine kalan süre",
+        "Mevcut Adresi",
+        "NOT",
+    ];
+
+    public static List<string> Cells(ReportDashboardPreviewRow row, int rowNumber, int? columnCount = null)
     {
+        var target = columnCount ?? Headers.Length;
         var values = new List<string> { rowNumber.ToString(CultureInfo.InvariantCulture) };
         if (row.CalismaCells != null)
             values.AddRange(row.CalismaCells);
-        while (values.Count < Headers.Length)
+        while (values.Count < target)
             values.Add(string.Empty);
-        if (values.Count > Headers.Length)
-            values.RemoveRange(Headers.Length, values.Count - Headers.Length);
+        if (values.Count > target)
+            values.RemoveRange(target, values.Count - target);
         return values;
     }
 }

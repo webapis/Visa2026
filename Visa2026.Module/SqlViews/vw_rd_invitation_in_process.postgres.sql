@@ -17,7 +17,18 @@ SELECT
     COALESCE(pc."NameTm", '')                                               AS "ProjectNameRaw",
     COALESCE(pc."NameTm", '')                                               AS "ProjectNameTm",
     COALESCE(p."PersonRole", 0)                                             AS "PersonRoleCode",
-    COALESCE(NULLIF(BTRIM(visa_pos."NameTm"), ''), NULLIF(BTRIM(visa_pos."Name"), ''), '') AS "PositionLabel",
+    CASE
+        WHEN p."PersonRole" = 1 THEN CONCAT_WS(' · ',
+            NULLIF(BTRIM(CONCAT_WS(' ',
+                NULLIF(BTRIM(sp."FirstName"), ''),
+                NULLIF(BTRIM(sp."MiddleName"), ''),
+                NULLIF(BTRIM(sp."LastName"), '')
+            )), ''),
+            NULLIF(COALESCE(NULLIF(BTRIM(visa_pos."NameTm"), ''), NULLIF(BTRIM(visa_pos."Name"), ''), ''), ''),
+            NULLIF(COALESCE(NULLIF(BTRIM(rel."NameTm"), ''), NULLIF(BTRIM(rel."Name"), ''), ''), '')
+        )
+        ELSE COALESCE(NULLIF(BTRIM(visa_pos."NameTm"), ''), NULLIF(BTRIM(visa_pos."Name"), ''), '')
+    END                                                                     AS "PositionLabel",
     COALESCE(dept."Name", '')                                               AS "DepartmentLabel",
     COALESCE(
         NULLIF(BTRIM(sub."NameTm"), ''),
@@ -125,6 +136,8 @@ INNER JOIN "ApplicationProfileInstancePeople" roster
     ON roster."ApplicationProfileInstanceId" = a."ID"
 INNER JOIN "People" p
     ON p."ID" = roster."PersonId"
+LEFT JOIN "People" sp
+    ON sp."ID" = p."SponsoringEmployeeID" AND COALESCE(sp."GCRecord", 0) = 0
    AND COALESCE(p."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = a."ProjectContractID"
@@ -141,7 +154,10 @@ LEFT JOIN "VisaTypes" vt
 LEFT JOIN LATERAL (
     SELECT eph."PositionID"
     FROM "EmployeePositionHistories" eph
-    WHERE eph."PersonID" = p."ID"
+    WHERE eph."PersonID" = CASE
+            WHEN p."PersonRole" = 1 AND sp."ID" IS NOT NULL THEN sp."ID"
+            ELSE p."ID"
+        END
       AND COALESCE(eph."GCRecord", 0) = 0
     ORDER BY
         CASE
@@ -154,6 +170,8 @@ LEFT JOIN LATERAL (
 ) cur_pos ON TRUE
 LEFT JOIN "Positions" visa_pos
     ON visa_pos."ID" = cur_pos."PositionID" AND COALESCE(visa_pos."GCRecord", 0) = 0
+LEFT JOIN "Relationships" rel
+    ON rel."ID" = p."RelationshipID" AND COALESCE(rel."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
     SELECT COALESCE(NULLIF(BTRIM(dep."NameTm"), ''), NULLIF(BTRIM(dep."Name"), ''), '') AS "Name"
     FROM "People" dept_person

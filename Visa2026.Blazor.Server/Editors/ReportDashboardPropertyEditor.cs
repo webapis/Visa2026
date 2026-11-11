@@ -94,13 +94,17 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         var initialCategory = _initialCategory;
         var model = new ReportDashboardModel
         {
-            PersonType        = ReportDashboardPersonType.All,
+            PersonType        = ReportDashboardPersonType.Employees,
             Category          = initialCategory,
-            SubReport         = ReportDashboardCatalog.DefaultSubReport(initialCategory),
+            SubReport         = ReportDashboardCatalog.DefaultSubReportForAudience(
+                initialCategory, ReportDashboardPersonType.Employees),
             ProjectKey        = "All",
             ChartView         = _initialShowOverview
                 ? "pie"
-                : DefaultChartViewFor(initialCategory, ReportDashboardCatalog.DefaultSubReport(initialCategory)),
+                : DefaultChartViewFor(
+                    initialCategory,
+                    ReportDashboardCatalog.DefaultSubReportForAudience(
+                        initialCategory, ReportDashboardPersonType.Employees)),
             DateRangeMonths   = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             PassportDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             PositionHistoryDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
@@ -151,14 +155,31 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
 
     private Task OnPersonTypeChanged(ReportDashboardPersonType personType)
     {
+        if (personType == ReportDashboardPersonType.FamilyMembers
+            && !ReportDashboardCatalog.SupportsFamilyAudienceParent(ComponentModel.Category))
+            personType = ReportDashboardPersonType.Employees;
+
         ComponentModel.PersonType = personType;
+        var audienceSubs = ReportDashboardCatalog.SubReportsForAudience(
+            ComponentModel.Category, personType, ComponentModel.SubReportCounts);
+        if (audienceSubs.Count > 0
+            && !audienceSubs.Any(s => string.Equals(s.Key, ComponentModel.SubReport, StringComparison.OrdinalIgnoreCase)))
+        {
+            ComponentModel.SubReport = audienceSubs[0].Key;
+            ComponentModel.ChartView = DefaultChartViewFor(ComponentModel.Category, ComponentModel.SubReport);
+            ComponentModel.Panel = null;
+        }
+
         return RefreshAsync(ComponentModel);
     }
 
     private Task OnCategoryChanged(ReportDashboardCategory category)
     {
+        // Always land on Employees when opening a category (do not remember Family).
+        ComponentModel.PersonType  = ReportDashboardPersonType.Employees;
         ComponentModel.Category    = category;
-        ComponentModel.SubReport   = ReportDashboardCatalog.DefaultSubReport(category);
+        ComponentModel.SubReport   = ReportDashboardCatalog.DefaultSubReportForAudience(
+            category, ComponentModel.PersonType);
         ComponentModel.ChartView   = DefaultChartViewFor(category, ComponentModel.SubReport);
         ComponentModel.ShowAllView = false;
         ComponentModel.AllPanels   = null;

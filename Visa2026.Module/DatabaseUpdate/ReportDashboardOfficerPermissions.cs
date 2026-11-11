@@ -65,6 +65,7 @@ public static class ReportDashboardOfficerPermissions
 
         EnsureViewReadPermission<VwRdRegistration>(role);
         EnsureViewReadPermission<VwRdRegistrationOturumSayisi>(role);
+        EnsureViewReadPermission<VwRdRegistrationOturumSayisiFm>(role);
         EnsureViewReadPermission<VwRdToBeCheckedIn>(role);
         EnsureViewReadPermission<VwRdToBeCheckedOut>(role);
 

@@ -26,9 +26,17 @@ public static class ReportDashboardExcelTemplateService
     public static bool Supports(ReportDashboardCategory category, string? subReport) =>
         CanonicalKey(category, subReport) != null;
 
-    /// <summary>Stored key for this tab. Invitation (V) twins share the (P) key. A Maglumat is Work Permit only.</summary>
+    /// <summary>Stored key for this tab. Invitation (V) twins share the (P) key. FM tabs reuse employee templates except aktiv aile.</summary>
     public static string? CanonicalKey(ReportDashboardCategory category, string? subReport)
     {
+        // Family Member keys: aktiv aile has its own 14-col template; others reuse the employee template row.
+        if (ReportDashboardCatalog.IsFamilySubReport(subReport))
+        {
+            if (string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase))
+                return ReportDashboardCatalog.VisaAktivPersonellerFmKey;
+            return ReportDashboardCatalog.EmployeeTemplateKeyFor(subReport);
+        }
+
         if (category == ReportDashboardCategory.VisaExtension
             && string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
             return ReportDashboardCatalog.VisaUzatilanlarKey;
@@ -104,7 +112,7 @@ public static class ReportDashboardExcelTemplateService
             && string.Equals(subReport, ReportDashboardCatalog.WorkPermitPersonelSayiKey, StringComparison.OrdinalIgnoreCase))
             content = ExportPersonelSayi(objectSpace, rows);
         else if (category == ReportDashboardCategory.Registration
-            && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+            && ReportDashboardCatalog.IsRegistrationOturumSayisiSubReport(subReport))
             content = ExportOturumSayisi(objectSpace, rows);
         else
         {
@@ -225,7 +233,7 @@ public static class ReportDashboardExcelTemplateService
         }
 
         if (category == ReportDashboardCategory.VisaExtension
-            && string.Equals(subReport, ReportDashboardCatalog.VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+            && ReportDashboardCatalog.IsVisaUzatilanlarSubReport(subReport))
         {
             var uzatilanlar = template != null
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
@@ -235,7 +243,19 @@ public static class ReportDashboardExcelTemplateService
         }
 
         if (category == ReportDashboardCategory.VisaExtension
-            && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+            && string.Equals(subReport, ReportDashboardCatalog.VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase))
+        {
+            var aktivFm = template != null
+                && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
+                ? template
+                : ReportDashboardExcelTemplateWorkbook.BuildCalismaListesiStarter(
+                    "aktiv aile üyeleri",
+                    ReportDashboardWorkPermitCalismaExcel.AktivAileUyeleriHeaders);
+            return FinishDownload(category, subReport, aktivFm, headers);
+        }
+
+        if (category == ReportDashboardCategory.VisaExtension
+            && ReportDashboardCatalog.IsVisaAktivPersonellerSubReport(subReport))
         {
             var aktiv = template != null
                 && ReportDashboardExcelTemplateWorkbook.MatchesColumns(template, headers.Count)
@@ -267,7 +287,7 @@ public static class ReportDashboardExcelTemplateService
         }
 
         if (category == ReportDashboardCategory.Registration
-            && string.Equals(subReport, ReportDashboardCatalog.RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
+            && ReportDashboardCatalog.IsRegistrationOturumSayisiSubReport(subReport))
         {
             return FinishDownload(category, subReport, ReportDashboardRegistrationOturumSayisiExcel.BuildStarter(), headers);
         }

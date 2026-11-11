@@ -105,6 +105,7 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_work_permit_kota_oranimiz", "vw_rd_work_permit_kota_oranimiz.postgres.sql"),
         ("vw_rd_work_permit_personel_sayi", "vw_rd_work_permit_personel_sayi.postgres.sql"),
         ("vw_rd_registration_oturum_sayisi", "vw_rd_registration_oturum_sayisi.postgres.sql"),
+        ("vw_rd_registration_oturum_sayisi_fm", "vw_rd_registration_oturum_sayisi_fm.postgres.sql"),
         ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
     };
 
@@ -204,9 +205,13 @@ public static class ReportDashboardPostgresViewsHealSql
                 && (viewName != "vw_rd_visa_aktiv_personeller"
                     || (ColumnExists(connection, viewName, "VisaStartDate")
                         && ViewDefinitionContains(connection, viewName, "RegistrationKind")
+                        && ViewDefinitionContains(connection, viewName, "Relationships\" rel")
+                        && ViewDefinitionContains(connection, viewName, "CONCAT_WS(' · '")
                         && !WorkPermitCancellationStillRequiresIssued(connection, viewName)))
                 && (viewName != "vw_rd_visa_uzatilanlar"
-                    || ColumnExists(connection, viewName, "SecondLastApprovalDate")))
+                    || (ColumnExists(connection, viewName, "SecondLastApprovalDate")
+                        && ViewDefinitionContains(connection, viewName, "Relationships\" rel")
+                        && ViewDefinitionContains(connection, viewName, "CONCAT_WS(' · '"))))
                 continue;
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
@@ -272,6 +277,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     && requiresLinkedInstance
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
+                    && ViewDefinitionContains(connection, viewName, "Relationships\" rel")
+                    && ViewDefinitionContains(connection, viewName, "CONCAT_WS(' · '")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -300,6 +307,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "IssuingInvitationItemID")
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
+                    && ViewDefinitionContains(connection, viewName, "Relationships\" rel")
+                    && ViewDefinitionContains(connection, viewName, "CONCAT_WS(' · '")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -317,6 +326,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "ApplicationProfileInstanceID\" IS NOT NULL")
                     && ViewDefinitionContains(connection, viewName, "DepartmentLabel")
                     && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
+                    && ViewDefinitionContains(connection, viewName, "Relationships\" rel")
+                    && ViewDefinitionContains(connection, viewName, "CONCAT_WS(' · '")
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 
@@ -340,6 +351,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "eph.\"PositionID\"")
                     && ViewDefinitionContains(connection, viewName, "MigrationSubmittedDate")
                     && ViewDefinitionContains(connection, viewName, "IsShortVisaPeriod")
+                    && ViewDefinitionContains(connection, viewName, "Relationships\" rel")
+                    && ViewDefinitionContains(connection, viewName, "CONCAT_WS(' · '")
                     && (ColumnExists(connection, viewName, "Approval5Date")
                         || ColumnExists(connection, viewName, "approval5date"))
                     && (ColumnExists(connection, viewName, "MinistryShortName")

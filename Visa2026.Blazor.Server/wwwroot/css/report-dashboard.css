@@ -1212,6 +1212,38 @@
   outline-offset: 2px;
 }
 
+/* Employees / Family Members parent strip above sub-report chips */
+.rd-audience-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 8px 2px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--rd-border);
+}
+.rd-audience-tab {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rd-muted);
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.14s, background 0.14s, border-color 0.14s;
+}
+.rd-audience-tab:hover { color: var(--rd-text); background: var(--rd-bg); }
+.rd-audience-tab.active {
+  color: var(--rd-accent);
+  border-color: var(--rd-accent);
+  background: color-mix(in srgb, var(--rd-accent) 12%, transparent);
+}
+.rd-audience-tab:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 /* Sub-report tab strip — appears between report head and chart when a category has multiple report types */
 .rd-sub-tabs-row {
   display: flex;

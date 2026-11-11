@@ -9,6 +9,7 @@ namespace Visa2026.Module.Services.ReportDashboard;
 
 /// <summary>
 /// Shared Excel-bundle sheet order: catalog merge + persist for all officers.
+/// Employees and Family Members keep separate saved orders.
 /// </summary>
 public static class ReportDashboardExcelBundleOrder
 {
@@ -18,14 +19,25 @@ public static class ReportDashboardExcelBundleOrder
     };
 
     public static IReadOnlyList<(ReportDashboardCategory Category, string Key)> ResolveOrderedReports(
-        IObjectSpace objectSpace)
+        IObjectSpace objectSpace) =>
+        ResolveOrderedReports(objectSpace, familyMembers: false);
+
+    public static IReadOnlyList<(ReportDashboardCategory Category, string Key)> ResolveOrderedFamilyReports(
+        IObjectSpace objectSpace) =>
+        ResolveOrderedReports(objectSpace, familyMembers: true);
+
+    public static IReadOnlyList<(ReportDashboardCategory Category, string Key)> ResolveOrderedReports(
+        IObjectSpace objectSpace,
+        bool familyMembers)
     {
-        var catalog = ReportDashboardCatalog.ExcelBundleReports().ToList();
+        var catalog = (familyMembers
+            ? ReportDashboardCatalog.ExcelFamilyBundleReports()
+            : ReportDashboardCatalog.ExcelBundleReports()).ToList();
         var catalogKeys = new HashSet<string>(
             catalog.Select(EntryKey), StringComparer.OrdinalIgnoreCase);
 
         var settings = ReportDashboardExcelBundleSettings.TryGetInstance(objectSpace);
-        var saved = Parse(settings?.OrderJson);
+        var saved = Parse(familyMembers ? settings?.FamilyOrderJson : settings?.OrderJson);
         var ordered = new List<(ReportDashboardCategory Category, string Key)>(catalog.Count);
 
         foreach (var entry in saved)
@@ -49,7 +61,18 @@ public static class ReportDashboardExcelBundleOrder
 
     public static void SaveOrder(
         IObjectSpace objectSpace,
-        IReadOnlyList<(ReportDashboardCategory Category, string Key)> order)
+        IReadOnlyList<(ReportDashboardCategory Category, string Key)> order) =>
+        SaveOrder(objectSpace, order, familyMembers: false);
+
+    public static void SaveFamilyOrder(
+        IObjectSpace objectSpace,
+        IReadOnlyList<(ReportDashboardCategory Category, string Key)> order) =>
+        SaveOrder(objectSpace, order, familyMembers: true);
+
+    public static void SaveOrder(
+        IObjectSpace objectSpace,
+        IReadOnlyList<(ReportDashboardCategory Category, string Key)> order,
+        bool familyMembers)
     {
         var settings = ReportDashboardExcelBundleSettings.GetOrCreateInstance(objectSpace);
         var payload = order.Select(x => new OrderEntry
@@ -57,7 +80,11 @@ public static class ReportDashboardExcelBundleOrder
             C = (int)x.Category,
             K = x.Key ?? string.Empty,
         }).ToList();
-        settings.OrderJson = JsonSerializer.Serialize(payload, JsonOptions);
+        var json = JsonSerializer.Serialize(payload, JsonOptions);
+        if (familyMembers)
+            settings.FamilyOrderJson = json;
+        else
+            settings.OrderJson = json;
         objectSpace.CommitChanges();
     }
 

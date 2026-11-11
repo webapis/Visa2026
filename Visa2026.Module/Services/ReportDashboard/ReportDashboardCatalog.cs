@@ -214,6 +214,17 @@ public static class ReportDashboardCatalog
 
     public const string VisaUzatilanlarKey = "uzatilanlar";
 
+    /// <summary>Family Member (FM) dashboard / Excel-bundle keys — separate tabs from employees.</summary>
+    public const string InvitationReadyFmKey = "ready-by-project-fm";
+    public const string InvitationExpiredFmKey = "expired-invitation-fm";
+    public const string InvitationCancelledFmKey = "cancelled-invitation-fm";
+    public const string InvitationInProcessFmKey = "in-process-fm";
+    public const string InvitationInProcessLongFmKey = "in-process-long-fm";
+    public const string InvitationUsedFmKey = "used-fm";
+    public const string RegistrationOturumSayisiFmKey = "oturum-sayisi-fm";
+    public const string VisaUzatilanlarFmKey = "uzatilanlar-fm";
+    public const string VisaAktivPersonellerFmKey = "aktiv-personeller-fm";
+
     public static bool IsWorkPermitMaglumatSubReport(string? subReport) =>
         subReport is "active-by-project" or WorkPermitMaglumat2Key or WorkPermitMaglumat3Key;
 
@@ -470,6 +481,8 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.VisaExtension => [
             new() { Key = VisaUzatilanlarKey, Label = "uzatımlar" },
             new() { Key = VisaAktivPersonellerKey, Label = "aktiv personeller" },
+            new() { Key = VisaUzatilanlarFmKey, Label = "uzatımlar (FM)" },
+            new() { Key = VisaAktivPersonellerFmKey, Label = "aktiv aile üyeleri" },
             // Active Visa, Extension Required, Visa On Extension, Visa Validity, and Extension Result
             // stay loadable by key. Officers do not see them.
         ],
@@ -480,6 +493,12 @@ public static class ReportDashboardCatalog
             new() { Key = "in-process", Label = "işlemde olanlar kısa dönem" },
             new() { Key = InvitationInProcessLongKey, Label = "işlemde olanlar uzun dönem" },
             new() { Key = "used", Label = "Used Invitations" },
+            new() { Key = InvitationReadyFmKey, Label = "hazır kullanılabilecek davetiye (FM)" },
+            new() { Key = InvitationExpiredFmKey, Label = "Expired Invitation (FM)" },
+            new() { Key = InvitationCancelledFmKey, Label = "Cancelled Invitation (FM)" },
+            new() { Key = InvitationInProcessFmKey, Label = "işlemde olanlar kısa dönem (FM)" },
+            new() { Key = InvitationInProcessLongFmKey, Label = "işlemde olanlar uzun dönem (FM)" },
+            new() { Key = InvitationUsedFmKey, Label = "Used Invitations (FM)" },
             // Process Result and Invitation Validity stay loadable by key. Officers do not see them.
         ],
         ReportDashboardCategory.Registration =>
@@ -491,6 +510,7 @@ public static class ReportDashboardCatalog
             new() { Key = RegistrationToBeCheckedOutSubReportKey, Label = "To Be Checked Out" },
             new() { Key = RegistrationOnProcessSubReportKey, Label = "On Process" },
             new() { Key = RegistrationOturumSayisiKey, Label = "Oturum sayısı" },
+            new() { Key = RegistrationOturumSayisiFmKey, Label = "Oturum sayısı (FM)" },
         ],
         ReportDashboardCategory.WorkPermit => [
             new() { Key = "active-by-project", Label = "A. Maglumat" },
@@ -572,9 +592,116 @@ public static class ReportDashboardCatalog
         (ReportDashboardCategory.VisaExtension, VisaAktivPersonellerKey),
     ];
 
+    /// <summary>
+    /// Family Member Excel bundle — Invitation / Registration Oturum / Visa only (no Work Permit).
+    /// </summary>
+    public static IReadOnlyList<(ReportDashboardCategory Category, string Key)> ExcelFamilyBundleReports() =>
+    [
+        (ReportDashboardCategory.Invitation, InvitationReadyFmKey),
+        (ReportDashboardCategory.Invitation, InvitationExpiredFmKey),
+        (ReportDashboardCategory.Invitation, InvitationCancelledFmKey),
+        (ReportDashboardCategory.Invitation, InvitationInProcessFmKey),
+        (ReportDashboardCategory.Invitation, InvitationInProcessLongFmKey),
+        (ReportDashboardCategory.Invitation, InvitationUsedFmKey),
+        (ReportDashboardCategory.Registration, RegistrationOturumSayisiFmKey),
+        (ReportDashboardCategory.VisaExtension, VisaUzatilanlarFmKey),
+        (ReportDashboardCategory.VisaExtension, VisaAktivPersonellerFmKey),
+    ];
+
     public static string ExcelBundleLabel(ReportDashboardCategory category, string key) =>
         SubReports(category).FirstOrDefault(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase))?.Label
         ?? key;
+
+    public static bool IsFamilySubReport(string? subReport) =>
+        subReport is InvitationReadyFmKey
+            or InvitationExpiredFmKey
+            or InvitationCancelledFmKey
+            or InvitationInProcessFmKey
+            or InvitationInProcessLongFmKey
+            or InvitationUsedFmKey
+            or RegistrationOturumSayisiFmKey
+            or VisaUzatilanlarFmKey
+            or VisaAktivPersonellerFmKey;
+
+    /// <summary>
+    /// Parent Employees / Family Members strip on every category report view.
+    /// Work Permit stays Employees-only (no Family parent).
+    /// </summary>
+    public static bool SupportsFamilyAudienceParent(ReportDashboardCategory category) =>
+        category != ReportDashboardCategory.WorkPermit;
+
+    /// <summary>
+    /// Invitation / Registration / Visa Extension keep dedicated FM catalog keys.
+    /// Other categories reuse the same keys and filter by person role.
+    /// </summary>
+    public static bool UsesDedicatedFamilySubReports(ReportDashboardCategory category) =>
+        category is ReportDashboardCategory.Invitation
+            or ReportDashboardCategory.Registration
+            or ReportDashboardCategory.VisaExtension;
+
+    /// <summary>Maps UI person-type chrome to the Employees / Family Members parent.</summary>
+    public static ReportDashboardPersonType ResolveAudiencePersonType(
+        ReportDashboardPersonType personType) =>
+        personType == ReportDashboardPersonType.FamilyMembers
+            ? ReportDashboardPersonType.FamilyMembers
+            : ReportDashboardPersonType.Employees;
+
+    /// <summary>Sub-report chips visible under the Employees or Family Members parent.</summary>
+    public static IReadOnlyList<ReportDashboardSubReport> SubReportsForAudience(
+        ReportDashboardCategory category,
+        ReportDashboardPersonType audience,
+        IReadOnlyDictionary<string, int>? counts = null)
+    {
+        var list = OrderedSubReports(category, counts);
+        if (!UsesDedicatedFamilySubReports(category))
+            return list;
+
+        var family = ResolveAudiencePersonType(audience) == ReportDashboardPersonType.FamilyMembers;
+        return list.Where(s => IsFamilySubReport(s.Key) == family).ToList();
+    }
+
+    public static string DefaultSubReportForAudience(
+        ReportDashboardCategory category,
+        ReportDashboardPersonType audience)
+    {
+        var list = SubReportsForAudience(category, audience);
+        return list.Count > 0 ? list[0].Key : DefaultSubReport(category);
+    }
+
+    /// <summary>Under Family Members, drop the trailing " (FM)" from dedicated FM labels.</summary>
+    public static string AudienceSubReportLabel(
+        ReportDashboardSubReport subReport,
+        ReportDashboardPersonType audience)
+    {
+        var label = subReport.Label ?? string.Empty;
+        if (ResolveAudiencePersonType(audience) == ReportDashboardPersonType.FamilyMembers
+            && label.EndsWith(" (FM)", StringComparison.Ordinal))
+            return label[..^5];
+        return label;
+    }
+
+    /// <summary>Maps an FM catalog key to the employee template / loader key (same sheet layout).</summary>
+    public static string? EmployeeTemplateKeyFor(string? fmKey) => fmKey switch
+    {
+        InvitationReadyFmKey => "ready-by-project",
+        InvitationExpiredFmKey => "expired-invitation",
+        InvitationCancelledFmKey => "cancelled-invitation",
+        InvitationInProcessFmKey => "in-process",
+        InvitationInProcessLongFmKey => InvitationInProcessLongKey,
+        InvitationUsedFmKey => "used",
+        RegistrationOturumSayisiFmKey => RegistrationOturumSayisiKey,
+        VisaUzatilanlarFmKey => VisaUzatilanlarKey,
+        VisaAktivPersonellerFmKey => VisaAktivPersonellerKey,
+        _ => null,
+    };
+
+    /// <summary>Canonical key for template lookup (FM → employee except aktiv FM which has its own columns).</summary>
+    public static string ExcelTemplateLookupKey(string? subReport)
+    {
+        if (string.Equals(subReport, VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase))
+            return VisaAktivPersonellerFmKey;
+        return EmployeeTemplateKeyFor(subReport) ?? subReport ?? string.Empty;
+    }
 
     // ---- Labels ----------------------------------------------------------
 
@@ -589,8 +716,8 @@ public static class ReportDashboardCatalog
         personType == ReportDashboardPersonType.All;
 
     /// <summary>
-    /// Invitation, Work Permit, Registration, and Visa Extension officer reports are Employees only
-    /// until Family / Temporary Visitor sub-reports are added.
+    /// Invitation, Work Permit, Registration, and Visa Extension employee tabs force Employees
+    /// (unless the active sub-report is a Family Member key).
     /// </summary>
     public static bool RestrictsToEmployeesOnly(ReportDashboardCategory category) =>
         category is ReportDashboardCategory.Invitation
@@ -599,23 +726,26 @@ public static class ReportDashboardCatalog
             or ReportDashboardCategory.VisaExtension;
 
     /// <summary>
-    /// Family / Temporary Visitor tabs hide these categories' sub-reports for now.
+    /// Temporary Visitor chrome still hides these categories. Family Members use dedicated FM tabs
+    /// (not the person-type filter).
     /// </summary>
     public static bool SuppressesSubReportsForPersonType(
         ReportDashboardCategory category,
         ReportDashboardPersonType personType) =>
         RestrictsToEmployeesOnly(category)
-        && personType is ReportDashboardPersonType.FamilyMembers
-            or ReportDashboardPersonType.TemporaryVisitors;
+        && personType is ReportDashboardPersonType.TemporaryVisitors;
 
     /// <summary>
-    /// Maps All → Employees for employee-only categories. Family / Temporary stay as-is
-    /// (callers empty or suppress). Other categories unchanged.
+    /// FM keys → FamilyMembers; employee keys on employee-only categories → Employees;
+    /// Temporary Visitors stay as-is (callers empty or suppress).
     /// </summary>
     public static ReportDashboardPersonType ResolveEffectivePersonType(
         ReportDashboardCategory category,
-        ReportDashboardPersonType personType)
+        ReportDashboardPersonType personType,
+        string? subReport = null)
     {
+        if (IsFamilySubReport(subReport))
+            return ReportDashboardPersonType.FamilyMembers;
         if (!RestrictsToEmployeesOnly(category))
             return personType;
         if (personType is ReportDashboardPersonType.FamilyMembers
@@ -765,37 +895,54 @@ public static class ReportDashboardCatalog
 
     /// <summary>Active Invitation (P)/(V): issued, unused, not yet expired.</summary>
     public static bool IsInvitationReadySubReport(string? subReport) =>
-        subReport is "ready-by-project" or "ready-by-period-category";
+        subReport is "ready-by-project" or "ready-by-period-category" or InvitationReadyFmKey;
 
     public const string InvitationInProcessLongKey = "in-process-long";
 
     /// <summary>Invitation Process: applications that produce an invitation and do not have one yet.</summary>
     public static bool IsInvitationProcessSubReport(string? subReport) =>
-        subReport is "in-process" or "in-process-by-period-category-type"
+        subReport is "in-process" or "in-process-by-period-category-type" or InvitationInProcessFmKey
             || IsInvitationProcessLongSubReport(subReport);
 
     /// <summary>işlemde olanlar uzun dönem: Invitation Process rows whose visa period is longer than one month.</summary>
     public static bool IsInvitationProcessLongSubReport(string? subReport) =>
-        string.Equals(subReport, InvitationInProcessLongKey, StringComparison.OrdinalIgnoreCase);
+        string.Equals(subReport, InvitationInProcessLongKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(subReport, InvitationInProcessLongFmKey, StringComparison.OrdinalIgnoreCase);
 
     public static string? InvitationProcessSheetName(string? subReport) =>
         string.Equals(subReport, "in-process", StringComparison.OrdinalIgnoreCase)
             ? "işlemde olanlar kısa dönem"
-            : IsInvitationProcessLongSubReport(subReport)
-                ? "işlemde olanlar uzun dönem"
-                : null;
+            : string.Equals(subReport, InvitationInProcessFmKey, StringComparison.OrdinalIgnoreCase)
+                ? "işlemde olanlar kısa dönem (FM)"
+                : string.Equals(subReport, InvitationInProcessLongFmKey, StringComparison.OrdinalIgnoreCase)
+                    ? "işlemde olanlar uzun dönem (FM)"
+                    : string.Equals(subReport, InvitationInProcessLongKey, StringComparison.OrdinalIgnoreCase)
+                        ? "işlemde olanlar uzun dönem"
+                        : null;
 
     /// <summary>Expired Invitation: issued, unused, expiration date already passed.</summary>
     public static bool IsInvitationExpiredSubReport(string? subReport) =>
-        subReport is "expired-invitation";
+        subReport is "expired-invitation" or InvitationExpiredFmKey;
 
     /// <summary>Cancelled Invitation: one invitation line cancelled by a completed cancellation application.</summary>
     public static bool IsInvitationCancelledSubReport(string? subReport) =>
-        subReport is "cancelled-invitation";
+        subReport is "cancelled-invitation" or InvitationCancelledFmKey;
 
     /// <summary>Used Invitations: one issued visa per invitation line, including a visa cancelled later.</summary>
     public static bool IsInvitationUsedSubReport(string? subReport) =>
-        subReport is "used" or "used-by-period-category-type";
+        subReport is "used" or "used-by-period-category-type" or InvitationUsedFmKey;
+
+    public static bool IsVisaUzatilanlarSubReport(string? subReport) =>
+        string.Equals(subReport, VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(subReport, VisaUzatilanlarFmKey, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsVisaAktivPersonellerSubReport(string? subReport) =>
+        string.Equals(subReport, VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(subReport, VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsRegistrationOturumSayisiSubReport(string? subReport) =>
+        string.Equals(subReport, RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(subReport, RegistrationOturumSayisiFmKey, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Approval-step columns on Active Invitation, in leg sequence order.
@@ -942,6 +1089,10 @@ public static class ReportDashboardCatalog
             return ("VwRdWorkPermitPersonelSayi_ListView", typeof(VwRdWorkPermitPersonelSayi));
 
         if (category == ReportDashboardCategory.Registration
+            && string.Equals(subReport, RegistrationOturumSayisiFmKey, StringComparison.OrdinalIgnoreCase))
+            return ("VwRdRegistrationOturumSayisiFm_ListView", typeof(VwRdRegistrationOturumSayisiFm));
+
+        if (category == ReportDashboardCategory.Registration
             && string.Equals(subReport, RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase))
             return ("VwRdRegistrationOturumSayisi_ListView", typeof(VwRdRegistrationOturumSayisi));
 
@@ -1021,9 +1172,11 @@ public static class ReportDashboardCatalog
 
         if (category == ReportDashboardCategory.VisaExtension)
         {
-            if (string.Equals(subReport, VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase))
+            if (IsVisaUzatilanlarSubReport(subReport))
                 return ("VwRdVisaUzatilanlar_ListView", typeof(VwRdVisaUzatilanlar));
-            if (string.Equals(subReport, VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(subReport, VisaAktivPersonellerFmKey, StringComparison.OrdinalIgnoreCase))
+                return ("VwRdVisaAktivPersonellerFm_ListView", typeof(VwRdVisaAktivPersoneller));
+            if (IsVisaAktivPersonellerSubReport(subReport))
                 return ("VwRdVisaAktivPersoneller_ListView", typeof(VwRdVisaAktivPersoneller));
             if (UsesVisaActiveByProjectListView(subReport))
                 return ("VwRdVisaActiveByProject_ListView", typeof(VwRdVisaActiveByProject));
@@ -1156,7 +1309,8 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Registration, "to-be-checked-out") => ["Name", "Project", "Visa #", "Expiry", "Days Remaining"],
             (ReportDashboardCategory.Registration, "on-process") =>
                 ["Name", "Project", "App #", "App Date", "ApplicationProfileInstance Type · Process State"],
-            (ReportDashboardCategory.Registration, RegistrationOturumSayisiKey) =>
+            (ReportDashboardCategory.Registration, RegistrationOturumSayisiKey)
+                or (ReportDashboardCategory.Registration, RegistrationOturumSayisiFmKey) =>
                 ReportDashboardRegistrationOturumSayisiExcel.Headers,
             (ReportDashboardCategory.Registration, _) => ["Name", "Project", "Visa #", "Expiry", "Process State"],
             (ReportDashboardCategory.BorderZone, "by-zone")        => ["Name", "Project", "BZ Number",   "Valid Until", "Zone"],
@@ -1164,7 +1318,10 @@ public static class ReportDashboardCatalog
                 ["Name", "Project", "Passport #", "Visa #", "Expiry", "Days Remaining", "Project"],
             (ReportDashboardCategory.VisaExtension, VisaAktivPersonellerKey) =>
                 ReportDashboardWorkPermitCalismaExcel.AktivPersonellerHeaders,
-            (ReportDashboardCategory.VisaExtension, VisaUzatilanlarKey) =>
+            (ReportDashboardCategory.VisaExtension, VisaAktivPersonellerFmKey) =>
+                ReportDashboardWorkPermitCalismaExcel.AktivAileUyeleriHeaders,
+            (ReportDashboardCategory.VisaExtension, VisaUzatilanlarKey)
+                or (ReportDashboardCategory.VisaExtension, VisaUzatilanlarFmKey) =>
                 ReportDashboardVisaUzatilanlarExcel.Headers,
             (ReportDashboardCategory.VisaExtension, "by-period-category-type") =>
                 ["Name", "Project", "Passport #", "Visa #", "Expiry", "Days Remaining", "Period · Category · Type"],
@@ -1204,16 +1361,21 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.WorkPermit, "extension-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.WorkPermit, "by-status")         => ["Name", "Project", "WP Number",   "Expiry", "Status"],
             (ReportDashboardCategory.WorkPermit, "by-days-remaining") => ["Name", "Project", "WP Number",   "Expiry", "Days Remaining"],
-            (ReportDashboardCategory.Invitation, "ready-by-project") =>
+            (ReportDashboardCategory.Invitation, "ready-by-project")
+                or (ReportDashboardCategory.Invitation, InvitationReadyFmKey) =>
                 ActiveInvitationHeaders(null),
             (ReportDashboardCategory.Invitation, "ready-by-period-category") =>
                 ActiveInvitationHeaders("Period · Category · Type"),
-            (ReportDashboardCategory.Invitation, "expired-invitation") =>
+            (ReportDashboardCategory.Invitation, "expired-invitation")
+                or (ReportDashboardCategory.Invitation, InvitationExpiredFmKey) =>
                 ActiveInvitationHeaders(null),
-            (ReportDashboardCategory.Invitation, "cancelled-invitation") =>
+            (ReportDashboardCategory.Invitation, "cancelled-invitation")
+                or (ReportDashboardCategory.Invitation, InvitationCancelledFmKey) =>
                 ["Full name", "Project", "Invitation #", "Issued date", "Valid Until", "Visa Period", "App #", "Date", "Migration"],
-            (ReportDashboardCategory.Invitation, "in-process") => InvitationProcessHeaders(),
-            (ReportDashboardCategory.Invitation, InvitationInProcessLongKey) => InvitationProcessLongHeaders(),
+            (ReportDashboardCategory.Invitation, "in-process")
+                or (ReportDashboardCategory.Invitation, InvitationInProcessFmKey) => InvitationProcessHeaders(),
+            (ReportDashboardCategory.Invitation, InvitationInProcessLongKey)
+                or (ReportDashboardCategory.Invitation, InvitationInProcessLongFmKey) => InvitationProcessLongHeaders(),
             (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") =>
                 InvitationProcessHeaders(),
             (ReportDashboardCategory.Invitation, "process-result") => ["Name", "Project", "App #", "App Date", "Project · State"],
@@ -1223,7 +1385,8 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.Invitation, "rejected-by-project") => ["Name", "Project", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.Invitation, "rejected-by-period-category-type") =>
                 ["Name", "Project", "App #", "App Date", "Period · Category · Type · State"],
-            (ReportDashboardCategory.Invitation, "used") => UsedInvitationHeaders(includeChart: false),
+            (ReportDashboardCategory.Invitation, "used")
+                or (ReportDashboardCategory.Invitation, InvitationUsedFmKey) => UsedInvitationHeaders(includeChart: false),
             (ReportDashboardCategory.Invitation, "used-by-period-category-type") =>
                 UsedInvitationHeaders(includeChart: true),
             (ReportDashboardCategory.Invitation, "valid-until") => ["Name", "Project", "Invitation #", "Expiry", "Valid Until"],
@@ -1279,15 +1442,16 @@ public static class ReportDashboardCatalog
         bool oneLastValidVisaPerPerson = false,
         string? searchTerm = null)
     {
-        if (SuppressesSubReportsForPersonType(category, personType))
+        if (SuppressesSubReportsForPersonType(category, personType)
+            && !IsFamilySubReport(subReport))
             return "False";
 
-        personType = ResolveEffectivePersonType(category, personType);
+        personType = ResolveEffectivePersonType(category, personType, subReport);
 
         var usesVisaUzatilanlar = category == ReportDashboardCategory.VisaExtension
-            && string.Equals(subReport, VisaUzatilanlarKey, StringComparison.OrdinalIgnoreCase);
+            && IsVisaUzatilanlarSubReport(subReport);
         var usesVisaAktiv = category == ReportDashboardCategory.VisaExtension
-            && string.Equals(subReport, VisaAktivPersonellerKey, StringComparison.OrdinalIgnoreCase);
+            && IsVisaAktivPersonellerSubReport(subReport);
         var usesVisaActive = category == ReportDashboardCategory.VisaExtension
             && UsesVisaActiveListView(subReport);
         var usesExtRequired = category == ReportDashboardCategory.VisaExtension
@@ -1305,7 +1469,7 @@ public static class ReportDashboardCatalog
         var usesRegistrationOnProcess = category == ReportDashboardCategory.Registration
             && IsRegistrationOnProcessSubReport(subReport);
         var usesRegistrationOturumSayisi = category == ReportDashboardCategory.Registration
-            && string.Equals(subReport, RegistrationOturumSayisiKey, StringComparison.OrdinalIgnoreCase);
+            && IsRegistrationOturumSayisiSubReport(subReport);
         var usesRegistrationRd = category == ReportDashboardCategory.Registration
             && !usesRegistrationOnProcess
             && !usesRegistrationOturumSayisi;
