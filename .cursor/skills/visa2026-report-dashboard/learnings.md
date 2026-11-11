@@ -4,6 +4,18 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-11-11 — Invitation Process Şu anki Durumu ministry names
+
+**Ask:** işlemde olanlar kısa/uzun dönem Excel Şu anki Durumu showed `1-NJI MINISTRLIKDE`. Use approval-leg ministry name (uzatımlar style). Migration steps as localized Yabancıların şubesinde.
+
+**Now:** `vw_rd_invitation_in_process` exposes `MinistryShortName`. `StatusLabel` is `FormatHeldStatus` (same as uzatımlar): review → Enerji Bakanlığında / …; `SUBMITTED_MIGRATION` → `Yabancıların şubesinde CO belgisine bekleniyor`; `PROCESS_STARTED` → `Yabancıların şubesinde · CO numarası alındı`; else OFISDE. Preview, ListView, Excel, and uzatımlar share it.
+
+**Prevent:** Do not use ApplicationLocations NameTm for company status. Heal when `MinistryShortName` is missing.
+
+**Files:** `vw_rd_invitation_in_process.postgres.sql`, `VwRdInvitationInProcess.cs`
+
+---
+
 ## 2026-10-29 — Work Permit checkboxes removed
 
 **Ask:** Remove the three Work Permit checkboxes: one last valid work permit, valid visa only, and include archived.

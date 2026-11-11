@@ -162,9 +162,11 @@ public class VwRdVisaUzatilanlar
     public static string FormatHeldStatus(string? stateCode, string? ministryShortName)
     {
         var code = (stateCode ?? string.Empty).Trim();
-        if (code.Equals("SUBMITTED_MIGRATION", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("PROCESS_STARTED", StringComparison.OrdinalIgnoreCase))
-            return "Yabancıların şubesinde";
+        // Company sheets: place first, then the migration step that was reached.
+        if (code.Equals("SUBMITTED_MIGRATION", StringComparison.OrdinalIgnoreCase))
+            return "Yabancıların şubesinde CO belgisine bekleniyor";
+        if (code.Equals("PROCESS_STARTED", StringComparison.OrdinalIgnoreCase))
+            return "Yabancıların şubesinde · CO numarası alındı";
 
         if (code.Length >= 16
             && code[0] is >= '1' and <= '5'

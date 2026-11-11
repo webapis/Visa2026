@@ -2926,7 +2926,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         ColumnB = r.SubcontractorLabel ?? string.Empty,
                         ColumnC = r.ApplicationNumber ?? string.Empty,
                         ColumnD = FormatDate(r.ApplicationDate),
-                        ColumnE = string.IsNullOrWhiteSpace(r.StatusLabel) ? "OFISDE" : r.StatusLabel.Trim(),
+                        ColumnE = r.StatusLabel,
                         ColumnG = FormatDate(r.MigrationSubmittedDate),
                         ColumnH = r.VisaPeriodLabel ?? string.Empty,
                         ColumnI = FormatMigration(r.MigrationDate, r.MigrationResultNumber),

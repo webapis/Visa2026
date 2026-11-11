@@ -103,6 +103,7 @@ SELECT
         ELSE 'st-pending'
     END                                                                     AS "StatusCssClass",
     COALESCE(ast."Code", '')                                                AS "ProgressStateCode",
+    COALESCE(NULLIF(BTRIM(held_ministry."Name"), ''), '')                   AS "MinistryShortName",
     (
         COALESCE(NULLIF(BTRIM(pc."NameTm"), ''), '(No project)')
         || ' · ' ||
@@ -198,6 +199,32 @@ LEFT JOIN "ApplicationLocations" held
             THEN 'AT_THE_MINISTERY_' || left(BTRIM(ast."Code"), 1)
         ELSE 'AT_OFFICE'
     END
+LEFT JOIN LATERAL (
+    SELECT BTRIM(legs.mname) AS "Name"
+    FROM (
+        SELECT snap."Sequence" AS seq, snap."MinistryShortName" AS mname
+        FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap
+        WHERE snap."ApplicationProfileInstanceId" = a."ID"
+          AND COALESCE(snap."GCRecord", 0) = 0
+        UNION ALL
+        SELECT leg."Sequence", m."ShortNameTm"
+        FROM "ApprovalLegProfileMinistryLegs" leg
+        INNER JOIN "ApprovingMinistries" m
+            ON m."ID" = leg."ApprovingMinistryId"
+           AND COALESCE(m."GCRecord", 0) = 0
+        WHERE a."ApprovalLegProfileID" IS NOT NULL
+          AND leg."ApprovalLegProfileId" = a."ApprovalLegProfileID"
+          AND COALESCE(leg."GCRecord", 0) = 0
+          AND NOT EXISTS (
+              SELECT 1
+              FROM "ApplicationProfileInstanceApprovalLegSnapshots" snap2
+              WHERE snap2."ApplicationProfileInstanceId" = a."ID"
+                AND COALESCE(snap2."GCRecord", 0) = 0)
+    ) legs
+    WHERE BTRIM(COALESCE(ast."Code", '')) ~ '^[1-5]_REVIEW_STARTED$'
+      AND legs.seq = (left(BTRIM(ast."Code"), 1))::int
+    LIMIT 1
+) held_ministry ON TRUE
 LEFT JOIN LATERAL (
     SELECT
         MAX(dec.d) FILTER (WHERE legs.seq = 1) AS "Approval1Date",

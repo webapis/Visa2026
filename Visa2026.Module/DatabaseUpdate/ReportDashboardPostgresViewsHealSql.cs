@@ -342,6 +342,8 @@ public static class ReportDashboardPostgresViewsHealSql
                     && ViewDefinitionContains(connection, viewName, "IsShortVisaPeriod")
                     && (ColumnExists(connection, viewName, "Approval5Date")
                         || ColumnExists(connection, viewName, "approval5date"))
+                    && (ColumnExists(connection, viewName, "MinistryShortName")
+                        || ColumnExists(connection, viewName, "ministryshortname"))
                     && !ViewDefinitionContains(connection, viewName, "ApplicationItems"))
                     continue;
 

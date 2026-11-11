@@ -194,8 +194,26 @@ public class VwRdInvitationInProcess
     [Browsable(false)]
     public virtual bool ValidityExtended { get; set; }
 
+    [Browsable(false)]
+    [Column("StatusLabel")]
+    public virtual string LocationStatusLabel { get; set; }
+
+    [Browsable(false)]
+    public virtual string MinistryShortName { get; set; }
+
+    /// <summary>
+    /// Company / Preview / ListView status: ministry locative on review, migration Turkish labels, else OFISDE.
+    /// </summary>
+    [NotMapped]
     [ModelDefault("Caption", "Process state")]
-    public virtual string StatusLabel { get; set; }
+    public string StatusLabel
+    {
+        get
+        {
+            var text = VwRdVisaUzatilanlar.FormatHeldStatus(ProgressStateCode, MinistryShortName);
+            return string.IsNullOrWhiteSpace(text) ? "OFISDE" : text;
+        }
+    }
 
     [Browsable(false)]
     public virtual string StatusCssClass { get; set; }

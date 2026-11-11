@@ -36,6 +36,19 @@ public static class WorkPermitQuotaSettingsSchemaSql
             ALTER COLUMN "GCRecord" SET NOT NULL,
             ALTER COLUMN "OptimisticLockField" SET DEFAULT 0,
             ALTER COLUMN "OptimisticLockField" SET NOT NULL;
+
+          -- One singleton row so Configuration ListView / DetailView is never empty
+          -- when ModuleInfo skipped OrganizationSingletonSeedUpdater.
+          IF NOT EXISTS (
+              SELECT 1 FROM "WorkPermitQuotaSettings" WHERE COALESCE("GCRecord", 0) = 0
+          ) THEN
+            INSERT INTO "WorkPermitQuotaSettings" (
+              "ID", "LocalPersonnelCount", "ForeignRatio", "LocalRatio",
+              "GCRecord", "OptimisticLockField"
+            ) VALUES (
+              gen_random_uuid(), 0, 10, 90, 0, 0
+            );
+          END IF;
         END $$;
         """;
 
