@@ -134,6 +134,25 @@ Rejection is optional and never blocks green. When the gate passes, green **repl
 
 Implementation: `ApplicationWorkspaceViaMinistryIssuanceGreenGate` → `ApplicationListViewDisplayState.Resolve`.
 
+## 7b. Submitted→Migration yellow; AS/CO received blue
+
+On **all** Application Profile Instance ListViews:
+
+| Latest progress | Row color |
+|---|---|
+| `SUBMITTED_MIGRATION` (Submitted to migration service) | **Yellow** (`Khaki` / `#fde047`) |
+| `PROCESS_STARTED` (AS/CO number received) | **Yellow** `#FED700` / dark text (sampled from officer CO ListView screenshot) |
+
+These override SLA tint for those steps. Via Ministries issuance-complete green (§7a) still wins when required Result chips are N/N.
+
+## 7c. Approval legs — teal between At Office and Submitted→Migration
+
+Ministry approval-leg steps (`N_REVIEW_STARTED`, `N_REVIEW_APPROVED`, `AT_THE_MINISTERY_N`) use **teal** `#3FE0D0` / `#134e4a` text on all Application Profile Instance ListViews (sampled from officer “Ministrlige iberilen” screenshot). Rejected legs stay red. Precedence: issuance green → AS/CO yellow → Submitted yellow → approval teal.
+
+## 7d. At Office — peach
+
+`IS_BEING_PREPARED` / `AT_OFFICE` (Ofisde) ListView rows use peach `#FEDEAF` / `#7c4a03` text (sampled from officer Ofisde screenshot).
+
 ## 7. Out of scope (this requirement)
 
 - SLA / overdue highlighting (`DaysElapsed` > max) — separate **follow-up** signal (notification, badge); may **add** border or icon later, not replace state color.
@@ -149,3 +168,6 @@ Implementation: `ApplicationWorkspaceViaMinistryIssuanceGreenGate` → `Applicat
 |------|------|
 | 2026-06-01 | Requirement captured: Application ListView row color from latest `ApplicationProgress` / `CurrentState`; implementation explicitly deferred |
 | 2026-11-11 | Via Ministries: green when `PROCESS_STARTED` (AS/CO) and required Result issuance complete (visa ignored for invitation-getting) |
+| 2026-11-11 | `SUBMITTED_MIGRATION` yellow; `PROCESS_STARTED` (AS/CO) yellow `#FED700`; Via Ministries green gate still overrides |
+| 2026-11-11 | Approval-leg ListView rows (between At Office and Submitted) use teal `#3FE0D0` |
+| 2026-11-11 | At Office (IS_BEING_PREPARED / AT_OFFICE) ListView rows use peach $peach |

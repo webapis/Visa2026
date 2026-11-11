@@ -31,9 +31,39 @@ internal readonly struct ApplicationListViewDisplayState
         var listRowAppearance = !string.IsNullOrEmpty(slaAppearanceCode)
             ? slaAppearanceCode
             : CompletedRouteAppearance(application, primaryStateCode);
-        // Via Ministries: AS/CO received + required Result docs → same green as Issued.
+        // Green (issuance) > AS/CO yellow > Submitted yellow > approval-leg teal > At Office peach > SLA/progress.
         if (ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(application, primaryStateCode))
             listRowAppearance = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        else if (string.Equals(
+            primaryStateCode,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            StringComparison.OrdinalIgnoreCase))
+            listRowAppearance = ApplicationProfileInstanceProgressStateCodes.ProcessStarted;
+        else if (string.Equals(
+            primaryStateCode,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            StringComparison.OrdinalIgnoreCase))
+            listRowAppearance = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration;
+        else if (ApplicationProfileInstanceProgressLegCodes.IsApprovalLegListRowTintState(primaryStateCode))
+            listRowAppearance = primaryStateCode;
+        else if (string.Equals(
+            primaryStateCode,
+            ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
+            StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                primaryStateCode,
+                ApplicationProfileInstanceProgressLocationCodes.AtOffice,
+                StringComparison.OrdinalIgnoreCase)
+            || string.Equals(
+                listRowAppearance,
+                ApplicationProfileInstanceProgressLocationCodes.AtOffice,
+                StringComparison.OrdinalIgnoreCase))
+            listRowAppearance = string.Equals(
+                primaryStateCode,
+                ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared,
+                StringComparison.OrdinalIgnoreCase)
+                ? ApplicationProfileInstanceProgressStateCodes.IsBeingPrepared
+                : ApplicationProfileInstanceProgressLocationCodes.AtOffice;
         var listRowCssClass = ResolveListRowCssClass(listRowAppearance);
 
         return new ApplicationListViewDisplayState

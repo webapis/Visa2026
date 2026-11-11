@@ -38,6 +38,27 @@ public static class ApplicationProfileInstanceProgressLegCodes
         return string.Equals(trimmed, ReviewStarted(1), StringComparison.OrdinalIgnoreCase);
     }
 
+
+    /// <summary>
+    /// ListView teal band: ministry review started/approved or at-ministry location —
+    /// after At Office and before Submitted to migration (rejects stay red).
+    /// </summary>
+    public static bool IsApprovalLegListRowTintState(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        var trimmed = stateCode.Trim();
+        if (TryParseMinistryLegFromLocationCode(trimmed, out _))
+            return true;
+
+        if (!TryParseMinistryLegFromStateCode(trimmed, out _))
+            return false;
+
+        return trimmed.EndsWith("_REVIEW_STARTED", StringComparison.OrdinalIgnoreCase)
+            || trimmed.EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase);
+    }
+
     public static bool IsReviewStateCode(string? stateCode) =>
         TryParseMinistryLegFromStateCode(stateCode, out _);
 

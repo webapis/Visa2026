@@ -150,7 +150,7 @@ Lookup: `DatabaseUpdate/LookupCatalogs/application-state.json` · BO: `Applicati
 | `2_REVIEW_APPROVED` | 2-NJI IŞ YLALAŞYK ALYNDY | Green | T5 | Info | `MintCream` | `#ecfccb` / `#3f6212` | `DarkGreen` |
 | `1_REVIEW_REJECTED` | 1-NJI IŞ YLALAŞYK BERILMEDI | Red | T4 | Critical | `PeachPuff` | `#ffedd5` / `#c2410c` | `OrangeRed` |
 | `2_REVIEW_REJECTED` | 2-NJI IŞ YLALAŞYK BERILMEDI | Red | T5 | Critical | `NavajoWhite` | `#fed7aa` / `#9a3412` | `Chocolate` |
-| `PROCESS_STARTED` | İŞLENMEKDE | Blue | T4 | Info | `CornflowerBlue` | `#93c5fd` / `#1d4ed8` | `RoyalBlue` |
+| `SUBMITTED_MIGRATION` | Submitted to migration | Gold | T4 | Info | `Khaki` | `#fde047` / `#854d0e` | `DarkGoldenrod` |`n| `PROCESS_STARTED` | İŞLENMEKDE / AS(CO) received | Gold | T5 | Info | `Gold` | `#FED700` / `#1a1a1a` | `Black` |
 | `PROCESS_CANCELLED` | ÝÜZTUTMA ÝATYRYLDY | Red | T6 | Critical | `RosyBrown` | `#fecaca` / `#991b1b` | `Firebrick` |
 | `PROCESS_REJECTED` | GARŞYLYK BERILDI | Red | T6′ | Critical | `Salmon` | `#fca5a5` / `#b91c1c` | `IndianRed` |
 | `PROCESS_ISSUED` | RESMILEŞDİRİLDİ | Green | T6 | Healthy | `SpringGreen` | `#86efac` / `#15803d` | `DarkGreen` |
@@ -170,8 +170,8 @@ Lookup: `DatabaseUpdate/LookupCatalogs/application-location.json` · BO: `Applic
 
 \* No exact System.Drawing name — use hex in CSS; nearest XAF fallback `CornflowerBlue` / `LightSteelBlue` respectively.
 
-**Gold family** (`AtOffice`, `IS_BEING_PREPARED`, `AT_OFFICE`) — same “held locally / not yet dispatched” meaning, three tones.  
-**Blue family** (`OnProcess`, `*_REVIEW_STARTED`, `PROCESS_STARTED`, ministry & migration locations) — same “in the pipeline” meaning, progressively deeper blues.  
+**Gold family** (`AtOffice`, `IS_BEING_PREPARED`, `AT_OFFICE`, `PROCESS_STARTED` AS/CO received) — local / AS-CO milestone yellows.  
+**Blue family** (`OnProcess`, `*_REVIEW_STARTED`, ministry & migration locations) — same “in the pipeline” meaning, progressively deeper blues.  
 **Red family** — all cancellation, rejection, and expiry states; document flags use cooler rose tones, workflow rejections use warmer peach-to-red tones.
 
 ---
@@ -293,7 +293,7 @@ Evaluators on `Visa`, `WorkPermitItem`, `Passport`, etc. still map to three buck
 | `OnProcess` | T1 | LightSkyBlue |
 | `1_REVIEW_STARTED` | T2 | LightSteelBlue |
 | `2_REVIEW_STARTED` | T3 | SkyBlue |
-| `PROCESS_STARTED` | T4 | CornflowerBlue |
+| `SUBMITTED_MIGRATION` | T4 | Khaki |`n| `PROCESS_STARTED` | T5 | Gold |
 | `AT_THE_MINISTERY_1` | T5 | `#c7d2fe` |
 | `AT_THE_MINISTERY_2` | T6 | `#a5b4fc` |
 | `AT_MIGRATION_SERVICE` | T6′ | LightCyan |
