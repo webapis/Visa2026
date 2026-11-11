@@ -18,7 +18,8 @@
 | Case Organization catalogs (2026-09-03) | `application-profile-instance-create-choose-organization-prototype.png`, overview/edit PNGs, `application-profile-organization-catalogs-prototype.png` — [README](prototypes/application-profile-instance-organization-README.md). **Shipped** (live FKs, tenant Default; Config + inline **+ New / Edit**). |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
-**Location grants:** [`docs/WORK_PERMIT_LOCATION_GRANT.md`](WORK_PERMIT_LOCATION_GRANT.md) — Serhet Ýaka requested BZ + BorderZone; goşmaça barjak ýeri requested WP + `WorkPermitLocationGrant` (prototypes under `docs/prototypes/gosmaca-*`, `serhet-yaka-*`, `location-permissions-timeline-01.jpg`).
+**Location grants:** [`docs/WORK_PERMIT_LOCATION_GRANT.md`](WORK_PERMIT_LOCATION_GRANT.md) — Serhet Ýaka requested BZ + BorderZone; goşmaça barjak ýeri requested WP + `WorkPermitLocationGrant` (prototypes under `docs/prototypes/gosmaca-*`, `serhet-yaka-*`, `location-permissions-timeline-01.jpg`).  
+**Progress step visibility:** [`docs/APPLICATION_PROFILE_PROGRESS_STEPS.md`](APPLICATION_PROFILE_PROGRESS_STEPS.md) — which `ProgressSteps` keys are visible per Calik Energi profile (Office / Ministry / Submitted / Migration / Issued / Rejected / Cancelled).
 
 **Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
 

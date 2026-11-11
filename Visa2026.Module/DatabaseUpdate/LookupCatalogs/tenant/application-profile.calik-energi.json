@@ -420,9 +420,9 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": true },
-        { "Key": "process-issued", "Visible": true },
-        { "Key": "process-rejected", "Visible": true },
-        { "Key": "process-cancelled", "Visible": true }
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
       ],
       "ProfileCatalogKey": "App_Change_Inv"
     },
@@ -1886,9 +1886,9 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": true },
-        { "Key": "process-issued", "Visible": true },
-        { "Key": "process-rejected", "Visible": true },
-        { "Key": "process-cancelled", "Visible": true }
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
       ],
       "ProfileCatalogKey": "App_Change_Visa_Category"
     },
@@ -1960,9 +1960,9 @@
         { "Key": "ministry", "Visible": false },
         { "Key": "migration-submitted", "Visible": true },
         { "Key": "migration", "Visible": true },
-        { "Key": "process-issued", "Visible": true },
-        { "Key": "process-rejected", "Visible": true },
-        { "Key": "process-cancelled", "Visible": true }
+        { "Key": "process-issued", "Visible": false },
+        { "Key": "process-rejected", "Visible": false },
+        { "Key": "process-cancelled", "Visible": false }
       ],
       "ProfileCatalogKey": "App_Change_Passport"
     },
