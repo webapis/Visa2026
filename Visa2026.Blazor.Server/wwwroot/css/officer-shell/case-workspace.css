@@ -1179,6 +1179,13 @@ select.cw-summary-field__input option {
   background: var(--os-warn-soft, color-mix(in srgb, #f59e0b 28%, var(--os-panel)));
   color: var(--os-warn, #92400e);
 }
+/* Warning content token stays a dark amber on Fluent Dark, so header labels disappear. */
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-prog-step__badge--active,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .ct-prog-acc__hint,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .ct-prog-v--current .ct-prog-v__date {
+  color: #fde68a;
+  -webkit-text-fill-color: #fde68a;
+}
 .cw-prog-step__badge--muted { background: var(--os-surface); color: var(--os-muted); }
 .cw-prog-step__date { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--os-muted); }
 .cw-prog-step__result-number { display: block; margin-top: 2px; font-size: 0.72rem; font-weight: 600; color: var(--os-ink); }

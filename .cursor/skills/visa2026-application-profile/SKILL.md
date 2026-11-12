@@ -153,7 +153,7 @@ flowchart LR
 | First open of a case shows white skeleton bars | `.cw-loading` bars use `#e2e8f0` / `#f8fafc` | `case-workspace.css`; bars shimmer between `--os-line` and the panel |
 | Organization letterhead fields stay white | Disabled `.cw-summary-field__input` is `#f8fafc` | `case-workspace.css`; Organization inputs use `--os-panel` |
 | Case summary right-side number/date card stays white | `.cw-summary-identity` is `#f8fafc` | `case-workspace.css`; the card uses `--os-surface`, fields use `--os-panel` |
-| Progress header “In progress” / “Result needed” disappear on Fluent Dark | Badge text is `#92400e`; current date is `#d97706` | `case-workspace.css` + `case-tabs.css`; header labels use `--os-warn` |
+| Progress header “In progress” / “Result needed” is hard to read on Fluent Dark | Those labels use `--os-warn`, which stays dark amber | `case-workspace.css`; dark theme uses `#fde68a` |
 | Wizard still has Company, Signatories | Removed 2026-09-03 — not profile config. Create picker does not ask either | Case Organization edits the tenant Default rows applied at create |
 | Template overview lists Approval legs catalog | Removed — shared catalog, not profile config | **Choose Approval legs** (pick / Catalog / Make default) |
 | Can leave Overview with empty Case summary | Office preparation + red tiles | `ApplicationWorkspaceCaseSummaryCompletenessGate`; People & links stay open |
