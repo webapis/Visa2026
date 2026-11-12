@@ -114,6 +114,65 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-prog-v { display: grid; grid-template-columns: 88px 1fr; gap: 12px; }
 .ct-prog-v__rail { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
 .ct-prog-v__date { font-size: 0.72rem; color: var(--os-muted); margin-bottom: 6px; text-align: center; }
+.ct-prog-v__date.is-exceptional { color: var(--os-warn); font-weight: 700; }
+.ct-prog-v__exception {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--os-warn);
+  background: var(--os-warn-soft);
+  border: 1px solid color-mix(in srgb, var(--os-warn) 45%, transparent);
+}
+.ct-prog-date-line { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.ct-prog-date-line__field { flex: 1 1 180px; min-width: 0; }
+.ct-exceptional-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0;
+  padding: 0 12px 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--os-line);
+  background: var(--os-panel);
+  color: var(--os-ink);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ct-exceptional-date:disabled { opacity: 0.5; cursor: default; }
+.ct-exceptional-date__knob {
+  width: 34px;
+  height: 18px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--os-ink) 22%, var(--os-panel));
+  position: relative;
+  flex: none;
+}
+.ct-exceptional-date__knob::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--os-panel);
+}
+.ct-exceptional-date.is-on {
+  border-color: var(--os-warn);
+  background: var(--os-warn-soft);
+  color: var(--os-warn);
+}
+.ct-exceptional-date.is-on .ct-exceptional-date__knob { background: var(--os-warn); }
+.ct-exceptional-date.is-on .ct-exceptional-date__knob::after { left: 18px; }
+.ct-label--exceptional { color: var(--os-warn); }
+.ct-field-hint { margin: 6px 0 0; color: var(--os-warn); font-size: 0.82rem; }
 .ct-prog-v__dot {
   width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--os-line);
   display: grid; place-items: center; background: var(--os-panel); color: var(--os-ink); font-size: 0.85rem;
@@ -307,6 +366,12 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   border-color: var(--os-bad) !important;
   box-shadow: 0 0 0 1px var(--os-bad);
   background: color-mix(in srgb, var(--os-bad) 12%, transparent);
+}
+.ct-prog-advance .ct-prog-date.is-exceptional,
+.ct-step-correct .ct-prog-date.is-exceptional {
+  border-color: var(--os-warn) !important;
+  box-shadow: 0 0 0 1px var(--os-warn);
+  background: var(--os-warn-soft);
 }
 .ct-prog-advance .os-input.is-invalid {
   border-color: var(--os-bad);

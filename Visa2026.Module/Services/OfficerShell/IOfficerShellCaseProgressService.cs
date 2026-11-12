@@ -26,7 +26,8 @@ public interface IOfficerShellCaseProgressService
         string? processNumber = null,
         string? resultNumber = null,
         string? submissionDocumentNumber = null,
-        IReadOnlyList<(string Name, byte[] Content)>? additionalFiles = null);
+        IReadOnlyList<(string Name, byte[] Content)>? additionalFiles = null,
+        bool exceptionalDate = false);
 
     OfficerShellCaseProgressResult CorrectStep(
         IObjectSpace objectSpace,
@@ -35,7 +36,8 @@ public interface IOfficerShellCaseProgressService
         DateTime stepDate,
         string? submissionDocumentNumber,
         string? resultNumber = null,
-        string? processNumber = null);
+        string? processNumber = null,
+        bool exceptionalDate = false);
 
     OfficerShellCaseProgressResult AddProgressFile(
         IObjectSpace objectSpace,

@@ -32,11 +32,27 @@
     <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
         @if (Step.CanCorrectDate && Step.DateProgressId is Guid)
         {
-            <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="step-date-@Step.Key">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
-            <OfficerDateEdit InputId="@($"step-date-{Step.Key}")"
-                             @bind-Date="_date"
-                             CssClass="@(IsDateInvalid ? "ct-prog-date is-invalid" : "ct-prog-date")"
-                             Enabled="@(!Busy)" />
+            <div class="ct-prog-date-line">
+                <div class="ct-prog-date-line__field">
+                    <label class="ct-label @DateLabelClass" for="step-date-@Step.Key">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
+                    <OfficerDateEdit InputId="@($"step-date-{Step.Key}")"
+                                     @bind-Date="_date"
+                                     CssClass="@DateCssClass"
+                                     Enabled="@(!Busy)" />
+                </div>
+                <button type="button"
+                        class="ct-exceptional-date @(_exceptionalDate ? "is-on" : null)"
+                        aria-pressed="@_exceptionalDate"
+                        disabled="@Busy"
+                        @onclick="ToggleExceptionalDate">
+                    <span class="ct-exceptional-date__knob" aria-hidden="true"></span>
+                    <span>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDate")</span>
+                </button>
+            </div>
+            @if (_exceptionalDate)
+            {
+                <p class="ct-field-hint">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDateHint")</p>
+            }
             @if (IsDateInvalid && !string.IsNullOrWhiteSpace(DateError))
             {
                 <p class="ct-field-error" role="alert">@DateError</p>
@@ -157,6 +173,7 @@
     [Parameter] public EventCallback RevertRequested { get; set; }
 
     private DateTime? _date;
+    private bool _exceptionalDate;
     private string _number = string.Empty;
     private string _resultNumber = string.Empty;
     private string _processNumber = string.Empty;
@@ -165,13 +182,14 @@
 
     protected override void OnParametersSet()
     {
-        var stamp = $"{Step.DateProgressId:N}:{Step.DateValue:yyyyMMdd}:{Step.SubmissionDocumentNumber}:{Step.ResultNumber}:{Step.ProcessNumber}";
+        var stamp = $"{Step.DateProgressId:N}:{Step.DateValue:yyyyMMdd}:{Step.ExceptionalDate}:{Step.SubmissionDocumentNumber}:{Step.ResultNumber}:{Step.ProcessNumber}";
         if (stamp == _stamp)
             return;
 
         _stamp = stamp;
         _showDateErrors = false;
         _date = Step.DateValue;
+        _exceptionalDate = Step.ExceptionalDate;
         _number = Step.SubmissionDocumentNumber ?? string.Empty;
         _resultNumber = Step.ResultNumber ?? string.Empty;
         _processNumber = Step.ProcessNumber ?? string.Empty;
@@ -189,6 +207,9 @@
                     ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired")
                     : null;
 
+            if (_exceptionalDate)
+                return null;
+
             return ApplicationProfileInstanceProgressStepDates.TryValidate(
                 date,
                 Step.EarliestDate,
@@ -200,6 +221,37 @@
                 : error;
         }
     }
+
+    private bool DateBreaksOrder
+    {
+        get
+        {
+            if (_date is not DateTime date || date == default)
+                return false;
+
+            return !ApplicationProfileInstanceProgressStepDates.TryValidate(
+                date,
+                Step.EarliestDate,
+                Step.LatestDate,
+                Step.PrecedingStepLabel,
+                Step.FollowingStepLabel,
+                out _);
+        }
+    }
+
+    private bool ShowExceptionalChrome => _exceptionalDate && DateBreaksOrder;
+
+    private string DateCssClass =>
+        IsDateInvalid ? "ct-prog-date is-invalid"
+        : ShowExceptionalChrome ? "ct-prog-date is-exceptional"
+        : "ct-prog-date";
+
+    private string? DateLabelClass =>
+        IsDateInvalid ? "ct-label--error"
+        : ShowExceptionalChrome ? "ct-label--exceptional"
+        : null;
+
+    private void ToggleExceptionalDate() => _exceptionalDate = !_exceptionalDate;
 
     private bool IsDateInvalid =>
         !string.IsNullOrWhiteSpace(DateError)
@@ -228,6 +280,7 @@
             SubmissionDocumentNumber = Step.CanEditSubmissionNumber ? _number : null,
             ResultNumber = Step.CanEditResultNumber ? _resultNumber : null,
             ProcessNumber = Step.CanEditProcessNumber ? _processNumber : null,
+            ExceptionalDate = _exceptionalDate,
         });
     }
 

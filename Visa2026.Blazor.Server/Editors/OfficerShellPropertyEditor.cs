@@ -1177,7 +1177,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 request.Date,
                 request.SubmissionDocumentNumber,
                 request.ResultNumber,
-                request.ProcessNumber);
+                request.ProcessNumber,
+                request.ExceptionalDate);
             if (!result.Success)
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save this step.";
@@ -1275,7 +1276,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 request.SubmissionDocumentNumber,
                 request.AdditionalFiles.Count == 0
                     ? null
-                    : request.AdditionalFiles.Select(file => (file.FileName, file.Content)).ToList());
+                    : request.AdditionalFiles.Select(file => (file.FileName, file.Content)).ToList(),
+                request.ExceptionalDate);
 
             if (!result.Success)
             {

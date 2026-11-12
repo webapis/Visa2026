@@ -312,6 +312,9 @@ public sealed class ApplicationWorkspaceCaseProgressStep
 
     public DateTime? DateValue { get; init; }
 
+    /// <summary>Saved override: this step's date may sit outside its neighbors. Order stays put.</summary>
+    public bool ExceptionalDate { get; init; }
+
     public bool CanCorrectDate { get; set; }
 
     public DateTime? EarliestDate { get; set; }

@@ -63,7 +63,7 @@
                 <div class="ct-prog-v__rail" aria-hidden="true">
                     @if (showRailDate)
                     {
-                        <span class="ct-prog-v__date">@step.Date</span>
+                        <span class="ct-prog-v__date @(step.ExceptionalDate ? "is-exceptional" : null)">@step.Date</span>
                     }
                     <span class="ct-prog-v__dot">@icon</span>
                     <span class="ct-prog-v__line"></span>
@@ -79,6 +79,10 @@
                                 disabled="@_busy"
                                 @onclick="() => ToggleAccordion(step)">
                             <strong>@StepText(step.Label)</strong>
+                            @if (step.ExceptionalDate)
+                            {
+                                <span class="ct-prog-v__exception">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDate")</span>
+                            }
                             @if (!string.IsNullOrWhiteSpace(badge))
                             {
                                 <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
@@ -232,12 +236,28 @@
                             @if (step.CanAdvance)
                             {
                                 <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
-                                    <label class="ct-label @(IsDateInvalid ? "ct-label--error" : null)" for="advance-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
-                                    <OfficerDateEdit @ref="_advanceDateEdit"
-                                                     InputId="@($"advance-date-{ApplicationProfileInstanceId}")"
-                                                     @bind-Date="_advanceDate"
-                                                     CssClass="@AdvanceDateCssClass"
-                                                     Enabled="@(!_busy)" />
+                                    <div class="ct-prog-date-line">
+                                        <div class="ct-prog-date-line__field">
+                                            <label class="ct-label @AdvanceDateLabelClass" for="advance-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
+                                            <OfficerDateEdit @ref="_advanceDateEdit"
+                                                             InputId="@($"advance-date-{ApplicationProfileInstanceId}")"
+                                                             @bind-Date="_advanceDate"
+                                                             CssClass="@AdvanceDateCssClass"
+                                                             Enabled="@(!_busy)" />
+                                        </div>
+                                        <button type="button"
+                                                class="ct-exceptional-date @(_exceptionalDate ? "is-on" : null)"
+                                                aria-pressed="@_exceptionalDate"
+                                                disabled="@_busy"
+                                                @onclick="ToggleExceptionalDate">
+                                            <span class="ct-exceptional-date__knob" aria-hidden="true"></span>
+                                            <span>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDate")</span>
+                                        </button>
+                                    </div>
+                                    @if (_exceptionalDate)
+                                    {
+                                        <p class="ct-field-hint">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDateHint")</p>
+                                    }
                                     @if (IsDateInvalid && !string.IsNullOrWhiteSpace(AdvanceDateError))
                                     {
                                         <p class="ct-field-error" role="alert">@AdvanceDateError</p>
@@ -441,6 +461,7 @@
     private string _processNumber = string.Empty;
     private string _resultNumber = string.Empty;
     private DateTime? _advanceDate = DateTime.Today;
+    private bool _exceptionalDate;
     private bool _busy;
     private bool _advancing;
     private string? _editingStepKey;
@@ -467,7 +488,18 @@
     internal DateTime AdvanceDate =>
         _advanceDate is DateTime date && date != default ? date.Date : DateTime.Today;
 
-    private string AdvanceDateCssClass => IsDateInvalid ? "ct-prog-date is-invalid" : "ct-prog-date";
+    private string AdvanceDateCssClass =>
+        IsDateInvalid ? "ct-prog-date is-invalid"
+        : ShowExceptionalDateChrome ? "ct-prog-date is-exceptional"
+        : "ct-prog-date";
+
+    private string? AdvanceDateLabelClass =>
+        IsDateInvalid ? "ct-label--error"
+        : ShowExceptionalDateChrome ? "ct-label--exceptional"
+        : null;
+
+    private bool ShowExceptionalDateChrome =>
+        _exceptionalDate && !IsMissingAdvanceDate(_advanceDate) && AdvanceDateBreaksOrder();
 
     private static bool IsMissingAdvanceDate(DateTime? value) =>
         value is not DateTime date || date == default;
@@ -642,6 +674,7 @@
             && !string.Equals(_advanceFormStepKey, current.Key, StringComparison.OrdinalIgnoreCase))
         {
             _advanceDate = DateTime.Today;
+            _exceptionalDate = false;
             _resultNumber = string.Empty;
             _submissionDocumentNumber = string.Empty;
             _selectedAdvanceStateCode = string.Empty;
@@ -695,7 +728,7 @@
     private bool TryGetAdvanceDateError(DateTime? value, out string? error)
     {
         error = null;
-        if (value is not DateTime date || date == default)
+        if (value is not DateTime date || date == default || _exceptionalDate)
             return true;
 
         var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
@@ -721,6 +754,25 @@
             followingLabel,
             out error);
     }
+
+    private bool AdvanceDateBreaksOrder()
+    {
+        if (IsMissingAdvanceDate(_advanceDate))
+            return false;
+
+        var saved = _exceptionalDate;
+        _exceptionalDate = false;
+        try
+        {
+            return !TryGetAdvanceDateError(_advanceDate, out _);
+        }
+        finally
+        {
+            _exceptionalDate = saved;
+        }
+    }
+
+    private void ToggleExceptionalDate() => _exceptionalDate = !_exceptionalDate;
 
     private static string FileUploadLabel(ApplicationWorkspaceCaseProgressStep step) =>
         string.Equals(step.Key, "office", StringComparison.OrdinalIgnoreCase)
@@ -908,6 +960,7 @@
             {
                 StateCode = code,
                 Date = AdvanceDate,
+                ExceptionalDate = _exceptionalDate,
                 LetterFileName = _pendingFiles.Count == 0 ? null : _pendingFiles[0].FileName,
                 LetterContent = _pendingFiles.Count == 0 ? null : _pendingFiles[0].Content,
                 AdditionalFiles = _pendingFiles.Skip(1).ToList(),

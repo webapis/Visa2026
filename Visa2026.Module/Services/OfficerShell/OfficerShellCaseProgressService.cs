@@ -67,7 +67,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         string? processNumber = null,
         string? resultNumber = null,
         string? submissionDocumentNumber = null,
-        IReadOnlyList<(string Name, byte[] Content)>? additionalFiles = null)
+        IReadOnlyList<(string Name, byte[] Content)>? additionalFiles = null,
+        bool exceptionalDate = false)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -134,6 +135,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                     latestBound,
                     precedingLabel,
                     followingLabel,
+                    exceptionalDate,
                     out var advanceDateError))
             {
                 return OfficerShellCaseProgressResult.Failed(
@@ -214,6 +216,7 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         var progress = objectSpace.CreateObject<ApplicationProfileInstanceProgress>();
         progress.ApplicationProfileInstance = application;
         progress.Date = date;
+        progress.ExceptionalDate = exceptionalDate;
         progress.State = state;
         application.ProgressHistory ??= new System.Collections.ObjectModel.ObservableCollection<ApplicationProfileInstanceProgress>();
         if (!application.ProgressHistory.Contains(progress))
@@ -366,7 +369,8 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
         DateTime stepDate,
         string? submissionDocumentNumber,
         string? resultNumber = null,
-        string? processNumber = null)
+        string? processNumber = null,
+        bool exceptionalDate = false)
     {
         if (objectSpace == null)
             return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
@@ -396,10 +400,12 @@ public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressS
                 step.LatestDate,
                 step.PrecedingStepLabel,
                 step.FollowingStepLabel,
+                exceptionalDate,
                 out var dateError))
             return OfficerShellCaseProgressResult.Failed(dateError ?? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
 
         row.Date = stepDate.Date;
+        row.ExceptionalDate = exceptionalDate;
         if (step.CanEditResultNumber)
         {
             if (!ApplicationProgressResultNumberHelper.TryNormalize(

@@ -113,6 +113,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.BorderZoneSourceVisaSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressResultNumberSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileInstanceProgressExceptionalDateSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressSubmissionDocumentSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileInstanceProgressFilesSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProfileSchemaUpdater(objectSpace, versionFromDB),

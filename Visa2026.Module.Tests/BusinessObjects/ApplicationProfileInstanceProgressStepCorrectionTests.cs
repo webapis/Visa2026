@@ -49,6 +49,38 @@ public class ApplicationProfileInstanceProgressStepCorrectionTests
     }
 
     [Fact]
+    public void Exceptional_date_accepts_a_day_outside_both_neighbors()
+    {
+        var ok = ApplicationProfileInstanceProgressStepDates.TryValidate(
+            new DateTime(2026, 10, 5),
+            new DateTime(2026, 10, 12),
+            new DateTime(2026, 10, 17),
+            "Office preparation",
+            "Energetika",
+            exceptionalDate: true,
+            out var error);
+
+        Assert.True(ok);
+        Assert.Null(error);
+    }
+
+    [Fact]
+    public void Exceptional_date_still_requires_a_date()
+    {
+        var ok = ApplicationProfileInstanceProgressStepDates.TryValidate(
+            default,
+            new DateTime(2026, 10, 12),
+            latest: null,
+            precedingStepLabel: null,
+            followingStepLabel: null,
+            exceptionalDate: true,
+            out var error);
+
+        Assert.False(ok);
+        Assert.False(string.IsNullOrWhiteSpace(error));
+    }
+
+    [Fact]
     public void Same_day_as_both_neighbors_is_accepted()
     {
         var day = new DateTime(2026, 9, 24, 15, 0, 0);

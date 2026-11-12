@@ -5516,6 +5516,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Geçen",
             ["ru-RU"] = "Прошло",
         },
+        ["ApplicationProfileInstance.Workspace.ExceptionalDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exceptional date",
+            ["tr-TR"] = "İstisnai tarih",
+            ["tk-TM"] = "Aýratyn sene",
+            ["ru-RU"] = "Исключительная дата",
+        },
+        ["ApplicationProfileInstance.Workspace.ExceptionalDateHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The step order stays the same. Any date is accepted.",
+            ["tr-TR"] = "Adım sırası değişmez. Herhangi bir tarih kabul edilir.",
+            ["tk-TM"] = "Ädimleriň tertibi üýtgemeýär. Islendik sene kabul edilýär.",
+            ["ru-RU"] = "Порядок шагов не меняется. Принимается любая дата.",
+        },
         ["ApplicationProfileInstance.Workspace.ExpectedCompletion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Expected completion",

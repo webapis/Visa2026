@@ -158,6 +158,7 @@ namespace Visa2026.Blazor.Server
                         ApplicationProfileInstanceCutoverSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceProgressResultNumberSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceProgressExceptionalDateSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceProgressSubmissionDocumentSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileInstanceProgressFilesSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
@@ -363,6 +364,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationProfileInstanceCutoverSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceProgressResultNumberSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceProgressExceptionalDateSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceProgressSubmissionDocumentSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileInstanceProgressFilesSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);

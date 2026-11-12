@@ -20,6 +20,8 @@ public sealed class OfficerShellCaseProgressAdvanceRequest
 
     public string? SubmissionDocumentNumber { get; init; }
 
+    public bool ExceptionalDate { get; init; }
+
     public IReadOnlyList<ProgressLetterInlineFile> AdditionalFiles { get; init; }
         = Array.Empty<ProgressLetterInlineFile>();
 }
@@ -35,6 +37,8 @@ public sealed class OfficerShellCaseProgressStepCorrection
     public string? ResultNumber { get; init; }
 
     public string? ProcessNumber { get; init; }
+
+    public bool ExceptionalDate { get; init; }
 }
 
 public sealed class OfficerShellCaseProgressFileChange

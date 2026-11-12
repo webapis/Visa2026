@@ -563,6 +563,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             Label = OfficeLabel,
             Date = date,
             DateValue = officeDateRow?.Date is { } officeDate && officeDate != default ? officeDate : null,
+            ExceptionalDate = officeDateRow?.ExceptionalDate == true,
             DateProgressId = officeDateId,
             CanCorrectDate = officeCanCorrect,
             CanEditFiles = officeCanCorrect,
@@ -746,6 +747,7 @@ internal static class ApplicationWorkspaceProgressTimeline
                 ? date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
                 : string.Empty,
             DateValue = row?.Date is { } storedDate && storedDate != default ? storedDate : null,
+            ExceptionalDate = row?.ExceptionalDate == true,
             DateProgressId = dateProgressId,
             CanCorrectDate = canCorrect,
             CanEditFiles = canCorrect,

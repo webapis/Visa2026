@@ -6,11 +6,12 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// A progress date stays on or between the previous step and the next step (same day allowed).
+/// An exceptional date skips both bounds. The step sequence does not change.
 /// </summary>
 public static class ApplicationProfileInstanceProgressStepDates
 {
     public static bool TryValidate(DateTime value, DateTime? earliest, DateTime? latest, out string? error) =>
-        TryValidate(value, earliest, latest, precedingStepLabel: null, followingStepLabel: null, out error);
+        TryValidate(value, earliest, latest, precedingStepLabel: null, followingStepLabel: null, exceptionalDate: false, out error);
 
     public static bool TryValidate(
         DateTime value,
@@ -18,6 +19,16 @@ public static class ApplicationProfileInstanceProgressStepDates
         DateTime? latest,
         string? precedingStepLabel,
         string? followingStepLabel,
+        out string? error) =>
+        TryValidate(value, earliest, latest, precedingStepLabel, followingStepLabel, exceptionalDate: false, out error);
+
+    public static bool TryValidate(
+        DateTime value,
+        DateTime? earliest,
+        DateTime? latest,
+        string? precedingStepLabel,
+        string? followingStepLabel,
+        bool exceptionalDate,
         out string? error)
     {
         var date = value.Date;
@@ -25,6 +36,12 @@ public static class ApplicationProfileInstanceProgressStepDates
         {
             error = VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired");
             return false;
+        }
+
+        if (exceptionalDate)
+        {
+            error = null;
+            return true;
         }
 
         var min = earliest?.Date;

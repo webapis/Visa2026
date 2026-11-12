@@ -1144,6 +1144,7 @@ public class ApplicationWorkspaceProgressTimelineTests
         {
             ID = Guid.NewGuid(),
             Date = new DateTime(2026, 9, 10),
+            ExceptionalDate = true,
             State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.Review1Approved },
             MinistryLetterFile = new FileData { ID = Guid.NewGuid(), FileName = "turkmenenergo.pdf", Size = 10 },
             Files = new ObservableCollection<ApplicationProfileInstanceProgressFile>(),
@@ -1166,6 +1167,8 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.True(office.CanCorrectDate);
         Assert.True(office.CanEditFiles);
         Assert.Equal(new DateTime(2026, 9, 10), office.LatestDate);
+        Assert.False(office.ExceptionalDate);
+        Assert.True(firstLeg.ExceptionalDate);
         Assert.True(firstLeg.CanCorrectDate);
         Assert.True(firstLeg.CanEditFiles);
         Assert.True(firstLeg.CanEditResultNumber);

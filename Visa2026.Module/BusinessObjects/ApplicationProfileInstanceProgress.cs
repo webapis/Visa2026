@@ -58,6 +58,17 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime Date { get; set; }
 
         /// <summary>
+        /// The officer accepted a date outside the previous and next step.
+        /// The step stays in its sequence place.
+        /// </summary>
+        [Column("ExceptionalDate")]
+        [XafDisplayName("Exceptional date")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool ExceptionalDate { get; set; }
+
+        /// <summary>
         /// Officer notes. Hidden in the case workspace and progress views until the field is needed again.
         /// Still copied from office preparation onto the first progress row.
         /// </summary>
