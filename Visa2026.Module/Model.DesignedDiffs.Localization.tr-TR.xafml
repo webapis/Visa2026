@@ -258,7 +258,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Month" Caption="Ay" />
-        <Member Name="ProcessNumber" Caption="Süreç numarası" />
+        <Member Name="ProcessNumber" Caption="CO numarası" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="VisaCategory" Caption="Vize Kategorisi" />
         <Member Name="VisaPeriod" Caption="Vize Süresi" />
@@ -441,7 +441,7 @@
         <Member Name="Month" Caption="Ay" />
         <Member Name="MovementPermitLocation" Caption="Hareket İzni Yeri" />
         <Member Name="People" Caption="Kişiler" />
-        <Member Name="ProcessNumber" Caption="Süreç numarası" />
+        <Member Name="ProcessNumber" Caption="CO numarası" />
         <Member Name="ProgressSlaStatement" Caption="Onay süresi" />
         <Member Name="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
@@ -2536,7 +2536,7 @@
         <ColumnInfo Id="MigrationService" Caption="Göç Dairesi" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
-        <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
@@ -2563,7 +2563,7 @@
         <ColumnInfo Id="MigrationService" Caption="Göç Dairesi" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
-        <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
@@ -2593,7 +2593,7 @@
         <ColumnInfo Id="MigrationService" Caption="Göç Dairesi" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
-        <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO numarası" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
@@ -2649,7 +2649,7 @@
         <ColumnInfo Id="LinkedPeopleDisplay" Caption="Kişiler" />
         <ColumnInfo Id="MigrationService" Caption="Göç Dairesi" />
         <ColumnInfo Id="Month" Caption="Ay" />
-        <ColumnInfo Id="ProcessNumber" Caption="Süreç numarası" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO numarası" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Başvuru ilerlemesi" />
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="VisaCategory" Caption="Vize Kategorisi" />

@@ -258,7 +258,7 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Month" Caption="Aý" />
-        <Member Name="ProcessNumber" Caption="Proses belgisi" />
+        <Member Name="ProcessNumber" Caption="CO belgesi" />
         <Member Name="ProjectContract" Caption="Taslama belgisi" />
         <Member Name="VisaCategory" Caption="Wiza kategoriýasy" />
         <Member Name="VisaPeriod" Caption="Wiza möhleti" />
@@ -441,7 +441,7 @@
         <Member Name="Month" Caption="Aý" />
         <Member Name="MovementPermitLocation" Caption="Hereket rugsady ýeri" />
         <Member Name="People" Caption="Adamlar" />
-        <Member Name="ProcessNumber" Caption="Proses belgisi" />
+        <Member Name="ProcessNumber" Caption="CO belgesi" />
         <Member Name="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <Member Name="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <Member Name="ProjectContract" Caption="Taslama belgisi" />
@@ -2536,7 +2536,7 @@
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
-        <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO belgesi" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
@@ -2563,7 +2563,7 @@
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
-        <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO belgesi" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
@@ -2593,7 +2593,7 @@
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
-        <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO belgesi" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
@@ -2649,7 +2649,7 @@
         <ColumnInfo Id="LinkedPeopleDisplay" Caption="Ýüztutmadaky adamlar we netijesi" />
         <ColumnInfo Id="MigrationService" Caption="Migrasiýa gullugy" />
         <ColumnInfo Id="Month" Caption="Aý" />
-        <ColumnInfo Id="ProcessNumber" Caption="Proses belgisi" />
+        <ColumnInfo Id="ProcessNumber" Caption="CO belgesi" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Ýüztutma ýagdaýy we netijesi" />
         <ColumnInfo Id="ProjectContract" Caption="Taslama belgisi" />
         <ColumnInfo Id="VisaCategory" Caption="Wiza kategoriýasy" />

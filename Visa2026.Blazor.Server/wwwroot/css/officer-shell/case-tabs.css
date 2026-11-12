@@ -182,6 +182,14 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-prog-v--tone-rejected .ct-prog-v__dot { background: var(--os-bad-soft); border-color: var(--os-bad); color: var(--os-ink); }
 .ct-prog-v--tone-cancelled .ct-prog-v__dot { background: var(--os-bad-soft); border-color: var(--os-bad); color: var(--os-ink); }
 .ct-prog-v--current .ct-prog-v__dot { background: var(--os-accent); border-color: var(--os-accent); color: #fff; }
+.ct-prog-v--pending .ct-prog-v__dot,
+.ct-prog-v--tone-pending .ct-prog-v__dot {
+  background: var(--os-surface);
+  border-color: var(--os-line);
+  color: transparent;
+}
+.ct-prog-v--tone-ok .ct-prog-v__dot { background: var(--os-ok-soft); border-color: var(--os-ok); color: var(--os-ink); }
+.ct-field-hint--muted { color: var(--os-muted); }
 .ct-prog-v__line { flex: 1; width: 2px; background: var(--os-line); min-height: 24px; margin: 4px 0; }
 .ct-prog-v--current .ct-prog-v__line { background: var(--os-accent); }
 .ct-prog-v:last-child .ct-prog-v__line { display: none; }
@@ -828,4 +836,123 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 }
 .os-person-link-picker--dialog .os-person-link-picker__list {
   max-height: min(50vh, 420px);
+}
+
+/* Progress UX polish — sticky actions, edit clarity, files, timeline */
+.ct-page__sub--progress {
+  margin: 0 0 16px;
+  font-size: 0.92rem;
+  color: var(--os-ink);
+  font-weight: 650;
+}
+.ct-prog-date-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.ct-prog-date-stack .ct-exceptional-date {
+  align-self: flex-start;
+}
+.ct-prog-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.ct-prog-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin-top: 18px;
+  padding: 12px 0 4px;
+  background: linear-gradient(to top, var(--os-panel) 70%, transparent);
+  border-top: 1px solid var(--os-line);
+}
+.ct-prog-actions__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--os-muted);
+  line-height: 1.4;
+}
+.ct-prog-actions__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ct-prog-revert-link {
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  color: var(--os-muted);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+.ct-prog-revert-link:hover:not(:disabled) { color: var(--os-ink); }
+.ct-prog-revert-link:disabled { opacity: 0.55; cursor: default; text-decoration: none; }
+.ct-step-edit-btn {
+  padding: 4px 10px !important;
+  font-size: 0.78rem !important;
+}
+.ct-prog-acc__head {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.ct-prog-v--current .ct-prog-v__date {
+  color: #d97706;
+  font-weight: 700;
+}
+.ct-prog-v--current .ct-prog-v__dot {
+  background: #f59e0b;
+  border-color: #d97706;
+  color: #111;
+  font-size: 0.65rem;
+}
+.ct-upload--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px dashed var(--os-line);
+  border-radius: 8px;
+  background: var(--os-surface);
+  color: var(--os-ink);
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+  position: relative;
+}
+.ct-upload--compact input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.ct-upload--compact .ct-upload__hint {
+  display: block;
+  font-weight: 500;
+  color: var(--os-muted);
+  font-size: 0.72rem;
+}
+.ct-step-file__btn--danger {
+  color: #b91c1c !important;
+  border-color: color-mix(in srgb, #b91c1c 35%, var(--os-line)) !important;
+}
+.ct-step-file .ct-letter-preview {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
 }

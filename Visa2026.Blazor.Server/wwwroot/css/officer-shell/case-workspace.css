@@ -1175,7 +1175,7 @@ select.cw-summary-field__input option {
 }
 .cw-prog-step__badge--rejected { background: color-mix(in srgb, var(--os-bad) 16%, var(--os-panel)); color: var(--os-muted); }
 .cw-prog-step__badge--cancelled { background: color-mix(in srgb, var(--os-bad) 16%, var(--os-panel)); color: var(--os-muted); }
-.cw-prog-step__badge--active { background: var(--os-accent-soft); color: var(--os-muted); }
+.cw-prog-step__badge--active { background: color-mix(in srgb, #f59e0b 28%, var(--os-panel)); color: #92400e; }
 .cw-prog-step__badge--muted { background: var(--os-surface); color: var(--os-muted); }
 .cw-prog-step__date { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--os-muted); }
 .cw-prog-step__result-number { display: block; margin-top: 2px; font-size: 0.72rem; font-weight: 600; color: var(--os-ink); }

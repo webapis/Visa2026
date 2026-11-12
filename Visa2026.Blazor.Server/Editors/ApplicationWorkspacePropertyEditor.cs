@@ -170,6 +170,8 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
                 ? service.Load(objectSpace, applicationId)
                 : new ApplicationWorkspaceMockQueryService().Load(objectSpace, applicationId);
 
+            ApplyCaseTabCaption(model.Snapshot);
+
             if (model.SelectedPersonRowIndex >= (model.Snapshot?.Tabs
                     .FirstOrDefault(t => t.Key == "person")?.RowPersonIds.Count ?? 0))
             {
@@ -1354,5 +1356,25 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         return _application != null
             ? ApplicationWorkspacePendingOpenGate.Get(_application)
             : Guid.Empty;
+    }
+
+
+    private void ApplyCaseTabCaption(ApplicationWorkspaceSnapshot? snapshot)
+    {
+        if (CurrentObject is not ApplicationWorkspaceHost host || snapshot == null)
+            return;
+
+        var chrome = snapshot.CaseChrome ?? snapshot.CaseView?.Chrome;
+        var name = chrome?.ProfileTemplateName;
+        if (string.IsNullOrWhiteSpace(name))
+            name = chrome?.DisplayNumber;
+        if (string.IsNullOrWhiteSpace(name))
+            name = snapshot.Profile?.Title;
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+
+        host.TabCaption = VisaUiMessages.Format("ApplicationProfileInstance.Workspace.CaseTabCaption", name.Trim());
+        if (View != null && !string.IsNullOrWhiteSpace(host.TabCaption))
+            View.Caption = host.TabCaption;
     }
 }

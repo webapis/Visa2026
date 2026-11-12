@@ -19,16 +19,22 @@
              role="@(DisplayStatusIsError ? "alert" : "status")">@DisplayStatusMessage</div>
     }
 
-    <h2 class="ct-page__title">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Progress")</h2>
-    <p class="ct-page__sub">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProgressSubtitle", view.Chrome.TemplateFamilyLabel, LocalizedCurrentStepHeading)</p>
+    <p class="ct-page__sub ct-page__sub--progress">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ProgressSubtitle", view.Chrome.TemplateFamilyLabel, LocalizedCurrentStepHeading)</p>
     <div class="ct-prog-v-list">
         @foreach (var step in view.ProgressSteps)
         {
             // Result dropdown is unsaved until Advance. Keep the current node blue + pen
             // (same as Office preparation), not Issued/Approved green tick.
             var isCurrent = string.Equals(step.State, "current", StringComparison.OrdinalIgnoreCase);
+            var isPending = string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase);
+            var isDone = string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase);
             var badge = ApplicationWorkspaceListProgressSteps.Badge(step);
-            var tone = isCurrent ? "current" : step.OutcomeKind;
+            // Tone follows OutcomeKind, but pending/current always win so empty future steps never look completed.
+            var tone = isPending
+                ? "pending"
+                : isCurrent
+                    ? "current"
+                    : string.IsNullOrWhiteSpace(step.OutcomeKind) ? (isDone ? "ok" : "pending") : step.OutcomeKind;
             var badgeCls = tone switch
             {
                 "issued" => "issued",
@@ -41,24 +47,24 @@
             var letterName = step.MinistryLetterFileName;
             var hasStepFiles = step.Files.Count > 0 || !string.IsNullOrWhiteSpace(letterName);
             var stepFilesProgressId = step.ProgressId ?? step.DateProgressId;
-            var isPending = string.Equals(step.State, "pending", StringComparison.OrdinalIgnoreCase);
             var isOpen = IsAccordionOpen(step);
-            var showRailDate = !isCurrent
-                && !isPending
+            var showRailDate = !isPending
                 && !string.IsNullOrWhiteSpace(step.Date)
                 && step.Date != "—"
                 && step.Date != "-";
             var showResultHint = isCurrent && step.CanAdvance && step.ResultOptions.Count > 0;
-            var icon = isCurrent
+            var icon = isPending
                 ? ""
-                : tone switch
-                {
-                    "rejected" => "✕",
-                    "cancelled" => "–",
-                    "issued" or "ok" => "✓",
-                    "pending" => "",
-                    _ => isPending ? "" : "○",
-                };
+                : isCurrent
+                    ? "●"
+                    : tone switch
+                    {
+                        "rejected" => "✕",
+                        "cancelled" => "–",
+                        "issued" or "ok" => "✓",
+                        "current" => "●",
+                        _ => "○",
+                    };
             <div class="ct-prog-v ct-prog-v--@step.State ct-prog-v--tone-@tone @(IsMigrationStep(step) ? "ct-prog-v--migration" : null) @(isOpen ? "is-open" : null) @(isPending ? "ct-prog-v--locked" : null)">
                 <div class="ct-prog-v__rail" aria-hidden="true">
                     @if (showRailDate)
@@ -115,19 +121,14 @@
                     @if (isOpen)
                     {
                     <div class="ct-prog-acc__panel">
-                    @if (CanOfferPen(step))
+                    @if (CanOfferPen(step) && !IsEditing(step))
                     {
                         <div class="ct-prog-acc__tools">
                             <button type="button"
-                                    class="ct-step-pen @(IsEditing(step) ? "is-open" : null)"
-                                    title="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.EditStep")"
-                                    aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.EditStep")"
-                                    aria-pressed="@IsEditing(step)"
+                                    class="os-btn os-btn--ghost ct-step-edit-btn"
                                     disabled="@_busy"
                                     @onclick="() => ToggleStepEdit(step)">
-                                <svg viewBox="0 0 16 16" aria-hidden="true">
-                                    <path fill="currentColor" d="M12.1 1.3a1.5 1.5 0 0 1 2.1 2.1l-8.4 8.4-2.8.7.7-2.8 8.4-8.4zM2 13.2h12v1.3H2z" />
-                                </svg>
+                                @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.EditStep")
                             </button>
                         </div>
                     }
@@ -145,7 +146,8 @@
                                                             ShowRevertToHere="@(ShowRevertToHere && step.CanRevertToHere)"
                                                             SaveRequested="SaveStepAsync"
                                                             FileChangeRequested="ChangeFileAsync"
-                                                            RevertRequested="EventCallback.Factory.Create(this, () => RevertAsync(step))" />
+                                                            RevertRequested="EventCallback.Factory.Create(this, () => RevertAsync(step))"
+                                                            CancelRequested="EventCallback.Factory.Create(this, () => CancelStepEdit(step))" />
                     }
                     else if (CanOfferPen(step))
                     {
@@ -230,7 +232,7 @@
                             @if (step.CanAdvance)
                             {
                                 <div class="ct-prog-advance">
-                                    <div class="ct-prog-date-line">
+                                    <div class="ct-prog-date-stack">
                                         <div class="ct-prog-date-line__field">
                                             <label class="ct-label @AdvanceDateLabelClass" for="advance-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
                                             <OfficerDateEdit @ref="_advanceDateEdit"
@@ -247,11 +249,8 @@
                                             <span class="ct-exceptional-date__knob" aria-hidden="true"></span>
                                             <span>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDate")</span>
                                         </button>
+                                        <p class="ct-field-hint @(_exceptionalDate ? null : "ct-field-hint--muted")">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDateHint")</p>
                                     </div>
-                                    @if (_exceptionalDate)
-                                    {
-                                        <p class="ct-field-hint">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDateHint")</p>
-                                    }
                                     @if (IsDateInvalid && !string.IsNullOrWhiteSpace(AdvanceDateError))
                                     {
                                         <p class="ct-field-error" role="alert">@AdvanceDateError</p>
@@ -303,18 +302,17 @@
                                     }
                                     @if (ShowResultNumberOnAdvance)
                                     {
+                                        <label class="ct-label @(IsResultNumberInvalid ? "ct-label--error" : null)" for="advance-result-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalNumber")</label>
                                         <input id="advance-result-number-@ApplicationProfileInstanceId"
                                                @ref="_advanceResultNumberInput"
                                                type="text"
                                                class="os-input @(IsResultNumberInvalid ? "is-invalid" : null)"
-                                               style="margin-top:10px"
                                                aria-invalid="@IsResultNumberInvalid"
-                                               aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")"
                                                maxlength="@ApplicationProgressResultNumberHelper.MaxLength"
                                                @bind="_resultNumber"
                                                @bind:event="oninput"
                                                disabled="@_busy"
-                                               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")" />
+                                               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalNumber")" />
                                     }
                                     @if (ShowProcessNumberOnAdvance)
                                     {
@@ -429,24 +427,41 @@
                 </div>
             </div>
         }
-        @if (ShowStandingProgressActions)
-        {
-            <div class="ct-prog-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+        <div class="ct-prog-actions">
+            @if (!CanAdvanceStanding)
+            {
+                <p class="ct-prog-actions__hint" title="@StandingAdvanceTitle">
+                    <span aria-hidden="true">ℹ</span>
+                    @(string.IsNullOrWhiteSpace(StandingAdvanceTitle)
+                        ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceUnlockHint")
+                        : StandingAdvanceTitle)
+                </p>
+            }
+            <div class="ct-prog-actions__row">
                 <button type="button"
-                        class="os-btn os-btn--primary"
-                        disabled="@(_busy || !CanAdvanceStanding)"
-                        title="@StandingAdvanceTitle"
-                        @onclick="AdvanceAsync">
-                    ▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")
-                </button>
-                <button type="button"
-                        class="os-btn os-btn--ghost"
+                        class="ct-prog-revert-link"
                         disabled="@(_busy || StandingRevertStep == null)"
-                        @onclick="RevertStandingAsync">
+                        @onclick="AskRevertStanding">
                     ◀ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgress")
                 </button>
+                @if (ShowStandingProgressActions)
+                {
+                    <button type="button"
+                            class="os-btn os-btn--primary"
+                            disabled="@(_busy || !CanAdvanceStanding)"
+                            title="@StandingAdvanceTitle"
+                            @onclick="AdvanceAsync">
+                        ▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")
+                    </button>
+                }
             </div>
-        }
+        </div>
+
+        <OfficerDeleteConfirmDialog @bind-Visible="_revertConfirmVisible"
+                                    Title="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgressConfirmTitle")"
+                                    Message="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgressConfirm")"
+                                    DeleteText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgress")"
+                                    Confirmed="ConfirmRevertStandingAsync" />
     </div>
 </div>
 
@@ -475,6 +490,7 @@
     private bool _exceptionalDate;
     private bool _busy;
     private bool _advancing;
+    private bool _revertConfirmVisible;
     private string? _editingStepKey;
     private int _seenCorrectionRevision;
     private string _pendingLetterStepKey = string.Empty;
@@ -1151,10 +1167,23 @@
         }
     }
 
-    private Task RevertStandingAsync()
+    private void AskRevertStanding()
+    {
+        if (StandingRevertStep == null || _busy)
+            return;
+        _revertConfirmVisible = true;
+    }
+
+    private Task ConfirmRevertStandingAsync()
     {
         var step = StandingRevertStep;
         return step == null ? Task.CompletedTask : RevertAsync(step);
+    }
+
+    private void CancelStepEdit(ApplicationWorkspaceCaseProgressStep step)
+    {
+        if (IsEditing(step))
+            ToggleStepEdit(step);
     }
 
     private async Task RevertAsync(ApplicationWorkspaceCaseProgressStep step)

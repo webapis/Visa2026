@@ -553,3 +553,11 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Fix**: Gear toggle uses imperative `OptionalDetailFieldsVisibilityApplicator` only (+ reentrancy guard). Lock narrowed to `ApplicationProgressProfileResolver.LockedApplicationHeaderTargetItems` (numbering, date, type, contract); child collection commit blocking removed.
 - **Docs**: [`docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](../../../docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) §3.4; [`docs/OPTIONAL_DETAIL_FIELDS.md`](../../../docs/OPTIONAL_DETAIL_FIELDS.md) — interaction + pitfall #6.
 - **Prevent**: Do not add workflow/child fields to header lock without product sign-off; do not call `AppearanceController.Refresh()` from optional-fields gear toggle on Blazor.
+
+### 2026-11-12 — Progress step editor placement UX
+
+- **Need**: Officers saw redundant Progress title, ambiguous Advance/Revert far from context, unclear pen-edit, crowded date/number/file controls, green checks on current step, mixed date formats.
+- **Fix**: Sticky Progress actions with disabled Advance hint + Revert confirm; Edit text + Cancel/Save on correction; Approval number label; Exceptional date under Date; per-file preview + danger Remove confirm + compact Add; amber current marker/badge; timeline dates `dd.MM.yyyy`; drop Progress h2; Case tab caption `Case: {profile}`.
+- **Officer**: Hard-refresh Progress tab. Expand a finished ministry step — Edit → change → Cancel/Save; Remove asks confirm; sticky Revert confirms; current step rail is amber dot not check.
+- **Prevent**: Do not put Advance beside Revert with equal weight; do not use completion check for current step.
+- **Cross-skill**: visa2026-application-profile

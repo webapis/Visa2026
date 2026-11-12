@@ -664,7 +664,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             ApplicationWorkspaceProgressAdvancePreview.IsOfficeSubmitted("office", row.State?.Code));
 
     private static string FormatStepDate(DateTime date) =>
-        date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+        date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
 
     private static ApplicationWorkspaceCaseProgressStep BuildFilledStep(
         string key,
@@ -744,7 +744,7 @@ internal static class ApplicationWorkspaceProgressTimeline
             Key = key,
             Label = label,
             Date = row?.Date is { } date && date != default
-                ? date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
+                ? date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
                 : string.Empty,
             DateValue = row?.Date is { } storedDate && storedDate != default ? storedDate : null,
             ExceptionalDate = row?.ExceptionalDate == true,
@@ -1144,6 +1144,6 @@ internal static class ApplicationWorkspaceProgressTimeline
             return string.Empty;
 
         return WorkingDaysHelper.AddWorkingDaysInclusive(anchor, maxDays)
-            .ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+            .ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
     }
 }

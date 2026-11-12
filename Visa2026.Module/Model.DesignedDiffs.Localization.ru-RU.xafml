@@ -258,7 +258,7 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Month" Caption="Месяц" />
-        <Member Name="ProcessNumber" Caption="Номер процесса" />
+        <Member Name="ProcessNumber" Caption="Номер CO" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="VisaCategory" Caption="Категория визы" />
         <Member Name="VisaPeriod" Caption="Срок визы" />
@@ -441,7 +441,7 @@
         <Member Name="Month" Caption="Месяц" />
         <Member Name="MovementPermitLocation" Caption="Место разрешения на перемещение" />
         <Member Name="People" Caption="Люди" />
-        <Member Name="ProcessNumber" Caption="Номер процесса" />
+        <Member Name="ProcessNumber" Caption="Номер CO" />
         <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
         <Member Name="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
@@ -2536,7 +2536,7 @@
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
-        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер CO" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
@@ -2563,7 +2563,7 @@
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
-        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер CO" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
@@ -2593,7 +2593,7 @@
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
-        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер CO" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
@@ -2649,7 +2649,7 @@
         <ColumnInfo Id="LinkedPeopleDisplay" Caption="Люди" />
         <ColumnInfo Id="MigrationService" Caption="Миграционная служба" />
         <ColumnInfo Id="Month" Caption="Месяц" />
-        <ColumnInfo Id="ProcessNumber" Caption="Номер процесса" />
+        <ColumnInfo Id="ProcessNumber" Caption="Номер CO" />
         <ColumnInfo Id="ProgressStepsDisplay" Caption="Прогресс заявки" />
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="VisaCategory" Caption="Категория визы" />

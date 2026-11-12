@@ -11,7 +11,7 @@
     <div class="ct-prog-advance">
         @if (Step.CanCorrectDate && Step.DateProgressId is Guid)
         {
-            <div class="ct-prog-date-line">
+            <div class="ct-prog-date-stack">
                 <div class="ct-prog-date-line__field">
                     <label class="ct-label @DateLabelClass" for="step-date-@Step.Key">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
                     <OfficerDateEdit InputId="@($"step-date-{Step.Key}")"
@@ -27,28 +27,24 @@
                     <span class="ct-exceptional-date__knob" aria-hidden="true"></span>
                     <span>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDate")</span>
                 </button>
+                <p class="ct-field-hint @(_exceptionalDate ? null : "ct-field-hint--muted")">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDateHint")</p>
+                @if (IsDateInvalid && !string.IsNullOrWhiteSpace(DateError))
+                {
+                    <p class="ct-field-error" role="alert">@DateError</p>
+                }
             </div>
-            @if (_exceptionalDate)
-            {
-                <p class="ct-field-hint">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ExceptionalDateHint")</p>
-            }
-            @if (IsDateInvalid && !string.IsNullOrWhiteSpace(DateError))
-            {
-                <p class="ct-field-error" role="alert">@DateError</p>
-            }
         }
         @if (Step.CanEditResultNumber)
         {
+            <label class="ct-label" for="step-result-@Step.Key" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalNumber")</label>
             <input id="step-result-@Step.Key"
                    type="text"
                    class="os-input"
-                   style="margin-top:10px"
                    maxlength="@ApplicationProgressResultNumberHelper.MaxLength"
                    @bind="_resultNumber"
                    @bind:event="oninput"
                    disabled="@Busy"
-                   aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")"
-                   placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")" />
+                   placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalNumber")" />
         }
         @if (Step.CanEditSubmissionNumber)
         {
@@ -77,68 +73,103 @@
         @if (Step.Files.Count > 0 || Step.CanEditFiles)
         {
             <div class="ct-step-files" style="margin-top:10px">
-            @foreach (var file in Step.Files)
-            {
-                <div class="ct-step-file" title="@file.FileName">
-                    <span class="ct-step-file__name">@file.FileName</span>
-                    @if (Step.CanEditFiles)
+                @foreach (var file in Step.Files)
+                {
+                    <div class="ct-step-file" title="@file.FileName">
+                        @if (FileProgressId is Guid previewProgressId)
+                        {
+                            <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
+                                                               ProgressId="previewProgressId"
+                                                               FileId="file.FileId"
+                                                               FileName="@file.FileName"
+                                                               LinkText="@file.FileName"
+                                                               CssClass="ct-step-file__name ct-letter-preview"
+                                                               OwnerViewId="@OwnerViewId" />
+                        }
+                        else
+                        {
+                            <span class="ct-step-file__name">@file.FileName</span>
+                        }
+                        @if (Step.CanEditFiles)
+                        {
+                            <label class="ct-step-file__btn">
+                                <InputFile OnChange="e => ReplaceAsync(e, file.FileId)" accept="@Accept" disabled="@Busy" />
+                                @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ReplaceFile")
+                            </label>
+                            <button type="button"
+                                    class="ct-step-file__btn ct-step-file__btn--danger"
+                                    disabled="@Busy"
+                                    @onclick="() => AskRemove(file.FileId, file.FileName)">
+                                @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RemoveFile")
+                            </button>
+                        }
+                    </div>
+                }
+                @if (Step.CanEditFiles)
+                {
+                    @if (Step.Files.Count > 0)
                     {
-                        <label class="ct-step-file__btn">
-                            <InputFile OnChange="e => ReplaceAsync(e, file.FileId)" accept="@Accept" disabled="@Busy" />
-                            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ReplaceFile")
+                        <label class="ct-upload ct-upload--compact">
+                            <InputFile OnChange="AddAsync" accept="@Accept" multiple disabled="@Busy" />
+                            <span>+ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AddFile")
+                                <span class="ct-upload__hint">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span>
+                            </span>
                         </label>
-                        <button type="button"
-                                class="ct-step-file__btn"
-                                disabled="@Busy"
-                                @onclick="() => RemoveAsync(file.FileId)">
-                            @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RemoveFile")
-                        </button>
                     }
-                </div>
-            }
-            @if (Step.CanEditFiles)
-            {
-                <label class="ct-upload ct-upload--action" style="margin-top:8px">
-                    <InputFile OnChange="AddAsync" accept="@Accept" multiple disabled="@Busy" />
-                    <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
-                </label>
-            }
-            @if (Step.Files.Count > 0 && FileProgressId is Guid)
-            {
-                <p class="ct-prog-v__letter" style="margin:8px 0 0">
-                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="ApplicationProfileInstanceId"
-                                                       ProgressId="FileProgressId"
-                                                       FileName="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
-                                                       LinkText="@VisaUiMessages.Get("PersonDossier.Progress.ViewFile")"
-                                                       PreviewAll="true"
-                                                       OwnerViewId="@OwnerViewId" />
-                </p>
-            }
+                    else
+                    {
+                        <label class="ct-upload ct-upload--action">
+                            <InputFile OnChange="AddAsync" accept="@Accept" multiple disabled="@Busy" />
+                            <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadFile")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
+                        </label>
+                    }
+                }
             </div>
         }
 
-        @if (Step.CanCorrectDate || Step.CanEditSubmissionNumber || Step.CanEditResultNumber || Step.CanEditProcessNumber)
-        {
-            <button type="button"
-                    class="os-btn os-btn--primary"
-                    style="margin-top:10px"
-                    disabled="@Busy"
-                    @onclick="SaveAsync">
-                @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SaveSubmission")
-            </button>
-        }
+        <div class="ct-prog-edit-actions">
+            @if (CancelRequested.HasDelegate)
+            {
+                <button type="button"
+                        class="os-btn os-btn--ghost"
+                        disabled="@Busy"
+                        @onclick="CancelAsync">
+                    @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CancelEdit")
+                </button>
+            }
+            @if (Step.CanCorrectDate || Step.CanEditSubmissionNumber || Step.CanEditResultNumber || Step.CanEditProcessNumber)
+            {
+                <button type="button"
+                        class="os-btn os-btn--primary"
+                        disabled="@Busy"
+                        @onclick="SaveAsync">
+                    @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SaveChanges")
+                </button>
+            }
+        </div>
         @if (ShowRevertToHere)
         {
             <button type="button"
-                    class="os-btn os-btn--ghost"
-                    style="margin-top:10px;margin-left:8px"
+                    class="ct-prog-revert-link"
                     disabled="@Busy"
-                    @onclick="RevertAsync">
+                    @onclick="AskRevert">
                 ◀ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertToHere")
             </button>
         }
     </div>
 </div>
+
+<OfficerDeleteConfirmDialog @bind-Visible="_removeConfirmVisible"
+                            Title="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RemoveFileConfirmTitle")"
+                            Message="@_removeConfirmMessage"
+                            DeleteText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RemoveFile")"
+                            Confirmed="ConfirmRemoveAsync" />
+
+<OfficerDeleteConfirmDialog @bind-Visible="_revertConfirmVisible"
+                            Title="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgressConfirmTitle")"
+                            Message="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgressConfirm")"
+                            DeleteText="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgress")"
+                            Confirmed="ConfirmRevertAsync" />
 
 @code {
     private const string Accept = ".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp";
@@ -152,6 +183,7 @@
     [Parameter] public EventCallback<OfficerShellCaseProgressStepCorrection> SaveRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressFileChange> FileChangeRequested { get; set; }
     [Parameter] public EventCallback RevertRequested { get; set; }
+    [Parameter] public EventCallback CancelRequested { get; set; }
 
     private DateTime? _date;
     private bool _exceptionalDate;
@@ -160,6 +192,10 @@
     private string _processNumber = string.Empty;
     private string _stamp = string.Empty;
     private bool _showDateErrors;
+    private bool _removeConfirmVisible;
+    private bool _revertConfirmVisible;
+    private Guid _pendingRemoveFileId;
+    private string _removeConfirmMessage = string.Empty;
 
     protected override void OnParametersSet()
     {
@@ -175,9 +211,6 @@
         _resultNumber = Step.ResultNumber ?? string.Empty;
         _processNumber = Step.ProcessNumber ?? string.Empty;
     }
-
-    private static string StepText(string? text) =>
-        ApplicationProfileLocalization.ProgressStepLabel(text);
 
     private string? DateError
     {
@@ -238,12 +271,15 @@
         !string.IsNullOrWhiteSpace(DateError)
         && (_showDateErrors || DateError != VisaUiMessages.Get("ApplicationProfileInstance.Workspace.DateRequired"));
 
-    private string FileUploadLabel =>
-        string.Equals(Step.Key, "office", StringComparison.OrdinalIgnoreCase)
-            ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.OfficeFile")
-            : string.Equals(Step.Key, "migration", StringComparison.OrdinalIgnoreCase)
-                ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents")
-                : VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ApprovalLetter");
+    private Guid? FileProgressId =>
+        Step.ProgressId is Guid progressId && progressId != Guid.Empty
+            ? progressId
+            : Step.DateProgressId is Guid dateId && dateId != Guid.Empty
+                ? dateId
+                : null;
+
+    private Task CancelAsync() =>
+        CancelRequested.HasDelegate ? CancelRequested.InvokeAsync() : Task.CompletedTask;
 
     private async Task SaveAsync()
     {
@@ -265,17 +301,37 @@
         });
     }
 
-    private Task RevertAsync() =>
+    private void AskRevert() => _revertConfirmVisible = true;
+
+    private Task ConfirmRevertAsync() =>
         Busy || !RevertRequested.HasDelegate
             ? Task.CompletedTask
             : RevertRequested.InvokeAsync();
 
-    private Guid? FileProgressId =>
-        Step.ProgressId is Guid progressId && progressId != Guid.Empty
-            ? progressId
-            : Step.DateProgressId is Guid dateId && dateId != Guid.Empty
-                ? dateId
-                : null;
+    private void AskRemove(Guid fileId, string? fileName)
+    {
+        _pendingRemoveFileId = fileId;
+        _removeConfirmMessage = VisaUiMessages.Format(
+            "ApplicationProfileInstance.Workspace.RemoveFileConfirm",
+            string.IsNullOrWhiteSpace(fileName) ? "—" : fileName);
+        _removeConfirmVisible = true;
+    }
+
+    private Task ConfirmRemoveAsync()
+    {
+        if (Busy || FileProgressId is not Guid progressId || _pendingRemoveFileId == Guid.Empty)
+            return Task.CompletedTask;
+
+        var id = _pendingRemoveFileId;
+        _pendingRemoveFileId = Guid.Empty;
+        return FileChangeRequested.InvokeAsync(new OfficerShellCaseProgressFileChange
+        {
+            ProgressId = progressId,
+            FileId = id,
+            Remove = true,
+            Slot = Step.FileSlot,
+        });
+    }
 
     private async Task AddAsync(InputFileChangeEventArgs e)
     {
@@ -315,20 +371,6 @@
             Slot = Step.FileSlot,
             FileName = file.Name,
             Content = content,
-        });
-    }
-
-    private Task RemoveAsync(Guid fileId)
-    {
-        if (Busy || FileProgressId is not Guid progressId)
-            return Task.CompletedTask;
-
-        return FileChangeRequested.InvokeAsync(new OfficerShellCaseProgressFileChange
-        {
-            ProgressId = progressId,
-            FileId = fileId,
-            Remove = true,
-            Slot = Step.FileSlot,
         });
     }
 

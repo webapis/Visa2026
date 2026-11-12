@@ -2968,10 +2968,10 @@
     "ru-RU": "Исключительная дата"
   },
   "ApplicationProfileInstance.Workspace.ExceptionalDateHint": {
-    "en-US": "The step order stays the same. Any date is accepted.",
-    "tr-TR": "Adım sırası değişmez. Herhangi bir tarih kabul edilir.",
-    "tk-TM": "Ädimleriň tertibi üýtgemeýär. Islendik sene kabul edilýär.",
-    "ru-RU": "Порядок шагов не меняется. Принимается любая дата."
+    "en-US": "Turn on if the date falls outside the normal processing window.",
+    "tr-TR": "Normal işlem penceresinin dışındaki bir tarih için açın.",
+    "tk-TM": "Adaty iş penciresinden daşary sene bolsa açyň.",
+    "ru-RU": "Включите, если дата вне обычного окна обработки."
   },
   "ApplicationProfileInstance.Workspace.AddFile": {
     "en-US": "Add file",
@@ -3527,6 +3527,60 @@
     "tr-TR": "Durumu geri al",
     "tk-TM": "Ýagdaýy yzyna öwürmek",
     "ru-RU": "Вернуть прогресс"
+  },
+  "ApplicationProfileInstance.Workspace.RevertProgressConfirmTitle": {
+    "en-US": "Revert progress?",
+    "tr-TR": "Durum geri alınsın mı?",
+    "tk-TM": "Ýagdaý yzyna öwrülsinmi?",
+    "ru-RU": "Вернуть прогресс?"
+  },
+  "ApplicationProfileInstance.Workspace.RevertProgressConfirm": {
+    "en-US": "This returns the case to the previous progress step. Continue?",
+    "tr-TR": "Bu işlem başvuruyu önceki adıma döndürür. Devam edilsin mi?",
+    "tk-TM": "Bu ýüztutmany öňki ädime gaýtarýar. Dowam edilsinmi?",
+    "ru-RU": "Дело вернётся на предыдущий шаг. Продолжить?"
+  },
+  "ApplicationProfileInstance.Workspace.RemoveFileConfirmTitle": {
+    "en-US": "Remove file?",
+    "tr-TR": "Dosya kaldırılsın mı?",
+    "tk-TM": "Faýl aýrylsynmy?",
+    "ru-RU": "Удалить файл?"
+  },
+  "ApplicationProfileInstance.Workspace.RemoveFileConfirm": {
+    "en-US": "Remove “{0}” from this step?",
+    "tr-TR": "“{0}” bu adımdan kaldırılsın mı?",
+    "tk-TM": "“{0}” bu ädimden aýrylsynmy?",
+    "ru-RU": "Удалить «{0}» из этого шага?"
+  },
+  "ApplicationProfileInstance.Workspace.CancelEdit": {
+    "en-US": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "ApplicationProfileInstance.Workspace.SaveChanges": {
+    "en-US": "Save changes",
+    "tr-TR": "Değişiklikleri kaydet",
+    "tk-TM": "Üýtgeşmeleri ýatda sakla",
+    "ru-RU": "Сохранить изменения"
+  },
+  "ApplicationProfileInstance.Workspace.ApprovalNumber": {
+    "en-US": "Approval number",
+    "tr-TR": "Onay numarası",
+    "tk-TM": "Ylalaşyk belgisi",
+    "ru-RU": "Номер согласования"
+  },
+  "ApplicationProfileInstance.Workspace.AdvanceUnlockHint": {
+    "en-US": "Advance unlocks once the current step can continue.",
+    "tr-TR": "İlerletme, mevcut adım devam edebildiğinde açılır.",
+    "tk-TM": "Häzirki ädim dowam edip bilenden soň Ilerletmek açylýar.",
+    "ru-RU": "Продвижение станет доступно, когда текущий шаг можно продолжить."
+  },
+  "ApplicationProfileInstance.Workspace.CaseTabCaption": {
+    "en-US": "Case: {0}",
+    "tr-TR": "Dosya: {0}",
+    "tk-TM": "Iş: {0}",
+    "ru-RU": "Дело: {0}"
   },
   "ApplicationProfileInstance.Workspace.Activity": {
     "en-US": "Activity",

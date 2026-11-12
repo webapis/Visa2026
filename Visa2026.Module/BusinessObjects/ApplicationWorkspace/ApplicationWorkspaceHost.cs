@@ -21,9 +21,15 @@ public class ApplicationWorkspaceHost : NonPersistentBaseObject
     [Browsable(false)]
     public Guid ApplicationProfileInstanceId { get; set; }
 
+    [Browsable(false)]
+    public string TabCaption { get; set; } = string.Empty;
+
     [VisibleInListView(false)]
     [VisibleInLookupListView(false)]
     [ModelDefault("ShowCaption", "False")]
     [EditorAlias(ApplicationWorkspaceEditorAliases.Workspace)]
     public string WorkspaceUi { get; set; } = string.Empty;
+
+    public override string ToString() =>
+        string.IsNullOrWhiteSpace(TabCaption) ? base.ToString() ?? "Case workspace" : TabCaption;
 }
