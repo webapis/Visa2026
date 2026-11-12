@@ -10,6 +10,7 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// DxGrid SearchBox only matches visible columns (person names and progress
 /// result numbers are not). Route Application Profile Instance ListView grid
 /// search through XAF FullTextSearch so linked-people and Netije belgisi criteria apply.
+/// Also notifies the progress color-tab strip so Search/Gözleg can host cross-color hits.
 /// </summary>
 public sealed class ApplicationProfileInstanceListViewSearchBridgeController
     : ObjectViewController<ListView, ApplicationProfileInstance>
@@ -42,5 +43,7 @@ public sealed class ApplicationProfileInstanceListViewSearchBridgeController
     {
         var filterController = Frame.GetController<FilterController>();
         filterController?.FullTextFilterAction?.DoExecute(searchText ?? string.Empty);
+        Frame.GetController<ApplicationProfileInstanceProgressColorTabsController>()
+            ?.NotifySearchTextChanged(searchText);
     }
 }

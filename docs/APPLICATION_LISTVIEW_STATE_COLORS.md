@@ -3,6 +3,7 @@
 > **Status:** **Implemented.** `Application.PrimaryStateCode` (latest progress), `BoStateAppearanceColors`, `BoStateRowAppearanceRegistration`, `ApplicationProgressRowStateRefreshController`, Blazor `ApplicationProgressRowAppearanceController` + `site.css` row classes. **`ApplicationItem`** reuses the same codes via `[NotMapped]` `LastApplicationState` / `ListRowCssClass` (parent denormalized fields) and Blazor `ApplicationItemProgressRowAppearanceController` (cancelled lines keep coral Appearance).
 >
 > **Related:**
+> - [`APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md`](APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md) — **canonical** Application Profile Instance ListView progress palette + precedence
 > - [`BO_STATE_COLORS.md`](BO_STATE_COLORS.md) — color registry per `ApplicationState.Code`
 > - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — Progress History UI and happy-path example
 > - [`APPLICATION_PROGRESS_STATE_VALIDATION.md`](APPLICATION_PROGRESS_STATE_VALIDATION.md) — progress timeline rules (separate concern)
@@ -130,7 +131,7 @@ Green only when **both** hold:
 | Border zone | Border zone |
 | Work-location grant | Location permission |
 
-Rejection is optional and never blocks green. When the gate passes, green **replaces** the normal `PROCESS_STARTED` blue and any SLA row tint. Direct-migration / cancel / registration lists are out of scope.
+Rejection is optional and never blocks green. All reject outcomes (PROCESS_REJECTED, N_REVIEW_REJECTED) share ListView red `#fca5a5`. When the gate passes, green **replaces** the normal `PROCESS_STARTED` blue and any SLA row tint. Direct-migration / cancel / registration lists are out of scope.
 
 Implementation: `ApplicationWorkspaceViaMinistryIssuanceGreenGate` → `ApplicationListViewDisplayState.Resolve`.
 
@@ -140,18 +141,22 @@ On **all** Application Profile Instance ListViews:
 
 | Latest progress | Row color |
 |---|---|
-| `SUBMITTED_MIGRATION` (Submitted to migration service) | **Yellow** (`Khaki` / `#fde047`) |
+| `SUBMITTED_MIGRATION` (Submitted to migration service) | **Light yellow** (`Khaki` / `#FFF59D`) |
 | `PROCESS_STARTED` (AS/CO number received) | **Yellow** `#FED700` / dark text (sampled from officer CO ListView screenshot) |
 
 These override SLA tint for those steps. Via Ministries issuance-complete green (§7a) still wins when required Result chips are N/N.
 
 ## 7c. Approval legs — teal between At Office and Submitted→Migration
 
-Ministry approval-leg steps (`N_REVIEW_STARTED`, `N_REVIEW_APPROVED`, `AT_THE_MINISTERY_N`) use **teal** `#3FE0D0` / `#134e4a` text on all Application Profile Instance ListViews (sampled from officer “Ministrlige iberilen” screenshot). Rejected legs stay red. Precedence: issuance green → AS/CO yellow → Submitted yellow → approval teal.
+Ministry approval-leg steps (`N_REVIEW_STARTED`, `N_REVIEW_APPROVED`, `AT_THE_MINISTERY_N`) use **teal** `#3FE0D0` / `#134e4a` text on all Application Profile Instance ListViews (sampled from officer “Ministrlige iberlen” screenshot). Rejected legs stay red. Precedence: issuance green → AS/CO yellow → Submitted yellow → approval teal.
 
 ## 7d. At Office — peach
 
 `IS_BEING_PREPARED` / `AT_OFFICE` (Ofisde) ListView rows use peach `#FEDEAF` / `#7c4a03` text (sampled from officer Ofisde screenshot).
+
+## 7e. Last approval leg — Ministrlikden çykan
+
+When latest progress is `N_REVIEW_APPROVED` for the profile's **last** ministry leg, ListView uses blue `#4169E2` (appearance code `LAST_APPROVAL_COMPLETE`). Intermediate approvals stay teal (§7c). Officer label: **Ministrlikden çykan**.
 
 ## 7. Out of scope (this requirement)
 
@@ -168,6 +173,9 @@ Ministry approval-leg steps (`N_REVIEW_STARTED`, `N_REVIEW_APPROVED`, `AT_THE_MI
 |------|------|
 | 2026-06-01 | Requirement captured: Application ListView row color from latest `ApplicationProgress` / `CurrentState`; implementation explicitly deferred |
 | 2026-11-11 | Via Ministries: green when `PROCESS_STARTED` (AS/CO) and required Result issuance complete (visa ignored for invitation-getting) |
-| 2026-11-11 | `SUBMITTED_MIGRATION` yellow; `PROCESS_STARTED` (AS/CO) yellow `#FED700`; Via Ministries green gate still overrides |
+| 2026-11-11 | `SUBMITTED_MIGRATION` light yellow `#FFF59D`; `PROCESS_STARTED` (AS/CO) darker yellow `#FED700`; Via Ministries green gate still overrides |
 | 2026-11-11 | Approval-leg ListView rows (between At Office and Submitted) use teal `#3FE0D0` |
-| 2026-11-11 | At Office (IS_BEING_PREPARED / AT_OFFICE) ListView rows use peach $peach |
+| 2026-11-11 | At Office (IS_BEING_PREPARED / AT_OFFICE) ListView rows use peach `#FEDEAF` |
+| 2026-11-12 | All reject ListView rows use one red `#fca5a5` |
+| 2026-11-12 | Last ministry approval (Ministrlikden çykan) ListView blue `#4169E2` |
+| 2026-11-12 | Canonical strategy doc: [APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md](APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md) |

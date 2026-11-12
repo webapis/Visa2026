@@ -42,6 +42,7 @@ disable-model-invocation: false
 | Artifact | Role |
 |----------|------|
 | **`docs/BO_STATE_COLORS.md`** | Every **state code** → one **tone** within a **hue family**; severity for row **priority** only |
+| **`docs/APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md`** | Application Profile Instance ListView progress palette, Turkmen labels, precedence |
 | **`docs/BO_STATE_TRACKING.md`** | What each state **means** and when it applies |
 | **`docs/STATE_SPECIFICATIONS.md`** | Dashboard tiles; evaluator/SQL must match counts |
 | **`ApplicationProgress` + catalogs** | Workflow state codes (`IS_BEING_PREPARED`, `PROCESS_ISSUED`, `AT_OFFICE`, …) |

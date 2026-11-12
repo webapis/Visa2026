@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects
     {
         public const string IsBeingPrepared = "IS_BEING_PREPARED";
 
-        /// <summary>First-leg only — "Ylalaşyga Iberildi".</summary>
+        /// <summary>First-leg only — "Ministrlige iberlen".</summary>
         public const string Review1Started = "1_REVIEW_STARTED";
         public const string Review1Approved = "1_REVIEW_APPROVED";
         public const string Review1Rejected = "1_REVIEW_REJECTED";

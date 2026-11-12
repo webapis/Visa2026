@@ -9,6 +9,7 @@
 > 3. States with **different meaning** use a **different hue family** so officers can scan by color group.
 >
 > **Related docs:**
+> - [`APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md`](APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md) — Application Profile Instance ListView progress palette + precedence
 > - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — officer UI examples, unnamed states (**ideation**)
 > - [`APPLICATION_PROGRESS_STATE_VALIDATION.md`](APPLICATION_PROGRESS_STATE_VALIDATION.md) — SLA / transition design (**not implemented**)
 > - [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) — canonical state definitions per BO
@@ -139,6 +140,8 @@ Look up color **by state code**. The **Family** and **Tone** columns explain why
 
 ### `ApplicationState` codes
 
+ListView progress palette + precedence for Application Profile Instance: see [`APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md`](APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md) (authoritative for officer ListView hues).
+
 Lookup: `DatabaseUpdate/LookupCatalogs/application-state.json` · BO: `ApplicationProgress.State`
 
 | State code | Display (TM seed) | Family | Tone | Severity | XAF row `BackColor` | CSS bg / text | Column `FontColor` |
@@ -150,7 +153,8 @@ Lookup: `DatabaseUpdate/LookupCatalogs/application-state.json` · BO: `Applicati
 | `2_REVIEW_APPROVED` | 2-NJI IŞ YLALAŞYK ALYNDY | Green | T5 | Info | `MintCream` | `#ecfccb` / `#3f6212` | `DarkGreen` |
 | `1_REVIEW_REJECTED` | 1-NJI IŞ YLALAŞYK BERILMEDI | Red | T4 | Critical | `PeachPuff` | `#ffedd5` / `#c2410c` | `OrangeRed` |
 | `2_REVIEW_REJECTED` | 2-NJI IŞ YLALAŞYK BERILMEDI | Red | T5 | Critical | `NavajoWhite` | `#fed7aa` / `#9a3412` | `Chocolate` |
-| `SUBMITTED_MIGRATION` | Submitted to migration | Gold | T4 | Info | `Khaki` | `#fde047` / `#854d0e` | `DarkGoldenrod` |`n| `PROCESS_STARTED` | İŞLENMEKDE / AS(CO) received | Gold | T5 | Info | `Gold` | `#FED700` / `#1a1a1a` | `Black` |
+| `SUBMITTED_MIGRATION` | Submitted to migration | Gold | T4 | Info | `Khaki` | `#FFF59D` / `#854d0e` | `DarkGoldenrod` |
+| `PROCESS_STARTED` | İŞLENMEKDE / AS(CO) received | Gold | T5 | Info | `Gold` | `#FED700` / `#1a1a1a` | `Black` |
 | `PROCESS_CANCELLED` | ÝÜZTUTMA ÝATYRYLDY | Red | T6 | Critical | `RosyBrown` | `#fecaca` / `#991b1b` | `Firebrick` |
 | `PROCESS_REJECTED` | GARŞYLYK BERILDI | Red | T6′ | Critical | `Salmon` | `#fca5a5` / `#b91c1c` | `IndianRed` |
 | `PROCESS_ISSUED` | RESMILEŞDİRİLDİ | Green | T6 | Healthy | `SpringGreen` | `#86efac` / `#15803d` | `DarkGreen` |
@@ -293,7 +297,8 @@ Evaluators on `Visa`, `WorkPermitItem`, `Passport`, etc. still map to three buck
 | `OnProcess` | T1 | LightSkyBlue |
 | `1_REVIEW_STARTED` | T2 | LightSteelBlue |
 | `2_REVIEW_STARTED` | T3 | SkyBlue |
-| `SUBMITTED_MIGRATION` | T4 | Khaki |`n| `PROCESS_STARTED` | T5 | Gold |
+| `SUBMITTED_MIGRATION` | T4 | Khaki |
+| `PROCESS_STARTED` | T5 | Gold |
 | `AT_THE_MINISTERY_1` | T5 | `#c7d2fe` |
 | `AT_THE_MINISTERY_2` | T6 | `#a5b4fc` |
 | `AT_MIGRATION_SERVICE` | T6′ | LightCyan |

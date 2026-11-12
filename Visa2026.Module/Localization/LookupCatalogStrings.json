@@ -41,8 +41,14 @@
     "1_REVIEW_STARTED": {
       "en-US": "Sent for agreement",
       "tr-TR": "Mutabakata gönderildi",
-      "tk-TM": "Ylalaşyga Iberildi",
+      "tk-TM": "Ministrlige iberlen",
       "ru-RU": "Отправлено на согласование"
+    },
+    "LAST_APPROVAL_COMPLETE": {
+      "en-US": "Cleared last ministry",
+      "tr-TR": "Son bakanlıktan çıktı",
+      "tk-TM": "Ministrlikden çykan",
+      "ru-RU": "Вышло из последнего министерства"
     },
     "1_REVIEW_APPROVED": {
       "en-US": "Cleared agreement",

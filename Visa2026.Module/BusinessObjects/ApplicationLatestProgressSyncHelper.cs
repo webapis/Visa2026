@@ -63,7 +63,7 @@ public static class ApplicationLatestProgressSyncHelper
         var primaryCode = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveFromLatest(latest) ?? string.Empty;
         application.LatestPrimaryStateCode = primaryCode;
         application.LatestProgressDisplay =
-            ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty;
+            ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayName(application) ?? string.Empty;
         SyncProcessNumber(application, objectSpace);
 
         if (CanLinkLatestProgress(latest, objectSpace))

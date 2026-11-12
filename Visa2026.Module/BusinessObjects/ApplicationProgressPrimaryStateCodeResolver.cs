@@ -30,13 +30,26 @@ public static class ApplicationProfileInstanceProgressPrimaryStateCodeResolver
 
     /// <summary>
     /// Localized label for the latest progress step (ListView <see cref="Application.CurrentState"/>).
+    /// Last ministry approval uses ListView label <c>Ministrlikden çykan</c> (<c>LAST_APPROVAL_COMPLETE</c>).
     /// </summary>
     public static string? ResolveDisplayName(ApplicationProfileInstance? application)
     {
         if (application == null)
             return null;
 
-        return ResolveDisplayNameFromLatest(ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory));
+        var latest = ApplicationProfileInstanceProgressHelper.GetLatest(application.ProgressHistory);
+        var primary = ResolveFromLatest(latest);
+        if (ApplicationProfileInstanceProgressLegCodes.IsLastApprovalLegComplete(
+            primary,
+            ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application)))
+        {
+            var lastApproval = LookupLocalization.GetCatalogDisplayName(
+                "application-state",
+                ApplicationProfileInstanceProgressLegCodes.LastApprovalCompleteListAppearance);
+            return string.IsNullOrEmpty(lastApproval) ? "Ministrlikden çykan" : lastApproval;
+        }
+
+        return ResolveDisplayNameFromLatest(latest);
     }
 
     public static string? ResolveDisplayNameFromLatest(ApplicationProfileInstanceProgress? latest)

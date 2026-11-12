@@ -31,7 +31,7 @@ internal readonly struct ApplicationListViewDisplayState
         var listRowAppearance = !string.IsNullOrEmpty(slaAppearanceCode)
             ? slaAppearanceCode
             : CompletedRouteAppearance(application, primaryStateCode);
-        // Green (issuance) > AS/CO yellow > Submitted yellow > approval-leg teal > At Office peach > SLA/progress.
+        // Green > AS/CO yellow > Submitted yellow > Ministrlikden çykan (last approval) > approval-leg teal > At Office peach > SLA.
         if (ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(application, primaryStateCode))
             listRowAppearance = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
         else if (string.Equals(
@@ -44,6 +44,10 @@ internal readonly struct ApplicationListViewDisplayState
             ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
             StringComparison.OrdinalIgnoreCase))
             listRowAppearance = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration;
+        else if (ApplicationProfileInstanceProgressLegCodes.IsLastApprovalLegComplete(
+            primaryStateCode,
+            ApplicationProfileInstanceProgressProfileResolver.GetMinistryLegCount(application)))
+            listRowAppearance = ApplicationProfileInstanceProgressLegCodes.LastApprovalCompleteListAppearance;
         else if (ApplicationProfileInstanceProgressLegCodes.IsApprovalLegListRowTintState(primaryStateCode))
             listRowAppearance = primaryStateCode;
         else if (string.Equals(
@@ -69,7 +73,7 @@ internal readonly struct ApplicationListViewDisplayState
         return new ApplicationListViewDisplayState
         {
             PrimaryStateCode = primaryStateCode,
-            CurrentState = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty,
+            CurrentState = ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveDisplayName(application) ?? string.Empty,
             LatestProgressDate = latest?.Date,
             WorkingDaysInCurrentStep = progressSla.WorkingDaysInCurrentStep,
             ProgressSlaStatement = ApplicationProfileInstanceProgressSlaHelper.FormatStatement(progressSla),

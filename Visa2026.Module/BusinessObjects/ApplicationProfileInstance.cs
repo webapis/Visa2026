@@ -390,6 +390,16 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [NotMapped]
         public string ListRowCssClass => listRowCssClass ?? ListViewDisplay.ListRowCssClass;
+        /// <summary>
+        /// Painted progress color-tab key for ListView filtering
+        /// (<see cref="ApplicationProfileInstanceProgressColorTab"/>).
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string ProgressColorTabKey =>
+            ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(
+                ListRowAppearanceStateCode,
+                PrimaryStateCode);
 
         /// <summary>
         /// ListView sort key for the Application progress column — same 0-100 scale as CompletionPercentage.

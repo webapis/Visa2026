@@ -11,8 +11,11 @@ public static class ApplicationProfileInstanceProgressLegCodes
 {
     public const int MaxLegCount = 5;
 
+    /// <summary>ListView-only appearance when the last ministry leg is approved (Ministrlikden çykan).</summary>
+    public const string LastApprovalCompleteListAppearance = "LAST_APPROVAL_COMPLETE";
+
     /// <summary>
-    /// First-leg only for new progress ("Ministrlige iberilen"). Legs 2–5 STARTED are legacy rows only.
+    /// First-leg only for new progress ("Ministrlige iberlen"). Legs 2–5 STARTED are legacy rows only.
     /// </summary>
     public static string ReviewStarted(int leg) => $"{leg}_REVIEW_STARTED";
     public static string ReviewApproved(int leg) => $"{leg}_REVIEW_APPROVED";
@@ -40,9 +43,19 @@ public static class ApplicationProfileInstanceProgressLegCodes
 
 
     /// <summary>
-    /// ListView teal band: ministry review started/approved or at-ministry location —
-    /// after At Office and before Submitted to migration (rejects stay red).
+    /// True when <paramref name="stateCode"/> is <c>N_REVIEW_APPROVED</c> for the profile's last ministry leg.
     /// </summary>
+    public static bool IsLastApprovalLegComplete(string? stateCode, int ministryLegCount)
+    {
+        if (ministryLegCount <= 0
+            || !TryParseMinistryLegFromStateCode(stateCode, out var leg)
+            || stateCode is null
+            || !stateCode.Trim().EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return Math.Clamp(leg, 1, MaxLegCount) >= ministryLegCount;
+    }
+
     public static bool IsApprovalLegListRowTintState(string? stateCode)
     {
         if (string.IsNullOrWhiteSpace(stateCode))

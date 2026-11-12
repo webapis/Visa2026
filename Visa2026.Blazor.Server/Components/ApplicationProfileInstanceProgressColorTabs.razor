@@ -1,0 +1,31 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.BusinessObjects
+
+<div class="visa-progress-color-tabs" role="tablist" aria-label="Progress color filter">
+    @foreach (var tab in Tabs)
+    {
+        var isSelected = string.Equals(tab.Key, SelectedKey, StringComparison.OrdinalIgnoreCase);
+        var isSearch = ApplicationProfileInstanceProgressColorTab.IsSearchTab(tab.Key);
+        <button type="button"
+                role="tab"
+                class="visa-progress-color-tab @(isSelected ? "is-selected" : null) @(isSearch ? "is-search" : null)"
+                aria-selected="@isSelected"
+                @onclick="() => OnSelect.InvokeAsync(tab.Key)">
+            @if (!string.IsNullOrWhiteSpace(tab.BackgroundHex))
+            {
+                <span class="visa-progress-color-tab__swatch" style="background:@tab.BackgroundHex" aria-hidden="true"></span>
+            }
+            <span class="visa-progress-color-tab__label">@tab.Label</span>
+            <span class="visa-progress-color-tab__count">@tab.Count</span>
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<ApplicationProfileInstanceProgressColorTab.TabInfo> Tabs { get; set; }
+        = Array.Empty<ApplicationProfileInstanceProgressColorTab.TabInfo>();
+
+    [Parameter] public string SelectedKey { get; set; } = ApplicationProfileInstanceProgressColorTab.AllKey;
+
+    [Parameter] public EventCallback<string> OnSelect { get; set; }
+}

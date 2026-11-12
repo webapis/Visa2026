@@ -62,3 +62,13 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **`SKILL.md`** or 
 - **What worked / failed**: Unit tests for `ResolveOutcomeKind`. Build passed. Manual F5 pending.
 - **Reuse next time**: Do not color workspace steppers from slot `done` alone; read the progress `State.Code`.
 - **Promote**: pending
+
+### 2026-11-12 — [+] ApplicationProfileInstance progress color filter tabs
+
+- **Outcome**: positive
+- **Context**: Every ApplicationProfileInstance ListView; filter by painted row color bucket
+- **What we tried**: DxGrid `ToolbarTemplate` tab strip + `CollectionSource.Criteria` on NotMapped `ProgressColorTabKey` (Client data access mode)
+- **What worked / failed**: Works with Client mode; counts taken with color criteria cleared; per-ListView localStorage; missing tab → Ähli
+- **Prevent next time**: Prefer `ToolbarTemplate` over custom ListEditor for strip-above-grid; map SLA appearance back to primary state for bucket
+- **Refs**: `docs/APPLICATION_PROFILE_LISTVIEW_PROGRESS_COLORS.md` §6; prototype `docs/prototypes/application-profile-instance-listview-process-color-tabs-prototype-dark.jpg`
+

@@ -6533,7 +6533,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProgress.FirstStepMustBeOfficePreparation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "The first progress step must be sent for agreement (Ylalaşyga Iberildi) or processing (direct route).",
+            ["en-US"] = "The first progress step must be sent for agreement (Ministrlige iberlen) or processing (direct route).",
             ["tr-TR"] = "İlk ilerleme adımı ofis hazırlığı olmalıdır (hazırlanıyor @ ofiste).",
             ["tk-TM"] = "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (taýýarlykda @ ofisde).",
             ["ru-RU"] = "Первый шаг прогресса — подготовка в офисе.",
