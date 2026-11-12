@@ -25,7 +25,7 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 .ct-muted { color: var(--os-muted); font-size: 0.82rem; }
 /* Left-stacked case tabs. Right of column stays blank. Progress Advance/Revert stay in .cw-rail. */
 .ct-page--progress {
-  max-width: 560px;
+  max-width: 720px;
   width: 100%;
   margin-inline-end: auto;
   box-sizing: border-box;
@@ -386,7 +386,7 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
 }
 .ct-upload .bi { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 .ct-meta { margin: 0; font-size: 0.82rem; }
-.ct-meta div { display: grid; grid-template-columns: 100px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--os-line); }
+.ct-meta div { display: grid; grid-template-columns: 118px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--os-line); }
 .ct-meta dt { margin: 0; color: var(--os-ink); }
 .ct-meta dd { margin: 0; font-weight: 600; color: var(--os-ink); }
 .ct-prog-detail .os-status--process {

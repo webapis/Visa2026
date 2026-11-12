@@ -181,8 +181,7 @@ public static class ApplicationProfileInstanceProgressColorTab
 
         foreach (var key in BucketOrder)
         {
-            if (!counts.TryGetValue(key, out var count) || count <= 0)
-                continue;
+            counts.TryGetValue(key, out var count);
             tabs.Add(new TabInfo(key, GetLabel(key), GetBackgroundHex(key), count));
         }
 

@@ -218,7 +218,6 @@
                     {
                         <div class="ct-prog-v__letter-missing">
                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
-                            <label class="ct-label">@FileUploadLabel(step)</label>
                             <label class="ct-upload ct-upload--action ct-upload--missing">
                                 <InputFile OnChange="e => OnMinistryLetterSelected(e, step)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
                                 <span>☁ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.UploadApprovalCopy")<br /><span>@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ScanLimit", MaxUploadMb)</span></span>
@@ -228,14 +227,9 @@
                     @if (step.State == "current")
                     {
                         <div class="ct-prog-detail">
-                            <dl class="ct-meta">
-                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt><dd><span class="os-status os-status--process">@ApplicationProfileLocalization.ProgressStatusWithProcessNumber(StepText(string.IsNullOrWhiteSpace(step.CurrentStateLabel) ? step.Label : step.CurrentStateLabel), step.ProcessNumber)</span></dd></div>
-                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt><dd>@step.Date</dd></div>
-                                <div><dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
-                            </dl>
                             @if (step.CanAdvance)
                             {
-                                <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                <div class="ct-prog-advance">
                                     <div class="ct-prog-date-line">
                                         <div class="ct-prog-date-line__field">
                                             <label class="ct-label @AdvanceDateLabelClass" for="advance-date-@ApplicationProfileInstanceId">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Date")</label>
@@ -309,17 +303,18 @@
                                     }
                                     @if (ShowResultNumberOnAdvance)
                                     {
-                                        <label class="ct-label @(IsResultNumberInvalid ? "ct-label--error" : null)" for="advance-result-number-@ApplicationProfileInstanceId" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")</label>
                                         <input id="advance-result-number-@ApplicationProfileInstanceId"
                                                @ref="_advanceResultNumberInput"
                                                type="text"
                                                class="os-input @(IsResultNumberInvalid ? "is-invalid" : null)"
+                                               style="margin-top:10px"
                                                aria-invalid="@IsResultNumberInvalid"
+                                               aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")"
                                                maxlength="@ApplicationProgressResultNumberHelper.MaxLength"
                                                @bind="_resultNumber"
                                                @bind:event="oninput"
                                                disabled="@_busy"
-                                               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberPlaceholder")" />
+                                               placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")" />
                                     }
                                     @if (ShowProcessNumberOnAdvance)
                                     {
@@ -337,7 +332,6 @@
                                     }
                                     @if (step.ShowMinistryLetterUpload)
                                     {
-                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)" style="margin-top:10px">@FileUploadLabel(step)</label>
                                         @if (step.MissingMinistryLetter)
                                         {
                                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
@@ -394,14 +388,13 @@
                                 || step.CanRevert
                                 || !string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
                             {
-                                <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                <div class="ct-prog-advance">
                                     @if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
                                     {
                                         <p class="ct-muted" style="margin:0 0 10px">@ApplicationProfileLocalization.ProgressReason(step.AdvanceBlockedReason)</p>
                                     }
                                     @if (step.ShowMinistryLetterUpload && !IsEditing(step))
                                     {
-                                        <label class="ct-label @(step.MissingMinistryLetter ? "ct-label--warn" : null)">@FileUploadLabel(step)</label>
                                         @if (step.MissingMinistryLetter)
                                         {
                                             <span class="person-dossier__pill st-pending doc-copies-catalog__pill doc-copies-catalog__pill--missing" style="margin:0 0 8px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Missing")</span>
@@ -434,6 +427,24 @@
                     </div>
                     </div>
                 </div>
+            </div>
+        }
+        @if (ShowStandingProgressActions)
+        {
+            <div class="ct-prog-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+                <button type="button"
+                        class="os-btn os-btn--primary"
+                        disabled="@(_busy || !CanAdvanceStanding)"
+                        title="@StandingAdvanceTitle"
+                        @onclick="AdvanceAsync">
+                    ▶ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.AdvanceProgress")
+                </button>
+                <button type="button"
+                        class="os-btn os-btn--ghost"
+                        disabled="@(_busy || StandingRevertStep == null)"
+                        @onclick="RevertStandingAsync">
+                    ◀ @VisaUiMessages.Get("ApplicationProfileInstance.Workspace.RevertProgress")
+                </button>
             </div>
         }
     </div>
@@ -1108,6 +1119,42 @@
         {
             _busy = false;
         }
+    }
+
+    /// <summary>
+    /// A finished case has no current step, so the in-step Advance and Revert controls are not drawn.
+    /// Keep both buttons on the page. Advance stays disabled until a next step exists.
+    /// </summary>
+    private bool ShowStandingProgressActions =>
+        !view.ProgressSteps.Any(s =>
+            string.Equals(s.State, "current", StringComparison.OrdinalIgnoreCase) && s.CanAdvance);
+
+    private bool CanAdvanceStanding =>
+        view.ProgressSteps.Any(s => s.CanAdvance && s.AdvanceOptions.Count > 0);
+
+    private ApplicationWorkspaceCaseProgressStep? StandingRevertStep =>
+        view.ProgressSteps.LastOrDefault(s => s.CanRevert);
+
+    private string StandingAdvanceTitle
+    {
+        get
+        {
+            if (CanAdvanceStanding)
+                return string.Empty;
+
+            var reason = view.ProgressSteps
+                .Select(s => s.AdvanceBlockedReason)
+                .FirstOrDefault(text => !string.IsNullOrWhiteSpace(text));
+            return string.IsNullOrWhiteSpace(reason)
+                ? VisaUiMessages.Get("ApplicationProfileInstance.Workspace.TerminalBlocked")
+                : ApplicationProfileLocalization.ProgressReason(reason);
+        }
+    }
+
+    private Task RevertStandingAsync()
+    {
+        var step = StandingRevertStep;
+        return step == null ? Task.CompletedTask : RevertAsync(step);
     }
 
     private async Task RevertAsync(ApplicationWorkspaceCaseProgressStep step)

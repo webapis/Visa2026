@@ -8,28 +8,7 @@
 @using Visa2026.Module.Services.PreviewSlot
 
 <div class="ct-prog-detail ct-step-correct">
-    <dl class="ct-meta">
-        <div>
-            <dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.CurrentState")</dt>
-            <dd>
-                <span class="os-status os-status--process">
-                    @ApplicationProfileLocalization.ProgressStatusWithProcessNumber(
-                        StepText(string.IsNullOrWhiteSpace(Step.CurrentStateLabel) ? Step.Label : Step.CurrentStateLabel),
-                        Step.ProcessNumber)
-                </span>
-            </dd>
-        </div>
-        <div>
-            <dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.StartedOn")</dt>
-            <dd>@(string.IsNullOrWhiteSpace(Step.Date) ? "—" : Step.Date)</dd>
-        </div>
-        <div>
-            <dt>@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.SlaTarget")</dt>
-            <dd>@(string.IsNullOrWhiteSpace(Step.SlaTargetDate) ? "—" : Step.SlaTargetDate)</dd>
-        </div>
-    </dl>
-
-    <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+    <div class="ct-prog-advance">
         @if (Step.CanCorrectDate && Step.DateProgressId is Guid)
         {
             <div class="ct-prog-date-line">
@@ -60,15 +39,16 @@
         }
         @if (Step.CanEditResultNumber)
         {
-            <label class="ct-label" for="step-result-@Step.Key" style="margin-top:10px">@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")</label>
             <input id="step-result-@Step.Key"
                    type="text"
                    class="os-input"
+                   style="margin-top:10px"
                    maxlength="@ApplicationProgressResultNumberHelper.MaxLength"
                    @bind="_resultNumber"
                    @bind:event="oninput"
                    disabled="@Busy"
-                   placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumberPlaceholder")" />
+                   aria-label="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")"
+                   placeholder="@VisaUiMessages.Get("ApplicationProfileInstance.Workspace.ResultNumber")" />
         }
         @if (Step.CanEditSubmissionNumber)
         {
@@ -96,7 +76,7 @@
 
         @if (Step.Files.Count > 0 || Step.CanEditFiles)
         {
-            <label class="ct-label" style="margin-top:10px">@FileUploadLabel</label>
+            <div class="ct-step-files" style="margin-top:10px">
             @foreach (var file in Step.Files)
             {
                 <div class="ct-step-file" title="@file.FileName">
@@ -134,6 +114,7 @@
                                                        OwnerViewId="@OwnerViewId" />
                 </p>
             }
+            </div>
         }
 
         @if (Step.CanCorrectDate || Step.CanEditSubmissionNumber || Step.CanEditResultNumber || Step.CanEditProcessNumber)

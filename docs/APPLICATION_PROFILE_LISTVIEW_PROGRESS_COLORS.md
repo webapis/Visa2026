@@ -71,10 +71,10 @@ All reject outcomes share one red (`#fca5a5`). Cancelled stays the lighter coral
 
 Above every Application Profile Instance ListView grid:
 
-- **Ähli** always; other tabs only for colors present in the current (route) result set
+- **Ähli** always; every color bucket always visible (count may be **0**; empty grid when selected)
 - One tab **per painted color** (swatch + Turkmen label + count)
 - Filter uses `ProgressColorTabKey` from `ListRowAppearanceStateCode` (Via Ministries green gate and Ministrlikden çykan included)
-- Remembers last tab **per ListView id** in browser `localStorage`; missing color → fall back to **Ähli**
+- Remembers last tab **per ListView id** in browser `localStorage`; unknown key → fall back to **Ähli**
 - Left nav (Via ministry / Direct migration) unchanged
 - **Gözleg/Search** tab: appears when searching (auto-selected); count = matches across all colors; clearing the box keeps Search at 0 until a color tab is chosen; color tabs stay visible
 
@@ -88,3 +88,4 @@ Above every Application Profile Instance ListView grid:
 Prototype: [`docs/prototypes/application-profile-instance-listview-process-color-tabs-prototype-dark.jpg`](prototypes/application-profile-instance-listview-process-color-tabs-prototype-dark.jpg)
 
 | 2026-11-12 | Color filter tabs: per-ListView localStorage, Ähli fallback, one tab per painted color |
+| 2026-11-12 | Always show zero-count color tabs (incl. Rejected/Cancelled); click keeps filter / empty grid |

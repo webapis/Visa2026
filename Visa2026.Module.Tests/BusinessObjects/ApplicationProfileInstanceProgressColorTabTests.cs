@@ -28,7 +28,7 @@ public class ApplicationProfileInstanceProgressColorTabTests
     }
 
     [Fact]
-    public void BuildTabs_includes_All_and_only_present_colors()
+    public void BuildTabs_always_includes_every_color_bucket_even_when_count_is_zero()
     {
         var apps = new[]
         {
@@ -43,18 +43,27 @@ public class ApplicationProfileInstanceProgressColorTabTests
         Assert.Equal(3, tabs[0].Count);
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Office && t.Count == 1);
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Issued && t.Count == 2);
-        Assert.DoesNotContain(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Submitted);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Submitted && t.Count == 0);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Rejected && t.Count == 0);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Cancelled && t.Count == 0);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.OrderedBucketKeys.Count + 1,
+            tabs.Count);
     }
 
     [Fact]
-    public void NormalizeSelection_falls_back_to_All_when_missing()
+    public void NormalizeSelection_keeps_zero_count_bucket_and_falls_back_for_unknown()
     {
         var tabs = ApplicationProfileInstanceProgressColorTab.BuildTabs(
             [AppWithAppearance("PROCESS_ISSUED")],
             selectedKey: "office");
 
-        var selected = ApplicationProfileInstanceProgressColorTab.NormalizeSelection("office", tabs);
-        Assert.Equal(ApplicationProfileInstanceProgressColorTab.AllKey, selected);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.Office,
+            ApplicationProfileInstanceProgressColorTab.NormalizeSelection("office", tabs));
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.AllKey,
+            ApplicationProfileInstanceProgressColorTab.NormalizeSelection("not-a-bucket", tabs));
     }
 
     [Fact]
