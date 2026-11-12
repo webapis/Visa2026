@@ -1,3 +1,4 @@
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
@@ -24,6 +25,9 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
         {
             if (views[viewId] is not IModelListView listView)
                 continue;
+
+            // Roster grids page in the database. Client mode loaded every person before the first row painted.
+            listView.DataAccessMode = CollectionSourceDataAccessMode.Server;
 
             var employees = viewId == "Person_ListView_Employees";
             EnsureActionColumns(listView, includeDocumentCopies: !employees);

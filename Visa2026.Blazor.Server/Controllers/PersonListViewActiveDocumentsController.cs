@@ -3,6 +3,7 @@ using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Editors.Models;
+using DevExpress.ExpressApp.Blazor.SystemModule;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +58,30 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         nameof(Person.DocumentCopiesListLink),
     };
 
+    /// <summary>Calculated roster columns. Server paging cannot sort or filter them in SQL.</summary>
+    private static readonly HashSet<string> PageLocalFields = new(StringComparer.Ordinal)
+    {
+        nameof(Person.FullName),
+        nameof(Person.Age),
+        nameof(Person.DossierListLink),
+        nameof(Person.DocumentCopiesListLink),
+        nameof(Person.EmployeeListActivePassport),
+        nameof(Person.EmployeeListEducationPlace),
+        nameof(Person.EmployeeListEducationProfession),
+        nameof(Person.EmployeeListPositionName),
+        nameof(Person.EmployeeListActualPositionName),
+        nameof(Person.EmployeeListDepartmentName),
+        nameof(Person.EmployeeListActiveVisaNumbers),
+        nameof(Person.EmployeeListActiveWorkPermitNumbers),
+        nameof(Person.EmployeeListActiveInvitationNumbers),
+        nameof(Person.EmployeeListResidenceAddress),
+        nameof(Person.EmployeeListCvCopies),
+        nameof(Person.EmployeeListFamilyProofCopies),
+    };
+
+    private const int RosterPageSize = 50;
+    private static readonly int[] RosterPageSizeOptions = [50];
+
     /// <summary>First-paint weights, used until the browser measures real cell text.</summary>
     private static readonly Dictionary<string, int> FallbackPreferred = new(StringComparer.Ordinal)
     {
@@ -108,6 +133,7 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     protected override void OnActivated()
     {
         base.OnActivated();
+        ApplyRosterPaging();
         var changed = HideColumn(nameof(Person.Gender));
         if (string.Equals(View.Id, "Person_ListView_Employees", StringComparison.Ordinal))
         {
@@ -264,6 +290,20 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         }
     }
 
+    /// <summary>
+    /// The roster grid virtual-scrolled the full list. A pager of 50 loads one database page.
+    /// Global virtual scrolling would ignore <see cref="RosterPageSize"/>.
+    /// </summary>
+    private void ApplyRosterPaging()
+    {
+        if (View.Model is not IModelListViewBlazor blazorModel)
+            return;
+
+        blazorModel.ShowAllRows = false;
+        blazorModel.VirtualScrollingEnabled = false;
+        blazorModel.PageSize = RosterPageSize;
+    }
+
     private void ApplyPresentation()
     {
         if (View?.Editor is not DxGridListEditor editor)
@@ -273,11 +313,24 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         editor.GridModel.ColumnResizeMode = GridColumnResizeMode.ColumnsContainer;
         editor.GridModel.LayoutAutoSaving = OnLayoutSaving;
         editor.GridModel.CssClass = AppendCssClass(editor.GridModel.CssClass, "visa-person-roster");
+        editor.GridModel.VirtualScrollingEnabled = false;
+        editor.GridModel.ShowAllRows = false;
+        editor.GridModel.PageSize = RosterPageSize;
+        editor.GridModel.PagerVisible = true;
+        editor.GridModel.PageSizeSelectorVisible = true;
+        editor.GridModel.PageSizeSelectorAllRowsItemVisible = false;
+        editor.GridModel.PageSizeSelectorItems = RosterPageSizeOptions;
+        editor.GridModel.SelectAllCheckboxMode = GridSelectAllCheckboxMode.Page;
 
         var ownerViewId = View.Id ?? string.Empty;
         foreach (var column in editor.GridDataColumnModels)
         {
             var fieldName = column.FieldName ?? string.Empty;
+            if (PageLocalFields.Contains(fieldName))
+            {
+                column.AllowSort = false;
+                column.FilterMenuButtonDisplayMode = GridFilterMenuButtonDisplayMode.Never;
+            }
             if (CopyFields.Contains(fieldName, StringComparer.Ordinal))
             {
                 var copyField = fieldName;
