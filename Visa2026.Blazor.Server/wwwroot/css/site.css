@@ -4224,12 +4224,14 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 }
 
 /* Instance ListView — progress + merged Application result chips. */
+
+
 .dxbl-grid td .lv-progress-with-result,
 .lv-progress-with-result {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start;
-    gap: 0;
+    gap: 1.25rem;
     width: 100%;
     min-width: 0;
 }
@@ -4328,8 +4330,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .dxbl-grid td .lv-progress-with-result--via-ministry .lv-result-neck,
 .lv-progress-with-result--via-ministry .lv-result-neck {
-    flex: 0 0 14px !important;
-    min-width: 14px;
+    flex: 0 0 36px !important;
+    min-width: 36px;
 }
 
 /* Neck from the last check into the result trunk. */
@@ -4345,12 +4347,12 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 /* Grows so every row's result stack starts on the same vertical line. */
 .dxbl-grid td .lv-result-neck,
 .lv-result-neck {
-    flex: 1 1 12px;
+    flex: 1 1 36px;
     align-self: flex-start;
     display: flex;
     align-items: center;
     height: 22px;
-    min-width: 12px;
+    min-width: 36px;
 }
 
 .dxbl-grid td .lv-result-neck::before,
@@ -4390,13 +4392,13 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 .lv-result-stems {
     position: relative;
     display: flex;
-    flex: 0 0 12.75rem;
-    width: 12.75rem;
+    flex: 0 0 13.5rem;
+    width: 13.5rem;
     box-sizing: border-box;
     align-items: stretch;
     align-self: flex-start;
     margin-top: -3px;
-    padding-left: 12px;
+    padding-left: 28px;
 }
 
 .dxbl-grid td .lv-result-stems .lv-result-chips--stack,
@@ -4930,7 +4932,7 @@ button.lv-person-mark-follow__app {
 }
 
 .lv-progress-step__meta {
-    padding: 6px 8px 0 0;
+    padding: 6px 14px 0 0;
     min-width: 0;
 }
 
@@ -4946,6 +4948,14 @@ button.lv-person-mark-follow__app {
     white-space: normal !important;
     overflow-wrap: normal;
     word-break: normal;
+}
+
+.lv-progress-step__label-word {
+    display: inline;
+}
+
+.lv-progress-step:last-child .lv-progress-step__meta {
+    padding-right: 18px;
 }
 
 .lv-progress-step__date,

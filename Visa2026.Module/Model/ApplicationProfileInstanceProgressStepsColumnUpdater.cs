@@ -18,13 +18,13 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
     public const string ColumnId = nameof(ApplicationProfileInstance.ProgressStepsDisplay);
 
     /// <summary>
-    /// Default width for office + up to five ministry legs + hand-in + CO number, plus the result chips.
-    /// An officer drag replaces this for that user; the new width is a user model difference.
+    /// Fixed width for office + up to five ministry legs + hand-in + CO number, plus the result chips.
+    /// Not officer-resizable — custom DxGrid cell keeps this width for a consistent ListView.
     /// </summary>
     public const int ProgressColumnWidth = 1120;
 
-    /// <summary>Smallest width an officer can drag the progress column down to.</summary>
-    public const int ProgressColumnMinWidth = 280;
+    /// <summary>Same as ProgressColumnWidth so drag cannot shrink the progress column.</summary>
+    public const int ProgressColumnMinWidth = ProgressColumnWidth;
     public const string ReplacedColumnId = nameof(ApplicationProfileInstance.LatestProgressState);
 
     private static readonly string[] ApplicationInstanceListViewIds =

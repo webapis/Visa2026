@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Blazor.Editors.Models;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Visa2026.Blazor.Server.Editors;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
@@ -103,16 +104,20 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             return;
         if (View is not { IsDisposed: false, Model: not null })
             return;
+
+        // Custom progress CellDisplayTemplate column — fixed width, not officer-resizable.
+        if (IsProgressStepperColumn(column))
+        {
+            SnapProgressColumnWidth(column);
+            return;
+        }
+
         if (!TryParsePx(widthText, out var pixels))
             return;
 
         var modelId = ModelColumnId(column);
         if (string.IsNullOrEmpty(modelId))
             return;
-
-        if (string.Equals(modelId, ApplicationProfileInstanceProgressStepsColumnUpdater.ColumnId, StringComparison.Ordinal)
-            && pixels < ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnMinWidth)
-            pixels = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnMinWidth;
 
         var modelColumn = View.Model.Columns[modelId];
         if (modelColumn == null || Math.Abs(modelColumn.Width - pixels) < 4)
@@ -142,6 +147,28 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         }
     }
 
+    private void SnapProgressColumnWidth(DxGridDataColumnModel column)
+    {
+        var fixedPx = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
+        var text = fixedPx.ToString(CultureInfo.InvariantCulture) + "px";
+        Interlocked.Increment(ref ignoreWidthSave);
+        try
+        {
+            if (column.MinWidth != fixedPx)
+                column.MinWidth = fixedPx;
+            if (!string.Equals(column.Width, text, StringComparison.Ordinal))
+                column.Width = text;
+
+            var modelColumn = View?.Model?.Columns[ApplicationProfileInstanceProgressStepsColumnUpdater.ColumnId];
+            if (modelColumn != null && modelColumn.Width != fixedPx)
+                modelColumn.Width = fixedPx;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref ignoreWidthSave);
+        }
+    }
+
     internal void RestoreProgressColumnWidth()
     {
         SuppressWidthSave();
@@ -163,13 +190,18 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                 continue;
 
             var pixels = progress
-                ? SavedProgressColumnWidth()
+                ? ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth
                 : modelColumn.Width;
             if (pixels <= 0)
                 continue;
 
-            if (progress && column.MinWidth != ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnMinWidth)
-                column.MinWidth = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnMinWidth;
+            if (progress)
+            {
+                if (column.MinWidth != ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth)
+                    column.MinWidth = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
+                if (modelColumn.Width != ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth)
+                    modelColumn.Width = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
+            }
 
             var text = pixels.ToString(CultureInfo.InvariantCulture) + "px";
             if (!string.Equals(column.Width, text, StringComparison.Ordinal))
@@ -177,13 +209,8 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         }
     }
 
-    private int SavedProgressColumnWidth()
-    {
-        var width = View?.Model?.Columns[ApplicationProfileInstanceProgressStepsColumnUpdater.ColumnId]?.Width ?? 0;
-        if (width < ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnMinWidth)
-            width = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
-        return width;
-    }
+    private static int FixedProgressColumnWidth() =>
+        ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
 
     protected override void OnDeactivated()
     {
@@ -240,8 +267,8 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             if (!string.IsNullOrWhiteSpace(caption))
                 columnModel.Caption = caption;
             columnModel.Name = ApplicationProfileInstanceProgressStepsColumnUpdater.ColumnId;
-            columnModel.MinWidth = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnMinWidth;
-            columnModel.Width = SavedProgressColumnWidth().ToString(CultureInfo.InvariantCulture) + "px";
+            columnModel.MinWidth = ApplicationProfileInstanceProgressStepsColumnUpdater.ProgressColumnWidth;
+            columnModel.Width = FixedProgressColumnWidth().ToString(CultureInfo.InvariantCulture) + "px";
             var resultColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
                 string.Equals(
                     c.FieldName,
@@ -345,7 +372,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                         builder.AddAttribute(seq++, "class", "lv-progress-step__meta");
                         builder.OpenElement(seq++, "div");
                         builder.AddAttribute(seq++, "class", "lv-progress-step__label");
-                        builder.AddContent(seq++, step.Label);
+                        RenderStackedWords(builder, ref seq, step.Label);
                         builder.CloseElement();
                         if (!string.IsNullOrWhiteSpace(step.Date))
                         {
@@ -501,5 +528,27 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         return string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressStepsDisplay), StringComparison.Ordinal)
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.ProgressListSortKey), StringComparison.Ordinal)
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// One word per line so long step titles (e.g. Submitted to migration service)
+    /// stay inside the step column and clear of result chips.
+    /// </summary>
+    private static void RenderStackedWords(RenderTreeBuilder builder, ref int seq, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        var words = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i < words.Length; i++)
+        {
+            if (i > 0)
+                builder.AddMarkupContent(seq++, "<br />");
+
+            builder.OpenElement(seq++, "span");
+            builder.AddAttribute(seq++, "class", "lv-progress-step__label-word");
+            builder.AddContent(seq++, words[i]);
+            builder.CloseElement();
+        }
     }
 }
