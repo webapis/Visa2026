@@ -54,6 +54,7 @@
                                         LinkPersonFromPickerRequested="@LinkPersonFromPickerRequested"
                                         ClosePersonLinkPickerRequested="@ClosePersonLinkPickerRequested"
                                         ShowPersonLinkReview="@ShowPersonLinkReview"
+                                        LastLinkedPersonId="@LastLinkedPersonId"
                                         PersonLinkReviewExisting="@PersonLinkReviewExisting"
                                         OpenExistingPersonLinkReviewRequested="@OpenExistingPersonLinkReviewRequested"
                                         PersonLinkReviewPersonId="@PersonLinkReviewPersonId"
@@ -132,6 +133,7 @@
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
     [Parameter] public bool ShowPersonLinkReview { get; set; }
+    [Parameter] public Guid LastLinkedPersonId { get; set; }
     [Parameter] public bool PersonLinkReviewExisting { get; set; }
     [Parameter] public EventCallback<Guid> OpenExistingPersonLinkReviewRequested { get; set; }
     [Parameter] public Guid PersonLinkReviewPersonId { get; set; }

@@ -2638,6 +2638,9 @@ select.cw-summary-field__input option {
   color: var(--os-ink);
 }
 .os-person-row { cursor: pointer; }
+.officer-case-workspace .os-person-row.is-just-linked td {
+  background: color-mix(in srgb, var(--os-accent, #1d6ef2) 16%, transparent);
+}
 .os-link-review-person { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .os-link-review-person__photo,
 .os-link-review-person__photo-empty {

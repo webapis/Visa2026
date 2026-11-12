@@ -17,13 +17,13 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 /// </summary>
 public static class ApplicationProfileInstancePersonResolver
 {
-    public static void RefreshResolvedLinks(
+    public static IReadOnlyList<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)> RefreshResolvedLinks(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         Person person)
     {
         if (objectSpace == null || application == null || person == null)
-            return;
+            return [];
 
         var trackedPerson = person.ID != Guid.Empty
             ? objectSpace.GetObject(person) ?? person
@@ -33,10 +33,10 @@ public static class ApplicationProfileInstancePersonResolver
             : application;
 
         if (trackedPerson == null)
-            return;
+            return [];
 
         if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(trackedApplication))
-            return;
+            return [];
 
         EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
 
@@ -46,7 +46,7 @@ public static class ApplicationProfileInstancePersonResolver
         // Import pins PersonInApplication snapshots (Passport/Visa/WorkPermitItem). Do not attach
         // today's PersonCurrentItems / latest-N onto historical application types.
         if (MigrationImportContext.IsDataImport)
-            return;
+            return [];
         var candidates = ResolveEntities(objectSpace, trackedPerson, trackedApplication);
         foreach (var (kind, linkedObjectId) in CollectMissingAutoLinks(trackedApplication, existing, candidates))
         {
@@ -58,6 +58,8 @@ public static class ApplicationProfileInstancePersonResolver
             trackedApplication.PersonResolvedLinks?.Add(link);
             ApplicationProfileInstanceChildMembership.Add(objectSpace, trackedApplication, kind, linkedObjectId);
         }
+
+        return candidates;
     }
 
     /// <summary>

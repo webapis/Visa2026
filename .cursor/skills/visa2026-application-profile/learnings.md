@@ -6,6 +6,20 @@
 - **Prevent**: Do not apply this end formula to issued visas or to **Iş Rugsatnamasyny Uzaltmak** (`workpermit_extension`). Do not default new work-permit `Include` to true.
 - **Verify**: Isolated artifacts build (`RunAnalyzers=false`) succeeded; `IssuedExtensionDefaultsHelperTests` 13 passed.
 
+## 2026-11-12 — Join closes Linked records and pins the person first
+
+- **Need**: After Join, an empty Linked records dialog stayed up (blank photo, "—", green "linked" line, Join still visible). The new person stayed in name order, so the officer could not see who was just added.
+- **Fix**: The review window is not rendered once the person id is cleared, and Join does not write the success line into that dialog. `LastLinkedPersonId` sorts that person to the top of People & links and highlights the row.
+- **Officer**: Stop F5, rebuild, hard-refresh. Join a person. The dialog should disappear. That person is the first row in the table.
+- **Prevent**: Do not clear the review body while the DxWindow stays mounted. Do not put the Join success banner inside the review window.
+
+## 2026-11-12 — Linking a person no longer walks the whole roster
+
+- **Need**: Each Join got slower as more people were already on the case.
+- **Fix**: Relink copies the stay address and requested locations for the person being linked. Case summary save still fills the rest of the roster, in one address query. The workspace loads requested locations once per case, and skips active-document counts for kinds the profile does not show. `RefreshResolvedLinks` returns the candidates it already resolved so Join does not resolve them again.
+- **Officer**: Stop F5, rebuild. Link several people on one case. Later links should not pause longer than the first.
+- **Prevent**: Do not call `EnsureForPeople*` from `RelinkPerson`. Do not `GetLocations` once per person when painting location tabs.
+
 ## 2026-11-12 — Choose Approval legs: horizontal row, per-card progress, larger type
 
 - **Need**: Approval-leg cards wrapped in a narrow grid. Ministry names were too small to read. Clicking a card only showed one shared progress bar at the bottom.

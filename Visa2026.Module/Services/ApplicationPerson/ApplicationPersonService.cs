@@ -80,20 +80,18 @@ public static class ApplicationProfileInstancePersonService
             return false;
 
         ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(objectSpace, trackedApplication);
-        InvitationStayAddressCopy.EnsureForPeopleWithoutAddress(objectSpace, trackedApplication);
-        CaseWorkPermitLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, trackedApplication);
-        CaseBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, trackedApplication);
-        CaseVisaBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, trackedApplication);
+        // One person only. Case summary save still fills the rest of the roster.
+        InvitationStayAddressCopy.EnsureForPersonWithoutAddress(objectSpace, trackedApplication, trackedPerson);
 
         if (trackedPerson.ID != Guid.Empty && !objectSpace.IsNewObject(trackedPerson))
             objectSpace.ReloadObject(trackedPerson);
 
-        ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(
+        var candidates = ApplicationProfileInstancePersonResolver.RefreshResolvedLinks(
             objectSpace,
             trackedApplication,
             trackedPerson);
 
-        foreach (var (kind, entity) in ApplicationProfileInstancePersonResolver.ResolveEntities(objectSpace, trackedPerson, trackedApplication))
+        foreach (var (kind, entity) in candidates)
         {
             if (!ApplicationProfileInstancePersonResolver.IsAutoLinkEnabled(trackedApplication, kind))
                 continue;

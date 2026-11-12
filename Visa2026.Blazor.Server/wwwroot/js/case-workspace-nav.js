@@ -206,6 +206,16 @@ window.visaCaseWorkspaceNav = window.visaCaseWorkspaceNav || (function () {
                 kind: host.getAttribute("data-summary-kind") || "",
                 value: "value" in el ? (el.value || "") : ""
             };
+        },
+        scrollJustLinkedPerson: function () {
+            var row = document.querySelector(".officer-case-workspace .os-person-row.is-just-linked");
+            if (!row)
+                return;
+            var scroller = row.closest(".cw-people-links-scroll");
+            if (scroller)
+                scroller.scrollTop = 0;
+            if (row.scrollIntoView)
+                row.scrollIntoView({ block: "nearest" });
         }
     };
 })();

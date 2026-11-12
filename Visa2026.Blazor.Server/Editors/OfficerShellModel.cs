@@ -629,6 +629,13 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    /// <summary>Person just joined onto this case. The people table pins this row first.</summary>
+    public Guid LastLinkedPersonId
+    {
+        get => GetPropertyValue<Guid>();
+        set => SetPropertyValue(value);
+    }
+
     public bool PersonLinkReviewExisting
     {
         get => GetPropertyValue<bool>();

@@ -1151,12 +1151,12 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             ClearPersonLinkReview(model);
             model.ShowPersonLinkPicker = false;
             model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
-            model.PersonLinkStatusMessage = existing
-                ? VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Updated", person.FullName)
-                : VisaUiMessages.Format("ApplicationProfileInstance.LinkReview.Linked", person.FullName);
+            model.PersonLinkStatusMessage = null;
             model.PersonLinkStatusIsError = false;
+            model.LastLinkedPersonId = person.ID;
             model.CaseTab = "people";
             await LoadAsync(showLoading: false);
+            FocusLastLinkedPerson(model);
         }
         catch (Exception ex)
         {
@@ -1306,6 +1306,20 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         var person = objectSpace.GetObjectByKey<Person>(model.PersonLinkReviewPersonId);
         model.PersonLinkReviewCreateForm = PersonLinkReview.BuildEditForm(objectSpace, application, person, line);
         return Task.CompletedTask;
+    }
+
+    private static void FocusLastLinkedPerson(ApplicationWorkspaceModel model)
+    {
+        var people = model.Snapshot?.CaseView?.People;
+        if (people == null || model.LastLinkedPersonId == Guid.Empty)
+            return;
+
+        var person = people.FirstOrDefault(p => p.PersonId == model.LastLinkedPersonId);
+        if (person == null)
+            return;
+
+        model.SelectedPersonRowIndex = person.Index;
+        model.CanOpenPersonDetail = true;
     }
 
     private static void ClearPersonLinkReview(ApplicationWorkspaceModel model)

@@ -75,6 +75,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         var linkableCounts = ApplicationWorkspaceLinkableActiveCounts.Load(
             objectSpace,
             rosterPeople,
+            application,
             includeNotYetStartedVisas: true);
         var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
         if (application != null)

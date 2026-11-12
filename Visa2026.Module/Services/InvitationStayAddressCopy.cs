@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -62,28 +63,68 @@ public static class InvitationStayAddressCopy
     /// <summary>
     /// When the stay is complete, people on this case who have no address of residence
     /// get one created from the stay and linked. People who already have an address are left alone.
+    /// Case summary save uses this. Link / Relink uses <see cref="EnsureForPersonWithoutAddress"/>.
     /// </summary>
     public static void EnsureForPeopleWithoutAddress(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
         if (!CanCopy(objectSpace, application, out var stay))
             return;
 
-        foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))
+        var people = application.People?.Where(p => p != null && p.ID != Guid.Empty).ToList() ?? [];
+        if (people.Count == 0)
+            return;
+
+        var withAddress = PeopleWithAddress(objectSpace, people.Select(p => p.ID));
+        foreach (var person in people)
         {
-            if (PersonHasAddress(objectSpace, person.ID))
+            if (withAddress.Contains(person.ID))
                 continue;
-
-            var created = CreateFromStay(objectSpace, person, stay!);
-            if (created == null || created.ID == Guid.Empty)
-                continue;
-
-            ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
-                objectSpace,
-                application,
-                person,
-                ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
-                created.ID);
+            LinkCreatedStayAddress(objectSpace, application, person, stay!);
         }
+    }
+
+    /// <summary>Same copy as <see cref="EnsureForPeopleWithoutAddress"/>, for the person being linked.</summary>
+    public static void EnsureForPersonWithoutAddress(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        if (!CanCopy(objectSpace, application, out var stay) || person == null || person.ID == Guid.Empty)
+            return;
+        if (PersonHasAddress(objectSpace, person.ID))
+            return;
+        LinkCreatedStayAddress(objectSpace, application, person, stay!);
+    }
+
+    private static void LinkCreatedStayAddress(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person,
+        InvitationAddress stay)
+    {
+        var created = CreateFromStay(objectSpace, person, stay);
+        if (created == null || created.ID == Guid.Empty)
+            return;
+
+        ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
+            objectSpace,
+            application,
+            person,
+            ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+            created.ID);
+    }
+
+    private static HashSet<Guid> PeopleWithAddress(IObjectSpace objectSpace, IEnumerable<Guid> personIds)
+    {
+        var ids = personIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0)
+            return [];
+
+        return objectSpace.GetObjectsQuery<AddressOfResidence>()
+            .Where(address => address.Person != null && ids.Contains(address.Person.ID))
+            .Select(address => address.Person.ID)
+            .Distinct()
+            .ToHashSet();
     }
 
     /// <summary>

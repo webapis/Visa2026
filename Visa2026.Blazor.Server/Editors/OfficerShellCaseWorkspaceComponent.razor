@@ -340,6 +340,7 @@
     [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
     [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
     [Parameter] public bool ShowPersonLinkReview { get; set; }
+    [Parameter] public Guid LastLinkedPersonId { get; set; }
     [Parameter] public bool PersonLinkReviewExisting { get; set; }
     [Parameter] public EventCallback<Guid> OpenExistingPersonLinkReviewRequested { get; set; }
     [Parameter] public Guid PersonLinkReviewPersonId { get; set; }
@@ -422,6 +423,7 @@
 
     private VisaPreviewSlotMode _previewSlotMode;
     private bool _caseNavHeld;
+    private Guid _scrolledLastLinkedPersonId;
     private bool _linkReviewUserPositioned;
     private int? _linkReviewPosX;
     private int? _linkReviewPosY;
@@ -634,6 +636,24 @@
             EnsureDocumentCopiesCompleteness(Snapshot.CaseView);
             if (_documentCopiesNavReady)
                 await InvokeAsync(StateHasChanged);
+        }
+
+        if (LastLinkedPersonId != Guid.Empty && LastLinkedPersonId != _scrolledLastLinkedPersonId)
+        {
+            _scrolledLastLinkedPersonId = LastLinkedPersonId;
+            try
+            {
+                await JS.InvokeVoidAsync("visaCaseWorkspaceNav.scrollJustLinkedPerson");
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+            catch (JSException)
+            {
+            }
+            catch (InvalidOperationException)
+            {
+            }
         }
 
         if (_peopleActionMenuNeedsPlace && (_peopleDocMenuOpen || _peopleResmiMenuOpen))
@@ -2592,7 +2612,7 @@
 
     private RenderFragment RenderPeople(ApplicationWorkspaceCaseView view) => __builder =>
     {
-        var filteredPeople = FilterLinkedPeople(view.People).ToList();
+        var filteredPeople = OrderLastLinkedFirst(FilterLinkedPeople(view.People)).ToList();
         var selectablePeople = filteredPeople.Where(p => !p.IsExcluded && p.PersonId != Guid.Empty).ToList();
         var allPeopleSelected = AreAllDocumentPeopleSelected(selectablePeople);
         var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
@@ -2729,7 +2749,9 @@
                                                            CloseRequested="@ClosePersonLinkPickerRequested" />
                 </BodyContentTemplate>
             </DxWindow>
-            <DxWindow Visible="@ShowPersonLinkReview"
+            @if (ShowPersonLinkReview && PersonLinkReviewPersonId != Guid.Empty)
+            {
+            <DxWindow Visible="true"
                       VisibleChanged="OnPersonLinkReviewVisibleChanged"
                       HeaderText="@Msg("ApplicationProfileInstance.Workspace.LinkedRecords")"
                       ShowFooter="@(_reviewTab == "overview" && !_reviewCreating)"
@@ -2991,6 +3013,7 @@
                     </div>
                 </FooterContentTemplate>
             </DxWindow>
+            }
             @if (view.People.Count == 0)
             {
                 <p class="os-empty">No people linked.</p>
@@ -3034,7 +3057,7 @@
                             @foreach (var person in filteredPeople)
                             {
                                 var personSelected = IsDocumentPersonSelected(person.PersonId);
-                                <tr class="os-person-row @(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.IsExcluded ? "is-excluded" : null)"
+                                <tr class="os-person-row @(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.PersonId == LastLinkedPersonId ? "is-just-linked" : null) @(person.IsExcluded ? "is-excluded" : null)"
                                     @onclick="() => OpenPersonReviewFromRowAsync(person)">
                                     <td class="os-people-check-col" @onclick:stopPropagation="true">
                                         @if (!person.IsExcluded && person.PersonId != Guid.Empty)
@@ -3073,21 +3096,17 @@
                                                     var sourceId = uploadSourceId;
                                                     var missingScans = !PeopleDocHasScans(kind, sourceId);
                                                     <button type="button"
-                                                            class="ct-link os-people-doc-nusga"
+                                                            class="os-people-doc-icon @(missingScans ? "os-people-doc-icon--missing" : "os-people-doc-icon--ready")"
+                                                            title="@(missingScans
+                                                                ? Msg("PersonDocumentCopies.Menu.NoFile")
+                                                                : Msg("PersonDocumentCopies.Action.Preview"))"
+                                                            aria-label="@(missingScans
+                                                                ? Msg("PersonDocumentCopies.Menu.NoFile")
+                                                                : Msg("PersonDocumentCopies.Action.Preview"))"
                                                             @onclick:stopPropagation="true"
                                                             @onclick="() => OpenPeopleDocNusgaAsync(person, kind, sourceId, record)">
-                                                        @Msg("PersonDocumentCopies.People.Nusga")
+                                                        <span aria-hidden="true">@(missingScans ? "⚠" : "📄")</span>
                                                     </button>
-                                                    @if (missingScans)
-                                                    {
-                                                        <button type="button"
-                                                                class="os-people-doc-missing"
-                                                                @onclick:stopPropagation="true"
-                                                                @onclick="() => OpenPeopleDocNusgaAsync(person, kind, sourceId, record)">
-                                                            <span class="os-people-doc-missing__icon" aria-hidden="true">⚠</span>
-                                                            <span>@Msg("PersonDocumentCopies.People.NoFile")</span>
-                                                        </button>
-                                                    }
                                                 }
                                             </div>
                                         </td>
@@ -3533,6 +3552,15 @@
 
         var q = _peopleSearchText.Trim();
         return people.Where(person => PersonMatchesSearch(person, q));
+    }
+
+    private IEnumerable<ApplicationWorkspaceCasePerson> OrderLastLinkedFirst(
+        IEnumerable<ApplicationWorkspaceCasePerson> people)
+    {
+        if (LastLinkedPersonId == Guid.Empty)
+            return people;
+
+        return people.OrderBy(person => person.PersonId == LastLinkedPersonId ? 0 : 1);
     }
 
     private static bool PersonMatchesSearch(ApplicationWorkspaceCasePerson person, string query)
