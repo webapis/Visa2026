@@ -89,6 +89,57 @@ public static class IssuedExtensionDefaultsHelper
         return true;
     }
 
+    /// <summary>
+    /// Wiza we Iş Rugsatnamasyny Uzaltmak (<c>extend_visa_wp</c> / <c>App_Visa_and_WP_Ext</c>).
+    /// </summary>
+    public static bool IsVisaAndWorkPermitExtension(ApplicationProfileInstance? instance)
+    {
+        var code = instance?.ApplicationProfile?.Code?.Trim();
+        if (string.Equals(code, "extend_visa_wp", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+#pragma warning disable CS0618 // ApplicationType.Name is the seed key (App_Visa_and_WP_Ext).
+        var typeName = instance?.ApplicationType?.Name?.Trim();
+#pragma warning restore CS0618
+        return string.Equals(typeName, "App_Visa_and_WP_Ext", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// New work permit on a visa-and-work-permit extension.
+    /// Start = linked work-permit end + 1 day (not moved forward to today).
+    /// End = that start + the case <see cref="VisaPeriod"/>. Months use calendar
+    /// <see cref="DateTime.AddMonths(int)"/> so the day count follows the months crossed.
+    /// </summary>
+    public static bool TryComputeVisaAndWorkPermitExtensionWorkPermitDates(
+        DateTime? linkedEnd,
+        VisaPeriod? period,
+        out DateTime start,
+        out DateTime? end,
+        out string note)
+    {
+        start = default;
+        end = null;
+        note = string.Empty;
+
+        if (linkedEnd is not DateTime linked || linked == default)
+        {
+            note = "No linked work permit end date — enter Start and End.";
+            return false;
+        }
+
+        var linkedDate = linked.Date;
+        start = linkedDate.AddDays(1);
+        if (!TryAddVisaPeriod(start, period, out var fromStart) || fromStart.Date <= start.Date)
+        {
+            note = $"Start day after linked work permit end {linkedDate:dd MMM yyyy}; case visa period missing — enter End.";
+            return true;
+        }
+
+        end = fromStart.Date;
+        note = $"Start day after linked work permit end {linkedDate:dd MMM yyyy}; End = that start + case visa period.";
+        return true;
+    }
+
     public static Visa? TryResolveLinkedVisa(
         IObjectSpace objectSpace,
         ApplicationProfileInstance? instance,

@@ -1,3 +1,11 @@
+## 2026-11-12 — Visa+WP extension work permit dates, and new work permit people start unchecked
+
+- **Need**: On **Wiza we Iş Rugsatnamasyny Uzaltmak** (`extend_visa_wp`), a new work permit’s start is the linked work-permit end + 1 day, and the end is that start plus the case visa period (months via calendar `AddMonths`). New work permits also open with every person unchecked, same as issued visa.
+- **Fix**: `TryComputeVisaAndWorkPermitExtensionWorkPermitDates` (no clamp to today). Other profiles still use linked end + period and the issue-date clamp. Create sets `Include = false`; edit still checks people already on the permit. `LoadForApplication` skips a requested location whose kind is null.
+- **Officer**: Stop F5, rebuild, hard-refresh. New work permit — checkboxes empty. On a visa-and-work-permit extension, check a person: Start is the day after the linked item’s end; End is that start + the case visa period (6 months from 5 Nov is 5 May).
+- **Prevent**: Do not apply this end formula to issued visas or to **Iş Rugsatnamasyny Uzaltmak** (`workpermit_extension`). Do not default new work-permit `Include` to true.
+- **Verify**: Isolated artifacts build (`RunAnalyzers=false`) succeeded; `IssuedExtensionDefaultsHelperTests` 13 passed.
+
 ## 2026-11-12 — Choose Approval legs: horizontal row, per-card progress, larger type
 
 - **Need**: Approval-leg cards wrapped in a narrow grid. Ministry names were too small to read. Clicking a card only showed one shared progress bar at the bottom.

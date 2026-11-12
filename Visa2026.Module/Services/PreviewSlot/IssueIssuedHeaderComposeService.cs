@@ -623,7 +623,8 @@ public static partial class IssueIssuedHeaderComposeService
                 var include = kind switch
                 {
                     IssueIssuedHeaderKind.Invitation => ready && !onOther,
-                    IssueIssuedHeaderKind.WorkPermit => p.IsEmployee && ready,
+                    // Create: officer opts employees in — same as issued visas.
+                    IssueIssuedHeaderKind.WorkPermit => false,
                     IssueIssuedHeaderKind.WorkPermitLocationGrant => p.IsEmployee && ready,
                     _ => true,
                 };
@@ -2337,17 +2338,38 @@ public static partial class IssueIssuedHeaderComposeService
         {
             line.IsReady = true;
             line.StatusCaption = "Ready";
-            line.Include = true;
+            // Create: officer opts people in. Edit re-checks people already on this permit.
+            line.Include = false;
         }
 
         var linked = IssuedExtensionDefaultsHelper.TryResolveLinkedWorkPermitItem(objectSpace, instance, person);
-        if (IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
+        // Visa + work-permit extension: start the day after the linked item ends, end is that
+        // start plus the case visa period. Other cases keep linked-end + period (and the issue-date clamp).
+        bool datesComputed;
+        DateTime start;
+        DateTime? end;
+        string note;
+        if (IssuedExtensionDefaultsHelper.IsVisaAndWorkPermitExtension(instance))
+        {
+            datesComputed = IssuedExtensionDefaultsHelper.TryComputeVisaAndWorkPermitExtensionWorkPermitDates(
+                linked?.ExpirationDate,
+                instance.VisaPeriod,
+                out start,
+                out end,
+                out note);
+        }
+        else
+        {
+            datesComputed = IssuedExtensionDefaultsHelper.TryComputeExtensionDates(
                 linked?.ExpirationDate,
                 DateTime.Today,
                 instance.VisaPeriod,
-                out var start,
-                out var end,
-                out var note))
+                out start,
+                out end,
+                out note);
+        }
+
+        if (datesComputed)
         {
             line.ItemStartDate = start;
             line.ItemExpirationDate = end;

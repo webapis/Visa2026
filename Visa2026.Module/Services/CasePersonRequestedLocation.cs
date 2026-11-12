@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
@@ -11,6 +12,35 @@ namespace Visa2026.Module.Services;
 /// </summary>
 public static class CasePersonRequestedLocation
 {
+    /// <summary>
+    /// One query for every requested location on this case. Workspace tabs read this
+    /// instead of <see cref="GetLocations"/> once per person.
+    /// </summary>
+    public static Dictionary<(Guid PersonId, ApplicationProfileInstancePersonRequestedLocationKind Kind), string> LoadForApplication(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application)
+    {
+        var map = new Dictionary<(Guid, ApplicationProfileInstancePersonRequestedLocationKind), string>();
+        if (objectSpace == null || application == null || application.ID == Guid.Empty)
+            return map;
+
+        var rows = objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonRequestedLocation>()
+            .Where(row => row.ApplicationProfileInstanceId == application.ID)
+            .Select(row => new { row.PersonId, row.Kind, row.Locations })
+            .ToList();
+        foreach (var row in rows)
+        {
+            if (row.PersonId == Guid.Empty || row.Kind is not ApplicationProfileInstancePersonRequestedLocationKind kind)
+                continue;
+            var value = row.Locations?.Trim();
+            if (string.IsNullOrWhiteSpace(value) || value == "—")
+                continue;
+            map[(row.PersonId, kind)] = value;
+        }
+
+        return map;
+    }
+
     public static string? GetLocations(
         IObjectSpace objectSpace,
         Guid applicationId,
