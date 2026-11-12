@@ -19,7 +19,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("WorkPermit")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(WorkPermitNumber))]
     [SupportsOptionalDetailFields]
     public class WorkPermit : BaseObject, IOptionalDetailFields

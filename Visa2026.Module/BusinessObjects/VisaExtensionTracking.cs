@@ -9,7 +9,7 @@ using DevExpress.Persistent.Base;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Visa Tracking")]
+    [NavigationItem(false)]
     [ModelDefault("Caption", "Visa Extension History")]
     [ModelDefault("AllowEdit", "False")]
     [ModelDefault("AllowNew", "False")]

@@ -14,7 +14,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Rejection")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(RejectionItemName))]
     public class RejectionItem : PersonLinkedItemBase<RejectionItem, Rejection>
     {

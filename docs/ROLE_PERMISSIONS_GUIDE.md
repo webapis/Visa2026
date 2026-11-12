@@ -181,6 +181,10 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `ReportDataV2`, `ReportVisibility` |
 | **Report Dashboard `VwRd*`** (all `vw_rd_*` view BOs) + **`ReportDashboardHost`** | Read + Navigate on all view BOs; host shell Read/Write/Create — via `ReportDashboardOfficerPermissions.Ensure` (Users, UsersReadOnly, VisaOffice). Upgrades existing permission rows on startup (not add-only). Missing Read → Overview cards show Total **0** even when data exists. |
 
+### Left navigation hidden
+
+These folders are hidden for every role. The type permissions above stay, so the records still open from a person or an application: Invitation, Invitation items, Work permit, Work permit items, Visa Tracking, Work Permit Tracking, Temporary visitor, Rejection, and Border zone. The Work permit folder stays for the other items in that group (`ForeignWorkerMaglumat` and location grants).
+
 ---
 
 ## Current UsersReadOnly Role Permissions

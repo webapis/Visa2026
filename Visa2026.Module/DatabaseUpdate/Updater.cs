@@ -451,20 +451,18 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
-        // Rejection group (separate from ApplicationProfileInstance)
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
-
-        // Invitation group
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
-
-        // BorderZone group (separate from Invitation)
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Allow);
+        // Left nav hidden. Type grants above still allow these records from a person or application.
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Visa Tracking", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Work Permit Tracking", SecurityPermissionState.Deny);
 
         // Operations — UserFeedback only (see EnsureUserFeedbackOfficerPermissions); runtime log + state inbox are admin-only.
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
@@ -710,27 +708,30 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Deny);
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Deny);
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Deny);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Visa Tracking", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Work Permit Tracking", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/ForeignWorkerMaglumat", SecurityPermissionState.Allow);
 
-            // Top-level person lists (legacy-style; not under People).
+            // Top-level person lists (legacy-style; not under People). Temporary visitors stay off the left menu.
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);

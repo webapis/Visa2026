@@ -25,7 +25,7 @@ namespace Visa2026.Module.BusinessObjects
     /// No Netije/Result property — Rejection is a separate BO.
     /// </summary>
     [DefaultClassOptions]
-    [NavigationItem("Invitation")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(InvitationNumber))]
     [RuleCriteria("Invitation_ExpirationAfterIssued", DefaultContexts.Save,
         "ExpirationDate > IssuedDate",

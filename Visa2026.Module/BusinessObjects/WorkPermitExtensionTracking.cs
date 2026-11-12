@@ -9,7 +9,7 @@ using DevExpress.Persistent.Base;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Work Permit Tracking")]
+    [NavigationItem(false)]
     [ModelDefault("Caption", "Work Permit Extension History")]
     [ModelDefault("AllowEdit", "False")]
     [ModelDefault("AllowNew", "False")]

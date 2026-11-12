@@ -9,7 +9,7 @@ using DevExpress.Persistent.Base;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Visa Tracking")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(ApplicationNumber))]
     [ModelDefault("Caption", "Visa Cancellation Status")]
     [ModelDefault("AllowEdit", "False")]

@@ -17,7 +17,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("BorderZone")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(BorderZoneNumber))]
     [RuleCriteria("BorderZone_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent

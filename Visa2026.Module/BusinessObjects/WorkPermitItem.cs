@@ -22,7 +22,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("WorkPermit")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(WorkPermitItemName))]
     [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [Appearance("WPStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",

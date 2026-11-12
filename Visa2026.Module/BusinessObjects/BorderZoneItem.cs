@@ -18,7 +18,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("BorderZone")]
+    [NavigationItem(false)]
     public class BorderZoneItem  : BaseObject
     {
         [RuleRequiredField]

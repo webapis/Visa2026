@@ -57,6 +57,7 @@ namespace Visa2026.Module.DatabaseUpdate
             RemoveStaleInvitationBorderZoneNavigation(navigationItems);
             RemoveStaleApplicationProfileListNavigation(navigationItems);
             HideTemplateOwnedConfigurationNavigation(navigationItems);
+            HideRetiredLeftNavigation(navigationItems);
         }
 
         /// <summary>
@@ -94,6 +95,53 @@ namespace Visa2026.Module.DatabaseUpdate
         private static void HideNavItemIfPresent(IModelNavigationItem parentGroup, string itemId)
         {
             if (parentGroup.Items[itemId] is IModelNavigationItem item)
+                item.Visible = false;
+        }
+
+        /// <summary>
+        /// Invitation, work permit headers/items, visa tracking, work-permit tracking, temporary visitors,
+        /// rejection, and border zone stay off the left menu. Records remain reachable from a person or application.
+        /// The Work permit group stays for the other items in that folder.
+        /// </summary>
+        private static void HideRetiredLeftNavigation(IModelNavigationItems navigationItems)
+        {
+            HideTopLevelIfPresent(navigationItems, "TemporaryVisitors");
+            HideTopLevelIfPresent(navigationItems, "Invitation");
+            HideTopLevelIfPresent(navigationItems, "Rejection");
+            HideTopLevelIfPresent(navigationItems, "BorderZone");
+            HideTopLevelIfPresent(navigationItems, "Visa Tracking");
+            HideTopLevelIfPresent(navigationItems, "Work Permit Tracking");
+
+            if (navigationItems["WorkPermit"] is IModelNavigationItem workPermitGroup)
+            {
+                HideNavItemIfPresent(workPermitGroup, "WorkPermit");
+                HideNavItemIfPresent(workPermitGroup, "WorkPermitItem");
+            }
+
+            if (navigationItems["People"] is IModelNavigationItem peopleGroup)
+                HideNavItemIfPresent(peopleGroup, "TemporaryVisitors");
+
+            if (navigationItems["Default"] is IModelNavigationItem defaultGroup)
+            {
+                foreach (var itemId in new[]
+                         {
+                             "Invitation", "InvitationItem",
+                             "WorkPermit", "WorkPermitItem",
+                             "Rejection", "RejectionItem",
+                             "BorderZone", "BorderZoneItem",
+                             "VisaExtensionStatus", "VisaExtensionTracking", "VisaTransferStatus",
+                             "VisaCancelExtStatus", "VisaCancellationStatus",
+                             "WorkPermitExtensionStatus", "WorkPermitExtensionTracking",
+                         })
+                {
+                    HideNavItemIfPresent(defaultGroup, itemId);
+                }
+            }
+        }
+
+        private static void HideTopLevelIfPresent(IModelNavigationItems navigationItems, string itemId)
+        {
+            if (navigationItems[itemId] is IModelNavigationItem item)
                 item.Visible = false;
         }
 
@@ -136,7 +184,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
         /// <summary>
         /// Person, Passport, Visa, etc. use <see cref="NavigationItemAttribute"/>(false); strip stale nodes if the generator re-added them.
-        /// Officers use top-level Employees / Family Members / Temporary Visitors instead of a flat Person list.
+        /// Officers use top-level Employees / Family Members. Temporary visitors stay off the left navigation.
         /// </summary>
         private static void RemoveLegacyLookupOperationalNavigation(IModelNavigationItems navigationItems)
         {

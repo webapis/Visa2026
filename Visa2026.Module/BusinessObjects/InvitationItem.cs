@@ -19,7 +19,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Invitation")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(InvitationItemName))]
     [Appearance("InvitationItem_InputApplicationProfileInstancesHiddenWhenIssued", Priority = 50,
         AppearanceItemType = "ViewItem", TargetItems = "ApplicationProfileInstances",
