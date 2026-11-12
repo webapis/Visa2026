@@ -1,0 +1,38 @@
+[
+    {
+        "value":  "8",
+        "label":  "Other"
+    },
+    {
+        "value":  "9",
+        "label":  "Residence / Organization Premises"
+    },
+    {
+        "value":  "1",
+        "label":  "Hotel"
+    },
+    {
+        "value":  "2",
+        "label":  "Dormitory"
+    },
+    {
+        "value":  "3",
+        "label":  "Hospital"
+    },
+    {
+        "value":  "4",
+        "label":  "Visa and Registration Department"
+    },
+    {
+        "value":  "5",
+        "label":  "Private House"
+    },
+    {
+        "value":  "7",
+        "label":  "Private House (Registered Address)"
+    },
+    {
+        "value":  "6",
+        "label":  "Parking Lot"
+    }
+]

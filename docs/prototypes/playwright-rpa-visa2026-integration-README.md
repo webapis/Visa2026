@@ -10,7 +10,7 @@ Conceptual prototype — worker **scaffold** lives in [Visa2026.PortalFiling.Wor
 | Where Playwright runs | Separate Windows worker + Edge profile — **not** inside Blazor/IIS. |
 | Visa2026 role | Queue job from case, show status, officer **Confirm save**. |
 | Worker role | Poll Ready jobs, fill `rgstr.migration.gov.tm`, screenshot, wait. |
-| Secrets | Migration portal login stays in Edge profile; Visa2026 uses JWT/OData only. |
+| Secrets | Prefer persistent browser profile session; fallback worker-local PortalLogin (cellphone + SMS code ~10 days). Never store SMS login in Visa2026 DB; JWT/OData only for jobs. |
 | Mode | Attended first (officer watches / confirms). Unattended later if licensed/ops allow. |
 
 ## Screens
@@ -36,9 +36,12 @@ flowchart TD
   C --> D[Visa2026 creates job Ready<br/>person, address, dates, letter]
   D --> E[Worker polls API for oldest Ready]
   E --> F[Claim job → Filling]
-  F --> G{Edge session logged in?}
-  G -->|No| H[Mark Failed · need portal login]
+  F --> G{Persistent browser session valid?}
   G -->|Yes| I[Open unfinished or new REGISTRATION]
+  G -->|Login page| G1{Worker PortalLogin cellphone+SMS code?}
+  G1 -->|No| H[Mark Failed · configure login or login once in profile]
+  G1 -->|Yes| G2[Enter cellphone + SMS code]
+  G2 --> I
   I --> J[Map Visa2026 fields → portal controls<br/>incl. dropdown translation table]
   J --> K[Fill text + dates + dropdowns]
   K --> L[Add citizen subflow]
@@ -70,10 +73,13 @@ LOOP Worker every N seconds:
   IF job is null: continue
 
   TRY
-    browser = AttachEdge(profile=MigrationPortal)
+    browser = AttachPersistentProfile(MigrationPortal)
     IF browser shows login page:
-      Fail(job, "Portal session expired")
-      CONTINUE
+      IF NOT WorkerConfig.PortalLogin usable:
+        Fail(job, "Portal session expired · set cellphone+SMS code or login once in profile")
+        CONTINUE
+      EnterCellphoneAndSmsCode(WorkerConfig.PortalLogin)  // code ~10 days
+      IF still on login page: Fail(job, "Portal login failed"); CONTINUE
 
     page = OpenApplication(job)   // new or existing unfinished URL
     values = Map(job.payload, DropdownTranslationTable)
@@ -122,7 +128,7 @@ LOOP Worker also handles Confirmed:
 
 1. Feature off → no new jobs; worker idle.
 2. Missing required Visa2026 data → cannot queue.
-3. Portal login page → `Failed` (officer signs in on that PC).
+3. Portal login page → try worker PortalLogin (cellphone + SMS code); else `Failed` (refresh code / one manual login in persistent profile).
 4. Dropdown label not in translation table → `Failed` (do not guess).
 5. UI selector miss / page change → `Failed`, leave form unsaved.
 6. Save on portal only after officer `ConfirmSave`.
@@ -132,3 +138,14 @@ LOOP Worker also handles Confirmed:
 - Power Automate Desktop path (alternative robot; same Visa2026 job model).
 - Exact portal **Add citizen** field map.
 - Production SLA / legal approval to automate the government site.
+
+## Registration field map
+
+Draft mapping: [playwright-rpa-registration-field-map.md](./playwright-rpa-registration-field-map.md).
+
+
+## Registration process diagrams
+
+- [playwright-rpa-registration-process.mmd](./playwright-rpa-registration-process.mmd) — flowchart
+- [playwright-rpa-registration-sequence.mmd](./playwright-rpa-registration-sequence.mmd) — sequence
+- Field map: [playwright-rpa-registration-field-map.md](./playwright-rpa-registration-field-map.md)

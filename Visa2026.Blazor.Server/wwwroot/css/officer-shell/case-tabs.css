@@ -228,7 +228,7 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   transform: rotate(45deg);
 }
 .ct-prog-v.is-open .ct-prog-acc__chevron { transform: rotate(-135deg); margin-top: 4px; }
-.ct-prog-acc__hint { color: var(--os-muted); font-size: 0.78rem; font-weight: 650; }
+.ct-prog-acc__hint { color: var(--os-warn, var(--os-ink)); font-size: 0.78rem; font-weight: 650; }
 .ct-prog-acc__head .ct-prog-v__result-number { margin: 0; }
 .ct-prog-acc__tools { display: flex; justify-content: flex-end; margin-bottom: 8px; }
 .ct-prog-acc__panel .ct-step-pen { position: static; }
@@ -909,7 +909,7 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   cursor: pointer;
 }
 .ct-prog-v--current .ct-prog-v__date {
-  color: #d97706;
+  color: var(--os-warn, #d97706);
   font-weight: 700;
 }
 .ct-prog-v--current .ct-prog-v__dot {

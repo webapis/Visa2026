@@ -1,3 +1,10 @@
+## 2026-11-12 — Progress header status label follows the theme
+
+- **Need**: On Fluent Dark the current-step label (“In progress”, “Result needed”, and the rail date) used dark brown `#92400e` / `#d97706`, so the words sank into the header.
+- **Fix**: Those header labels use `--os-warn`. Fluent Dark sets the text to the theme warning color, with `#fcd34d` if that token is missing.
+- **Officer**: Hard-refresh. Open Progress. The current step’s status label and “Result needed” should be readable. Check light once.
+- **Prevent**: Do not put `#92400e` back on `.cw-prog-step__badge--active` or `.ct-prog-acc__hint`.
+
 ## 2026-11-12 — Visa+WP extension work permit dates, and new work permit people start unchecked
 
 - **Need**: On **Wiza we Iş Rugsatnamasyny Uzaltmak** (`extend_visa_wp`), a new work permit’s start is the linked work-permit end + 1 day, and the end is that start plus the case visa period (months via calendar `AddMonths`). New work permits also open with every person unchecked, same as issued visa.

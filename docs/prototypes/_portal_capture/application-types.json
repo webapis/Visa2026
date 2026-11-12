@@ -1,0 +1,37 @@
+[
+    {
+        "value":  "PA3",
+        "label":  "PASSPORT REPLACEMENT",
+        "dataReqs":  "1. Hat"
+    },
+    {
+        "value":  "HA4",
+        "label":  "REGISTRATION",
+        "dataReqs":  "1. Hat"
+    },
+    {
+        "value":  "HA5",
+        "label":  "REGISTRATION EXTENSION",
+        "dataReqs":  "1. Hat"
+    },
+    {
+        "value":  "SA6",
+        "label":  "CHANGE OF ADDRESS",
+        "dataReqs":  "1. Hat"
+    },
+    {
+        "value":  "WE8",
+        "label":  "MOVING TO ANOTHER REGION",
+        "dataReqs":  "1. Hat"
+    },
+    {
+        "value":  "IS9",
+        "label":  "CHANGE OF WORKPLACE",
+        "dataReqs":  "1. Hat"
+    },
+    {
+        "value":  "IS100",
+        "label":  "BUSINESS TRIP",
+        "dataReqs":  "1. Hat"
+    }
+]

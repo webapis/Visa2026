@@ -1,0 +1,48 @@
+%% Sequence: Registration portal RPA (HA4)
+%% Actors aligned with locked field map
+
+sequenceDiagram
+  autonumber
+  actor Officer
+  participant Visa as Visa2026
+  participant Filing as MigrationPortalFiling
+  participant Worker as PortalFiling Worker
+  participant Portal as rgstr.migration.gov.tm
+
+  Officer->>Visa: Open Registration case · linked People are the filing set
+  Officer->>Visa: Click Queue for migration portal (DetailView)
+  Visa->>Visa: Validate passport/DOB/photo/visa dates<br/>same AddressOfResidence · PortalWorkplace
+  alt Validation fails
+    Visa-->>Officer: Refuse queue · gaps
+  else Validation OK
+    Visa->>Filing: Create/update filing + job Ready
+    Worker->>Visa: Poll / claim Ready job
+    Worker->>Worker: Attach persistent browser profile
+    alt Session still valid
+      Worker->>Portal: Already logged in
+    else Login page shown
+      Note over Worker: PortalLogin config on worker PC<br/>cellphone + SMS code (~10 days)
+      Worker->>Portal: Enter cellphone + SMS code as password
+    end
+    Worker->>Portal: Set language tk
+    Worker->>Portal: Click + Add application (/panel/applications/create/)
+    Note over Portal: Portal auto-creates ID + Creation date
+    Portal-->>Worker: Redirect edit/{id}/ Unfinished
+    Worker->>Filing: Store PortalApplicationId + PortalCreatedOn
+    Worker->>Visa: Set FullApplicationNumber + ApplicationDate from portal ID + date
+    Note over Worker,Filing: ID from URL/header · date from list/UI
+    loop Each selected person
+      Worker->>Portal: Search passport + DOB
+      Worker->>Portal: Upload Person.Photo · Add citizen
+    end
+    Worker->>Portal: Fill stay · visa dates · workplace · letter fields<br/>attachments from Required person-related data copies × roster
+    Worker->>Filing: Job DraftOnScreen + screenshot
+    Worker-->>Officer: Review draft
+    alt Reject
+      Officer->>Filing: Failed / Ready again
+    else ConfirmSave
+      Officer->>Filing: Confirmed
+      Worker->>Portal: Save
+      Worker->>Filing: Saved
+    end
+  end

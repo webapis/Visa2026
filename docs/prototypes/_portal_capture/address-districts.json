@@ -1,0 +1,497 @@
+[
+    {
+        "value":  "27",
+        "label":  "BÜZMEÝIN ETRABY",
+        "group":  "Ashgabat"
+    },
+    {
+        "value":  "92",
+        "label":  "BAGTYÝARLYK ETRABY",
+        "group":  "Ashgabat"
+    },
+    {
+        "value":  "91",
+        "label":  "BERKARARLYK ETRABY",
+        "group":  "Ashgabat"
+    },
+    {
+        "value":  "82",
+        "label":  "AŞGABAT ŞÄHERI",
+        "group":  "Ashgabat"
+    },
+    {
+        "value":  "59",
+        "label":  "KÖPETDAG ETRABY",
+        "group":  "Ashgabat"
+    },
+    {
+        "value":  "52",
+        "label":  "GÖKDEPE ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "51",
+        "label":  "AK BUGDAÝ ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "26",
+        "label":  "BÄHERDEN ETRABYNYŇ BÄHERDEN ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "25",
+        "label":  "BÄHERDEN ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "28",
+        "label":  "BABADAÝHAN ETRABYNYŇ BABADAÝHAN ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "83",
+        "label":  "ALTYN ASYR ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "29",
+        "label":  "TEJEN ETRABYNYŇ TEJEN ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "94",
+        "label":  "KAKA ETRABYNYŇ KAKA ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "93",
+        "label":  "SARAHS ETRABYNYŇ SARAHS ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "87",
+        "label":  "GÖKDEPE ETRABYNYŇ GÖKDEPE ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "86",
+        "label":  "AKBUGDAÝ ETRABYNYŇ ÄNEW ŞÄHERI",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "85",
+        "label":  "BABADAÝHAN ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "69",
+        "label":  "TEJEN ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "66",
+        "label":  "SARAHS ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "57",
+        "label":  "KAKA ETRABY",
+        "group":  "Ahal"
+    },
+    {
+        "value":  "49",
+        "label":  "GARAGUM ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "41",
+        "label":  "BAÝRAMALY ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "35",
+        "label":  "TAGTABAZAR ETRABYNYŇ SERHETABAT ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "100",
+        "label":  "OGUZHAN ETRABYNYŇ ŞATLYK ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "89",
+        "label":  "ÝOLÖTEN ETRABYNYŇ ÝOLÖTEN ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "80",
+        "label":  "BAÝRAMALY ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "76",
+        "label":  "ÝOLÖTEN ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "98",
+        "label":  "TÜRKMENGALA ETRABYNYŇ TÜRKMENGALA ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "97",
+        "label":  "SAKARÇÄGE ETRABYNYŇ SAKARÇÄGE ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "96",
+        "label":  "MURGAP ETRABYNYŇ MURGAP ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "75",
+        "label":  "WEKILBAZAR ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "74",
+        "label":  "TÜRKMENGALA ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "70",
+        "label":  "MARY ŞÄHERI",
+        "group":  "Mary"
+    },
+    {
+        "value":  "68",
+        "label":  "TAGTABAZAR ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "65",
+        "label":  "SAKARÇÄGE ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "64",
+        "label":  "OGUZHAN ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "62",
+        "label":  "MURGAP ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "61",
+        "label":  "MARY ETRABY",
+        "group":  "Mary"
+    },
+    {
+        "value":  "48",
+        "label":  "GARABEKEWÜL ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "47",
+        "label":  "FARAP ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "34",
+        "label":  "KÖÝTENDAG ETRABYNYŇ DOSTLUK ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "33",
+        "label":  "ÇÄRJEW ETRABYNYŇ FARAP ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "32",
+        "label":  "SAÝAT ETRABYNYŇ GARABEKEWÜL ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "22",
+        "label":  "SAÝAT ETRABYNYŇ SAKAR ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "19",
+        "label":  "KÖÝTENDAG ETRABYNYŇ MAGDANLY ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "18",
+        "label":  "DARGANATA ETRABYNYŇ GAZOJAK ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "13",
+        "label":  "KÖÝTENDAG ETRABYNYŇ KÖÝTENDAG ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "12",
+        "label":  "HOJAMBAZ ETRABYNYŇ HOJAMBAZ ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "10",
+        "label":  "SAÝAT ETRABYNYŇ SAÝAT ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "11",
+        "label":  "HALAÇ ETRABYNYŇ HALAÇ ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "1",
+        "label":  "ÇÄRJEW ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "14",
+        "label":  "KERKI ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "17",
+        "label":  "DARGANATA ETRABYNYŇ DARGANATA ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "16",
+        "label":  "DARGANATA ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "20",
+        "label":  "DÄNEW ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "23",
+        "label":  "DÄNEW ETRABYNYŇ SEÝDI ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "21",
+        "label":  "DÄNEW ETRABYNYŇ DÄNEW ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "15",
+        "label":  "KERKI ETRABYNYŇ KERKI ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "67",
+        "label":  "SAÝAT ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "60",
+        "label":  "KÖÝTENDAG ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "56",
+        "label":  "HOJAMBAZ ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "55",
+        "label":  "HALAÇ ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "90",
+        "label":  "DÖWLETLI ETRABY",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "71",
+        "label":  "TÜRKMENABAT ŞÄHERI",
+        "group":  "Lebap"
+    },
+    {
+        "value":  "54",
+        "label":  "GUBADAG ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "53",
+        "label":  "GÖROGLY ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "43",
+        "label":  "BOLDUMSAZ ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "39",
+        "label":  "AKDEPE ETRABYNYŇ ANDALYP ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "37",
+        "label":  "ŞABAT ETRABYNYŇ ŞABAT ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "36",
+        "label":  "ŞABAT ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "9",
+        "label":  "SAPARMYRAT TÜRKMENBAŞY ETRABYNYŇ SAPARMYRAT TÜRKMENBAŞY ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "6",
+        "label":  "BOLDUMSAZ ETRABYNYŇ BOLDUMSAZ ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "8",
+        "label":  "GÖROGLY ETRABYNYŇ GÖROGLY ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "5",
+        "label":  "AKDEPE ETRABYNYŇ AKDEPE ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "7",
+        "label":  "GUBADAG ETRABYNYŇ GUBADAG ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "44",
+        "label":  "DAŞOGUZ ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "81",
+        "label":  "RUHUBELENT ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "99",
+        "label":  "GARAŞSYZLYK ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "78",
+        "label":  "SAPARMYRAT TÜRKMENBAŞY ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "58",
+        "label":  "KÖNEÜRGENÇ ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "38",
+        "label":  "KÖNEÜRGENÇ ETRABYNYŇ KÖNEÜRGENÇ ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "95",
+        "label":  "S.A.NYÝAZOW ADYNDAKY ETRABYNYŇ NYÝAZOW ŞÄHERI",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "84",
+        "label":  "AKDEPE ETRABY",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "63",
+        "label":  "S.A.NYÝAZOW ADYNDAKY ETRAP",
+        "group":  "Dashoguz"
+    },
+    {
+        "value":  "40",
+        "label":  "BALKANABAT ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "30",
+        "label":  "GYZYLARBAT ETRABY",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "2",
+        "label":  "ESENGULY ETRABYNYŇ ESENGULY ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "3",
+        "label":  "ETREK ETRABYNYŇ ETREK ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "4",
+        "label":  "MAGTYMGULY ETRABYNYŇ MAGTYMGULY ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "31",
+        "label":  "GYZYLARBAT ETRABYNYŇ GYZYLARBAT ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "45",
+        "label":  "ESENGULY ETRABY",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "46",
+        "label":  "ETREK ETRABY",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "42",
+        "label":  "BEREKET ETRABY",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "50",
+        "label":  "MAGTYMGULY ETRABY",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "88",
+        "label":  "BEREKET ETRABYNYŇ BEREKET ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "79",
+        "label":  "TÜRKMENBAŞY ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "73",
+        "label":  "TÜRKMENBAŞY ETRABY",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "77",
+        "label":  "TÜRKMENBAŞY ETRABYNYŇ GARABOGAZ ŞÄHERI",
+        "group":  "Balkan"
+    },
+    {
+        "value":  "24",
+        "label":  "ARKADAG ŞÄHERI",
+        "group":  "Arkadag"
+    }
+]

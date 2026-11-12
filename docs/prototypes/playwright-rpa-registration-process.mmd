@@ -1,0 +1,50 @@
+%% Visa2026 → rgstr.migration.gov.tm Registration (HA4) RPA process
+%% Source decisions: playwright-rpa-registration-field-map.md
+%% Doc only — no automation until mapping is approved.
+%% Portal UI language: Türkmençe (tk)
+
+flowchart TD
+  subgraph VISA["Visa2026"]
+    A[Officer opens Registration case<br/>ApplicationProfileInstance] --> B{Portal filing RPA enabled?}
+    B -->|No| Z1[Hide queue UI · stop]
+    B -->|Yes| C[All linked People on case are included<br/>same AddressOfResidence required]
+    C --> C2[Officer clicks Queue for migration portal<br/>on ApplicationProfileInstance DetailView]
+    C2 --> D{Queue validation}
+    D -->|Fail gaps or mixed addresses| Z2[Refuse queue · show gaps]
+    D -->|OK| E[Create / update MigrationPortalFiling<br/>+ job status Ready]
+  end
+
+  E --> F[PortalFiling Worker polls Ready job]
+
+  subgraph WORKER["PortalFiling Worker · browser Türkmençe"]
+    F --> G{Reuse persistent browser profile<br/>session still valid?}
+    G -->|Yes · already in app| H[Set language tk · click + Add application<br/>a href=/panel/applications/create/]
+    G -->|No · login page| G1{Worker config has cellphone<br/>+ SMS code?}
+    G1 -->|No| Z3[Job Failed · set worker PortalLogin config<br/>or complete SMS login once in browser]
+    G1 -->|Yes| G2[Enter cellphone · enter SMS code as password<br/>code valid up to ~10 days]
+    G2 --> G3{Login OK?}
+    G3 -->|No| Z3
+    G3 -->|Yes| H
+    H --> I[Portal auto-assigns ID + Creation date<br/>redirect edit/id Unfinished]
+    I --> J[Capture ID + Creation date · store on filing<br/>set FullApplicationNumber + ApplicationDate]
+    J --> K[Add citizens loop]
+    K --> K1[Passport + DOB search]
+    K1 --> K2[Upload Person.Photo]
+    K2 --> K3[Add citizen]
+    K3 -->|More people| K1
+    K3 -->|All added| L[Fill application details once]
+    L --> L1[Type of location / place / city<br/>from AddressOfResidence + Portal codes]
+    L1 --> L2[Dates from linked Visa start/end]
+    L2 --> L3[Workplace from PortalWorkplace<br/>short site name]
+    L3 --> L4[Letter number/date = portal ID + Creation date]
+    L4 --> L5[Attachments from Required person-related data<br/>document copies × roster · jpg/png]
+    L5 --> M[Screenshot draft]
+  end
+
+  M --> N[Job DraftOnScreen]
+  N --> O{Officer reviews on portal / Visa2026}
+  O -->|Reject / fix| P[Job Failed or Ready again]
+  O -->|ConfirmSave| Q[Job Confirmed]
+  Q --> R[Worker clicks Save on portal]
+  R --> S[Update MigrationPortalFiling status Saved]
+  S --> T[Set FullApplicationNumber + ApplicationDate<br/>from portal ID + Creation date · Done]
