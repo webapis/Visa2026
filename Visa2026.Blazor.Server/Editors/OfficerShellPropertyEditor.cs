@@ -697,7 +697,16 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (line == null)
             return Task.CompletedTask;
 
-        PersonLinkReview.ApplyChoice(line, request.ObjectId, View?.ObjectSpace);
+        // The shell view object space is non-persistent and cannot load Visa (or other link records).
+        if (_application == null)
+        {
+            PersonLinkReview.ApplyChoice(line, request.ObjectId);
+        }
+        else
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            PersonLinkReview.ApplyChoice(line, request.ObjectId, objectSpace);
+        }
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
         {
             model.PersonLinkReviewDeclineCaseSummaryAddress = line.ObjectId != Guid.Empty;
