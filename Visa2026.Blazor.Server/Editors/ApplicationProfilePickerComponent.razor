@@ -7,7 +7,7 @@
 @using Visa2026.Module.Services.ApplicationProfilePicker
 @using Visa2026.Module.Services.ApplicationWorkspace
 
-<div class="ap-picker" aria-busy="@IsAdvancing">
+<div class="ap-picker @(Step == 2 ? "ap-picker--wide" : null)" aria-busy="@(IsAdvancing || _busyVersionId != Guid.Empty)">
     @if (IsLoading)
     {
         <div class="ap-picker__loading" role="status">@Msg("ApplicationProfileInstance.Picker.Loading")</div>
@@ -79,18 +79,24 @@
             }
             else
             {
-                <div class="ap-picker__versions">
+                <div class="ap-picker__versions" aria-busy="@(_busyVersionId != Guid.Empty)">
                     @foreach (var version in SelectedRow.ApprovalLegVersions)
                     {
                         var versionSelected = version.VersionId == SelectedVersionId;
-                        <div class="ap-picker__version @(versionSelected ? "is-selected" : null)"
+                        var advancing = version.VersionId == _busyVersionId;
+                        <div class="ap-picker__version @(versionSelected ? "is-selected" : null) @(advancing ? "is-advancing" : null)"
                              role="button"
-                             tabindex="0"
+                             tabindex="@(_busyVersionId != Guid.Empty && !advancing ? -1 : 0)"
+                             aria-busy="@advancing"
                              @onclick="() => SelectVersionAndContinueAsync(version.VersionId)"
                              @onkeydown="e => OnVersionKey(e, version.VersionId)">
                             <span class="ap-picker__version-title">
                                 @version.Name
-                                @if (version.IsDefault)
+                                @if (advancing)
+                                {
+                                    <span class="ap-picker__item-spinner" aria-hidden="true"></span>
+                                }
+                                else if (version.IsDefault)
                                 {
                                     <span class="ap-picker__badge ap-picker__badge--on">@Msg("ApplicationProfileInstance.Picker.Default")</span>
                                 }
@@ -102,25 +108,38 @@
                                 }
                             </ol>
                             <div class="ap-picker__version-foot">
-                                <span class="ap-picker__meta">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.MinistriesCount", version.MinistryNames.Count)</span>
-                                <span class="ap-picker__version-foot-actions">
-                                    @if (!version.IsDefault)
-                                    {
+                                @if (advancing)
+                                {
+                                    <span class="ap-picker__version-advance" role="status">@VersionBusyText</span>
+                                }
+                                else
+                                {
+                                    <span class="ap-picker__meta">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.MinistriesCount", version.MinistryNames.Count)</span>
+                                    <span class="ap-picker__version-foot-actions">
+                                        @if (!version.IsDefault)
+                                        {
+                                            <button type="button"
+                                                    class="ap-picker__link"
+                                                    disabled="@(_busyVersionId != Guid.Empty)"
+                                                    @onclick="() => MakeDefaultApprovalLegAsync(version.VersionId)"
+                                                    @onclick:stopPropagation="true">
+                                                @Msg("ApplicationProfileInstance.Picker.MakeDefault")
+                                            </button>
+                                        }
                                         <button type="button"
                                                 class="ap-picker__link"
-                                                @onclick="() => MakeDefaultApprovalLegAsync(version.VersionId)"
+                                                disabled="@(_busyVersionId != Guid.Empty)"
+                                                @onclick="() => OpenApprovalLegAsync(version.VersionId)"
                                                 @onclick:stopPropagation="true">
-                                            @Msg("ApplicationProfileInstance.Picker.MakeDefault")
+                                            @Msg("ApplicationProfileInstance.Picker.Open")
                                         </button>
-                                    }
-                                    <button type="button"
-                                            class="ap-picker__link"
-                                            @onclick="() => OpenApprovalLegAsync(version.VersionId)"
-                                            @onclick:stopPropagation="true">
-                                        @Msg("ApplicationProfileInstance.Picker.Open")
-                                    </button>
-                                </span>
+                                    </span>
+                                }
                             </div>
+                            @if (advancing)
+                            {
+                                <span class="ap-picker__item-track" aria-hidden="true"><span class="ap-picker__item-bar"></span></span>
+                            }
                         </div>
                     }
                 </div>
@@ -128,8 +147,11 @@
         }
 
         <div class="ap-picker__actions">
-            @RenderAdvance()
-            <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+            @if (_busyVersionId == Guid.Empty)
+            {
+                @RenderAdvance()
+            }
+            <button type="button" class="ap-picker__btn" disabled="@(IsAdvancing || _busyVersionId != Guid.Empty)" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
         </div>
     }
     else if (Step == 4)
@@ -442,6 +464,15 @@
     private bool _dialogOpen;
     private bool _dialogRename;
     private string _dialogName = string.Empty;
+    private Guid _busyVersionId;
+    private string? _busyLabel;
+
+    private string VersionBusyText =>
+        !string.IsNullOrWhiteSpace(StatusMessage)
+            ? StatusMessage!
+            : !string.IsNullOrWhiteSpace(_busyLabel)
+                ? _busyLabel!
+                : Msg("ApplicationProfileInstance.Picker.Loading");
 
     private enum MenuMode { Profile, Shelf }
 
@@ -641,17 +672,20 @@
             await SelectProfileAndContinueAsync(profileId);
     }
 
-    private async Task SelectVersionAndContinueAsync(Guid versionId)
-    {
-        if (IsAdvancing || versionId == Guid.Empty)
-            return;
+    private Task SelectVersionAndContinueAsync(Guid versionId) =>
+        RunVersionActionAsync(
+            versionId,
+            VisaUiMessages.Format(
+                "ApplicationProfileInstance.Picker.MovingTo",
+                Msg("ApplicationProfileInstance.Picker.CaseSummary")),
+            async () =>
+            {
+                if (SelectVersionRequested.HasDelegate)
+                    await SelectVersionRequested.InvokeAsync(versionId);
 
-        if (SelectVersionRequested.HasDelegate)
-            await SelectVersionRequested.InvokeAsync(versionId);
-
-        if (NextStepRequested.HasDelegate)
-            await NextStepRequested.InvokeAsync();
-    }
+                if (NextStepRequested.HasDelegate)
+                    await NextStepRequested.InvokeAsync();
+            });
 
     private async Task SelectSubmitToOrganizationAndContinueAsync(string value)
     {
@@ -681,11 +715,12 @@
             await NewApprovalLegRequested.InvokeAsync();
     }
 
-    private async Task OpenApprovalLegAsync(Guid versionId)
-    {
-        if (OpenApprovalLegRequested.HasDelegate)
-            await OpenApprovalLegRequested.InvokeAsync(versionId);
-    }
+    private Task OpenApprovalLegAsync(Guid versionId) =>
+        RunVersionActionAsync(versionId, Msg("ApplicationProfileInstance.Picker.Open"), async () =>
+        {
+            if (OpenApprovalLegRequested.HasDelegate)
+                await OpenApprovalLegRequested.InvokeAsync(versionId);
+        });
 
     private async Task OpenApprovalLegCatalogAsync()
     {
@@ -693,10 +728,30 @@
             await OpenApprovalLegCatalogRequested.InvokeAsync();
     }
 
-    private async Task MakeDefaultApprovalLegAsync(Guid versionId)
+    private Task MakeDefaultApprovalLegAsync(Guid versionId) =>
+        RunVersionActionAsync(versionId, Msg("ApplicationProfileInstance.Picker.MakeDefault"), async () =>
+        {
+            if (MakeDefaultApprovalLegRequested.HasDelegate)
+                await MakeDefaultApprovalLegRequested.InvokeAsync(versionId);
+        });
+
+    private async Task RunVersionActionAsync(Guid versionId, string label, Func<Task> action)
     {
-        if (MakeDefaultApprovalLegRequested.HasDelegate)
-            await MakeDefaultApprovalLegRequested.InvokeAsync(versionId);
+        if (IsAdvancing || _busyVersionId != Guid.Empty || versionId == Guid.Empty)
+            return;
+
+        _busyVersionId = versionId;
+        _busyLabel = label;
+        await Task.Yield();
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            _busyVersionId = Guid.Empty;
+            _busyLabel = null;
+        }
     }
 
     private RenderFragment RenderSummaryField(ApplicationWorkspaceCaseHeaderField field) => __builder =>

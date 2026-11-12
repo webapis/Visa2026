@@ -1,3 +1,10 @@
+## 2026-11-12 — Choose Approval legs: horizontal row, per-card progress, larger type
+
+- **Need**: Approval-leg cards wrapped in a narrow grid. Ministry names were too small to read. Clicking a card only showed one shared progress bar at the bottom.
+- **Fix**: `.ap-picker__versions` is `flex-flow: row wrap` (left to right, then the next line). No horizontal scroll. Cards are 24rem. Custom officer text is one size, 1.2rem, on the instance wizard, case workspace, Invitation / work permit / border zone / visa create, and the Linked records dialog (`site.css` shared rule). The clicked approval-leg card shows its own spinner, status, and bar (`RunVersionActionAsync`) for choose, Open, and Make default.
+- **Officer**: Hard-refresh Choose Approval legs. Cards fill the row left to right and wrap. There is no sideways scrollbar. Click one — that card shows Opening Application… while the others dim.
+- **Prevent**: Do not set `flex-wrap: nowrap` or `overflow-x: auto` on `.ap-picker__versions`. Do not shrink `.ap-picker__version-legs` under 1.2rem.
+
 ## 2026-11-10 — Case summary right-side property card follows the theme
 
 - **Need**: On Fluent Dark the Application number / date / code card on the right of Case summary stayed a light `#f8fafc` well, and the fields inside it stayed white.

@@ -1087,6 +1087,10 @@
             ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
             : CommaSeparatedMultiSelectEditorAliases.BorderZone;
 
+    private static bool WrapsLookupDisplay(ApplicationWorkspaceCaseHeaderField field) =>
+        string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationLodging, StringComparison.Ordinal)
+        || string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.BusinessTripLodging, StringComparison.Ordinal);
+
     private static bool CanAddAlternativeAddress(ApplicationWorkspaceCaseHeaderField field) =>
         !field.ReadOnly
         && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationAlternativeAddress, StringComparison.Ordinal);
@@ -1822,12 +1826,19 @@
             {
                 @if (readOnly)
                 {
-                    @* Catalogs load only on Edit — a disabled <select> with no options shows blank. *@
-                    <input type="text"
-                           class="cw-summary-field__input"
-                           value="@field.DisplayValue"
-                           readonly
-                           disabled />
+                    @if (WrapsLookupDisplay(field))
+                    {
+                        <div class="cw-summary-field__input cw-summary-field__wrap">@field.DisplayValue</div>
+                    }
+                    else
+                    {
+                        @* Catalogs load only on Edit — a disabled <select> with no options shows blank. *@
+                        <input type="text"
+                               class="cw-summary-field__input"
+                               value="@field.DisplayValue"
+                               readonly
+                               disabled />
+                    }
                 }
                 else
                 {
