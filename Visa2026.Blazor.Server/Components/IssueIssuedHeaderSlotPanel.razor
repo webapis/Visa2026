@@ -278,11 +278,9 @@
                         }
                         else
                         {
-                            @foreach (var person in _draft.People)
+                            @foreach (var person in WorkPermitPeopleInOrder)
                             {
-                                var cardClass = !person.Include
-                                    ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--off"
-                                    : "issue-issued-visa-slot__card";
+                                var cardClass = "issue-issued-visa-slot__card";
                                 <article class="@cardClass" @key="@($"{_boundOccupantKey}:wp:{person.PersonId:N}")">
                                     <div class="issue-issued-visa-slot__card-head">
                                         <input type="checkbox"
@@ -695,6 +693,25 @@
 
     private int SelectedCount => _draft?.People.Count(p => p.Include) ?? 0;
     private int SelectedReadyCount => _draft?.People.Count(p => p.Include && p.IsReady) ?? 0;
+
+    /// <summary>
+    /// New work permit: people not filled yet stay at the top. Checked forms follow.
+    /// Not-ready rows stay under those two groups.
+    /// </summary>
+    private IEnumerable<IssueIssuedHeaderPersonLineDraft> WorkPermitPeopleInOrder
+    {
+        get
+        {
+            if (_draft == null)
+                return Array.Empty<IssueIssuedHeaderPersonLineDraft>();
+            if (_draft.Kind != IssueIssuedHeaderKind.WorkPermit)
+                return _draft.People;
+
+            return _draft.People
+                .OrderBy(p => p.IsReady && !p.Include ? 0 : p.Include ? 1 : 2)
+                .ThenBy(p => p.PersonName, StringComparer.CurrentCultureIgnoreCase);
+        }
+    }
 
     private string CopySectionTitle => ApplicationProfileLocalization.Format(
         "ApplicationProfileInstance.Issued.Copy",

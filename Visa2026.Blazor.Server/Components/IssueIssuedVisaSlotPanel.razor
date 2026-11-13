@@ -79,9 +79,7 @@
                             var issued = person.AlreadyIssued && !_draft.IsEditMode;
                             var cardClass = issued
                                 ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--issued"
-                                : person.Include || _draft.IsEditMode
-                                    ? "issue-issued-visa-slot__card"
-                                    : "issue-issued-visa-slot__card issue-issued-visa-slot__card--off";
+                                : "issue-issued-visa-slot__card";
                             <article class="@cardClass">
                                 <div class="issue-issued-visa-slot__card-head">
                                     @if (!_draft.IsEditMode)
@@ -404,7 +402,8 @@
         && _draft.SelectedUnusedCount > 0;
 
     /// <summary>
-    /// Create: flat blocks (selected → not selected → already issued → not ready).
+    /// Create: flat blocks (not selected → selected → already issued → not ready).
+    /// Unchecked people stay at the top so the next person is easy to find.
     /// Edit: keep invitation / case grouping as loaded.
     /// </summary>
     private IEnumerable<(string Title, IReadOnlyList<IssueIssuedVisaPersonCardDraft> People)> PeopleSections
@@ -426,18 +425,17 @@
             var people = _draft.AllPeople
                 .OrderBy(p => p.PersonName, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();
-            // Selected forms first so checking someone brings their editor to the top.
             return
             [
-                (
-                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateSelected"),
-                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
-                        .Where(p => !p.AlreadyIssued && p.IsReady && p.Include)
-                        .ToList()),
                 (
                     ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateNotSelected"),
                     (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
                         .Where(p => !p.AlreadyIssued && p.IsReady && !p.Include)
+                        .ToList()),
+                (
+                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateSelected"),
+                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
+                        .Where(p => !p.AlreadyIssued && p.IsReady && p.Include)
                         .ToList()),
                 (
                     ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateAlreadyIssued"),

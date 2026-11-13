@@ -91,10 +91,6 @@
   color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
 }
 
-.issue-issued-visa-slot__card--off {
-  opacity: 0.72;
-}
-
 .issue-issued-visa-slot__card-head {
   display: flex;
   align-items: center;

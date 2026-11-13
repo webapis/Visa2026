@@ -26,6 +26,13 @@
 - **Officer**: Hard-refresh. Open Progress. The current step’s badge, “Result needed”, and the date should be easy to read.
 - **Prevent**: Do not set those labels back to `--os-warn` or `#92400e` on Fluent Dark.
 
+## 2026-11-13 — Unchecked work-permit and visa people stay full color at the top
+
+- **Need**: On a new work permit, people not filled yet were mixed under the open forms and looked disabled. Unchecked visas on Application result used the same dim card.
+- **Fix**: Work-permit create lists ready unchecked people first, then checked forms, then not-ready. Visa create lists **Not selected yet** above **Selected for this create**. Removed `.issue-issued-visa-slot__card--off` opacity.
+- **Officer**: Hard-refresh. New work permit and New issued visa — empty names are at the top in the normal card color. Check one and that form moves below the remaining names.
+- **Prevent**: Do not put `opacity` back on an unchecked person card. Do not list checked work-permit forms above the people still waiting.
+
 ## 2026-11-12 — Visa+WP extension work permit dates, and new work permit people start unchecked
 
 - **Need**: On **Wiza we Iş Rugsatnamasyny Uzaltmak** (`extend_visa_wp`), a new work permit’s start is the linked work-permit end + 1 day, and the end is that start plus the case visa period (months via calendar `AddMonths`). New work permits also open with every person unchecked, same as issued visa.
