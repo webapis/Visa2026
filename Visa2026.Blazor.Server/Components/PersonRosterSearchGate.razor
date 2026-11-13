@@ -1,0 +1,157 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Localization
+@implements IDisposable
+
+@if (IsAwaiting)
+{
+    <div class="visa-roster-search-gate">
+        <form class="visa-roster-search-gate__card" @onsubmit="Submit" @onsubmit:preventDefault="true" aria-busy="@searching">
+            <div class="visa-roster-search-gate__kicker">@Kicker</div>
+            <h2 class="visa-roster-search-gate__title">@Title</h2>
+            <p class="visa-roster-search-gate__hint">@Msg("PersonRosterSearch.Hint")</p>
+            <div class="visa-roster-search-gate__row">
+                <label class="visa-roster-search-gate__field">
+                    <span class="visa-roster-search-gate__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <circle cx="11" cy="11" r="6.25" fill="none" stroke="currentColor" stroke-width="1.75" />
+                            <path d="M16 16.5L20 20.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                        </svg>
+                    </span>
+                    <input @ref="input"
+                           data-testid="visa-roster-search-input"
+                           value="@text"
+                           @oninput="OnInput"
+                           placeholder="@Msg("PersonRosterSearch.Placeholder")"
+                           aria-label="@Msg("PersonRosterSearch.Placeholder")"
+                           autocomplete="off"
+                           spellcheck="false"
+                           disabled="@searching" />
+                </label>
+                <button type="submit"
+                        class="visa-roster-search-gate__submit @(searching ? "is-loading" : null)"
+                        data-testid="visa-roster-search-submit"
+                        disabled="@(searching || string.IsNullOrWhiteSpace(text))"
+                        aria-busy="@searching">
+                    @if (searching)
+                    {
+                        <span class="visa-roster-search-gate__spinner" aria-hidden="true"></span>
+                        <span>@Msg("PersonRosterSearch.Searching")</span>
+                    }
+                    else
+                    {
+                        @Msg("PersonRosterSearch.Search")
+                    }
+                </button>
+            </div>
+            <div class="visa-roster-search-gate__chips" aria-hidden="true">
+                <span>@Msg("PersonRosterSearch.Chip.FullName")</span>
+                <span>@Msg("PersonRosterSearch.Chip.PersonalNumber")</span>
+                <span>@Msg("PersonRosterSearch.Chip.PassportNumber")</span>
+            </div>
+        </form>
+    </div>
+}
+else
+{
+    <div class="visa-roster-search-warning-host">
+        <div class="visa-roster-search-warning" role="alert">
+            <span class="visa-roster-search-warning__mark" aria-hidden="true">!</span>
+            <p>@Msg("PersonRosterSearch.NoMatches")</p>
+        </div>
+    </div>
+}
+
+@code {
+    private string text = string.Empty;
+    private bool searching;
+    private ElementReference input;
+
+    private PersonRosterSearchState? subscribed;
+
+    [Parameter] public PersonRosterSearchState? State { get; set; }
+
+    [Parameter] public bool IsFamilyMember { get; set; }
+
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+
+    private bool IsAwaiting => State?.Awaiting ?? true;
+
+    private string Kicker => Msg(IsFamilyMember
+        ? "PersonRosterSearch.Kicker.FamilyMembers"
+        : "PersonRosterSearch.Kicker.Employees");
+
+    private string Title => Msg(IsFamilyMember
+        ? "PersonRosterSearch.Title.FamilyMembers"
+        : "PersonRosterSearch.Title.Employees");
+
+    protected override void OnParametersSet() => Subscribe();
+
+    public void Dispose()
+    {
+        if (subscribed != null)
+            subscribed.Changed -= OnStateChanged;
+        subscribed = null;
+    }
+
+    private void Subscribe()
+    {
+        if (ReferenceEquals(subscribed, State))
+            return;
+
+        if (subscribed != null)
+            subscribed.Changed -= OnStateChanged;
+
+        subscribed = State;
+        if (subscribed != null)
+            subscribed.Changed += OnStateChanged;
+    }
+
+    private void OnStateChanged()
+    {
+        if (IsAwaiting)
+            text = string.Empty;
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && IsAwaiting)
+        {
+            try
+            {
+                await input.FocusAsync();
+            }
+            catch
+            {
+                // The input is gone if the gate unmounted during the first render.
+            }
+        }
+    }
+
+    private void OnInput(ChangeEventArgs e) => text = e.Value?.ToString() ?? string.Empty;
+
+    private async Task Submit()
+    {
+        var query = text.Trim();
+        if (query.Length == 0 || searching)
+            return;
+
+        // Paint the busy button before the search runs. The query blocks this circuit,
+        // so a render queued after it starts never reaches the browser until the rows are back.
+        searching = true;
+        StateHasChanged();
+        await Task.Delay(1);
+
+        try
+        {
+            await OnSearch.InvokeAsync(query);
+        }
+        finally
+        {
+            searching = false;
+        }
+    }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
+}

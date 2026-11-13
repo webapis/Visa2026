@@ -20,6 +20,9 @@ public sealed class PersonListViewSearchBridgeController : ObjectViewController<
         if (wired)
             return;
 
+        if (View.IsRoot && View.Id is "Person_ListView_Employees" or "Person_ListView_FamilyMembers")
+            return;
+
         if (View.Editor is not DxGridListEditor gridListEditor)
             return;
 

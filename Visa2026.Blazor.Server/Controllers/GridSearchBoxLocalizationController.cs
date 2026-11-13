@@ -67,8 +67,16 @@ public sealed class GridSearchBoxLocalizationController : ViewController<ListVie
         // Show criteria + Clear when any column filter is active (hidden otherwise).
         gridModel.FilterPanelDisplayMode = GridFilterPanelDisplayMode.Auto;
 
+        // Employees and Family Members use the roster search card. The grid search box
+        // would sit above that card, so a late chrome refresh must keep it off.
+        if (View.Id is "Person_ListView_Employees" or "Person_ListView_FamilyMembers")
+            gridModel.ShowSearchBox = false;
+
         gridModel.SearchBoxNullText = VisaLocalization.GetGridSearchBoxNullText();
-        gridModel.EmptyDataAreaTemplate = _ => builder => RenderEmptyDataArea(builder, () => gridModel.ComponentInstance);
+        // Employees and Family Members own this template (search card, then no-match text).
+        // A deferred chrome refresh must not put the default empty grid back.
+        if (View.Id is not ("Person_ListView_Employees" or "Person_ListView_FamilyMembers"))
+            gridModel.EmptyDataAreaTemplate = _ => builder => RenderEmptyDataArea(builder, () => gridModel.ComponentInstance);
     }
 
     private void RenderEmptyDataArea(RenderTreeBuilder builder, Func<IGrid?> getGrid)

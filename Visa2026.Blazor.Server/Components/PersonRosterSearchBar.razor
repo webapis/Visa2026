@@ -1,0 +1,148 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Localization
+@implements IDisposable
+
+@if (Visible)
+{
+<div class="visa-roster-search-bar-block">
+<form class="visa-roster-search-bar" @onsubmit="Submit" @onsubmit:preventDefault="true" aria-busy="@searching">
+    <label class="visa-roster-search-gate__field">
+        <span class="visa-roster-search-gate__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <circle cx="11" cy="11" r="6.25" fill="none" stroke="currentColor" stroke-width="1.75" />
+                <path d="M16 16.5L20 20.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+            </svg>
+        </span>
+        <input data-testid="visa-roster-search-input"
+               value="@text"
+               @oninput="OnInput"
+               placeholder="@Msg("PersonRosterSearch.Placeholder")"
+               aria-label="@Msg("PersonRosterSearch.Placeholder")"
+               autocomplete="off"
+               spellcheck="false"
+               disabled="@searching" />
+        <button type="button"
+                class="visa-roster-search-bar__clear"
+                data-testid="visa-roster-search-clear"
+                aria-label="@Msg("PersonRosterSearch.Clear")"
+                disabled="@searching"
+                @onclick="Clear">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </label>
+    <button type="submit"
+            class="visa-roster-search-gate__submit @(searching ? "is-loading" : null)"
+            data-testid="visa-roster-search-submit"
+            disabled="@searching"
+            aria-busy="@searching">
+        @if (searching)
+        {
+            <span class="visa-roster-search-gate__spinner" aria-hidden="true"></span>
+            <span>@Msg("PersonRosterSearch.Searching")</span>
+        }
+        else
+        {
+            @Msg("PersonRosterSearch.Search")
+        }
+    </button>
+</form>
+@if (State?.ResultCount is int found)
+{
+    <p class="visa-roster-search-count" role="status">@CountText(found)</p>
+}
+</div>
+}
+
+@code {
+    private string text = string.Empty;
+    private bool searching;
+    private PersonRosterSearchState? subscribed;
+
+    [Parameter] public PersonRosterSearchState? State { get; set; }
+
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    private bool Visible => !string.IsNullOrWhiteSpace(State?.Query);
+
+    protected override void OnParametersSet()
+    {
+        Subscribe();
+        if (!searching)
+            text = State?.Query ?? string.Empty;
+    }
+
+    public void Dispose()
+    {
+        if (subscribed != null)
+            subscribed.Changed -= OnStateChanged;
+        subscribed = null;
+    }
+
+    private void Subscribe()
+    {
+        if (ReferenceEquals(subscribed, State))
+            return;
+
+        if (subscribed != null)
+            subscribed.Changed -= OnStateChanged;
+
+        subscribed = State;
+        if (subscribed != null)
+            subscribed.Changed += OnStateChanged;
+    }
+
+    private void OnStateChanged()
+    {
+        if (!searching)
+            text = State?.Query ?? string.Empty;
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void OnInput(ChangeEventArgs e) => text = e.Value?.ToString() ?? string.Empty;
+
+    private Task Submit()
+    {
+        if (searching)
+            return Task.CompletedTask;
+
+        var query = text.Trim();
+        if (query.Length == 0)
+            return Clear();
+
+        return RunAsync(() => OnSearch.InvokeAsync(query));
+    }
+
+    private Task Clear()
+    {
+        if (searching)
+            return Task.CompletedTask;
+
+        text = string.Empty;
+        return RunAsync(() => OnClear.InvokeAsync());
+    }
+
+    private async Task RunAsync(Func<Task> action)
+    {
+        searching = true;
+        StateHasChanged();
+        await Task.Delay(1);
+        try
+        {
+            await action();
+        }
+        finally
+        {
+            searching = false;
+        }
+    }
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
+
+    private static string CountText(int count) =>
+        count == 1
+            ? Msg("PersonRosterSearch.ResultCount.One")
+            : VisaUiMessages.Format("PersonRosterSearch.ResultCount.Many", count);
+}

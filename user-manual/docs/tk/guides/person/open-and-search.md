@@ -52,13 +52,15 @@ Adamlar görnüşe görä aýry sanawlarda saklanýar.
 2. Çep menýudan **Employees** (ýa-da **Family Members** / **Temporary visitor**) saýlaň.
 3. Sanawyň ýüklenmegine garaşyň.
 
+**Employees** we **Family Members** gözleg kartasy bilen açylýar. At, şahsy belgi ýa-da pasport belgisini ýazyň we **Gözle** basyň. Sanaw şondan soň peýda bolýar. **Temporary visitor** açylanda setirleri görkezýär.
+
 Tablisa **Full Name**, **Personal Number**, **Date Of Birth** ýaly sütunlary görkezýär. Ilkinji sütunlarda **Dossier** we **Copies** bolup biler; bu gollanma adaty jikme-jik formany açmagy görkezýär.
 
 ![Işgärler sanawy](../../assets/screenshots/v2026.08/tk/navigation-step-03-employees-list.png)
 
 ## Ädim 2 — Sanawda gözleg
 
-Sanaw uzyn bolsa gural panelindäki **gözleg** meýdançasyny ulanyň (**Search** / **Gözle** düwmesi bolsa ony açyň).
+Sanaw açylandan soň gözlän tekstiňiz tablisanyň üstündäki meýdançada galýar. **×** gözlegi arassalaýar we gözleg kartasyny yzyna getirýär.
 
 1. Gözleg meýdançasyna basyň.
 2. **First Name**, **Last Name**, **Personal Number** ýa-da islendik **Passport Number** bölegini ýazyň.
@@ -68,7 +70,7 @@ Maslahatlar:
 
 - Birnäçe söz netijäni daraldýar.
 - Nyşanly harpler köplenç nyşansyz gabat gelýär.
-- Gözleg gutusyny arassalap ähli sanawy görüň.
+- Sanaw peýda bolandan soň gözlän tekstiňiz tablisanyň üstündäki meýdançada galýar. **×** ony arassalaýar we gözleg kartasyny yzyna getirýär. **Employees** we **Family Members** ähli sanawy görkezmeýär.
 4. Gerek bolsa **Refresh** saýlaň.
 
 !!! note "Haýsy meýdanlar gözlenýär"
@@ -107,7 +109,7 @@ Görnüşi bilýän bolsaňyz çep menýu sanawlaryny ulanyň. Şübhe bolsa **P
 
 | Mesele | Çäre |
 |--------|------|
-| Sanaw boş | Gözlegi arassalaň; **Refresh**; menýuny barlaň |
+| Sanaw gözlegden öň boş | At, **Personal Number** ýa-da pasport belgisini ýazyň we **Enter** basyň |
 | Köp setir | Has doly at ýa-da **Personal Number** ýazyň |
 | Tapylmady | **Report Dashboard** → **Person search** |
 | Dossier açyldy | Setiriň özüne basyň — jikme-jik forma üçin |

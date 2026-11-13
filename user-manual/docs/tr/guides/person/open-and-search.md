@@ -50,13 +50,15 @@ Kişiler türe göre ayrı listelerde tutulur. Doğru listeyi seçin.
 2. Sol menüden **Employees** (veya **Family Members** / **Temporary visitor**) seçin.
 3. Listenin yüklenmesini bekleyin.
 
+**Employees** ve **Family Members** bir arama kartıyla açılır. Ad, kişisel numara veya pasaport numarası yazıp **Ara**'ya basın. Liste bundan sonra görünür. **Temporary visitor** açıldığında satırlarını gösterir.
+
 Tabloda **Full Name**, **Personal Number**, **Date Of Birth** gibi sütunlar görünür. İlk sütunlarda **Dossier** ve **Copies** kısayolları olabilir; bu kılavuz standart ayrıntı formunu açmayı anlatır.
 
 ![Çalışanlar listesi](../../assets/screenshots/v2026.08/tr/navigation-step-03-employees-list.png)
 
 ## Adım 2 — Listede arama
 
-Liste uzunsa araç çubuğundaki **arama** alanını kullanın (veya düzeninizde **Search** / **Ara** düğmesini açın).
+Liste açıldıktan sonra aradığınız metin tablonun üstündeki alanda kalır. **×** aramayı temizler ve arama kartını geri getirir.
 
 1. Arama alanına tıklayın.
 2. **First Name**, **Last Name**, **Personal Number** veya kişinin herhangi bir pasaport **Passport Number** değerinin bir kısmını yazın.
@@ -66,7 +68,7 @@ Liste uzunsa araç çubuğundaki **arama** alanını kullanın (veya düzeninizd
 
 - Birden fazla kelime sonucu daraltır.
 - Vurgulu harfler genelde vurgusuz eşleşir (`u` ile `ü` bulunabilir).
-- Arama kutusunu temizleyerek tüm listeyi görebilirsiniz.
+- Liste göründükten sonra aradığınız metin tablonun üstündeki alanda kalır. **×** onu temizler ve arama kartını geri getirir. **Employees** ve **Family Members** tüm kadroyu göstermez.
 4. Meslektaşınız kayıt güncellediyse **Refresh** / **Yenile** seçin.
 
 !!! note "Hangi alanlar aranır"
@@ -107,7 +109,7 @@ Düzenleme için doğru listeyi açıp adım 3 ile **ayrıntı formunu** açın.
 
 | Sorun | Ne yapmalı |
 |-------|------------|
-| Liste boş | Aramayı temizleyin; **Refresh**; doğru menü öğesini kontrol edin |
+| Liste aramadan önce boş | Ad, **Personal Number** veya pasaport numarası yazıp **Enter**'a basın |
 | Çok fazla satır | Daha fazla ad veya tam **Personal Number** yazın |
 | Kişi yok | **Report Dashboard** → **Person search**; **Family Members** veya **Temporary visitor** deneyin |
 | Dossier açıldı | **Dossier** veya **Person search** kullandınız — ayrıntı formu için satırın kendisine tıklayın |

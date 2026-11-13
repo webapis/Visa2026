@@ -11450,6 +11450,111 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Dosýe görnüşi",
             ["ru-RU"] = "Вид досье",
         },
+        ["PersonRosterSearch.Chip.FullName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Full name",
+            ["tr-TR"] = "Tam ad",
+            ["tk-TM"] = "Doly ady",
+            ["ru-RU"] = "Полное имя",
+        },
+        ["PersonRosterSearch.Chip.PassportNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport number",
+            ["tr-TR"] = "Pasaport numarası",
+            ["tk-TM"] = "Pasport belgisi",
+            ["ru-RU"] = "Номер паспорта",
+        },
+        ["PersonRosterSearch.Chip.PersonalNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Personal number",
+            ["tr-TR"] = "Kişisel numara",
+            ["tk-TM"] = "Şahsy belgi",
+            ["ru-RU"] = "Личный номер",
+        },
+        ["PersonRosterSearch.Clear"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clear search",
+            ["tr-TR"] = "Aramayı temizle",
+            ["tk-TM"] = "Gözlegi arassala",
+            ["ru-RU"] = "Очистить поиск",
+        },
+        ["PersonRosterSearch.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The list appears after you search. Nothing is loaded until then.",
+            ["tr-TR"] = "Liste aramadan sonra görünür. O zamana kadar kayıt yüklenmez.",
+            ["tk-TM"] = "Sanaw gözlegden soň peýda bolýar. Şondan öň hiç zat ýüklenmeýär.",
+            ["ru-RU"] = "Список появится после поиска. До этого записи не загружаются.",
+        },
+        ["PersonRosterSearch.Kicker.Employees"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employees",
+            ["tr-TR"] = "Çalışanlar",
+            ["tk-TM"] = "Işgärler",
+            ["ru-RU"] = "Сотрудники",
+        },
+        ["PersonRosterSearch.Kicker.FamilyMembers"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family members",
+            ["tr-TR"] = "Aile üyeleri",
+            ["tk-TM"] = "Maşgala agzalary",
+            ["ru-RU"] = "Родственники",
+        },
+        ["PersonRosterSearch.NoMatches"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No matching people. Try another name, personal number, or passport number.",
+            ["tr-TR"] = "Eşleşen kişi yok. Başka bir ad, kişisel numara veya pasaport numarası deneyin.",
+            ["tk-TM"] = "Gabat gelýän adam tapylmady. Başga at, şahsy belgi ýa-da pasport belgisini synap görüň.",
+            ["ru-RU"] = "Никого не найдено. Попробуйте другое имя, личный номер или номер паспорта.",
+        },
+        ["PersonRosterSearch.Placeholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name, personal number, or passport number",
+            ["tr-TR"] = "Ad, kişisel numara veya pasaport numarası",
+            ["tk-TM"] = "At, şahsy belgi ýa-da pasport belgisi",
+            ["ru-RU"] = "Имя, личный номер или номер паспорта",
+        },
+        ["PersonRosterSearch.ResultCount.Many"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0:N0} results",
+            ["tr-TR"] = "{0:N0} sonuç",
+            ["tk-TM"] = "{0:N0} netije",
+            ["ru-RU"] = "{0:N0} результатов",
+        },
+        ["PersonRosterSearch.ResultCount.One"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "1 result",
+            ["tr-TR"] = "1 sonuç",
+            ["tk-TM"] = "1 netije",
+            ["ru-RU"] = "1 результат",
+        },
+        ["PersonRosterSearch.Search"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Search",
+            ["tr-TR"] = "Ara",
+            ["tk-TM"] = "Gözle",
+            ["ru-RU"] = "Найти",
+        },
+        ["PersonRosterSearch.Searching"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Searching…",
+            ["tr-TR"] = "Aranıyor…",
+            ["tk-TM"] = "Gözlenýär…",
+            ["ru-RU"] = "Поиск…",
+        },
+        ["PersonRosterSearch.Title.Employees"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Find an employee",
+            ["tr-TR"] = "Çalışan bulun",
+            ["tk-TM"] = "Işgär tapyň",
+            ["ru-RU"] = "Найти сотрудника",
+        },
+        ["PersonRosterSearch.Title.FamilyMembers"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Find a family member",
+            ["tr-TR"] = "Aile üyesi bulun",
+            ["tk-TM"] = "Maşgala agzasyny tapyň",
+            ["ru-RU"] = "Найти родственника",
+        },
         ["PlaceholderManual.Column.Canonical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Full name",

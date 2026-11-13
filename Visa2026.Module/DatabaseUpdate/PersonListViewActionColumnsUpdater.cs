@@ -55,7 +55,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             if (viewId == "Person_ListView_FamilyMembers")
             {
                 EnsureColumn(listView, nameof(Person.PersonalNumber), 3, 120, "Personal Number");
-                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 11, 120, null);
+                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 11, 166, null);
                 EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 17, 220, null);
                 EnsureColumn(listView, nameof(Person.EmployeeListFamilyProofCopies), 18, 160, null);
                 var archived = listView.Columns[nameof(Person.IsArchived)];
@@ -64,7 +64,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             }
             else if (viewId == "Person_ListView_TemporaryVisitors")
             {
-                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 15, 120, null);
+                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 15, 166, null);
                 EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 16, 220, null);
                 var archived = listView.Columns[nameof(Person.IsArchived)];
                 if (archived != null)
@@ -79,14 +79,14 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
     /// </summary>
     private static void EnsureEmployeeSummaryColumns(IModelListView listView)
     {
-        EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 3, 120, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 3, 166, null);
         EnsureEducationColumns(listView, 11);
         EnsureColumn(listView, nameof(Person.EmployeeListPositionName), 13, 160, null);
         EnsureColumn(listView, nameof(Person.EmployeeListActualPositionName), 14, 180, null);
         EnsureColumn(listView, nameof(Person.EmployeeListDepartmentName), 15, 120, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), 16, 140, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), 17, 160, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), 18, 150, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), 16, 193, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), 17, 164, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), 18, 204, null);
         EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 19, 220, null);
     }
 
@@ -95,9 +95,9 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
     {
         var temporary = string.Equals(listView.Id, "Person_ListView_TemporaryVisitors", StringComparison.Ordinal);
         var start = temporary ? 12 : 14;
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), start, 140, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), start + 1, 160, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), start + 2, 150, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), start, 193, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), start + 1, 164, null);
+        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), start + 2, 204, null);
 
         var archived = listView.Columns[nameof(Person.IsArchived)];
         if (archived != null)

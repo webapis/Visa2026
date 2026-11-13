@@ -43,14 +43,16 @@ This guide uses **Employees**. The same search-and-open pattern works on **Famil
 2. In the left menu, select **Employees**.
 3. Wait until the list titled **Employees** loads.
 
-You should see **Employees** highlighted in the left menu and an **Employees** tab in the main area.
+**Employees** and **Family Members** open on a search card. Type a name, personal number, or passport number, then click **Search**. The list appears after that. **Temporary visitor** still shows its rows when you open it.
+
+You should see **Employees** highlighted in the left menu, an **Employees** tab, and the search card. There is no table yet.
 
 <!-- media-capture: navigation-step-03-employees-list -->
 ![Employees list](../../assets/screenshots/v2026.08/en/navigation-step-03-employees-list.png)
 
 ## Step 2 — Check the list
 
-The toolbar includes **New**, **Delete**, **Close all tabs**, and a search box that reads *Text to search...*.
+The toolbar includes **New**, **Delete**, and **Close all tabs**. Employees and Family Members do not use the usual list search box.
 
 The table columns include:
 
@@ -62,18 +64,18 @@ The table columns include:
 
 You may also see **Age**, **Gender**, **Marital Status**, **Project Contract**, **Company (Subcontractor)**, and **Is Archived**.
 
-If the list has only one row, register another employee first — otherwise search cannot show that it found the right person.
+The search card is the whole list area. The chips under the box are hints, not filters. Register at least two employees first if search cannot tell them apart.
 
 ## Step 3 — Search the list
 
-1. Click the search box (*Text to search...*).
+1. Click the search box on the card.
 2. Type part of a **First Name**, **Last Name**, **Personal Number**, or a **Passport Number**.
-3. Press **Enter**, or wait for the list to refresh.
+3. Click **Search**, or press **Enter**.
 
 Tips:
 
 - Extra words narrow the result (for example a first name and a last name together).
-- Clear the search box to see the full list again.
+- After the list appears, the text you searched stays in the bar above the table. Click **×** to clear it and return to the search card. **Employees** and **Family Members** do not show the full roster.
 - Select **Refresh** on the toolbar if a colleague just saved a change and your list looks old.
 
 ## Step 4 — Open the detail form
@@ -100,7 +102,7 @@ You should see:
 | Problem | What to do |
 |---------|------------|
 | You still see **Report Dashboard** | Select **Employees** in the left menu |
-| List is empty | Clear search; select **Refresh**; confirm the menu item is **Employees** |
+| List is empty before you search | Type a name, **Personal Number**, or passport number and press **Enter** |
 | Too many rows | Type more of the name or the full **Personal Number** |
 | Person not found | Try **Family Members** or **Temporary visitor**; or register them if they are new |
 | Dossier opens instead of the detail form | You clicked **Dossier** — click the **Full Name** / **Personal Number** row instead |

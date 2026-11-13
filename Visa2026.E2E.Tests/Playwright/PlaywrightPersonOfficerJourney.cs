@@ -481,7 +481,7 @@ internal sealed class PlaywrightPersonOfficerJourney
     }
 
     /// <summary>
-    /// Find-and-open: Employees list has decoy rows; search opens the target employee.
+    /// Find-and-open: Employees opens empty; a search among decoy rows opens the target employee.
     /// </summary>
     internal async Task RunFindEmployeeAsync()
     {
@@ -491,14 +491,13 @@ internal sealed class PlaywrightPersonOfficerJourney
         {
             await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
             await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
-            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
-            await Task.Delay(1000);
+            await PlaywrightPageInteractions.ApplyListSearchFilterAsync(_page, "Search");
 
             int rows = await PlaywrightPageInteractions.CountEmployeeListRowsAsync(_page);
             if (rows < 2)
             {
                 throw new InvalidOperationException(
-                    $"Find-and-open needs more than one employee; Employees list has {rows} row(s).");
+                    $"Find-and-open needs more than one employee matching 'Search'; Employees list has {rows} row(s).");
             }
         });
 

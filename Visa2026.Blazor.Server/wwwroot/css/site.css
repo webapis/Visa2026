@@ -5120,3 +5120,313 @@ button.lv-progress-step__files {
 .lv-progress-step__dot {
     font-size: 11px !important;
 }
+
+/* Employees / Family Members: search card replaces the empty grid until a search runs. */
+.dxbl-grid:has(.visa-roster-search-gate) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-search-box,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-search-box-container,
+.visa-person-roster:has(.visa-roster-search-gate) .dxbl-grid-search-box,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-header-row,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-filter-row,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-footer-row,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-pager,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-toolbar-container,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-group-panel {
+    display: none !important;
+}
+
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-table,
+.dxbl-grid:has(.visa-roster-search-gate) .dxbl-scroll-viewer {
+    background: transparent !important;
+    border: none !important;
+}
+
+.dxbl-grid:has(.visa-roster-search-gate) td:has(.visa-roster-search-gate) {
+    width: 100%;
+}
+
+.visa-roster-search-gate {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 26rem;
+    padding: 3.5rem 1.25rem 4rem;
+    box-sizing: border-box;
+}
+
+.visa-roster-search-gate__card {
+    width: min(36rem, 100%);
+    margin: 0;
+    padding: 1.6rem 1.5rem 1.15rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    text-align: left;
+}
+
+.visa-roster-search-gate__kicker {
+    margin: 0 0 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.62;
+}
+
+.visa-roster-search-gate__title {
+    margin: 0 0 0.4rem;
+    font-size: 1.55rem;
+    font-weight: 650;
+    line-height: 1.25;
+}
+
+.visa-roster-search-gate__hint {
+    margin: 0 0 1.15rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    opacity: 0.72;
+}
+
+.visa-roster-search-gate__row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: stretch;
+}
+
+.visa-roster-search-gate__field {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.visa-roster-search-gate__icon {
+    display: flex;
+    flex: 0 0 auto;
+    width: 1.05rem;
+    height: 1.05rem;
+    opacity: 0.7;
+}
+
+.visa-roster-search-gate__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.visa-roster-search-gate__field input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 0.7rem 0;
+}
+
+.visa-roster-search-gate__submit {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 7.25rem;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 1.15rem;
+    background: #5b4dff;
+    color: #fff;
+    font: inherit;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.visa-roster-search-gate__submit:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.visa-roster-search-gate__submit.is-loading,
+.visa-roster-search-gate__submit.is-loading:disabled {
+    opacity: 1;
+    cursor: progress;
+}
+
+.visa-roster-search-gate__spinner {
+    width: 0.95rem;
+    height: 0.95rem;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: visa-roster-search-spin 0.7s linear infinite;
+    flex: 0 0 auto;
+}
+
+@keyframes visa-roster-search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.visa-roster-search-gate__field input:disabled {
+    opacity: 0.65;
+}
+
+.visa-roster-search-gate__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+}
+
+.visa-roster-search-gate__chips span {
+    padding: 0.22rem 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    opacity: 0.75;
+}
+
+.dxbl-grid td:has(.visa-roster-search-warning-host),
+.dxbl-grid tr:has(.visa-roster-search-warning-host) {
+    width: 100%;
+    height: auto !important;
+}
+
+.visa-roster-search-warning-host {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 16rem;
+    padding: 2.5rem 1.25rem 3rem;
+    box-sizing: border-box;
+}
+
+.visa-roster-search-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    width: min(40rem, 100%);
+    margin: 1.25rem auto;
+    padding: 0.9rem 1rem;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 186, 73, 0.55);
+    border-radius: 10px;
+    background: rgba(255, 186, 73, 0.14);
+    color: #ffe3a3;
+    text-align: left;
+}
+
+.visa-roster-search-warning__mark {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    background: #e0a100;
+    color: #1c1400;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.visa-roster-search-warning p {
+    margin: 0.05rem 0 0;
+    line-height: 1.4;
+}
+
+.dxbl-grid-toolbar-container:has(.visa-roster-search-bar) {
+    display: flex !important;
+    align-items: center;
+    padding: 0.65rem 0.75rem 0.45rem;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.visa-roster-search-bar-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    width: min(42rem, 100%);
+}
+
+.visa-roster-search-bar {
+    display: flex;
+    gap: 0.6rem;
+    align-items: stretch;
+    width: 100%;
+}
+
+.visa-roster-search-count {
+    margin: 0;
+    opacity: 0.72;
+}
+
+.visa-roster-search-bar__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-right: -0.2rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.visa-roster-search-bar__clear:hover:not(:disabled) {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.visa-roster-search-bar__clear:disabled {
+    cursor: default;
+    opacity: 0.35;
+}
+
+.dxbl-theme-fluent-mode-light .visa-roster-search-warning {
+    background: #fff6e0;
+    border-color: #c48a00;
+    color: #5c4300;
+}
+
+.dxbl-theme-fluent-mode-light .visa-roster-search-gate__card {
+    border-color: rgba(20, 32, 51, 0.12);
+    background: #fff;
+}
+
+.dxbl-theme-fluent-mode-light .visa-roster-search-gate__field {
+    border-color: rgba(20, 32, 51, 0.16);
+    background: #f4f5f7;
+}
+
+.dxbl-theme-fluent-mode-light .visa-roster-search-gate__chips span {
+    border-color: rgba(20, 32, 51, 0.14);
+}
+
+.dxbl-theme-fluent-mode-light .dxbl-grid-toolbar-container:has(.visa-roster-search-bar) {
+    border-bottom-color: rgba(20, 32, 51, 0.08);
+}
+
+.dxbl-theme-fluent-mode-light .visa-roster-search-bar__clear:hover:not(:disabled) {
+    background: rgba(20, 32, 51, 0.06);
+}

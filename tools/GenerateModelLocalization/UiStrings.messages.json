@@ -8775,5 +8775,95 @@
     "tr-TR": "Parça {0} / {1} – içeriği: {2}",
     "tk-TM": "Bölek {0} / {1} – içindäki: {2}",
     "ru-RU": "Часть {0} из {1} – содержимое: {2}"
+  },
+  "PersonRosterSearch.Kicker.Employees": {
+    "en": "Employees",
+    "tr-TR": "Çalışanlar",
+    "tk-TM": "Işgärler",
+    "ru-RU": "Сотрудники"
+  },
+  "PersonRosterSearch.Kicker.FamilyMembers": {
+    "en": "Family members",
+    "tr-TR": "Aile üyeleri",
+    "tk-TM": "Maşgala agzalary",
+    "ru-RU": "Родственники"
+  },
+  "PersonRosterSearch.Title.Employees": {
+    "en": "Find an employee",
+    "tr-TR": "Çalışan bulun",
+    "tk-TM": "Işgär tapyň",
+    "ru-RU": "Найти сотрудника"
+  },
+  "PersonRosterSearch.Title.FamilyMembers": {
+    "en": "Find a family member",
+    "tr-TR": "Aile üyesi bulun",
+    "tk-TM": "Maşgala agzasyny tapyň",
+    "ru-RU": "Найти родственника"
+  },
+  "PersonRosterSearch.Hint": {
+    "en": "The list appears after you search. Nothing is loaded until then.",
+    "tr-TR": "Liste aramadan sonra görünür. O zamana kadar kayıt yüklenmez.",
+    "tk-TM": "Sanaw gözlegden soň peýda bolýar. Şondan öň hiç zat ýüklenmeýär.",
+    "ru-RU": "Список появится после поиска. До этого записи не загружаются."
+  },
+  "PersonRosterSearch.Placeholder": {
+    "en": "Name, personal number, or passport number",
+    "tr-TR": "Ad, kişisel numara veya pasaport numarası",
+    "tk-TM": "At, şahsy belgi ýa-da pasport belgisi",
+    "ru-RU": "Имя, личный номер или номер паспорта"
+  },
+  "PersonRosterSearch.ResultCount.One": {
+    "en": "1 result",
+    "tr-TR": "1 sonuç",
+    "tk-TM": "1 netije",
+    "ru-RU": "1 результат"
+  },
+  "PersonRosterSearch.ResultCount.Many": {
+    "en": "{0:N0} results",
+    "tr-TR": "{0:N0} sonuç",
+    "tk-TM": "{0:N0} netije",
+    "ru-RU": "{0:N0} результатов"
+  },
+  "PersonRosterSearch.Search": {
+    "en": "Search",
+    "tr-TR": "Ara",
+    "tk-TM": "Gözle",
+    "ru-RU": "Найти"
+  },
+  "PersonRosterSearch.Searching": {
+    "en": "Searching…",
+    "tr-TR": "Aranıyor…",
+    "tk-TM": "Gözlenýär…",
+    "ru-RU": "Поиск…"
+  },
+  "PersonRosterSearch.Chip.FullName": {
+    "en": "Full name",
+    "tr-TR": "Tam ad",
+    "tk-TM": "Doly ady",
+    "ru-RU": "Полное имя"
+  },
+  "PersonRosterSearch.Chip.PersonalNumber": {
+    "en": "Personal number",
+    "tr-TR": "Kişisel numara",
+    "tk-TM": "Şahsy belgi",
+    "ru-RU": "Личный номер"
+  },
+  "PersonRosterSearch.Chip.PassportNumber": {
+    "en": "Passport number",
+    "tr-TR": "Pasaport numarası",
+    "tk-TM": "Pasport belgisi",
+    "ru-RU": "Номер паспорта"
+  },
+  "PersonRosterSearch.Clear": {
+    "en": "Clear search",
+    "tr-TR": "Aramayı temizle",
+    "tk-TM": "Gözlegi arassala",
+    "ru-RU": "Очистить поиск"
+  },
+  "PersonRosterSearch.NoMatches": {
+    "en": "No matching people. Try another name, personal number, or passport number.",
+    "tr-TR": "Eşleşen kişi yok. Başka bir ad, kişisel numara veya pasaport numarası deneyin.",
+    "tk-TM": "Gabat gelýän adam tapylmady. Başga at, şahsy belgi ýa-da pasport belgisini synap görüň.",
+    "ru-RU": "Никого не найдено. Попробуйте другое имя, личный номер или номер паспорта."
   }
 }

@@ -834,7 +834,7 @@ internal static class PlaywrightPageInteractions
         await page.WaitForURLAsync(
             url => url.Contains("Person_ListView_Employees", StringComparison.OrdinalIgnoreCase),
             new PageWaitForURLOptions { Timeout = 60_000 });
-        await EmployeeListSearchInput(page).WaitForAsync(new LocatorWaitForOptions
+        await page.Locator("[data-testid='visa-roster-search-input']").First.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Visible,
             Timeout = 30_000,
@@ -925,8 +925,25 @@ internal static class PlaywrightPageInteractions
     internal static ILocator EmployeeListSearchInput(IPage page) =>
         page.GetByPlaceholder("Text to search", new PageGetByPlaceholderOptions { Exact = false }).First;
 
+    internal static ILocator RosterSearchInput(IPage page) =>
+        page.Locator("[data-testid='visa-roster-search-input']").First;
+
     internal static async Task ClearListSearchFilterAsync(IPage page)
     {
+        ILocator clear = page.Locator("[data-testid='visa-roster-search-clear']:visible");
+        if (await clear.CountAsync() > 0)
+        {
+            await clear.First.ClickAsync();
+            await page.Locator(".visa-roster-search-gate [data-testid='visa-roster-search-input']").First
+                .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 15_000 });
+            await Task.Delay(400);
+            return;
+        }
+
+        ILocator gate = page.Locator(".visa-roster-search-gate [data-testid='visa-roster-search-input']");
+        if (await gate.CountAsync() > 0 && await gate.First.IsVisibleAsync())
+            return;
+
         ILocator input = EmployeeListSearchInput(page);
         if (!await TryWaitVisibleAsync(input, 3_000))
             return;
@@ -941,6 +958,16 @@ internal static class PlaywrightPageInteractions
     {
         if (string.IsNullOrWhiteSpace(text))
             return;
+
+        ILocator gate = page.Locator("[data-testid='visa-roster-search-input']:visible");
+        if (await gate.CountAsync() > 0)
+        {
+            await gate.First.ClickAsync(new LocatorClickOptions { Force = true });
+            await gate.First.FillAsync(text);
+            await page.Locator("[data-testid='visa-roster-search-submit']:visible").First.ClickAsync();
+            await Task.Delay(1200);
+            return;
+        }
 
         ILocator input = EmployeeListSearchInput(page);
         await input.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 15_000 });

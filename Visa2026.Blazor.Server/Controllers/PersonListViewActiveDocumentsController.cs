@@ -82,6 +82,18 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     private const int RosterPageSize = 50;
     private static readonly int[] RosterPageSizeOptions = [50];
 
+    /// <summary>
+    /// Passport and the three in-force document columns stay at the widths saved
+    /// for the Employees list. Officers can still drag every other column.
+    /// </summary>
+    private static readonly Dictionary<string, int> LockedColumnWidths = new(StringComparer.Ordinal)
+    {
+        [nameof(Person.EmployeeListActivePassport)] = 166,
+        [nameof(Person.EmployeeListActiveVisaNumbers)] = 193,
+        [nameof(Person.EmployeeListActiveInvitationNumbers)] = 204,
+        [nameof(Person.EmployeeListActiveWorkPermitNumbers)] = 164,
+    };
+
     /// <summary>First-paint weights, used until the browser measures real cell text.</summary>
     private static readonly Dictionary<string, int> FallbackPreferred = new(StringComparer.Ordinal)
     {
@@ -197,6 +209,9 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         var field = columns[dataIndex].FieldName ?? string.Empty;
         if (field.Length == 0)
             return;
+
+        if (LockedColumnWidths.TryGetValue(field, out var lockedPixels))
+            pixels = lockedPixels;
 
         var modelColumn = View.Model.Columns[field];
         if (modelColumn != null && modelColumn.Width != pixels)
@@ -362,7 +377,9 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         {
             var field = column.FieldName ?? string.Empty;
             var pixels = 0;
-            if (field.Length > 0)
+            if (field.Length > 0 && LockedColumnWidths.TryGetValue(field, out var lockedPixels))
+                pixels = lockedPixels;
+            else if (field.Length > 0)
                 pixels = View.Model?.Columns[field]?.Width ?? 0;
             if (pixels <= 0)
                 pixels = FallbackPreferred.GetValueOrDefault(field, 120);
@@ -400,6 +417,9 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
                     var text = match.Pixels.ToString(CultureInfo.InvariantCulture) + "px";
                     if (!string.Equals(column.Width, text, StringComparison.Ordinal))
                         column.Width = text;
+                    if (LockedColumnWidths.ContainsKey(column.FieldName ?? string.Empty)
+                        && column.MinWidth != match.Pixels)
+                        column.MinWidth = match.Pixels;
                 }
             }
             finally
@@ -422,6 +442,8 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
                             continue;
 
                         column.Width = match.Pixels.ToString(CultureInfo.InvariantCulture) + "px";
+                        if (LockedColumnWidths.ContainsKey(column.FieldName ?? string.Empty))
+                            column.MinWidth = match.Pixels;
                     }
                 }
                 finally
@@ -519,6 +541,8 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
                 var field = column.FieldName ?? string.Empty;
                 if (field.Length == 0 || !widths.TryGetValue(field, out var pixels) || pixels <= 0)
                     continue;
+                if (LockedColumnWidths.TryGetValue(field, out var lockedPixels))
+                    pixels = lockedPixels;
 
                 var modelColumn = View.Model.Columns[field];
                 if (modelColumn != null && modelColumn.Width != pixels)
