@@ -5135,7 +5135,6 @@ button.lv-progress-step__files {
 .dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-filter-row,
 .dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-footer-row,
 .dxbl-grid:has(.visa-roster-search-gate) .dxbl-pager,
-.dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-toolbar-container,
 .dxbl-grid:has(.visa-roster-search-gate) .dxbl-grid-group-panel {
     display: none !important;
 }
@@ -5151,12 +5150,7 @@ button.lv-progress-step__files {
 }
 
 .visa-roster-search-gate {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    min-height: 26rem;
-    padding: 3.5rem 1.25rem 4rem;
-    box-sizing: border-box;
+    display: none;
 }
 
 .visa-roster-search-gate__card {
@@ -5349,7 +5343,8 @@ button.lv-progress-step__files {
 
 .dxbl-grid-toolbar-container:has(.visa-roster-search-bar) {
     display: flex !important;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     padding: 0.65rem 0.75rem 0.45rem;
     background: transparent;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);

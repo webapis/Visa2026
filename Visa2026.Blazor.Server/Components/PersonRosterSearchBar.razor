@@ -2,8 +2,6 @@
 @using Visa2026.Module.Localization
 @implements IDisposable
 
-@if (Visible)
-{
 <div class="visa-roster-search-bar-block">
 <form class="visa-roster-search-bar" @onsubmit="Submit" @onsubmit:preventDefault="true" aria-busy="@searching">
     <label class="visa-roster-search-gate__field">
@@ -13,7 +11,8 @@
                 <path d="M16 16.5L20 20.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
             </svg>
         </span>
-        <input data-testid="visa-roster-search-input"
+        <input @ref="input"
+               data-testid="visa-roster-search-input"
                value="@text"
                @oninput="OnInput"
                placeholder="@Msg("PersonRosterSearch.Placeholder")"
@@ -21,19 +20,22 @@
                autocomplete="off"
                spellcheck="false"
                disabled="@searching" />
-        <button type="button"
-                class="visa-roster-search-bar__clear"
-                data-testid="visa-roster-search-clear"
-                aria-label="@Msg("PersonRosterSearch.Clear")"
-                disabled="@searching"
-                @onclick="Clear">
-            <span aria-hidden="true">&times;</span>
-        </button>
+        @if (HasQuery)
+        {
+            <button type="button"
+                    class="visa-roster-search-bar__clear"
+                    data-testid="visa-roster-search-clear"
+                    aria-label="@Msg("PersonRosterSearch.Clear")"
+                    disabled="@searching"
+                    @onclick="Clear">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        }
     </label>
     <button type="submit"
             class="visa-roster-search-gate__submit @(searching ? "is-loading" : null)"
             data-testid="visa-roster-search-submit"
-            disabled="@searching"
+            disabled="@(searching || string.IsNullOrWhiteSpace(text))"
             aria-busy="@searching">
         @if (searching)
         {
@@ -46,16 +48,16 @@
         }
     </button>
 </form>
-@if (State?.ResultCount is int found)
+@if (HasQuery && State?.ResultCount is int found)
 {
     <p class="visa-roster-search-count" role="status">@CountText(found)</p>
 }
 </div>
-}
 
 @code {
     private string text = string.Empty;
     private bool searching;
+    private ElementReference input;
     private PersonRosterSearchState? subscribed;
 
     [Parameter] public PersonRosterSearchState? State { get; set; }
@@ -64,7 +66,7 @@
 
     [Parameter] public EventCallback OnClear { get; set; }
 
-    private bool Visible => !string.IsNullOrWhiteSpace(State?.Query);
+    private bool HasQuery => !string.IsNullOrWhiteSpace(State?.Query);
 
     protected override void OnParametersSet()
     {
@@ -99,6 +101,21 @@
             text = State?.Query ?? string.Empty;
 
         _ = InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || HasQuery)
+            return;
+
+        try
+        {
+            await input.FocusAsync();
+        }
+        catch
+        {
+            // The bar can unmount before the browser finishes focusing.
+        }
     }
 
     private void OnInput(ChangeEventArgs e) => text = e.Value?.ToString() ?? string.Empty;

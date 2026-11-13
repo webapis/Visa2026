@@ -52,7 +52,7 @@ Adamlar görnüşe görä aýry sanawlarda saklanýar.
 2. Çep menýudan **Employees** (ýa-da **Family Members** / **Temporary visitor**) saýlaň.
 3. Sanawyň ýüklenmegine garaşyň.
 
-**Employees** we **Family Members** gözleg kartasy bilen açylýar. At, şahsy belgi ýa-da pasport belgisini ýazyň we **Gözle** basyň. Sanaw şondan soň peýda bolýar. **Temporary visitor** açylanda setirleri görkezýär.
+**Employees** we **Family Members** çep ýokarky burçda gözleg meýdançasy bilen açylýar. At, şahsy belgi ýa-da pasport belgisini ýazyň we **Gözle** basyň. Sanaw şol meýdançanyň aşagynda peýda bolýar. **Temporary visitor** açylanda setirleri görkezýär.
 
 Tablisa **Full Name**, **Personal Number**, **Date Of Birth** ýaly sütunlary görkezýär. Ilkinji sütunlarda **Dossier** we **Copies** bolup biler; bu gollanma adaty jikme-jik formany açmagy görkezýär.
 
@@ -60,7 +60,7 @@ Tablisa **Full Name**, **Personal Number**, **Date Of Birth** ýaly sütunlary g
 
 ## Ädim 2 — Sanawda gözleg
 
-Sanaw açylandan soň gözlän tekstiňiz tablisanyň üstündäki meýdançada galýar. **×** gözlegi arassalaýar we gözleg kartasyny yzyna getirýär.
+Sanaw açylandan soň gözlän tekstiňiz çep ýokarky meýdançada galýar. **×** gözlegi arassalaýar; meýdança şol ýerde galýar, tablisa ýitýär.
 
 1. Gözleg meýdançasyna basyň.
 2. **First Name**, **Last Name**, **Personal Number** ýa-da islendik **Passport Number** bölegini ýazyň.
@@ -70,7 +70,7 @@ Maslahatlar:
 
 - Birnäçe söz netijäni daraldýar.
 - Nyşanly harpler köplenç nyşansyz gabat gelýär.
-- Sanaw peýda bolandan soň gözlän tekstiňiz tablisanyň üstündäki meýdançada galýar. **×** ony arassalaýar we gözleg kartasyny yzyna getirýär. **Employees** we **Family Members** ähli sanawy görkezmeýär.
+- Sanaw peýda bolandan soň gözlän tekstiňiz çep ýokarky meýdançada galýar. **×** ony arassalaýar; meýdança şol ýerde galýar. **Employees** we **Family Members** ähli sanawy görkezmeýär.
 4. Gerek bolsa **Refresh** saýlaň.
 
 !!! note "Haýsy meýdanlar gözlenýär"

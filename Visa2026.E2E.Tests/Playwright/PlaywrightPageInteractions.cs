@@ -934,14 +934,14 @@ internal static class PlaywrightPageInteractions
         if (await clear.CountAsync() > 0)
         {
             await clear.First.ClickAsync();
-            await page.Locator(".visa-roster-search-gate [data-testid='visa-roster-search-input']").First
-                .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 15_000 });
+            await page.Locator("[data-testid='visa-roster-search-clear']")
+                .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden, Timeout = 15_000 });
             await Task.Delay(400);
             return;
         }
 
-        ILocator gate = page.Locator(".visa-roster-search-gate [data-testid='visa-roster-search-input']");
-        if (await gate.CountAsync() > 0 && await gate.First.IsVisibleAsync())
+        ILocator gate = page.Locator("[data-testid='visa-roster-search-input']:visible");
+        if (await gate.CountAsync() > 0 && await clear.CountAsync() == 0)
             return;
 
         ILocator input = EmployeeListSearchInput(page);

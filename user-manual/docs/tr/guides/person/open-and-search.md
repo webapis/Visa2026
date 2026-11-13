@@ -50,7 +50,7 @@ Kişiler türe göre ayrı listelerde tutulur. Doğru listeyi seçin.
 2. Sol menüden **Employees** (veya **Family Members** / **Temporary visitor**) seçin.
 3. Listenin yüklenmesini bekleyin.
 
-**Employees** ve **Family Members** bir arama kartıyla açılır. Ad, kişisel numara veya pasaport numarası yazıp **Ara**'ya basın. Liste bundan sonra görünür. **Temporary visitor** açıldığında satırlarını gösterir.
+**Employees** ve **Family Members** sol üstte bir arama kutusuyla açılır. Ad, kişisel numara veya pasaport numarası yazıp **Ara**'ya basın. Liste bu kutunun altında görünür. **Temporary visitor** açıldığında satırlarını gösterir.
 
 Tabloda **Full Name**, **Personal Number**, **Date Of Birth** gibi sütunlar görünür. İlk sütunlarda **Dossier** ve **Copies** kısayolları olabilir; bu kılavuz standart ayrıntı formunu açmayı anlatır.
 
@@ -58,7 +58,7 @@ Tabloda **Full Name**, **Personal Number**, **Date Of Birth** gibi sütunlar gö
 
 ## Adım 2 — Listede arama
 
-Liste açıldıktan sonra aradığınız metin tablonun üstündeki alanda kalır. **×** aramayı temizler ve arama kartını geri getirir.
+Liste açıldıktan sonra aradığınız metin sol üstteki kutuda kalır. **×** aramayı temizler; kutu yerinde kalır ve tablo kaybolur.
 
 1. Arama alanına tıklayın.
 2. **First Name**, **Last Name**, **Personal Number** veya kişinin herhangi bir pasaport **Passport Number** değerinin bir kısmını yazın.
@@ -68,7 +68,7 @@ Liste açıldıktan sonra aradığınız metin tablonun üstündeki alanda kalı
 
 - Birden fazla kelime sonucu daraltır.
 - Vurgulu harfler genelde vurgusuz eşleşir (`u` ile `ü` bulunabilir).
-- Liste göründükten sonra aradığınız metin tablonun üstündeki alanda kalır. **×** onu temizler ve arama kartını geri getirir. **Employees** ve **Family Members** tüm kadroyu göstermez.
+- Liste göründükten sonra aradığınız metin sol üstteki kutuda kalır. **×** onu temizler; kutu yerinde kalır. **Employees** ve **Family Members** tüm kadroyu göstermez.
 4. Meslektaşınız kayıt güncellediyse **Refresh** / **Yenile** seçin.
 
 !!! note "Hangi alanlar aranır"

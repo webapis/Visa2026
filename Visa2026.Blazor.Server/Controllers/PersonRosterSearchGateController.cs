@@ -131,15 +131,12 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
         previousToolbarTemplate = gridModel.ToolbarTemplate;
         templateCaptured = true;
 
-        var family = string.Equals(View.Id, "Person_ListView_FamilyMembers", StringComparison.Ordinal);
         var search = EventCallback.Factory.Create<string>(this, OnSearchRequested);
         var clear = EventCallback.Factory.Create(this, OnClearRequested);
         gridModel.EmptyDataAreaTemplate = _ => builder =>
         {
             builder.OpenComponent<PersonRosterSearchGate>(0);
             builder.AddAttribute(1, "State", presentation);
-            builder.AddAttribute(2, "IsFamilyMember", family);
-            builder.AddAttribute(3, "OnSearch", search);
             builder.CloseComponent();
         };
 
