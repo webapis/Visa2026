@@ -2640,7 +2640,6 @@ select.cw-summary-field__input option {
 .ct-address-editor__error { color: var(--os-bad, #dc2626); }
 /* DxWindow portals to body — keep it under the preview column so scroll/wheel reach the PDF. */
 .dxbl-window.os-link-review-popup--beside-preview {
-  max-width: min(520px, 45vw) !important;
   z-index: 1050 !important;
 }
 #visa-app-shell.visa-app-shell--preview-open #visa-preview-slot.visa-preview-slot--open {

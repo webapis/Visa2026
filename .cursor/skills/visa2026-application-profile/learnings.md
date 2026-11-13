@@ -5,6 +5,13 @@
 - **Officer**: Hard-refresh. Open Progress. The current step’s status label and “Result needed” should be readable. Check light once.
 - **Prevent**: Do not put `#92400e` back on `.cw-prog-step__badge--active` or `.ct-prog-acc__hint`.
 
+## 2026-11-12 — Linked records dialog is wider and resizable
+
+- **Need**: The custom Linked records window (`DxWindow` in `OfficerShellCaseWorkspaceComponent`, not an XAF popup) opened at 720px and could not be resized. Beside the preview slot, CSS capped it at 520px.
+- **Fix**: Default width is `min(1040px, 94vw)` (880px beside the preview). `AllowResize` is on. `ResizeCompleted` stores width and height so a later render does not snap it back. The 520px `max-width` is gone.
+- **Officer**: Rebuild the Blazor host (this is Razor, not CSS-only). Open Linked records. Drag a corner. It should open wider and keep the size you set.
+- **Prevent**: Do not put `max-width: min(520px, 45vw)` back on `.os-link-review-popup--beside-preview`.
+
 ## 2026-11-12 — Progress header labels stay readable on Fluent Dark
 
 - **Need**: “In progress”, “Result needed”, and the current-step date were a dark amber on the dark progress header.

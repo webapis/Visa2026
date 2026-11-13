@@ -426,6 +426,8 @@
     private Guid _scrolledLastLinkedPersonId;
     private bool _linkReviewUserPositioned;
     private int? _linkReviewPosX;
+    private string? _linkReviewWidth;
+    private string? _linkReviewHeight;
     private int? _linkReviewPosY;
 
     protected override void OnInitialized()
@@ -542,6 +544,8 @@
             _linkReviewUserPositioned = false;
             _linkReviewPosX = null;
             _linkReviewPosY = null;
+            _linkReviewWidth = null;
+            _linkReviewHeight = null;
             EnsureLinkReviewBesidePreview();
         }
 
@@ -2759,10 +2763,16 @@
                       CloseOnEscape="true"
                       AllowDrag="true"
                       AllowDragByHeaderOnly="true"
+                      AllowResize="true"
+                      MinWidth="640px"
+                      MaxWidth="96vw"
+                      MinHeight="280px"
                       PositionX="@LinkReviewPositionX"
                       PositionY="@LinkReviewPositionY"
                       DragCompleted="OnLinkReviewDragCompleted"
+                      ResizeCompleted="OnLinkReviewResizeCompleted"
                       Width="@LinkReviewPopupWidth"
+                      Height="@_linkReviewHeight"
                       CssClass="@LinkReviewPopupCssClass">
                 <BodyContentTemplate>
                     <div class="os-link-review-person">
@@ -4184,9 +4194,10 @@
             : "os-link-review-popup";
 
     private string LinkReviewPopupWidth =>
-        IsPreviewSlotOpen
-            ? "min(520px, 45vw)"
-            : "min(720px, 92vw)";
+        _linkReviewWidth
+        ?? (IsPreviewSlotOpen
+            ? "min(880px, 56vw)"
+            : "min(1040px, 94vw)");
 
     private int? LinkReviewPositionX => _linkReviewPosX;
 
@@ -4207,6 +4218,12 @@
         _linkReviewUserPositioned = true;
         _linkReviewPosX = args.End.X;
         _linkReviewPosY = args.End.Y;
+    }
+
+    private void OnLinkReviewResizeCompleted(WindowResizeCompletedEventArgs args)
+    {
+        _linkReviewWidth = $"{args.Size.Width}px";
+        _linkReviewHeight = $"{args.Size.Height}px";
     }
     private async Task PreviewLinkReviewDocumentAsync(PersonLinkReviewLine line)
     {
