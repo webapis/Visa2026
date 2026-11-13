@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Reflection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.MigrationImport;
 using Xunit;
@@ -257,6 +259,94 @@ public class ApplicationProfileInstancePersonValidItemsTests
             StartDate = Today.AddMonths(-6),
             ExpirationDate = Today.AddYears(1),
         }));
+    }
+
+    [Fact]
+    public void ActiveWorkPermitChoices_ListsEveryActivePermit_NewestStartFirst()
+    {
+        WorkPermitItem Permit(string number, DateTime start, DateTime expiration, string id) =>
+            new()
+            {
+                ID = Guid.Parse(id),
+                WorkPermitNumber = number,
+                StartDate = start,
+                ExpirationDate = expiration,
+            };
+
+        var newest = Permit("1377/6", Today.AddMonths(-1), Today.AddYears(1), "22222222-2222-2222-2222-222222222222");
+        var middle = Permit("900/1", Today.AddMonths(-8), Today.AddMonths(6), "44444444-4444-4444-4444-444444444444");
+        var third = Permit("100/2", Today.AddYears(-1), Today.AddMonths(4), "55555555-5555-5555-5555-555555555555");
+        var older = Permit("451/14", Today.AddYears(-2), Today.AddMonths(2), "33333333-3333-3333-3333-333333333333");
+        var expired = Permit("1/1", Today.AddYears(-3), Today.AddDays(-1), "11111111-1111-1111-1111-111111111111");
+        var cancelled = WithCompletedFamily(
+            Permit("2/2", Today.AddMonths(-3), Today.AddYears(1), "66666666-6666-6666-6666-666666666666"),
+            ApplicationProfileActionFamily.Cancellation);
+        var changed = WithCompletedFamily(
+            Permit("3/3", Today.AddMonths(-2), Today.AddYears(1), "77777777-7777-7777-7777-777777777777"),
+            ApplicationProfileActionFamily.Change);
+
+        var items = new[] { older, expired, newest, cancelled, middle, changed, third };
+        var all = PersonLinkReview.WorkPermitChoices(items);
+        Assert.Equal(7, all.Count);
+        Assert.False(all.Single(choice => choice.ObjectId == expired.ID).Active);
+        Assert.False(all.Single(choice => choice.ObjectId == cancelled.ID).Active);
+        Assert.False(all.Single(choice => choice.ObjectId == changed.ID).Active);
+        Assert.True(all.Single(choice => choice.ObjectId == newest.ID).Active);
+
+        var manual = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            ObjectId = newest.ID,
+            Choices = all,
+        };
+        Assert.Equal(4, PersonLinkReview.ChoicesForManualPick(manual, activeOnly: true).Count);
+        Assert.Equal(7, PersonLinkReview.ChoicesForManualPick(manual, activeOnly: false).Count);
+
+        var pinnedExpired = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            ObjectId = expired.ID,
+            Choices = all,
+        };
+        var pinnedShown = PersonLinkReview.ChoicesForManualPick(pinnedExpired, activeOnly: true);
+        Assert.Equal(5, pinnedShown.Count);
+        Assert.Contains(pinnedShown, choice => choice.ObjectId == expired.ID);
+
+        var choices = PersonLinkReview.ActiveWorkPermitChoices(items);
+
+        Assert.Equal(4, choices.Count);
+        Assert.Equal(
+            new[] { newest.ID, middle.ID, third.ID, older.ID },
+            choices.Select(choice => choice.ObjectId));
+        Assert.Equal(
+            string.Join(", ", new[]
+            {
+                "1377/6",
+                newest.StartDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
+                newest.ExpirationDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
+            }),
+            choices[0].Label);
+    }
+
+    [Fact]
+    public void FindChoiceLine_UsesWorkPermitSlot()
+    {
+        var first = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            SlotIndex = 1,
+        };
+        var second = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            SlotIndex = 2,
+        };
+        var request = new PersonLinkReviewChoiceRequest(
+            ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            Guid.NewGuid(),
+            slotIndex: 2);
+
+        Assert.Same(second, PersonLinkReview.FindChoiceLine(new[] { first, second }, request));
     }
 
     [Fact]

@@ -539,6 +539,7 @@
         if (ShowPersonLinkReview && !_reviewWasOpen)
         {
             _reviewGearOn = false;
+            _reviewActiveOnly = true;
             _reviewTab = "overview";
             _reviewCreating = false;
             _linkReviewUserPositioned = false;
@@ -2785,11 +2786,22 @@
                             <div class="os-link-review-person__photo-empty" aria-hidden="true"></div>
                         }
                         <span class="os-link-review-person__name">@(string.IsNullOrWhiteSpace(PersonLinkReviewPersonName) ? "—" : PersonLinkReviewPersonName)</span>
-                        <button type="button"
-                                class="os-link-review__gear @(_reviewGearOn ? "is-on" : null)"
-                                title="@Msg("ApplicationProfileInstance.LinkReview.ChooseAnother")"
-                                aria-pressed="@_reviewGearOn"
-                                @onclick="ToggleReviewGear">⚙</button>
+                        <span class="os-link-review-person__tools">
+                            @if (_reviewGearOn && PersonLinkReviewLines.Any(PersonLinkReview.ManualActiveFilterApplies))
+                            {
+                                <label class="os-link-review-active">
+                                    <input type="checkbox"
+                                           checked="@_reviewActiveOnly"
+                                           @onchange="OnReviewActiveOnlyChanged" />
+                                    @Msg("ApplicationProfileInstance.LinkReview.ActiveOnly")
+                                </label>
+                            }
+                            <button type="button"
+                                    class="os-link-review__gear @(_reviewGearOn ? "is-on" : null)"
+                                    title="@Msg("ApplicationProfileInstance.LinkReview.ChooseAnother")"
+                                    aria-pressed="@_reviewGearOn"
+                                    @onclick="ToggleReviewGear">⚙</button>
+                        </span>
                     </div>
                     @if (_reviewGearOn)
                     {
@@ -2888,7 +2900,7 @@
                                         <select class="os-link-review__select"
                                                 value="@line.ObjectId"
                                                 @onchange="e => OnReviewChoiceChanged(line, e)">
-                                            @foreach (var choice in line.Choices)
+                                            @foreach (var choice in PersonLinkReview.ChoicesForManualPick(line, _reviewActiveOnly))
                                             {
                                                 <option value="@choice.ObjectId">@choice.Label</option>
                                             }
@@ -4271,6 +4283,7 @@
 
     private bool _reviewWasOpen;
     private bool _reviewGearOn;
+    private bool _reviewActiveOnly = true;
     private int _locationChipAddNonce;
     private bool _reviewCreating;
     private bool _reviewCreateSaving;
@@ -4298,6 +4311,11 @@
             _reviewCreating = false;
         _reviewTab = tab;
     }
+
+    private void OnReviewActiveOnlyChanged(ChangeEventArgs change) =>
+        _reviewActiveOnly = change.Value is bool on
+            ? on
+            : string.Equals(change.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
 
     private void ToggleReviewGear()
     {
@@ -4380,7 +4398,7 @@
     private Task OnReviewChoiceChanged(PersonLinkReviewLine line, ChangeEventArgs change)
     {
         var objectId = Guid.TryParse(change.Value?.ToString(), out var parsed) ? parsed : Guid.Empty;
-        return SelectPersonLinkReviewRequested.InvokeAsync(new PersonLinkReviewChoiceRequest(line.Kind, objectId));
+        return SelectPersonLinkReviewRequested.InvokeAsync(new PersonLinkReviewChoiceRequest(line.Kind, objectId, line.SlotIndex));
     }
 
     private Task CancelPersonLinkReviewAsync() => CancelPersonLinkReviewRequested.InvokeAsync();

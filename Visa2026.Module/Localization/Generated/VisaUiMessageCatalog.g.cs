@@ -3526,6 +3526,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu ýüztutma üçin bir iş rugsady haty. Diňe işgärler. Baglanan iş rugsady elementleri çeşme däl.",
             ["ru-RU"] = "Одно письмо разрешения на работу для этого дела. Только сотрудники. Связанные позиции не источник.",
         },
+        ["ApplicationProfileInstance.LinkReview.ActiveOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active only",
+            ["tr-TR"] = "Yalnız aktif",
+            ["tk-TM"] = "Diňe işjeň",
+            ["ru-RU"] = "Только действующие",
+        },
         ["ApplicationProfileInstance.LinkReview.Authority"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Authority",

@@ -1,3 +1,10 @@
+## 2026-11-13 — Manual Linked records lists can show active visas and work permits only
+
+- **Need**: Gear on Linked records is how an officer sets Visa or Work permit by hand. Those dropdowns listed one auto-picked permit, or every historical visa. Join without the gear still uses the automatic Last-N value.
+- **Fix**: With the gear on, **Diňe işjeň** is checked. Visa and Work permit dropdowns then list records that are not cancelled, not changed, and not expired, plus the value already selected. Clear the box to pick from the full history. Last-N is unchanged.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Linked records, turn the gear on. Mehmet Akkuş: visas A1758165 and A1675937, work permits 1377/6 and 416/15. Clear **Diňe işjeň** to see older numbers.
+- **Prevent**: Do not apply this filter when the gear is off. Do not fill the dropdown from `ResolveWorkPermitItems` / Last-N.
+
 ## 2026-11-12 — Progress header status label follows the theme
 
 - **Need**: On Fluent Dark the current-step label (“In progress”, “Result needed”, and the rail date) used dark brown `#92400e` / `#d97706`, so the words sank into the header.

@@ -4224,6 +4224,12 @@
     "tk-TM": "Pasport möhleti",
     "ru-RU": "Срок действия паспорта"
   },
+  "ApplicationProfileInstance.LinkReview.ActiveOnly": {
+    "en-US": "Active only",
+    "tr-TR": "Yalnız aktif",
+    "tk-TM": "Diňe işjeň",
+    "ru-RU": "Только действующие"
+  },
   "ApplicationProfileInstance.LinkReview.ChooseAnother": {
     "en-US": "Choose another record",
     "tr-TR": "Başka bir kayıt seç",

@@ -1190,7 +1190,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (model == null || request == null)
             return Task.CompletedTask;
 
-        var line = model.PersonLinkReviewLines.FirstOrDefault(item => item.Kind == request.Kind);
+        var line = PersonLinkReview.FindChoiceLine(model.PersonLinkReviewLines, request);
         if (line == null)
             return Task.CompletedTask;
 

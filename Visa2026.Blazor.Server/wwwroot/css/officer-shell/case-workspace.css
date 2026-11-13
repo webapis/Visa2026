@@ -2673,6 +2673,19 @@ select.cw-summary-field__input option {
 .os-link-review-person__photo { object-fit: cover; display: block; }
 .os-link-review-person__photo-empty { border-style: dashed; }
 .os-link-review-person__name { font-size: 1.15rem; font-weight: 600; min-width: 0; }
+.os-link-review-person__tools { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.os-link-review-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--os-ink);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.os-link-review-active input { accent-color: var(--os-accent, #7c3aed); width: 15px; height: 15px; margin: 0; }
 .os-link-review-tabs { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
 .os-link-review-tabs__tab {
   border: 1px solid var(--os-line);
@@ -2687,7 +2700,6 @@ select.cw-summary-field__input option {
 }
 .os-link-review-tabs__tab.is-active { background: var(--os-accent); border-color: var(--os-accent); color: #fff; }
 .os-link-review__gear {
-  margin-left: auto;
   width: 32px;
   height: 32px;
   border-radius: 8px;

@@ -55,6 +55,8 @@ public sealed class PersonLinkReviewChoice
     public Guid ObjectId { get; init; }
     public string Label { get; init; } = "—";
     public IReadOnlyList<PersonLinkReviewField> Fields { get; init; } = Array.Empty<PersonLinkReviewField>();
+    /// <summary>Not cancelled, not changed, and not expired. Manual dropdowns can hide the rest.</summary>
+    public bool Active { get; init; } = true;
 }
 
 public sealed class PersonLinkReviewField
@@ -67,14 +69,17 @@ public sealed class PersonLinkReviewField
 
 public sealed class PersonLinkReviewChoiceRequest
 {
-    public PersonLinkReviewChoiceRequest(ApplicationProfileInstancePersonLinkKind kind, Guid objectId)
+    public PersonLinkReviewChoiceRequest(ApplicationProfileInstancePersonLinkKind kind, Guid objectId, int slotIndex = 0)
     {
         Kind = kind;
         ObjectId = objectId;
+        SlotIndex = slotIndex;
     }
 
     public ApplicationProfileInstancePersonLinkKind Kind { get; }
     public Guid ObjectId { get; }
+    /// <summary>Which Last-N row changed. 0 is a single row.</summary>
+    public int SlotIndex { get; }
 }
 
 public sealed class PersonLinkReviewCreateOption
@@ -774,14 +779,83 @@ public static partial class PersonLinkReview
             .AsEnumerable()
             .Select(row => Choice(row.ID, PositionSummary(row).Summary, PositionFields(row)))
             .ToList(),
-        ApplicationProfileInstancePersonLinkKind.Visa => objectSpace.GetObjectsQuery<Visa>()
-            .Where(row => row.Passport != null && row.Passport.Person != null && row.Passport.Person.ID == personId)
-            .OrderByDescending(row => row.ID)
-            .AsEnumerable()
-            .Select(row => Choice(row.ID, VisaSummary(row).Summary, VisaFields(row)))
-            .ToList(),
+        ApplicationProfileInstancePersonLinkKind.Visa => VisaChoices(
+            objectSpace.GetObjectsQuery<Visa>()
+                .Where(row => row.Passport != null && row.Passport.Person != null && row.Passport.Person.ID == personId)
+                .ToList()),
+        ApplicationProfileInstancePersonLinkKind.WorkPermitItem => WorkPermitChoices(
+            objectSpace.GetObjectsQuery<WorkPermitItem>()
+                .Where(row => row.Person != null && row.Person.ID == personId)
+                .ToList()),
         _ => Array.Empty<PersonLinkReviewChoice>(),
     };
+
+    /// <summary>
+    /// Every visa for the manual dropdown. <see cref="PersonLinkReviewChoice.Active"/> is the default filter.
+    /// Last-N still decides which visa is selected until the officer picks another.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> VisaChoices(IEnumerable<Visa>? items) =>
+        (items ?? Array.Empty<Visa>())
+            .OrderByDescending(row => row.StartDate)
+            .ThenByDescending(row => row.ID)
+            .Select(row => Choice(
+                row.ID,
+                VisaSummary(row).Summary,
+                VisaFields(row),
+                ApplicationProfileInstancePersonValidItems.CanLinkVisa(row)))
+            .ToList();
+
+    /// <summary>
+    /// Every work permit for the manual dropdown, newest start first.
+    /// <see cref="PersonLinkReviewChoice.Active"/> is not cancelled, not changed, and not expired.
+    /// Last-N still decides which permit is selected until the officer picks another.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> WorkPermitChoices(IEnumerable<WorkPermitItem>? items) =>
+        (items ?? Array.Empty<WorkPermitItem>())
+            .OrderByDescending(row => row.StartDate)
+            .ThenByDescending(row => row.ID)
+            .Select(row => Choice(
+                row.ID,
+                WorkPermitSummary(row).Summary,
+                WorkPermitFields(row),
+                ApplicationProfileInstancePersonValidItems.CanLinkWorkPermitItem(row)))
+            .ToList();
+
+    public static IReadOnlyList<PersonLinkReviewChoice> ActiveWorkPermitChoices(IEnumerable<WorkPermitItem>? items) =>
+        WorkPermitChoices(items).Where(choice => choice.Active).ToList();
+
+    /// <summary>Visa and work permit rows can be narrowed while the officer picks by hand.</summary>
+    public static bool ManualActiveFilterApplies(PersonLinkReviewLine? line) =>
+        line != null
+        && !line.OmitFromJoin
+        && line.Kind is ApplicationProfileInstancePersonLinkKind.Visa
+            or ApplicationProfileInstancePersonLinkKind.WorkPermitItem;
+
+    /// <summary>
+    /// Gear-on dropdown. Active-only keeps active rows and the value already selected.
+    /// Other record types, and an unchecked box, list every choice.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> ChoicesForManualPick(PersonLinkReviewLine? line, bool activeOnly)
+    {
+        if (line == null)
+            return Array.Empty<PersonLinkReviewChoice>();
+        if (!activeOnly || !ManualActiveFilterApplies(line))
+            return line.Choices;
+
+        return line.Choices
+            .Where(choice => choice.Active || choice.ObjectId == line.ObjectId)
+            .ToList();
+    }
+
+    public static PersonLinkReviewLine? FindChoiceLine(
+        IEnumerable<PersonLinkReviewLine>? lines,
+        PersonLinkReviewChoiceRequest? request)
+    {
+        if (lines == null || request == null)
+            return null;
+
+        return lines.FirstOrDefault(item => item.Kind == request.Kind && item.SlotIndex == request.SlotIndex);
+    }
 
     private static List<PersonLinkReviewChoice> AddressChoicesFor(
         IObjectSpace objectSpace,
@@ -823,7 +897,10 @@ public static partial class PersonLinkReview
                 return position == null ? null : Choice(position.ID, PositionSummary(position).Summary, PositionFields(position));
             case ApplicationProfileInstancePersonLinkKind.Visa:
                 var visa = objectSpace.GetObjectByKey<Visa>(objectId);
-                return visa == null ? null : Choice(visa.ID, VisaSummary(visa).Summary, VisaFields(visa));
+                return visa == null ? null : VisaChoices(new[] { visa }).FirstOrDefault();
+            case ApplicationProfileInstancePersonLinkKind.WorkPermitItem:
+                var workPermit = objectSpace.GetObjectByKey<WorkPermitItem>(objectId);
+                return workPermit == null ? null : WorkPermitChoices(new[] { workPermit }).FirstOrDefault();
             case ApplicationProfileInstancePersonLinkKind.AddressOfResidence:
                 var address = objectSpace.GetObjectByKey<AddressOfResidence>(objectId);
                 return address == null ? null : Choice(address.ID, AddressSummary(address), AddressFields(address));
@@ -855,12 +932,17 @@ public static partial class PersonLinkReview
         return choices;
     }
 
-    private static PersonLinkReviewChoice Choice(Guid objectId, string? label, IReadOnlyList<PersonLinkReviewField> fields) =>
+    private static PersonLinkReviewChoice Choice(
+        Guid objectId,
+        string? label,
+        IReadOnlyList<PersonLinkReviewField> fields,
+        bool active = true) =>
         new()
         {
             ObjectId = objectId,
             Label = string.IsNullOrWhiteSpace(label) ? "—" : label,
             Fields = fields,
+            Active = active,
         };
 
     private static IReadOnlyList<PersonLinkReviewField> TextFields(string label, string value) =>
@@ -898,6 +980,13 @@ public static partial class PersonLinkReview
         Field(T("PositionReports"), position.Position?.NameTm, true, true),
         Field(T("PositionActual"), position.ActualPosition?.Name, true, true),
         Field(T("Department"), position.Department?.NameTm, false, true),
+    };
+
+    private static IReadOnlyList<PersonLinkReviewField> WorkPermitFields(WorkPermitItem item) => new[]
+    {
+        Field(U("ApplicationProfileInstance.Issued.WorkPermitNumber"), item.WorkPermitNumber, true, false),
+        Field(U("ApplicationProfile.Field.StartDate"), DateText(item.StartDate), true, false),
+        Field(U("ApplicationProfileInstance.Workspace.AddressExpiration"), DateText(item.ExpirationDate), true, false),
     };
 
     private static IReadOnlyList<PersonLinkReviewField> VisaFields(Visa visa) => new[]
