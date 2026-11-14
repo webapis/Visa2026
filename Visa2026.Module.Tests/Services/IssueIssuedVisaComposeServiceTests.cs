@@ -40,6 +40,64 @@ public class IssueIssuedVisaComposeServiceTests
         Assert.False(IssueIssuedVisaComposeService.CanOpenInSlot(null));
     }
 
+    [Theory]
+    [InlineData("visa_ext")]
+    [InlineData("visa_ext_fm")]
+    [InlineData("visa_ext_according_to_wp")]
+    [InlineData("extend_visa_wp")]
+    [InlineData("pasport_change")]
+    [InlineData("visa_category_change")]
+    [InlineData("visa_exit")]
+    [InlineData("visa_for_new_born_fm")]
+    public void UsesAshgabatCityIssuedPlace_MatchesListedProfiles(string code)
+    {
+        var instance = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { Code = code },
+        };
+        Assert.True(IssueIssuedVisaComposeService.UsesAshgabatCityIssuedPlace(instance));
+    }
+
+    [Fact]
+    public void UsesAshgabatCityIssuedPlace_LeavesInvitationCasesOnCatalogDefault()
+    {
+        var instance = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { Code = "get_invitation" },
+        };
+        Assert.False(IssueIssuedVisaComposeService.UsesAshgabatCityIssuedPlace(instance));
+    }
+
+    [Fact]
+    public void ResolveDefaultVisaIssuedPlaceId_PrefersAshgabatCityOverAirportDefault()
+    {
+        var airportId = Guid.NewGuid();
+        var cityId = Guid.NewGuid();
+        var places = new[]
+        {
+            new VisaIssuedPlace
+            {
+                NameTm = "Aşgabat şäher howa menzilindäki MGP",
+                IsDefault = true,
+            },
+            new VisaIssuedPlace { NameTm = IssueIssuedVisaComposeService.AshgabatCityIssuedPlaceName },
+        };
+        places[0].ID = airportId;
+        places[1].ID = cityId;
+
+        var extension = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { Code = "extend_visa_wp" },
+        };
+        var invitation = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { Code = "get_invitation_wp" },
+        };
+
+        Assert.Equal(cityId, IssueIssuedVisaComposeService.ResolveDefaultVisaIssuedPlaceId(extension, places));
+        Assert.Equal(airportId, IssueIssuedVisaComposeService.ResolveDefaultVisaIssuedPlaceId(invitation, places));
+    }
+
     [Fact]
     public void UsesInvitationSource_OnlyWhenProfileProducesInvitation()
     {

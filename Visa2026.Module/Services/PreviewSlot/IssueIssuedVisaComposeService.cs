@@ -29,6 +29,87 @@ public static class IssueIssuedVisaComposeService
         CanOpenInSlot(application)
         && ApplicationProfileConfigurationResolver.CanIssueInvitation(application);
 
+    /// <summary>Turkmen catalog title for the city migration office (not the airport post).</summary>
+    public const string AshgabatCityIssuedPlaceName = "Aşgabat şäheri";
+
+    private static readonly HashSet<string> AshgabatCityIssuedPlaceProfiles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "visa_ext",
+        "visa_ext_fm",
+        "visa_ext_according_to_wp",
+        "extend_visa_wp",
+        "pasport_change",
+        "visa_category_change",
+        "visa_exit",
+        "visa_for_new_born_fm",
+    };
+
+    private static readonly HashSet<string> AshgabatCityIssuedPlaceTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "App_Visa_Ext",
+        "App_Visa_Ext_FM",
+        "App_Visa_Ext_According_to_WP",
+        "App_Visa_and_WP_Ext",
+        "App_Change_Passport",
+        "App_Change_Visa_Category",
+        "App_Exit_Visa",
+        "App_Visa_For_New_Born_FM",
+    };
+
+    /// <summary>
+    /// Visa extension, transfer to a new passport, visa-category change, exit visa, and newborn visa
+    /// open a new issued visa at Aşgabat şäheri. Other cases keep the catalog default.
+    /// </summary>
+    public static bool UsesAshgabatCityIssuedPlace(ApplicationProfileInstance? instance)
+    {
+        var code = instance?.ApplicationProfile?.Code?.Trim();
+        if (!string.IsNullOrEmpty(code) && AshgabatCityIssuedPlaceProfiles.Contains(code))
+            return true;
+
+#pragma warning disable CS0618 // ApplicationType.Name is the seed key.
+        var typeName = instance?.ApplicationType?.Name?.Trim();
+#pragma warning restore CS0618
+        return !string.IsNullOrEmpty(typeName) && AshgabatCityIssuedPlaceTypes.Contains(typeName);
+    }
+
+    public static Guid? ResolveDefaultVisaIssuedPlaceId(
+        ApplicationProfileInstance? instance,
+        IEnumerable<VisaIssuedPlace>? places)
+    {
+        var list = places?.Where(p => p != null).ToList() ?? new List<VisaIssuedPlace>();
+        if (UsesAshgabatCityIssuedPlace(instance))
+        {
+            var city = list.FirstOrDefault(p =>
+                string.Equals(p.NameTm?.Trim(), AshgabatCityIssuedPlaceName, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(p.LocalizationKey?.Trim(), "AS", StringComparison.OrdinalIgnoreCase));
+            if (city != null)
+                return city.ID;
+        }
+
+        return list.FirstOrDefault(p => p.IsDefault)?.ID ?? list.FirstOrDefault()?.ID;
+    }
+
+    private static Guid? DefaultIssuedPlaceId(IObjectSpace objectSpace, ApplicationProfileInstance instance) =>
+        ResolveDefaultVisaIssuedPlaceId(instance, objectSpace.GetObjectsQuery<VisaIssuedPlace>().ToList());
+
+    private static VisaIssuedPlace? ResolveIssuedPlace(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance instance,
+        Guid? placeId)
+    {
+        if (placeId is Guid id && id != Guid.Empty)
+        {
+            var chosen = objectSpace.GetObjectByKey<VisaIssuedPlace>(id);
+            if (chosen != null)
+                return chosen;
+        }
+
+        var fallbackId = DefaultIssuedPlaceId(objectSpace, instance);
+        return fallbackId is Guid fid && fid != Guid.Empty
+            ? objectSpace.GetObjectByKey<VisaIssuedPlace>(fid)
+            : null;
+    }
+
     public static IssueIssuedVisaComposeDraft? LoadDraft(IObjectSpace objectSpace, Guid applicationId)
     {
         if (objectSpace == null || applicationId == Guid.Empty)
@@ -77,7 +158,7 @@ public static class IssueIssuedVisaComposeService
         var visaCategories = LoadLookups<VisaCategory>(objectSpace);
         var visaPeriods = LoadLookups<VisaPeriod>(objectSpace);
         var visaIssuedPlaces = LoadLookups<VisaIssuedPlace>(objectSpace);
-        var defaultPlaceId = objectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(p => p.IsDefault)?.ID
+        var defaultPlaceId = DefaultIssuedPlaceId(objectSpace, instance)
             ?? visaIssuedPlaces.FirstOrDefault()?.Id;
         var borderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
             objectSpace,
@@ -234,7 +315,7 @@ public static class IssueIssuedVisaComposeService
         var visaCategories = LoadLookups<VisaCategory>(objectSpace);
         var visaPeriods = LoadLookups<VisaPeriod>(objectSpace);
         var visaIssuedPlaces = LoadLookups<VisaIssuedPlace>(objectSpace);
-        var defaultPlaceId = objectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(p => p.IsDefault)?.ID
+        var defaultPlaceId = DefaultIssuedPlaceId(objectSpace, instance)
             ?? visaIssuedPlaces.FirstOrDefault()?.Id;
         var borderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
             objectSpace,
@@ -575,9 +656,7 @@ public static class IssueIssuedVisaComposeService
                 visa.VisaCategory = row.VisaCategoryId is Guid catId
                     ? objectSpace.GetObjectByKey<VisaCategory>(catId)
                     : item.Invitation.VisaCategory;
-                var issuedPlace = row.VisaIssuedPlaceId is Guid placeId
-                    ? objectSpace.GetObjectByKey<VisaIssuedPlace>(placeId)
-                    : objectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(p => p.IsDefault);
+                var issuedPlace = ResolveIssuedPlace(objectSpace, instance, row.VisaIssuedPlaceId);
                 if (issuedPlace == null)
                 {
                     return new IssueIssuedVisaCreateResult
@@ -723,9 +802,7 @@ public static class IssueIssuedVisaComposeService
             visa.VisaCategory = row.VisaCategoryId is Guid catId
                 ? objectSpace.GetObjectByKey<VisaCategory>(catId)
                 : instance.VisaCategory;
-            var issuedPlace = row.VisaIssuedPlaceId is Guid placeId
-                ? objectSpace.GetObjectByKey<VisaIssuedPlace>(placeId)
-                : objectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(p => p.IsDefault);
+            var issuedPlace = ResolveIssuedPlace(objectSpace, instance, row.VisaIssuedPlaceId);
             if (issuedPlace == null)
             {
                 return new IssueIssuedVisaCreateResult

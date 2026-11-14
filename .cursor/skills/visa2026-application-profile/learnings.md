@@ -26,6 +26,13 @@
 - **Officer**: Hard-refresh. Open Progress. The current step’s badge, “Result needed”, and the date should be easy to read.
 - **Prevent**: Do not set those labels back to `--os-warn` or `#92400e` on Fluent Dark.
 
+## 2026-11-14 — New visa on extension-style cases defaults issued place to Aşgabat şäheri
+
+- **Need**: New issued visa on visa extension, visa+WP extension, transfer to a new passport, visa category change, exit visa, and newborn visa was opening at the catalog default (Aşgabat airport MGP). Officers want **Aşgabat şäheri**.
+- **Fix**: `IssueIssuedVisaComposeService.ResolveDefaultVisaIssuedPlaceId` prefers NameTm / localization key `AS` for those profile codes. Other profiles still use `VisaIssuedPlace.IsDefault`. An already saved visa keeps its place.
+- **Officer**: Hard-refresh. Application result → + Add issued visa on Wiza we Iş Rugsatnamasyny Uzaltmak — Wiza berlen ýeri is Aşgabat şäheri. Invitation cases stay on the airport default.
+- **Prevent**: Do not mark Aşgabat şäheri `IsDefault` in the catalog; that would change every other profile. Do not apply this default when editing an existing visa.
+
 ## 2026-11-13 — Unchecked work-permit and visa people stay full color at the top
 
 - **Need**: On a new work permit, people not filled yet were mixed under the open forms and looked disabled. Unchecked visas on Application result used the same dim card.
