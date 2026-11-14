@@ -159,8 +159,11 @@ public static class PersonDossierDocumentHtmlBuilder
         string progressHeader = Msg("PersonDossier.Column.Progress", culture);
         string issuedHeader = Msg("PersonDossier.Column.Issued", culture);
 
-        foreach (var section in snapshot.Sections)
+        foreach (var section in SectionsForPaper(snapshot))
         {
+            if (section.Records.Count == 0)
+                continue;
+
             html.Append(CultureInfo.InvariantCulture,
                 $"<p style=\"font-size:9pt;font-weight:bold;margin:8pt 0 3pt 0;\">{Enc(section.SectionLabel)} ({section.Records.Count})</p>");
 
@@ -168,6 +171,8 @@ public static class PersonDossierDocumentHtmlBuilder
                 $"<table style=\"width:100%;border-collapse:collapse;border:1px solid {RuleColor};\">");
 
             html.Append(CultureInfo.InvariantCulture, $"<tr style=\"background-color:{HeadBackground};\">");
+            if (section.HasMemberColumn)
+                AppendHeaderCell(html, Msg("PersonDossier.Column.Name", culture));
             foreach (var header in section.ColumnHeaders)
                 AppendHeaderCell(html, header);
             if (section.ShowsStatusColumn)
@@ -181,6 +186,11 @@ public static class PersonDossierDocumentHtmlBuilder
             foreach (var record in section.Records)
             {
                 html.Append("<tr>");
+                if (section.HasMemberColumn)
+                {
+                    html.Append(CultureInfo.InvariantCulture,
+                        $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">{Enc(record.MemberName)}</td>");
+                }
                 for (var cellIndex = 0; cellIndex < record.Cells.Count; cellIndex++)
                 {
                     var cell = record.Cells[cellIndex];
@@ -190,8 +200,26 @@ public static class PersonDossierDocumentHtmlBuilder
                     var note = cellIndex == 0 && !string.IsNullOrWhiteSpace(record.FirstCellNote)
                         ? $"<br />{Enc(record.FirstCellNote)}"
                         : string.Empty;
+                    var missingLetters = cellIndex == 0 && record.MissingApprovalSteps.Count > 0
+                        ? string.Concat(record.MissingApprovalSteps.Select(step =>
+                            $"<br />{Enc(step)} ({Enc(Msg("ApplicationProfileInstance.Workspace.Missing", culture))})"))
+                        : string.Empty;
                     html.Append(CultureInfo.InvariantCulture,
-                        $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">{Enc(cell)}{detail}{note}</td>");
+                        $"<td style=\"border:1px solid {RuleColor};padding:3pt;font-size:8pt;vertical-align:top;\">{Enc(cell)}{detail}{note}{missingLetters}");
+                    if (record.CompanionCellIndex == cellIndex && !string.IsNullOrWhiteSpace(record.CompanionStatusLabel))
+                    {
+                        html.Append(' ');
+                        AppendPill(html, record.CompanionStatusLabel, record.CompanionStatusCssClass);
+                    }
+                    else if (cellIndex < record.CellChips.Count
+                        && record.CellChips[cellIndex] is { } chip
+                        && !string.IsNullOrWhiteSpace(chip.StatusLabel))
+                    {
+                        html.Append(' ');
+                        AppendPill(html, chip.StatusLabel, chip.StatusCssClass);
+                    }
+
+                    html.Append("</td>");
                 }
 
                 if (section.ShowsStatusColumn)
@@ -214,6 +242,16 @@ public static class PersonDossierDocumentHtmlBuilder
             }
 
             html.Append("</table>");
+        }
+    }
+
+    private static IEnumerable<PersonDossierSection> SectionsForPaper(PersonDossierSnapshot snapshot)
+    {
+        foreach (var section in snapshot.Sections)
+        {
+            yield return section;
+            foreach (var nested in section.NestedSections)
+                yield return nested;
         }
     }
 

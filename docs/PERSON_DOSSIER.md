@@ -78,19 +78,24 @@ employment block.
 | Section | Source | Notes |
 |---------|--------|-------|
 | Passports | `Person.Passports` | `Current` badge via `PersonCurrentItems.GetCurrentPassport` |
-| Visas | `Passport.Visas` **flattened** | Not on `Person` - see Modelling traps |
+| Active processes | Every `ApplicationProfileInstance` for this person whose latest progress is not a last step | First tab on the issued strip, always shown. Issued, rejected, and cancelled cases stay off this tab. Same columns as Invitations. The progress track is always visible on this tab. There is no Progress button. |
+| Visas | `ApplicationProfileInstance` that issues a visa and does not issue a new invitation | The Visas tab, after Invitations. Same columns, approval letters, and Progress control. A visa-only case (extension, transfer to a new passport) and a visa-and-work-permit extension belong here, including while the visa is not issued yet. The work permit from that extension stays in the work-permit column. An application that issues a new invitation stays on Invitations. |
+| Invitations | `ApplicationProfileInstance` that issues a new invitation (`ProduceInvitation`) | The Invitations tab. One row per invitation case, including one still in progress with no invitation number yet. Passport, invitation, visa, and work permit issued by that same case stay on the row. A visa extension or a visa-and-work-permit extension is not listed here. Under the application number, **Approval letters** opens that case's ministry approval letters in the preview slot, in progress-step order. Ministry steps that still have no letter are named under the link. **Progress**, to the right of that case, opens the same progress track as Applications for that row only. |
 | Work permits | `Person.WorkPermitItems` -> parent `WorkPermit` | |
+| Border zones | Invitation, visa, or border-zone case that can grant a border zone | Tab after Work permits. Same row as Invitations, plus the granted places. A dash until the places are on an issued invitation, visa, or border-zone permit. The case also stays on Invitations or Visas. |
+| Work permit locations | Case that issues a new work permit, or a separate grant of additional places | Tab after Border zones. Same row as Invitations, plus the granted places. The case also stays on Invitations or Visas. |
+| Rejections | A case that issued a rejection for this person, or a rejection application that has not issued it yet | Tab after Work permit locations. An invitation or visa case stays off this tab until a rejection exists. |
 | Education | `Person.Educations` | Employee only |
-| Position history | `Person.PositionHistory` | Employee only |
-| Addresses of residence | `Person.AddressesOfResidence` | Registration/lodging |
-| Travel history | `Person.TravelHistories` | In/out movement |
+| Position history | `Person.PositionHistory` | Employee only. On screen, the tab after Education. |
+| Addresses of residence | `Person.AddressesOfResidence` | Registration/lodging. On screen, the tab after Position history. |
+| Travel history | `Person.TravelHistories` | In/out movement. On screen, the tab after Addresses of residence. |
 | Medical records | `Person.MedicalRecords` | |
-| Family members | `Person.FamilyMembers` | Employee only (self-ref via `SponsoringEmployee`) |
-| Applications | `Person.ApplicationProfileInstances` | Same progress track as the instance list. Seretmezlik stays a status pill beside that track |
-| Invitations | Shown on the Applications row, in the Issued column after the progress track, for this person only | |
+| Family members | `Person.FamilyMembers` | On screen, the tab after Addresses of residence. The tab stays when this person has no family member (count 0). Each row shows the member's current passport, invitation, and visa (number and state; the latest document when none is current) and one link labeled Family relation documents. That link previews every relationship-document copy for the member in one PDF. Under the table, Active processes, Invitations, Visas, and Border zones list each family member's own cases, with the member's name and the same columns and progress as the employee's tabs. |
+| Applications | `Person.ApplicationProfileInstances` | Not shown on the dossier for now. The progress track and Issued chips stay in the builder. |
+| Invitations | Issued-column chip on the Applications row | Not on the page while the Applications section is hidden. Invitation cases are on the Invitations tab. |
 | Rejections | `Person.RejectionItems` | |
 
-Screen keeps the five newest rows in each section. **Show more** opens the rest and shows how many are hidden. **Show less** returns that section to five. Applications apply the limit inside the selected group. Paper and the director PDF still list every row.
+Screen keeps the five newest rows in each section. **Show more** opens the rest and shows how many are hidden. **Show less** returns that section to five. Applications apply the limit inside the selected group. On screen, active processes, invitations, visas, and work permits share one tab strip, and passports, education, position history, addresses of residence, family members, and travel history share another. Active processes is the first tab. Those four tabs stay on the strip even when the person has no row in that section (count 0). Family members stays on the second strip the same way. Paper and the director PDF list every section that has rows and omit an empty one. The invitations and visas tables are one row per case (numbers and states, no scans).
 
 ### Status tiles
 
@@ -211,9 +216,12 @@ service-passport invitation and change-invitation). **Iş sapary** is departure 
 **Bellige alyş** is check-in, check-out, and registration changes. Empty groups are hidden.
 Paper and the director PDF still list every application. The application number, profile, and
 date share one column. After Migration service is finished, the Issued column shows this person's
-invitation number and status (valid to, used, expired, cancelled). A rejection on that step replaces
-the invitation. The number opens the issued copy when a file is stored. The separate Invitations
-section is no longer printed.
+invitation number and status (valid to, used, expired, cancelled, changed). A rejection on that step replaces
+the invitation. The number opens the issued copy when a file is stored. The Invitations section
+lists every invitation for this person, including that same status. A used row names the visa that
+was issued from it and that visa's state, and the application number opens the case that issued
+the letter. Paper and the director PDF include the table. Preview of a used invitation shows the
+letter, then the visa scan beside its passport scan.
 
 ### Schema note
 
@@ -227,9 +235,7 @@ host start, because a database already at the current module version skips the u
 
 Three things that will bite an implementer:
 
-1. **Visas hang off `Passport`, not `Person`.** There is no `Person.Visas`. The Visas section is a
-   flatten across `Person.Passports` -> `Passport.Visas`, and "current visa" must survive a passport
-   replacement (`PersonCurrentItems.GetCurrentVisa(Person)` already handles this).
+1. **Visas hang off `Passport`, not `Person`.** There is no `Person.Visas`. The Visas tab lists the visa-issuing case, and the visa number on that row is read from `Passport.Visas`. "Current visa" must survive a passport replacement (`PersonCurrentItems.GetCurrentVisa(Person)` already handles this).
 2. **There is no `Registration` collection on `Person`.** Registration lives on `ApplicationItem`;
    physical movement is `TravelHistories`; lodging is `AddressesOfResidence`. The dossier merges
    these for the reader, but they are three sources.

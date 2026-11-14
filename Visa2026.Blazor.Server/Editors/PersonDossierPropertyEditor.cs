@@ -156,6 +156,8 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
                         && dossierPersonId != Guid.Empty
                         ? dossierPersonId
                         : null,
+                    AppendIssuedVisaBesidePassport = record.PreviewFamily == HeaderDocumentCopiesFamily.Invitation
+                        && record.AppendIssuedVisaBesidePassport,
                 },
                 PersonDossierViewIds.DetailView);
         }
@@ -164,7 +166,10 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
             new PersonDocumentCopiesSlotRequest
             {
                 PersonIds = new[] { record.PersonCopyPersonId!.Value },
-                FocusRecordKey = record.PersonCopyRecordKey,
+                FocusRecordKey = string.IsNullOrWhiteSpace(record.PersonCopySectionId)
+                    ? record.PersonCopyRecordKey
+                    : null,
+                FocusSectionId = record.PersonCopySectionId,
                 FocusDisplayName = string.IsNullOrWhiteSpace(record.PersonCopyDisplayName)
                     ? (record.Cells.Count > 0 ? record.Cells[0] : null)
                     : record.PersonCopyDisplayName,

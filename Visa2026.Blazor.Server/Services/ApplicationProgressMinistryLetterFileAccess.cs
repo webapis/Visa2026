@@ -3,6 +3,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -161,6 +162,73 @@ public sealed class ApplicationProfileInstanceProgressMinistryLetterFileAccess
             return false;
 
         content = bytes;
+        return true;
+    }
+
+    /// <summary>
+    /// Ministry approval letters for the whole case, in progress-step order.
+    /// Submission documents are left out. Steps with no letter are skipped.
+    /// </summary>
+    public bool TryGetMinistryLettersInProcessOrder(
+        Guid applicationId,
+        out ApplicationProfileInstanceProgressMinistryLetterFileResult? result)
+    {
+        result = null;
+        if (applicationId == Guid.Empty)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+        if (application == null)
+            return false;
+
+        var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(
+            objectSpace,
+            new[] { application });
+        if (!timelines.TryGetValue(applicationId, out var steps) || steps.Count == 0)
+            return false;
+
+        var pairs = new List<(string Name, byte[] Content)>();
+        foreach (var step in steps)
+        {
+            if (!step.Key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
+                || step.FileSlot != ApplicationProfileInstanceProgressFiles.MinistryLetter)
+                continue;
+
+            if (step.Files is { Count: > 0 })
+            {
+                foreach (var stored in step.Files)
+                {
+                    var file = objectSpace.GetObjectByKey<FileData>(stored.FileId);
+                    if (!TryReadBytes(objectSpace, file, out var content))
+                        continue;
+                    var name = string.IsNullOrWhiteSpace(stored.FileName) ? "file" : stored.FileName;
+                    pairs.Add((name, content));
+                }
+
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(step.MinistryLetterFileName)
+                || step.ProgressId is not Guid progressId
+                || progressId == Guid.Empty)
+                continue;
+
+            var progress = LoadProgress(objectSpace, progressId);
+            if (!TryReadBytes(objectSpace, progress?.MinistryLetterFile, out var letter))
+                continue;
+            pairs.Add((step.MinistryLetterFileName, letter));
+        }
+
+        if (!ApplicationProfileInstanceProgressFilePreview.TryBuild(pairs, out var built, out _) || built == null)
+            return false;
+
+        result = new ApplicationProfileInstanceProgressMinistryLetterFileResult
+        {
+            Content = built.Content,
+            FileName = built.FileName,
+            ContentType = built.ContentType,
+        };
         return true;
     }
 

@@ -10617,6 +10617,62 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Salgy",
             ["ru-RU"] = "Адрес",
         },
+        ["PersonDossier.Column.Application"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application",
+            ["tr-TR"] = "Başvuru",
+            ["tk-TM"] = "Ýüztutma",
+            ["ru-RU"] = "Заявление",
+        },
+        ["PersonDossier.Column.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["PersonDossier.Column.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation",
+            ["tr-TR"] = "Davet",
+            ["tk-TM"] = "Çakylyk",
+            ["ru-RU"] = "Приглашение",
+        },
+        ["PersonDossier.Column.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["PersonDossier.Column.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit",
+            ["tr-TR"] = "Çalışma izni",
+            ["tk-TM"] = "Iş rugsady",
+            ["ru-RU"] = "Разрешение на работу",
+        },
+        ["PersonDossier.Column.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone",
+            ["tr-TR"] = "Sınır bölgesi",
+            ["tk-TM"] = "Serhet ýakasy",
+            ["ru-RU"] = "Пограничная зона",
+        },
+        ["PersonDossier.Column.WorkPermitLocations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit locations",
+            ["tr-TR"] = "Çalışma izni yerleri",
+            ["tk-TM"] = "Iş rugsat ýerleri",
+            ["ru-RU"] = "Места разрешения на работу",
+        },
+        ["PersonDossier.Column.Rejection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection",
+            ["tr-TR"] = "Ret",
+            ["tk-TM"] = "Seretmezlik",
+            ["ru-RU"] = "Отказ",
+        },
         ["PersonDossier.Column.ApplicationDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application date",
@@ -10827,6 +10883,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Gatnaşyk",
             ["ru-RU"] = "Степень родства",
         },
+        ["PersonDossier.Column.RelationshipDocument"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Relationship document",
+            ["tr-TR"] = "Akrabalık belgesi",
+            ["tk-TM"] = "Garyndaşlyk resminamasy",
+            ["ru-RU"] = "Документ о родстве",
+        },
         ["PersonDossier.Column.Specialty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Specialty",
@@ -10861,6 +10924,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Başlangıç",
             ["tk-TM"] = "Başlanýan senesi",
             ["ru-RU"] = "Действует с",
+        },
+        ["PersonDossier.Column.VisaIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa issued",
+            ["tr-TR"] = "Verilen vize",
+            ["tk-TM"] = "Berlen wiza",
+            ["ru-RU"] = "Выданная виза",
+        },
+        ["PersonDossier.Column.VisaPeriod"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa period",
+            ["tr-TR"] = "Vize süresi",
+            ["tk-TM"] = "Wiza möhleti",
+            ["ru-RU"] = "Срок визы",
         },
         ["PersonDossier.Copy.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -11121,12 +11198,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Gitmek",
             ["ru-RU"] = "Выезд",
         },
+        ["PersonDossier.ApprovalLetters"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Approval letters",
+            ["tr-TR"] = "Onay yazıları",
+            ["tk-TM"] = "Tassyklama hatlary",
+            ["ru-RU"] = "Письма согласования",
+        },
         ["PersonDossier.Progress.ViewFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "View file",
             ["tr-TR"] = "Dosyayı görüntüle",
             ["tk-TM"] = "Nusga",
             ["ru-RU"] = "Открыть файл",
+        },
+        ["PersonDossier.Progress.Toggle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Progress",
+            ["tr-TR"] = "İlerleme",
+            ["tk-TM"] = "Ösüş",
+            ["ru-RU"] = "Ход",
         },
         ["PersonDossier.Progress.ViewLetter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -11191,6 +11282,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wagtlaýyn myhman",
             ["ru-RU"] = "Временный посетитель",
         },
+        ["PersonDossier.Section.activeProcesses"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active processes",
+            ["tr-TR"] = "Aktif işlemler",
+            ["tk-TM"] = "Işjeň prosesler",
+            ["ru-RU"] = "Активные процессы",
+        },
         ["PersonDossier.Section.addresses"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Addresses of residence",
@@ -11204,6 +11302,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Başvurular",
             ["tk-TM"] = "Ýüztutmalar",
             ["ru-RU"] = "Заявления",
+        },
+        ["PersonDossier.Section.byApplication"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitations",
+            ["tr-TR"] = "Davetler",
+            ["tk-TM"] = "Çakylyklar",
+            ["ru-RU"] = "Приглашения",
+        },
+        ["PersonDossier.Section.borderZones"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zones",
+            ["tr-TR"] = "Sınır bölgeleri",
+            ["tk-TM"] = "Serhet ýakalary",
+            ["ru-RU"] = "Пограничные зоны",
+        },
+        ["PersonDossier.Section.workPermitLocations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit locations",
+            ["tr-TR"] = "Çalışma izni yerleri",
+            ["tk-TM"] = "Iş rugsat ýerleri",
+            ["ru-RU"] = "Места разрешения на работу",
+        },
+        ["PersonDossier.Section.rejections"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejections",
+            ["tr-TR"] = "Retler",
+            ["tk-TM"] = "Seretmezlikler",
+            ["ru-RU"] = "Отказы",
         },
         ["PersonDossier.Section.education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

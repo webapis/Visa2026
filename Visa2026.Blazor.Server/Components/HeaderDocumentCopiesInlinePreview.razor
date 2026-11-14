@@ -122,6 +122,8 @@
     private string ActionDownload => Msg("PersonDocumentCopies.Action.Download");
 
     private bool _previewAllCopies;
+    private bool _appendIssuedVisaBesidePassport;
+    private Guid? _previewPersonId;
     private IReadOnlyList<InvitationPreviewStates.PersonState> _invitationStates =
         Array.Empty<InvitationPreviewStates.PersonState>();
 
@@ -137,6 +139,8 @@
             _printLayout = DocumentCopyPrintLayout.DefaultFor(request.RecordKey);
 
         _previewAllCopies = request.PreviewAllCopies;
+        _appendIssuedVisaBesidePassport = request.AppendIssuedVisaBesidePassport;
+        _previewPersonId = request.PersonId;
         _invitationStates = ResolveInvitationStates(request);
         _activeRecordKey = request.RecordKey;
         _parentId = request.ParentId;
@@ -187,7 +191,13 @@
                 _previewHeaderLabel,
                 () =>
                 {
-                    if (!FileAccess.TryGetMergedAllCopiesPdf(_family, _parentId, _previewHeaderLabel, out var result) || result == null)
+                    if (!FileAccess.TryGetMergedAllCopiesPdf(
+                            _family,
+                            _parentId,
+                            _previewHeaderLabel,
+                            out var result,
+                            _appendIssuedVisaBesidePassport,
+                            _previewPersonId) || result == null)
                         return (null, null, PreviewError);
 
                     return (result.Content, result.FileName, null);
@@ -199,7 +209,14 @@
             _previewHeaderLabel,
             () =>
             {
-                if (!FileAccess.TryGetMergedRecordPdf(_family, _parentId, _activeRecordKey, out var result, _printLayout) || result == null)
+                if (!FileAccess.TryGetMergedRecordPdf(
+                        _family,
+                        _parentId,
+                        _activeRecordKey,
+                        out var result,
+                        _printLayout,
+                        _appendIssuedVisaBesidePassport,
+                        _previewPersonId) || result == null)
                     return (null, null, PreviewError);
 
                 return (result.Content, result.FileName, null);

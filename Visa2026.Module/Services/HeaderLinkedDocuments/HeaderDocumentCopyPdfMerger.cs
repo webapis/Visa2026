@@ -174,6 +174,80 @@ public sealed class HeaderDocumentCopyPdfMerger
         }
     }
 
+    /// <summary>
+    /// After an invitation letter, append one page that places the visa issued for
+    /// <paramref name="personId"/> beside that visa's passport. Returns the letter unchanged
+    /// when the pair cannot be built.
+    /// </summary>
+    public byte[] WithIssuedVisaBesidePassport(
+        byte[] invitationPdf,
+        HeaderDocumentCopiesFamily family,
+        Guid invitationId,
+        bool append,
+        Guid? personId)
+    {
+        if (!append
+            || family != HeaderDocumentCopiesFamily.Invitation
+            || invitationPdf == null
+            || invitationPdf.Length == 0
+            || invitationId == Guid.Empty
+            || personId is not Guid holderId
+            || holderId == Guid.Empty)
+            return invitationPdf;
+
+        using var objectSpace = CreateObjectSpace(HeaderDocumentCopiesFamily.Invitation);
+        if (objectSpace == null)
+            return invitationPdf;
+
+        var visa = objectSpace.GetObjectsQuery<Visa>()
+            .Where(row => row.IssuingInvitationItem != null
+                && row.IssuingInvitationItem.Invitation != null
+                && row.IssuingInvitationItem.Invitation.ID == invitationId
+                && row.IssuingInvitationItem.Person != null
+                && row.IssuingInvitationItem.Person.ID == holderId
+                && row.Passport != null)
+            .Select(row => new { row.ID, PassportId = row.Passport.ID })
+            .FirstOrDefault();
+        if (visa == null || visa.ID == Guid.Empty || visa.PassportId == Guid.Empty)
+            return invitationPdf;
+
+        var passportBytes = LoadLatestPassportScan(objectSpace, visa.ID);
+        var visaBytes = LoadLatestContentFile(
+            objectSpace,
+            ApplicationItemLinkedDocumentsResolver.LoadDocumentFiles<VisaDocument>(
+                objectSpace,
+                document => document.Visa.ID == visa.ID));
+        if (passportBytes == null
+            || visaBytes == null
+            || !TryCreateVisaBesidePassportStream(
+                passportBytes,
+                visaBytes,
+                DocumentCopyPrintLayout.DefaultFor("Visa"),
+                out var paired))
+            return invitationPdf;
+
+        var streams = new List<MemoryStream>(2);
+        try
+        {
+            streams.Add(new MemoryStream(invitationPdf));
+            streams.Add(paired);
+            using var merged = new MemoryStream();
+            SupportingDocumentsPdfSharpHelper.MergePdfStreams(streams, merged);
+            var content = merged.ToArray();
+            return content.Length > 0 ? content : invitationPdf;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Invitation preview: could not place the issued visa beside its passport.");
+            return invitationPdf;
+        }
+        finally
+        {
+            foreach (var stream in streams)
+                stream.Dispose();
+        }
+    }
+
     private IObjectSpace? CreateObjectSpace(HeaderDocumentCopiesFamily family) =>
         family switch
         {
@@ -203,6 +277,19 @@ public sealed class HeaderDocumentCopyPdfMerger
             ApplicationItemLinkedDocumentsResolver.LoadDocumentFiles<PassportDocument>(
                 objectSpace,
                 document => document.Passport.ID == passportId));
+        if (latest == null)
+            return null;
+
+        return TryLoadFileContent(objectSpace, latest.FileDataId, out byte[] content, out _)
+            ? content
+            : null;
+    }
+
+    private byte[]? LoadLatestContentFile(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ApplicationItemLinkedDocumentFile> files)
+    {
+        var latest = LatestPassportContentFile(files);
         if (latest == null)
             return null;
 

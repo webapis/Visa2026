@@ -176,17 +176,40 @@
             }
 
             <div class="person-dossier__sections">
-                @foreach (var section in Snapshot.Sections)
+                @foreach (var block in ScreenBlocks())
                 {
+                    var section = block.Section;
                     var visibleRecords = VisibleRecords(section);
                     var displayedRecords = DisplayedRecords(section, visibleRecords);
                     var hiddenCount = visibleRecords.Count - displayedRecords.Count;
                     var canCollapse = IsSectionExpanded(section) && visibleRecords.Count > SectionPreviewLimit;
                     <section class="person-dossier__section">
-                        <header class="person-dossier__section-head">
-                            <span class="person-dossier__section-title">@(section.SectionLabel)</span>
-                            <span class="person-dossier__section-count">@visibleRecords.Count</span>
-                        </header>
+                        @if (block.Tabs.Count > 0)
+                        {
+                            var tabGroupId = block.TabGroupId!;
+                            <div class="person-dossier__groups person-dossier__tabs" role="tablist">
+                                @foreach (var tab in block.Tabs)
+                                {
+                                    var tabId = tab.SectionId;
+                                    var selected = string.Equals(section.SectionId, tabId, StringComparison.Ordinal);
+                                    <button type="button"
+                                            class="person-dossier__group @(selected ? "is-selected" : null)"
+                                            role="tab"
+                                            aria-selected="@selected"
+                                            @onclick="() => SelectTab(tabGroupId, tabId)">
+                                        <span>@tab.SectionLabel</span>
+                                        <span class="person-dossier__group-count">@tab.Records.Count</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <header class="person-dossier__section-head">
+                                <span class="person-dossier__section-title">@(section.SectionLabel)</span>
+                                <span class="person-dossier__section-count">@visibleRecords.Count</span>
+                            </header>
+                        }
                         @if (section.ApplicationGroups.Count > 0)
                         {
                             <div class="person-dossier__groups" role="tablist">
@@ -210,6 +233,10 @@
                             <table class="person-dossier__table">
                                 <thead>
                                     <tr>
+                                        @if (section.HasMemberColumn)
+                                        {
+                                            <th>@Msg("PersonDossier.Column.Name")</th>
+                                        }
                                         @foreach (var header in section.ColumnHeaders)
                                         {
                                             <th>@header</th>
@@ -241,13 +268,25 @@
                                             </td>
                                         </tr>
                                     }
+                                    else if (visibleRecords.Count == 0)
+                                    {
+                                        <tr>
+                                            <td class="person-dossier__group-empty" colspan="@SectionColumnCount(section)">—</td>
+                                        </tr>
+                                    }
                                     @foreach (var record in displayedRecords)
                                     {
                                         <tr class="@(record.IsCurrent ? "person-dossier__row--current" : null)">
+                                            @if (section.HasMemberColumn)
+                                            {
+                                                <td>@record.MemberName</td>
+                                            }
                                             @for (var cellIndex = 0; cellIndex < record.Cells.Count; cellIndex++)
                                             {
                                                 var cell = record.Cells[cellIndex];
                                                 <td class="@(section.HasIssuedOutcomeColumn && cellIndex == 0 ? "person-dossier__col-application" : null)">
+                                                    <div class="@(IsInlineProgressCell(section, record, cellIndex) ? "person-dossier__app-row" : null)">
+                                                    <div class="@(IsInlineProgressCell(section, record, cellIndex) ? "person-dossier__app-main" : null)">
                                                     @if (IsApplicationNumberLink(section, record, cellIndex))
                                                     {
                                                         <button type="button"
@@ -256,6 +295,59 @@
                                                                 @onclick="() => OnOpenApplication(record.SourceObjectId!.Value)">
                                                             @cell
                                                         </button>
+                                                    }
+                                                    else if (IsApplicationLinkCell(record, cellIndex))
+                                                    {
+                                                        <button type="button"
+                                                                class="person-dossier__app-link"
+                                                                title="@Msg("PersonDossier.Applications.OpenWorkspace")"
+                                                                @onclick="() => OnOpenApplication(record.ApplicationLinkId!.Value)">
+                                                            @cell
+                                                        </button>
+                                                    }
+                                                    else if (record.CompanionCellIndex == cellIndex)
+                                                    {
+                                                        <span class="person-dossier__visa-issued">
+                                                            <span>@cell</span>
+                                                            @if (!string.IsNullOrWhiteSpace(record.CompanionStatusLabel))
+                                                            {
+                                                                <span class="person-dossier__pill @record.CompanionStatusCssClass">@record.CompanionStatusLabel</span>
+                                                            }
+                                                        </span>
+                                                    }
+                                                    else if (record.MultiChipCellIndex == cellIndex && record.MultiChips.Count > 0)
+                                                    {
+                                                        <span class="person-dossier__visa-issued">
+                                                            @foreach (var proof in record.MultiChips)
+                                                            {
+                                                                <button type="button"
+                                                                        class="person-dossier__app-link"
+                                                                        @onclick="() => OnPreviewChip(proof)">
+                                                                    @proof.Number
+                                                                </button>
+                                                            }
+                                                        </span>
+                                                    }
+                                                    else if (ChipAt(record, cellIndex) is { } chip)
+                                                    {
+                                                        <span class="person-dossier__visa-issued">
+                                                            @if (chip.HasPreview)
+                                                            {
+                                                                <button type="button"
+                                                                        class="person-dossier__app-link"
+                                                                        @onclick="() => OnPreviewChip(chip)">
+                                                                    @chip.Number
+                                                                </button>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>@chip.Number</span>
+                                                            }
+                                                            @if (!string.IsNullOrWhiteSpace(chip.StatusLabel))
+                                                            {
+                                                                <span class="person-dossier__pill @chip.StatusCssClass">@chip.StatusLabel</span>
+                                                            }
+                                                        </span>
                                                     }
                                                     else
                                                     {
@@ -269,6 +361,92 @@
                                                     {
                                                         <span class="person-dossier__cell-note">@record.FirstCellNote</span>
                                                     }
+                                                    @if (cellIndex == 0 && IsApprovalLettersCell(section, record))
+                                                    {
+                                                        <span class="person-dossier__approval-letters">
+                                                            @if (record.HasApprovalLetters && record.ApplicationLinkId is Guid lettersApplicationId)
+                                                            {
+                                                                <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="lettersApplicationId"
+                                                                                                   PreviewAllMinistryLetters="true"
+                                                                                                   OwnerViewId="@PersonDossierViewIds.DetailView"
+                                                                                                   LinkText="@Msg("PersonDossier.ApprovalLetters")"
+                                                                                                   FileName="@Msg("PersonDossier.ApprovalLetters")"
+                                                                                                   CssClass="person-dossier__app-link" />
+                                                            }
+                                                            @foreach (var missingStep in record.MissingApprovalSteps)
+                                                            {
+                                                                <span class="person-dossier__missing-letter">
+                                                                    <span>@missingStep</span>
+                                                                    <span class="person-dossier__pill st-pending">@Msg("ApplicationProfileInstance.Workspace.Missing")</span>
+                                                                </span>
+                                                            }
+                                                        </span>
+                                                    }
+                                                    </div>
+                                                    @if (IsInlineProgressCell(section, record, cellIndex))
+                                                    {
+                                                        @if (!IsActiveProcessSection(section))
+                                                        {
+                                                            <button type="button"
+                                                                    class="person-dossier__group @(IsProgressOpen(record) ? "is-selected" : null)"
+                                                                    @onclick="() => ToggleProgress(record)">
+                                                                @Msg("PersonDossier.Progress.Toggle")
+                                                            </button>
+                                                        }
+                                                        @if (IsActiveProcessSection(section) || IsProgressOpen(record))
+                                                        {
+                                                            <div class="person-dossier__inline-progress">
+                                                                <div class="lv-progress-stepper">
+                                                                    @for (var stepIndex = 0; stepIndex < record.ProgressSteps.Count; stepIndex++)
+                                                                    {
+                                                                        var step = record.ProgressSteps[stepIndex];
+                                                                        <div class="lv-progress-step lv-progress-step--@(step.Tone)">
+                                                                            <div class="lv-progress-step__track">
+                                                                                <span class="lv-progress-step__dot">@step.Glyph</span>
+                                                                                @if (stepIndex < record.ProgressSteps.Count - 1)
+                                                                                {
+                                                                                    <span class="lv-progress-step__line @(step.ConnectorDone ? "lv-progress-step__line--done" : null)"></span>
+                                                                                }
+                                                                            </div>
+                                                                            <div class="lv-progress-step__meta">
+                                                                                <div class="lv-progress-step__label">@step.Label</div>
+                                                                                @if (!string.IsNullOrWhiteSpace(step.StatusLabel))
+                                                                                {
+                                                                                    <span class="lv-progress-step__status">@step.StatusLabel</span>
+                                                                                }
+                                                                                @if (!string.IsNullOrWhiteSpace(step.Date))
+                                                                                {
+                                                                                    <span class="lv-progress-step__date">@step.Date</span>
+                                                                                }
+                                                                                @if (!string.IsNullOrWhiteSpace(step.ResultNumber))
+                                                                                {
+                                                                                    <span class="person-dossier__progress-result">@VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ResultNumberValue", step.ResultNumber)</span>
+                                                                                }
+                                                                                @if (step.LetterProgressId is Guid letterId
+                                                                                     && letterId != Guid.Empty
+                                                                                     && !string.IsNullOrWhiteSpace(step.LetterFileName)
+                                                                                     && record.SourceObjectId is Guid instanceId)
+                                                                                {
+                                                                                    <ProgressMinistryLetterPreviewLink ApplicationProfileInstanceId="instanceId"
+                                                                                                                       ProgressId="letterId"
+                                                                                                                       FileName="@Msg("PersonDossier.Progress.ViewFile")"
+                                                                                                                       OwnerViewId="@PersonDossierViewIds.DetailView"
+                                                                                                                       LinkText="@Msg("PersonDossier.Progress.ViewFile")"
+                                                                                                                       PreviewAll="true"
+                                                                                                                       CssClass="person-dossier__progress-letter" />
+                                                                                }
+                                                                                else if (step.ShowMissingLetter)
+                                                                                {
+                                                                                    <span class="person-dossier__pill st-pending">@Msg("ApplicationProfileInstance.Workspace.Missing")</span>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    }
+                                                    </div>
                                                 </td>
                                             }
                                             @if (section.ShowsStatusColumn)
@@ -490,9 +668,95 @@
 
     private void SelectApplicationGroup(string groupId) => _applicationGroupId = groupId;
 
+    private static readonly string[] IssuedTabOrder =
+        ["activeProcesses", "byApplication", "visas", "workPermits", "borderZones", "workPermitLocations", "rejections"];
+    private static readonly string[] IdentityTabOrder = ["passports", "education", "positionHistory", "addresses", "familyMembers", "travel"];
+    private static readonly string[] FamilyCaseTabOrder =
+        ["familyActiveProcesses", "familyInvitations", "familyVisas", "familyBorderZones"];
+    private readonly Dictionary<string, string> _selectedTabs = new(StringComparer.Ordinal);
+
+    private void SelectTab(string groupId, string sectionId) => _selectedTabs[groupId] = sectionId;
+
+    private IReadOnlyList<ScreenBlock> ScreenBlocks()
+    {
+        var sections = Snapshot?.Sections ?? Array.Empty<PersonDossierSection>();
+        var byId = new Dictionary<string, PersonDossierSection>(StringComparer.Ordinal);
+        foreach (var section in sections)
+            byId[section.SectionId] = section;
+
+        var blocks = new List<ScreenBlock>();
+        AddTabGroup(blocks, "issued", IssuedTabOrder, byId);
+        var identity = AddTabGroup(blocks, "identity", IdentityTabOrder, byId);
+        if (identity?.Section is { SectionId: "familyMembers" } family && family.NestedSections.Count > 0)
+        {
+            var nested = new Dictionary<string, PersonDossierSection>(StringComparer.Ordinal);
+            foreach (var section in family.NestedSections)
+                nested[section.SectionId] = section;
+            AddTabGroup(blocks, "familyCases", FamilyCaseTabOrder, nested);
+        }
+
+        var tabbed = new HashSet<string>(IssuedTabOrder.Concat(IdentityTabOrder), StringComparer.Ordinal);
+        foreach (var section in sections)
+        {
+            if (!tabbed.Contains(section.SectionId))
+                blocks.Add(new ScreenBlock { Section = section });
+        }
+
+        return blocks;
+    }
+
+    private ScreenBlock? AddTabGroup(
+        List<ScreenBlock> blocks,
+        string groupId,
+        IReadOnlyList<string> order,
+        IReadOnlyDictionary<string, PersonDossierSection> byId)
+    {
+        var tabs = new List<PersonDossierSection>(order.Count);
+        foreach (var sectionId in order)
+        {
+            if (byId.TryGetValue(sectionId, out var section))
+                tabs.Add(section);
+        }
+
+        if (tabs.Count == 0)
+            return null;
+
+        PersonDossierSection selected = tabs.FirstOrDefault(tab => tab.Records.Count > 0) ?? tabs[0];
+        if (_selectedTabs.TryGetValue(groupId, out var selectedId))
+        {
+            foreach (var tab in tabs)
+            {
+                if (string.Equals(tab.SectionId, selectedId, StringComparison.Ordinal))
+                {
+                    selected = tab;
+                    break;
+                }
+            }
+        }
+
+        blocks.Add(new ScreenBlock
+        {
+            TabGroupId = groupId,
+            Tabs = tabs,
+            Section = selected,
+        });
+        return blocks[^1];
+    }
+
+    private sealed class ScreenBlock
+    {
+        public string? TabGroupId { get; init; }
+
+        public IReadOnlyList<PersonDossierSection> Tabs { get; init; } = Array.Empty<PersonDossierSection>();
+
+        public required PersonDossierSection Section { get; init; }
+    }
+
     private static int SectionColumnCount(PersonDossierSection section)
     {
         var count = section.ColumnHeaders.Count;
+        if (section.HasMemberColumn)
+            count++;
         if (section.ShowsStatusColumn)
             count++;
         if (section.HasProgressColumn)
@@ -549,11 +813,83 @@
         && record.Cells.Count > 0
         && !string.IsNullOrWhiteSpace(record.Cells[0]);
 
+    private static bool IsApplicationLinkCell(PersonDossierRecord record, int cellIndex) =>
+        record.ApplicationLinkCellIndex == cellIndex
+        && record.ApplicationLinkId is { } id
+        && id != Guid.Empty;
+
+    private static bool IsActiveProcessSection(PersonDossierSection section) =>
+        section.SectionId is "activeProcesses" or "familyActiveProcesses";
+
+    private static bool IsCaseRowSection(PersonDossierSection section) =>
+        IsActiveProcessSection(section)
+        || section.SectionId is "byApplication" or "visas" or "borderZones" or "workPermitLocations" or "rejections"
+            or "familyInvitations" or "familyVisas" or "familyBorderZones";
+
+    private static bool IsApprovalLettersCell(PersonDossierSection section, PersonDossierRecord record) =>
+        IsCaseRowSection(section)
+        && (record.HasApprovalLetters || record.MissingApprovalSteps.Count > 0);
+
+    private static bool IsInlineProgressCell(PersonDossierSection section, PersonDossierRecord record, int cellIndex) =>
+        cellIndex == 0
+        && IsCaseRowSection(section)
+        && record.ProgressSteps.Count > 0;
+
+    private readonly HashSet<string> _openProgressRows = new(StringComparer.Ordinal);
+
+    private bool IsProgressOpen(PersonDossierRecord record) =>
+        ProcessNeedsAttention(record) || _openProgressRows.Contains(record.RecordKey);
+
+    private void ToggleProgress(PersonDossierRecord record)
+    {
+        if (ProcessNeedsAttention(record))
+            return;
+
+        if (!_openProgressRows.Add(record.RecordKey))
+            _openProgressRows.Remove(record.RecordKey);
+    }
+
+    /// <summary>
+    /// A case that has not reached its last step stays open so the remaining steps are visible.
+    /// Issued, rejected, and cancelled tracks stay collapsed until Progress is clicked.
+    /// </summary>
+    private static bool ProcessNeedsAttention(PersonDossierRecord record)
+    {
+        if (record.ProgressSteps.Count == 0)
+            return false;
+
+        if (record.ProgressSteps.Any(step => step.Tone is "rej" or "cancel" or "issued"))
+            return false;
+
+        return record.ProgressSteps.Any(step =>
+            step.IsCurrentStep || step.Tone is "current" or "pending");
+    }
+
+    private static PersonDossierIssuedChip? ChipAt(PersonDossierRecord record, int cellIndex) =>
+        cellIndex >= 0 && cellIndex < record.CellChips.Count
+            ? record.CellChips[cellIndex]
+            : null;
+
+    private Task OnPreviewChip(PersonDossierIssuedChip chip) =>
+        OnPreviewRecord(new PersonDossierRecord
+        {
+            RecordKey = chip.PersonCopyRecordKey ?? $"header:{chip.PreviewFamily}:{chip.PreviewParentId}",
+            PreviewFamily = chip.PreviewFamily,
+            PreviewParentId = chip.PreviewParentId,
+            PersonCopyPersonId = chip.PersonCopyPersonId,
+            PersonCopyRecordKey = chip.PersonCopyRecordKey,
+            PersonCopySectionId = chip.PersonCopySectionId,
+            PersonCopyDisplayName = chip.PersonCopyDisplayName,
+            AppendIssuedVisaBesidePassport = chip.AppendIssuedVisaBesidePassport,
+            Cells = [chip.Number],
+        });
+
     private Task OnPreviewIssuedOutcome(PersonDossierIssuedOutcome outcome) =>
         OnPreviewRecord(new PersonDossierRecord
         {
             PreviewFamily = outcome.PreviewFamily,
             PreviewParentId = outcome.PreviewParentId,
+            AppendIssuedVisaBesidePassport = outcome.AppendIssuedVisaBesidePassport,
             Cells = [outcome.Number],
         });
 
@@ -582,6 +918,7 @@
         {
             _expandedForPersonId = personId;
             _expandedSections.Clear();
+            _openProgressRows.Clear();
         }
 
         // Snapshot arrives after InitialLoadRequested — refresh Paper if that mode is already open.

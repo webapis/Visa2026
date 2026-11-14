@@ -56,6 +56,9 @@ public static class VisaPreviewSlotOccupantKeys
         if (request?.InlineFiles is { Count: > 0 })
             return $"{baseKey}|inline:{request.InlineFiles.Count}:{request.FocusDisplayName}";
 
+        if (request?.OpenPreviewOnly == true && request.PreviewAllMinistryLetters)
+            return $"{baseKey}|preview:ministry-letters";
+
         if (request?.OpenPreviewOnly == true
             && request.FocusProgressId is Guid focus
             && focus != Guid.Empty)
@@ -139,7 +142,8 @@ public static class VisaPreviewSlotOccupantKeys
             var focus = string.IsNullOrWhiteSpace(request.FocusRecordKey)
                 ? "first"
                 : request.FocusRecordKey.Trim();
-            return $"{key}|preview:{focus}";
+            var beside = request.AppendIssuedVisaBesidePassport ? "|visa-beside" : "";
+            return $"{key}|preview:{focus}{person}{beside}";
         }
 
         return key;

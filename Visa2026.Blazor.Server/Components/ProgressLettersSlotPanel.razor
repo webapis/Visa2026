@@ -201,6 +201,16 @@
             };
         }
 
+        if (request.PreviewAllMinistryLetters)
+        {
+            return new ProgressLettersInlinePreviewRequest
+            {
+                ApplicationProfileInstanceId = request.ApplicationProfileInstanceId,
+                DisplayName = displayName,
+                PreviewAllMinistryLetters = true,
+            };
+        }
+
         if (request.FocusProgressId is not Guid progressId || progressId == Guid.Empty)
             return null;
 

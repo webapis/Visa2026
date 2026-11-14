@@ -110,10 +110,26 @@ public sealed class PersonDossierSection
     /// <summary>Applications: invitation or rejection column after the progress track.</summary>
     public bool HasIssuedOutcomeColumn { get; init; }
 
+    /// <summary>
+    /// By application keeps status on each document chip, so the row has no Status column.
+    /// </summary>
+    public bool HideStatusColumn { get; init; }
+
+    /// <summary>Case rows for family members: a name column before the application columns.</summary>
+    public bool HasMemberColumn { get; init; }
+
+    /// <summary>
+    /// Tabs shown under this section. Family members carries Active processes, Invitations,
+    /// Visas, and Border zones for the members' own cases.
+    /// </summary>
+    public IReadOnlyList<PersonDossierSection> NestedSections { get; init; } =
+        Array.Empty<PersonDossierSection>();
+
     public bool ShowsStatusColumn =>
-        !HasProgressColumn
-        || Records.Any(record =>
-            record.IsCurrent || !string.IsNullOrWhiteSpace(record.StatusLabel));
+        !HideStatusColumn
+        && (!HasProgressColumn
+            || Records.Any(record =>
+                record.IsCurrent || !string.IsNullOrWhiteSpace(record.StatusLabel)));
 }
 
 /// <summary>One child business object rendered as a summary row.</summary>
@@ -121,6 +137,9 @@ public sealed class PersonDossierRecord
 {
     /// <summary>Matches the document-copies record key for the same object (Phase 2 linkage).</summary>
     public string RecordKey { get; init; } = string.Empty;
+
+    /// <summary>Family member who owns this case, when the section lists several members.</summary>
+    public string MemberName { get; set; } = string.Empty;
 
     public IReadOnlyList<string> Cells { get; init; } = Array.Empty<string>();
 
@@ -169,6 +188,12 @@ public sealed class PersonDossierRecord
     /// <summary>Person-copies record key (<c>Passport:{id:N}</c>, …) for preview-only.</summary>
     public string? PersonCopyRecordKey { get; init; }
 
+    /// <summary>
+    /// Person-copies catalog section (<c>FamilyRelationDocuments</c>, …). When set, preview
+    /// merges every file in that section instead of one record.
+    /// </summary>
+    public string? PersonCopySectionId { get; init; }
+
     public string? PersonCopyDisplayName { get; init; }
 
     public bool HasHeaderPreview =>
@@ -176,7 +201,8 @@ public sealed class PersonDossierRecord
 
     public bool HasPersonCopyPreview =>
         PersonCopyPersonId is { } personId && personId != Guid.Empty
-        && !string.IsNullOrWhiteSpace(PersonCopyRecordKey);
+        && (!string.IsNullOrWhiteSpace(PersonCopyRecordKey)
+            || !string.IsNullOrWhiteSpace(PersonCopySectionId));
 
     public bool HasPreview => HasHeaderPreview || HasPersonCopyPreview;
 
@@ -203,6 +229,42 @@ public sealed class PersonDossierRecord
         && detailId != Guid.Empty;
 
     public bool CanUpload => CanUploadHeader || CanUploadDetail;
+
+    /// <summary>Cell that shows a companion number plus <see cref="CompanionStatusLabel"/> (issued visa).</summary>
+    public int? CompanionCellIndex { get; init; }
+
+    public string CompanionStatusLabel { get; init; } = string.Empty;
+
+    public string CompanionStatusCssClass { get; init; } = string.Empty;
+
+    /// <summary>Cell that opens <see cref="ApplicationLinkId"/>.</summary>
+    public int? ApplicationLinkCellIndex { get; init; }
+
+    public Guid? ApplicationLinkId { get; init; }
+
+    /// <summary>By application: the case has at least one ministry approval letter.</summary>
+    public bool HasApprovalLetters { get; init; }
+
+    /// <summary>Ministry steps on this case that are still missing an approval letter, in process order.</summary>
+    public IReadOnlyList<string> MissingApprovalSteps { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// By application: one chip per cell (null for a plain cell). Same length as
+    /// <see cref="Cells"/> when set.
+    /// </summary>
+    public IReadOnlyList<PersonDossierIssuedChip?> CellChips { get; init; } =
+        Array.Empty<PersonDossierIssuedChip?>();
+
+    /// <summary>Cell that lists more than one preview link, such as relationship documents.</summary>
+    public int? MultiChipCellIndex { get; init; }
+
+    public IReadOnlyList<PersonDossierIssuedChip> MultiChips { get; init; } =
+        Array.Empty<PersonDossierIssuedChip>();
+
+    /// <summary>
+    /// Used invitation: the preview appends the issued visa scan beside its passport scan.
+    /// </summary>
+    public bool AppendIssuedVisaBesidePassport { get; init; }
 }
 
 /// <summary>
@@ -275,6 +337,45 @@ public sealed class PersonDossierIssuedOutcome
         PreviewFamily != null && PreviewParentId is { } id && id != Guid.Empty;
 
     public bool HasDetail => !string.IsNullOrWhiteSpace(Detail);
+
+    /// <summary>Used invitation: preview places the issued visa beside its passport.</summary>
+    public bool AppendIssuedVisaBesidePassport { get; init; }
+}
+
+/// <summary>
+/// Number and status of one issued document inside a By application cell.
+/// Preview opens that document; a used invitation also asks for the visa beside its passport.
+/// </summary>
+public sealed class PersonDossierIssuedChip
+{
+    public string Number { get; init; } = string.Empty;
+
+    public string StatusLabel { get; init; } = string.Empty;
+
+    public string StatusCssClass { get; init; } = string.Empty;
+
+    public HeaderDocumentCopiesFamily? PreviewFamily { get; init; }
+
+    public Guid? PreviewParentId { get; init; }
+
+    public Guid? PersonCopyPersonId { get; init; }
+
+    public string? PersonCopyRecordKey { get; init; }
+
+    /// <summary>When set, preview merges every file in this person-copies section.</summary>
+    public string? PersonCopySectionId { get; init; }
+
+    public string? PersonCopyDisplayName { get; init; }
+
+    /// <summary>Used invitation: preview places the issued visa beside its passport.</summary>
+    public bool AppendIssuedVisaBesidePassport { get; init; }
+
+    public bool HasPreview =>
+        (PreviewFamily != null && PreviewParentId is { } parentId && parentId != Guid.Empty)
+        || (PersonCopyPersonId is { } personId
+            && personId != Guid.Empty
+            && (!string.IsNullOrWhiteSpace(PersonCopyRecordKey)
+                || !string.IsNullOrWhiteSpace(PersonCopySectionId)));
 }
 
 /// <summary>One Applications filter button (Çakylyklar, Wizalar, …).</summary>

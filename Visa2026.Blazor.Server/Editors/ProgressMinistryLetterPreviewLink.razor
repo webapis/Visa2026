@@ -27,6 +27,7 @@
     [Parameter] public string? LinkText { get; set; }
     [Parameter] public Guid? FileId { get; set; }
     [Parameter] public bool PreviewAll { get; set; }
+    [Parameter] public bool PreviewAllMinistryLetters { get; set; }
     [Parameter] public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; set; }
         = Array.Empty<ProgressLetterInlineFile>();
 
@@ -37,7 +38,8 @@
 
     private bool CanPreview =>
         ApplicationProfileInstanceId != Guid.Empty
-        && (InlineFiles is { Count: > 0 }
+        && (PreviewAllMinistryLetters
+            || InlineFiles is { Count: > 0 }
             || (ProgressId is Guid id
                 && id != Guid.Empty
                 && (PreviewAll || !string.IsNullOrWhiteSpace(FileName))));
@@ -60,6 +62,7 @@
             FocusDisplayName = string.IsNullOrWhiteSpace(FileName) ? LinkText : FileName,
             FocusFileId = FileId,
             PreviewAllFiles = PreviewAll,
+            PreviewAllMinistryLetters = PreviewAllMinistryLetters,
             InlineFiles = InlineFiles,
             OpenPreviewOnly = true,
         }, ownerViewId);

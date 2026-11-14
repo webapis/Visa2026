@@ -36,7 +36,7 @@ public static class PersonDossierResolver
         var target = objectSpace.GetObject(person) ?? person;
 
         var sections = BuildSections(objectSpace, target)
-            .Where(section => section.Records.Count > 0)
+            .Where(IncludeSection)
             .OrderBy(section => section.SortOrder)
             .ToList();
 
@@ -186,16 +186,28 @@ public static class PersonDossierResolver
 
     // ---------------------------------------------------------------- sections
 
+    /// <summary>
+    /// Invitations, Visas, Work permits, Active processes, and Family members stay on the
+    /// screen tab strip even when the person has no row in that section. Other empty sections
+    /// stay off the page.
+    /// </summary>
+    internal static bool IncludeSection(PersonDossierSection section) =>
+        section.Records.Count > 0
+        || section.SectionId is "activeProcesses" or "byApplication" or "visas" or "workPermits"
+            or "borderZones" or "workPermitLocations" or "rejections" or "familyMembers";
+
     private static IEnumerable<PersonDossierSection> BuildSections(IObjectSpace objectSpace, Person person)
     {
         var isEmployee = person.PersonRole == PersonRecordRole.Employee;
-        var isVisitor = person.PersonRole == PersonRecordRole.TemporaryVisitor;
 
         yield return BuildPassports(person);
-        yield return BuildVisas(person);
-
-        if (!isVisitor)
-            yield return BuildWorkPermits(person);
+        yield return BuildActiveProcesses(objectSpace, person);
+        yield return BuildByApplication(objectSpace, person);
+        yield return BuildVisaCases(objectSpace, person);
+        yield return BuildWorkPermits(person);
+        yield return BuildBorderZoneCases(objectSpace, person);
+        yield return BuildWorkPermitLocationCases(objectSpace, person);
+        yield return BuildRejectionCases(objectSpace, person);
 
         if (isEmployee)
         {
@@ -204,13 +216,11 @@ public static class PersonDossierResolver
         }
 
         yield return BuildAddresses(person);
+        yield return BuildFamilyMembers(objectSpace, person);
         yield return BuildTravelHistory(person);
         yield return BuildMedicalRecords(person);
 
-        if (isEmployee)
-            yield return BuildFamilyMembers(person);
-
-        yield return BuildApplications(objectSpace, person);
+        // Applications (progress track and Issued chips) stays off the dossier for now.
         var rejections = BuildRejections(person);
         if (rejections.Records.Count > 0)
             yield return rejections;
@@ -255,37 +265,77 @@ public static class PersonDossierResolver
             ["Number", "Type", "IssuedBy", "IssueDate", "Expiry"], records, hasCopyColumn: true);
     }
 
-    private static PersonDossierSection BuildVisas(Person person)
-    {
-        var current = PersonCurrentItems.GetCurrentVisa(person);
+    private const int InvitationVisaCellIndex = 5;
+    private const int InvitationApplicationCellIndex = 6;
 
-        // Visas hang off Passport, not Person - flatten across passports.
-        var records = Safe(person.Passports)
-            .SelectMany(passport => Safe(passport.Visas).Select(visa => (Passport: passport, Visa: visa)))
-            .OrderByDescending(pair => pair.Visa.ExpirationDate ?? DateTime.MinValue)
-            .Select(pair =>
+    private static PersonDossierSection BuildInvitations(IObjectSpace objectSpace, Person person)
+    {
+        var items = Safe(person.InvitationItems).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+        return BuildInvitations(person, usedIds);
+    }
+
+    /// <summary>
+    /// One row per invitation issued for this person. A used row names the visa and,
+    /// on preview, places that visa scan beside its passport.
+    /// </summary>
+    internal static PersonDossierSection BuildInvitations(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds)
+    {
+        var usedLabel = L("Status.Used");
+        var records = Safe(person.InvitationItems)
+            .Where(item => item.Invitation != null)
+            .OrderByDescending(item => item.Invitation!.ExpirationDate ?? item.ExpirationDate ?? DateTime.MinValue)
+            .ThenByDescending(item => item.Invitation!.IssuedDate)
+            .Select(item =>
             {
-                var visa = pair.Visa;
-                var status = Classify(visa.ExpirationDate, visa.IsCancelled, visa.DaysRemaining);
-                var hasCopy = HasAttachedFile(visa.Documents);
+                var invitation = item.Invitation!;
+                var status = ClassifyInvitationItem(item, usedInvitationItemIds);
+                var hasCopy = invitation.ID != Guid.Empty
+                    && HasAttachedFile(invitation.Documents);
+                var visa = item.IssuedVisa;
+                var visaStatus = visa == null
+                    ? (Label: string.Empty, CssClass: string.Empty)
+                    : ClassifyIssuedVisa(visa);
+                var application = invitation.ApplicationProfileInstance;
+                var applicationNumber = application == null
+                    ? string.Empty
+                    : (application.FullApplicationNumber ?? application.ApplicationNumber ?? string.Empty).Trim();
+                var applicationId = application?.ID ?? Guid.Empty;
+                var visaNumber = visa?.VisaNumber?.Trim();
+                var used = string.Equals(status.Label, usedLabel, StringComparison.Ordinal);
                 return new PersonDossierRecord
                 {
-                    RecordKey = $"Passport:{pair.Passport.ID}/Visa:{visa.ID}",
-                    SourceObjectId = visa.ID,
-                    SourceObjectType = typeof(Visa),
-                    IsCurrent = current != null && current.ID == visa.ID,
-                    PersonCopyPersonId = hasCopy ? person.ID : null,
-                    PersonCopyRecordKey = hasCopy ? $"Passport:{pair.Passport.ID:N}/Visa:{visa.ID:N}" : null,
-                    PersonCopyDisplayName = hasCopy ? visa.VisaNumber : null,
-                    UploadDetailType = hasCopy ? null : typeof(Visa),
-                    UploadDetailId = hasCopy ? null : visa.ID,
+                    RecordKey = $"InvitationItem:{item.ID}",
+                    SourceObjectId = item.ID,
+                    SourceObjectType = typeof(InvitationItem),
+                    PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
+                    PreviewParentId = hasCopy ? invitation.ID : null,
+                    AppendIssuedVisaBesidePassport = used,
+                    UploadHeaderId = !hasCopy && invitation.ID != Guid.Empty ? invitation.ID : null,
+                    UploadIssuedKind = !hasCopy && invitation.ID != Guid.Empty
+                        ? IssueIssuedHeaderKind.Invitation
+                        : null,
+                    UploadApplicationProfileInstanceId = !hasCopy ? applicationId == Guid.Empty ? null : applicationId : null,
+                    CompanionCellIndex = visa == null ? null : InvitationVisaCellIndex,
+                    CompanionStatusLabel = visaStatus.Label,
+                    CompanionStatusCssClass = visaStatus.CssClass,
+                    ApplicationLinkCellIndex = applicationId != Guid.Empty && !string.IsNullOrWhiteSpace(applicationNumber)
+                        ? InvitationApplicationCellIndex
+                        : null,
+                    ApplicationLinkId = applicationId == Guid.Empty ? null : applicationId,
                     Cells =
                     [
-                        visa.VisaNumber ?? string.Empty,
-                        Describe(visa.VisaCategory),
-                        Describe(visa.VisaType),
-                        FormatDate(visa.StartDate),
-                        FormatDate(visa.ExpirationDate),
+                        invitation.InvitationNumber ?? string.Empty,
+                        Describe(invitation.VisaCategory),
+                        Describe(invitation.VisaPeriod),
+                        FormatDate(invitation.IssuedDate),
+                        FormatDate(invitation.ExpirationDate ?? item.ExpirationDate),
+                        string.IsNullOrWhiteSpace(visaNumber) ? "\u2014" : visaNumber,
+                        string.IsNullOrWhiteSpace(applicationNumber) ? "\u2014" : applicationNumber,
                     ],
                     StatusLabel = status.Label,
                     StatusCssClass = status.CssClass,
@@ -293,8 +343,677 @@ public static class PersonDossierResolver
             })
             .ToList();
 
-        return Section("visas", 20,
-            ["Number", "Category", "Type", "ValidFrom", "Expiry"], records, hasCopyColumn: true);
+        return Section("invitations", 25,
+            ["Number", "Category", "VisaPeriod", "IssueDate", "Expiry", "VisaIssued", "Application"],
+            records,
+            hasCopyColumn: true);
+    }
+
+    private static PersonDossierSection BuildByApplication(IObjectSpace objectSpace, Person person)
+    {
+        var items = Safe(person.InvitationItems).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+        var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(
+            objectSpace,
+            CollectInvitationCaseApplications(person));
+        return BuildByApplication(person, usedIds, timelines);
+    }
+
+    private static PersonDossierSection BuildVisaCases(IObjectSpace objectSpace, Person person)
+    {
+        var items = Safe(person.InvitationItems).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+        var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(
+            objectSpace,
+            CollectVisaCaseApplications(person));
+        return BuildVisaCases(person, usedIds, timelines);
+    }
+
+    private static PersonDossierSection BuildActiveProcesses(IObjectSpace objectSpace, Person person)
+    {
+        var items = Safe(person.InvitationItems).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+        var active = CollectActiveProcessApplications(person);
+        var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(objectSpace, active);
+        return BuildActiveProcesses(person, usedIds, timelines);
+    }
+
+    private static PersonDossierSection BuildBorderZoneCases(IObjectSpace objectSpace, Person person) =>
+        BuildTrackedCaseSection(objectSpace, person, CollectBorderZoneApplications(person), BuildBorderZoneCases);
+
+    private static PersonDossierSection BuildWorkPermitLocationCases(IObjectSpace objectSpace, Person person) =>
+        BuildTrackedCaseSection(objectSpace, person, CollectWorkPermitLocationApplications(person), BuildWorkPermitLocationCases);
+
+    private static PersonDossierSection BuildRejectionCases(IObjectSpace objectSpace, Person person) =>
+        BuildTrackedCaseSection(objectSpace, person, CollectRejectionApplications(person), BuildRejectionCases);
+
+    private static PersonDossierSection BuildTrackedCaseSection(
+        IObjectSpace objectSpace,
+        Person person,
+        IReadOnlyList<ApplicationProfileInstance> applications,
+        Func<Person, IReadOnlySet<Guid>?, IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>?, PersonDossierSection> build)
+    {
+        var items = Safe(person.InvitationItems).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList());
+        var timelines = ApplicationWorkspaceListProgressSteps.LoadTimelines(objectSpace, applications);
+        return build(person, usedIds, timelines);
+    }
+
+    /// <summary>
+    /// Invitations tab: one row per case that issues a new invitation, including a case that
+    /// has not issued the invitation yet. A visa or work permit from that same case stays on
+    /// the row. A visa extension stays on the Visas tab.
+    /// </summary>
+    internal static PersonDossierSection BuildByApplication(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null)
+    {
+        var buckets = CollectDocumentBuckets(person);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+        {
+            if (IsInvitationTabCase(application))
+                Bucket(buckets, application);
+        }
+
+        return CaseSection(
+            "byApplication",
+            27,
+            "ByApplication",
+            buckets.Values.Where(bucket => IsInvitationTabCase(bucket.Application)),
+            person,
+            usedInvitationItemIds,
+            timelines);
+    }
+
+    /// <summary>
+    /// Visas tab: one row per case that issues a visa and does not issue a new invitation.
+    /// That includes a visa-only case and a visa-and-work-permit extension. An invitation
+    /// case stays on the Invitations tab.
+    /// </summary>
+    internal static PersonDossierSection BuildVisaCases(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null)
+    {
+        var buckets = CollectDocumentBuckets(person);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+        {
+            if (IsVisaTabCase(application))
+                Bucket(buckets, application);
+        }
+
+        return CaseSection(
+            "visas",
+            28,
+            "VisaCase",
+            buckets.Values.Where(bucket => IsVisaTabCase(bucket.Application)),
+            person,
+            usedInvitationItemIds,
+            timelines);
+    }
+
+    /// <summary>
+    /// Active processes: every case for this person that has not reached a last step
+    /// (issued, rejected, or cancelled), whatever the application type.
+    /// </summary>
+    internal static PersonDossierSection BuildActiveProcesses(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null)
+    {
+        var active = Safe(person.ApplicationProfileInstances).Where(IsActiveProcess).ToList();
+        var activeIds = active.Select(application => application.ID).ToHashSet();
+        var buckets = CollectDocumentBuckets(person);
+        foreach (var application in active)
+            Bucket(buckets, application);
+
+        return CaseSection(
+            "activeProcesses",
+            26,
+            "ActiveProcess",
+            buckets.Values.Where(bucket => activeIds.Contains(bucket.Application.ID)),
+            person,
+            usedInvitationItemIds,
+            timelines);
+    }
+
+    private static bool IsActiveProcess(ApplicationProfileInstance? application)
+    {
+        if (application == null || application.ID == Guid.Empty)
+            return false;
+
+        var code = application.LatestProgress?.State?.Code;
+        if (string.IsNullOrWhiteSpace(code))
+            code = application.LatestPrimaryStateCode;
+        return !ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(code, application);
+    }
+
+    private static bool IsInvitationTabCase(ApplicationProfileInstance? application) =>
+        application != null
+        && application.ID != Guid.Empty
+        && ApplicationProfileConfigurationResolver.CanIssueInvitation(application);
+
+    private static bool IsVisaTabCase(ApplicationProfileInstance? application) =>
+        application != null
+        && application.ID != Guid.Empty
+        && ApplicationProfileConfigurationResolver.CanIssueVisa(application)
+        && !ApplicationProfileConfigurationResolver.CanIssueInvitation(application);
+
+    /// <summary>
+    /// Border zones: an invitation or visa case that asks for a border zone, a border-zone
+    /// permit case, and a case that already granted places. The same case stays on Invitations
+    /// or Visas.
+    /// </summary>
+    internal static PersonDossierSection BuildBorderZoneCases(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null) =>
+        GrantCaseSection(
+            person,
+            usedInvitationItemIds,
+            timelines,
+            "borderZones",
+            31,
+            "BorderZoneCase",
+            "BorderZone",
+            IsBorderZoneTabCase,
+            BorderZoneGrantText);
+
+    /// <summary>
+    /// Work-permit locations: a case that issues a new work permit, or a separate grant of
+    /// additional places. The same case stays on Invitations or Visas.
+    /// </summary>
+    internal static PersonDossierSection BuildWorkPermitLocationCases(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null) =>
+        GrantCaseSection(
+            person,
+            usedInvitationItemIds,
+            timelines,
+            "workPermitLocations",
+            32,
+            "WorkPermitLocationCase",
+            "WorkPermitLocations",
+            IsWorkPermitLocationTabCase,
+            WorkPermitLocationGrantText);
+
+    /// <summary>
+    /// Rejections: a case that already issued a rejection for this person, and a rejection
+    /// application that has not issued it yet. An invitation or visa case stays off this tab
+    /// until a rejection exists.
+    /// </summary>
+    internal static PersonDossierSection BuildRejectionCases(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null) =>
+        GrantCaseSection(
+            person,
+            usedInvitationItemIds,
+            timelines,
+            "rejections",
+            33,
+            "RejectionCase",
+            "Rejection",
+            IsRejectionTabCase,
+            RejectionGrantText);
+
+    private static PersonDossierSection GrantCaseSection(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines,
+        string sectionId,
+        int sortOrder,
+        string recordKeyPrefix,
+        string extraColumnKey,
+        Func<ApplicationProfileInstance?, bool> include,
+        Func<Person, IssuedCaseBucket, string?> extraValue)
+    {
+        var buckets = CollectDocumentBuckets(person);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+        {
+            if (include(application))
+                Bucket(buckets, application);
+        }
+
+        foreach (var item in Safe(person.RejectionItems))
+        {
+            if (include(item.Rejection?.ApplicationProfileInstance))
+                Bucket(buckets, item.Rejection!.ApplicationProfileInstance!);
+        }
+
+        return CaseSection(
+            sectionId,
+            sortOrder,
+            recordKeyPrefix,
+            buckets.Values.Where(bucket => include(bucket.Application)),
+            person,
+            usedInvitationItemIds,
+            timelines,
+            extraColumnKey,
+            bucket => extraValue(person, bucket));
+    }
+
+    private static bool IsBorderZoneTabCase(ApplicationProfileInstance? application) =>
+        application != null
+        && application.ID != Guid.Empty
+        && (ApplicationProfileConfigurationResolver.CanIssueBorderZone(application)
+            || application.ApplicationProfile?.RequireBorderZone == true);
+
+    private static bool IsWorkPermitLocationTabCase(ApplicationProfileInstance? application) =>
+        application != null
+        && application.ID != Guid.Empty
+        && (ApplicationProfileConfigurationResolver.CanIssueWorkPermit(application)
+            || ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant(application));
+
+    private static bool IsRejectionTabCase(ApplicationProfileInstance? application)
+    {
+        if (application == null || application.ID == Guid.Empty)
+            return false;
+
+        if (Safe(application.Rejections).Any())
+            return true;
+
+        var code = application.ApplicationProfile?.Code;
+        if (!string.IsNullOrWhiteSpace(code)
+            && code.Contains("seretmezlik", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return ApplicationProfileConfigurationResolver.CanIssueRejection(application)
+            && !ApplicationProfileConfigurationResolver.CanIssueInvitation(application)
+            && !ApplicationProfileConfigurationResolver.CanIssueVisa(application)
+            && !ApplicationProfileConfigurationResolver.CanIssueWorkPermit(application)
+            && !ApplicationProfileConfigurationResolver.CanIssueBorderZone(application)
+            && !ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant(application);
+    }
+
+    private static string? BorderZoneGrantText(Person person, IssuedCaseBucket bucket)
+    {
+        foreach (var zone in Safe(bucket.Application.BorderZones))
+        {
+            if (string.IsNullOrWhiteSpace(zone.BorderZoneNumber))
+                continue;
+
+            foreach (var item in Safe(zone.BorderZoneItems))
+            {
+                if (!SamePerson(person, item.Person))
+                    continue;
+
+                var onItem = MeaningfulBorderZoneLocations(item.BorderZoneLocation);
+                if (onItem != null)
+                    return onItem;
+            }
+        }
+
+        var invitationLocations = MeaningfulBorderZoneLocations(bucket.Invitation?.Invitation?.BorderZoneLocation);
+        if (invitationLocations != null && !string.IsNullOrWhiteSpace(bucket.Invitation?.Invitation?.InvitationNumber))
+            return invitationLocations;
+
+        var visa = bucket.Visa?.Visa;
+        var visaLocations = MeaningfulBorderZoneLocations(visa?.BorderZoneLocation);
+        if (visaLocations != null && !string.IsNullOrWhiteSpace(visa?.VisaNumber))
+            return visaLocations;
+
+        return null;
+    }
+
+    private static string? WorkPermitLocationGrantText(Person person, IssuedCaseBucket bucket)
+    {
+        foreach (var grant in Safe(bucket.Application.WorkPermitLocationGrants))
+        {
+            foreach (var item in Safe(grant.Items))
+            {
+                if (!SamePerson(person, item.Person))
+                    continue;
+
+                var granted = MeaningfulList(item.GrantedLocations);
+                if (granted != null)
+                    return granted;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(bucket.WorkPermit?.WorkPermitNumber))
+            return MeaningfulList(bucket.WorkPermit.WorkPermittedLocations);
+
+        return null;
+    }
+
+    private static string? RejectionGrantText(Person person, IssuedCaseBucket bucket)
+    {
+        foreach (var rejection in Safe(bucket.Application.Rejections))
+        {
+            var items = Safe(rejection.RejectionItems).ToList();
+            if (items.Count > 0 && items.All(item => !SamePerson(person, item.Person)))
+                continue;
+
+            var number = rejection.RejectedDocNumber?.Trim();
+            if (!string.IsNullOrWhiteSpace(number))
+                return number;
+
+            var reason = rejection.Reason?.Trim();
+            if (!string.IsNullOrWhiteSpace(reason))
+                return reason;
+
+            if (rejection.Date != default)
+                return FormatDate(rejection.Date);
+        }
+
+        return null;
+    }
+
+    private static bool SamePerson(Person person, Person? other) =>
+        other != null
+        && (ReferenceEquals(person, other)
+            || (person.ID != Guid.Empty && person.ID == other.ID));
+
+    private static string? MeaningfulList(string? stored)
+    {
+        var trimmed = stored?.Trim();
+        return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
+    }
+
+    private static PersonDossierSection CaseSection(
+        string sectionId,
+        int sortOrder,
+        string recordKeyPrefix,
+        IEnumerable<IssuedCaseBucket> buckets,
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines,
+        string? extraColumnKey = null,
+        Func<IssuedCaseBucket, string?>? extraValue = null)
+    {
+        var usedLabel = L("Status.Used");
+        var records = buckets
+            .OrderByDescending(bucket => bucket.Application.ApplicationDate)
+            .ThenByDescending(bucket =>
+                bucket.Application.FullApplicationNumber ?? bucket.Application.ApplicationNumber ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase)
+            .Select(bucket =>
+            {
+                var application = bucket.Application;
+                var applicationNumber = (application.FullApplicationNumber ?? application.ApplicationNumber ?? string.Empty).Trim();
+                IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? timeline = null;
+                if (timelines != null)
+                    timelines.TryGetValue(application.ID, out timeline);
+                var approvalLetters = ReadApprovalLetters(timeline);
+                var passportChip = PassportChip(person, CasePassport(person, bucket));
+                var invitationChip = InvitationChip(bucket.Invitation, usedInvitationItemIds, usedLabel);
+                var visaChip = VisaChip(person, bucket.Visa);
+                var workPermitChip = WorkPermitChip(bucket.WorkPermit);
+                var cells = new List<string>
+                {
+                    string.IsNullOrWhiteSpace(applicationNumber) ? "\u2014" : applicationNumber,
+                    passportChip?.Number ?? "\u2014",
+                    invitationChip?.Number ?? "\u2014",
+                    visaChip?.Number ?? "\u2014",
+                    workPermitChip?.Number ?? "\u2014",
+                };
+                var chips = new List<PersonDossierIssuedChip?>
+                {
+                    null, passportChip, invitationChip, visaChip, workPermitChip,
+                };
+                if (extraColumnKey != null)
+                {
+                    var extra = extraValue?.Invoke(bucket);
+                    cells.Add(string.IsNullOrWhiteSpace(extra) ? "\u2014" : extra);
+                    chips.Add(null);
+                }
+
+                return new PersonDossierRecord
+                {
+                    RecordKey = $"{recordKeyPrefix}:{application.ID}",
+                    SourceObjectId = application.ID,
+                    SourceObjectType = typeof(ApplicationProfileInstance),
+                    FirstCellDetail = application.ApplicationProfile?.Name ?? string.Empty,
+                    FirstCellNote = FormatDate(application.ApplicationDate),
+                    ApplicationLinkCellIndex = string.IsNullOrWhiteSpace(applicationNumber) ? null : 0,
+                    ApplicationLinkId = string.IsNullOrWhiteSpace(applicationNumber) ? null : application.ID,
+                    HasApprovalLetters = approvalLetters.HasLetters,
+                    MissingApprovalSteps = approvalLetters.MissingSteps,
+                    ProgressSteps = ToDossierProgressSteps(timeline),
+                    Cells = cells,
+                    CellChips = chips,
+                };
+            })
+            .ToList();
+
+        var columnKeys = new List<string> { "Application", "Passport", "Invitation", "Visa", "WorkPermit" };
+        if (extraColumnKey != null)
+            columnKeys.Add(extraColumnKey);
+
+        return Section(
+            sectionId,
+            sortOrder,
+            columnKeys.ToArray(),
+            records,
+            hideStatusColumn: true);
+    }
+
+    private static Dictionary<Guid, IssuedCaseBucket> CollectDocumentBuckets(Person person)
+    {
+        var buckets = new Dictionary<Guid, IssuedCaseBucket>();
+
+        foreach (var item in Safe(person.InvitationItems))
+        {
+            var application = item.Invitation?.ApplicationProfileInstance;
+            if (application == null || application.ID == Guid.Empty || item.Invitation == null)
+                continue;
+            if (string.IsNullOrWhiteSpace(item.Invitation.InvitationNumber))
+                continue;
+
+            var bucket = Bucket(buckets, application);
+            if (bucket.Invitation == null || LaterInvitation(item, bucket.Invitation))
+                bucket.Invitation = item;
+        }
+
+        foreach (var passport in Safe(person.Passports))
+        {
+            foreach (var visa in Safe(passport.Visas))
+            {
+                var application = visa.IssuingApplicationProfileInstance;
+                if (application == null || application.ID == Guid.Empty)
+                    continue;
+                if (string.IsNullOrWhiteSpace(visa.VisaNumber))
+                    continue;
+
+                var bucket = Bucket(buckets, application);
+                if (bucket.Visa == null || LaterVisa(visa, bucket.Visa.Value.Visa))
+                    bucket.Visa = (passport, visa);
+            }
+        }
+
+        foreach (var item in Safe(person.WorkPermitItems))
+        {
+            var application = item.WorkPermit?.ApplicationProfileInstance;
+            if (application == null || application.ID == Guid.Empty)
+                continue;
+            if (string.IsNullOrWhiteSpace(item.WorkPermitNumber))
+                continue;
+
+            var bucket = Bucket(buckets, application);
+            if (bucket.WorkPermit == null || LaterWorkPermit(item, bucket.WorkPermit))
+                bucket.WorkPermit = item;
+        }
+
+        return buckets;
+    }
+
+    private static IssuedCaseBucket Bucket(
+        Dictionary<Guid, IssuedCaseBucket> buckets,
+        ApplicationProfileInstance application)
+    {
+        if (!buckets.TryGetValue(application.ID, out var bucket))
+        {
+            bucket = new IssuedCaseBucket(application);
+            buckets[application.ID] = bucket;
+        }
+
+        return bucket;
+    }
+
+    private static bool LaterInvitation(InvitationItem candidate, InvitationItem current) =>
+        IsLater(
+            candidate.Invitation?.ExpirationDate ?? candidate.ExpirationDate,
+            current.Invitation?.ExpirationDate ?? current.ExpirationDate,
+            candidate.Invitation?.IssuedDate ?? DateTime.MinValue,
+            current.Invitation?.IssuedDate ?? DateTime.MinValue);
+
+    private static bool LaterVisa(Visa candidate, Visa current) =>
+        IsLater(
+            candidate.ExpirationDate,
+            current.ExpirationDate,
+            candidate.IssueDate,
+            current.IssueDate);
+
+    private static bool LaterWorkPermit(WorkPermitItem candidate, WorkPermitItem current) =>
+        IsLater(
+            candidate.ExpirationDate,
+            current.ExpirationDate,
+            candidate.StartDate,
+            current.StartDate);
+
+    private static bool IsLater(
+        DateTime? candidateExpiry,
+        DateTime? currentExpiry,
+        DateTime candidateIssued,
+        DateTime currentIssued)
+    {
+        var candidateKey = candidateExpiry ?? DateTime.MinValue;
+        var currentKey = currentExpiry ?? DateTime.MinValue;
+        if (candidateKey != currentKey)
+            return candidateKey > currentKey;
+        return candidateIssued > currentIssued;
+    }
+
+    /// <summary>
+    /// Passport recorded on this person's invitation or work permit for the case,
+    /// otherwise the passport the case's visa was issued in.
+    /// </summary>
+    private static Passport? CasePassport(Person person, IssuedCaseBucket bucket)
+    {
+        if (BelongsToPerson(person, bucket.Invitation?.Passport))
+            return bucket.Invitation!.Passport;
+        if (BelongsToPerson(person, bucket.WorkPermit?.Passport))
+            return bucket.WorkPermit!.Passport;
+        if (bucket.Visa is { } pair && BelongsToPerson(person, pair.Passport))
+            return pair.Passport;
+
+        return Safe(bucket.Application.Passports)
+            .Where(passport => BelongsToPerson(person, passport))
+            .OrderByDescending(passport => passport.ExpirationDate ?? DateTime.MinValue)
+            .FirstOrDefault();
+    }
+
+    private static bool BelongsToPerson(Person person, Passport? passport)
+    {
+        if (passport == null || string.IsNullOrWhiteSpace(passport.PassportNumber))
+            return false;
+        if (passport.Person == null)
+            return true;
+        if (person.ID != Guid.Empty && passport.Person.ID != Guid.Empty)
+            return passport.Person.ID == person.ID;
+        return ReferenceEquals(passport.Person, person) || passport.Person.ID == person.ID;
+    }
+
+    private static PersonDossierIssuedChip? PassportChip(Person person, Passport? passport)
+    {
+        if (passport == null || string.IsNullOrWhiteSpace(passport.PassportNumber))
+            return null;
+
+        var status = Classify(passport.ExpirationDate, passport.IsCancelled, passport.DaysRemaining);
+        var hasCopy = HasAttachedFile(passport.Documents);
+        return new PersonDossierIssuedChip
+        {
+            Number = passport.PassportNumber.Trim(),
+            StatusLabel = status.Label,
+            StatusCssClass = status.CssClass,
+            PersonCopyPersonId = hasCopy ? person.ID : null,
+            PersonCopyRecordKey = hasCopy ? $"Passport:{passport.ID:N}" : null,
+            PersonCopyDisplayName = hasCopy ? passport.PassportNumber : null,
+        };
+    }
+
+    private static PersonDossierIssuedChip? InvitationChip(
+        InvitationItem? item,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        string usedLabel)
+    {
+        var invitation = item?.Invitation;
+        if (item == null || invitation == null || string.IsNullOrWhiteSpace(invitation.InvitationNumber))
+            return null;
+
+        var status = ClassifyInvitationItem(item, usedInvitationItemIds);
+        var hasCopy = invitation.ID != Guid.Empty && HasAttachedFile(invitation.Documents);
+        return new PersonDossierIssuedChip
+        {
+            Number = invitation.InvitationNumber.Trim(),
+            StatusLabel = status.Label,
+            StatusCssClass = status.CssClass,
+            PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
+            PreviewParentId = hasCopy ? invitation.ID : null,
+            AppendIssuedVisaBesidePassport = string.Equals(status.Label, usedLabel, StringComparison.Ordinal),
+        };
+    }
+
+    private static PersonDossierIssuedChip? VisaChip(Person person, (Passport Passport, Visa Visa)? pair)
+    {
+        if (pair == null)
+            return null;
+
+        var (passport, visa) = pair.Value;
+        if (string.IsNullOrWhiteSpace(visa.VisaNumber))
+            return null;
+
+        var status = ClassifyIssuedVisa(visa);
+        var hasCopy = HasAttachedFile(visa.Documents);
+        return new PersonDossierIssuedChip
+        {
+            Number = visa.VisaNumber.Trim(),
+            StatusLabel = status.Label,
+            StatusCssClass = status.CssClass,
+            PersonCopyPersonId = hasCopy ? person.ID : null,
+            PersonCopyRecordKey = hasCopy ? $"Passport:{passport.ID:N}/Visa:{visa.ID:N}" : null,
+            PersonCopyDisplayName = hasCopy ? visa.VisaNumber : null,
+        };
+    }
+
+    private static PersonDossierIssuedChip? WorkPermitChip(WorkPermitItem? item)
+    {
+        var permit = item?.WorkPermit;
+        if (item == null || string.IsNullOrWhiteSpace(item.WorkPermitNumber))
+            return null;
+
+        var status = Classify(item.ExpirationDate, item.IsCancelled, item.DaysRemaining);
+        var hasCopy = permit != null && permit.ID != Guid.Empty && HasAttachedFile(permit.Documents);
+        return new PersonDossierIssuedChip
+        {
+            Number = item.WorkPermitNumber.Trim(),
+            StatusLabel = status.Label,
+            StatusCssClass = status.CssClass,
+            PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.WorkPermit : null,
+            PreviewParentId = hasCopy ? permit!.ID : null,
+        };
+    }
+
+    private sealed class IssuedCaseBucket(ApplicationProfileInstance application)
+    {
+        public ApplicationProfileInstance Application { get; } = application;
+
+        public InvitationItem? Invitation { get; set; }
+
+        public (Passport Passport, Visa Visa)? Visa { get; set; }
+
+        public WorkPermitItem? WorkPermit { get; set; }
     }
 
     private static PersonDossierSection BuildWorkPermits(Person person)
@@ -487,26 +1206,149 @@ public static class PersonDossierResolver
             ["Number", "IssueDate", "Expiry"], records);
     }
 
-    private static PersonDossierSection BuildFamilyMembers(Person person)
+    internal static PersonDossierSection BuildFamilyMembers(IObjectSpace objectSpace, Person person)
     {
-        var records = Safe(person.FamilyMembers)
-            .Select(member => new PersonDossierRecord
+        var members = Safe(person.FamilyMembers).ToList();
+        var usedIds = IssuedDocumentLifecycle.LoadUsedInvitationItemIds(
+            objectSpace,
+            members.SelectMany(member => Safe(member.InvitationItems))
+                .Select(item => item.ID)
+                .Where(id => id != Guid.Empty)
+                .ToList());
+        var usedLabel = L("Status.Used");
+        var records = members
+            .Select(member =>
             {
-                RecordKey = $"FamilyMember:{member.ID}",
-                SourceObjectId = member.ID,
-                SourceObjectType = typeof(Person),
-                Cells =
-                [
-                    member.FullName ?? string.Empty,
-                    Describe(member.Relationship),
-                    FormatDate(member.DateOfBirth),
-                    Describe(member.Nationality),
-                ],
+                var passport = PassportChip(member, CurrentOrLatestPassport(member));
+                var invitation = InvitationChip(LatestInvitationItem(member), usedIds, usedLabel);
+                var visa = VisaChip(member, CurrentOrLatestVisa(member));
+                var proof = RelationshipDocumentChips(member);
+                return new PersonDossierRecord
+                {
+                    RecordKey = $"FamilyMember:{member.ID}",
+                    SourceObjectId = member.ID,
+                    SourceObjectType = typeof(Person),
+                    Cells =
+                    [
+                        member.FullName ?? string.Empty,
+                        Describe(member.Relationship),
+                        FormatDate(member.DateOfBirth),
+                        Describe(member.Nationality),
+                        passport?.Number ?? "\u2014",
+                        invitation?.Number ?? "\u2014",
+                        visa?.Number ?? "\u2014",
+                        proof.Count == 0 ? "\u2014" : proof[0].Number,
+                    ],
+                    CellChips = [null, null, null, null, passport, invitation, visa, null],
+                    MultiChipCellIndex = proof.Count == 0 ? null : 7,
+                    MultiChips = proof,
+                };
             })
             .ToList();
 
         return Section("familyMembers", 90,
-            ["Name", "Relationship", "DateOfBirth", "Citizenship"], records);
+            ["Name", "Relationship", "DateOfBirth", "Citizenship", "Passport", "Invitation", "Visa", "RelationshipDocument"],
+            records,
+            nestedSections:
+            [
+                MergeFamilyCases(objectSpace, members, "familyActiveProcesses", "activeProcesses", BuildActiveProcesses),
+                MergeFamilyCases(objectSpace, members, "familyInvitations", "byApplication", BuildByApplication),
+                MergeFamilyCases(objectSpace, members, "familyVisas", "visas", BuildVisaCases),
+                MergeFamilyCases(objectSpace, members, "familyBorderZones", "borderZones", BuildBorderZoneCases),
+            ]);
+    }
+
+    /// <summary>
+    /// One tab under Family members. Rows are that member's own cases, with the member's name.
+    /// The label reuses the employee tab caption.
+    /// </summary>
+    private static PersonDossierSection MergeFamilyCases(
+        IObjectSpace objectSpace,
+        IReadOnlyList<Person> members,
+        string sectionId,
+        string labelSectionId,
+        Func<IObjectSpace, Person, PersonDossierSection> build)
+    {
+        var records = new List<PersonDossierRecord>();
+        PersonDossierSection? template = null;
+        IReadOnlyList<Person> people = members.Count == 0
+            ? new List<Person> { new Person() }
+            : members;
+        foreach (var member in people)
+        {
+            var built = build(objectSpace, member);
+            template ??= built;
+            if (members.Count == 0)
+                break;
+
+            var name = member.FullName ?? string.Empty;
+            foreach (var record in built.Records)
+            {
+                record.MemberName = name;
+                records.Add(record);
+            }
+        }
+
+        return new PersonDossierSection
+        {
+            SectionId = sectionId,
+            SectionLabel = L($"Section.{labelSectionId}"),
+            SortOrder = template?.SortOrder ?? 0,
+            ColumnHeaders = template?.ColumnHeaders ?? Array.Empty<string>(),
+            Records = records,
+            HideStatusColumn = true,
+            HasMemberColumn = true,
+        };
+    }
+
+    private static Passport? CurrentOrLatestPassport(Person person) =>
+        PersonCurrentItems.GetCurrentPassport(person)
+        ?? Safe(person.Passports)
+            .OrderByDescending(passport => passport.ExpirationDate ?? DateTime.MinValue)
+            .FirstOrDefault();
+
+    private static InvitationItem? LatestInvitationItem(Person person) =>
+        Safe(person.InvitationItems)
+            .Where(item => !string.IsNullOrWhiteSpace(item.Invitation?.InvitationNumber))
+            .OrderByDescending(item => item.Invitation?.ExpirationDate ?? item.ExpirationDate ?? DateTime.MinValue)
+            .FirstOrDefault();
+
+    private static (Passport Passport, Visa Visa)? CurrentOrLatestVisa(Person person)
+    {
+        var current = PersonCurrentItems.GetCurrentVisa(person);
+        if (current?.Passport != null && !string.IsNullOrWhiteSpace(current.VisaNumber))
+            return (current.Passport, current);
+
+        var latest = Safe(person.Passports)
+            .SelectMany(passport => Safe(passport.Visas).Select(visa => (passport, visa)))
+            .Where(pair => !string.IsNullOrWhiteSpace(pair.visa.VisaNumber))
+            .OrderByDescending(pair => pair.visa.ExpirationDate ?? DateTime.MinValue)
+            .FirstOrDefault();
+        return latest.visa == null ? null : latest;
+    }
+
+    private static IReadOnlyList<PersonDossierIssuedChip> RelationshipDocumentChips(Person member)
+    {
+        if (member.ID == Guid.Empty)
+            return Array.Empty<PersonDossierIssuedChip>();
+
+        var document = Safe(member.FamilyRelationDocuments)
+            .FirstOrDefault(item => item.File != null && item.ID != Guid.Empty);
+        if (document == null)
+            return Array.Empty<PersonDossierIssuedChip>();
+
+        var label = VisaUiMessages.Get("PersonDocumentCopies.Section.FamilyRelationDocuments");
+        return
+        [
+            new PersonDossierIssuedChip
+            {
+                Number = label,
+                PersonCopyPersonId = member.ID,
+                PersonCopySectionId = "FamilyRelationDocuments",
+                PersonCopyRecordKey = $"FamilyRelationDocument:{document.ID:N}",
+                PersonCopyDisplayName = label,
+            },
+        ];
     }
 
     private static PersonDossierSection BuildApplications(IObjectSpace objectSpace, Person person)
@@ -587,6 +1429,104 @@ public static class PersonDossierResolver
             hasProgressColumn: true,
             hasIssuedOutcomeColumn: true,
             applicationGroups: BuildApplicationGroups(records));
+    }
+
+    /// <summary>
+    /// Ministry approval letters on the progress track, in process order.
+    /// A step counts when it is a ministry leg with a letter file. Missing steps are ministry
+    /// decisions that still have no letter.
+    /// </summary>
+    internal static (bool HasLetters, IReadOnlyList<string> MissingSteps) ReadApprovalLetters(
+        IReadOnlyList<ApplicationWorkspaceCaseProgressStep>? steps)
+    {
+        if (steps == null || steps.Count == 0)
+            return (false, Array.Empty<string>());
+
+        var hasLetters = false;
+        var missing = new List<string>();
+        foreach (var step in steps)
+        {
+            if (IsMinistryApprovalStep(step) && HasMinistryLetterFile(step))
+                hasLetters = true;
+            if (step.MissingMinistryLetter)
+            {
+                var label = ApplicationProfileLocalization.ProgressStepLabel(step.Label);
+                if (!string.IsNullOrWhiteSpace(label))
+                    missing.Add(label);
+            }
+        }
+
+        return (hasLetters, missing);
+    }
+
+    private static bool IsMinistryApprovalStep(ApplicationWorkspaceCaseProgressStep step) =>
+        step.Key.StartsWith("leg-", StringComparison.OrdinalIgnoreCase)
+        && step.FileSlot == ApplicationProfileInstanceProgressFiles.MinistryLetter;
+
+    private static bool HasMinistryLetterFile(ApplicationWorkspaceCaseProgressStep step) =>
+        step.Files is { Count: > 0 } || !string.IsNullOrWhiteSpace(step.MinistryLetterFileName);
+
+    private static List<ApplicationProfileInstance> CollectInvitationCaseApplications(Person person)
+    {
+        var map = new Dictionary<Guid, ApplicationProfileInstance>();
+        void Add(ApplicationProfileInstance? application)
+        {
+            if (IsInvitationTabCase(application))
+                map[application!.ID] = application;
+        }
+
+        foreach (var item in Safe(person.InvitationItems))
+            Add(item.Invitation?.ApplicationProfileInstance);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+            Add(application);
+        return map.Values.ToList();
+    }
+
+    private static List<ApplicationProfileInstance> CollectVisaCaseApplications(Person person)
+    {
+        var map = new Dictionary<Guid, ApplicationProfileInstance>();
+        void Add(ApplicationProfileInstance? application)
+        {
+            if (IsVisaTabCase(application))
+                map[application!.ID] = application;
+        }
+
+        foreach (var passport in Safe(person.Passports))
+        {
+            foreach (var visa in Safe(passport.Visas))
+                Add(visa.IssuingApplicationProfileInstance);
+        }
+
+        foreach (var item in Safe(person.WorkPermitItems))
+            Add(item.WorkPermit?.ApplicationProfileInstance);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+            Add(application);
+        return map.Values.ToList();
+    }
+
+    private static List<ApplicationProfileInstance> CollectActiveProcessApplications(Person person) =>
+        Safe(person.ApplicationProfileInstances).Where(IsActiveProcess).ToList();
+
+    private static List<ApplicationProfileInstance> CollectBorderZoneApplications(Person person) =>
+        Safe(person.ApplicationProfileInstances).Where(IsBorderZoneTabCase).ToList();
+
+    private static List<ApplicationProfileInstance> CollectWorkPermitLocationApplications(Person person) =>
+        Safe(person.ApplicationProfileInstances).Where(IsWorkPermitLocationTabCase).ToList();
+
+    private static List<ApplicationProfileInstance> CollectRejectionApplications(Person person)
+    {
+        var map = new Dictionary<Guid, ApplicationProfileInstance>();
+        void Add(ApplicationProfileInstance? application)
+        {
+            if (IsRejectionTabCase(application))
+                map[application!.ID] = application;
+        }
+
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+            Add(application);
+        foreach (var item in Safe(person.RejectionItems))
+            Add(item.Rejection?.ApplicationProfileInstance);
+        return map.Values.ToList();
     }
 
     /// <summary>Maps the workspace progress track onto dossier rows (screen and paper share this).</summary>
@@ -735,6 +1675,18 @@ public static class PersonDossierResolver
         return (string.Empty, string.Empty);
     }
 
+    /// <summary>Visa state on a used invitation row. Same expiry pills as the Visas section, after cancelled and changed.</summary>
+    internal static (string Label, string CssClass) ClassifyIssuedVisa(Visa visa)
+    {
+        if (IssuedDocumentLifecycle.IsCancelled(visa))
+            return (L("Status.Cancelled"), "st-expiring");
+
+        if (IssuedDocumentLifecycle.IsChanged(visa))
+            return (L("Status.Changed"), "st-expiring");
+
+        return Classify(visa.ExpirationDate, false, visa.DaysRemaining);
+    }
+
     /// <summary>
     /// Invitation, location grant (WPL), border zone, or rejection for this person — only after Migration service is finished.
     /// A rejection on that step replaces the invitation / grant.
@@ -783,6 +1735,7 @@ public static class PersonDossierResolver
             StatusCssClass = status.CssClass,
             PreviewFamily = hasCopy ? HeaderDocumentCopiesFamily.Invitation : null,
             PreviewParentId = hasCopy ? invitation.ID : null,
+            AppendIssuedVisaBesidePassport = string.Equals(status.Label, L("Status.Used"), StringComparison.Ordinal),
         };
     }
 
@@ -977,7 +1930,9 @@ public static class PersonDossierResolver
         bool hasCopyColumn = false,
         bool hasProgressColumn = false,
         bool hasIssuedOutcomeColumn = false,
-        IReadOnlyList<PersonDossierApplicationGroup>? applicationGroups = null) => new()
+        IReadOnlyList<PersonDossierApplicationGroup>? applicationGroups = null,
+        bool hideStatusColumn = false,
+        IReadOnlyList<PersonDossierSection>? nestedSections = null) => new()
         {
             SectionId = sectionId,
             SectionLabel = L($"Section.{sectionId}"),
@@ -988,6 +1943,8 @@ public static class PersonDossierResolver
             HasProgressColumn = hasProgressColumn,
             HasIssuedOutcomeColumn = hasIssuedOutcomeColumn,
             ApplicationGroups = applicationGroups ?? Array.Empty<PersonDossierApplicationGroup>(),
+            HideStatusColumn = hideStatusColumn,
+            NestedSections = nestedSections ?? Array.Empty<PersonDossierSection>(),
         };
 
     private static List<PersonDossierApplicationGroup> BuildApplicationGroups(

@@ -128,7 +128,9 @@
         if (request == null)
             return;
         var hasInline = request.InlineFiles is { Count: > 0 };
-        if (!hasInline && (request.ApplicationProfileInstanceId == Guid.Empty || request.ProgressId == Guid.Empty))
+        if (!hasInline
+            && !request.PreviewAllMinistryLetters
+            && (request.ApplicationProfileInstanceId == Guid.Empty || request.ProgressId == Guid.Empty))
             return;
 
         _fileName = request.DisplayName;
@@ -162,6 +164,12 @@
                     };
                     loaded = true;
                 }
+            }
+            else if (request.PreviewAllMinistryLetters)
+            {
+                loaded = FileAccess.TryGetMinistryLettersInProcessOrder(
+                    request.ApplicationProfileInstanceId,
+                    out result);
             }
             else if (request.PreviewAllFiles || request.FileId is Guid)
             {

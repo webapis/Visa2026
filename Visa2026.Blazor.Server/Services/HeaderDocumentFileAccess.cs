@@ -25,7 +25,9 @@ public sealed class HeaderDocumentFileAccess
         Guid parentId,
         string recordKey,
         out ApplicationItemDocumentFileResult? result,
-        DocumentCopyPrintLayout? printLayout = null)
+        DocumentCopyPrintLayout? printLayout = null,
+        bool appendIssuedVisaBesidePassport = false,
+        Guid? dossierPersonId = null)
     {
         result = null;
         if (parentId == Guid.Empty || string.IsNullOrWhiteSpace(recordKey))
@@ -48,6 +50,13 @@ public sealed class HeaderDocumentFileAccess
             return false;
         }
 
+        content = pdfMerger.WithIssuedVisaBesidePassport(
+            content,
+            family,
+            parentId,
+            appendIssuedVisaBesidePassport,
+            dossierPersonId);
+
         result = new ApplicationItemDocumentFileResult
         {
             Content = content,
@@ -61,7 +70,9 @@ public sealed class HeaderDocumentFileAccess
         HeaderDocumentCopiesFamily family,
         Guid parentId,
         string headerLabel,
-        out ApplicationItemDocumentFileResult? result)
+        out ApplicationItemDocumentFileResult? result,
+        bool appendIssuedVisaBesidePassport = false,
+        Guid? dossierPersonId = null)
     {
         result = null;
         if (parentId == Guid.Empty)
@@ -74,6 +85,13 @@ public sealed class HeaderDocumentFileAccess
         {
             return false;
         }
+
+        content = pdfMerger.WithIssuedVisaBesidePassport(
+            content,
+            family,
+            parentId,
+            appendIssuedVisaBesidePassport,
+            dossierPersonId);
 
         result = new ApplicationItemDocumentFileResult
         {

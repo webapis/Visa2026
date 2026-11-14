@@ -181,6 +181,12 @@ public sealed class ProgressLettersSlotRequest
     /// <summary>Merge every stored file on <see cref="FocusProgressId"/> into one preview.</summary>
     public bool PreviewAllFiles { get; init; }
 
+    /// <summary>
+    /// Merge ministry approval letters from every progress step of
+    /// <see cref="ApplicationProfileInstanceId"/>, in process order.
+    /// </summary>
+    public bool PreviewAllMinistryLetters { get; init; }
+
     /// <summary>Files chosen on screen and not saved yet. When set, the preview does not read the database.</summary>
     public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; init; }
         = Array.Empty<ProgressLetterInlineFile>();
@@ -275,6 +281,11 @@ public sealed class HeaderDocumentCopiesSlotRequest
 
     /// <summary>When set, the banner is this person's state on the invitation.</summary>
     public Guid? PersonId { get; init; }
+
+    /// <summary>
+    /// Used invitation: after the letter, append the issued visa scan beside its passport scan.
+    /// </summary>
+    public bool AppendIssuedVisaBesidePassport { get; init; }
 }
 
 /// <summary>
@@ -357,6 +368,9 @@ public sealed class ProgressLettersInlinePreviewRequest
 
     public bool PreviewAllFiles { get; init; }
 
+    /// <summary>Merge ministry approval letters from every progress step, in process order.</summary>
+    public bool PreviewAllMinistryLetters { get; init; }
+
     public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; init; }
         = Array.Empty<ProgressLetterInlineFile>();
 
@@ -394,4 +408,9 @@ public sealed class HeaderDocumentCopiesInlinePreviewRequest
 
     /// <summary>When set, the banner is this person's state on the invitation.</summary>
     public Guid? PersonId { get; init; }
+
+    /// <summary>
+    /// Used invitation: after the letter, append the issued visa scan beside its passport scan.
+    /// </summary>
+    public bool AppendIssuedVisaBesidePassport { get; init; }
 }

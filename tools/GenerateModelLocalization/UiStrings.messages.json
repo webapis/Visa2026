@@ -461,11 +461,41 @@
     "tk-TM": "Maşgala agzalary",
     "ru-RU": "Члены семьи"
   },
+  "PersonDossier.Section.activeProcesses": {
+    "en": "Active processes",
+    "tr-TR": "Aktif işlemler",
+    "tk-TM": "Işjeň prosesler",
+    "ru-RU": "Активные процессы"
+  },
   "PersonDossier.Section.applications": {
     "en": "Applications",
     "tr-TR": "Başvurular",
     "tk-TM": "Ýüztutmalar",
     "ru-RU": "Заявления"
+  },
+  "PersonDossier.Section.byApplication": {
+    "en": "Invitations",
+    "tr-TR": "Davetler",
+    "tk-TM": "Çakylyklar",
+    "ru-RU": "Приглашения"
+  },
+  "PersonDossier.Section.borderZones": {
+    "en": "Border zones",
+    "tr-TR": "Sınır bölgeleri",
+    "tk-TM": "Serhet ýakalary",
+    "ru-RU": "Пограничные зоны"
+  },
+  "PersonDossier.Section.workPermitLocations": {
+    "en": "Work permit locations",
+    "tr-TR": "Çalışma izni yerleri",
+    "tk-TM": "Iş rugsat ýerleri",
+    "ru-RU": "Места разрешения на работу"
+  },
+  "PersonDossier.Section.rejections": {
+    "en": "Rejections",
+    "tr-TR": "Retler",
+    "tk-TM": "Seretmezlikler",
+    "ru-RU": "Отказы"
   },
   "PersonDossier.Section.invitations": {
     "en": "Invitations",
@@ -629,6 +659,12 @@
     "tk-TM": "Gatnaşyk",
     "ru-RU": "Степень родства"
   },
+  "PersonDossier.Column.RelationshipDocument": {
+    "en": "Relationship document",
+    "tr-TR": "Akrabalık belgesi",
+    "tk-TM": "Garyndaşlyk resminamasy",
+    "ru-RU": "Документ о родстве"
+  },
   "PersonDossier.Column.DateOfBirth": {
     "en": "Date of birth",
     "tr-TR": "Doğum tarihi",
@@ -737,6 +773,66 @@
     "tk-TM": "Nusga",
     "ru-RU": "Копия"
   },
+  "PersonDossier.Column.VisaIssued": {
+    "en": "Visa issued",
+    "tr-TR": "Verilen vize",
+    "tk-TM": "Berlen wiza",
+    "ru-RU": "Выданная виза"
+  },
+  "PersonDossier.Column.VisaPeriod": {
+    "en": "Visa period",
+    "tr-TR": "Vize süresi",
+    "tk-TM": "Wiza möhleti",
+    "ru-RU": "Срок визы"
+  },
+  "PersonDossier.Column.Application": {
+    "en": "Application",
+    "tr-TR": "Başvuru",
+    "tk-TM": "Ýüztutma",
+    "ru-RU": "Заявление"
+  },
+  "PersonDossier.Column.Passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "PersonDossier.Column.Invitation": {
+    "en": "Invitation",
+    "tr-TR": "Davet",
+    "tk-TM": "Çakylyk",
+    "ru-RU": "Приглашение"
+  },
+  "PersonDossier.Column.Visa": {
+    "en": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "PersonDossier.Column.WorkPermit": {
+    "en": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsady",
+    "ru-RU": "Разрешение на работу"
+  },
+  "PersonDossier.Column.BorderZone": {
+    "en": "Border zone",
+    "tr-TR": "Sınır bölgesi",
+    "tk-TM": "Serhet ýakasy",
+    "ru-RU": "Пограничная зона"
+  },
+  "PersonDossier.Column.WorkPermitLocations": {
+    "en": "Work permit locations",
+    "tr-TR": "Çalışma izni yerleri",
+    "tk-TM": "Iş rugsat ýerleri",
+    "ru-RU": "Места разрешения на работу"
+  },
+  "PersonDossier.Column.Rejection": {
+    "en": "Rejection",
+    "tr-TR": "Ret",
+    "tk-TM": "Seretmezlik",
+    "ru-RU": "Отказ"
+  },
   "PersonDossier.Copy.Preview": {
     "en": "Preview",
     "tr-TR": "Önizle",
@@ -766,6 +862,18 @@
     "tr-TR": "Başvuru ilerlemesi",
     "tk-TM": "Ýüztutma ösüşi",
     "ru-RU": "Прогресс заявки"
+  },
+  "PersonDossier.ApprovalLetters": {
+    "en": "Approval letters",
+    "tr-TR": "Onay yazıları",
+    "tk-TM": "Tassyklama hatlary",
+    "ru-RU": "Письма согласования"
+  },
+  "PersonDossier.Progress.Toggle": {
+    "en": "Progress",
+    "tr-TR": "İlerleme",
+    "tk-TM": "Ösüş",
+    "ru-RU": "Ход"
   },
   "PersonDossier.Progress.ViewLetter": {
     "en": "View letter",
