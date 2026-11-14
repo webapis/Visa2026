@@ -30,11 +30,27 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 
 ## Local build and test (from repo root)
 
+After a code change, an agent that needs a compile or test check builds into its **own artifacts directory**. Repository `bin/` and `obj/` stay with Visual Studio (F5) and the developer’s build. Two builds writing those folders lock the same DLLs (`MSB3021` / `MSB3027`) and break each other.
+
+On the first build in a conversation, create one folder and **reuse that exact path** for every later build and test in the same conversation. Put it outside the repo so agent output does not fill the working copy:
+
 ```powershell
-dotnet build Visa2026.slnx -c Debug
-dotnet build Visa2026.slnx -c EasyTest
-dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
+$artifacts = Join-Path $env:LOCALAPPDATA "Visa2026\agent-builds\<session>"
+if (-not $artifacts.EndsWith('\')) { $artifacts += '\' }
+New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
+
+dotnet build Visa2026.slnx -c Debug --artifacts-path $artifacts
+dotnet build Visa2026.slnx -c EasyTest --artifacts-path $artifacts
+dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --artifacts-path $artifacts
 ```
+
+`<session>` is a short id chosen once for this conversation (for example 8 hex characters). The trailing `\` is required on the .NET 8 SDK in this repo (`8.0.100`); without it, MSBuild concatenates the path onto `bin` and `obj`.
+
+- Pass `--artifacts-path` on `dotnet build` and `dotnet test`. The same flag applies to a single project (`Visa2026.Module`, `Visa2026.Blazor.Server`, `Visa2026.DataImporter`, `Visa2026.Module.Tests`).
+- Leave project `OutputPath` unchanged. F5, IIS publish, and import scripts keep using repository `bin/` and `obj/`.
+- When the task is to **run** the assembly just built (DataImporter, a unit-test host), start the exe under that artifacts path: `<artifacts>\bin\<Project>\<configuration>\net8.0\`. The configuration folder is lowercase (`debug`, `easytest`).
+- Skip the build when the change cannot affect compilation (docs, comments, prompts only).
+- The artifacts folder is disposable. A later cleanup of `%LOCALAPPDATA%\Visa2026\agent-builds` is safe. During a session, leave other sessions’ folders alone.
 
 ## Git: “commit” with verification first
 

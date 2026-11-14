@@ -16,10 +16,13 @@ The user wants a **git commit** but expects: **verify first** → **commit only 
 
 ## Procedure (run in order)
 
-1. **Build the full solution** from repo root (failures here include many “runtime” issues that appear as load failures):
+1. **Build the full solution** from repo root (failures here include many “runtime” issues that appear as load failures). Use this conversation’s private artifacts directory so the build does not lock repository `bin/` and `obj/` (see **`AGENTS.md`**, Local build and test). Reuse the same `$artifacts` path if this conversation already chose one.
 
    ```powershell
-   dotnet build Visa2026.slnx -c Release
+   $artifacts = Join-Path $env:LOCALAPPDATA "Visa2026\agent-builds\<session>"
+   if (-not $artifacts.EndsWith('\')) { $artifacts += '\' }
+   New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
+   dotnet build Visa2026.slnx -c Release --artifacts-path $artifacts
    ```
 
    If `Release` is inappropriate for the task, use `-c Debug` instead and say so in the reply.
