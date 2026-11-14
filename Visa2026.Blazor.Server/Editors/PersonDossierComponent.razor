@@ -669,7 +669,7 @@
     private void SelectApplicationGroup(string groupId) => _applicationGroupId = groupId;
 
     private static readonly string[] IssuedTabOrder =
-        ["activeProcesses", "byApplication", "visas", "workPermits", "borderZones", "workPermitLocations", "rejections"];
+        ["activeProcesses", "byApplication", "visas", "workPermits", "borderZones", "workPermitLocations", "rejections", "registration", "businessTrips"];
     private static readonly string[] IdentityTabOrder = ["passports", "education", "positionHistory", "addresses", "familyMembers", "travel"];
     private static readonly string[] FamilyCaseTabOrder =
         ["familyActiveProcesses", "familyInvitations", "familyVisas", "familyBorderZones"];
@@ -824,6 +824,7 @@
     private static bool IsCaseRowSection(PersonDossierSection section) =>
         IsActiveProcessSection(section)
         || section.SectionId is "byApplication" or "visas" or "borderZones" or "workPermitLocations" or "rejections"
+            or "registration" or "businessTrips"
             or "familyInvitations" or "familyVisas" or "familyBorderZones";
 
     private static bool IsApprovalLettersCell(PersonDossierSection section, PersonDossierRecord record) =>

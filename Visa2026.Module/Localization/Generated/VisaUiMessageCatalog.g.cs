@@ -11331,6 +11331,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Seretmezlikler",
             ["ru-RU"] = "Отказы",
         },
+        ["PersonDossier.Section.registration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Hasaba alyş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["PersonDossier.Section.businessTrips"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Business trips",
+            ["tr-TR"] = "İş seyahatleri",
+            ["tk-TM"] = "Iş saparlary",
+            ["ru-RU"] = "Командировки",
+        },
         ["PersonDossier.Section.education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Education",

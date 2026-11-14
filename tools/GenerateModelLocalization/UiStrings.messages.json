@@ -497,6 +497,18 @@
     "tk-TM": "Seretmezlikler",
     "ru-RU": "Отказы"
   },
+  "PersonDossier.Section.registration": {
+    "en": "Registration",
+    "tr-TR": "Kayıt",
+    "tk-TM": "Hasaba alyş",
+    "ru-RU": "Регистрация"
+  },
+  "PersonDossier.Section.businessTrips": {
+    "en": "Business trips",
+    "tr-TR": "İş seyahatleri",
+    "tk-TM": "Iş saparlary",
+    "ru-RU": "Командировки"
+  },
   "PersonDossier.Section.invitations": {
     "en": "Invitations",
     "tr-TR": "Davetler",

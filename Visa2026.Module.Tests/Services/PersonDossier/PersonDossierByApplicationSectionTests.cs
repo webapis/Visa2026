@@ -353,6 +353,10 @@ public class PersonDossierByApplicationSectionTests
             new PersonDossierSection { SectionId = "workPermitLocations" }));
         Assert.True(PersonDossierResolver.IncludeSection(
             new PersonDossierSection { SectionId = "rejections" }));
+        Assert.True(PersonDossierResolver.IncludeSection(
+            new PersonDossierSection { SectionId = "registration" }));
+        Assert.True(PersonDossierResolver.IncludeSection(
+            new PersonDossierSection { SectionId = "businessTrips" }));
         Assert.False(PersonDossierResolver.IncludeSection(
             new PersonDossierSection { SectionId = "passports" }));
     }
@@ -645,6 +649,49 @@ public class PersonDossierByApplicationSectionTests
         var active = section.NestedSections.Single(tab => tab.SectionId == "familyActiveProcesses");
         Assert.Contains(active.Records, record => record.Cells[0] == "CE-FAM-1" && record.MemberName == "Alper Kucukakkaya");
         Assert.Empty(section.NestedSections.Single(tab => tab.SectionId == "familyVisas").Records);
+    }
+
+    [Fact]
+    public void Registration_and_business_trip_tabs_list_only_those_cases()
+    {
+        var person = new Person();
+        person.ApplicationProfileInstances.Add(Case(
+            "CE-REG",
+            new DateTime(2026, 11, 2),
+            null,
+            new ApplicationProfile
+            {
+                Name = "Check in",
+                ActionFamily = ApplicationProfileActionFamily.Registration,
+            }));
+        person.ApplicationProfileInstances.Add(Case(
+            "CE-TRIP",
+            new DateTime(2026, 11, 3),
+            null,
+            new ApplicationProfile
+            {
+                Name = "Departure",
+                ActionFamily = ApplicationProfileActionFamily.BusinessTrip,
+            }));
+        person.ApplicationProfileInstances.Add(Case(
+            "CE-INV",
+            new DateTime(2026, 11, 1),
+            null,
+            new ApplicationProfile { Name = "Invitation", ProduceInvitation = true }));
+
+        var registration = PersonDossierResolver.BuildRegistrationCases(person, null);
+        var trips = PersonDossierResolver.BuildBusinessTripCases(person, null);
+
+        Assert.Equal("Registration", registration.SectionLabel);
+        Assert.Equal("Business trips", trips.SectionLabel);
+        var registrationRow = Assert.Single(registration.Records);
+        Assert.Equal("CE-REG", registrationRow.Cells[0]);
+        Assert.Equal("Check in", registrationRow.FirstCellDetail);
+        var tripRow = Assert.Single(trips.Records);
+        Assert.Equal("CE-TRIP", tripRow.Cells[0]);
+        Assert.Equal("Departure", tripRow.FirstCellDetail);
+        Assert.DoesNotContain(registration.Records, record => record.Cells[0] == "CE-INV");
+        Assert.DoesNotContain(trips.Records, record => record.Cells[0] == "CE-INV" || record.Cells[0] == "CE-REG");
     }
 
     private static ApplicationProfileInstance Case(

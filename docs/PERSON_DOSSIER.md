@@ -85,6 +85,8 @@ employment block.
 | Border zones | Invitation, visa, or border-zone case that can grant a border zone | Tab after Work permits. Same row as Invitations, plus the granted places. A dash until the places are on an issued invitation, visa, or border-zone permit. The case also stays on Invitations or Visas. |
 | Work permit locations | Case that issues a new work permit, or a separate grant of additional places | Tab after Border zones. Same row as Invitations, plus the granted places. The case also stays on Invitations or Visas. |
 | Rejections | A case that issued a rejection for this person, or a rejection application that has not issued it yet | Tab after Work permit locations. An invitation or visa case stays off this tab until a rejection exists. |
+| Registration | `ApplicationProfile` with action family Registration | Tab after Rejections, always shown. Check-in, check-out, registration info change, and registration extension. Same columns and progress as Invitations. The profile name under the application number names the kind. |
+| Business trips | `ApplicationProfile` with action family Business trip | Tab after Registration, always shown. Departure and arrival. Same columns and progress as Invitations. |
 | Education | `Person.Educations` | Employee only |
 | Position history | `Person.PositionHistory` | Employee only. On screen, the tab after Education. |
 | Addresses of residence | `Person.AddressesOfResidence` | Registration/lodging. On screen, the tab after Position history. |

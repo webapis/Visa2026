@@ -194,7 +194,8 @@ public static class PersonDossierResolver
     internal static bool IncludeSection(PersonDossierSection section) =>
         section.Records.Count > 0
         || section.SectionId is "activeProcesses" or "byApplication" or "visas" or "workPermits"
-            or "borderZones" or "workPermitLocations" or "rejections" or "familyMembers";
+            or "borderZones" or "workPermitLocations" or "rejections" or "registration" or "businessTrips"
+            or "familyMembers";
 
     private static IEnumerable<PersonDossierSection> BuildSections(IObjectSpace objectSpace, Person person)
     {
@@ -208,6 +209,8 @@ public static class PersonDossierResolver
         yield return BuildBorderZoneCases(objectSpace, person);
         yield return BuildWorkPermitLocationCases(objectSpace, person);
         yield return BuildRejectionCases(objectSpace, person);
+        yield return BuildRegistrationCases(objectSpace, person);
+        yield return BuildBusinessTripCases(objectSpace, person);
 
         if (isEmployee)
         {
@@ -393,6 +396,12 @@ public static class PersonDossierResolver
     private static PersonDossierSection BuildRejectionCases(IObjectSpace objectSpace, Person person) =>
         BuildTrackedCaseSection(objectSpace, person, CollectRejectionApplications(person), BuildRejectionCases);
 
+    private static PersonDossierSection BuildRegistrationCases(IObjectSpace objectSpace, Person person) =>
+        BuildTrackedCaseSection(objectSpace, person, CollectRegistrationApplications(person), BuildRegistrationCases);
+
+    private static PersonDossierSection BuildBusinessTripCases(IObjectSpace objectSpace, Person person) =>
+        BuildTrackedCaseSection(objectSpace, person, CollectBusinessTripApplications(person), BuildBusinessTripCases);
+
     private static PersonDossierSection BuildTrackedCaseSection(
         IObjectSpace objectSpace,
         Person person,
@@ -502,6 +511,16 @@ public static class PersonDossierResolver
         && application.ID != Guid.Empty
         && ApplicationProfileConfigurationResolver.CanIssueInvitation(application);
 
+    private static bool IsRegistrationTabCase(ApplicationProfileInstance? application) =>
+        application != null
+        && application.ID != Guid.Empty
+        && application.ApplicationProfile?.ActionFamily == ApplicationProfileActionFamily.Registration;
+
+    private static bool IsBusinessTripTabCase(ApplicationProfileInstance? application) =>
+        application != null
+        && application.ID != Guid.Empty
+        && application.ApplicationProfile?.ActionFamily == ApplicationProfileActionFamily.BusinessTrip;
+
     private static bool IsVisaTabCase(ApplicationProfileInstance? application) =>
         application != null
         && application.ID != Guid.Empty
@@ -566,6 +585,57 @@ public static class PersonDossierResolver
             "Rejection",
             IsRejectionTabCase,
             RejectionGrantText);
+
+    /// <summary>
+    /// Registration: check-in, check-out, registration info change, and registration extension.
+    /// Same columns as Invitations. The profile name names the kind of registration.
+    /// </summary>
+    internal static PersonDossierSection BuildRegistrationCases(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null)
+    {
+        var buckets = CollectDocumentBuckets(person);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+        {
+            if (IsRegistrationTabCase(application))
+                Bucket(buckets, application);
+        }
+
+        return CaseSection(
+            "registration",
+            34,
+            "RegistrationCase",
+            buckets.Values.Where(bucket => IsRegistrationTabCase(bucket.Application)),
+            person,
+            usedInvitationItemIds,
+            timelines);
+    }
+
+    /// <summary>
+    /// Business trips: departure and arrival. Same columns as Invitations.
+    /// </summary>
+    internal static PersonDossierSection BuildBusinessTripCases(
+        Person person,
+        IReadOnlySet<Guid>? usedInvitationItemIds,
+        IReadOnlyDictionary<Guid, IReadOnlyList<ApplicationWorkspaceCaseProgressStep>>? timelines = null)
+    {
+        var buckets = CollectDocumentBuckets(person);
+        foreach (var application in Safe(person.ApplicationProfileInstances))
+        {
+            if (IsBusinessTripTabCase(application))
+                Bucket(buckets, application);
+        }
+
+        return CaseSection(
+            "businessTrips",
+            35,
+            "BusinessTripCase",
+            buckets.Values.Where(bucket => IsBusinessTripTabCase(bucket.Application)),
+            person,
+            usedInvitationItemIds,
+            timelines);
+    }
 
     private static PersonDossierSection GrantCaseSection(
         Person person,
@@ -1528,6 +1598,12 @@ public static class PersonDossierResolver
             Add(item.Rejection?.ApplicationProfileInstance);
         return map.Values.ToList();
     }
+
+    private static List<ApplicationProfileInstance> CollectRegistrationApplications(Person person) =>
+        Safe(person.ApplicationProfileInstances).Where(IsRegistrationTabCase).ToList();
+
+    private static List<ApplicationProfileInstance> CollectBusinessTripApplications(Person person) =>
+        Safe(person.ApplicationProfileInstances).Where(IsBusinessTripTabCase).ToList();
 
     /// <summary>Maps the workspace progress track onto dossier rows (screen and paper share this).</summary>
     internal static IReadOnlyList<PersonDossierProgressStep> ToDossierProgressSteps(
