@@ -25,6 +25,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     private readonly Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>> progressById = new();
     private readonly Dictionary<Guid, IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>> resultById = new();
     private readonly Dictionary<Guid, IReadOnlyList<ApplicationListLinkedPeople.Row>> peopleById = new();
+    private readonly Dictionary<Guid, VisaIssueWindowCalculator.Badge?> visaWindowById = new();
     private EventHandler? collectionReloadedHandler;
     private EventHandler? collectionChangedHandler;
     private EventHandler<ComponentInstanceCapturedEventArgs<IGrid>>? gridCapturedHandler;
@@ -92,6 +93,9 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         id != Guid.Empty && peopleById.TryGetValue(id, out var people)
             ? people
             : Array.Empty<ApplicationListLinkedPeople.Row>();
+
+    internal VisaIssueWindowCalculator.Badge? VisaWindowFor(Guid id) =>
+        id != Guid.Empty && visaWindowById.TryGetValue(id, out var badge) ? badge : null;
 
     internal void EnsureScrollAheadIfNeeded(IGrid grid, int visibleIndex)
     {
@@ -223,6 +227,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             progressById[application.ID] = application.ListViewProgressSteps;
             resultById[application.ID] = application.ListViewResultCoverageChips;
             peopleById[application.ID] = application.ListViewLinkedPeople;
+            visaWindowById[application.ID] = application.ListViewVisaIssueWindow;
             preloadedIds.Add(application.ID);
         }
 
@@ -250,6 +255,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
 
             row.SetListViewTotalPersonCount(source.TotalPersonCount);
             row.SetListViewResultCoverage(source.ListViewResultCoverageChips);
+            row.SetListViewVisaIssueWindow(source.ListViewVisaIssueWindow);
             row.SetListViewProgressSteps(source.ListViewProgressSteps);
             row.SetListViewLinkedPeople(source.ListViewLinkedPeople);
             row.InvalidateListViewDisplayCache();
@@ -273,15 +279,32 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
                 && steps.Count > 0)
                 row.SetListViewProgressSteps(steps);
 
+            var stampedChips = false;
             if (row.ListViewResultCoverageChips.Count == 0
                 && resultById.TryGetValue(row.ID, out var chips)
                 && chips.Count > 0)
+            {
                 row.SetListViewResultCoverage(chips);
+                stampedChips = true;
+            }
+
+            var stampedWindow = false;
+            if (row.ListViewVisaIssueWindow == null && visaWindowById.TryGetValue(row.ID, out var visaWindow))
+            {
+                row.SetListViewVisaIssueWindow(visaWindow);
+                stampedWindow = true;
+            }
 
             if (row.ListViewLinkedPeople.Count == 0
                 && peopleById.TryGetValue(row.ID, out var people)
                 && people.Count > 0)
                 row.SetListViewLinkedPeople(people);
+
+            if (stampedChips || stampedWindow)
+            {
+                row.InvalidateListViewDisplayCache();
+                row.WarmListViewDisplayCache();
+            }
         }
     }
 

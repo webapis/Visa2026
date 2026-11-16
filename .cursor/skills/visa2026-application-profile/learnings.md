@@ -1,3 +1,19 @@
+## 2026-11-16 — extend_visa_wp list turns green at visa-window day 0
+
+- **Need**: This profile has no Resmileşdirildi step. The last stored step is CO belgisi alyndy. The list should treat the case as finished when every work permit is in the result and either every visa is in or the visa-issue counter has reached 0.
+- **Fix**: `ApplicationWorkspaceViaMinistryIssuanceGreenGate` paints the row `PROCESS_ISSUED` (green, Resmileşdirildi tab) for `extend_visa_wp` when the counter badge is day 0 and still recolors the Wiza pill. Warning days (4, 3, …) stay on the CO gold row. The counter and the Wiza pill stay amber at 0. The stored progress step is unchanged. Report Dashboard is unchanged.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Wiza we Iş Rugsatnamasyny Uzaltmak, a row with all work permits and a 0 gün counter moves to the green Resmileşdirildi tab. The amber 0 gün counter and amber Wiza pill stay. A row still inside the window stays on CO belgisi alyndy.
+- **Prevent**: Do not paint the warning days (above 0) onto the row. Do not turn the day-0 controls green. Do not apply this day-0 row rule to other profiles. Do not change Report Dashboard open/closed counts from this paint.
+- **Verify**: Green-gate and visa-window tests 27 passed. Blazor host build succeeded. The list was not opened in the browser.
+
+## 2026-11-16 — Visa issue window counter on extend_visa_wp list
+
+- **Need**: After the work-permit letter on **Wiza we Iş Rugsatnamasyny Uzaltmak**, officers need the days left to issue the new visas. 45 days and a 5-day warning must be configurable. The list row color stays the progress step.
+- **Fix**: `VisaIssueWindowCalculator` plus Configuration → **Wiza berilmeli möhlet** (`VisaIssueWindowSettings`, defaults 45 and 5). The counter sits to the right of the **Wiza** pill. Teal while more than the warning days remain, amber on the counter and the **Wiza** pill for the last warning days and day 0 while visas are still missing, success teal frozen at the days left on the last visa’s issue date (0 if that visa was late). Hidden until every expected person has a work permit. Creating a visa is not blocked.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. Configuration → Wiza berilmeli möhlet. On a visa+work-permit extension list row, the counter is beside **Wiza**. The row background does not change with the counter.
+- **Prevent**: Do not paint this state on the list row. Do not show the counter on other profiles. Do not hide it once every visa exists. Do not start it before work-permit coverage is complete.
+- **Verify**: `VisaIssueWindowCalculatorTests` 11 passed. Blazor host build succeeded. The list was not opened in the browser.
+
 ## 2026-11-16 — Direct-migration Seretmezlik link picker must not require Submit-to
 
 - **Need**: Via-ministry Seretmezlik showed target people; direct-migration Seretmezlik showed none.

@@ -4501,6 +4501,80 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     color: #fff !important;
 }
 
+.dxbl-grid td .lv-result-chip--warn,
+.lv-result-chip--warn {
+    background: #b45309 !important;
+    border-color: #b45309 !important;
+    color: #fff7ed !important;
+}
+
+.lv-result-chips--stack .lv-result-chip--warn::before {
+    background: #fdba74;
+}
+
+/* Visa-issue day counter sits on the Wiza pill. It does not paint the row. */
+.dxbl-grid td .lv-visa-line,
+.lv-visa-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    max-width: none;
+}
+
+.dxbl-grid td .lv-result-stems:has(.lv-visa-window),
+.lv-result-stems:has(.lv-visa-window) {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 13.5rem;
+}
+
+.dxbl-grid td .lv-result-stems .lv-visa-line .lv-result-chip,
+.lv-result-stems .lv-visa-line .lv-result-chip {
+    width: auto;
+    flex: 0 0 auto;
+}
+
+.dxbl-grid td .lv-visa-window,
+.lv-visa-window {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.lv-visa-window small {
+    font-weight: 600;
+    margin-left: 3px;
+}
+
+.dxbl-grid td .lv-visa-window--ok,
+.lv-visa-window--ok {
+    background: #042f2e !important;
+    color: #ccfbf1 !important;
+    box-shadow: inset 0 0 0 1.5px #2dd4bf;
+}
+
+.dxbl-grid td .lv-visa-window--warn,
+.lv-visa-window--warn {
+    background: #b45309 !important;
+    color: #fff7ed !important;
+    box-shadow: inset 0 0 0 1.5px #fdba74;
+}
+
+.dxbl-grid td .lv-visa-window--done,
+.lv-visa-window--done {
+    background: #0f766e !important;
+    color: #fff !important;
+    box-shadow: inset 0 0 0 1.5px #5eead4;
+}
+
 .dxbl-grid.dxbl-grid-nowrap td.lv-plain-cell:has(.lv-people),
 .dxbl-grid.dxbl-grid-nowrap td.lv-plain-cell:has(.lv-people) .dxbl-grid-cell-content {
     white-space: normal !important;

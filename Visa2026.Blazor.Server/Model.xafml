@@ -1834,6 +1834,12 @@
         <ColumnInfo Id="Notes" Index="11" Width="80" Caption="Bellik" IsNewNode="True" />
       </Columns>
     </ListView>
+    <ListView Id="VisaIssueWindowSettings_ListView" ClassName="Visa2026.Module.BusinessObjects.VisaIssueWindowSettings" Caption="Wiza berilmeli möhlet" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="WindowDays" Index="0" Width="180" Caption="Wiza berilmeli möhlet (gün)" IsNewNode="True" />
+        <ColumnInfo Id="WarningDays" Index="1" Width="160" Caption="Duýduryş öňünden (gün)" IsNewNode="True" />
+      </Columns>
+    </ListView>
     <ListView Id="WorkPermitQuotaSettings_ListView" ClassName="Visa2026.Module.BusinessObjects.WorkPermitQuotaSettings" Caption="Work permit quota" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="LocalPersonnelCount" Index="0" Width="160" Caption="Mevcut Lokal personel" IsNewNode="True" />

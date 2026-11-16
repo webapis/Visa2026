@@ -7,6 +7,8 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// <summary>
 /// Via Ministries ListView row green: AS/CO received (<c>PROCESS_STARTED</c>) and required
 /// Result-section documents fully issued. Invitation-getting profiles ignore Issued visa.
+/// <c>extend_visa_wp</c> is also green when the visa-issue counter has reached 0 while visas
+/// are still missing. That counter and the Wiza pill stay amber; only the list row changes.
 /// </summary>
 public static class ApplicationWorkspaceViaMinistryIssuanceGreenGate
 {
@@ -34,6 +36,34 @@ public static class ApplicationWorkspaceViaMinistryIssuanceGreenGate
         if (required.Count == 0)
             return false;
 
+        if (AllRequiredChipsComplete(application, required))
+            return true;
+
+        return ExtendVisaWorkPermitWindowExpired(application);
+    }
+
+    /// <summary>
+    /// Wiza we Iş Rugsatnamasyny Uzaltmak has no Resmileşdirildi step. The list treats the
+    /// case as finished when every work permit is in and the visa window has reached 0,
+    /// even if visas are still missing.
+    /// </summary>
+    private static bool ExtendVisaWorkPermitWindowExpired(ApplicationProfileInstance application)
+    {
+        if (!VisaIssueWindowCalculator.Applies(application.ApplicationProfile?.Code))
+            return false;
+
+        if (application.ListViewVisaIssueWindow is not { Days: 0, RecolorVisaChip: true })
+            return false;
+
+        return IsChipComplete(
+            application.ListViewResultCoverageChips,
+            ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit);
+    }
+
+    private static bool AllRequiredChipsComplete(
+        ApplicationProfileInstance application,
+        IReadOnlyList<string> required)
+    {
         var chips = application.ListViewResultCoverageChips;
         foreach (var key in required)
         {

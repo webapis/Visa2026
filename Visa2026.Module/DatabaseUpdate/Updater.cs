@@ -609,6 +609,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<Urgency>(userRole);
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
     EnsureReadOnlyPermission<ExpirationAlertRule>(userRole);
+    EnsureReadOnlyPermission<VisaIssueWindowSettings>(userRole);
 
     // ApplicationProfileInstance ListView process-tracking columns (status, approval/migration SLA).
     EnsureApplicationProcessTrackingReadPermissions(userRole, officerCanWriteProgress: true);
@@ -850,6 +851,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureTypePermission<BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureReadOnlyPermission<ExpirationAlertRule>(role);
+            EnsureReadOnlyPermission<VisaIssueWindowSettings>(role);
             EnsureReadOnlyPermission<PdfFormMapping>(role);
 
             // Same process-tracking reads as Users (status + approval/migration SLA columns); no write.
@@ -1200,6 +1202,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureFullAccessRecursivePermission<SystemSettings>(role);
             EnsureFullAccessRecursivePermission<MinistryReviewSlaSettings>(role);
             EnsureFullAccessRecursivePermission<WorkPermitQuotaSettings>(role);
+            EnsureFullAccessRecursivePermission<VisaIssueWindowSettings>(role);
             EnsureFullAccessRecursivePermission<Visa2026.Module.BusinessObjects.Email.EmailSmtpSettings>(role);
             EnsureReadWriteOnlyPermission<ExpirationAlertRule>(role);
             // Link types on Configuration screens that still need ApplicationType read.
@@ -1219,6 +1222,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/MinistryReviewSlaSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/WorkPermitQuotaSettings", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/VisaIssueWindowSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/EmailSmtpSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/SystemSettings", SecurityPermissionState.Allow);

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="utf-8" />
+  <title>Ýüztutmalar — wiza berilmeli gün sany</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --chrome: #2c3138;
+      --chrome-2: #3a4048;
+      --gold: #FED700;
+      --gold-text: #1a1a1a;
+      --head: #3a4048;
+      --pill: #15803d;
+      --pill-none: #4b5563;
+      --stem: #4ade80;
+      --ok-bg: #042f2e;
+      --ok-fg: #ccfbf1;
+      --done-bg: #0f766e;
+      --done-ring: #5eead4;
+      --warn-bg: #b45309;
+      --warn-fg: #fff7ed;
+      --card: #1f242b;
+      --card-line: #3a424c;
+      --muted: #9aa3af;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #1a1e24; color: #f4f4f5; font-family: Inter, "Segoe UI", sans-serif; }
+    .app { padding: 18px 20px 32px; }
+    .crumb { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: -0.02em; }
+    .sub { margin: 0 0 14px; color: var(--muted); font-size: 13px; max-width: 980px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tab { height: 28px; padding: 0 10px; border-radius: 6px; background: var(--chrome-2); color: #e5e7eb; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+    .tab strong { font-weight: 700; }
+    .tab.is-on { background: var(--gold); color: #1a1a1a; }
+    .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; align-items: start; }
+    .card { background: var(--chrome); border: 1px solid #000; border-radius: 8px; overflow: hidden; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #262b32; border-bottom: 1px solid #000; font-size: 12px; color: #d1d5db; }
+    .scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 980px; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.25); text-align: left; vertical-align: top; font-size: 12px; }
+    th { background: var(--head); color: #e5e7eb; font-weight: 600; white-space: nowrap; }
+    tbody td { background: var(--gold); color: var(--gold-text); }
+    tr.is-issued td { background: #86efac; color: #15803d; }
+    tr.is-issued .why { color: #166534; }
+    .num { font-weight: 700; }
+    .track { display: flex; align-items: flex-start; gap: 0; min-width: 520px; }
+    .steps { display: flex; align-items: center; padding-top: 4px; flex: 0 0 auto; }
+    .step { display: flex; align-items: center; }
+    .step span { height: 22px; padding: 0 8px; border-radius: 999px; background: var(--pill); color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; white-space: nowrap; }
+    .step i { width: 10px; height: 2px; background: var(--stem); display: block; }
+    .stems { position: relative; margin-left: 8px; padding-left: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 240px; }
+    .stems::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 2px; background: var(--stem); border-radius: 1px; }
+    .chip { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 999px; background: var(--pill); color: #fff; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+    .chip::before { content: ""; position: absolute; right: 100%; top: 50%; width: 16px; height: 2px; margin-top: -1px; background: var(--stem); }
+    .chip b { font-variant-numeric: tabular-nums; }
+    .chip--none { background: var(--pill-none); color: #e5e7eb; }
+    .chip--none::before { background: #6b7280; }
+    .chip--warn { background: var(--warn-bg); color: var(--warn-fg); }
+    .chip--warn::before { background: #fdba74; }
+    .visa-line { display: flex; align-items: center; gap: 8px; }
+    .timer { height: 28px; padding: 0 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .timer small { font-weight: 600; opacity: 0.9; }
+    .timer--ok { background: var(--ok-bg); color: var(--ok-fg); box-shadow: inset 0 0 0 1.5px #2dd4bf; }
+    .timer--warn { background: var(--warn-bg); color: var(--warn-fg); box-shadow: inset 0 0 0 1.5px #fdba74; }
+    .timer--done { background: var(--done-bg); color: #fff; box-shadow: inset 0 0 0 1.5px var(--done-ring); }
+    .clock { width: 12px; height: 12px; border: 1.5px solid currentColor; border-radius: 50%; position: relative; flex: 0 0 auto; }
+    .clock::before { content: ""; position: absolute; left: 4px; top: 2px; width: 1.5px; height: 4px; background: currentColor; }
+    .clock::after { content: ""; position: absolute; left: 4px; top: 5px; width: 3px; height: 1.5px; background: currentColor; }
+    .why { display: block; margin-top: 4px; font-size: 10.5px; font-weight: 600; color: #3f3f46; max-width: 320px; }
+    .side { background: var(--card); border: 1px solid var(--card-line); border-radius: 8px; padding: 14px; }
+    .side h2 { margin: 0 0 4px; font-size: 14px; }
+    .side p { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .field { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    input[type="number"] { width: 72px; height: 32px; border-radius: 6px; border: 1px solid #4b5563; background: #111418; color: #fff; font: inherit; font-weight: 700; padding: 0 8px; }
+    .unit { color: var(--muted); font-size: 12px; }
+    .note { background: #111418; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #d1d5db; line-height: 1.45; }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 12px; color: var(--muted); font-size: 12px; }
+    .legend .timer, .legend .chip { height: 24px; font-size: 12px; }
+    .legend .chip::before { display: none; }
+    @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="crumb">Ýüztutmalar / Ministrlikler bilen ylalaşylýan ýüztutmalar · prototip · 16.11.2026</div>
+    <h1>Wiza berilmeli gün sany</h1>
+    <p class="sub">Diňe <b>Wiza we Iş Rugsatnamasyny Uzaltmak</b>. Saklanan ädim <b>CO belgisi alyndy</b>. Setir ýaşyl bolýar (Resmileşdirildi taby) haçan-da ähli iş rugsady goşulan bolsa we ýa ähli wiza goşulan bolsa, ýa-da wiza ýetmeýän wagty hasaplaýjy <b>0 gün</b> bolanda. 0 günde hasaplaýjy we Wiza tegelegi duýduryş reňkinde galýar.</p>
+
+    <div class="tabs">
+      <span class="tab">Ähli <strong>116</strong></span>
+      <span class="tab"><span class="swatch" style="background:#FEDEAF"></span> Ofisde</span>
+      <span class="tab"><span class="swatch" style="background:#3FE0D0"></span> Ministrlige iberlen</span>
+      <span class="tab"><span class="swatch" style="background:#4169E2"></span> Ministrlikden çykan</span>
+      <span class="tab"><span class="swatch" style="background:#FFF59D"></span> Migrasiýa tabşyryldy</span>
+      <span class="tab is-on"><span class="swatch" style="background:#FED700"></span> CO belgisi alyndy <strong>19</strong></span>
+      <span class="tab"><span class="swatch" style="background:#86efac"></span> Resmileşdirildi</span>
+    </div>
+
+    <div class="layout">
+      <div class="card">
+        <div class="toolbar">
+          <span>Ministrlikler bilen ylalaşylýan ýüztutmalar</span>
+          <span>Prototip — ylalaşylandan soň programma giriziler</span>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Ýüztutmanyň belgisi</th>
+                <th>CO belgi</th>
+                <th>Profil</th>
+                <th>Adam</th>
+                <th>Ýüztutmanyň ýagdaýy we netijesi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="num">2026-01840</td>
+                <td>CO/UZ/1840</td>
+                <td>Wiza we Iş Rugsatnamasyny Uzaltmak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 03.11.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip chip--none">Wiza <b>0 / 2</b></span>
+                        <span class="timer timer--ok" title="Iş rugsady 03.11.2026 · wiza 18.12.2026 çenli"><span class="clock"></span>32 <small>gün</small></span>
+                      </div>
+                      <span class="why">Wagty bar. Reňk hasaplaýjynyň özünde — gök-ýaşyl. Wiza tegelegi çal. Setir degilmedi</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="num">2026-01811</td>
+                <td>CO/UZ/1811</td>
+                <td>Wiza we Iş Rugsatnamasyny Uzaltmak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 06.10.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip chip--warn">Wiza <b>1 / 2</b></span>
+                        <span class="timer timer--warn" title="Iş rugsady 06.10.2026 · wiza 20.11.2026 çenli"><span class="clock"></span>4 <small>gün</small></span>
+                      </div>
+                      <span class="why">Soňky 5 gün. Duýduryş reňki hasaplaýjyda we Wiza tegeleginde. Setir CO altyn reňkinde galýar</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr class="is-issued">
+                <td class="num">2026-01790</td>
+                <td>CO/UZ/1790</td>
+                <td>Wiza we Iş Rugsatnamasyny Uzaltmak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 02.10.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip chip--warn">Wiza <b>0 / 2</b></span>
+                        <span class="timer timer--warn" title="Iş rugsady 02.10.2026 · wiza 16.11.2026 çenli"><span class="clock"></span>0 <small>gün</small></span>
+                      </div>
+                      <span class="why">0 gün, wizalar ýok. Setir ýaşyl we Resmileşdirildi tabyna geçýär. Hasaplaýjy we Wiza tegelegi duýduryş reňkinde galýar</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr class="is-issued">
+                <td class="num">2026-01855</td>
+                <td>CO/UZ/1855</td>
+                <td>Wiza we Iş Rugsatnamasyny Uzaltmak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 01.11.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip">Wiza <b>2 / 2</b></span>
+                        <span class="timer timer--done" title="Soňky wiza 10.11.2026. Şol gün 36 gün galdy"><span class="clock"></span>36 <small>gün</small></span>
+                      </div>
+                      <span class="why">Ähli iş rugsady we ähli wiza goşuldy. Setir ýaşyl. Hasaplaýjy 36 gün, Wiza tegelegi adaty ýaşyl</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="num">2026-01890</td>
+                <td>CO/UZ/1890</td>
+                <td>Wiza we Iş Rugsatnamasyny Uzaltmak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 16.11.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip chip--none">Wiza <b>0 / 2</b></span>
+                        <span class="timer timer--ok" title="Iş rugsady 16.11.2026 · wiza 31.12.2026 çenli"><span class="clock"></span>45 <small>gün</small></span>
+                      </div>
+                      <span class="why">Bir hat, ähli adamlar içinde. Hat şu gün — hasaplaýjy 45 gün</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr class="is-issued">
+                <td class="num">2026-01770</td>
+                <td>CO/UZ/1770</td>
+                <td>Wiza we Iş Rugsatnamasyny Uzaltmak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 01.09.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip">Wiza <b>2 / 2</b></span>
+                        <span class="timer timer--done" title="Soňky wiza möhletden soň. Galyndy 0"><span class="clock"></span>0 <small>gün</small></span>
+                      </div>
+                      <span class="why">Ähli wiza goşuldy, soňky wiza giç. Setir ýaşyl. Hasaplaýjy üstünlik reňkinde, san 0</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="num">2026-01602</td>
+                <td>CO/ÇAK/1602</td>
+                <td>Çakylyk we Iş Rugsatnamasyny Almak</td>
+                <td>2</td>
+                <td>
+                  <div class="track">
+                    <div class="steps">
+                      <div class="step"><span>Ofis</span><i></i></div>
+                      <div class="step"><span>Ministrlik</span><i></i></div>
+                      <div class="step"><span>Migrasiýa</span><i></i></div>
+                      <div class="step"><span>CO 30.09.2026</span></div>
+                    </div>
+                    <div class="stems">
+                      <span class="chip">Çakylyk <b>2 / 2</b></span>
+                      <span class="chip">Iş rugsady <b>2 / 2</b></span>
+                      <div class="visa-line">
+                        <span class="chip">Wiza <b>2 / 2</b></span>
+                      </div>
+                      <span class="why">Bu profilde hasaplaýjy ýok</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="side">
+        <h2>Sazlama</h2>
+        <p>Configuration. Tutuş programma üçin bir jübüt. Profil boýunça däl.</p>
+        <label for="limit">Wiza berilmeli möhlet</label>
+        <div class="field">
+          <input id="limit" type="number" value="45" min="1" />
+          <span class="unit">gün</span>
+        </div>
+        <label for="warn">Duýduryş öňünden</label>
+        <div class="field">
+          <input id="warn" type="number" value="5" min="1" />
+          <span class="unit">gün</span>
+        </div>
+        <div class="note">45 günü 40 gün etseňiz, açyk setirler şol iş-rugsady senesinden täzeden hasaplanýar. 5, 4, 3, 2, 1 we 0 gün duýduryş reňkinde. Wiza döretmek ýapylmaýar.</div>
+      </aside>
+    </div>
+
+    <div class="legend">
+      <span class="timer timer--ok"><span class="clock"></span>32 gün · wagty bar</span>
+      <span class="timer timer--warn"><span class="clock"></span>4 gün we 0 gün · duýduryş</span>
+      <span class="chip chip--warn">Wiza 0/2 · möhlet geçdi, wiza ýok</span>
+      <span class="timer timer--done"><span class="clock"></span>36 gün · wizalar berildi</span>
+      <span>Setir reňki hasaplaýjydan üýtgemeýär</span>
+    </div>
+  </div>
+</body>
+</html>

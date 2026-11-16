@@ -37,6 +37,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             EnsureMinistryReviewSlaSettings();
             EnsureWorkPermitQuotaSettings();
+            EnsureVisaIssueWindowSettings();
             EnsureEmailSmtpSettings();
 
             ObjectSpace.CommitChanges();
@@ -70,6 +71,26 @@ namespace Visa2026.Module.DatabaseUpdate
             if (removed > 0)
             {
                 var line = $"OrganizationSingletonSeedUpdater: removed {removed} duplicate WorkPermitQuotaSettings row(s).";
+                Tracing.Tracer.LogText(line);
+                System.Diagnostics.Trace.WriteLine(line);
+            }
+        }
+
+        private void EnsureVisaIssueWindowSettings()
+        {
+            var settings = VisaIssueWindowSettings.GetOrCreateInstance(ObjectSpace);
+            if (settings.WindowDays <= 0)
+                settings.WindowDays = VisaIssueWindowSettings.DefaultWindowDays;
+            if (settings.WarningDays <= 0)
+                settings.WarningDays = VisaIssueWindowSettings.DefaultWarningDays;
+            if (settings.WarningDays > settings.WindowDays)
+                settings.WarningDays = settings.WindowDays;
+
+            var removed = OrganizationSingletonHelper.CollapseToSingleRow(
+                ObjectSpace, (VisaIssueWindowSettings _) => "Visa issue window");
+            if (removed > 0)
+            {
+                var line = $"OrganizationSingletonSeedUpdater: removed {removed} duplicate VisaIssueWindowSettings row(s).";
                 Tracing.Tracer.LogText(line);
                 System.Diagnostics.Trace.WriteLine(line);
             }

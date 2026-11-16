@@ -35,7 +35,7 @@ Turkmen labels below are the officer-facing names used in seed / localization (`
 
 Resolved in `ApplicationListViewDisplayState.Resolve`. Milestone colors **override** SLA tint for forced steps:
 
-1. **Via Ministries issuance green** — latest is `PROCESS_STARTED` **and** required Result chips are complete → paint as `PROCESS_ISSUED` (`ApplicationWorkspaceViaMinistryIssuanceGreenGate`). Invitation profiles ignore Visa chip.
+1. **Via Ministries issuance green** — latest is `PROCESS_STARTED` **and** required Result chips are complete → paint as `PROCESS_ISSUED` (`ApplicationWorkspaceViaMinistryIssuanceGreenGate`). Invitation profiles ignore the Visa chip. **Wiza we Iş Rugsatnamasyny Uzaltmak** (`extend_visa_wp`) is also green when every work permit is in and the visa-issue counter is **0 gün** while visas are still missing. The counter and the Wiza pill stay amber. The stored step stays **CO belgisi alyndy**. Report Dashboard is unchanged.
 2. **CO belgisi alyndy** — `PROCESS_STARTED` → `#FED700`
 3. **Migrasiýa gullugyna tabşyryldy** — `SUBMITTED_MIGRATION` → `#FFF59D`
 4. **Ministrlikden çykan** — last ministry leg `N_REVIEW_APPROVED` → `LAST_APPROVAL_COMPLETE` → `#4169E2`
@@ -66,14 +66,16 @@ All reject outcomes share one red (`#fca5a5`). Cancelled stays the lighter coral
 |------|------|
 | 2026-11-12 | Strategy captured: palette, Turkmen labels, precedence, yellow pair contrast (`#FFF59D` vs `#FED700`), Ministrlikden çykan blue, Ministrlige iberlen rename |
 | 2026-11-12 | Applied: palette/precedence wired; last-approval ListView label Ministrlikden çykan; unit tests lock hex + Resolve |
+| 2026-11-16 | `extend_visa_wp`: list row turns green at visa-window day 0 with visas still missing. Controls stay amber. Stored step stays CO belgisi alyndy |
 
 ## 6. Color filter tabs (ListView)
 
 Above every Application Profile Instance ListView grid:
 
 - **Ähli** always; every color bucket always visible (count may be **0**; empty grid when selected)
-- One tab **per painted color** (swatch + Turkmen label + count)
-- Filter uses `ProgressColorTabKey` from `ListRowAppearanceStateCode` (Via Ministries green gate and Ministrlikden çykan included)
+- One tab **per painted color** (swatch + Turkmen label + count) — **no** Cancelled / Ýüz tutma ýatyryldy tab (cancelled rows stay under Ähli)
+- Filter uses `ProgressColorTabKey` (Via Ministries green gate and Ministrlikden çykan included)
+- **Garşylyk berildi** = Application Result has **≥1** `Rejection` header (not progress-rejected alone)
 - Remembers last tab **per ListView id** in browser `localStorage`; unknown key → fall back to **Ähli**
 - Left nav (Via ministry / Direct migration) unchanged
 - **Gözleg/Search** tab: appears when searching (auto-selected); count = matches across all colors; clearing the box keeps Search at 0 until a color tab is chosen; color tabs stay visible
@@ -89,3 +91,4 @@ Prototype: [`docs/prototypes/application-profile-instance-listview-process-color
 
 | 2026-11-12 | Color filter tabs: per-ListView localStorage, Ähli fallback, one tab per painted color |
 | 2026-11-12 | Always show zero-count color tabs (incl. Rejected/Cancelled); click keeps filter / empty grid |
+| 2026-11-16 | Drop Cancelled tab; Garşylyk berildi = ≥1 Application Result Rejection |

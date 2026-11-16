@@ -456,7 +456,9 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                         builder.OpenElement(seq++, "div");
                         builder.AddAttribute(seq++, "class", "lv-result-neck");
                         builder.CloseElement();
-                        ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips);
+                        var visaWindow = application.ListViewVisaIssueWindow
+                            ?? Frame.GetController<ApplicationListViewPreloadController>()?.VisaWindowFor(application.ID);
+                        ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips, visaWindow);
                     }
 
                     if (alignViaMinistry)

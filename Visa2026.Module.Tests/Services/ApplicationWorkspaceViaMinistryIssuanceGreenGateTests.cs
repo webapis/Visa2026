@@ -172,6 +172,54 @@ public class ApplicationWorkspaceViaMinistryIssuanceGreenGateTests
     }
 
     [Fact]
+    public void IsGreen_true_for_extend_visa_wp_when_visas_missing_and_window_is_zero()
+    {
+        var app = ExtendVisaWpApp();
+        app.SetListViewResultCoverage(
+        [
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, 2, 2),
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, 0, 2),
+        ]);
+        app.SetListViewVisaIssueWindow(new VisaIssueWindowCalculator.Badge(0, "warn", true, "0"));
+
+        Assert.True(ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(
+            app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+    }
+
+    [Fact]
+    public void IsGreen_false_for_extend_visa_wp_when_window_still_open()
+    {
+        var app = ExtendVisaWpApp();
+        app.SetListViewResultCoverage(
+        [
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, 2, 2),
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, 1, 2),
+        ]);
+        app.SetListViewVisaIssueWindow(new VisaIssueWindowCalculator.Badge(4, "warn", true, "4"));
+
+        Assert.False(ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(
+            app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+    }
+
+    [Fact]
+    public void IsGreen_false_for_extend_visa_wp_when_work_permit_incomplete()
+    {
+        var app = ExtendVisaWpApp();
+        app.SetListViewResultCoverage(
+        [
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, 1, 2),
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, 0, 2),
+        ]);
+        app.SetListViewVisaIssueWindow(new VisaIssueWindowCalculator.Badge(0, "warn", true, "0"));
+
+        Assert.False(ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(
+            app,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+    }
+
+    [Fact]
     public void IsGreen_false_for_invitation_and_wp_when_wp_incomplete()
     {
         var app = ViaMinistryApp(produceInvitation: true, produceVisa: true, produceWorkPermit: true);
@@ -185,6 +233,13 @@ public class ApplicationWorkspaceViaMinistryIssuanceGreenGateTests
         Assert.False(ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(
             app,
             ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+    }
+
+    private static ApplicationProfileInstance ExtendVisaWpApp()
+    {
+        var app = ViaMinistryApp(produceInvitation: false, produceVisa: true, produceWorkPermit: true);
+        app.ApplicationProfile!.Code = VisaIssueWindowCalculator.ProfileCode;
+        return app;
     }
 
     private static ApplicationProfileInstance ViaMinistryApp(

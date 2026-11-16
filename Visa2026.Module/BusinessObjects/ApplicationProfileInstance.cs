@@ -267,6 +267,7 @@ namespace Visa2026.Module.BusinessObjects
         private string? listRowCssClass;
         private int? listViewTotalPersonCount;
         private IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip>? listViewResultCoverageChips;
+        private VisaIssueWindowCalculator.Badge? listViewVisaIssueWindow;
         private IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? listViewProgressSteps;
         private IReadOnlyList<ApplicationListLinkedPeople.Row>? listViewLinkedPeople;
         private int? listViewCompletionPercentage;
@@ -285,6 +286,9 @@ namespace Visa2026.Module.BusinessObjects
             IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> chips) =>
             listViewResultCoverageChips = chips;
 
+        public void SetListViewVisaIssueWindow(VisaIssueWindowCalculator.Badge? badge) =>
+            listViewVisaIssueWindow = badge;
+
         public void SetListViewProgressSteps(
             IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> steps) =>
             listViewProgressSteps = steps;
@@ -300,6 +304,11 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> ListViewResultCoverageChips =>
             listViewResultCoverageChips ?? Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+
+        /// <summary>Visa-issue day counter for the list. Null until preload, or when this profile has no window.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public VisaIssueWindowCalculator.Badge? ListViewVisaIssueWindow => listViewVisaIssueWindow;
 
         /// <summary>Same people coverage as Ýüztutmanyň netijesi (Netije syny). Display-only.</summary>
         [XafDisplayName("Application result")]

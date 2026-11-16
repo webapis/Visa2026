@@ -144,6 +144,14 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var invitationReplacements = LoadInvitationReplacements(objectSpace, ids);
         var expiredWorkPermit = LoadExpiredWorkPermits(objectSpace, ids);
         var expiredVisa = LoadExpiredVisas(objectSpace, ids);
+        var windowApplications = applications
+            .Where(a => a.ID != Guid.Empty && VisaIssueWindowCalculator.Applies(a.ApplicationProfile?.Code))
+            .Select(a => a.ID)
+            .Distinct()
+            .ToList();
+        var workPermitIssued = LoadWorkPermitIssuedDates(objectSpace, windowApplications);
+        var visaIssued = LoadVisaIssueDates(objectSpace, windowApplications);
+        var (windowDays, warningDays) = VisaIssueWindowSettings.Current(objectSpace);
 
         foreach (var application in applications)
         {
@@ -165,7 +173,16 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 [ApplicationWorkspaceIssuedRecordsCatalog.BorderZone] = CountOnRoster(borderZone, application.ID, activeRoster),
                 [ApplicationWorkspaceIssuedRecordsCatalog.WorkPermitLocationGrant] = CountOnRoster(locationGrant, application.ID, activeRoster),
             };
-            application.SetListViewResultCoverage(Build(application, rosterCount, coverage));
+            var chips = Build(application, rosterCount, coverage);
+            application.SetListViewResultCoverage(chips);
+            application.SetListViewVisaIssueWindow(VisaIssueWindowCalculator.ForCoverage(
+                application.ApplicationProfile?.Code,
+                chips,
+                IssuedDateFor(workPermitIssued, application.ID),
+                LastVisaIssued(visaIssued, application.ID, activeRoster),
+                DateTime.Today,
+                windowDays,
+                warningDays));
             // Full roster so excluded people still appear with the case Excluded badge (no Inv/Visa/WP marks).
             application.SetListViewLinkedPeople(ApplicationListLinkedPeople.Build(
                 application,
@@ -468,6 +485,91 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
         var active = new HashSet<Guid>(rosterIds);
         active.ExceptWith(excludedIds);
         return active;
+    }
+
+    private static DateTime? IssuedDateFor(IReadOnlyDictionary<Guid, DateTime> dates, Guid id) =>
+        dates.TryGetValue(id, out var date) && date != default ? date : null;
+
+    private static DateTime? LastVisaIssued(
+        IReadOnlyDictionary<Guid, Dictionary<Guid, DateTime>> byInstance,
+        Guid applicationId,
+        HashSet<Guid>? activeRoster)
+    {
+        if (!byInstance.TryGetValue(applicationId, out var people) || people.Count == 0)
+            return null;
+
+        DateTime? latest = null;
+        foreach (var pair in people)
+        {
+            if (activeRoster is { Count: > 0 } && !activeRoster.Contains(pair.Key))
+                continue;
+            if (pair.Value == default)
+                continue;
+            if (latest == null || pair.Value > latest)
+                latest = pair.Value;
+        }
+
+        return latest;
+    }
+
+    private static Dictionary<Guid, DateTime> LoadWorkPermitIssuedDates(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        var result = new Dictionary<Guid, DateTime>();
+        if (objectSpace == null || ids.Count == 0)
+            return result;
+
+        var rows = objectSpace.GetObjectsQuery<WorkPermit>()
+            .Where(w => w.ApplicationProfileInstance != null && ids.Contains(w.ApplicationProfileInstance.ID))
+            .Select(w => new { Id = w.ApplicationProfileInstance.ID, w.IssuedDate })
+            .ToList();
+        foreach (var row in rows)
+        {
+            if (row.IssuedDate == default)
+                continue;
+            if (!result.TryGetValue(row.Id, out var current) || row.IssuedDate < current)
+                result[row.Id] = row.IssuedDate;
+        }
+
+        return result;
+    }
+
+    private static Dictionary<Guid, Dictionary<Guid, DateTime>> LoadVisaIssueDates(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid> ids)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, DateTime>>();
+        if (objectSpace == null || ids.Count == 0)
+            return result;
+
+        var rows = objectSpace.GetObjectsQuery<Visa>()
+            .Where(v => v.IssuingApplicationProfileInstance != null
+                && ids.Contains(v.IssuingApplicationProfileInstance.ID)
+                && v.Passport != null
+                && v.Passport.Person != null)
+            .Select(v => new
+            {
+                Id = v.IssuingApplicationProfileInstance.ID,
+                PersonId = v.Passport.Person.ID,
+                v.IssueDate,
+            })
+            .ToList();
+        foreach (var row in rows)
+        {
+            if (row.IssueDate == default)
+                continue;
+            if (!result.TryGetValue(row.Id, out var people))
+            {
+                people = new Dictionary<Guid, DateTime>();
+                result[row.Id] = people;
+            }
+
+            if (!people.TryGetValue(row.PersonId, out var current) || row.IssueDate > current)
+                people[row.PersonId] = row.IssueDate;
+        }
+
+        return result;
     }
 
     private static int CountOnRoster(
