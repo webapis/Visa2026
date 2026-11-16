@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using DevExpress.ExpressApp;
 
+using Visa2026.Module.Services.OfficerShell;
+
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
@@ -105,6 +107,10 @@ public static class ApplicationProfileSubmitToOrganizationHelper
 
         if (string.IsNullOrWhiteSpace(value))
         {
+            if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateSubmitToChange(
+                    objectSpace, application, string.Empty, out error))
+                return false;
+
             application.SubmitToApprovingMinistry = null;
             application.SubmitToApprovingMinistryId = null;
             application.SubmitToMigrationService = null;
@@ -128,6 +134,11 @@ public static class ApplicationProfileSubmitToOrganizationHelper
                 return false;
             }
 
+            var ministryValue = MinistryValuePrefix + ministry.ID.ToString("D");
+            if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateSubmitToChange(
+                    objectSpace, application, ministryValue, out error))
+                return false;
+
             application.SubmitToApprovingMinistry = ministry;
             application.SubmitToApprovingMinistryId = ministry.ID;
             application.SubmitToMigrationService = null;
@@ -141,6 +152,11 @@ public static class ApplicationProfileSubmitToOrganizationHelper
             error = "Migration service not found.";
             return false;
         }
+
+        var migrationValue = MigrationValuePrefix + migration.ID.ToString("D");
+        if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateSubmitToChange(
+                objectSpace, application, migrationValue, out error))
+            return false;
 
         application.SubmitToMigrationService = migration;
         application.SubmitToMigrationServiceId = migration.ID;

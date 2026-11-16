@@ -61,6 +61,10 @@
                             {
                                 <span class="os-person-link-picker__block">@row.BlockReason</span>
                             }
+                            else if (!string.IsNullOrWhiteSpace(row.LinkNote))
+                            {
+                                <span class="os-person-link-picker__note">@row.LinkNote</span>
+                            }
                         </div>
                         <button type="button"
                                 class="os-btn os-btn--primary os-person-link-picker__link @(isThisLinking ? "is-busy" : null)"

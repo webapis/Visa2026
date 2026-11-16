@@ -13,7 +13,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: inherit;
+  -webkit-text-fill-color: inherit;
+}
+.officer-case-workspace .target-app-search__value,
+.officer-shell .target-app-search__value {
   color: var(--os-ink, #1e293b);
+  -webkit-text-fill-color: var(--os-ink, #1e293b);
 }
 .target-app-search__value.is-readonly {
   opacity: 0.85;

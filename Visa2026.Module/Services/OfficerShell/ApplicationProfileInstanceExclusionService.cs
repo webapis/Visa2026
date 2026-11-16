@@ -42,7 +42,42 @@ public sealed class ApplicationProfileInstanceExclusionRosterRow
     public bool IsExcluded => ExclusionId.HasValue;
 }
 
-public sealed record ApplicationProfileInstanceExcludedPerson(Guid ExclusionId, string LetterNumber, DateTime LetterDate);
+public sealed record ApplicationProfileInstanceExcludedPerson(
+    Guid ExclusionId,
+    string LetterNumber,
+    DateTime LetterDate,
+    IReadOnlyList<(string LetterNumber, DateTime LetterDate)>? MoreLetters = null)
+{
+    public int LetterCount => 1 + (MoreLetters?.Count ?? 0);
+
+    public IReadOnlyList<(string LetterNumber, DateTime LetterDate)> AllLetters()
+    {
+        if (MoreLetters == null || MoreLetters.Count == 0)
+            return [(LetterNumber, LetterDate)];
+
+        var list = new List<(string LetterNumber, DateTime LetterDate)>(LetterCount)
+        {
+            (LetterNumber, LetterDate),
+        };
+        list.AddRange(MoreLetters);
+        return list;
+    }
+
+    public ApplicationProfileInstanceExcludedPerson WithAdditionalLetter(string letterNumber, DateTime letterDate)
+    {
+        var number = string.IsNullOrWhiteSpace(letterNumber) ? "—" : letterNumber.Trim();
+        foreach (var existing in AllLetters())
+        {
+            if (string.Equals(existing.LetterNumber, number, StringComparison.OrdinalIgnoreCase)
+                && existing.LetterDate.Date == letterDate.Date)
+                return this;
+        }
+
+        var more = MoreLetters?.ToList() ?? new List<(string LetterNumber, DateTime LetterDate)>();
+        more.Add((number, letterDate.Date));
+        return this with { MoreLetters = more };
+    }
+}
 
 public sealed class ApplicationProfileInstanceExclusionResult
 {
@@ -495,12 +530,15 @@ public static class ApplicationProfileInstanceExclusionQueries
                 continue;
             foreach (var person in seretmezlik.People)
             {
-                if (person == null || person.ID == Guid.Empty || result.ContainsKey(person.ID))
+                if (person == null || person.ID == Guid.Empty)
                     continue;
-                result[person.ID] = new ApplicationProfileInstanceExcludedPerson(
-                    seretmezlik.ID,
-                    letterNumber,
-                    letterDate);
+                if (result.TryGetValue(person.ID, out var existing))
+                    result[person.ID] = existing.WithAdditionalLetter(letterNumber, letterDate);
+                else
+                    result[person.ID] = new ApplicationProfileInstanceExcludedPerson(
+                        seretmezlik.ID,
+                        letterNumber,
+                        letterDate);
             }
         }
 
@@ -525,7 +563,9 @@ public static class ApplicationProfileInstanceExclusionQueries
         {
             if (!letterById.TryGetValue(row.ExclusionId, out var letter))
                 continue;
-            if (!result.ContainsKey(row.PersonId))
+            if (result.TryGetValue(row.PersonId, out var existing))
+                result[row.PersonId] = existing.WithAdditionalLetter(letter.LetterNumber, letter.LetterDate);
+            else
                 result[row.PersonId] = new ApplicationProfileInstanceExcludedPerson(letter.ID, letter.LetterNumber, letter.LetterDate);
         }
 

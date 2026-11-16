@@ -165,9 +165,12 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             p => p.RequireTargetApplicationProfileInstance,
             ApplicationProfileConfigurationResolver.ShowTargetApplicationProfileInstance,
             application);
+        var targetId = application.TargetApplicationProfileInstanceId
+            ?? application.TargetApplicationProfileInstance?.ID;
+        var target = ResolveTargetApplicationProfileInstance(application, objectSpace, targetId);
         var targetLocked = targetVisible
-            && application.TargetApplicationProfileInstanceId.HasValue
-            && application.TargetApplicationProfileInstanceId.Value != Guid.Empty
+            && targetId.HasValue
+            && targetId.Value != Guid.Empty
             && (application.People?.Any(p => p != null && p.ID != Guid.Empty) == true);
         AddLookup(
             fields,
@@ -176,13 +179,11 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             "purple",
             "🔗",
             targetVisible,
-            application.TargetApplicationProfileInstanceId ?? application.TargetApplicationProfileInstance?.ID,
-            FormatTargetInstanceLabel(application.TargetApplicationProfileInstance),
-            catalogs.TargetApplicationProfileInstances,
+            targetId,
+            FormatTargetInstanceLabel(target),
+            EnsureSelectedTargetOption(catalogs.TargetApplicationProfileInstances, target),
             readOnly: targetLocked,
-            LookupFill(
-                application.TargetApplicationProfileInstanceId ?? application.TargetApplicationProfileInstance?.ID,
-                defaultId: null));
+            LookupFill(targetId, defaultId: null));
 
         AddSubmitToOrganizationField(fields, application, profile, catalogs);
 
@@ -1196,6 +1197,40 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             : ApplicationWorkspaceCaseSummaryFillState.Default;
     }
 
+    private static ApplicationProfileInstance? ResolveTargetApplicationProfileInstance(
+        ApplicationProfileInstance application,
+        IObjectSpace? objectSpace,
+        Guid? targetId)
+    {
+        var target = application.TargetApplicationProfileInstance;
+        if (target != null)
+            return target;
+        if (objectSpace == null || targetId is not Guid id || id == Guid.Empty)
+            return null;
+        return objectSpace.GetObjectByKey<ApplicationProfileInstance>(id);
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceLookupOption> EnsureSelectedTargetOption(
+        IReadOnlyList<ApplicationWorkspaceLookupOption> options,
+        ApplicationProfileInstance? selected)
+    {
+        if (selected == null || selected.ID == Guid.Empty)
+            return options;
+        if (options.Any(o => o.Id == selected.ID))
+            return options;
+
+        var selectedOption = Catalogs.ToTargetApplicationLookupOption(selected);
+        if (options.Count == 0)
+            return [selectedOption];
+
+        var list = new List<ApplicationWorkspaceLookupOption>(options.Count + 1) { selectedOption };
+        list.AddRange(options);
+        return list;
+    }
+
+    /// <summary>
+    /// Officer-facing label: number · date · profile (never a GUID).
+    /// </summary>
     private static string FormatTargetInstanceLabel(ApplicationProfileInstance? target)
     {
         if (target == null)
@@ -1204,16 +1239,16 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         var number = !string.IsNullOrWhiteSpace(target.FullApplicationNumber)
             ? target.FullApplicationNumber.Trim()
             : target.ApplicationNumber?.Trim() ?? string.Empty;
+        var date = target.ApplicationDate == default
+            ? string.Empty
+            : target.ApplicationDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
         var profileName = target.ApplicationProfile?.DisplayName
             ?? target.ApplicationProfile?.Name
             ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(number) && string.IsNullOrWhiteSpace(profileName))
-            return string.Empty;
-        if (string.IsNullOrWhiteSpace(profileName))
-            return number;
-        if (string.IsNullOrWhiteSpace(number))
-            return profileName;
-        return $"{number} · {profileName}";
+
+        return string.Join(
+            " · ",
+            new[] { number, date, profileName }.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 
     private static bool TrySetTargetApplicationProfileInstance(
@@ -1693,7 +1728,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .ToList();
         }
 
-        private static ApplicationWorkspaceLookupOption ToTargetApplicationLookupOption(
+        internal static ApplicationWorkspaceLookupOption ToTargetApplicationLookupOption(
             ApplicationProfileInstance instance)
         {
             var display = FormatTargetInstanceLabel(instance);
@@ -1709,9 +1744,12 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             var number = !string.IsNullOrWhiteSpace(instance.FullApplicationNumber)
                 ? instance.FullApplicationNumber.Trim()
                 : instance.ApplicationNumber?.Trim() ?? string.Empty;
+            var date = instance.ApplicationDate == default
+                ? string.Empty
+                : instance.ApplicationDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
             var search = string.Join(
                 ' ',
-                new[] { number, display, detail }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                new[] { number, date, display, detail }.Where(s => !string.IsNullOrWhiteSpace(s)));
 
             return new ApplicationWorkspaceLookupOption
             {

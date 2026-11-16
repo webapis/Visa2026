@@ -125,3 +125,4 @@
 .sm-tpl-manual__hint { font-size: 0.78rem; color: var(--os-muted); margin: 0 0 8px; line-height: 1.45; }
 .sm-tpl-table code { font-size: 0.76rem; background: #f8fafc; border: 1px solid #eef2f6; border-radius: 5px; padding: 1px 5px; }
 .sm-tpl-example { color: var(--os-muted); font-size: 0.76rem; }
+.cw-excluded-badge.is-multi { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; border-top: 3px double #991b1b; padding-top: 5px; border-radius: 8px; white-space: normal; max-width: min(100%, 22rem); }

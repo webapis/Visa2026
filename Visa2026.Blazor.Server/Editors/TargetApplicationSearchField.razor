@@ -78,6 +78,8 @@
     private ElementReference _searchInput;
 
     [Parameter] public string? Value { get; set; }
+    /// <summary>Human label (number · date · profile). Never fall back to showing Value (GUID).</summary>
+    [Parameter] public string? Caption { get; set; }
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
     [Parameter] public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; set; } = Array.Empty<ApplicationWorkspaceLookupOption>();
     [Parameter] public bool ReadOnly { get; set; }
@@ -98,9 +100,18 @@
         {
             if (string.IsNullOrWhiteSpace(Value))
                 return string.Empty;
+
             var match = Options.FirstOrDefault(o =>
                 string.Equals(o.Id.ToString("D"), Value, StringComparison.OrdinalIgnoreCase));
-            return match?.DisplayName ?? Value ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(match?.DisplayName))
+                return match!.DisplayName;
+
+            var caption = Caption?.Trim();
+            if (!string.IsNullOrWhiteSpace(caption) && caption != "—")
+                return caption;
+
+            // Value is a GUID key — never show it to officers.
+            return string.Empty;
         }
     }
 

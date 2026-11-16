@@ -10,6 +10,29 @@ namespace Visa2026.Module.Tests.Services;
 
 public class ApplicationListLinkedPeopleTests
 {
+    
+
+    [Fact]
+    public void FormatExcludedBadge_lists_both_Seretmezlik_numbers_when_multi()
+    {
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("tk-TM");
+            var badge = ApplicationListLinkedPeople.FormatExcludedBadge(
+                "11/-037",
+                new DateTime(2026, 11, 16),
+                [("11/-038", new DateTime(2026, 11, 16))]);
+            Assert.Contains("11/-037", badge, StringComparison.Ordinal);
+            Assert.Contains("11/-038", badge, StringComparison.Ordinal);
+            Assert.StartsWith("⊘ ", badge, StringComparison.Ordinal);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
+    }
+
     [Fact]
     public void Build_marks_each_person_for_the_results_that_profile_produces()
     {

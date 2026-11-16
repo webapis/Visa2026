@@ -956,3 +956,4 @@ button.ct-letter-preview:disabled { cursor: default; opacity: 0.65; }
   min-width: 0;
   text-align: left;
 }
+.os-person-link-picker__note { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--os-muted, #64748b); font-weight: 600; }

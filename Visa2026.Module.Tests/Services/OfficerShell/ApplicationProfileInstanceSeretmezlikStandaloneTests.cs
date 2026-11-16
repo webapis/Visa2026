@@ -18,6 +18,7 @@ public class ApplicationProfileInstanceSeretmezlikStandaloneTests
         {
             ID = Guid.NewGuid(),
             FullApplicationNumber = "M/R/-1807",
+            ApplicationDate = new DateTime(2026, 1, 15),
             ApplicationProfile = new ApplicationProfile { Name = "Wiza uzaltmak" },
         };
         var application = new ApplicationProfileInstance
@@ -33,6 +34,9 @@ public class ApplicationProfileInstanceSeretmezlikStandaloneTests
         Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Lookup, field.Kind);
         Assert.Equal(target.ID, field.SelectedId);
         Assert.Contains("M/R/-1807", field.DisplayValue, StringComparison.Ordinal);
+        Assert.Contains("15.01.2026", field.DisplayValue, StringComparison.Ordinal);
+        Assert.Contains("Wiza uzaltmak", field.DisplayValue, StringComparison.Ordinal);
+        Assert.DoesNotContain(target.ID.ToString("D"), field.DisplayValue, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -167,5 +171,70 @@ public class ApplicationProfileInstanceSeretmezlikStandaloneTests
         Assert.Empty(ApplicationProfileInstanceSeretmezlikRosterHelper.GetLinkableTargetPersonIds(
             objectSpace: null!,
             seretmezlik));
+    }
+
+    [Fact]
+    public void HasDestination_UsesSubmitToIds()
+    {
+        var app = new ApplicationProfileInstance();
+        Assert.False(ApplicationProfileInstanceSeretmezlikRosterHelper.HasDestination(app));
+
+        app.SubmitToMigrationServiceId = Guid.NewGuid();
+        Assert.True(ApplicationProfileInstanceSeretmezlikRosterHelper.HasDestination(app));
+        Assert.StartsWith(
+            ApplicationProfileSubmitToOrganizationHelper.MigrationValuePrefix,
+            ApplicationProfileInstanceSeretmezlikRosterHelper.GetDestinationKey(app),
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ExcludedPerson_WithAdditionalLetter_IncreasesCount()
+    {
+        var first = new ApplicationProfileInstanceExcludedPerson(
+            Guid.NewGuid(),
+            "11/-037",
+            new DateTime(2026, 11, 16));
+        var two = first.WithAdditionalLetter("11/-038", new DateTime(2026, 11, 16));
+        Assert.Equal(2, two.LetterCount);
+        Assert.Equal(2, two.AllLetters().Count);
+        var same = two.WithAdditionalLetter("11/-038", new DateTime(2026, 11, 16));
+        Assert.Equal(2, same.LetterCount);
+    }
+
+    [Fact]
+    public void RequiresSubmitToBeforeLink_OnlyViaMinistrySubmitToProfiles()
+    {
+        var viaMinistry = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequireTargetApplicationProfileInstance = true,
+                RequireSubmitToOrganization = true,
+            },
+            CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        Assert.True(ApplicationProfileInstanceSeretmezlikRosterHelper.RequiresSubmitToBeforeLink(viaMinistry));
+
+        var direct = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequireTargetApplicationProfileInstance = true,
+                RequireSubmitToOrganization = true,
+            },
+            CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+        };
+        Assert.False(ApplicationProfileInstanceSeretmezlikRosterHelper.RequiresSubmitToBeforeLink(direct));
+
+        var noSubmitField = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequireTargetApplicationProfileInstance = true,
+                RequireSubmitToOrganization = false,
+            },
+            CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+        };
+        Assert.False(ApplicationProfileInstanceSeretmezlikRosterHelper.RequiresSubmitToBeforeLink(noSubmitField));
     }
 }

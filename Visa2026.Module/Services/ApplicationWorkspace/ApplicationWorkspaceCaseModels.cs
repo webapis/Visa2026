@@ -407,6 +407,14 @@ public sealed class ApplicationWorkspaceCasePerson
 
     public DateTime? ExcludedLetterDate { get; set; }
 
+    /// <summary>Additional Seretmezlik letters when the person is on more than one case for this target.</summary>
+    public IReadOnlyList<(string LetterNumber, DateTime LetterDate)>? ExcludedMoreLetters { get; set; }
+
+    public int ExcludedLetterCount =>
+        ExcludedLetterDate.HasValue
+            ? 1 + (ExcludedMoreLetters?.Count ?? 0)
+            : 0;
+
     public bool IsExcluded => ExcludedLetterDate.HasValue;
 }
 

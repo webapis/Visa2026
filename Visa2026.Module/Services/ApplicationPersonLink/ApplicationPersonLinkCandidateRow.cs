@@ -19,4 +19,7 @@ public sealed class ApplicationProfileInstancePersonLinkCandidateRow
     public bool CanLink { get; init; } = true;
 
     public string? BlockReason { get; init; }
+
+    /// <summary>Non-blocking note (e.g. already on another Seretmezlik).</summary>
+    public string? LinkNote { get; init; }
 }

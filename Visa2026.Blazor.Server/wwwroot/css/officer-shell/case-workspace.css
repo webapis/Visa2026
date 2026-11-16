@@ -3203,3 +3203,4 @@ select.cw-summary-field__input option {
   background: rgba(15, 23, 42, 0.55);
   border-color: rgba(148, 163, 184, 0.28);
 }
+.os-person-link-picker__note { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--os-muted, #64748b); font-weight: 600; }

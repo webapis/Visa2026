@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
@@ -41,16 +42,25 @@ public static class ApplicationListLinkedPeople
         string Tone,
         string? State);
 
-    /// <param name="ExcludedLetterNumber">Seretmezlik letter / case number when this person is excluded on the target.</param>
-    /// <param name="ExcludedLetterDate">Letter / application date for the same excluded state as People &amp; links.</param>
+    /// <param name="ExcludedLetterNumber">First Seretmezlik letter / case number when excluded on the target.</param>
+    /// <param name="ExcludedLetterDate">First letter / application date.</param>
+    /// <param name="ExcludedLetterCount">How many Seretmezlik cases exclude this person (chip uses double overline when &gt; 1).</param>
+    /// <param name="ExcludedMoreLetters">Additional Seretmezlik numbers/dates after the first.</param>
     public readonly record struct Row(
         Guid PersonId,
         string Name,
         IReadOnlyList<Mark> Marks,
         string? ExcludedLetterNumber = null,
-        DateTime? ExcludedLetterDate = null)
+        DateTime? ExcludedLetterDate = null,
+        int ExcludedLetterCount = 0,
+        IReadOnlyList<(string LetterNumber, DateTime LetterDate)>? ExcludedMoreLetters = null)
     {
         public bool IsExcluded => ExcludedLetterDate.HasValue;
+
+        public int ResolvedExcludedLetterCount =>
+            ExcludedLetterCount > 0
+                ? ExcludedLetterCount
+                : ExcludedLetterDate.HasValue ? 1 : 0;
     }
 
     /// <summary>
@@ -67,8 +77,28 @@ public static class ApplicationListLinkedPeople
         return "⊘ " + VisaUiMessages.Format("PersonDossier.Status.Excluded", number, date);
     }
 
+    public static string FormatExcludedBadge(
+        string? letterNumber,
+        DateTime? letterDate,
+        IReadOnlyList<(string LetterNumber, DateTime LetterDate)>? moreLetters)
+    {
+        var first = FormatExcludedBadge(letterNumber, letterDate);
+        if (string.IsNullOrEmpty(first) || moreLetters == null || moreLetters.Count == 0)
+            return first;
+
+        var suffix = string.Join(
+            " · ",
+            moreLetters.Select(l =>
+            {
+                var n = string.IsNullOrWhiteSpace(l.LetterNumber) ? "—" : l.LetterNumber.Trim();
+                var d = l.LetterDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+                return "№ " + n + " · " + d;
+            }));
+        return first + " · " + suffix;
+    }
+
     public static string FormatExcludedBadge(Row row) =>
-        FormatExcludedBadge(row.ExcludedLetterNumber, row.ExcludedLetterDate);
+        FormatExcludedBadge(row.ExcludedLetterNumber, row.ExcludedLetterDate, row.ExcludedMoreLetters);
 
     /// <summary>Hover / title — localized <c>ApplicationProfileInstance.People.ExcludedByTitle</c>.</summary>
     public static string FormatExcludedTitle(string? letterNumber, DateTime? letterDate)
@@ -122,7 +152,9 @@ public static class ApplicationListLinkedPeople
                     NameOf(names, personId),
                     Array.Empty<Mark>(),
                     excluded.LetterNumber,
-                    excluded.LetterDate));
+                    excluded.LetterDate,
+                    excluded.LetterCount,
+                    excluded.MoreLetters));
                 continue;
             }
 

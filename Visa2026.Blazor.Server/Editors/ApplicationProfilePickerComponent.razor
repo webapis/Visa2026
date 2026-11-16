@@ -786,6 +786,7 @@
                      && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
             {
                 <TargetApplicationSearchField Value="@field.Value"
+                                              Caption="@field.DisplayValue"
                                               Options="@field.Options"
                                               ReadOnly="@field.ReadOnly"
                                               Placeholder="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"

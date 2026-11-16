@@ -1833,6 +1833,7 @@
                      && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
             {
                 <TargetApplicationSearchField Value="@field.Value"
+                                              Caption="@field.DisplayValue"
                                               Options="@field.Options"
                                               ReadOnly="@readOnly"
                                               Placeholder="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"
@@ -3099,7 +3100,7 @@
                                                 @onclick="() => OpenExistingPersonLinkReviewAsync(person.PersonId)">@person.Name</button>
                                         @if (person.IsExcluded)
                                         {
-                                            <span class="cw-excluded-badge" title="@ExcludedTitle(person)">@ApplicationListLinkedPeople.FormatExcludedBadge(person.ExcludedLetterNumber, person.ExcludedLetterDate)</span>
+                                            <span class="cw-excluded-badge @(person.ExcludedLetterCount > 1 ? "is-multi" : null)" title="@ExcludedTitle(person)">@ApplicationListLinkedPeople.FormatExcludedBadge(person.ExcludedLetterNumber, person.ExcludedLetterDate, person.ExcludedMoreLetters)</span>
                                         }
                                     </td>
                                     <td>@person.RoleLabel</td>

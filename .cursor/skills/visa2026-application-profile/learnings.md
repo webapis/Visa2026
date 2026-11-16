@@ -1,3 +1,15 @@
+## 2026-11-16 — Direct-migration Seretmezlik link picker must not require Submit-to
+
+- **Need**: Via-ministry Seretmezlik showed target people; direct-migration Seretmezlik showed none.
+- **Fix**: Require Submit-to before Link only when `ShowSubmitToOrganization` (via-ministry + RequireSubmitToOrganization). Direct-migration has no Submit-to field — `GetLinkableTargetPersonIds` no longer returns empty for missing destination.
+- **Officer**: Rebuild/F5. Open direct-migration Seretmezlik with a target — Link existing lists target roster people.
+- **Prevent**: Do not gate Seretmezlik linking on `HasDestination` alone; use `RequiresSubmitToBeforeLink`.
+## 2026-11-16 — Same person on multiple Seretmezliks when Submit-to differs
+
+- **Need**: One target person (e.g. Alperen on `10/-2034`) must join Seretmezlik for Migrasiýa and another for Energetika. Link picker hid anyone already excluded by the first Seretmezlik.
+- **Fix**: Link allow-list no longer drops all excluded people — only same **Submit to organization** destination blocks a second link. Submit-to is required before Link. Changing Submit-to to a conflicting destination (or clearing it while people are linked) fails save. Picker shows “Already on Seretmezlik …”. Target ListView / People badges list both numbers on one chip with double overline when count > 1. Application Result exclusion unchanged.
+- **Officer**: Set Submit-to on the second Seretmezlik first, then Link existing — Alperen appears with a note. Target list shows both Seretmezlik numbers on one red chip.
+- **Prevent**: Do not reintroduce “already excluded on target → cannot link”. Do not allow same destination twice for the same person+target.
 ## 2026-11-13 — Manual Linked records lists can show active visas and work permits only
 
 - **Need**: Gear on Linked records is how an officer sets Visa or Work permit by hand. Those dropdowns listed one auto-picked permit, or every historical visa. Join without the gear still uses the automatic Last-N value.

@@ -589,7 +589,10 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 result[targetId] = byPerson;
             }
 
-            byPerson.TryAdd(personId, meta);
+            if (byPerson.TryGetValue(personId, out var existing))
+                byPerson[personId] = existing.WithAdditionalLetter(meta.LetterNumber, meta.LetterDate);
+            else
+                byPerson[personId] = meta;
         }
 
         var seretmezlikCases = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()

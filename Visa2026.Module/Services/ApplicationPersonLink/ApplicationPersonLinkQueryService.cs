@@ -21,8 +21,9 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
 
         var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
 
-        // Seretmezlik: only active people on the Target application (empty when target unset).
+        // Seretmezlik: target-roster people still allowed for this Submit-to destination.
         CriteriaOperator? rosterScope = null;
+        IReadOnlyDictionary<Guid, string> otherNotes = new Dictionary<Guid, string>();
         if (ApplicationProfileInstanceSeretmezlikRosterHelper.IsSeretmezlik(application))
         {
             var allowedIds = ApplicationProfileInstanceSeretmezlikRosterHelper
@@ -31,6 +32,8 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
                 return Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
 
             rosterScope = new InOperator(nameof(Person.ID), allowedIds.Cast<object>().ToArray());
+            otherNotes = ApplicationProfileInstanceSeretmezlikRosterHelper
+                .GetOtherSeretmezlikNotesForTargetPeople(objectSpace, application!);
         }
 
         var notLinked = CriteriaOperator.Parse(
@@ -52,13 +55,16 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
             .OrderBy(p => p.LastName)
             .ThenBy(p => p.FirstName)
             .Take(maxResults)
-            .Select(MapRow)
+            .Select(p => MapRow(p, otherNotes))
             .ToList();
     }
 
-    private static ApplicationProfileInstancePersonLinkCandidateRow MapRow(Person person)
+    private static ApplicationProfileInstancePersonLinkCandidateRow MapRow(
+        Person person,
+        IReadOnlyDictionary<Guid, string> otherNotes)
     {
         var canLink = !ApplicationProfileInstancePersonLinkPassportGate.TryGetBlockReason(person, out var blockReason);
+        otherNotes.TryGetValue(person.ID, out var note);
         return new ApplicationProfileInstancePersonLinkCandidateRow
         {
             PersonId = person.ID,
@@ -69,6 +75,7 @@ public sealed class ApplicationProfileInstancePersonLinkQueryService : IApplicat
             HasPhoto = person.Photo is { Length: > 0 },
             CanLink = canLink,
             BlockReason = canLink ? null : blockReason,
+            LinkNote = canLink ? note : null,
         };
     }
 

@@ -139,6 +139,9 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
         {
             builder.OpenElement(seq++, "div");
             builder.AddAttribute(seq++, "class", person.IsExcluded ? "lv-people__row is-excluded" : "lv-people__row");
+
+            builder.OpenElement(seq++, "div");
+            builder.AddAttribute(seq++, "class", person.IsExcluded ? "lv-people__main" : "lv-people__main lv-people__main--inline");
             builder.OpenElement(seq++, "span");
             builder.AddAttribute(seq++, "class", "lv-people__name");
             builder.AddContent(seq++, person.Name);
@@ -146,17 +149,47 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
 
             if (person.IsExcluded)
             {
+                var letters = person.ExcludedMoreLetters == null || person.ExcludedMoreLetters.Count == 0
+                    ? null
+                    : person.ExcludedMoreLetters;
                 var badge = ApplicationListLinkedPeople.FormatExcludedBadge(person);
                 if (!string.IsNullOrEmpty(badge))
                 {
                     builder.OpenElement(seq++, "span");
-                    builder.AddAttribute(seq++, "class", "lv-people__excluded");
+                    var excludedClass = person.ResolvedExcludedLetterCount > 1
+                        ? "lv-people__excluded is-multi"
+                        : "lv-people__excluded";
+                    builder.AddAttribute(seq++, "class", excludedClass);
                     builder.AddAttribute(seq++, "title", badge);
-                    builder.AddContent(seq++, badge);
+
+                    var firstLine = ApplicationListLinkedPeople.FormatExcludedBadge(
+                        person.ExcludedLetterNumber,
+                        person.ExcludedLetterDate);
+                    builder.OpenElement(seq++, "span");
+                    builder.AddAttribute(seq++, "class", "lv-people__excluded-line");
+                    builder.AddContent(seq++, firstLine);
+                    builder.CloseElement();
+
+                    if (letters != null)
+                    {
+                        foreach (var letter in letters)
+                        {
+                            var n = string.IsNullOrWhiteSpace(letter.LetterNumber) ? "—" : letter.LetterNumber.Trim();
+                            var d = letter.LetterDate.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                            builder.OpenElement(seq++, "span");
+                            builder.AddAttribute(seq++, "class", "lv-people__excluded-line");
+                            builder.AddContent(seq++, "№ " + n + " · " + d);
+                            builder.CloseElement();
+                        }
+                    }
+
                     builder.CloseElement();
                 }
             }
-            else if (person.Marks.Count > 0)
+
+            builder.CloseElement(); // lv-people__main
+
+            if (!person.IsExcluded && person.Marks.Count > 0)
             {
                 builder.OpenElement(seq++, "span");
                 builder.AddAttribute(seq++, "class", "lv-people__marks");
