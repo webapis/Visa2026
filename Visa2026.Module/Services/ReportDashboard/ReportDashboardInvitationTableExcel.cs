@@ -289,13 +289,25 @@ public static class ReportDashboardInvitationTableExcel
 
     private static bool TryOfficerDate(string text, out DateTime date)
     {
+        var invariant = System.Globalization.CultureInfo.InvariantCulture;
+        if (DateTime.TryParseExact(
+                text,
+                "dd.MM.yyyy",
+                invariant,
+                System.Globalization.DateTimeStyles.None,
+                out date))
+            return true;
+
         var cultures = new[]
         {
-            System.Globalization.CultureInfo.InvariantCulture,
+            invariant,
             System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+            System.Globalization.CultureInfo.GetCultureInfo("tr-TR"),
+            System.Globalization.CultureInfo.GetCultureInfo("tk-TM"),
         };
         foreach (var culture in cultures)
         {
+            // Legacy preview strings before dd.MM.yyyy (e.g. "MMM dd, yyyy" / localized months).
             if (DateTime.TryParseExact(text, "MMM dd, yyyy", culture, System.Globalization.DateTimeStyles.None, out date))
                 return true;
         }

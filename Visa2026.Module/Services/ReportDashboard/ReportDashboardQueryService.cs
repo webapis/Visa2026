@@ -894,7 +894,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
             var totalCount = buckets.Sum(b => b.Count);
             var rows = labeled
-                .OrderByDescending(x => x.Row.ApplicationDate)
+                .OrderBy(x => OfficerDateSortGroup(x.Row.ApplicationDate))
+                .ThenBy(x => OfficerDateSortValue(x.Row.ApplicationDate))
                 .ThenBy(x => x.Row.PersonName)
                 .Take(PreviewLimit)
                 .Select(x =>
@@ -988,7 +989,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
             var totalCount = buckets.Sum(b => b.Count);
             var rows = labeled
-                .OrderBy(x => x.Row.PersonName)
+                .OrderBy(x => OfficerDateSortGroup(x.Row.VisaEndDate))
+                .ThenBy(x => VisaDaysRemainingSortValue(x.Row.VisaEndDate))
+                .ThenBy(x => x.Row.PersonName)
                 .Take(PreviewLimit)
                 .Select(x =>
                 {
@@ -1869,7 +1872,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
 
             var rows = labeled
-                .OrderByDescending(x => x.Row.ExpirationDate)
+                .OrderBy(x => OfficerDateSortGroup(x.Row.ExpirationDate))
+                .ThenBy(x => OfficerDateSortValue(x.Row.ExpirationDate))
                 .ThenBy(x => x.Row.PersonName)
                 .Take(PreviewLimit)
                 .Select(x =>
@@ -2946,7 +2950,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var buckets = AssignCategoricalCss(groups);
 
             var rows = labeled
-                .OrderByDescending(x => x.Row.ApplicationDate)
+                .OrderBy(x => OfficerDateSortGroup(x.Row.ApplicationDate))
+                .ThenBy(x => OfficerDateSortValue(x.Row.ApplicationDate))
                 .ThenBy(x => x.Row.PersonName)
                 .Take(PreviewLimit)
                 .Select(x =>
@@ -4519,7 +4524,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
         var totalCount = buckets.Sum(b => b.Count);
         var rows = labeled
-            .OrderBy(x => x.Row.PersonName)
+            .OrderBy(x => OfficerDateSortGroup(x.Row.VisaEndDate))
+            .ThenBy(x => VisaDaysRemainingSortValue(x.Row.VisaEndDate))
+            .ThenBy(x => x.Row.PersonName)
             .Take(PreviewLimit)
             .Select(x =>
             {
@@ -6826,11 +6833,24 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         return project.Name ?? string.Empty;
     }
 
-    private static string FormatDate(DateTime? value) =>
-        value.HasValue ? value.Value.ToString("MMM dd, yyyy") : string.Empty;
+    /// <summary>Officer-facing dates — same <c>dd.MM.yyyy</c> style as çalışma izni listesi.</summary>
+    private static string FormatDate(DateTime? value) => FormatOfficerDay(value);
 
     private static string FormatOfficerDay(DateTime? value) =>
-        value is { Year: > 1900 } date ? date.ToString("dd.MM.yyyy") : string.Empty;
+        value is { Year: > 1900 } date
+            ? date.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture)
+            : string.Empty;
+
+    /// <summary>0 = missing/blank first; 1 = real officer date.</summary>
+    private static int OfficerDateSortGroup(DateTime? value) =>
+        value is { Year: > 1900 } ? 1 : 0;
+
+    private static DateTime OfficerDateSortValue(DateTime? value) =>
+        value is { Year: > 1900 } date ? date.Date : DateTime.MinValue;
+
+    /// <summary>Days until visa end (negative when expired). Used after <see cref="OfficerDateSortGroup"/>.</summary>
+    private static int VisaDaysRemainingSortValue(DateTime? visaEnd) =>
+        visaEnd is { Year: > 1900 } value ? (value.Date - DateTime.Today).Days : 0;
 
     private static string FormatLastApproval(
         DateTime? approval1Date, string? approval1Number,

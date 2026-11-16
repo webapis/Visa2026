@@ -6395,6 +6395,18 @@
     "tk-TM": "Saýlananlary Excel-de aç",
     "ru-RU": "Открыть выбранные в Excel"
   },
+  "ReportDashboard.Chrome.OpenSelectedInExcelEmployees": {
+    "en": "Open selected in Excel (Employees)",
+    "tr-TR": "Seçilenleri Excel'e aktar (Personel)",
+    "tk-TM": "Saýlananlary Excel-de aç (Işgärler)",
+    "ru-RU": "Открыть выбранные в Excel (Сотрудники)"
+  },
+  "ReportDashboard.Chrome.OpenSelectedInExcelFamilyMembers": {
+    "en": "Open selected in Excel (Family Members)",
+    "tr-TR": "Seçilenleri Excel'e aktar (Aile üyeleri)",
+    "tk-TM": "Saýlananlary Excel-de aç (Maşgala agzalary)",
+    "ru-RU": "Открыть выбранные в Excel (Члены семьи)"
+  },
   "ReportDashboard.Chrome.ExcelBundleTitle": {
     "en": "Reports in this file",
     "tr-TR": "Bu dosyadaki raporlar",

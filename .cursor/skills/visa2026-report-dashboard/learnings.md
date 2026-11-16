@@ -30,6 +30,28 @@ Date format: `YYYY-MM-DD`
 **Files:** `ReportDashboardComponent.razor`
 
 
+## 2026-11-16 — Officer-fill sheet sort keys
+
+**Ask:** Sort preview+Excel: aktiv/çalışma by Vize bitmesine kalan süre asc; hazır davetiye by expiration earliest; process kısa/uzun + uzatımlar by Başvuru tarihi earliest. FM twins same; blanks first; name A→Z ties.
+
+**Now:** QueryService loaders use `OfficerDateSortGroup` / `OfficerDateSortValue` / `VisaDaysRemainingSortValue`. Excel follows preview row order.
+
+**Prevent:** Do not reintroduce `OrderByDescending` expiration/application for these officer-fill sheets without matching the officer column semantics.
+
+**Files:** `ReportDashboardQueryService.cs`
+
+
+## 2026-11-16 — Invitation dates dd.MM.yyyy + Excel button labels
+
+**Ask:** Invitation ready / process (short+long) dates should match çalışma izni `dd.MM.yyyy` in preview and Excel (Employees + FM); composite ministry/migration cells too; all Invitation officer dates; fix raw `OpenSelectedInExcelEmployees` / `FamilyMembers` button keys.
+
+**Now:** `FormatDate` uses `FormatOfficerDay` (`dd.MM.yyyy`). Invitation Excel `TryOfficerDate` accepts `dd.MM.yyyy` first (legacy `MMM dd, yyyy` kept). Localization keys added to `UiStrings.messages.json` + `VisaUiMessageCatalog.g.cs`.
+
+**Prevent:** Do not reintroduce culture `MMM dd, yyyy` for dashboard dates. When adding Excel chrome keys, seed both messages JSON and generated catalog (or regenerate).
+
+**Files:** `ReportDashboardQueryService.cs`, `ReportDashboardInvitationTableExcel.cs`, `UiStrings.messages.json`, `VisaUiMessageCatalog.g.cs`
+
+
 ## 2026-11-11 — Employees / Family Members parent tabs
 
 **Ask:** Separate sub-report chips under parent Employees / Family Members tabs on every category. Default Employees. Work Permit has no Family parent.
