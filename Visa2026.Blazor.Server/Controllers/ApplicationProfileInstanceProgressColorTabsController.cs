@@ -176,6 +176,8 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
                 .ToList()
                 ?? [];
 
+            StampApplicationResultRejectionFlags(countCache);
+
             RebuildTabsFromCache();
             ApplySelectionFilter();
         }
@@ -186,6 +188,25 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
 
         if (reloadToolbar)
             ApplyToolbar();
+    }
+
+    /// <summary>
+    /// Garşylyk berildi counts/filter need Rejection headers; ListView rows often omit the nav.
+    /// </summary>
+    private void StampApplicationResultRejectionFlags(IReadOnlyList<ApplicationProfileInstance> applications)
+    {
+        if (applications.Count == 0 || ObjectSpace == null)
+            return;
+
+        var ids = applications.Select(a => a.ID).Distinct().ToList();
+        var withRejection = ObjectSpace.GetObjectsQuery<Rejection>()
+            .Where(r => r.ApplicationProfileInstance != null && ids.Contains(r.ApplicationProfileInstance.ID))
+            .Select(r => r.ApplicationProfileInstance!.ID)
+            .Distinct()
+            .ToHashSet();
+
+        foreach (var application in applications)
+            application.SetListViewHasApplicationResultRejection(withRejection.Contains(application.ID));
     }
 
     private void RebuildTabsFromCache()

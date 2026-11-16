@@ -219,9 +219,17 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         ApplicationWorkspaceIssuedResultListCoverage.ApplyTo(ObjectSpace, applications);
         ApplicationWorkspaceListProgressSteps.ApplyTo(ObjectSpace, applications);
 
+        var rejectionInstanceIds = ObjectSpace.GetObjectsQuery<Rejection>()
+            .Where(r => r.ApplicationProfileInstance != null && batchIds.Contains(r.ApplicationProfileInstance.ID))
+            .Select(r => r.ApplicationProfileInstance!.ID)
+            .Distinct()
+            .ToHashSet();
+
         foreach (var application in applications)
         {
             application.SetListViewTotalPersonCount(personCounts.GetValueOrDefault(application.ID, 0));
+            application.SetListViewHasApplicationResultRejection(
+                rejectionInstanceIds.Contains(application.ID));
             application.InvalidateListViewDisplayCache();
             application.WarmListViewDisplayCache();
             progressById[application.ID] = application.ListViewProgressSteps;
@@ -258,6 +266,12 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             row.SetListViewVisaIssueWindow(source.ListViewVisaIssueWindow);
             row.SetListViewProgressSteps(source.ListViewProgressSteps);
             row.SetListViewLinkedPeople(source.ListViewLinkedPeople);
+            if (source.ListViewHasApplicationResultRejection.HasValue)
+            {
+                row.SetListViewHasApplicationResultRejection(
+                    source.ListViewHasApplicationResultRejection.Value);
+            }
+
             row.InvalidateListViewDisplayCache();
             row.WarmListViewDisplayCache();
         }

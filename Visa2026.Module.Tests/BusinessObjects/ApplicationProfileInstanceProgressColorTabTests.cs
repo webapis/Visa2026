@@ -45,10 +45,62 @@ public class ApplicationProfileInstanceProgressColorTabTests
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Issued && t.Count == 2);
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Submitted && t.Count == 0);
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Rejected && t.Count == 0);
-        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Cancelled && t.Count == 0);
+        Assert.DoesNotContain(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Cancelled);
         Assert.Equal(
             ApplicationProfileInstanceProgressColorTab.OrderedBucketKeys.Count + 1,
             tabs.Count);
+    }
+
+    [Fact]
+    public void NormalizeSelection_falls_back_when_cancelled_tab_removed()
+    {
+        var tabs = ApplicationProfileInstanceProgressColorTab.BuildTabs(
+            [AppWithAppearance("PROCESS_ISSUED")],
+            selectedKey: "office");
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.AllKey,
+            ApplicationProfileInstanceProgressColorTab.NormalizeSelection(
+                ApplicationProfileInstanceProgressColorTab.Cancelled,
+                tabs));
+    }
+
+    [Fact]
+    public void ResolveBucketKey_instance_uses_Application_Result_Rejection()
+    {
+        var withRejection = AppWithAppearance("PROCESS_ISSUED");
+        withRejection.Rejections = new ObservableCollection<Rejection>
+        {
+            new Rejection(),
+        };
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.Rejected,
+            ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(withRejection));
+
+        var progressRejectedOnly = AppWithAppearance("PROCESS_REJECTED");
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.ProcessStarted,
+            ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(progressRejectedOnly));
+
+        var reviewRejectedOnly = AppWithAppearance("2_REVIEW_REJECTED");
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.ApprovalInProgress,
+            ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(reviewRejectedOnly));
+    }
+
+    [Fact]
+    public void BuildTabs_counts_Garşylyk_from_Rejection_headers()
+    {
+        var withRejection = AppWithAppearance("PROCESS_ISSUED");
+        withRejection.Rejections = new ObservableCollection<Rejection> { new Rejection() };
+
+        var tabs = ApplicationProfileInstanceProgressColorTab.BuildTabs(
+            [withRejection, AppWithAppearance("PROCESS_ISSUED")],
+            selectedKey: ApplicationProfileInstanceProgressColorTab.Rejected);
+
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Rejected && t.Count == 1);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Issued && t.Count == 1);
     }
 
     [Fact]
@@ -105,6 +157,7 @@ public class ApplicationProfileInstanceProgressColorTabTests
                 ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
             },
             ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+            Rejections = new ObservableCollection<Rejection>(),
         };
 
         if (string.Equals(appearanceCode, "IS_BEING_PREPARED", System.StringComparison.OrdinalIgnoreCase))

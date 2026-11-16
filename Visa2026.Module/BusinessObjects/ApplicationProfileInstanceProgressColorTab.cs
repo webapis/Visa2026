@@ -23,6 +23,7 @@ public static class ApplicationProfileInstanceProgressColorTab
     public const string ProcessStarted = "process-started";
     public const string Issued = "issued";
     public const string Rejected = "rejected";
+    /// <summary>Progress-cancelled bucket key (no ListView color tab; cancelled rows stay under Ähli).</summary>
     public const string Cancelled = "cancelled";
 
     private static readonly string[] BucketOrder =
@@ -34,7 +35,6 @@ public static class ApplicationProfileInstanceProgressColorTab
         ProcessStarted,
         Issued,
         Rejected,
-        Cancelled,
     ];
 
     public readonly record struct TabInfo(string Key, string Label, string BackgroundHex, int Count);
@@ -89,11 +89,38 @@ public static class ApplicationProfileInstanceProgressColorTab
         return Office;
     }
 
+    /// <summary>
+    /// True when Application Result has at least one <see cref="Rejection"/> header
+    /// (Garşylyk berildi tab membership).
+    /// </summary>
+    public static bool HasApplicationResultRejection(ApplicationProfileInstance application)
+    {
+        ArgumentNullException.ThrowIfNull(application);
+        if (application.ListViewHasApplicationResultRejection.HasValue)
+            return application.ListViewHasApplicationResultRejection.Value;
+
+        return application.Rejections != null && application.Rejections.Count > 0;
+    }
+
     public static string ResolveBucketKey(ApplicationProfileInstance application)
     {
         ArgumentNullException.ThrowIfNull(application);
+        if (HasApplicationResultRejection(application))
+            return Rejected;
+
         var display = ApplicationListViewDisplayState.Resolve(application);
-        return ResolveBucketKey(display.ListRowAppearanceStateCode, display.PrimaryStateCode);
+        var key = ResolveBucketKey(display.ListRowAppearanceStateCode, display.PrimaryStateCode);
+
+        // Garşylyk berildi is Application Result Rejection only — not progress-rejected alone.
+        if (string.Equals(key, Rejected, StringComparison.OrdinalIgnoreCase))
+        {
+            var appearance = display.ListRowAppearanceStateCode?.Trim() ?? string.Empty;
+            if (ApplicationProfileInstanceProgressLegCodes.IsReviewRejectedStateCode(appearance))
+                return ApprovalInProgress;
+            return ProcessStarted;
+        }
+
+        return key;
     }
 
     public static string GetSearchLabel(CultureInfo? culture = null)

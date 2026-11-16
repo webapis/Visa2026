@@ -271,6 +271,7 @@ namespace Visa2026.Module.BusinessObjects
         private IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? listViewProgressSteps;
         private IReadOnlyList<ApplicationListLinkedPeople.Row>? listViewLinkedPeople;
         private int? listViewCompletionPercentage;
+        private bool? listViewHasApplicationResultRejection;
 
         /// <summary>Clears cached ListView computed fields (progress display, SLA, row color).</summary>
         public void InvalidateListViewDisplayCache()
@@ -299,11 +300,23 @@ namespace Visa2026.Module.BusinessObjects
         public void SetListViewCompletionPercentage(int percent) =>
             listViewCompletionPercentage = Math.Clamp(percent, 0, 100);
 
+        /// <summary>
+        /// ListView stamp: Application Result has ≥1 <see cref="Rejection"/> header
+        /// (Garşylyk berildi color tab). Null until stamped by preload / color-tab cache.
+        /// </summary>
+        public void SetListViewHasApplicationResultRejection(bool value) =>
+            listViewHasApplicationResultRejection = value;
+
         /// <summary>Preloaded Result-tab people coverage for ListView chips. Empty until preload.</summary>
         [Browsable(false)]
         [NotMapped]
         public IReadOnlyList<ApplicationWorkspaceIssuedResultListCoverage.Chip> ListViewResultCoverageChips =>
             listViewResultCoverageChips ?? Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
+
+        /// <summary>Null until ListView stamps whether Application Result has a Rejection.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public bool? ListViewHasApplicationResultRejection => listViewHasApplicationResultRejection;
 
         /// <summary>Visa-issue day counter for the list. Null until preload, or when this profile has no window.</summary>
         [Browsable(false)]
@@ -406,9 +419,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [NotMapped]
         public string ProgressColorTabKey =>
-            ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(
-                ListRowAppearanceStateCode,
-                PrimaryStateCode);
+            ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(this);
 
         /// <summary>
         /// ListView sort key for the Application progress column — same 0-100 scale as CompletionPercentage.
