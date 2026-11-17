@@ -13,7 +13,7 @@ public sealed class PersonIntakeWizardDetailViewLayoutController : ObjectViewCon
 {
     public PersonIntakeWizardDetailViewLayoutController()
     {
-        TargetViewId = PersonDetailViewIds.Employee + ";" + PersonDetailViewIds.FamilyMember;
+        TargetViewId = PersonDetailViewIds.EmployeeIntake + ";" + PersonDetailViewIds.FamilyMemberIntake;
     }
 
     protected override void OnActivated()

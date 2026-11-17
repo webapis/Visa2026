@@ -1,8 +1,10 @@
 # Person intake wizard — implementation plan
 
-**Status:** plan only. No application code.
+**Status:** in progress (create wizard + dual open path).
 
-Officer create and update for **Employee** and **Family member** moves into one wizard. The person can be saved while required information is still missing, and the Employees and Family members lists split into **Complete** and **Incomplete**. Temporary visitors keep the current detail view.
+Until the wizard is finished: **New** on Employees / Family members opens the intake wizard; **open / double-click** an existing row opens the **native** Person DetailView (`Person_DetailView_Employee` / `Person_DetailView_FamilyMember`). Temporary visitors stay native-only. When the wizard is complete, open-existing can switch to the wizard as well.
+
+Officer create for **Employee** and **Family member** moves into one wizard. The person can be saved while required information is still missing, and the Employees and Family members lists split into **Complete** and **Incomplete**.
 
 Prototypes:
 
@@ -19,8 +21,9 @@ Related docs: [PERSON_INCOMPLETE_DATA.md](PERSON_INCOMPLETE_DATA.md), [OPTIONAL_
 
 ### Where it lives
 
-- **New**, double-click, and **Provide info** on `Person_ListView_Employees` and `Person_ListView_FamilyMembers` open the wizard.
-- The wizard is the master-data surface of `Person_DetailView_Employee` and `Person_DetailView_FamilyMember`. The XAF shell, left navigation, and those two list views stay.
+- **New** on `Person_ListView_Employees` and `Person_ListView_FamilyMembers` opens the wizard (`PersonIntakeWizardHost`).
+- **Open / double-click** (transition period) opens the native typed DetailView. **Provide info** will open the wizard once that slice ships.
+- The XAF shell, left navigation, and those two list views stay.
 - Role comes from the list that created the person (`PersonListViewController.OnObjectCreated` already sets `PersonRole`). There is no Employee / Family member switch inside the wizard.
 - **Issued documents** (applications, work permits, invitations, rejections, emailed documents) stay out of the steps. A saved person can still open the existing `IssuedDocumentsTabs` from the wizard. New persons keep that section hidden (`PersonDetailViewIssuedDocumentsLayoutController`).
 

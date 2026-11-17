@@ -973,7 +973,7 @@
         <ColumnInfo Id="MiddleName" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_EmployeeIntake" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
+    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_Employee" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
@@ -1014,7 +1014,7 @@
         <ColumnInfo Id="SponsoringEmployee" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMemberIntake" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
+    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMember" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />

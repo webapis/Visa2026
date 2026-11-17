@@ -8,8 +8,9 @@ using Visa2026.Module.Services.PersonIntake;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Routes Employees / Family members list views to typed Person detail views (non-Blazor hosts).
-/// Blazor uses <see cref="PersonListViewBlazorNavigationController"/> for URL-based navigation.
+/// Employees / Family members: <b>New</b> opens the intake wizard; row open uses typed native DetailViews.
+/// Blazor row navigation is <c>PersonListViewBlazorNavigationController</c> (URL to native detail).
+/// Temporary visitors: classic create + typed detail only.
 /// </summary>
 public sealed class PersonListViewController : ViewController<ListView>
 {

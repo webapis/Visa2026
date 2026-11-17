@@ -2971,6 +2971,8 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Çalışan"></DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Aile üyesi"></DetailView>
     <DetailView Id="Person_DetailView_EmployeeIntake" Caption="Çalışan"></DetailView>
     <DetailView Id="Person_DetailView_FamilyMemberIntake" Caption="Aile üyesi"></DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Geçici ziyaretçi">

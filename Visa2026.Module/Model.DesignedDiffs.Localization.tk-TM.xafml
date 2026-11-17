@@ -2971,6 +2971,8 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Işgär"></DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy"></DetailView>
     <DetailView Id="Person_DetailView_EmployeeIntake" Caption="Işgär"></DetailView>
     <DetailView Id="Person_DetailView_FamilyMemberIntake" Caption="Maşgala agzy"></DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Wagtlaýyn myhman">

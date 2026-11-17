@@ -15,8 +15,8 @@ public static class PersonIntakeWizardModelPatch
 {
     private static readonly string[] ViewIds =
     [
-        PersonDetailViewIds.Employee,
-        PersonDetailViewIds.FamilyMember
+        PersonDetailViewIds.EmployeeIntake,
+        PersonDetailViewIds.FamilyMemberIntake
     ];
 
     private const string WizardHostGroupId = "PersonIntakeWizardHost";

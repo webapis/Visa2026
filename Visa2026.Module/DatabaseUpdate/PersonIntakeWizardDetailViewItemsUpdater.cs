@@ -11,8 +11,8 @@ public sealed class PersonIntakeWizardDetailViewItemsUpdater
 {
     private static readonly string[] ViewIds =
     [
-        PersonDetailViewIds.Employee,
-        PersonDetailViewIds.FamilyMember
+        PersonDetailViewIds.EmployeeIntake,
+        PersonDetailViewIds.FamilyMemberIntake
     ];
 
     public override void UpdateNode(ModelNode node)

@@ -18,8 +18,10 @@ public sealed class PersonDetailViewIssuedDocumentsLayoutController : ObjectView
 
     public PersonDetailViewIssuedDocumentsLayoutController()
     {
-        // Intake wizard owns Employee / Family member chrome; keep classic issued-docs behavior for visitors only.
-        TargetViewId = PersonDetailViewIds.TemporaryVisitor;
+        // Classic native Person detail views (wizard create uses PersonIntakeWizardHost, not these).
+        TargetViewId = PersonDetailViewIds.Employee + ";"
+            + PersonDetailViewIds.FamilyMember + ";"
+            + PersonDetailViewIds.TemporaryVisitor;
     }
 
     private string ResolveNewRecordHintKey() =>

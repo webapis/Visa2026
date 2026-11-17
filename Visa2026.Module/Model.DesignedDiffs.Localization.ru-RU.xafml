@@ -2971,6 +2971,8 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник"></DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи"></DetailView>
     <DetailView Id="Person_DetailView_EmployeeIntake" Caption="Сотрудник"></DetailView>
     <DetailView Id="Person_DetailView_FamilyMemberIntake" Caption="Член семьи"></DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Временный посетитель">
