@@ -18,7 +18,8 @@ public sealed class PersonDetailViewIssuedDocumentsLayoutController : ObjectView
 
     public PersonDetailViewIssuedDocumentsLayoutController()
     {
-        TargetViewId = PersonNestedCollectionLayout.TypedDetailViewIds;
+        // Intake wizard owns Employee / Family member chrome; keep classic issued-docs behavior for visitors only.
+        TargetViewId = PersonDetailViewIds.TemporaryVisitor;
     }
 
     private string ResolveNewRecordHintKey() =>

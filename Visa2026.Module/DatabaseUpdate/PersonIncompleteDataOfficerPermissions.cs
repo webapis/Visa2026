@@ -37,6 +37,7 @@ public static class PersonIncompleteDataOfficerPermissions
         }
 
         EnsurePopupDialogPermissions(role);
+        EnsurePendingItemPermissions(role);
 
         foreach (string memberName in PersonIncompleteMemberNames)
         {
@@ -65,6 +66,28 @@ public static class PersonIncompleteDataOfficerPermissions
         {
             newPerm.NavigateState = SecurityPermissionState.Allow;
         }
+    }
+
+    private static void EnsurePendingItemPermissions(PermissionPolicyRole role)
+    {
+        var targetType = typeof(PersonPendingItem);
+        var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+        if (existingPerm != null)
+        {
+            existingPerm.ReadState = SecurityPermissionState.Allow;
+            existingPerm.WriteState = SecurityPermissionState.Allow;
+            existingPerm.CreateState = SecurityPermissionState.Allow;
+            existingPerm.DeleteState = SecurityPermissionState.Allow;
+            existingPerm.NavigateState = SecurityPermissionState.Allow;
+            return;
+        }
+
+        const string crud =
+            $"{SecurityOperations.Read};{SecurityOperations.Write};{SecurityOperations.Create};{SecurityOperations.Delete}";
+        role.AddTypePermission<PersonPendingItem>(crud, SecurityPermissionState.Allow);
+        var newPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+        if (newPerm != null)
+            newPerm.NavigateState = SecurityPermissionState.Allow;
     }
 
     private static void EnsureMemberWritePermission<T>(PermissionPolicyRole role, string memberName) where T : class

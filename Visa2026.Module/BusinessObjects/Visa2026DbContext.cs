@@ -66,6 +66,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<MaritalStatus> MaritalStatuses { get; set; }
         public DbSet<Relationship> Relationships { get; set; }
         public DbSet<Person> People { get; set; }
+        public DbSet<PersonPendingItem> PersonPendingItems { get; set; }
         public DbSet<Visa> Visas { get; set; }
         public DbSet<VisaImage> VisaImages { get; set; }
         public DbSet<VisaType> VisaTypes { get; set; }
@@ -1331,6 +1332,19 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<Person>()
                 .Navigation(p => p.TravelHistories)
                 .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            modelBuilder.Entity<PersonPendingItem>(b =>
+            {
+                b.ToTable("PersonPendingItems");
+                b.Property(x => x.TargetKey).HasMaxLength(128).IsRequired();
+                b.Property(x => x.AreaKey).HasMaxLength(64).IsRequired();
+                b.Property(x => x.Note).HasMaxLength(2000);
+                b.HasOne(x => x.Person)
+                    .WithMany(p => p.PendingItems)
+                    .HasForeignKey("PersonID")
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex("PersonID");
+            });
 
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
             {

@@ -311,7 +311,7 @@ public static class E2ETestLoginValues
     public const string EmployeesListViewPath = "Person_ListView_Employees";
 
     /// <summary>Expected detail view id after New on the employees list.</summary>
-    public const string EmployeeDetailViewPath = "Person_DetailView_Employee";
+    public const string EmployeeDetailViewPath = "Person_DetailView_EmployeeIntake";
 
     /// <summary>EasyTest sidebar navigation item path (fallback only — prefer <see cref="EmployeesListViewPath"/> URL).</summary>
     public const string EmployeesNavigationPath = "Employees";
@@ -320,7 +320,7 @@ public static class E2ETestLoginValues
     public const string FamilyMembersListViewPath = "Person_ListView_FamilyMembers";
 
     /// <summary>Expected detail view id after New on the family members list.</summary>
-    public const string FamilyMemberDetailViewPath = "Person_DetailView_FamilyMember";
+    public const string FamilyMemberDetailViewPath = "Person_DetailView_FamilyMemberIntake";
 
     /// <summary>EasyTest sidebar navigation item path (fallback only).</summary>
     public const string FamilyMembersNavigationPath = "Family Members";

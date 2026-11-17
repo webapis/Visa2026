@@ -52,6 +52,9 @@ public static class FamilyMemberDefaultEducation
             return false;
         if (person.Educations != null && person.Educations.Any(e => e != null))
             return false;
+        if (person.PendingItems != null && person.PendingItems.Any(item =>
+                item != null && item.TargetKey == PersonPendingTargets.Education))
+            return false;
         return true;
     }
 

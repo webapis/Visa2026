@@ -3,6 +3,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.PersonIntake;
 
 namespace Visa2026.Module.Controllers;
 
@@ -13,6 +14,7 @@ namespace Visa2026.Module.Controllers;
 public sealed class PersonListViewController : ViewController<ListView>
 {
     private ListViewProcessCurrentObjectController? _processCurrentObjectController;
+    private NewObjectViewController? _newObjectController;
 
     public PersonListViewController()
     {
@@ -36,9 +38,46 @@ public sealed class PersonListViewController : ViewController<ListView>
                 _processCurrentObjectController.CustomHandleProcessSelectedItem += OnCustomHandleProcessSelectedItem;
         }
 
-        var newObjectController = Frame.GetController<NewObjectViewController>();
-        if (newObjectController != null)
-            newObjectController.ObjectCreated += OnObjectCreated;
+        _newObjectController = Frame.GetController<NewObjectViewController>();
+        if (_newObjectController != null)
+        {
+            _newObjectController.ObjectCreated += OnObjectCreated;
+            if (_newObjectController.NewObjectAction != null)
+                _newObjectController.NewObjectAction.Executing += OnNewExecuting;
+        }
+    }
+
+    private void OnNewExecuting(object? sender, CancelEventArgs e)
+    {
+        if (!TryGetIntakeRole(View.Id, out var role))
+            return;
+
+        var wizard = PersonIntakeWizardOpenHelper.OpenNew(Application, role);
+        if (wizard == null)
+            return;
+
+        e.Cancel = true;
+        Application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(wizard) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(Frame, null));
+    }
+
+    private static bool TryGetIntakeRole(string? listViewId, out PersonRecordRole role)
+    {
+        if (listViewId == "Person_ListView_Employees")
+        {
+            role = PersonRecordRole.Employee;
+            return true;
+        }
+
+        if (listViewId == "Person_ListView_FamilyMembers")
+        {
+            role = PersonRecordRole.FamilyMember;
+            return true;
+        }
+
+        role = default;
+        return false;
     }
 
     private void OnCreateCustomCurrentObjectDetailView(object sender, CreateCustomCurrentObjectDetailViewEventArgs e)
@@ -149,9 +188,13 @@ public sealed class PersonListViewController : ViewController<ListView>
             _processCurrentObjectController = null;
         }
 
-        var newObjectController = Frame.GetController<NewObjectViewController>();
-        if (newObjectController != null)
-            newObjectController.ObjectCreated -= OnObjectCreated;
+        if (_newObjectController != null)
+        {
+            _newObjectController.ObjectCreated -= OnObjectCreated;
+            if (_newObjectController.NewObjectAction != null)
+                _newObjectController.NewObjectAction.Executing -= OnNewExecuting;
+            _newObjectController = null;
+        }
 
         base.OnDeactivated();
     }

@@ -1,0 +1,720 @@
+@using System.IO
+@using System.Linq
+@using DevExpress.ExpressApp
+@using DevExpress.Persistent.BaseImpl.EF
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Rendering
+@using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.PersonIntake
+
+@if (Person == null)
+{
+    <div class="person-intake-wizard__empty">No person loaded.</div>
+}
+else
+{
+    var steps = PersonIntakeStepCatalog.Steps(Person);
+    var active = steps[Math.Clamp(_stepIndex, 0, steps.Count - 1)];
+    var findings = PersonIntakeCompleteness.Evaluate(Person, State.PendingKeys);
+    var unresolved = findings.Where(f => f.State == PersonIntakeItemState.Unresolved).ToList();
+    var pending = findings.Where(f => f.State == PersonIntakeItemState.Pending).ToList();
+
+    <div class="person-intake-wizard">
+        <header class="person-intake-wizard__header">
+            <div>
+                <h1 class="person-intake-wizard__title">
+                    @(ObjectSpace?.IsNewObject(Person) == true ? "New" : "Edit")
+                    @(Person.PersonRole == PersonRecordRole.Employee ? "employee" : "family member")
+                </h1>
+                <p class="person-intake-wizard__sub">Step @(_stepIndex + 1) of @steps.Count · @active.Title</p>
+            </div>
+            @if (pending.Count > 0)
+            {
+                <span class="person-intake-wizard__pending-pill">@pending.Count pending</span>
+            }
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="person-intake-wizard__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
+        }
+
+        <div class="person-intake-wizard__layout">
+            <nav class="person-intake-wizard__nav" aria-label="Wizard steps">
+                @for (var i = 0; i < steps.Count; i++)
+                {
+                    var step = steps[i];
+                    var stepFindings = findingsForStep(step, findings);
+                    var status = StepStatus(step, stepFindings);
+                    <button type="button"
+                            class="person-intake-wizard__nav-item @(i == _stepIndex ? "is-active" : null) @status.Css"
+                            @onclick="() => GoToStep(i)">
+                        <span class="person-intake-wizard__nav-badge">@status.Badge</span>
+                        <span>
+                            <span class="person-intake-wizard__nav-label">@step.Title</span>
+                            <span class="person-intake-wizard__nav-status">@status.Text</span>
+                        </span>
+                    </button>
+                }
+            </nav>
+
+            <div class="person-intake-wizard__panel">
+                <h2 class="person-intake-wizard__panel-title">@active.Title</h2>
+                <p class="person-intake-wizard__panel-hint">@active.Hint</p>
+
+                @if (active.Kind == PersonIntakeStepKind.Form)
+                {
+                    @foreach (var key in active.FieldKeys)
+                    {
+                        var defer = State.PendingKeys.Contains(key);
+                        var canDefer = PersonIntakeFieldLabels.CanDefer(key);
+                        <div class="person-intake-wizard__field-row">
+                            <label>@PersonIntakeFieldLabels.Label(key)</label>
+                            @RenderField(key, defer)
+                            @if (canDefer)
+                            {
+                                <label class="person-intake-wizard__toggle">
+                                    <input type="checkbox" checked="@defer" @onchange="e => TogglePending(key, e.Value is true)" />
+                                    <span>Not received</span>
+                                </label>
+                            }
+                        </div>
+                    }
+                }
+                else if (active.Kind == PersonIntakeStepKind.Record)
+                {
+                    var recordKey = active.RecordTargetKey;
+                    var deferRecord = State.PendingKeys.Contains(recordKey);
+                    var hasRows = RecordHasRows(recordKey);
+                    <div class="person-intake-wizard__record-card">
+                        <label class="person-intake-wizard__toggle">
+                            <input type="checkbox" checked="@deferRecord" disabled="@hasRows"
+                                   @onchange="e => TogglePending(recordKey, e.Value is true)" />
+                            <span>Not received yet</span>
+                        </label>
+                        @if (deferRecord)
+                        {
+                            <p class="person-intake-wizard__record-hint">This person stays on the Incomplete list until this record is added.</p>
+                            <input class="person-intake-wizard__input"
+                                   placeholder="Waiting on (optional)"
+                                   value="@GetRecordNote(recordKey)"
+                                   @oninput="e => SetRecordNote(recordKey, e.Value?.ToString())" />
+                        }
+                        else if (recordKey == PersonPendingTargets.Passport && !hasRows)
+                        {
+                            <div class="person-intake-wizard__passport-form">
+                                <input class="person-intake-wizard__input" placeholder="Passport number"
+                                       @bind="State.PassportDraft.PassportNumber" />
+                                <input class="person-intake-wizard__input" type="date"
+                                       @bind="State.PassportDraft.IssueDate" />
+                                <input class="person-intake-wizard__input" type="date"
+                                       @bind="State.PassportDraft.ExpirationDate" />
+                            </div>
+                        }
+                        else if (hasRows)
+                        {
+                            <p class="person-intake-wizard__record-hint">Record already on file.</p>
+                        }
+                        else
+                        {
+                            <p class="person-intake-wizard__record-hint">Add this record from the classic tabs after save, or mark Not received.</p>
+                        }
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.Others)
+                {
+                    @foreach (var option in active.OtherOptions)
+                    {
+                        var on = State.PendingKeys.Contains(option.TargetKey);
+                        <div class="person-intake-wizard__other-row">
+                            <div>
+                                <strong>@option.Label</strong>
+                                <p>@option.Help</p>
+                            </div>
+                            <label class="person-intake-wizard__toggle">
+                                <input type="checkbox" checked="@on" @onchange="e => TogglePending(option.TargetKey, e.Value is true)" />
+                                <span>Not received</span>
+                            </label>
+                        </div>
+                    }
+                }
+                else if (active.Kind == PersonIntakeStepKind.Review)
+                {
+                    @if (unresolved.Count > 0)
+                    {
+                        <div class="person-intake-wizard__review-block is-error">
+                            <strong>Needs a value or Not received (@unresolved.Count)</strong>
+                            <ul>
+                                @foreach (var u in unresolved)
+                                {
+                                    <li>@PersonIntakeFieldLabels.Label(u.TargetKey)</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (pending.Count > 0)
+                    {
+                        <div class="person-intake-wizard__review-block is-pending">
+                            <strong>Marked as not received (@pending.Count)</strong>
+                            <ul>
+                                @foreach (var p in pending)
+                                {
+                                    <li>@PersonIntakeFieldLabels.Label(p.TargetKey)</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    <div class="person-intake-wizard__field-row">
+                        <label>Note for the visa officer</label>
+                        <input class="person-intake-wizard__input" @bind="State.FollowNote" />
+                    </div>
+                }
+
+                <footer class="person-intake-wizard__footer">
+                    <button type="button" class="person-intake-wizard__btn" disabled="@(_stepIndex == 0)" @onclick="PreviousStep">Back</button>
+                    <div class="person-intake-wizard__footer-right">
+                        @if (_stepIndex < steps.Count - 1)
+                        {
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary" @onclick="NextStep">Next</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary"
+                                    disabled="@(unresolved.Count > 0)"
+                                    @onclick="SaveAsync">
+                                @(pending.Count > 0 ? "Create as incomplete" : SaveCompleteLabel())
+                            </button>
+                        }
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Person? Person { get; set; }
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public PersonIntakeWizardState State { get; set; } = new();
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback SaveRequested { get; set; }
+
+    private int _stepIndex;
+    private Guid? _familyPersonId;
+    private string? _familySourceText;
+    private IReadOnlyList<VisaFamilyMemberLineDto> _familyLines = Array.Empty<VisaFamilyMemberLineDto>();
+    private IReadOnlyList<VisaFamilyMemberLineDto> _familyDraft = Array.Empty<VisaFamilyMemberLineDto>();
+    private IReadOnlyList<RelationshipLookupItem> _familyRelationships = Array.Empty<RelationshipLookupItem>();
+    private IReadOnlyList<CountryLookupItem> _familyCountries = Array.Empty<CountryLookupItem>();
+    private bool _familyPopupVisible;
+    private string _familyStatus = string.Empty;
+    private bool _familyStatusError;
+    private VisaFamilyMembersTextLocalization.UiTexts? _familyUi;
+
+    private Task SaveAsync() => SaveRequested.HasDelegate ? SaveRequested.InvokeAsync() : Task.CompletedTask;
+    private Task NextStep()
+    {
+        if (Person != null)
+        {
+            var steps = PersonIntakeStepCatalog.Steps(Person);
+            _stepIndex = Math.Min(_stepIndex + 1, steps.Count - 1);
+        }
+        return Task.CompletedTask;
+    }
+
+    private Task PreviousStep()
+    {
+        _stepIndex = Math.Max(0, _stepIndex - 1);
+        return Task.CompletedTask;
+    }
+
+    private Task GoToStep(int index)
+    {
+        _stepIndex = index;
+        return Task.CompletedTask;
+    }
+
+    private void TogglePending(string key, bool on)
+    {
+        if (on)
+            State.PendingKeys.Add(key);
+        else
+            State.PendingKeys.Remove(key);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string SaveCompleteLabel() =>
+        Person?.PersonRole == PersonRecordRole.Employee ? "Create employee" : "Create family member";
+
+    private string GetRecordNote(string key) =>
+        State.RecordNotes.TryGetValue(key, out var note) ? note : string.Empty;
+
+    private void SetRecordNote(string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            State.RecordNotes.Remove(key);
+        else
+            State.RecordNotes[key] = value;
+    }
+
+    private bool RecordHasRows(string recordKey) => recordKey switch
+    {
+        PersonPendingTargets.Passport => Person?.Passports?.Any(p => p != null) == true,
+        PersonPendingTargets.Education => Person?.Educations?.Any(e => e != null) == true,
+        PersonPendingTargets.MedicalRecord => Person?.MedicalRecords?.Any(m => m != null) == true,
+        PersonPendingTargets.AddressOfResidence => Person?.AddressesOfResidence?.Any(a => a != null) == true,
+        _ => false
+    };
+
+    private RenderFragment RenderField(string key, bool deferred) => builder =>
+    {
+        if (Person == null)
+            return;
+
+        var seq = 0;
+        var css = "person-intake-wizard__input" + (deferred ? " is-pending" : string.Empty);
+        switch (key)
+        {
+            case PersonPendingTargets.FirstName:
+                builder.OpenElement(seq++, "input");
+                builder.AddAttribute(seq++, "class", css);
+                builder.AddAttribute(seq++, "disabled", deferred);
+                builder.AddAttribute(seq++, "value", Person.FirstName ?? string.Empty);
+                builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => Person.FirstName = e.Value?.ToString()));
+                builder.CloseElement();
+                break;
+            case PersonPendingTargets.LastName:
+                builder.OpenElement(seq++, "input");
+                builder.AddAttribute(seq++, "class", css);
+                builder.AddAttribute(seq++, "disabled", deferred);
+                builder.AddAttribute(seq++, "value", Person.LastName ?? string.Empty);
+                builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => Person.LastName = e.Value?.ToString()));
+                builder.CloseElement();
+                break;
+            case PersonPendingTargets.DateOfBirth:
+                builder.OpenElement(seq++, "input");
+                builder.AddAttribute(seq++, "type", "date");
+                builder.AddAttribute(seq++, "class", css);
+                builder.AddAttribute(seq++, "disabled", deferred);
+                builder.AddAttribute(seq++, "value", Person.DateOfBirth == default ? string.Empty : Person.DateOfBirth.ToString("yyyy-MM-dd"));
+                builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e =>
+                {
+                    if (DateTime.TryParse(e.Value?.ToString(), out var dt))
+                        Person.DateOfBirth = dt;
+                }));
+                builder.CloseElement();
+                break;
+            case PersonPendingTargets.PersonalNumber:
+            case PersonPendingTargets.BirthPlace:
+            case PersonPendingTargets.ForeignAddress:
+                AddTextInput(builder, ref seq, css, deferred, GetScalar(key), v => SetScalar(key, v));
+                break;
+            case PersonPendingTargets.Age:
+                builder.OpenElement(seq++, "input");
+                builder.AddAttribute(seq++, "class", css);
+                builder.AddAttribute(seq++, "disabled", true);
+                builder.AddAttribute(seq++, "value", Person.DateOfBirth == default ? string.Empty : Person.Age.ToString());
+                builder.CloseElement();
+                break;
+            case PersonPendingTargets.VisaApplicationFamilyMembersText:
+                EnsureVisaFamilyEditor();
+                var familyUi = _familyUi ?? VisaFamilyMembersTextLocalization.Resolve();
+                builder.OpenComponent<VisaFamilyMembersTextComponent>(seq++);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DisplayText), VisaFamilyDisplayText(familyUi));
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.Lines), _familyLines);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DraftLines), _familyDraft);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.RelationshipOptions), _familyRelationships);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.CountryOptions), _familyCountries);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.LinesCommitted), EventCallback.Factory.Create<IReadOnlyList<VisaFamilyMemberLineDto>>(this, OnVisaFamilyLinesCommittedAsync));
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DraftLinesChanged), EventCallback.Factory.Create<IReadOnlyList<VisaFamilyMemberLineDto>>(this, OnVisaFamilyDraftChanged));
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupVisible), _familyPopupVisible);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupVisibleChanged), EventCallback.Factory.Create<bool>(this, OnVisaFamilyPopupVisibleChanged));
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.ReadOnly), deferred);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.StatusMessage), _familyStatus);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.StatusIsError), _familyStatusError);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupTitle), familyUi.PopupTitle);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupButtonTitle), familyUi.PopupButtonTitle);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.OkText), familyUi.OkText);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.CancelText), familyUi.CancelText);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.AddButtonText), familyUi.AddButtonText);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.EditButtonText), familyUi.EditButtonText);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DeleteButtonText), familyUi.DeleteButtonText);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.EditPopupTitle), familyUi.EditPopupTitle);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.SaveEditText), familyUi.SaveEditText);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DeleteConfirmTitle), familyUi.DeleteConfirmTitle);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DeleteConfirmFormat), familyUi.DeleteConfirmFormat);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.MemberCountFormat), familyUi.MemberCountFormat);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.EmptyListMessage), familyUi.EmptyListMessage);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.FullNameLabel), familyUi.FullNameLabel);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.BirthDateLabel), familyUi.BirthDateLabel);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.RelationshipLabel), familyUi.RelationshipLabel);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.CountryLabel), familyUi.CountryLabel);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.EditFormIncompleteHint), familyUi.EditFormIncompleteHint);
+                builder.CloseComponent();
+                break;
+            case PersonPendingTargets.Photo:
+                builder.OpenComponent<InputFile>(seq++);
+                builder.AddAttribute(seq++, "class", css);
+                builder.AddAttribute(seq++, "accept", "image/*");
+                builder.AddAttribute(seq++, "disabled", deferred);
+                builder.AddAttribute(seq++, "OnChange", EventCallback.Factory.Create<InputFileChangeEventArgs>(this, OnPhotoSelected));
+                builder.CloseComponent();
+                if (Person.Photo is { Length: > 0 })
+                {
+                    builder.OpenElement(seq++, "span");
+                    builder.AddAttribute(seq++, "class", "person-intake-wizard__nav-status");
+                    builder.AddContent(seq++, "Photo attached");
+                    builder.CloseElement();
+                }
+                break;
+            case PersonPendingTargets.Gender:
+                RenderLookup(builder, ref seq, css, deferred, Person.Gender, value => Person.Gender = value);
+                break;
+            case PersonPendingTargets.CountryOfBirth:
+                RenderLookup(builder, ref seq, css, deferred, Person.CountryOfBirth, value => Person.CountryOfBirth = value);
+                break;
+            case PersonPendingTargets.Nationality:
+                RenderLookup(builder, ref seq, css, deferred, Person.Nationality, value => Person.Nationality = value);
+                break;
+            case PersonPendingTargets.ForeignAddressCountry:
+                RenderLookup(builder, ref seq, css, deferred, Person.ForeignAddressCountry, value => Person.ForeignAddressCountry = value);
+                break;
+            case PersonPendingTargets.MaritalStatus:
+                RenderLookup(builder, ref seq, css, deferred, Person.MaritalStatus, value => Person.MaritalStatus = value);
+                break;
+            case PersonPendingTargets.ProjectContract:
+                RenderLookup(builder, ref seq, css, deferred, Person.ProjectContract, value => Person.ProjectContract = value);
+                break;
+            case PersonPendingTargets.Subcontractor:
+                RenderLookup(builder, ref seq, css, deferred, Person.Subcontractor, value => Person.Subcontractor = value);
+                break;
+            case PersonPendingTargets.Relationship:
+                RenderLookup(builder, ref seq, css, deferred, Person.Relationship, value => Person.Relationship = value);
+                break;
+            case PersonPendingTargets.SponsoringEmployee:
+                RenderSponsoringEmployee(builder, ref seq, css, deferred);
+                break;
+            default:
+                AddTextInput(builder, ref seq, css, true, string.Empty, _ => { });
+                break;
+        }
+    };
+
+    private void RenderLookup<T>(
+        RenderTreeBuilder builder,
+        ref int seq,
+        string css,
+        bool deferred,
+        T? current,
+        Action<T?> assign) where T : BaseObject
+    {
+        if (ObjectSpace == null)
+            return;
+
+        var items = ObjectSpace.GetObjectsQuery<T>().ToList()
+            .OrderBy(LookupCaption, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        builder.OpenElement(seq++, "select");
+        builder.AddAttribute(seq++, "class", css);
+        builder.AddAttribute(seq++, "disabled", deferred);
+        builder.AddAttribute(seq++, "value", current?.ID.ToString() ?? string.Empty);
+        builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e =>
+        {
+            if (Guid.TryParse(e.Value?.ToString(), out var id))
+                assign(ObjectSpace.GetObjectByKey<T>(id));
+            else
+                assign(null);
+        }));
+        builder.OpenElement(seq++, "option");
+        builder.AddAttribute(seq++, "value", string.Empty);
+        builder.AddContent(seq++, "—");
+        builder.CloseElement();
+        foreach (var item in items)
+        {
+            builder.OpenElement(seq++, "option");
+            builder.AddAttribute(seq++, "value", item.ID.ToString());
+            builder.AddContent(seq++, LookupCaption(item));
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+    }
+
+    private void RenderSponsoringEmployee(RenderTreeBuilder builder, ref int seq, string css, bool deferred)
+    {
+        if (ObjectSpace == null || Person == null)
+            return;
+
+        var employees = ObjectSpace.GetObjectsQuery<Person>()
+            .Where(p => p.PersonRole == PersonRecordRole.Employee)
+            .ToList()
+            .OrderBy(p => p.FullName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        builder.OpenElement(seq++, "select");
+        builder.AddAttribute(seq++, "class", css);
+        builder.AddAttribute(seq++, "disabled", deferred);
+        builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e =>
+        {
+            if (Guid.TryParse(e.Value?.ToString(), out var id))
+                Person.SponsoringEmployee = ObjectSpace.GetObjectByKey<Person>(id);
+            else
+                Person.SponsoringEmployee = null;
+        }));
+        builder.OpenElement(seq++, "option");
+        builder.AddAttribute(seq++, "value", string.Empty);
+        builder.AddContent(seq++, "—");
+        builder.CloseElement();
+        foreach (var employee in employees)
+        {
+            builder.OpenElement(seq++, "option");
+            builder.AddAttribute(seq++, "value", employee.ID.ToString());
+            builder.AddAttribute(seq++, "selected", Person.SponsoringEmployee?.ID == employee.ID);
+            builder.AddContent(seq++, employee.FullName ?? employee.ToString());
+            builder.CloseElement();
+        }
+        builder.CloseElement();
+    }
+
+    private async Task OnPhotoSelected(InputFileChangeEventArgs args)
+    {
+        if (Person == null || args.File == null)
+            return;
+
+        await using var stream = args.File.OpenReadStream(2 * 1024 * 1024);
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer);
+        Person.Photo = buffer.ToArray();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string LookupCaption(BaseObject item)
+    {
+        if (item is LookupBase lookup)
+        {
+            var display = lookup.LocalizedDisplayName;
+            if (!string.IsNullOrWhiteSpace(display))
+                return display;
+            if (!string.IsNullOrWhiteSpace(lookup.NameTm))
+                return lookup.NameTm;
+        }
+
+        return item.ToString() ?? string.Empty;
+    }
+
+    private static List<PersonIntakeFinding> findingsForStep(PersonIntakeStep step, IReadOnlyList<PersonIntakeFinding> all)
+    {
+        if (step.Kind == PersonIntakeStepKind.Form)
+            return all.Where(f => step.FieldKeys.Contains(f.TargetKey)).ToList();
+        if (step.Kind == PersonIntakeStepKind.Record)
+            return all.Where(f => f.TargetKey == step.RecordTargetKey).ToList();
+        if (step.Kind == PersonIntakeStepKind.Others)
+            return all.Where(f => step.OtherOptions.Any(o => o.TargetKey == f.TargetKey)).ToList();
+        return all.ToList();
+    }
+
+    private void AddTextInput(
+        RenderTreeBuilder builder,
+        ref int seq,
+        string css,
+        bool deferred,
+        string value,
+        Action<string> assign)
+    {
+        builder.OpenElement(seq++, "input");
+        builder.AddAttribute(seq++, "class", css);
+        builder.AddAttribute(seq++, "disabled", deferred);
+        builder.AddAttribute(seq++, "value", value);
+        builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => assign(e.Value?.ToString() ?? string.Empty)));
+        builder.CloseElement();
+    }
+
+    private string GetScalar(string key)
+    {
+        if (Person == null)
+            return string.Empty;
+
+        return key switch
+        {
+            PersonPendingTargets.PersonalNumber => Person.PersonalNumber ?? string.Empty,
+            PersonPendingTargets.BirthPlace => Person.BirthPlace ?? string.Empty,
+            PersonPendingTargets.ForeignAddress => Person.ForeignAddress ?? string.Empty,
+            _ => string.Empty
+        };
+    }
+
+    private void SetScalar(string key, string value)
+    {
+        if (Person == null)
+            return;
+
+        switch (key)
+        {
+            case PersonPendingTargets.PersonalNumber:
+                Person.PersonalNumber = value;
+                break;
+            case PersonPendingTargets.BirthPlace:
+                Person.BirthPlace = value;
+                break;
+            case PersonPendingTargets.ForeignAddress:
+                Person.ForeignAddress = value;
+                break;
+        }
+    }
+
+    private void EnsureVisaFamilyEditor()
+    {
+        if (Person == null)
+            return;
+
+        _familyUi ??= VisaFamilyMembersTextLocalization.Resolve();
+        var stored = Person.VisaApplicationFamilyMembersText ?? string.Empty;
+        var personChanged = _familyPersonId != Person.ID;
+        var textChanged = !string.Equals(_familySourceText, stored, StringComparison.Ordinal);
+        if (!personChanged && !textChanged)
+            return;
+
+        _familyPersonId = Person.ID;
+        _familySourceText = stored;
+        _familyRelationships = VisaFamilyMemberLinesHelper.LoadRelationshipOptions(ObjectSpace);
+        _familyCountries = VisaFamilyMemberLinesHelper.LoadCountryOptions(ObjectSpace);
+        _familyLines = EnrichVisaFamilyLines(VisaFamilyMemberLinesHelper.Parse(stored));
+        if (!_familyPopupVisible)
+            _familyDraft = CloneVisaFamilyLines(_familyLines);
+    }
+
+    private string VisaFamilyDisplayText(VisaFamilyMembersTextLocalization.UiTexts ui) =>
+        VisaFamilyMemberLinesHelper.FormatDisplaySummary(
+            Person?.VisaApplicationFamilyMembersText,
+            ui.SummaryEmptyMessage,
+            ui.SummaryMemberCountFormat);
+
+    private Task OnVisaFamilyDraftChanged(IReadOnlyList<VisaFamilyMemberLineDto> draft)
+    {
+        _familyDraft = CloneVisaFamilyLines(draft);
+        return Task.CompletedTask;
+    }
+
+    private Task OnVisaFamilyPopupVisibleChanged(bool visible)
+    {
+        _familyPopupVisible = visible;
+        if (visible)
+        {
+            _familyStatus = string.Empty;
+            _familyStatusError = false;
+            _familyDraft = CloneVisaFamilyLines(_familyLines);
+            _familyRelationships = VisaFamilyMemberLinesHelper.LoadRelationshipOptions(ObjectSpace);
+            _familyCountries = VisaFamilyMemberLinesHelper.LoadCountryOptions(ObjectSpace);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnVisaFamilyLinesCommittedAsync(IReadOnlyList<VisaFamilyMemberLineDto> draft)
+    {
+        if (Person == null)
+            return Task.CompletedTask;
+
+        _familyUi ??= VisaFamilyMembersTextLocalization.Resolve();
+        var lines = CloneVisaFamilyLines(draft);
+        if (!VisaFamilyMemberLinesHelper.TryValidate(lines, out var error))
+        {
+            _familyStatus = string.IsNullOrWhiteSpace(error) ? _familyUi.ValidationFailedMessage : error;
+            _familyStatusError = true;
+            _familyPopupVisible = true;
+            return Task.CompletedTask;
+        }
+
+        foreach (var row in lines)
+        {
+            var relationship = VisaFamilyMemberLinesHelper.ResolveRelationship(
+                ObjectSpace,
+                row.RelationshipOid,
+                row.RelationshipNameTm);
+            VisaFamilyMemberLinesHelper.ApplyRelationshipSelection(row, relationship);
+
+            var country = VisaFamilyMemberLinesHelper.ResolveCountry(
+                ObjectSpace,
+                row.CountryOid,
+                row.CountryCode);
+            VisaFamilyMemberLinesHelper.ApplyCountrySelection(row, country);
+        }
+
+        _familyLines = lines;
+        _familyDraft = CloneVisaFamilyLines(lines);
+        var formatted = VisaFamilyMemberLinesHelper.Format(lines);
+        var stored = string.IsNullOrWhiteSpace(formatted)
+            ? (Person.IsEmployee ? VisaFamilyMemberLinesHelper.NoneValue : string.Empty)
+            : formatted;
+        Person.VisaApplicationFamilyMembersText = stored;
+        _familySourceText = stored;
+        _familyPopupVisible = false;
+        _familyStatus = string.Empty;
+        _familyStatusError = false;
+        return Task.CompletedTask;
+    }
+
+    private IReadOnlyList<VisaFamilyMemberLineDto> EnrichVisaFamilyLines(IReadOnlyList<VisaFamilyMemberLineDto> lines)
+    {
+        if (lines.Count == 0)
+            return lines;
+
+        var enriched = CloneVisaFamilyLines(lines);
+        foreach (var row in enriched)
+        {
+            var relationship = VisaFamilyMemberLinesHelper.ResolveRelationship(
+                ObjectSpace,
+                row.RelationshipOid,
+                row.RelationshipNameTm);
+            if (relationship != null)
+                VisaFamilyMemberLinesHelper.ApplyRelationshipSelection(row, relationship);
+
+            var country = VisaFamilyMemberLinesHelper.ResolveCountry(
+                ObjectSpace,
+                row.CountryOid,
+                row.CountryCode);
+            if (country != null)
+                VisaFamilyMemberLinesHelper.ApplyCountrySelection(row, country);
+        }
+
+        return enriched;
+    }
+
+    private static List<VisaFamilyMemberLineDto> CloneVisaFamilyLines(IEnumerable<VisaFamilyMemberLineDto>? source) =>
+        source == null
+            ? new List<VisaFamilyMemberLineDto>()
+            : source.Select(line => new VisaFamilyMemberLineDto
+            {
+                RowId = line.RowId,
+                FullName = line.FullName,
+                BirthDate = line.BirthDate,
+                RelationshipNameTm = line.RelationshipNameTm,
+                RelationshipOid = line.RelationshipOid,
+                CountryCode = line.CountryCode,
+                CountryOid = line.CountryOid,
+                IsLegacyIncomplete = line.IsLegacyIncomplete,
+            }).ToList();
+
+    private static (string Css, string Badge, string Text) StepStatus(PersonIntakeStep step, List<PersonIntakeFinding> stepFindings)
+    {
+        if (step.Kind == PersonIntakeStepKind.Review)
+            return ("is-review", "✓", "Summary");
+
+        if (stepFindings.Count == 0)
+            return ("is-todo", "·", "Not started");
+
+        if (stepFindings.Any(f => f.State == PersonIntakeItemState.Unresolved))
+            return ("is-progress", "…", "In progress");
+
+        var pendingCount = stepFindings.Count(f => f.State == PersonIntakeItemState.Pending);
+        if (pendingCount > 0 && stepFindings.All(f => f.State != PersonIntakeItemState.Unresolved))
+            return ("is-pending", "!", $"{pendingCount} pending");
+
+        if (stepFindings.All(f => f.State == PersonIntakeItemState.Filled))
+            return ("is-done", "✓", "Complete");
+
+        return ("is-todo", "·", "Not started");
+    }
+}

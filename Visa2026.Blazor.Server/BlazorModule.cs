@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
@@ -53,9 +53,9 @@ namespace Visa2026.Blazor.Server
             //application.CreateCustomModelDifferenceStore += Application_CreateCustomModelDifferenceStore;
             application.CreateCustomUserModelDifferenceStore += Application_CreateCustomUserModelDifferenceStore;
             Visa2026.Module.DatabaseUpdate.HeaderParentListViewConfigurator.Wire(application);
+            Visa2026.Module.DatabaseUpdate.PersonTypedDetailViewConfigurator.Wire(application);
             application.SetupComplete += (_, _) =>
             {
-                Visa2026.Module.DatabaseUpdate.PersonTypedDetailViewConfigurator.EnsureConfigured(application.Model);
                 UiScenarioHostModelConfigurator.Apply(application);
             };
         }

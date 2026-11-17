@@ -817,237 +817,31 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Person_DetailView_Employee" Caption="Employee">
+    <DetailView Id="Person_DetailView_EmployeeIntake" Caption="Employee" CustomCSSClassName="visa-person-intake-detail" FreezeLayout="True" CustomizationFormEnabled="False">
+      <Items>
+        <PropertyEditor Id="PersonIntakeWizardUi" PropertyName="PersonIntakeWizardUi" AllowEdit="True" ShowCaption="False" PropertyEditorType="Visa2026.Blazor.Server.Editors.PersonIntakeWizardPropertyEditor" IsNewNode="True" />
+      </Items>
       <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="75.20564042303172">
-            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" Caption="Employee" IsNewNode="True">
-                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="64.65028355387524" IsNewNode="True">
-                  <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="7.638888888888889" IsNewNode="True" />
-                  <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutGroup Id="Autodbbe6d56-77b7-4439-a868-9c8401cecd77" ShowCaption="False" Caption="Autodbbe6d56-77b7-4439-a868-9c8401cecd77(9)" Direction="Horizontal" Index="2" RelativeSize="8.680555555555555" IsNewNode="True">
-                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="50.58479532163743" IsNewNode="True" />
-                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="49.41520467836257" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutItem Id="BirthPlace" ViewItem="BirthPlace" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="4" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Gender" ViewItem="Gender" Index="5" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="MaritalStatus" ViewItem="MaritalStatus" Index="6" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="VisaApplicationFamilyMembersText" ViewItem="VisaApplicationFamilyMembersText" Index="7" RelativeSize="14.930555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Nationality" ViewItem="Nationality" Index="8" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="PersonalNumber" ViewItem="PersonalNumber" Index="9" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="ForeignAddress" ViewItem="ForeignAddress" Index="10" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="ForeignAddressCountry" ViewItem="ForeignAddressCountry" Index="11" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="12" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Subcontractor" ViewItem="Subcontractor" Index="13" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="7.638888888888889" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="35.349716446124766" Caption="Person_col2" IsNewNode="True">
-                  <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="8.365019011406844" IsNewNode="True" />
-                  <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="30.854166666666664" CaptionLocation="Top" IsNewNode="True" />
-                  <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.034722222222222" IsNewNode="True" />
-                  <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="PreviousWorkplacesInTurkmenistan" ViewItem="PreviousWorkplacesInTurkmenistan" Index="5" RelativeSize="45" IsNewNode="True" />
-                </LayoutGroup>
-              </LayoutGroup>
-            </TabbedGroup>
-<LayoutGroup Id="Person" Removed="True" />
-          </LayoutGroup>
-          <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="24.794359576968272" Index="1" IsNewNode="True">
-            <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs e2e-person-employee-tabs" IsNewNode="True">
-              <LayoutGroup Id="Educations" RelativeSize="100" Index="0" CustomCSSClassName="e2e-person-employee-tab-educations" IsNewNode="True">
-                <LayoutItem Id="Educations" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Passports" RelativeSize="100" Index="1" CustomCSSClassName="e2e-person-employee-tab-passports-content" IsNewNode="True">
-                <LayoutItem Id="Passports" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-passports-list" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Documents" ShowCaption="True" Caption="CV &amp; personal files" Index="2" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-documents" IsNewNode="True">
-                <LayoutItem Id="Documents" Index="0" RelativeSize="100" ViewItem="Documents" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="PositionHistory" RelativeSize="100" Index="3" CustomCSSClassName="e2e-person-employee-tab-position-history" IsNewNode="True">
-                <LayoutItem Id="PositionHistory" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="4" CustomCSSClassName="e2e-person-employee-tab-medical-records" IsNewNode="True">
-                <LayoutItem Id="MedicalRecords" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="5" CustomCSSClassName="e2e-person-employee-tab-addresses-of-residence" IsNewNode="True">
-                <LayoutItem Id="AddressesOfResidence" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="6" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-family-relation-documents" IsNewNode="True">
-                <LayoutItem Id="FamilyRelationDocuments" Index="0" RelativeSize="100" ViewItem="FamilyRelationDocuments" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="7" CustomCSSClassName="e2e-person-employee-tab-travel-histories" IsNewNode="True">
-                <LayoutItem Id="TravelHistories" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="WorkDuties" Index="8" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-work-duties" IsNewNode="True">
-                <LayoutItem Id="WorkDuties" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Salaries" Index="9" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-salaries" IsNewNode="True">
-                <LayoutItem Id="Salaries" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
-                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
-              </LayoutGroup>
-            </TabbedGroup>
-            <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="ApplicationProfileInstance items, work permits, and invitations appear here after you process applications. Add passports, education, and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
-            <TabbedGroup Id="IssuedDocumentsTabs" ShowCaption="True" Caption="Issued documents (view only)" CaptionLocation="Top" Index="2" RelativeSize="32" CustomCSSClassName="visa-person-issued-tabs" IsNewNode="True">
-              <LayoutGroup Id="ApplicationProfileInstances" Index="0" RelativeSize="100" Caption="Applications (linked)" IsNewNode="True">
-                <LayoutItem Id="ApplicationProfileInstances" RelativeSize="100" ViewItem="ApplicationProfileInstances" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="WorkPermitItems" RelativeSize="100" Index="1" Caption="Work permits (issued)" IsNewNode="True">
-                <LayoutItem Id="WorkPermitItems" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="InvitationItems" RelativeSize="100" Index="2" Caption="Invitations (issued)" IsNewNode="True">
-                <LayoutItem Id="InvitationItems" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="RejectionItems" RelativeSize="100" Index="3" Caption="Rejections (issued)" IsNewNode="True">
-                <LayoutItem Id="RejectionItems" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="4" Caption="Family members (linked)" IsNewNode="True">
-                <LayoutItem Id="FamilyMembers" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="EmailedDocuments" RelativeSize="100" Index="5" Caption="Emailed documents" IsNewNode="True">
-                <LayoutItem Id="EmailedDocuments" RelativeSize="100" ViewItem="EmailedDocuments" IsNewNode="True" />
-              </LayoutGroup>
-            </TabbedGroup>
-          </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="24.794359576968272" Index="1" CustomCSSClassName="e2e-person-employee-tabs" Removed="True" />
-          <LayoutGroup Id="SizeableEditors" RelativeSize="18.41046277665996" Caption="Family members for visa (manual)" Removed="True">
-            <LayoutItem Id="VisaApplicationFamilyMembersText" RelativeSize="100" Removed="True" />
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="PersonIntakeWizardHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="PersonIntakeWizardUi" ViewItem="PersonIntakeWizardUi" Index="0" RelativeSize="100" ShowCaption="False" CustomCSSClassName="visa-person-intake-wizard-host xaf-fill-available" IsNewNode="True" />
+            </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Person_DetailView_FamilyMember" Caption="Family member">
+    <DetailView Id="Person_DetailView_FamilyMemberIntake" Caption="Family member" CustomCSSClassName="visa-person-intake-detail" FreezeLayout="True" CustomizationFormEnabled="False">
       <Items>
         <PropertyEditor Id="SponsoringEmployee" PropertyName="SponsoringEmployee" IsNewNode="True" />
+        <PropertyEditor Id="PersonIntakeWizardUi" PropertyName="PersonIntakeWizardUi" AllowEdit="True" ShowCaption="False" PropertyEditorType="Visa2026.Blazor.Server.Editors.PersonIntakeWizardPropertyEditor" IsNewNode="True" />
       </Items>
       <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="41.5014164305949">
-            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" Caption="Family member" IsNewNode="True">
-                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="64.41756842775303" IsNewNode="True">
-                  <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" />
-                  <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutGroup Id="Autodbbe6d56-77b7-4439-a868-9c8401cecd77" ShowCaption="False" Caption="Autodbbe6d56-77b7-4439-a868-9c8401cecd77(9)" Direction="Horizontal" Index="2" RelativeSize="9.578544061302683" IsNewNode="True">
-                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="50.29644268774704" IsNewNode="True" />
-                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="49.70355731225296" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutItem Id="BirthPlace" ViewItem="BirthPlace" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="4" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="Gender" ViewItem="Gender" Index="5" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="MaritalStatus" ViewItem="MaritalStatus" Index="6" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="Nationality" ViewItem="Nationality" Index="7" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="PersonalNumber" ViewItem="PersonalNumber" Index="8" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ForeignAddress" ViewItem="ForeignAddress" Index="9" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ForeignAddressCountry" ViewItem="ForeignAddressCountry" Index="10" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="11" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="Subcontractor" ViewItem="Subcontractor" Index="12" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="SponsoringEmployee" ViewItem="SponsoringEmployee" Index="13" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="8.42911877394636" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="35.582431572246975" Caption="Person_col2" IsNewNode="True">
-                  <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" />
-                  <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="35.05747126436781" CaptionLocation="Top" IsNewNode="True" />
-                  <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="PreviousWorkplacesInTurkmenistan" ViewItem="PreviousWorkplacesInTurkmenistan" Index="5" RelativeSize="38.69731800766284" IsNewNode="True" />
-                </LayoutGroup>
-              </LayoutGroup>
-            </TabbedGroup>
-<LayoutGroup Id="Person" Removed="True" />
-          </LayoutGroup>
-          <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="58.4985835694051" Index="1" IsNewNode="True">
-            <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs" IsNewNode="True">
-              <LayoutGroup Id="Educations" RelativeSize="100" Index="0" CustomCSSClassName="e2e-person-family-tab-educations" IsNewNode="True">
-                <LayoutItem Id="Educations" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Passports" RelativeSize="100" Index="1" IsNewNode="True">
-                <LayoutItem Id="Passports" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="PositionHistory" RelativeSize="100" Index="1" IsNewNode="True">
-                <LayoutItem Id="PositionHistory" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="2" IsNewNode="True">
-                <LayoutItem Id="MedicalRecords" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="3" IsNewNode="True">
-                <LayoutItem Id="AddressesOfResidence" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Documents" ShowCaption="True" Index="4" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="Documents" Index="0" RelativeSize="100" ViewItem="Documents" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="FamilyRelationDocuments" Index="0" RelativeSize="100" ViewItem="FamilyRelationDocuments" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="6" IsNewNode="True">
-                <LayoutItem Id="TravelHistories" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="WorkDuties" Index="7" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="WorkDuties" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Salaries" Index="8" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="Salaries" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
-                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
-              </LayoutGroup>
-            </TabbedGroup>
-            <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="ApplicationProfileInstance items, work permits, and invitations appear here after you process applications. Add passports and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
-            <TabbedGroup Id="IssuedDocumentsTabs" ShowCaption="True" Caption="Issued documents (view only)" CaptionLocation="Top" Index="2" RelativeSize="32" CustomCSSClassName="visa-person-issued-tabs" IsNewNode="True">
-              <LayoutGroup Id="ApplicationProfileInstances" Index="0" RelativeSize="100" Caption="Applications (linked)" IsNewNode="True">
-                <LayoutItem Id="ApplicationProfileInstances" RelativeSize="100" ViewItem="ApplicationProfileInstances" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="WorkPermitItems" RelativeSize="100" Index="1" Caption="Work permits (issued)" IsNewNode="True">
-                <LayoutItem Id="WorkPermitItems" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="InvitationItems" RelativeSize="100" Index="2" Caption="Invitations (issued)" IsNewNode="True">
-                <LayoutItem Id="InvitationItems" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="RejectionItems" RelativeSize="100" Index="3" Caption="Rejections (issued)" IsNewNode="True">
-                <LayoutItem Id="RejectionItems" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="4" Caption="Family members (linked)" IsNewNode="True">
-                <LayoutItem Id="FamilyMembers" RelativeSize="100" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="EmailedDocuments" RelativeSize="100" Index="5" Caption="Emailed documents" IsNewNode="True">
-                <LayoutItem Id="EmailedDocuments" RelativeSize="100" ViewItem="EmailedDocuments" IsNewNode="True" />
-              </LayoutGroup>
-            </TabbedGroup>
-          </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="58.4985835694051" Index="1" Removed="True" />
-          <LayoutGroup Id="SizeableEditors" RelativeSize="18.41046277665996" Caption="Family members for visa (manual)" Removed="True">
-            <LayoutItem Id="VisaApplicationFamilyMembersText" RelativeSize="100" Removed="True" />
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="PersonIntakeWizardHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="PersonIntakeWizardUi" ViewItem="PersonIntakeWizardUi" Index="0" RelativeSize="100" ShowCaption="False" CustomCSSClassName="visa-person-intake-wizard-host xaf-fill-available" IsNewNode="True" />
+            </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
@@ -1179,7 +973,7 @@
         <ColumnInfo Id="MiddleName" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_Employee" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
+    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_EmployeeIntake" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
@@ -1220,7 +1014,7 @@
         <ColumnInfo Id="SponsoringEmployee" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMember" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
+    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMemberIntake" DataAccessMode="Server" PageSize="50" ShowAllRows="False" VirtualScrollingEnabled="False">
       <Columns>
         <ColumnInfo Id="FullName" Index="2" Width="140" />
         <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />

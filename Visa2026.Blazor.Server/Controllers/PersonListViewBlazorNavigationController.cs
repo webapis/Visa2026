@@ -5,12 +5,13 @@ using DevExpress.ExpressApp.SystemModule;
 using Microsoft.AspNetCore.Components;
 using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.PersonIntake;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
 /// Blazor list row navigation: route URL drives which Person detail view opens
-/// (<c>Person_DetailView_Employee</c> / <c>Person_DetailView_FamilyMember</c>).
+/// (<c>Person_DetailView_EmployeeIntake</c> / <c>Person_DetailView_FamilyMemberIntake</c>).
 /// </summary>
 public sealed class PersonListViewBlazorNavigationController : ViewController<ListView>
 {
@@ -47,6 +48,20 @@ public sealed class PersonListViewBlazorNavigationController : ViewController<Li
 
         if (View.ObjectSpace.IsNewObject(person))
             return;
+
+        if (View.Id is "Person_ListView_Employees" or "Person_ListView_FamilyMembers")
+        {
+            var wizard = PersonIntakeWizardOpenHelper.OpenExisting(Application, person);
+            if (wizard != null)
+            {
+                Application.ShowViewStrategy.ShowView(
+                    new ShowViewParameters(wizard) { TargetWindow = TargetWindow.Current },
+                    new ShowViewSource(Frame, null));
+                e.Handled = true;
+            }
+
+            return;
+        }
 
         PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
 

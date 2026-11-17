@@ -68,6 +68,7 @@ namespace Visa2026.Module.BusinessObjects
             TravelHistories = new ObservableCollection<TravelHistory>();
             ApplicationProfileInstances = new ObservableCollection<ApplicationProfileInstance>();
             WorkDuties = new ObservableCollection<WorkDuty>();
+            PendingItems = new ObservableCollection<PersonPendingItem>();
         }
 
         [MaxLength(100)]
@@ -87,7 +88,7 @@ namespace Visa2026.Module.BusinessObjects
         /// National / civil personal identifier — stable for this person across all passports (canonical source vs legacy per-passport copy).
         /// </summary>
         [MaxLength(50)]
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingPersonalNumber)]
         [ToolTip("National or civil ID number; unique per active person except 0 (use when the passport has no personal number). Same value applies to every passport for this person.")]
         [ModelDefault("CustomCSSClassName", "e2e-person-personal-number")]
         public virtual string PersonalNumber { get; set; }
@@ -173,7 +174,7 @@ namespace Visa2026.Module.BusinessObjects
         public string FullName => string.Join(" ", new[] { FirstName, MiddleName, LastName }.Where(s => !string.IsNullOrEmpty(s)));
 
         private DateTime dateOfBirth;
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingDateOfBirth)]
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
@@ -354,36 +355,36 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public RejectionItem CurrentRejectionItem => PersonCurrentItems.GetCurrentRejectionItem(this);
 
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingBirthPlace)]
         [ModelDefault("CustomCSSClassName", "e2e-person-birth-place")]
         public virtual string BirthPlace { get; set; }
 
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingCountryOfBirth)]
         [ModelDefault("CustomCSSClassName", "e2e-person-country-of-birth")]
         public virtual Country CountryOfBirth { get; set; }
 
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingGender)]
         [ModelDefault("CustomCSSClassName", "e2e-person-gender")]
         public virtual Gender Gender { get; set; }
 
-        [RuleRequiredField(TargetCriteria = EmployeeRequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.EmployeeUnlessPendingMaritalStatus)]
         [ModelDefault("CustomCSSClassName", "e2e-person-marital-status")]
         public virtual MaritalStatus MaritalStatus { get; set; }
 
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingNationality)]
         [ModelDefault("CustomCSSClassName", "e2e-person-nationality")]
         public virtual Country Nationality { get; set; }
 
         [MaxLength(255)]
-        [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.EmployeeUnlessPendingForeignAddress)]
         [ModelDefault("CustomCSSClassName", "e2e-person-foreign-address")]
         public virtual string ForeignAddress { get; set; }
 
-        [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.EmployeeUnlessPendingForeignAddressCountry)]
         [ModelDefault("CustomCSSClassName", "e2e-person-foreign-address-country")]
         public virtual Country ForeignAddressCountry { get; set; }
 
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingProjectContract)]
         [ModelDefault("CustomCSSClassName", "e2e-person-project-contract")]
         public virtual ProjectContract ProjectContract { get; set; }
 
@@ -533,7 +534,7 @@ namespace Visa2026.Module.BusinessObjects
             || (SponsoringEmployee == null && Relationship == null);
 
         [XafDisplayName("Company (Subcontractor)")]
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = PersonPendingTargets.UnlessPendingSubcontractor)]
         [ModelDefault("CustomCSSClassName", "e2e-person-subcontractor")]
         public virtual Subcontractor Subcontractor { get; set; }
 
@@ -633,6 +634,18 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName(" ")]
         public bool ShowOptionalFields { get; set; }
 
+        [NotMapped]
+        [Index(-2000)]
+        [Browsable(true)]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "True")]
+        [ModelDefault("ShowCaption", "False")]
+        [EditorAlias(Editors.PersonIntakeWizardEditorAliases.Wizard)]
+        [XafDisplayName(" ")]
+        public string PersonIntakeWizardUi { get; set; }
+
         [InverseProperty(nameof(Education.Person))]
         [Aggregated]
         public virtual IList<Education> Educations { get; set; }
@@ -687,6 +700,13 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(WorkDuty.Person))]
         [Aggregated]
         public virtual IList<WorkDuty> WorkDuties { get; set; }
+
+        [InverseProperty(nameof(PersonPendingItem.Person))]
+        [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual IList<PersonPendingItem> PendingItems { get; set; }
 
         [InverseProperty(nameof(InvitationItem.Person))]
         [Aggregated]

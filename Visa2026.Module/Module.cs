@@ -71,6 +71,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationWorkspace.ApplicationWorkspaceHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileWizard.ApplicationProfileWizardHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PersonIntake.PersonIntakeWizardHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfilePicker.ApplicationProfilePickerHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileOverview.ApplicationProfileOverviewHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost));
@@ -166,11 +167,15 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.ImportReimportHistoryDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ReportDashboardModelUpdater());
             updaters.Add(new DatabaseUpdate.ReportDashboardDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.PersonIntakeWizardDetailViewItemsUpdater());
+            updaters.Add(new DatabaseUpdate.PersonIntakeWizardLayoutUpdater());
             updaters.Add(new DatabaseUpdate.PersonDossierDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationWorkspaceDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationWorkspaceLayoutUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfileWizardDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfileWizardLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.PersonIntakeWizardHostDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.PersonIntakeWizardHostLayoutUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfilePickerDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfilePickerLayoutUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationProfileOverviewDetailViewUpdater());

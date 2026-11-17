@@ -567,6 +567,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<AuthorizedRepresentative>(userRole);
     EnsureTypePermission<BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost>(
         userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
+    EnsureTypePermission<BusinessObjects.PersonIntake.PersonIntakeWizardHost>(
+        userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
     // Address of residence: allow adding supporting documents inline (no Documents navigation group access needed).
     EnsureFullAccessRecursivePermission<AddressOfResidence>(userRole);
     EnsureFullAccessRecursivePermission<AddressOfResidenceDocument>(userRole);

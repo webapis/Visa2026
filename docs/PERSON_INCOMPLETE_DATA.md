@@ -10,6 +10,7 @@ Related:
 | [`.cursor/skills/visa2026-report-dashboard/`](../.cursor/skills/visa2026-report-dashboard/SKILL.md) | Dashboard wiring / `vw_rd_*` contract |
 | [`STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md) | Planned **automatic** `DataCompleteness` alerts (evaluators) — **orthogonal** to this manual flag |
 | [`OPTIONAL_DETAIL_FIELDS.md`](OPTIONAL_DETAIL_FIELDS.md) | Gear pattern; incomplete fields use `[ExcludeFromOptionalDetailFields]` and are not gear-driven |
+| [`PERSON_INTAKE_WIZARD.md`](PERSON_INTAKE_WIZARD.md) | Planned Employee / Family member wizard. Keeps this flag as the summary and adds per-field and per-record pending rows |
 
 ---
 
@@ -153,6 +154,7 @@ tools/GenerateModelLocalization/UiStrings.messages.json  # ReportDashboard.Categ
 - Incomplete episode history audit table
 - ListView row color for incomplete persons (optional later; see `visa2026-bo-state-colors`)
 - Incomplete episode history beyond MarkedOn/By (v1: tab + dashboard only)
+- Employee / Family member wizard UI (planned in [`PERSON_INTAKE_WIZARD.md`](PERSON_INTAKE_WIZARD.md); this popup stays for Temporary visitor)
 
 ---
 

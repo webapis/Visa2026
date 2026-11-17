@@ -4,7 +4,9 @@ namespace Visa2026.Module;
 public static class PersonDetailViewIds
 {
     public const string Default = "Person_DetailView";
-    public const string Employee = "Person_DetailView_Employee";
-    public const string FamilyMember = "Person_DetailView_FamilyMember";
+    /// <summary>Employee intake wizard surface (fresh id so user ModelDifference for the old classic Employee view cannot win).</summary>
+    public const string Employee = "Person_DetailView_EmployeeIntake";
+    /// <summary>Family member intake wizard surface (fresh id; same reason as <see cref="Employee"/>).</summary>
+    public const string FamilyMember = "Person_DetailView_FamilyMemberIntake";
     public const string TemporaryVisitor = "Person_DetailView_TemporaryVisitor";
 }
