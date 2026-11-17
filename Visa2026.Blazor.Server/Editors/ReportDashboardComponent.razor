@@ -232,6 +232,7 @@
                               || ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category)
                               || ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category)
                               || ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category)
+                              || ReportDashboardCatalog.SupportsExcludeNonPositiveDaysRemaining(Category, SubReport)
                               || ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category)
                               || ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category)
                               || ReportDashboardCatalog.SupportsCategoryDateRange(Category))
@@ -322,6 +323,16 @@
                                                checked="@ValidVisaPersonsOnly"
                                                @onchange="OnValidVisaPersonsOnlyChanged" />
                                         <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ValidVisaOnly")</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsExcludeNonPositiveDaysRemaining(Category, SubReport))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.ExcludeNonPositiveDaysRemaining")'>
+                                        <input type="checkbox"
+                                               checked="@ExcludeNonPositiveDaysRemaining"
+                                               @onchange="OnExcludeNonPositiveDaysRemainingChanged" />
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcludeNonPositiveDaysRemaining")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
@@ -1281,6 +1292,7 @@
     [Parameter] public bool                      IncludeCompletedApplicationProcesses { get; set; }
     [Parameter] public bool                      IncludeCancelledApplicationProcesses { get; set; }
     [Parameter] public bool                      ValidVisaPersonsOnly { get; set; } = true;
+    [Parameter] public bool                      ExcludeNonPositiveDaysRemaining { get; set; } = true;
     [Parameter] public string                    SearchTerm      { get; set; } = string.Empty;
 
     [Parameter] public EventCallback<ReportDashboardPersonType> PersonTypeChanged   { get; set; }
@@ -1296,6 +1308,7 @@
     [Parameter] public EventCallback<bool>                      IncludeCompletedApplicationProcessesChanged { get; set; }
     [Parameter] public EventCallback<bool>                      IncludeCancelledApplicationProcessesChanged { get; set; }
     [Parameter] public EventCallback<bool>                      ValidVisaPersonsOnlyChanged { get; set; }
+    [Parameter] public EventCallback<bool>                      ExcludeNonPositiveDaysRemainingChanged { get; set; }
     [Parameter] public EventCallback                            InitialLoadRequested { get; set; }
     [Parameter] public EventCallback                            OpenExcelRequested  { get; set; }
     [Parameter] public EventCallback<string?>                   OpenListViewRequested { get; set; }
@@ -1966,7 +1979,8 @@
             IncludeCompletedApplicationProcesses,
             IncludeCancelledApplicationProcesses,
             ValidVisaPersonsOnly,
-            searchTerm: null);
+            searchTerm: null,
+            ExcludeNonPositiveDaysRemaining);
         return ReportDashboardExcelTemplateService.Export(
             objectSpace,
             item.Category,
@@ -2569,6 +2583,17 @@
             _ => true
         };
         await ValidVisaPersonsOnlyChanged.InvokeAsync(validOnly);
+    }
+
+    private async Task OnExcludeNonPositiveDaysRemainingChanged(ChangeEventArgs e)
+    {
+        var exclude = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => true
+        };
+        await ExcludeNonPositiveDaysRemainingChanged.InvokeAsync(exclude);
     }
 
     private async Task OnIncludeCompletedApplicationChanged(ChangeEventArgs e)

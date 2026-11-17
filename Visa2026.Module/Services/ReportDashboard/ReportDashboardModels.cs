@@ -83,6 +83,11 @@ public sealed class ReportDashboardPreviewRow
     public string ColumnC       { get; init; } = string.Empty;
     /// <summary>Optional 7th column (e.g. days remaining before Status on Visa previews).</summary>
     public string ColumnD       { get; init; } = string.Empty;
+    /// <summary>
+    /// Numeric days-remaining used by Exclude 0 days remaining (null = blank / unknown).
+    /// May be negative when the underlying date is already past.
+    /// </summary>
+    public int? DaysRemainingValue { get; init; }
     /// <summary>Optional 8th column (e.g. App # when Visa Period/Type occupy C/D).</summary>
     public string ColumnE       { get; init; } = string.Empty;
     /// <summary>Optional 9th column (e.g. App Date when Visa Period/Type occupy C/D).</summary>

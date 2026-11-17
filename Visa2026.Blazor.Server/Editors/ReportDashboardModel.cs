@@ -102,6 +102,15 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     /// <summary>
+    /// When true (default), drop rows whose days-remaining is blank / 0 / negative
+    /// on sub-reports that support <see cref="ReportDashboardCatalog.SupportsExcludeNonPositiveDaysRemaining"/>.
+    /// </summary>
+    public bool ExcludeNonPositiveDaysRemaining
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>
     /// Application: when false (default), exclude latest progress PROCESS_ISSUED.
     /// </summary>
     public bool IncludeCompletedApplicationProcesses
@@ -258,6 +267,11 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     public EventCallback<bool> ValidVisaPersonsOnlyChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> ExcludeNonPositiveDaysRemainingChanged
     {
         get => GetPropertyValue<EventCallback<bool>>();
         set => SetPropertyValue(value);

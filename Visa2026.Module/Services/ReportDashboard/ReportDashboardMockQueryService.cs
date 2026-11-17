@@ -150,7 +150,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true,
-        string? searchTerm = null)
+        string? searchTerm = null,
+        bool excludeNonPositiveDaysRemaining = true)
     {
         if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
             return Build(personType, category, subReport, [], projectKey);
@@ -170,7 +171,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         var applyOneLastWp = oneLastValidWorkPermitPerPerson
             && category == ReportDashboardCategory.WorkPermit
             && ReportDashboardCatalog.SubReportCountsValidWorkPermits(subReport);
-        return (category, subReport) switch
+        var panel = (category, subReport) switch
         {
             // ApplicationProfileInstance (via ministry) — On Process / Completed by Invitation / Visa Extension / Other
             (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey) =>
@@ -313,6 +314,9 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             (ReportDashboardCategory.IncompletePersons, _) => IncompletePersonsByMissingArea(personType, category, subReport, projectKey),
             _ => Build(personType, category, subReport, [], projectKey)
         };
+
+        return ReportDashboardCatalog.ApplyExcludeNonPositiveDaysRemaining(
+            panel, excludeNonPositiveDaysRemaining);
     }
 
     // ===== Visa (Visa Extension) — sub-reports ============================
@@ -621,6 +625,10 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             ColumnB = colA,
             ColumnC = colB,
             ColumnD = colC,
+            DaysRemainingValue = int.TryParse(colC, System.Globalization.NumberStyles.Integer,
+                System.Globalization.CultureInfo.InvariantCulture, out var days)
+                ? days
+                : null,
             Status = status,
             StatusCssClass = css
         };

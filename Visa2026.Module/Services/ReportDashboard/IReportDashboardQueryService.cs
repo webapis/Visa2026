@@ -34,5 +34,6 @@ public interface IReportDashboardQueryService
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true,
-        string? searchTerm = null);
+        string? searchTerm = null,
+        bool excludeNonPositiveDaysRemaining = true);
 }

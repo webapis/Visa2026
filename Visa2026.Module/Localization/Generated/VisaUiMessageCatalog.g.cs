@@ -12325,6 +12325,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu tablisany Excel edip göçür",
             ["ru-RU"] = "Скачать эту таблицу в Excel",
         },
+        ["ReportDashboard.Chrome.ExcludeNonPositiveDaysRemaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exclude 0 days remaining",
+            ["tr-TR"] = "0 kalan günü hariç tut",
+            ["tk-TM"] = "0 galan güni aýyr",
+            ["ru-RU"] = "Исключить 0 дней осталось",
+        },
+        ["ReportDashboard.Chrome.Title.ExcludeNonPositiveDaysRemaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hide rows with blank, zero, or negative days remaining",
+            ["tr-TR"] = "Boş, sıfır veya negatif kalan günü olan satırları gizle",
+            ["tk-TM"] = "Boş, nol ýa-da negatif galan günlü hatarlary gizle",
+            ["ru-RU"] = "Скрыть строки с пустым, нулевым или отрицательным остатком дней",
+        },
         ["ReportDashboard.Chrome.IncludeArchived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Include archived",

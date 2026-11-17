@@ -169,7 +169,8 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true,
-        string? searchTerm = null)
+        string? searchTerm = null,
+        bool excludeNonPositiveDaysRemaining = true)
     {
         if (ReportDashboardCatalog.SuppressesSubReportsForPersonType(category, personType))
         {
@@ -177,7 +178,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
                 objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
                 includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
                 includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
-                validVisaPersonsOnly, searchTerm);
+                validVisaPersonsOnly, searchTerm, excludeNonPositiveDaysRemaining);
         }
 
         if (category == ReportDashboardCategory.Registration)
@@ -186,7 +187,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
                 objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
                 includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
                 includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
-                validVisaPersonsOnly, searchTerm);
+                validVisaPersonsOnly, searchTerm, excludeNonPositiveDaysRemaining);
         }
 
         if (category == ReportDashboardCategory.PersonSearch
@@ -215,7 +216,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
                 objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
                 includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
                 includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
-                validVisaPersonsOnly, searchTerm);
+                validVisaPersonsOnly, searchTerm, excludeNonPositiveDaysRemaining);
         }
         // Default sub-report key for Passport is "by-validity"
         if (category == ReportDashboardCategory.Passport
@@ -261,7 +262,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
             objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
             includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
             includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
-            validVisaPersonsOnly, searchTerm);
+            validVisaPersonsOnly, searchTerm, excludeNonPositiveDaysRemaining);
     }
 
     /// <summary>

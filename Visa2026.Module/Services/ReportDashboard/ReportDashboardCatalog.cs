@@ -123,6 +123,105 @@ public static class ReportDashboardCatalog
     public static bool SupportsIncludeCancelledApplicationProcesses(ReportDashboardCategory category) =>
         false;
 
+    /// <summary>
+    /// Sub-reports that expose a days-remaining count and can hide non-positive values
+    /// (blank / 0 / negative). Invitation ready/expired are excluded (NOT / geçerli gün).
+    /// </summary>
+    public static bool SupportsExcludeNonPositiveDaysRemaining(
+        ReportDashboardCategory category,
+        string? subReport)
+    {
+        if (string.IsNullOrWhiteSpace(subReport) || subReport == "default")
+            return false;
+
+        return category switch
+        {
+            ReportDashboardCategory.VisaExtension =>
+                IsVisaAktivPersonellerSubReport(subReport)
+                || subReport is "active-by-project"
+                    or "by-period-category-type"
+                    or "extension-required"
+                    or "extension-required-by-period-category-type"
+                    or "on-extension"
+                    or "on-extension-by-period-category-type"
+                    or "by-days-remaining",
+            ReportDashboardCategory.WorkPermit =>
+                string.Equals(subReport, WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase)
+                || subReport is "by-days-remaining" or "by-validity",
+            ReportDashboardCategory.Registration =>
+                IsRegistrationExpiringStateSubReport(subReport)
+                || IsRegistrationToBeCheckedOutSubReport(subReport),
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// When checked, drop preview/Excel rows whose <see cref="ReportDashboardPreviewRow.DaysRemainingValue"/>
+    /// is null or ≤ 0. No-op when the sub-report does not support the filter or no row carries a value.
+    /// </summary>
+    public static ReportDashboardPanelData ApplyExcludeNonPositiveDaysRemaining(
+        ReportDashboardPanelData panel,
+        bool excludeNonPositiveDaysRemaining)
+    {
+        if (!excludeNonPositiveDaysRemaining
+            || !SupportsExcludeNonPositiveDaysRemaining(panel.Category, panel.SubReport)
+            || panel.PreviewRows.Count == 0
+            || !panel.PreviewRows.Any(r => r.DaysRemainingValue.HasValue))
+        {
+            return panel;
+        }
+
+        var kept = panel.PreviewRows.Where(r => r.DaysRemainingValue is > 0).ToList();
+        if (kept.Count == panel.PreviewRows.Count)
+            return panel;
+
+        var removed = panel.PreviewRows.Count - kept.Count;
+        var counts = kept
+            .GroupBy(r => r.Status ?? string.Empty, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+
+        IReadOnlyList<ReportDashboardStatusBucket> buckets;
+        if (panel.StatusBuckets.Count == 0)
+        {
+            buckets = counts
+                .OrderByDescending(kv => kv.Value)
+                .Select((kv, i) => new ReportDashboardStatusBucket
+                {
+                    Label = kv.Key,
+                    CssClass = $"st-cat-{(i % 5) + 1}",
+                    Count = kv.Value
+                })
+                .ToList();
+        }
+        else
+        {
+            buckets = panel.StatusBuckets
+                .Select(b => new ReportDashboardStatusBucket
+                {
+                    Label = b.Label,
+                    CssClass = b.CssClass,
+                    Count = counts.TryGetValue(b.Label, out var c) ? c : 0
+                })
+                .ToList();
+        }
+
+        return new ReportDashboardPanelData
+        {
+            PersonType = panel.PersonType,
+            Category = panel.Category,
+            SubReport = panel.SubReport,
+            Title = panel.Title,
+            Subtitle = panel.Subtitle,
+            TableHeaders = panel.TableHeaders,
+            StatusBuckets = buckets,
+            PreviewRows = kept,
+            TotalCount = Math.Max(kept.Count, panel.TotalCount - removed),
+            ExcelTemplateNameHint = panel.ExcelTemplateNameHint,
+            ExcelConfigured = panel.ExcelConfigured,
+            ListViewId = panel.ListViewId
+        };
+    }
+
     // ApplicationProfileInstance (via ministry) sub-report keys
     public const string AppViaMinistryInvitationOnProcessKey = "invitation-on-process";
     public const string AppViaMinistryInvitationOnProcessVKey = "invitation-on-process-by-period-category-type";

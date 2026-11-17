@@ -6730,6 +6730,18 @@
     "tk-TM": "Diňe güýjündäki wiza",
     "ru-RU": "Только действующая виза"
   },
+    "ReportDashboard.Chrome.ExcludeNonPositiveDaysRemaining": {
+    "en": "Exclude 0 days remaining",
+    "tr-TR": "0 kalan günü hariç tut",
+    "tk-TM": "0 galan güni aýyr",
+    "ru-RU": "Исключить 0 дней осталось"
+  },
+  "ReportDashboard.Chrome.Title.ExcludeNonPositiveDaysRemaining": {
+    "en": "Hide rows with blank, zero, or negative days remaining",
+    "tr-TR": "Boş, sıfır veya negatif kalan günü olan satırları gizle",
+    "tk-TM": "Boş, nol ýa-da negatif galan günlü hatarlary gizle",
+    "ru-RU": "Скрыть строки с пустым, нулевым или отрицательным остатком дней"
+  },
   "ReportDashboard.Chrome.IncludeArchived": {
     "en": "Include archived",
     "tr-TR": "Arşivlenenleri dahil et",

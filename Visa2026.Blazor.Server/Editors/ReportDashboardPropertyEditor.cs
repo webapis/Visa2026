@@ -115,6 +115,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             OneLastValidVisaPerPerson = true,
             OneLastValidWorkPermitPerPerson = true,
             ValidVisaPersonsOnly = true,
+            ExcludeNonPositiveDaysRemaining = true,
             IncludeCompletedApplicationProcesses = false,
             IncludeCancelledApplicationProcesses = false,
             SearchTerm = string.Empty,
@@ -132,6 +133,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             OneLastValidVisaPerPersonChanged = EventCallback.Factory.Create<bool>(this, OnOneLastValidVisaPerPersonChanged),
             OneLastValidWorkPermitPerPersonChanged = EventCallback.Factory.Create<bool>(this, OnOneLastValidWorkPermitPerPersonChanged),
             ValidVisaPersonsOnlyChanged = EventCallback.Factory.Create<bool>(this, OnValidVisaPersonsOnlyChanged),
+            ExcludeNonPositiveDaysRemainingChanged = EventCallback.Factory.Create<bool>(this, OnExcludeNonPositiveDaysRemainingChanged),
             IncludeCompletedApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCompletedApplicationProcessesChanged),
             IncludeCancelledApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCancelledApplicationProcessesChanged),
             IsLoading               = true,
@@ -378,6 +380,12 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         return RefreshAsync(ComponentModel);
     }
 
+    private Task OnExcludeNonPositiveDaysRemainingChanged(bool exclude)
+    {
+        ComponentModel.ExcludeNonPositiveDaysRemaining = exclude;
+        return RefreshAsync(ComponentModel);
+    }
+
     private Task OnIncludeCompletedApplicationProcessesChanged(bool include)
     {
         ComponentModel.IncludeCompletedApplicationProcesses = include;
@@ -522,7 +530,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             model.IncludeCompletedApplicationProcesses,
             model.IncludeCancelledApplicationProcesses,
             model.ValidVisaPersonsOnly,
-            model.SearchTerm);
+            model.SearchTerm,
+            model.ExcludeNonPositiveDaysRemaining);
     }
 
     private async Task OnOpenExcelAsync()

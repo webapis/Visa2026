@@ -2761,3 +2761,13 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 - **Test**: Restart, Open selected in Excel dialog → Preview on a row. Slot shows PDF; Download saves xlsx; dialog remains.
 - **Prevent**: Do not close the bundle dialog on Preview. Do not require the checkbox for Preview.
 - **Cross-skill**: preview-slot | visa2026-report-dashboard
+
+## 2026-11-17 — Exclude 0 days remaining checkbox
+
+**Ask:** Checkbox (default on) to drop non-positive days-remaining rows from preview + Excel; every days-remaining RD subreport except Invitation ready/expired; localized label next to existing filters.
+
+**Now:** `SupportsExcludeNonPositiveDaysRemaining` + `PreviewRow.DaysRemainingValue` + `LoadPanel(..., excludeNonPositiveDaysRemaining)` + `ApplyExcludeNonPositiveDaysRemaining`. Invitation ready/expired (and FM) intentionally out of scope. Excel bundle export passes the same flag.
+
+**Prevent:** Do not filter Invitation NOT / geçerli gün. Do not treat Days Since Entry (To Be Checked In) as days-remaining.
+
+**Files:** ReportDashboardCatalog/Models/QueryService/Hybrid/Mock, ReportDashboardComponent/Model/PropertyEditor, UiStrings.messages.json, VisaUiMessageCatalog.g.cs, REPORT_DASHBOARD.md

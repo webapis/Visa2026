@@ -206,7 +206,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true,
-        string? searchTerm = null)
+        string? searchTerm = null,
+        bool excludeNonPositiveDaysRemaining = true)
     {
         // Categories without a Last-N UI must not silently filter Preview by ApplicationDate —
         // Open ListView BuildListCriteria has no date clause (Preview ↔ ListView Total parity).
@@ -229,7 +230,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         var role = ReportDashboardCatalog.TryGetPersonRole(personType);
         var validVisaPersonIds = ResolveValidVisaPersonIds(objectSpace, category, validVisaPersonsOnly);
 
-        return category switch
+        var panel = category switch
         {
             ReportDashboardCategory.ApplicationViaMinistry
                 when ReportDashboardCatalog.UsesApplicationViaMinistryRdListView(subReport) =>
@@ -259,6 +260,9 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             ReportDashboardCategory.PersonSearch     => LoadPersonSearch(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, searchTerm),
             _                                        => EmptyPanel(personType, category, subReport, excelHint, excelConfigured)
         };
+
+        return ReportDashboardCatalog.ApplyExcludeNonPositiveDaysRemaining(
+            panel, excludeNonPositiveDaysRemaining);
     }
 
     // ---- Project chips ---------------------------------------------------
@@ -683,6 +687,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnB = x.Row.VisaNumber ?? string.Empty,
                     ColumnC = FormatDate(x.Row.ExpirationDate),
                     ColumnD = x.ExactDays.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    DaysRemainingValue = x.ExactDays,
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                 })
@@ -833,6 +838,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnB = x.Row.VisaNumber ?? string.Empty,
                     ColumnC = FormatDate(x.Row.ExpirationDate),
                     ColumnD = x.ExactDays.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    DaysRemainingValue = x.ExactDays,
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                 })
@@ -1006,6 +1012,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         VisaId = row.VisaOid,
                         VisaNumber = row.VisaNumber ?? string.Empty,
                         CalismaCells = BuildAktivPersonellerCalismaCells(row, subReport),
+                        DaysRemainingValue = DaysRemainingFromEndDate(row.VisaEndDate),
                         Status = x.Status,
                         StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
                     };
@@ -1113,6 +1120,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnB = x.Row.VisaNumber ?? string.Empty,
                     ColumnC = FormatDate(x.Row.ExpirationDate),
                     ColumnD = FormatExactDaysRemainingColumn(x.Row.DaysRemaining),
+                    DaysRemainingValue = x.Row.DaysRemaining,
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                 })
@@ -1198,6 +1206,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnB = x.Row.VisaNumber ?? string.Empty,
                     ColumnC = FormatDate(x.Row.ExpirationDate),
                     ColumnD = FormatExactDaysRemainingColumn(x.Row.DaysRemaining),
+                    DaysRemainingValue = x.Row.DaysRemaining,
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                 })
@@ -1300,6 +1309,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnB = r.VisaNumber ?? string.Empty,
                     ColumnC = FormatDate(r.ExpirationDate),
                     ColumnD = FormatExactDaysRemainingColumn(r.DaysRemaining),
+                    DaysRemainingValue = r.DaysRemaining,
                     Status = r.StatusLabel ?? string.Empty,
                     StatusCssClass = r.StatusCssClass ?? "st-pending"
                 })
@@ -1487,6 +1497,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     ColumnD = excludeIssued && x.Row.DaysRemainingOnVisa is int d
                         ? FormatExactDaysRemainingColumn(d)
                         : string.Empty,
+                    DaysRemainingValue = excludeIssued ? x.Row.DaysRemainingOnVisa : null,
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
                 })
@@ -3501,6 +3512,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     Project = r.ProjectName ?? string.Empty,
                     ColumnA = r.VisaNumber ?? string.Empty,
                     ColumnB = FormatDate(r.VisaExpirationDate),
+                    DaysRemainingValue = r.DaysRemaining,
                     Status = r.ExpiryBucketLabel ?? string.Empty,
                     StatusCssClass = r.ExpiryBucketCssClass ?? "st-pending"
                 })
@@ -3722,6 +3734,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         Project = r.ProjectName ?? string.Empty,
                         ColumnA = r.VisaNumber ?? string.Empty,
                         ColumnB = FormatDate(r.VisaExpirationDate),
+                        DaysRemainingValue = r.DaysRemaining,
                         Status = r.ExpiryBucketLabel ?? string.Empty,
                         StatusCssClass = r.ExpiryBucketCssClass ?? "st-pending"
                     })
@@ -4556,6 +4569,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                         row.AddressLabel ?? string.Empty,
                         string.Empty
                     ],
+                    DaysRemainingValue = DaysRemainingFromEndDate(row.VisaEndDate),
                     Status = x.Status,
                     StatusCssClass = cssByLabel.TryGetValue(x.Status, out var css) ? css : "st-cat-1"
                 };
@@ -5057,6 +5071,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     Project = r.ProjectName ?? string.Empty,
                     ColumnA = r.WorkPermitNumber ?? string.Empty,
                     ColumnB = FormatDate(r.ExpirationDate),
+                    DaysRemainingValue = r.DaysRemaining,
                     Status = r.ValidityLabel ?? string.Empty,
                     StatusCssClass = r.ValidityCssClass ?? "st-pending"
                 })
@@ -6851,6 +6866,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     /// <summary>Days until visa end (negative when expired). Used after <see cref="OfficerDateSortGroup"/>.</summary>
     private static int VisaDaysRemainingSortValue(DateTime? visaEnd) =>
         visaEnd is { Year: > 1900 } value ? (value.Date - DateTime.Today).Days : 0;
+
+    /// <summary>Null when end date is blank; otherwise calendar days remaining (may be negative).</summary>
+    private static int? DaysRemainingFromEndDate(DateTime? end) =>
+        end is { Year: > 1900 } value ? (value.Date - DateTime.Today).Days : null;
 
     private static string FormatLastApproval(
         DateTime? approval1Date, string? approval1Number,
