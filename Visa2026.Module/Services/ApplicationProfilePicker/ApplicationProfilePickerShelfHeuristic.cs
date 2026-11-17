@@ -19,7 +19,7 @@ public static class ApplicationProfilePickerShelfHeuristic
         var name = profile.Name ?? string.Empty;
         var codes = new List<string>(8);
 
-        // Dual-list standalone exclusion profile — shelf even if Name is empty/renamed.
+        // Standalone exclusion profile — shelf even if Name is empty/renamed (Direct-list create only).
         if (ApplicationProfileConfigurationResolver.IsSeretmezlikProfile(profile)
             || NameMentionsSeretmezlik(name))
             codes.Add(ApplicationProfilePickerShelfCodes.Seretmezlik);

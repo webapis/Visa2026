@@ -202,7 +202,7 @@ public class ApplicationProfileInstanceSeretmezlikStandaloneTests
     }
 
     [Fact]
-    public void RequiresSubmitToBeforeLink_OnlyViaMinistrySubmitToProfiles()
+    public void RequiresSubmitToBeforeLink_WhenSubmitToShownForSeretmezlik()
     {
         var viaMinistry = new ApplicationProfileInstance
         {
@@ -224,7 +224,7 @@ public class ApplicationProfileInstanceSeretmezlikStandaloneTests
             },
             CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
         };
-        Assert.False(ApplicationProfileInstanceSeretmezlikRosterHelper.RequiresSubmitToBeforeLink(direct));
+        Assert.True(ApplicationProfileInstanceSeretmezlikRosterHelper.RequiresSubmitToBeforeLink(direct));
 
         var noSubmitField = new ApplicationProfileInstance
         {

@@ -26,7 +26,8 @@ public static class ApplicationProfilePickerShelfService
             shelves = shelves
                 .Where(s =>
                     !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.Registration, StringComparison.OrdinalIgnoreCase)
-                    && !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.BusinessTrip, StringComparison.OrdinalIgnoreCase))
+                    && !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.BusinessTrip, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(s.Code, ApplicationProfilePickerShelfCodes.Seretmezlik, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
         else if (progressRoute == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)

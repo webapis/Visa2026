@@ -14,8 +14,8 @@ namespace Visa2026.Module.BusinessObjects
         public const string CaptionGroup = "Application Profiles";
         public const string CaptionStaged = "Staged profiles";
         public const string CaptionInProcess = "In process";
-        public const string CaptionViaMinistries = "Application Profile Instances (via ministry)";
-        public const string CaptionDirectMigration = "Application Profile Instances (direct migration)";
+        public const string CaptionViaMinistries = "To be agreed with ministry";
+        public const string CaptionDirectMigration = "Applications not requiring agreement";
         public const string CaptionTemplates = "Application Profile Templates";
 
         public const string NavItemItemsViaMinistries = "ApplicationItem_ViaMinistries";
@@ -42,21 +42,26 @@ namespace Visa2026.Module.BusinessObjects
             "Visa2026.Module.BusinessObjects.ApplicationProfileInstanceProgressRouteKind,DirectToMigrationService#";
 
         /// <summary>
+        /// Via-ministry instances excluding Seretmezlik (those live on the Direct list only).
         /// Profile-first route filter: <see cref="Application.CreationProgressRoute"/>, then profile, then deprecated type.
         /// </summary>
         public const string CriteriaViaMinistries =
-            "CreationProgressRoute = ##Enum#" + ViaMinistriesEnum
+            "("
+            + "CreationProgressRoute = ##Enum#" + ViaMinistriesEnum
             + " Or (CreationProgressRoute is null And ApplicationProfile is not null And ApplicationProfile.ProgressRoute = ##Enum#"
             + ViaMinistriesEnum
             + ") Or (CreationProgressRoute is null And ApplicationProfile is null And ApplicationType is not null And ApplicationType.ApplicationProfileInstanceProgressRoute = ##Enum#"
-            + ViaMinistriesEnum + ")";
+            + ViaMinistriesEnum + ")"
+            + ") And Not (ApplicationProfile is not null And ApplicationProfile.RequireTargetApplicationProfileInstance = True)";
 
+        /// <summary>Direct-migration instances plus every Seretmezlik (including legacy Via-created).</summary>
         public const string CriteriaDirectMigration =
             "CreationProgressRoute = ##Enum#" + DirectMigrationEnum
             + " Or (CreationProgressRoute is null And ApplicationProfile is not null And ApplicationProfile.ProgressRoute = ##Enum#"
             + DirectMigrationEnum
             + ") Or (CreationProgressRoute is null And ApplicationProfile is null And ApplicationType is not null And ApplicationType.ApplicationProfileInstanceProgressRoute = ##Enum#"
-            + DirectMigrationEnum + ")";
+            + DirectMigrationEnum + ")"
+            + " Or (ApplicationProfile is not null And ApplicationProfile.RequireTargetApplicationProfileInstance = True)";
 
         /// <summary>No process number yet (officer shell staged queue).</summary>
         public const string CriteriaStaged =
@@ -72,7 +77,8 @@ namespace Visa2026.Module.BusinessObjects
             + " Or (Application.CreationProgressRoute is null And Application.ApplicationProfile is not null And Application.ApplicationProfile.ProgressRoute = ##Enum#"
             + ViaMinistriesEnum
             + ") Or (Application.CreationProgressRoute is null And Application.ApplicationProfile is null And Application.ApplicationType is not null And Application.ApplicationType.ApplicationProfileInstanceProgressRoute = ##Enum#"
-            + ViaMinistriesEnum + "))";
+            + ViaMinistriesEnum + ")"
+            + ") And Not (Application.ApplicationProfile is not null And Application.ApplicationProfile.RequireTargetApplicationProfileInstance = True)";
 
         public const string CriteriaItemsDirectMigration =
             "ApplicationProfileInstance is not null And ("
@@ -80,6 +86,7 @@ namespace Visa2026.Module.BusinessObjects
             + " Or (Application.CreationProgressRoute is null And Application.ApplicationProfile is not null And Application.ApplicationProfile.ProgressRoute = ##Enum#"
             + DirectMigrationEnum
             + ") Or (Application.CreationProgressRoute is null And Application.ApplicationProfile is null And Application.ApplicationType is not null And Application.ApplicationType.ApplicationProfileInstanceProgressRoute = ##Enum#"
-            + DirectMigrationEnum + "))";
+            + DirectMigrationEnum + ")"
+            + " Or (Application.ApplicationProfile is not null And Application.ApplicationProfile.RequireTargetApplicationProfileInstance = True))";
     }
 }

@@ -29,8 +29,7 @@ public static class ApplicationProfileInstanceSeretmezlikRosterHelper
         !string.IsNullOrWhiteSpace(GetDestinationKey(application));
 
     /// <summary>
-    /// Via-ministry Seretmezlik shows Submit-to; require it before Link.
-    /// Direct-migration Seretmezlik has no Submit-to field — do not block the picker.
+    /// Seretmezlik shows Submit-to on Direct create; require it before Link.
     /// </summary>
     public static bool RequiresSubmitToBeforeLink(ApplicationProfileInstance? application) =>
         IsSeretmezlik(application)

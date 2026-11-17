@@ -117,13 +117,15 @@ public static class ApplicationProfileConfigurationResolver
         Resolve(application, p => p.RequireTargetApplicationProfileInstance, _ => false);
 
     /// <summary>
-    /// Via-create Submit-to-organization only (ministry picker). Direct-create skips destination
-    /// and uses the generic migration hand-in label.
+    /// Submit-to-organization: Via-create lists for RequireSubmitToOrganization profiles,
+    /// and always for Seretmezlik (created only from the Direct list, ministry or migration).
+    /// Other Direct-create profiles skip destination (generic migration hand-in).
     /// </summary>
     public static bool ShowSubmitToOrganization(ApplicationProfileInstance? application) =>
         IsSubmitToOrganizationProfile(application?.ApplicationProfile)
-        && ResolveCreateListRoute(application)
-            == ApplicationProfileInstanceProgressRouteKind.ViaMinistries;
+        && (IsSeretmezlikInstance(application)
+            || ResolveCreateListRoute(application)
+                == ApplicationProfileInstanceProgressRouteKind.ViaMinistries);
 
     public static bool IsSubmitToOrganizationProfile(ApplicationProfile? profile) =>
         profile?.RequireSubmitToOrganization == true;

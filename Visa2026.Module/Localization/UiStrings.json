@@ -43,10 +43,10 @@
       "children": {
         "Application_ViaMinistries": {
           "caption": {
-            "en-US": "Application Profile Instances (via ministry)",
-            "tr-TR": "Başvuru profili örnekleri (bakanlık süreci)",
-            "tk-TM": "Ýüztutmalar (ministrlik arkaly)",
-            "ru-RU": "Экземпляры профиля заявки (через министерства)"
+            "en-US": "To be agreed with ministry",
+            "tr-TR": "Bakanlık ile anlaşılacak",
+            "tk-TM": "Ministrlik bilen ylalaşylmaly",
+            "ru-RU": "Согласование с министерством"
           },
           "children": {
             "ApplicationItem_ViaMinistries": {
@@ -59,10 +59,10 @@
         },
         "Application_DirectMigration": {
           "caption": {
-            "en-US": "Application Profile Instances (direct migration)",
-            "tr-TR": "Başvuru profili örnekleri (doğrudan migrasyon)",
-            "tk-TM": "Ýüztutmalar (migrasiýa gönümel)",
-            "ru-RU": "Экземпляры профиля заявки (напрямую в миграцию)"
+            "en-US": "Applications not requiring agreement",
+            "tr-TR": "Anlaşma gerektirmeyen başvurular",
+            "tk-TM": "Ylalaşyk zerur bolmadyk ýüztutmalar",
+            "ru-RU": "Заявки без необходимости согласования"
           },
           "children": {
             "ApplicationItem_DirectMigration": {

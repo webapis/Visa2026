@@ -32,7 +32,7 @@ public class ApplicationProfilePickerRowTests
     [Fact]
     public void RequiresApprovalLegVersion_TrueWhenCreateListOverridesToVia()
     {
-        // QueryService sets ProgressRoute from the create-list filter for dual-list Seretmezlik.
+        // ProgressRoute comes from the create-list filter when New is opened from Via/Direct.
         var row = new ApplicationProfilePickerRow
         {
             ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,

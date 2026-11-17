@@ -1,3 +1,9 @@
+## 2026-11-17 — Seretmezlik create only from Direct list with Submit-to
+
+- **Need**: Officers must not create Seretmezlik under Ministrlik bilen ylalaşylmaly. Create only under Ylalaşyk zerur bolmadyk ýüztutmalar, and choose ministry or migration as Submit-to.
+- **Fix**: Picker hides Seretmezlik (and its shelf) on Via. List criteria put every Seretmezlik on Direct (including legacy Via-created). `ShowSubmitToOrganization` is true for Seretmezlik on Direct. Same-destination multi-link rule unchanged.
+- **Officer**: Rebuild/F5. New Seretmezlik only from the Direct list; set Submit-to before linking people. Existing Via Seretmezlik cases appear on the Direct list.
+- **Prevent**: Do not re-allow Seretmezlik on Via create. Do not hide Submit-to for Direct Seretmezlik.
 ## 2026-11-17 — Changed invitation shows on Ýagdaý syny
 
 - **Need**: A completed change left the invitation “In force” on the sheet. The list showed Üýtgedildi and the new invitation.

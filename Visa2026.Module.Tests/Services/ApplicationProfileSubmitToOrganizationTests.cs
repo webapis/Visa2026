@@ -61,7 +61,7 @@ public class ApplicationProfileSubmitToOrganizationTests
     }
 
     [Fact]
-    public void ShowSubmitToOrganization_OnlyWhenViaCreateList()
+    public void ShowSubmitToOrganization_ViaCreateList_OrSeretmezlikOnDirect()
     {
         var profile = new ApplicationProfile { RequireSubmitToOrganization = true };
         var via = new ApplicationProfileInstance
@@ -74,9 +74,19 @@ public class ApplicationProfileSubmitToOrganizationTests
             ApplicationProfile = profile,
             CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
         };
+        var seretmezlikDirect = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                RequireSubmitToOrganization = true,
+                RequireTargetApplicationProfileInstance = true,
+            },
+            CreationProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+        };
 
         Assert.True(ApplicationProfileConfigurationResolver.ShowSubmitToOrganization(via));
         Assert.False(ApplicationProfileConfigurationResolver.ShowSubmitToOrganization(direct));
+        Assert.True(ApplicationProfileConfigurationResolver.ShowSubmitToOrganization(seretmezlikDirect));
     }
 
     [Fact]

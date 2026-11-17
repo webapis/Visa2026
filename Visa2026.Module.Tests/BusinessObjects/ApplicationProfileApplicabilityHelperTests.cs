@@ -35,7 +35,7 @@ public class ApplicationProfileApplicabilityHelperTests
     }
 
     [Fact]
-    public void IsProfileSelectable_AllowsSeretmezlikOnEitherProgressRoute()
+    public void IsProfileSelectable_SeretmezlikOnlyOnDirectProgressRoute()
     {
         var profile = new ApplicationProfile
         {
@@ -44,7 +44,7 @@ public class ApplicationProfileApplicabilityHelperTests
             RequireTargetApplicationProfileInstance = true,
         };
 
-        Assert.True(ApplicationProfileApplicabilityHelper.IsProfileSelectable(
+        Assert.False(ApplicationProfileApplicabilityHelper.IsProfileSelectable(
             profile,
             null,
             ApplicationProfileInstanceProgressRouteKind.ViaMinistries));
