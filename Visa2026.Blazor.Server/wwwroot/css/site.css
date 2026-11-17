@@ -1,10 +1,4 @@
-html {
-    height: 100%;
-    /* Default UI type ~17px so rem-based labels/controls read larger than Compact 14px. */
-    font-size: 106.25%;
-}
-
-body {
+html, body {
     height: 100%;
 }
 
@@ -552,8 +546,8 @@ dxd-license,
     color: inherit;
     border-radius: 0.35rem;
     padding: 0.28rem 0.55rem;
-    font-size: 1.2rem;
-    line-height: 1.35;
+    font-size: 0.8125rem;
+    line-height: 1.2;
     cursor: pointer;
 }
 .visa-progress-color-tab:hover {
@@ -4965,19 +4959,6 @@ button.lv-person-mark-follow__app {
     white-space: normal !important;
 }
 
-.dxbl-grid .dxbl-grid-header-content,
-.dxbl-grid .dxbl-grid-header-content > span,
-.dxbl-grid .dxbl-grid-cell-content,
-.dxbl-grid .dxbl-grid-table > tbody > tr > td,
-.dxbl-grid .dxbl-text,
-.dxbl-grid .dxbl-text-edit-input,
-.dxbl-grid .lv-people,
-.dxbl-grid .lv-people__name,
-.dxbl-grid .lv-people__excluded {
-    font-size: 1.2rem !important;
-    line-height: 1.35;
-}
-
 .lv-progress-step,
 .lv-progress-step:last-child {
     display: flex;
@@ -5059,7 +5040,7 @@ button.lv-person-mark-follow__app {
 .lv-progress-step--issued .lv-progress-step__label,
 .lv-progress-step--done .lv-progress-step__label,
 .lv-progress-step--rej .lv-progress-step__label {
-    font-size: 1.05rem;
+    font-size: 11px;
     font-weight: 600;
     color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
     line-height: 1.35;
@@ -5083,8 +5064,7 @@ button.lv-person-mark-follow__app {
 .lv-progress-step--rej .lv-progress-step__status {
     display: block;
     margin-top: 2px;
-    font-size: 1.05rem;
-    line-height: 1.35;
+    font-size: 10px;
     font-weight: 500;
     color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, #344054));
     white-space: normal !important;
@@ -5102,8 +5082,7 @@ button.lv-progress-step__files {
     padding: 0;
     border: 0;
     background: none;
-    font-size: 1.05rem;
-    line-height: 1.35;
+    font-size: 10px;
     font-weight: 600;
     line-height: 1.2;
     text-align: left;
@@ -5196,34 +5175,6 @@ button.lv-progress-step__files {
 .dxbl-fl-ctrl .dxbl-checkbox:disabled.dxbl-checkbox-checked .dxbl-checkbox-check-element .dxbl-image {
     color: #fff !important;
     opacity: 1;
-}
-
-/* One type size for custom officer UI: instance wizard, case, results,
-   Invitation / work permit / border zone / visa create, and Linked records. */
-:is(
-    .ap-picker,
-    .ap-wizard,
-    .ap-wizard-modal,
-    .officer-case-workspace,
-    .os-link-review-popup,
-    .issue-issued-header-slot-panel,
-    .issue-issued-visa-slot-panel,
-    .approval-leg-slot,
-    .approval-leg-slot-panel,
-    .resminamalar-slot-panel
-) :is(
-    h1, h2, h3, h4,
-    p, span, label, legend, li, dt, dd, th, td, caption,
-    a, button, strong, small, em,
-    input, select, textarea,
-    .dxbl-text-edit-input,
-    .dxbl-btn
-) {
-    font-size: 1.2rem !important;
-}
-
-.lv-progress-step__dot {
-    font-size: 11px !important;
 }
 
 /* Employees / Family Members: search card replaces the empty grid until a search runs. */
@@ -6127,6 +6078,13 @@ button.state-preview-doc {
     gap: 12px;
     padding: 2px 6px 6px;
     font-size: 13px;
+}
+
+.state-preview-group__id {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
 .state-preview-group__period {
