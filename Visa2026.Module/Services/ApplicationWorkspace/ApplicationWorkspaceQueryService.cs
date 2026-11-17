@@ -179,6 +179,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             ShowProcessNumber = ApplicationProfileConfigurationResolver.ShowProcessNumber(application),
             ProfileTemplateName = profile?.Name ?? string.Empty,
             ResolvedLinksLocked = ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application),
+            IsSpecialFollowUp = application.IsSpecialFollowUp,
         };
     }
 

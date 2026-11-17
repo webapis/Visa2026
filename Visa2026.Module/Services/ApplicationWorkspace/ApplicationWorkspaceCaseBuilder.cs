@@ -54,6 +54,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                 MergedFromCount = chrome.MergedFromCount,
                 ShowProcessNumber = chrome.ShowProcessNumber,
                 ProfileTemplateName = snapshot.Profile.Title,
+                ResolvedLinksLocked = chrome.ResolvedLinksLocked,
+                IsSpecialFollowUp = chrome.IsSpecialFollowUp,
             };
         }
 

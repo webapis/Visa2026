@@ -104,6 +104,7 @@ internal static class ApplicationWorkspaceSlaDashboardBuilder
             ShowProcessNumber = chrome.ShowProcessNumber,
             ProfileTemplateName = chrome.ProfileTemplateName,
             ResolvedLinksLocked = chrome.ResolvedLinksLocked,
+            IsSpecialFollowUp = chrome.IsSpecialFollowUp,
         };
 
     private static IReadOnlyList<ApplicationWorkspaceCaseSlaDeadline> BuildDeadlines(

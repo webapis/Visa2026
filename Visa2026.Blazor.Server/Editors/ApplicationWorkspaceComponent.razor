@@ -25,6 +25,7 @@
                                         BackToListRequested="@BackToListRequested"
                                         DeleteCaseRequested="@DeleteCaseRequested"
                                         DeleteCaseErrorMessage="@DeleteCaseErrorMessage"
+                                        SpecialFollowUpChanged="@SpecialFollowUpChanged"
                                         LinkPersonRequested="@LinkPersonRequested"
                                         UnlinkPersonRequested="@UnlinkPersonRequested"
                                         OpenPersonDetailRequested="@OpenPersonDetailRequested"
@@ -109,6 +110,7 @@
     [Parameter] public EventCallback BackToListRequested { get; set; }
     [Parameter] public EventCallback DeleteCaseRequested { get; set; }
     [Parameter] public string? DeleteCaseErrorMessage { get; set; }
+    [Parameter] public EventCallback<bool> SpecialFollowUpChanged { get; set; }
     [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
     [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
     [Parameter] public EventCallback<Guid> RelinkPersonRequested { get; set; }

@@ -36,6 +36,34 @@
   background: #eef2f6;
   color: var(--os-ink);
 }
+.cw-head__follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--os-line);
+  background: var(--os-panel);
+  color: var(--os-ink);
+  cursor: pointer;
+  user-select: none;
+}
+.cw-head__follow.is-on {
+  border-color: #a78bfa;
+  background: color-mix(in srgb, #a78bfa 16%, var(--os-panel));
+}
+.cw-head__follow input {
+  accent-color: #7c3aed;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  cursor: pointer;
+}
+.cw-head__follow input:disabled {
+  cursor: default;
+}
 .cw-head__delete {
   border: 1px solid color-mix(in srgb, var(--os-bad) 55%, var(--os-line));
   background: transparent;

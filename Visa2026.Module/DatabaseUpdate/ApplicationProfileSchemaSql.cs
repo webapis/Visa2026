@@ -543,6 +543,9 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureOfficePreparationNotesPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "OfficePreparationNotes" text NULL;""";
 
+    internal const string EnsureInstanceSpecialFollowUpPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "IsSpecialFollowUp" boolean NOT NULL DEFAULT false;""";
+
     internal const string EnsureInstanceEntryCheckPointPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "EntryCheckPointID" uuid NULL;""";
 
@@ -931,6 +934,7 @@ public static class ApplicationProfileSchemaSql
         EnsureDefaultPurposePostgres,
         EnsureInstancePurposePostgres,
         EnsureOfficePreparationNotesPostgres,
+        EnsureInstanceSpecialFollowUpPostgres,
         EnsureInstanceEntryCheckPointPostgres,
         ..EnsureInstanceLetterheadPostgresStatements,
         ..EnsureOrganizationCatalogPostgresStatements,

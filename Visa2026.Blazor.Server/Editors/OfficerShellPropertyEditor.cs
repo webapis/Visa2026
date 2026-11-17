@@ -105,6 +105,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
         BackToInProcessRequested = EventCallback.Factory.Create(this, BackToInProcessAsync),
         DeleteCaseRequested = EventCallback.Factory.Create(this, DeleteCaseAsync),
+        SpecialFollowUpChanged = EventCallback.Factory.Create<bool>(this, SetSpecialFollowUpAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
         UnlinkPersonRequested = EventCallback.Factory.Create<Guid>(this, UnlinkPersonAsync),
         OpenPersonDetailRequested = EventCallback.Factory.Create(this, OpenPersonDetailAsync),
@@ -457,6 +458,39 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.CaseApplicationProfileInstanceId = Guid.Empty;
         model.WorkspaceSnapshot = null;
         await BackToInProcessAsync();
+    }
+
+    private async Task SetSpecialFollowUpAsync(bool enabled)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+            if (application == null)
+                return;
+
+            if (application.IsSpecialFollowUp == enabled)
+                return;
+
+            application.IsSpecialFollowUp = enabled;
+            objectSpace.CommitChanges();
+            _application.ServiceProvider?.GetService<IApplicationProfileInstanceDeletedNotifier>()
+                ?.NotifySpecialFollowUpChanged(model.CaseApplicationProfileInstanceId, enabled);
+        }
+        catch (Exception ex)
+        {
+            model.HeaderFieldStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+            model.HeaderFieldStatusIsError = true;
+            return;
+        }
+
+        model.HeaderFieldStatusMessage = null;
+        model.HeaderFieldStatusIsError = false;
+        await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId, showLoading: false);
     }
 
     private async Task LinkPersonAsync()

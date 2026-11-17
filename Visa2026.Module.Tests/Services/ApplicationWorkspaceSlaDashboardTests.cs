@@ -18,11 +18,15 @@ public class ApplicationWorkspaceSlaDashboardTests
         {
             StartedOn = "25 Aug 2026",
             SlaDaysRemaining = 8,
+            IsSpecialFollowUp = true,
+            ResolvedLinksLocked = true,
         };
 
         var sla = ApplicationWorkspaceSlaDashboardBuilder.Build(application, profile, default, chrome, steps);
         var header = ApplicationWorkspaceSlaDashboardBuilder.WithHeaderRemaining(chrome, sla);
 
+        Assert.True(header.IsSpecialFollowUp);
+        Assert.True(header.ResolvedLinksLocked);
         Assert.True(sla.IsTerminal);
         Assert.Equal("issued", sla.ProcessOutcome);
         Assert.Equal("Issued", sla.CaseStatus);

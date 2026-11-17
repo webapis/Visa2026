@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Visa2026.Module.Appearance;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -14,6 +15,8 @@ public static class ApplicationProfileInstanceProgressColorTab
 {
     public const string AllKey = "";
     public const string SearchKey = "search";
+    public const string SpecialFollowUp = "special-follow-up";
+    public const string SpecialFollowUpMessageKey = "ApplicationProfileInstance.SpecialFollowUp";
     public const string CriteriaKey = "ProgressColorTab";
 
     public const string Office = "office";
@@ -43,6 +46,9 @@ public static class ApplicationProfileInstanceProgressColorTab
 
     public static bool IsSearchTab(string? key) =>
         string.Equals(key?.Trim(), SearchKey, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsSpecialFollowUpTab(string? key) =>
+        string.Equals(key?.Trim(), SpecialFollowUp, StringComparison.OrdinalIgnoreCase);
 
     public static string ResolveBucketKey(string? listRowAppearanceStateCode, string? primaryStateCode = null)
     {
@@ -151,6 +157,7 @@ public static class ApplicationProfileInstanceProgressColorTab
                     Issued => "Resmileşdirildi",
                     Rejected => "Garşylyk berildi",
                     Cancelled => "Ýüz tutma ýatyryldy",
+                    SpecialFollowUp => VisaUiMessages.Get(SpecialFollowUpMessageKey),
                     _ => bucketKey,
                 };
 
@@ -187,11 +194,14 @@ public static class ApplicationProfileInstanceProgressColorTab
     {
         var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var total = 0;
+        var followCount = 0;
         foreach (var app in applications)
         {
             if (app == null)
                 continue;
             total++;
+            if (app.IsSpecialFollowUp)
+                followCount++;
             var key = ResolveBucketKey(app);
             counts[key] = counts.TryGetValue(key, out var n) ? n + 1 : 1;
         }
@@ -211,6 +221,8 @@ public static class ApplicationProfileInstanceProgressColorTab
             counts.TryGetValue(key, out var count);
             tabs.Add(new TabInfo(key, GetLabel(key), GetBackgroundHex(key), count));
         }
+
+        tabs.Add(new TabInfo(SpecialFollowUp, GetLabel(SpecialFollowUp), string.Empty, followCount));
 
         _ = selectedKey;
         return tabs;

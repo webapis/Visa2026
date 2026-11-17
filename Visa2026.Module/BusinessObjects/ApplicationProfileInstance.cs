@@ -123,6 +123,16 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsManualEntry { get; set; }
 
         /// <summary>
+        /// Officer watch flag. The case-header switch turns it on or off at any progress step.
+        /// The last instance-list tab lists these cases without filtering by progress color.
+        /// </summary>
+        [XafDisplayName("Special follow-up")]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool IsSpecialFollowUp { get; set; }
+
+        /// <summary>
         /// When true, <see cref="ApplicationProfileInstanceProgressInitializer"/> does not seed the first progress row.
         /// Used by VISA2014 OData import — synthetic <see cref="ApplicationProfileInstanceProgress"/> is imported separately.
         /// </summary>

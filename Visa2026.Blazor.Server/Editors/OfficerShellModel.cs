@@ -448,6 +448,12 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<bool> SpecialFollowUpChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+
     public string? DeleteCaseErrorMessage
     {
         get => GetPropertyValue<string?>();

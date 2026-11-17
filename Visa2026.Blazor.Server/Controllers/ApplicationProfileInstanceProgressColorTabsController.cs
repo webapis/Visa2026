@@ -266,6 +266,14 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
                 return;
             }
 
+            if (ApplicationProfileInstanceProgressColorTab.IsSpecialFollowUpTab(selectedKey))
+            {
+                View.CollectionSource.Criteria[ApplicationProfileInstanceProgressColorTab.CriteriaKey] =
+                    CriteriaOperator.Parse(
+                        $"{nameof(ApplicationProfileInstance.IsSpecialFollowUp)} = True");
+                return;
+            }
+
             View.CollectionSource.Criteria[ApplicationProfileInstanceProgressColorTab.CriteriaKey] =
                 CriteriaOperator.Parse(
                     $"{nameof(ApplicationProfileInstance.ProgressColorTabKey)} = ?",

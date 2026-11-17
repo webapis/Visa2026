@@ -91,6 +91,7 @@
                                                                 BackToListRequested="@BackToInProcessRequested"
                                                                 DeleteCaseRequested="@DeleteCaseRequested"
                                                                 DeleteCaseErrorMessage="@DeleteCaseErrorMessage"
+                                                                SpecialFollowUpChanged="@SpecialFollowUpChanged"
                                                                 LinkPersonRequested="@LinkPersonRequested"
                                                                 UnlinkPersonRequested="@UnlinkPersonRequested"
                                                                 OpenPersonDetailRequested="@OpenPersonDetailRequested"
@@ -226,6 +227,7 @@
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToInProcessRequested { get; set; }
     [Parameter] public EventCallback DeleteCaseRequested { get; set; }
+    [Parameter] public EventCallback<bool> SpecialFollowUpChanged { get; set; }
     [Parameter] public string? DeleteCaseErrorMessage { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
     [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }

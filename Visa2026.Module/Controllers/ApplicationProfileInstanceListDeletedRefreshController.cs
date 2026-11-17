@@ -9,8 +9,8 @@ using Visa2026.Module.Services.ApplicationWorkspace;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Refreshes open ApplicationProfileInstance ListViews after a case is deleted from its workspace tab,
-/// so the list that opened the workspace no longer shows the deleted row.
+/// Refreshes open ApplicationProfileInstance ListViews after a case is deleted or its
+/// special-follow-up flag changes from a workspace tab, so list rows and color-tab counts stay current.
 /// </summary>
 public sealed class ApplicationProfileInstanceListDeletedRefreshController : ViewController<ListView>
 {
@@ -26,8 +26,11 @@ public sealed class ApplicationProfileInstanceListDeletedRefreshController : Vie
     {
         base.OnActivated();
         _notifier = Application?.ServiceProvider?.GetService<IApplicationProfileInstanceDeletedNotifier>();
-        if (_notifier != null)
-            _notifier.Deleted += OnInstanceDeleted;
+        if (_notifier == null)
+            return;
+
+        _notifier.Deleted += OnInstanceDeleted;
+        _notifier.SpecialFollowUpChanged += OnSpecialFollowUpChanged;
     }
 
     protected override void OnDeactivated()
@@ -35,13 +38,18 @@ public sealed class ApplicationProfileInstanceListDeletedRefreshController : Vie
         if (_notifier != null)
         {
             _notifier.Deleted -= OnInstanceDeleted;
+            _notifier.SpecialFollowUpChanged -= OnSpecialFollowUpChanged;
             _notifier = null;
         }
 
         base.OnDeactivated();
     }
 
-    private void OnInstanceDeleted(Guid instanceId)
+    private void OnInstanceDeleted(Guid instanceId) => RefreshList();
+
+    private void OnSpecialFollowUpChanged(Guid instanceId, bool enabled) => RefreshList();
+
+    private void RefreshList()
     {
         if (View?.ObjectSpace == null || View.ObjectSpace.IsDisposed)
             return;

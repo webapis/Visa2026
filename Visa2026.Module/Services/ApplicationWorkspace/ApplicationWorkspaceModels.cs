@@ -68,6 +68,9 @@ public sealed class ApplicationWorkspaceCaseChrome
 
     /// <summary>Person roster + resolved child links are immutable (workflow terminal).</summary>
     public bool ResolvedLinksLocked { get; init; }
+
+    /// <summary>Officer watch flag (<see cref="BusinessObjects.ApplicationProfileInstance.IsSpecialFollowUp"/>).</summary>
+    public bool IsSpecialFollowUp { get; init; }
 }
 
 public sealed class ApplicationWorkspaceHeader

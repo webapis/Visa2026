@@ -1,3 +1,23 @@
+## 2026-11-17 — Submit-to lists Migration services again
+
+- **Need**: Seretmezlik Submit to organization showed only ministries; officers also need Migrasiýa gullugy.
+- **Fix**: `ListLookupOptions` returns ApprovingMinistry and MigrationService. Picker shows a Migration services section under Ministries. Case-summary Submit-to uses the same catalog.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Submit to organization, pick a ministry or a migration service.
+- **Prevent**: Do not strip MigrationService from Submit-to options. Keep ministry cards for Seretmezlik.
+## 2026-11-17 — Special follow-up tab count stale after toggle off
+
+- **Need**: Turning off the case-header Special follow-up switch left the list tab counter high (e.g. 2) while the filtered grid already showed fewer rows.
+- **Fix**: After commit, `NotifySpecialFollowUpChanged` refreshes open instance ListViews (`ObjectSpace.Refresh`), which rebuilds color-tab `countCache` via `CollectionReloaded`.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Special follow-up tab, open a case, switch off, return to the list — counter matches the grid.
+- **Prevent**: Do not leave list tab counts on the in-memory snapshot after saving `IsSpecialFollowUp` from a separate ObjectSpace.
+- **Verify**: Isolated build `spf-fix-20` Module + Blazor.
+## 2026-11-17 — Special follow-up checkbox always looked off
+
+- **Need**: Cases on the Special follow-up / Özel takip list opened with the case-header switch unchecked.
+- **Fix**: `ApplicationWorkspaceSlaDashboardBuilder.WithHeaderRemaining` (and the `BuildFromSnapshot` chrome clone) now copy `IsSpecialFollowUp`. The rebuild was dropping the flag to false. Checkbox change parsing also accepts string `"on"` / `"true"`.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a case from the Special follow-up tab — the header switch is checked. Toggle off/on still updates the last list tab.
+- **Prevent**: When cloning `ApplicationWorkspaceCaseChrome`, copy every field including `IsSpecialFollowUp` and `ResolvedLinksLocked`.
+- **Verify**: Isolated build `%LOCALAPPDATA%\Visa2026\agent-builds\spf-fix-19\` — Module + Blazor OK; `ApplicationWorkspaceSlaDashboardTests` 2 passed.
 ## 2026-11-17 — Visa waiting list says Entäk berilmedi · Pasportyna garaşylýar
 
 - **Need**: People still without a visa are waiting for a passport. The heading only said Entäk berilmedi.
@@ -5,6 +25,15 @@
 - **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny the visa name list uses that heading.
 - **Prevent**: Do not put Pasportyna garaşylýar on invitation or work-permit Entäk berilmedi lists.
 - **Verify**: Blazor host build failed on unrelated `IsSpecialFollowUp` errors already in the working tree. The sheet was not opened in the browser.
+
+## 2026-11-17 — Special follow-up switch and last list tab
+
+- **Need**: An officer must be able to mark a case for separate follow-up and see those cases together, at any progress step.
+- **Fix**: `ApplicationProfileInstance.IsSpecialFollowUp` (column healed at startup). Case-header switch saves it. Last color tab filters `IsSpecialFollowUp = True` and does not change the progress color of the row. Captions: tk Ýörite gözegçilik, tr Özel takip, en Special follow-up, ru Особый контроль.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a case and turn the header switch on. On any instance list, the last tab lists that case whatever its progress color is. Turn the switch off and the case leaves that tab.
+- **Prevent**: Do not fold this flag into a progress color bucket. Do not lock the switch after office preparation.
+- **Verify**: `ApplicationProfileInstanceProgressColorTabTests` includes the last-tab count. Blazor host build. The switch was not clicked in the browser.
+
 ## 2026-11-17 — Invitation and work-permit states show on the document line
 
 - **Need**: Ýagdaý syny showed Güýjünde on people, and a changed or cancelled work permit stayed Güýjünde when the link was not loaded. The invitation and work-permit number line had no state.
@@ -28,6 +57,13 @@
 - **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny a pink line reads Seretmezlik · name · № 8/-33 · organization.
 - **Prevent**: Do not put the organization on the date. Do not use one organization for every letter of the same person.
 - **Verify**: `ApplicationProfileInstanceStatePreviewTests` 24 passed. Blazor host build succeeded. The sheet was not opened in the browser.
+
+## 2026-11-17 — Seretmezlik create only from Direct list with Submit-to
+
+- **Need**: Officers must not create Seretmezlik under Ministrlik bilen ylalaşylmaly. Create only under Ylalaşyk zerur bolmadyk ýüztutmalar, and choose ministry or migration as Submit-to.
+- **Fix**: Picker hides Seretmezlik (and its shelf) on Via. List criteria put every Seretmezlik on Direct (including legacy Via-created). `ShowSubmitToOrganization` is true for Seretmezlik on Direct. Same-destination multi-link rule unchanged.
+- **Officer**: Rebuild/F5. New Seretmezlik only from the Direct list; set Submit-to before linking people. Existing Via Seretmezlik cases appear on the Direct list.
+- **Prevent**: Do not re-allow Seretmezlik on Via create. Do not hide Submit-to for Direct Seretmezlik.
 
 ## 2026-11-17 — Seretmezlik people stay off Entäk berilmedi
 

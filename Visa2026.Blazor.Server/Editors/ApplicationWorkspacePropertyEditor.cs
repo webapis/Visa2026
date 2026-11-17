@@ -72,6 +72,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
         BackToListRequested = EventCallback.Factory.Create(this, BackToListAsync),
         DeleteCaseRequested = EventCallback.Factory.Create(this, DeleteCaseAsync),
+        SpecialFollowUpChanged = EventCallback.Factory.Create<bool>(this, SetSpecialFollowUpAsync),
         OpenResminamalarRequested = EventCallback.Factory.Create(this, OpenResminamalarAsync),
         OpenPersonDetailByIndexRequested = EventCallback.Factory.Create<int>(this, OpenPersonDetailByIndexAsync),
         RelinkPersonRequested = EventCallback.Factory.Create<Guid>(this, RelinkPersonAsync),
@@ -618,6 +619,40 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         _application.ServiceProvider?.GetService<IApplicationProfileInstanceDeletedNotifier>()?.NotifyDeleted(applicationId);
         View?.Close();
         return Task.CompletedTask;
+    }
+
+    private async Task SetSpecialFollowUpAsync(bool enabled)
+    {
+        var model = ComponentModel;
+        var applicationId = ResolveApplicationProfileInstanceId();
+        if (model == null || _application == null || applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            if (application == null)
+                return;
+
+            if (application.IsSpecialFollowUp == enabled)
+                return;
+
+            application.IsSpecialFollowUp = enabled;
+            objectSpace.CommitChanges();
+            _application.ServiceProvider?.GetService<IApplicationProfileInstanceDeletedNotifier>()
+                ?.NotifySpecialFollowUpChanged(applicationId, enabled);
+        }
+        catch (Exception ex)
+        {
+            model.HeaderFieldStatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+            model.HeaderFieldStatusIsError = true;
+            return;
+        }
+
+        model.HeaderFieldStatusMessage = null;
+        model.HeaderFieldStatusIsError = false;
+        await LoadAsync(showLoading: false);
     }
 
     private Task OpenResminamalarAsync()

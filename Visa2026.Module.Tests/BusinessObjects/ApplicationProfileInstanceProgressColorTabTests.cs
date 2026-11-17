@@ -46,8 +46,10 @@ public class ApplicationProfileInstanceProgressColorTabTests
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Submitted && t.Count == 0);
         Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Rejected && t.Count == 0);
         Assert.DoesNotContain(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Cancelled);
+        Assert.Equal(ApplicationProfileInstanceProgressColorTab.SpecialFollowUp, tabs[^1].Key);
+        Assert.Equal(0, tabs[^1].Count);
         Assert.Equal(
-            ApplicationProfileInstanceProgressColorTab.OrderedBucketKeys.Count + 1,
+            ApplicationProfileInstanceProgressColorTab.OrderedBucketKeys.Count + 2,
             tabs.Count);
     }
 
@@ -123,6 +125,31 @@ public class ApplicationProfileInstanceProgressColorTabTests
     {
         Assert.Equal("Gözleg", ApplicationProfileInstanceProgressColorTab.GetSearchLabel(new CultureInfo("tk-TM")));
         Assert.Equal("Search", ApplicationProfileInstanceProgressColorTab.GetSearchLabel(new CultureInfo("en-US")));
+    }
+
+    [Fact]
+    public void BuildTabs_special_follow_up_is_last_and_ignores_progress_color()
+    {
+        var flaggedIssued = AppWithAppearance("PROCESS_ISSUED");
+        flaggedIssued.IsSpecialFollowUp = true;
+        var flaggedOffice = AppWithAppearance("IS_BEING_PREPARED");
+        flaggedOffice.IsSpecialFollowUp = true;
+        var plain = AppWithAppearance("SUBMITTED_MIGRATION");
+
+        var tabs = ApplicationProfileInstanceProgressColorTab.BuildTabs(
+            [flaggedIssued, flaggedOffice, plain],
+            selectedKey: ApplicationProfileInstanceProgressColorTab.SpecialFollowUp);
+
+        Assert.Equal(ApplicationProfileInstanceProgressColorTab.SpecialFollowUp, tabs[^1].Key);
+        Assert.Equal(2, tabs[^1].Count);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Issued && t.Count == 1);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Office && t.Count == 1);
+        Assert.Contains(tabs, t => t.Key == ApplicationProfileInstanceProgressColorTab.Submitted && t.Count == 1);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressColorTab.SpecialFollowUp,
+            ApplicationProfileInstanceProgressColorTab.NormalizeSelection(
+                ApplicationProfileInstanceProgressColorTab.SpecialFollowUp,
+                tabs));
     }
 
     [Fact]

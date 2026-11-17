@@ -74,7 +74,8 @@ Above every Application Profile Instance ListView grid:
 
 - **Ähli** always; every color bucket always visible (count may be **0**; empty grid when selected)
 - One tab **per painted color** (swatch + Turkmen label + count) — **no** Cancelled / Ýüz tutma ýatyryldy tab (cancelled rows stay under Ähli)
-- Filter uses `ProgressColorTabKey` (Via Ministries green gate and Ministrlikden çykan included)
+- **Last tab** is the officer watch list: Turkmen **Ýörite gözegçilik**, Turkish **Özel takip**, English **Special follow-up**, Russian **Особый контроль**. It lists instances whose case-header switch is on, at any progress step. Those rows keep their progress color on the other tabs. The switch does not change the step, the row color, or notifications.
+- Filter uses `ProgressColorTabKey` (Via Ministries green gate and Ministrlikden çykan included). The watch tab filters `IsSpecialFollowUp = True` instead.
 - **Garşylyk berildi** = Application Result has **≥1** `Rejection` header (not progress-rejected alone)
 - Remembers last tab **per ListView id** in browser `localStorage`; unknown key → fall back to **Ähli**
 - Left nav (Via ministry / Direct migration) unchanged
@@ -92,3 +93,4 @@ Prototype: [`docs/prototypes/application-profile-instance-listview-process-color
 | 2026-11-12 | Color filter tabs: per-ListView localStorage, Ähli fallback, one tab per painted color |
 | 2026-11-12 | Always show zero-count color tabs (incl. Rejected/Cancelled); click keeps filter / empty grid |
 | 2026-11-16 | Drop Cancelled tab; Garşylyk berildi = ≥1 Application Result Rejection |
+| 2026-11-17 | Last tab Ýörite gözegçilik / Özel takip: case-header switch, any progress step |

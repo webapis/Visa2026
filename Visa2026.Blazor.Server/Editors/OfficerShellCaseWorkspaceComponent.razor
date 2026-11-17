@@ -134,6 +134,17 @@
                     {
                         <span class="cw-head-badge cw-head-badge--locked" title="@Msg("ApplicationProfileInstance.Workspace.LinksLockedTitle")">🔒 @Msg("ApplicationProfileInstance.Workspace.LinksLocked")</span>
                     }
+                    @{
+                        var followOn = _specialFollowUpOverride ?? chrome.IsSpecialFollowUp;
+                    }
+                    <label class="cw-head__follow @(followOn ? "is-on" : null)"
+                           title="@Msg("ApplicationProfileInstance.SpecialFollowUpHint")">
+                        <input type="checkbox"
+                               checked="@followOn"
+                               disabled="@(_specialFollowUpSaving || !SpecialFollowUpChanged.HasDelegate)"
+                               @onchange="ToggleSpecialFollowUpAsync" />
+                        <span>@Msg("ApplicationProfileInstance.SpecialFollowUp")</span>
+                    </label>
                     @if (DeleteCaseRequested.HasDelegate)
                     {
                         var caseLocked = view.Chrome.ResolvedLinksLocked;
@@ -311,6 +322,7 @@
     [Parameter] public EventCallback BackToListRequested { get; set; }
     [Parameter] public EventCallback DeleteCaseRequested { get; set; }
     [Parameter] public string? DeleteCaseErrorMessage { get; set; }
+    [Parameter] public EventCallback<bool> SpecialFollowUpChanged { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
     [Parameter] public EventCallback<Guid> UnlinkPersonRequested { get; set; }
     [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
@@ -4174,7 +4186,35 @@
         return row;
     }
 
+    private bool _specialFollowUpSaving;
+    private bool? _specialFollowUpOverride;
+
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();
+
+    private async Task ToggleSpecialFollowUpAsync(ChangeEventArgs e)
+    {
+        if (_specialFollowUpSaving || !SpecialFollowUpChanged.HasDelegate)
+            return;
+
+        var enabled = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            string s => string.Equals(s, "on", StringComparison.OrdinalIgnoreCase),
+            _ => false,
+        };
+        _specialFollowUpSaving = true;
+        _specialFollowUpOverride = enabled;
+        try
+        {
+            await SpecialFollowUpChanged.InvokeAsync(enabled);
+        }
+        finally
+        {
+            _specialFollowUpOverride = null;
+            _specialFollowUpSaving = false;
+        }
+    }
 
     private async Task DeleteCaseAsync()
     {
