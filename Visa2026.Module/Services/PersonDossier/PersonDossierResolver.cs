@@ -170,10 +170,17 @@ public static class PersonDossierResolver
         if (expiration == null)
             return (string.Empty, string.Empty);
 
-        var days = daysRemaining ?? (int)Math.Floor((expiration.Value.Date - DateTime.Today).TotalDays);
+        // Same rule as ExpirationLogicHelper.IsExpired: valid through the expiration day.
+        // Do not use BO DaysRemaining alone — it is floored to 0 after expiry.
+        var days = (expiration.Value.Date - DateTime.Today).Days;
+        if (daysRemaining is > 0)
+            days = daysRemaining.Value;
 
-        if (days <= 0)
+        if (days < 0)
             return (L("Status.Expired"), "st-expiring");
+
+        if (days == 0)
+            return (Format("Status.ValidTo", FormatDate(expiration)), "st-pending");
 
         if (days <= ExpiringSoonDays)
             return (Format("Status.ExpiresInDays", days), "st-expiring");
