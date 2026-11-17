@@ -1,3 +1,10 @@
+## 2026-11-17 — Progress color tab selection stuck + spinner
+
+- **Need**: Switching color tabs left the previous tab highlighted; officers needed loading feedback without strip flicker.
+- **Fix**: Live `ApplicationProfileInstanceProgressColorTabsModel` (NotifyChanged) so selection updates immediately. Per-tab reserved spinner slot; spinner only on the clicked tab until CollectionReloaded (2s timeout). Newer click cancels prior wait.
+- **Officer**: Stop F5, rebuild, hard-refresh. Click Resmileşdirildi then Ofisde — highlight moves immediately, spinner on the new tab until the grid settles.
+- **Prevent**: Do not pass SelectedKey through a ToolbarTemplate closure DxGrid never re-renders.
+- **Verify**: Isolated Blazor build `spf-tabs-22`.
 ## 2026-11-17 — Special follow-up counter stays 1 on empty grid
 
 - **Need**: After clearing all Special follow-up flags, the Ýörite gözegçilik tab still showed 1 while the grid was empty.

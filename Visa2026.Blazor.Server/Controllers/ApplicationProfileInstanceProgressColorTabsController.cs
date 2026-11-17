@@ -40,6 +40,9 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
     private bool suppressCollectionHandler;
     private RenderFragment<GridToolbarTemplateContext>? previousToolbarTemplate;
     private IApplicationProfileInstanceDeletedNotifier? _followUpNotifier;
+    private readonly ApplicationProfileInstanceProgressColorTabsModel _stripModel = new();
+    private bool _toolbarWired;
+    private int _switchGeneration;
 
     public ApplicationProfileInstanceProgressColorTabsController()
     {
@@ -93,6 +96,8 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
         }
 
         RestoreToolbar();
+        _toolbarWired = false;
+        _stripModel.LoadingKey = null;
         storageLoaded = false;
         searchTabSticky = false;
         searchText = string.Empty;
@@ -157,43 +162,101 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
 
     /// <summary>
     /// Tab click: swap filter in one criteria write (no clear-to-all flash).
+    /// Selection + spinner update immediately; spinner clears after the grid reloads.
     /// </summary>
     private async Task OnTabSelectedAsync(string key)
     {
         var normalized = ApplicationProfileInstanceProgressColorTab.NormalizeSelection(key, tabs);
         if (string.Equals(normalized, selectedKey, StringComparison.OrdinalIgnoreCase)
+            && string.IsNullOrEmpty(_stripModel.LoadingKey)
             && !ApplicationProfileInstanceProgressColorTab.IsSearchTab(normalized))
             return;
 
+        var leavingSearch = searchTabSticky
+            || ApplicationProfileInstanceProgressColorTab.IsSearchTab(selectedKey);
+        var gen = System.Threading.Interlocked.Increment(ref _switchGeneration);
+        selectedKey = normalized;
+        _stripModel.LoadingKey = normalized;
+        PublishStrip();
+
         if (ApplicationProfileInstanceProgressColorTab.IsSearchTab(normalized))
         {
-            selectedKey = ApplicationProfileInstanceProgressColorTab.SearchKey;
             searchTabSticky = true;
             RebuildTabsFromCache();
-            ApplySelectionFilter();
-            ApplyToolbar();
+            await ApplyFilterAndWaitForGridAsync(gen);
             return;
         }
 
-        var leavingSearch = searchTabSticky
-            || ApplicationProfileInstanceProgressColorTab.IsSearchTab(selectedKey);
         searchTabSticky = false;
-        selectedKey = normalized;
         await SaveSelectionAsync(selectedKey);
 
         if (leavingSearch)
         {
             ClearFullTextSearch();
             searchText = string.Empty;
-            RebuildCountCacheAndApply(reloadToolbar: true);
+            RebuildCountCacheAndApply(reloadToolbar: false);
+            PublishStrip();
+            await WaitForGridIdleAsync(gen);
             return;
         }
 
         RebuildTabsFromCache();
-        ApplySelectionFilter();
-        ApplyToolbar();
+        await ApplyFilterAndWaitForGridAsync(gen);
     }
 
+    private async Task ApplyFilterAndWaitForGridAsync(int gen)
+    {
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void OnReloaded(object? sender, EventArgs e) => tcs.TrySetResult(true);
+
+        if (View?.CollectionSource != null)
+            View.CollectionSource.CollectionReloaded += OnReloaded;
+
+        try
+        {
+            ApplySelectionFilter();
+            PublishStrip();
+            await Task.WhenAny(tcs.Task, Task.Delay(2000));
+            await Task.Delay(50);
+        }
+        finally
+        {
+            if (View?.CollectionSource != null)
+                View.CollectionSource.CollectionReloaded -= OnReloaded;
+        }
+
+        if (gen != System.Threading.Volatile.Read(ref _switchGeneration))
+            return;
+
+        _stripModel.LoadingKey = null;
+        PublishStrip();
+    }
+
+    private async Task WaitForGridIdleAsync(int gen)
+    {
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void OnReloaded(object? sender, EventArgs e) => tcs.TrySetResult(true);
+
+        if (View?.CollectionSource != null)
+            View.CollectionSource.CollectionReloaded += OnReloaded;
+
+        try
+        {
+            await Task.WhenAny(tcs.Task, Task.Delay(2000));
+            await Task.Delay(50);
+        }
+        finally
+        {
+            if (View?.CollectionSource != null)
+                View.CollectionSource.CollectionReloaded -= OnReloaded;
+        }
+
+        if (gen != System.Threading.Volatile.Read(ref _switchGeneration))
+            return;
+
+        _stripModel.LoadingKey = null;
+        PublishStrip();
+    }
     private void RebuildCountCacheAndApply(bool reloadToolbar)
     {
         if (View is not { IsDisposed: false } || suppressCollectionHandler)
@@ -362,21 +425,31 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
             return;
 
         previousToolbarTemplate ??= gridModel.ToolbarTemplate;
-        var currentTabs = tabs;
-        var currentSelected = selectedKey;
-        gridModel.ToolbarTemplate = _ => builder =>
+        _stripModel.OnSelect = EventCallback.Factory.Create<string>(this, OnTabSelectedAsync);
+        PublishStrip(notify: false);
+
+        if (!_toolbarWired)
         {
-            builder.OpenComponent<ApplicationProfileInstanceProgressColorTabs>(0);
-            builder.AddAttribute(1, "Tabs", currentTabs);
-            builder.AddAttribute(2, "SelectedKey", currentSelected);
-            builder.AddAttribute(
-                3,
-                "OnSelect",
-                EventCallback.Factory.Create<string>(this, OnTabSelectedAsync));
-            builder.CloseComponent();
-        };
+            _toolbarWired = true;
+            var model = _stripModel;
+            gridModel.ToolbarTemplate = _ => builder =>
+            {
+                builder.OpenComponent<ApplicationProfileInstanceProgressColorTabs>(0);
+                builder.AddAttribute(1, "Model", model);
+                builder.CloseComponent();
+            };
+        }
+
+        PublishStrip();
     }
 
+    private void PublishStrip(bool notify = true)
+    {
+        _stripModel.Tabs = tabs;
+        _stripModel.SelectedKey = selectedKey;
+        if (notify)
+            _stripModel.NotifyChanged();
+    }
     private void RestoreToolbar()
     {
         if (View?.Editor is DxGridListEditor { GridModel: { } gridModel }
