@@ -17729,6 +17729,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüzlenmäniň ýagdaýy",
             ["ru-RU"] = "Ход заявления",
         },
+        ["ApplicationProfileInstance.StatePreview.VisaNotIssued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not issued · Waiting for the passport",
+            ["tr-TR"] = "Henüz verilmedi · Pasaportu bekleniyor",
+            ["tk-TM"] = "Entäk berilmedi · Pasportyna garaşylýar",
+            ["ru-RU"] = "Не выдан · Ожидается паспорт",
+        },
         ["ApplicationProfileInstance.StatePreview.Seretmezlik"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Seretmezlik",
@@ -17861,6 +17868,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Kişi",
             ["tk-TM"] = "Adam",
             ["ru-RU"] = "Люди",
+        },
+        ["ApplicationProfileInstance.SpecialFollowUp"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Special follow-up",
+            ["tr-TR"] = "Özel takip",
+            ["tk-TM"] = "Ýörite gözegçilik",
+            ["ru-RU"] = "Особый контроль",
+        },
+        ["ApplicationProfileInstance.SpecialFollowUpHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Keep this case on the special-follow-up list, at any progress step.",
+            ["tr-TR"] = "Bu başvuruyu, süreç adımından bağımsız olarak özel takip listesinde tut.",
+            ["tk-TM"] = "Bu ýüztutmany, ösüş ädimine garamazdan, ýörite gözegçilik sanawynda sakla.",
+            ["ru-RU"] = "Держать эту заявку в списке особого контроля на любом шаге процесса.",
         },
     };
 
