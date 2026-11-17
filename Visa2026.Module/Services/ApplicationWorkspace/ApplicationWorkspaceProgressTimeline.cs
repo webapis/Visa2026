@@ -156,6 +156,8 @@ internal static class ApplicationWorkspaceProgressTimeline
         }
 
         // Via ministry: after last approval. Direct: after Office (same timeline label).
+        // When Office is hidden (e.g. Seretmezlik), hand-in is the first visible step —
+        // treat it as current while still at office so it is not locked as pending.
         if (showSubmission && (legs.Count > 0 || isDirect))
         {
             var submissionRow = LatestSubmissionRow(history);
@@ -165,6 +167,8 @@ internal static class ApplicationWorkspaceProgressTimeline
                 awaitingSubmission,
                 submissionRecorded,
                 cancelledOnCurrent);
+            if (!showOffice && atOffice && !cancelledOnCurrent)
+                submissionState = "current";
             var submissionMissing = !ApplicationMigrationSubmission.IsComplete(submissionRow);
             var submissionCurrent = submissionState == "current";
             // Via ministry requires document number; Direct only Date + optional file.

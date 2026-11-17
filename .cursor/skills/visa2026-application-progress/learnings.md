@@ -6,6 +6,16 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-17 — Seretmezlik hand-in locked when Office is hidden
+
+- **Symptom**: Seretmezlik Progress showed only **Migrasiýa gullugyna tabşyryldy** as **Garaşylýar** (locked), subtitle still **Ofisde taýýarlyk**, and the standing Advance hint said terminal even though the case had no progress yet.
+- **Cause**: Excel/`ProgressSteps` set Office `Visible=false`. Timeline still treated the case as at-office, so the submission slot stayed `pending`. No current step hosted Advance options, so standing Advance fell back to **TerminalBlocked**.
+- **Fix**: When Office is hidden and the case is still at office, make the submission step `current`. For DirectEndsAtMigrationSubmission profiles with Office off, first allowed advance is `SUBMITTED_MIGRATION` (not leave-office `1_REVIEW_STARTED`).
+- **Officer**: Rebuild Module, hard-refresh. Open a new Seretmezlik case on Progress — hand-in is open with Advance; complete it with date/file as usual.
+- **Prevent**: Do not leave submission `pending` behind a hidden Office step. Do not show TerminalBlocked when Advance options exist but no visible current step hosts them.
+- **Test**: `Build_DirectHandIn_OfficeHidden_SubmissionIsCurrentWithAdvance` passed.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-11-07 — Progress date must be on/after preceding step
 
 - **Need**: Advance/pen-edit dates earlier than the previous step broke the timeline with no clear field error.

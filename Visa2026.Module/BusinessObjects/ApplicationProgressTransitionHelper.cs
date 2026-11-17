@@ -313,6 +313,19 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
         var route = ApplicationProfileInstanceProgressRouteHelper.GetTypePickerRouteFilter(application);
         if (route == ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService)
         {
+            // Office step hidden (e.g. Seretmezlik): hand-in is the first officer action.
+            if (ApplicationProfileConfigurationResolver.DirectEndsAtMigrationSubmission(application)
+                && !ApplicationProfileProgressStepVisibility.IsVisible(
+                    application?.ApplicationProfile,
+                    ApplicationProfileProgressStepVisibility.Office))
+            {
+                return
+                [
+                    ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+                    ApplicationProfileInstanceProgressStateCodes.ProcessCancelled
+                ];
+            }
+
             // Leave office like via-ministry (Submitted → first review-started code), then
             // "Migrasiýa gullugyna tabşyryldy", then Process number on PROCESS_STARTED.
             return

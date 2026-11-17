@@ -1219,6 +1219,60 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.All(steps, step => Assert.False(step.CanAdvance));
     }
 
+    [Fact]
+    public void Build_DirectHandIn_OfficeHidden_SubmissionIsCurrentWithAdvance()
+    {
+        // Seretmezlik-style: Office off, hand-in is the only visible step.
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            ActionFamily = ApplicationProfileActionFamily.Cancellation,
+            RequireSubmitToOrganization = true,
+            MigrationSlaDays = 2,
+        };
+        profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            profile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Office, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Ministry, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Submission, true),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.AsNumber, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Rejected, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Cancelled, false),
+            ]);
+
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+
+        Assert.DoesNotContain(steps, s => s.Key == ApplicationWorkspaceProgressTimeline.OfficeKey);
+        var submission = Assert.Single(steps, s => s.Key == ApplicationMigrationSubmission.TimelineKey);
+        Assert.Equal("current", submission.State);
+        Assert.True(submission.CanAdvance);
+        Assert.True(submission.ShowMigrationSubmission);
+        Assert.Contains(submission.AdvanceOptions, o =>
+            o.StateCode == ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration);
+        Assert.Equal(
+            submission.Label,
+            ApplicationWorkspaceProgressTimeline.FormatChromeCurrentStep(steps));
+        Assert.Contains(
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressTransitionHelper.GetAllowedNextStateCodes(application, null));
+    }
+
     private static ApplicationProfile ThreeLegProfile()
     {
         var profile = new ApplicationProfile
