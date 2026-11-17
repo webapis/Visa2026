@@ -155,8 +155,10 @@ public static class ApplicationProfileInstanceStatePreview
         var plans = SectionsFor(layout, flags);
 
         var people = PeopleOf(application);
+        var excluded = ApplicationProfileInstanceExclusionQueries.GetExcludedPeople(objectSpace, application.ID);
+        var excludedIds = excluded.Count == 0 ? null : new HashSet<Guid>(excluded.Keys);
         var invitations = InvitationRows(objectSpace, application);
-        var workPermits = WorkPermitRows(application);
+        var workPermits = WorkPermitRows(objectSpace, application);
         var visas = VisaRows(application);
         var borderZones = BorderZoneRows(application);
         var locations = LocationRows(application);
@@ -166,11 +168,11 @@ public static class ApplicationProfileInstanceStatePreview
         {
             var rows = plan.Id switch
             {
-                SectionId.Invitation => Merge(people, invitations, plan.NestBorderZone ? borderZones : null),
-                SectionId.WorkPermit => Merge(people, workPermits, plan.NestLocations ? locations : null),
-                SectionId.Visa => Merge(people, visas, plan.NestBorderZone ? borderZones : null),
-                SectionId.BorderZone => Merge(people, borderZones, null),
-                SectionId.Location => Merge(people, locations, null),
+                SectionId.Invitation => Merge(people, invitations, plan.NestBorderZone ? borderZones : null, excludedIds),
+                SectionId.WorkPermit => Merge(people, workPermits, plan.NestLocations ? locations : null, excludedIds),
+                SectionId.Visa => Merge(people, visas, plan.NestBorderZone ? borderZones : null, excludedIds),
+                SectionId.BorderZone => Merge(people, borderZones, null, excludedIds),
+                SectionId.Location => Merge(people, locations, null, excludedIds),
                 _ => Array.Empty<Row>(),
             };
             IReadOnlyList<HeaderGroup>? groups = null;
@@ -180,6 +182,12 @@ public static class ApplicationProfileInstanceStatePreview
                 var grouped = GroupHeaders(rows, periodOnHeader: plan.Id == SectionId.Invitation);
                 groups = grouped.Groups;
                 notIssued = grouped.NotIssuedNames;
+            }
+            else if (plan.Id == SectionId.Visa)
+            {
+                var split = SplitNotIssued(rows);
+                rows = split.Issued;
+                notIssued = split.NotIssuedNames;
             }
 
             sections.Add(new Section(plan.Id, plan.NestBorderZone, plan.NestLocations, rows, groups, notIssued));
@@ -197,7 +205,7 @@ public static class ApplicationProfileInstanceStatePreview
             PersonCount: people.Count,
             CompletionPercent: application.CompletionPercentage,
             Steps: application.ListViewProgressSteps,
-            Seretmezlik: SeretmezlikRows(objectSpace, application, people),
+            Seretmezlik: SeretmezlikRows(objectSpace, application.ID, excluded, people),
             Sections: sections);
     }
 
@@ -319,6 +327,58 @@ public static class ApplicationProfileInstanceStatePreview
         return new HeaderGrouping(built, notIssued);
     }
 
+    /// <summary>
+    /// Issued visa rows stay in the table. People with no visa yet are names only.
+    /// A nested border zone stays on the table with the person it belongs to.
+    /// </summary>
+    public static (IReadOnlyList<Row> Issued, IReadOnlyList<string> NotIssuedNames) SplitNotIssued(IReadOnlyList<Row> rows)
+    {
+        var issued = new List<Row>();
+        var notIssued = new List<string>();
+        Row? waiting = null;
+        var waitingNested = new List<Row>();
+
+        void FlushWaiting()
+        {
+            if (waiting == null)
+                return;
+            if (waitingNested.Count == 0)
+            {
+                if (!string.IsNullOrWhiteSpace(waiting.PersonName))
+                    notIssued.Add(waiting.PersonName.Trim());
+            }
+            else
+            {
+                issued.Add(waiting);
+                issued.AddRange(waitingNested);
+            }
+
+            waiting = null;
+            waitingNested.Clear();
+        }
+
+        foreach (var row in rows)
+        {
+            if (row.Nested)
+            {
+                if (waiting != null)
+                    waitingNested.Add(row);
+                else
+                    issued.Add(row);
+                continue;
+            }
+
+            FlushWaiting();
+            if (row.CanPreview)
+                issued.Add(row);
+            else
+                waiting = row;
+        }
+
+        FlushWaiting();
+        return (issued, notIssued);
+    }
+
     private static string? SharedLife(IReadOnlyList<PersonBuilder> people)
     {
         string? life = null;
@@ -406,7 +466,31 @@ public static class ApplicationProfileInstanceStatePreview
         public bool CanPreview => PreviewParentId != Guid.Empty && PreviewFamily.HasValue;
     }
 
-    public sealed record SeretmezlikLine(string PersonName, string LetterNumber, string Period);
+    public sealed record SeretmezlikLine(string PersonName, string LetterNumber, string Period, string? Organization = null);
+
+    /// <summary>
+    /// Submit-to label for a Seretmezlik letter: ministry short name, then ministry name, then migration service.
+    /// </summary>
+    public static string? DestinationLabel(string? ministryShortName, string? ministryName, string? migrationServiceName)
+    {
+        var shortName = ministryShortName?.Trim();
+        if (!string.IsNullOrWhiteSpace(shortName))
+            return shortName;
+        var name = ministryName?.Trim();
+        if (!string.IsNullOrWhiteSpace(name))
+            return name;
+        var migration = migrationServiceName?.Trim();
+        return string.IsNullOrWhiteSpace(migration) ? null : migration;
+    }
+
+    /// <summary>Letter number, with the Submit-to organization after it when the letter has one.</summary>
+    public static string SeretmezlikLetterText(string? letterNumber, string? organization)
+    {
+        var number = string.IsNullOrWhiteSpace(letterNumber) ? "—" : letterNumber.Trim();
+        if (string.IsNullOrWhiteSpace(organization))
+            return number;
+        return number + " · " + organization.Trim();
+    }
 
     private sealed record Doc(
         Guid PersonId,
@@ -439,14 +523,20 @@ public static class ApplicationProfileInstanceStatePreview
         return people;
     }
 
+    /// <summary>A Seretmezlik person is already listed on that band, not as “not issued”.</summary>
+    public static bool ShowAsNotIssued(Guid personId, IReadOnlySet<Guid>? excludedPersonIds) =>
+        excludedPersonIds == null || personId == Guid.Empty || !excludedPersonIds.Contains(personId);
+
     private static IReadOnlyList<SeretmezlikLine> SeretmezlikRows(
         IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
+        Guid instanceId,
+        IReadOnlyDictionary<Guid, ApplicationProfileInstanceExcludedPerson> excluded,
         IReadOnlyList<(Guid Id, string Name)> people)
     {
-        var excluded = ApplicationProfileInstanceExclusionQueries.GetExcludedPeople(objectSpace, application.ID);
         if (excluded.Count == 0)
             return Array.Empty<SeretmezlikLine>();
+
+        var organizations = OrganizationsByLetterNumber(objectSpace, instanceId);
 
         var names = people.ToDictionary(person => person.Id, person => person.Name);
         var missing = excluded.Keys.Where(id => !names.ContainsKey(id)).ToList();
@@ -465,14 +555,84 @@ public static class ApplicationProfileInstanceStatePreview
             var personName = names.TryGetValue(pair.Key, out var known) ? known : "—";
             foreach (var letter in pair.Value.AllLetters())
             {
-                lines.Add(new SeretmezlikLine(
-                    personName,
-                    string.IsNullOrWhiteSpace(letter.LetterNumber) ? "—" : letter.LetterNumber.Trim(),
-                    FormatDate(letter.LetterDate)));
+                var number = string.IsNullOrWhiteSpace(letter.LetterNumber) ? "—" : letter.LetterNumber.Trim();
+                organizations.TryGetValue(number, out var organization);
+                lines.Add(new SeretmezlikLine(personName, number, FormatDate(letter.LetterDate), organization));
             }
         }
 
         return lines;
+    }
+
+    /// <summary>
+    /// Letter number → Submit-to organization for Seretmezlik cases aimed at this application.
+    /// The number key matches <see cref="ApplicationProfileInstanceExclusionQueries.FormatSeretmezlikLetterNumber"/>.
+    /// </summary>
+    private static Dictionary<string, string> OrganizationsByLetterNumber(IObjectSpace objectSpace, Guid instanceId)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (objectSpace == null || instanceId == Guid.Empty)
+            return map;
+
+        var cases = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(instance => instance.TargetApplicationProfileInstanceId == instanceId)
+            .ToList();
+        if (cases.Count == 0)
+            return map;
+
+        var ministryIds = cases
+            .Select(instance => instance.SubmitToApprovingMinistryId)
+            .Where(id => id is Guid value && value != Guid.Empty)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+        var migrationIds = cases
+            .Select(instance => instance.SubmitToMigrationServiceId)
+            .Where(id => id is Guid value && value != Guid.Empty)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+
+        var ministries = ministryIds.Count == 0
+            ? new Dictionary<Guid, (string? ShortName, string? Name)>()
+            : objectSpace.GetObjectsQuery<ApprovingMinistry>()
+                .Where(ministry => ministryIds.Contains(ministry.ID))
+                .Select(ministry => new { ministry.ID, ministry.ShortNameTm, ministry.NameTm })
+                .ToDictionary(ministry => ministry.ID, ministry => ((string?)ministry.ShortNameTm, (string?)ministry.NameTm));
+        var migrations = migrationIds.Count == 0
+            ? new Dictionary<Guid, string?>()
+            : objectSpace.GetObjectsQuery<MigrationService>()
+                .Where(service => migrationIds.Contains(service.ID))
+                .Select(service => new { service.ID, service.NameTm })
+                .ToDictionary(service => service.ID, service => (string?)service.NameTm);
+
+        foreach (var seretmezlik in cases)
+        {
+            string? shortName = null;
+            string? ministryName = null;
+            string? migrationName = null;
+            if (seretmezlik.SubmitToApprovingMinistryId is Guid ministryId
+                && ministries.TryGetValue(ministryId, out var ministry))
+            {
+                shortName = ministry.Item1;
+                ministryName = ministry.Item2;
+            }
+
+            if (seretmezlik.SubmitToMigrationServiceId is Guid migrationId
+                && migrations.TryGetValue(migrationId, out var migration))
+                migrationName = migration;
+
+            var organization = DestinationLabel(shortName, ministryName, migrationName);
+            if (string.IsNullOrWhiteSpace(organization))
+                continue;
+
+            var number = ApplicationProfileInstanceExclusionQueries.FormatSeretmezlikLetterNumber(seretmezlik);
+            if (string.IsNullOrWhiteSpace(number))
+                continue;
+            map[number.Trim()] = organization;
+        }
+
+        return map;
     }
 
     private static List<Doc> InvitationRows(IObjectSpace objectSpace, ApplicationProfileInstance application)
@@ -581,42 +741,74 @@ public static class ApplicationProfileInstanceStatePreview
         return successors;
     }
 
-    private static List<Doc> WorkPermitRows(ApplicationProfileInstance application)
+    private static List<Doc> WorkPermitRows(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
-        var rows = new List<Doc>();
-        if (application.WorkPermits == null)
-            return rows;
-
-        foreach (var header in application.WorkPermits)
+        var items = new List<WorkPermitItem>();
+        if (application.WorkPermits != null)
         {
-            if (header?.WorkPermitItems == null)
-                continue;
-            foreach (var item in header.WorkPermitItems)
+            foreach (var header in application.WorkPermits)
             {
-                var person = item?.Person;
-                if (item == null || person == null || person.ID == Guid.Empty)
+                if (header?.WorkPermitItems == null)
                     continue;
-
-                var life = InvitationLaterLife.Resolve(
-                    IssuedDocumentLifecycle.IsCancelled(item),
-                    IssuedDocumentLifecycle.IsChanged(item),
-                    used: false,
-                    expired: InvitationLaterLife.IsExpired(item.ExpirationDate));
-                var (key, tone) = Life(life);
-                var parentId = header.ID;
-                rows.Add(new Doc(
-                    person.ID,
-                    NameOf(person),
-                    Text(header.WorkPermitNumber),
-                    FormatPeriod(item.StartDate, item.ExpirationDate),
-                    key,
-                    tone,
-                    parentId,
-                    parentId == Guid.Empty ? null : HeaderDocumentCopiesFamily.WorkPermit));
+                foreach (var item in header.WorkPermitItems)
+                {
+                    if (item != null)
+                        items.Add(item);
+                }
             }
         }
 
+        var itemIds = items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList();
+        var cancelled = CompletedWorkPermitItems(objectSpace, itemIds, ApplicationProfileActionFamily.Cancellation);
+        var changed = CompletedWorkPermitItems(objectSpace, itemIds, ApplicationProfileActionFamily.Change);
+
+        var rows = new List<Doc>(items.Count);
+        foreach (var item in items)
+        {
+            var person = item.Person;
+            if (person == null || person.ID == Guid.Empty)
+                continue;
+
+            var header = item.WorkPermit;
+            var life = InvitationLaterLife.Resolve(
+                cancelled.Contains(item.ID) || IssuedDocumentLifecycle.IsCancelled(item),
+                changed.Contains(item.ID) || IssuedDocumentLifecycle.IsChanged(item),
+                used: false,
+                expired: InvitationLaterLife.IsExpired(item.ExpirationDate));
+            var (key, tone) = Life(life);
+            var parentId = header?.ID ?? Guid.Empty;
+            rows.Add(new Doc(
+                person.ID,
+                NameOf(person),
+                Text(header?.WorkPermitNumber),
+                FormatPeriod(item.StartDate, item.ExpirationDate),
+                key,
+                tone,
+                parentId,
+                parentId == Guid.Empty ? null : HeaderDocumentCopiesFamily.WorkPermit,
+                parentId == Guid.Empty ? null : life ?? InvitationLaterLife.InForce));
+        }
+
         return rows;
+    }
+
+    private static HashSet<Guid> CompletedWorkPermitItems(
+        IObjectSpace objectSpace,
+        IReadOnlyCollection<Guid> itemIds,
+        ApplicationProfileActionFamily family)
+    {
+        if (itemIds.Count == 0)
+            return [];
+
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        return objectSpace.GetObjectsQuery<WorkPermitItem>()
+            .Where(item => itemIds.Contains(item.ID)
+                && item.ApplicationProfileInstances.Any(instance =>
+                    instance.ApplicationProfile != null
+                    && instance.ApplicationProfile.ActionFamily == family
+                    && instance.LatestPrimaryStateCode == issued))
+            .Select(item => item.ID)
+            .ToHashSet();
     }
 
     private static List<Doc> VisaRows(ApplicationProfileInstance application)
@@ -734,7 +926,8 @@ public static class ApplicationProfileInstanceStatePreview
     private static IReadOnlyList<Row> Merge(
         IReadOnlyList<(Guid Id, string Name)> people,
         IReadOnlyList<Doc> documents,
-        IReadOnlyList<Doc>? nested)
+        IReadOnlyList<Doc>? nested,
+        IReadOnlySet<Guid>? excludedPersonIds)
     {
         var order = new List<(Guid Id, string Name)>(people);
         var seen = new HashSet<Guid>(people.Select(person => person.Id));
@@ -752,6 +945,8 @@ public static class ApplicationProfileInstanceStatePreview
             var own = documents.Where(doc => doc.PersonId == person.Id).ToList();
             if (own.Count == 0)
             {
+                if (!ShowAsNotIssued(person.Id, excludedPersonIds))
+                    continue;
                 rows.Add(new Row(
                     person.Name,
                     "—",
@@ -791,6 +986,9 @@ public static class ApplicationProfileInstanceStatePreview
             doc.SuccessorNumber,
             doc.SuccessorDocumentId,
             doc.SuccessorLifeKey);
+
+    /// <summary>Pill for a shared invitation or work-permit state. In force when the life is empty.</summary>
+    public static (string Key, string Tone) DocumentLife(string? life) => Life(life);
 
     private static (string Key, string Tone) Life(string? life) =>
         life switch

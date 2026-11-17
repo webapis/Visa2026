@@ -131,6 +131,72 @@ public class ApplicationProfileInstanceStatePreviewTests
     }
 
     [Fact]
+    public void Issued_visas_are_listed_apart_from_visas_not_issued_yet()
+    {
+        var visa = Guid.NewGuid();
+        var zone = Guid.NewGuid();
+        var rows = new[]
+        {
+            Waiting("Caner Faki"),
+            Person("Coşkun Demirbilek", "A1758468", "29.12.2026 – 28.06.2027", visa, null, HeaderDocumentCopiesFamily.Visa),
+            Zone("Ahal", zone),
+            Waiting("Fatih Akgöllü"),
+        };
+
+        var split = ApplicationProfileInstanceStatePreview.SplitNotIssued(rows);
+
+        Assert.Equal(new[] { "Coşkun Demirbilek", "" }, split.Issued.Select(row => row.PersonName));
+        Assert.True(split.Issued[1].Nested);
+        Assert.Equal(new[] { "Caner Faki", "Fatih Akgöllü" }, split.NotIssuedNames);
+    }
+
+    [Fact]
+    public void Border_zone_without_a_visa_stays_on_the_visa_table()
+    {
+        var rows = new[]
+        {
+            Waiting("Caner Faki"),
+            Zone("Ahal", Guid.NewGuid()),
+        };
+
+        var split = ApplicationProfileInstanceStatePreview.SplitNotIssued(rows);
+
+        Assert.Equal(2, split.Issued.Count);
+        Assert.Empty(split.NotIssuedNames);
+    }
+
+    [Fact]
+    public void Seretmezlik_letter_names_the_submit_to_organization()
+    {
+        Assert.Equal(
+            "8/-33 · Migrasiýa",
+            ApplicationProfileInstanceStatePreview.SeretmezlikLetterText("8/-33", "Migrasiýa"));
+        Assert.Equal("8/-33", ApplicationProfileInstanceStatePreview.SeretmezlikLetterText("8/-33", "  "));
+        Assert.Equal(
+            "Migrasiýa",
+            ApplicationProfileInstanceStatePreview.DestinationLabel(" Migrasiýa ", "Daşary işler ministrligi", "Migrasiýa gullugy"));
+        Assert.Equal(
+            "Daşary işler ministrligi",
+            ApplicationProfileInstanceStatePreview.DestinationLabel(null, "Daşary işler ministrligi", "Migrasiýa gullugy"));
+        Assert.Equal(
+            "Migrasiýa gullugy",
+            ApplicationProfileInstanceStatePreview.DestinationLabel(null, " ", "Migrasiýa gullugy"));
+        Assert.Null(ApplicationProfileInstanceStatePreview.DestinationLabel(null, null, null));
+    }
+
+    [Fact]
+    public void Seretmezlik_people_are_not_listed_as_not_issued()
+    {
+        var excluded = Guid.NewGuid();
+        var waiting = Guid.NewGuid();
+        var ids = new HashSet<Guid> { excluded };
+
+        Assert.False(ApplicationProfileInstanceStatePreview.ShowAsNotIssued(excluded, ids));
+        Assert.True(ApplicationProfileInstanceStatePreview.ShowAsNotIssued(waiting, ids));
+        Assert.True(ApplicationProfileInstanceStatePreview.ShowAsNotIssued(excluded, null));
+    }
+
+    [Fact]
     public void Work_permits_keep_one_number_and_each_person_period()
     {
         var first = Guid.NewGuid();
@@ -150,6 +216,36 @@ public class ApplicationProfileInstanceStatePreviewTests
         Assert.Equal("01.01.2026 – 01.04.2026", grouped.Groups[0].People[0].Period);
         Assert.Equal("01.03.2026 – 01.06.2026", grouped.Groups[0].People[1].Period);
         Assert.Empty(grouped.NotIssuedNames);
+    }
+
+    [Theory]
+    [InlineData(null, "ApplicationProfileInstance.List.Mark.InvitationInForce", "inforce")]
+    [InlineData("invitationInForce", "ApplicationProfileInstance.List.Mark.InvitationInForce", "inforce")]
+    [InlineData("invitationUsed", "ApplicationProfileInstance.List.Mark.InvitationUsedTitle", "used")]
+    [InlineData("invitationExpiredUnused", "ApplicationProfileInstance.List.Mark.DocumentExpiredTitle", "expired")]
+    [InlineData("invitationChanged", "ApplicationProfileInstance.List.Mark.InvitationChangedTitle", "changed")]
+    [InlineData("invitationCancelled", "ApplicationProfileInstance.List.Mark.InvitationCancelledTitle", "cancelled")]
+    public void Document_life_names_invitation_and_work_permit_states(string? life, string key, string tone)
+    {
+        var label = ApplicationProfileInstanceStatePreview.DocumentLife(life);
+        Assert.Equal(key, label.Key);
+        Assert.Equal(tone, label.Tone);
+    }
+
+    [Fact]
+    public void Shared_work_permit_state_stays_on_the_group()
+    {
+        var header = Guid.NewGuid();
+        var rows = new[]
+        {
+            Person("A Person", "WP-1", "01.01.2026 – 01.04.2026", header, "invitationExpiredUnused", HeaderDocumentCopiesFamily.WorkPermit),
+            Person("B Person", "WP-1", "01.02.2026 – 01.05.2026", header, "invitationExpiredUnused", HeaderDocumentCopiesFamily.WorkPermit),
+        };
+
+        var grouped = ApplicationProfileInstanceStatePreview.GroupHeaders(rows, periodOnHeader: false);
+
+        Assert.Equal("invitationExpiredUnused", grouped.Groups[0].InvitationLifeKey);
+        Assert.Equal("expired", ApplicationProfileInstanceStatePreview.DocumentLife(grouped.Groups[0].InvitationLifeKey).Tone);
     }
 
     [Fact]

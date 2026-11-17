@@ -1,9 +1,35 @@
-## 2026-11-17 — Seretmezlik create only from Direct list with Submit-to
+## 2026-11-17 — Invitation and work-permit states show on the document line
 
-- **Need**: Officers must not create Seretmezlik under Ministrlik bilen ylalaşylmaly. Create only under Ylalaşyk zerur bolmadyk ýüztutmalar, and choose ministry or migration as Submit-to.
-- **Fix**: Picker hides Seretmezlik (and its shelf) on Via. List criteria put every Seretmezlik on Direct (including legacy Via-created). `ShowSubmitToOrganization` is true for Seretmezlik on Direct. Same-destination multi-link rule unchanged.
-- **Officer**: Rebuild/F5. New Seretmezlik only from the Direct list; set Submit-to before linking people. Existing Via Seretmezlik cases appear on the Direct list.
-- **Prevent**: Do not re-allow Seretmezlik on Via create. Do not hide Submit-to for Direct Seretmezlik.
+- **Need**: Ýagdaý syny showed Güýjünde on people, and a changed or cancelled work permit stayed Güýjünde when the link was not loaded. The invitation and work-permit number line had no state.
+- **Fix**: When everyone on a document shares one state, that pill sits beside the number: Güýjünde, Ulanyldy, Möhleti geçdi, Üýtgedildi, Ýatyryldy. People keep their own pill, so a mixed invitation still differs per person. Work-permit changed and cancelled are read from completed cases, same as invitations. A work permit has no Ulanyldy state.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny the invitation or work-permit number shows its state. People who differ still show their own pill.
+- **Prevent**: Do not decide work-permit changed or cancelled only from the in-memory applications. Do not put Ulanyldy on a work permit.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 33 passed. Blazor host build succeeded. The sheet was not opened in the browser.
+
+## 2026-11-17 — Issued visas are listed apart from visas not issued yet
+
+- **Need**: Berlen wizalar mixed people who already have a visa with people who still have none, in one table.
+- **Fix**: The visa table lists only issued visas (number, period, state). People with no visa yet are a name list under Entäk berilmedi. A nested border zone stays on the table with its person.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny the visa table is only issued visas; the waiting names follow it.
+- **Prevent**: Do not put “—” visa rows back into the issued table. Do not drop a border zone that belongs to a person who has no visa yet.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 26 passed. Blazor host build succeeded. The sheet was not opened in the browser.
+
+## 2026-11-17 — Seretmezlik line names the Submit-to organization
+
+- **Need**: The pink Seretmezlik line showed the person, letter number, and date, but not which organization the letter was sent to.
+- **Fix**: Each line appends that letter’s Submit-to after the number (ministry short name, otherwise ministry name, otherwise migration service). A letter with no Submit-to stays number-only. Two letters for one person keep two lines, each with its own organization.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny a pink line reads Seretmezlik · name · № 8/-33 · organization.
+- **Prevent**: Do not put the organization on the date. Do not use one organization for every letter of the same person.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 24 passed. Blazor host build succeeded. The sheet was not opened in the browser.
+
+## 2026-11-17 — Seretmezlik people stay off Entäk berilmedi
+
+- **Need**: People already on the Seretmezlik band were repeated under Entäk berilmedi on the work-permit and invitation sections.
+- **Fix**: A person covered by Seretmezlik is not added as a waiting row. They stay on the Seretmezlik band. An issued document for that person still shows in its group.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny, Seretmezlik names are only in the pink band.
+- **Prevent**: Do not put a Seretmezlik person on Entäk berilmedi.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 24 passed (the not-issued check is included). Blazor host build succeeded. The sheet was not opened in the browser.
+
 ## 2026-11-17 — Changed invitation shows on Ýagdaý syny
 
 - **Need**: A completed change left the invitation “In force” on the sheet. The list showed Üýtgedildi and the new invitation.

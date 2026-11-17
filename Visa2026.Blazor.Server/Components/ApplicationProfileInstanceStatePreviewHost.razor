@@ -104,7 +104,7 @@
                             @foreach (var line in _sheet.Seretmezlik)
                             {
                                 <div class="state-preview-seret">
-                                    <div><b>@Msg("ApplicationProfileInstance.StatePreview.Seretmezlik")</b> · @line.PersonName · № @line.LetterNumber</div>
+                                    <div><b>@Msg("ApplicationProfileInstance.StatePreview.Seretmezlik")</b> · @line.PersonName · № @ApplicationProfileInstanceStatePreview.SeretmezlikLetterText(line.LetterNumber, line.Organization)</div>
                                     <div>@line.Period</div>
                                 </div>
                             }
@@ -133,14 +133,20 @@
                                     {
                                         <section class="state-preview-group">
                                             <div class="state-preview-group__head">
-                                                @if (group.CanPreview)
-                                                {
-                                                    <button type="button" class="state-preview-doc" @onclick="() => OpenGroup(group)">@group.Number</button>
-                                                }
-                                                else
-                                                {
-                                                    <b>@group.Number</b>
-                                                }
+                                                <span class="state-preview-group__id">
+                                                    @if (group.CanPreview)
+                                                    {
+                                                        <button type="button" class="state-preview-doc" @onclick="() => OpenGroup(group)">@group.Number</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <b>@group.Number</b>
+                                                    }
+                                                    @if (GroupLife(group) is { } life)
+                                                    {
+                                                        <span class="state-preview-pill state-preview-pill--@life.Tone">@Msg(life.Key)</span>
+                                                    }
+                                                </span>
                                                 @if (group.PeriodOnHeader && !IsBlank(group.Period))
                                                 {
                                                     <span class="state-preview-group__period">@group.Period</span>
@@ -228,12 +234,15 @@
                                     }
                                 }
                             }
-                            else if (section.Rows.Count == 0)
+                            else if (section.Rows.Count == 0 && (section.NotIssuedNames == null || section.NotIssuedNames.Count == 0))
                             {
                                 <p class="state-preview-empty">—</p>
                             }
                             else
                             {
+                                var waiting = section.NotIssuedNames ?? Array.Empty<string>();
+                                @if (section.Rows.Count > 0)
+                                {
                                 <table class="state-preview-table">
                                     <thead>
                                         <tr>
@@ -264,6 +273,19 @@
                                         }
                                     </tbody>
                                 </table>
+                                }
+                                @if (waiting.Count > 0)
+                                {
+                                    <div class="state-preview-waiting">
+                                        <div class="state-preview-waiting__title">@Msg("ApplicationProfileInstance.List.Mark.NotIssuedTitle")</div>
+                                        <ul>
+                                            @foreach (var name in waiting)
+                                            {
+                                                <li>@name</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
                             }
                         }
                     </article>
@@ -436,6 +458,11 @@
         var clamped = Math.Clamp(percent, 0, 100);
         return "background:conic-gradient(#15803d " + clamped.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%, #e7e5e4 0)";
     }
+
+    private static (string Key, string Tone)? GroupLife(ApplicationProfileInstanceStatePreview.HeaderGroup group) =>
+        string.IsNullOrEmpty(group.InvitationLifeKey)
+            ? null
+            : ApplicationProfileInstanceStatePreview.DocumentLife(group.InvitationLifeKey);
 
     private static string SectionTitle(ApplicationProfileInstanceStatePreview.SectionId id) => id switch
     {
