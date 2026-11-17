@@ -18,10 +18,9 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
     public const string ColumnId = nameof(ApplicationProfileInstance.ProgressStepsDisplay);
 
     /// <summary>
-    /// Fixed width for office + up to five ministry legs + hand-in + CO number, plus the result chips.
-    /// Not officer-resizable — custom DxGrid cell keeps this width for a consistent ListView.
+    /// Width of the Ýagdaý syny link. Progress and document states open in the A4 dialog.
     /// </summary>
-    public const int ProgressColumnWidth = 1120;
+    public const int ProgressColumnWidth = 160;
 
     /// <summary>Same as ProgressColumnWidth so drag cannot shrink the progress column.</summary>
     public const int ProgressColumnMinWidth = ProgressColumnWidth;

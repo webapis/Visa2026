@@ -308,6 +308,8 @@
         <div id="visa-preview-slot" aria-label="File preview panel">
             <component type="typeof(Visa2026.Blazor.Server.Components.VisaPreviewSlotHost)" render-mode="Server" />
         </div>
+
+        <component type="typeof(Visa2026.Blazor.Server.Components.ApplicationProfileInstanceStatePreviewHost)" render-mode="Server" />
     </div>
 
     <component type="typeof(AlertsHandler)" render-mode="Server" />
@@ -322,6 +324,7 @@
     @* <component type="typeof(Visa2026.Blazor.Server.Components.UserFeedbackHeaderPanel)" render-mode="Server" /> *@
 
     <script src="~/js/user-feedback-capture.js"></script>
+    <script src="~/js/state-preview-print.js" asp-append-version="true"></script>
     <script src="~/js/issued-field-cue.js" asp-append-version="true"></script>
     <script src="~/js/template-staging-local.js" asp-append-version="true"></script>
     <script src="~/js/report-dashboard-scroll-spy.js" asp-append-version="true"></script>

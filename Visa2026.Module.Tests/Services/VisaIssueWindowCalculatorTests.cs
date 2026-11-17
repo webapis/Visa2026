@@ -162,4 +162,38 @@ public class VisaIssueWindowCalculatorTests
         Assert.Equal(expectedWindow, VisaIssueWindowCalculator.NormalizeWindowDays(window));
         Assert.Equal(expectedWarning, VisaIssueWindowCalculator.NormalizeWarningDays(warning, window));
     }
+
+    [Fact]
+    public void Passport_wait_lists_people_with_a_work_permit_and_no_visa()
+    {
+        var withPermit = Guid.NewGuid();
+        var alsoWaiting = Guid.NewGuid();
+        var hasVisa = Guid.NewGuid();
+        var noPermit = Guid.NewGuid();
+        var names = VisaIssuePassportWait.SelectWaiting(
+            new[]
+            {
+                (withPermit, "B Person"),
+                (alsoWaiting, "A Person"),
+                (hasVisa, "C Person"),
+                (noPermit, "D Person"),
+            },
+            new HashSet<Guid> { withPermit, alsoWaiting, hasVisa },
+            new HashSet<Guid> { hasVisa });
+
+        Assert.Equal(new[] { "A Person", "B Person" }, names);
+    }
+
+    [Fact]
+    public void Passport_wait_ignores_people_outside_the_active_roster()
+    {
+        var onRoster = Guid.NewGuid();
+        var excluded = Guid.NewGuid();
+        var names = VisaIssuePassportWait.SelectWaiting(
+            new[] { (onRoster, "On roster") },
+            new HashSet<Guid> { onRoster, excluded },
+            new HashSet<Guid>());
+
+        Assert.Equal(new[] { "On roster" }, names);
+    }
 }

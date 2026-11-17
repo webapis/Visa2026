@@ -45,6 +45,12 @@ public sealed class ApplicationWorkspaceCaseView
         = new Dictionary<string, int>();
 
     public ApplicationWorkspaceCaseSlaDashboard Sla { get; init; } = new();
+
+    /// <summary>
+    /// Visa-and-work-permit extension only, and only after every work permit is issued.
+    /// Null on every other case.
+    /// </summary>
+    public VisaIssuePassportWait? VisaPassportWait { get; init; }
 }
 
 public enum ApplicationWorkspaceCaseSummaryFillState

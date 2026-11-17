@@ -1,4 +1,3 @@
-using System.Globalization;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Editors.Models;
@@ -8,8 +7,8 @@ using Visa2026.Module.Model;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Shows CompletionPercentage as N%. Shares FieldName with the progress stepper column
-/// (one grid sort); only this narrow column gets the % cell template.
+/// Hides the completion % column. The percent stays on the state-preview sheet.
+/// The link column still sorts by the same field.
 /// </summary>
 public sealed class ApplicationListViewCompletionPercentageController : ViewController<ListView>
 {
@@ -71,19 +70,9 @@ public sealed class ApplicationListViewCompletionPercentageController : ViewCont
             if (!IsNarrowPercentColumn(columnModel))
                 continue;
 
-            columnModel.AllowSort = true;
-            columnModel.SortMode = DevExpress.Blazor.GridColumnSortMode.Value;
-            columnModel.CellDisplayTemplate = context => builder =>
-            {
-                if (context.DataItem is not ApplicationProfileInstance application)
-                {
-                    builder.AddContent(0, "\u2014");
-                    return;
-                }
-
-                var text = application.CompletionPercentage.ToString(CultureInfo.InvariantCulture) + "%";
-                builder.AddContent(0, text);
-            };
+            // Completion % lives on the Ýagdaý syny sheet. Sort still uses this field on the link column.
+            columnModel.Visible = false;
+            columnModel.CellDisplayTemplate = null;
         }
     }
 

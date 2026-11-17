@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+<meta charset="utf-8" />
+<title>Ýagdaý syny — A4</title>
+<style>
+  :root {
+    --ink: #1c1917;
+    --muted: #57534e;
+    --line: #e7e5e4;
+    --paper: #fffef9;
+    --desk: #d6d3c4;
+    --peach: #fedeaf;
+    --teal: #3fe0d0;
+    --yellow: #fff59d;
+    --gold: #fed700;
+    --green: #86efac;
+    --green-ink: #166534;
+    --used: #d9f99d;
+    --used-ink: #365314;
+    --violet: #e9d5ff;
+    --violet-ink: #581c87;
+    --pink: #fecdd3;
+    --pink-ink: #9f1239;
+    --seret: #fbcfe8;
+    --seret-ink: #9d174d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #5c5848; }
+  body {
+    font-family: "Segoe UI", Calibri, sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .backdrop {
+    min-height: 100vh;
+    padding: 22px 0 32px;
+    background: rgba(28, 25, 23, .45);
+  }
+  .dialog {
+    width: 834px;
+    margin: 0 auto;
+    background: #f5f5f4;
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    overflow: hidden;
+  }
+  .dialog-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #292524;
+    color: #fafaf9;
+    font-size: 14px;
+  }
+  .dialog-bar span { color: #d6d3d1; font-weight: 400; margin-left: 8px; }
+  .close {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: grid; place-items: center;
+    background: #44403c; color: #fafaf9; font-size: 16px;
+  }
+  .sheet {
+    width: 794px;
+    margin: 16px auto 18px;
+    background: var(--paper);
+    box-shadow: 0 8px 22px rgba(0,0,0,.12);
+    padding: 28px 32px 24px;
+  }
+  header.case {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 16px;
+    border-bottom: 2px solid #1c1917;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .kicker {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 2px;
+  }
+  h1 { font-size: 26px; margin: 0; font-weight: 650; letter-spacing: -0.02em; }
+  .profile { margin: 2px 0 0; font-size: 15px; }
+  .meta { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .ring {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: conic-gradient(#15803d 0 48%, #e7e5e4 48% 100%);
+    display: grid;
+    place-items: center;
+    align-self: center;
+  }
+  .ring span {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--paper);
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .ring small { display: block; font-size: 9px; font-weight: 600; color: var(--muted); text-align: center; }
+  h2 {
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin: 18px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  h2 span { color: var(--muted); font-weight: 500; letter-spacing: 0; text-transform: none; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .step {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 6px 7px;
+    background: #fff;
+    min-height: 92px;
+  }
+  .step .dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .step .name { font-size: 11.5px; font-weight: 650; line-height: 1.25; }
+  .step .date { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .step.office .dot { background: var(--peach); }
+  .step.ministry .dot { background: var(--teal); }
+  .step.mig .dot { background: var(--yellow); }
+  .step.co { background: #fff8d6; border-color: #e6c200; }
+  .step.co .dot { background: var(--gold); }
+  .step .dot.done { color: #14532d; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    text-align: left; font-size: 11px; font-weight: 650; color: var(--muted);
+    padding: 4px 6px; border-bottom: 1px solid var(--line);
+  }
+  td { padding: 7px 6px; border-bottom: 1px solid #f5f5f4; vertical-align: top; }
+  tr.nest td { background: #f7f6f1; color: #44403c; font-size: 12px; padding-top: 5px; padding-bottom: 5px; }
+  tr.nest td:first-child { padding-left: 22px; }
+  .who { font-weight: 650; }
+  .sub { color: var(--muted); font-size: 11.5px; }
+  .pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .inforce { background: var(--green); color: var(--green-ink); }
+  .changed { background: var(--violet); color: var(--violet-ink); }
+  .used { background: var(--used); color: var(--used-ink); }
+  .expired { background: var(--pink); color: var(--pink-ink); }
+  .waiting { background: #e7e5e4; color: #44403c; }
+  .seret {
+    background: var(--seret);
+    border: 1px solid #f9a8d4;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+  }
+  .seret b { color: var(--seret-ink); }
+  .note {
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: var(--muted);
+    border-top: 1px dashed var(--line);
+    padding-top: 8px;
+  }
+</style>
+</head>
+<body>
+  <div class="backdrop">
+  <section class="dialog" aria-label="Ýagdaý syny">
+    <div class="dialog-bar">
+      <div>Ýagdaý syny<span>9/-1862 · diňe syn · ekranda süýşürilýär, çapda indiki A4 sahypalar</span></div>
+      <div class="close">×</div>
+    </div>
+  <article class="sheet">
+    <header class="case">
+      <div>
+        <p class="kicker">Ýagdaý syny</p>
+        <h1>9/-1862</h1>
+        <p class="profile">Çakylyk we iş rugsady almak</p>
+        <p class="meta">
+          <b>CD</b> CD0236788 · <b>Sene</b> 30.09.2026 · <b>Wiza</b> BŞT işewürlik · 30 gün<br />
+          <b>Taslama</b> 1574-43596(1) · <b>Gysgaçylyk</b> Gyssagly tertipde · <b>Adam</b> 3
+        </p>
+      </div>
+      <div class="ring" title="Tamamlanma"><span>48%<small>tamam</small></span></div>
+    </header>
+
+    <h2>1. Ýüzlenmäniň ýagdaýy</h2>
+    <div class="steps">
+      <div class="step office">
+        <div class="dot done">✓</div>
+        <div class="name">Ofisde taýýarlyk</div>
+        <div class="date">16.10.2026</div>
+      </div>
+      <div class="step ministry">
+        <div class="dot done">✓</div>
+        <div class="name">Türkmenenergo</div>
+        <div class="date">02.10.2026</div>
+      </div>
+      <div class="step ministry">
+        <div class="dot done">✓</div>
+        <div class="name">Energetika</div>
+        <div class="date">09.10.2026</div>
+      </div>
+      <div class="step mig">
+        <div class="dot done">✓</div>
+        <div class="name">Migrasiýa gullugyna tabşyryldy</div>
+        <div class="date">10.10.2026</div>
+      </div>
+      <div class="step mig">
+        <div class="dot done">✓</div>
+        <div class="name">AS belgisi garaşylýar</div>
+        <div class="date">boldy</div>
+      </div>
+      <div class="step co">
+        <div class="dot done">✓</div>
+        <div class="name">ÇÖ belgisi alyndy</div>
+        <div class="date">15.10.2026<br />CD0236788</div>
+      </div>
+    </div>
+
+    <h2>Seretmezlik <span>— sanawdaky gülgüne kartlar</span></h2>
+    <div class="seret">
+      <div><b>Seretmezlik</b> · Ceyhun Demirtaş · № 8/-33</div>
+      <div>14.08.2026 – 22.09.2026</div>
+    </div>
+
+    <h2>2. Berlen çakylyklar <span>— serhet ýaka rugsady çakylygyň içinde</span></h2>
+    <table>
+      <thead>
+        <tr><th>Adam</th><th>Çakylyk</th><th>Möhlet</th><th>Ýagdaý</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="who">Ferdi Tiryaki</td>
+          <td>1574-43596</td>
+          <td>14.08.2026 – 22.09.2026</td>
+          <td><span class="pill inforce">Güýjünde</span></td>
+        </tr>
+        <tr class="nest">
+          <td colspan="2">Serhet ýaka · Balkanabat</td>
+          <td>01.09.2026 – 30.09.2026</td>
+          <td><span class="pill inforce">Berlen</span></td>
+        </tr>
+        <tr>
+          <td class="who">Caner Yıldız</td>
+          <td>1574-43597</td>
+          <td>14.08.2026 – 22.09.2026</td>
+          <td><span class="pill changed">Üýtgedildi</span></td>
+        </tr>
+        <tr>
+          <td class="who">Ceyhun Demirtaş</td>
+          <td>1574-43598</td>
+          <td>14.08.2026 – 22.09.2026</td>
+          <td><span class="pill expired">Möhleti geçen</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Berlen iş rugsatnamalary</h2>
+    <table>
+      <thead>
+        <tr><th>Adam</th><th>Iş rugsady</th><th>Möhlet</th><th>Ýagdaý</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="who">Ferdi Tiryaki</td>
+          <td>IR-2041</td>
+          <td>01.10.2026 – 30.09.2027</td>
+          <td><span class="pill inforce">Güýjünde</span></td>
+        </tr>
+        <tr>
+          <td class="who">Caner Yıldız</td>
+          <td>IR-2042</td>
+          <td>01.10.2026 – 30.09.2027</td>
+          <td><span class="pill used">Ulanyldy</span></td>
+        </tr>
+        <tr>
+          <td class="who">Ceyhun Demirtaş</td>
+          <td class="sub">—</td>
+          <td class="sub">—</td>
+          <td><span class="pill waiting">Entäk berilmedi</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Berlen wizalar</h2>
+    <table>
+      <thead>
+        <tr><th>Adam</th><th>Wiza</th><th>Möhlet</th><th>Ýagdaý</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="who">Ferdi Tiryaki</td>
+          <td>BŞT işewürlik</td>
+          <td>15.10.2026 – 14.11.2026</td>
+          <td><span class="pill inforce">Güýjünde</span></td>
+        </tr>
+        <tr>
+          <td class="who">Caner Yıldız</td>
+          <td>BŞT işewürlik</td>
+          <td>15.10.2026 – 14.11.2026</td>
+          <td><span class="pill used">Ulanyldy</span></td>
+        </tr>
+        <tr>
+          <td class="who">Ceyhun Demirtaş</td>
+          <td class="sub">—</td>
+          <td class="sub">—</td>
+          <td><span class="pill waiting">Entäk berilmedi</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="note">
+      Bu sahypa iň doly görnüş: çakylyk (berlen serhet ýaka bilen), iş rugsady we wiza.
+      Beýleki profillerde diňe şol profiliň berýän bölümleri çykýar.
+      Wiza-diňe, hasaba alyş, üýtgetme we ýatyrmak profillerinde diňe ýokarky ädimler galýar.
+      Sanawda identifikasiýa sütunleri, adam atlary, reňk tablary we setir reňki galýar.
+    </p>
+  </article>
+  </section>
+  </div>
+</body>
+</html>

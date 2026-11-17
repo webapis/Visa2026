@@ -119,6 +119,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             PeopleSummary = BuildPeopleSummary(people),
             LinkedRecordsSummary = linkedSummary,
             Sla = slaDashboard,
+            VisaPassportWait = VisaIssuePassportWait.TryLoad(objectSpace, application),
         };
     }
 

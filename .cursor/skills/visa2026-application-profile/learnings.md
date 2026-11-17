@@ -1,3 +1,51 @@
+## 2026-11-17 — Changed invitation shows on Ýagdaý syny
+
+- **Need**: A completed change left the invitation “In force” on the sheet. The list showed Üýtgedildi and the new invitation.
+- **Fix**: The sheet asks the database which invitation lines a completed change or cancellation covers. A changed person keeps the Üýtgedildi pill and, under the name, Täze çakylyk with the change-case number. That number opens the new invitation’s copies.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Ýagdaý syny for a case whose invitation was changed. The person shows Üýtgedildi and the new case number.
+- **Prevent**: Do not decide “changed” only from the invitation line’s in-memory applications. Do not hide the new invitation when a change has issued one.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 22 passed. Blazor host build succeeded. The sheet was not opened in the browser.
+
+## 2026-11-17 — Ýagdaý syny progress number opens approval copies
+
+- **Need**: The list link that previewed a step’s approval copies has to be on the state sheet too.
+- **Fix**: On a progress step that has copies, the document number under the step opens that step’s letters in the side preview (`PreviewAllFiles`, preview only). The step name and the date stay plain. A step with copies but no number uses the status line, or “Preview copy” when that line is empty. The sheet stays open and shifts left with the slot. Print shows the number as text.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Ýagdaý syny and click the number under a ministry or CO step. The scan opens on the right.
+- **Prevent**: Do not link the step name or the date. Do not link a step that has no copies.
+- **Verify**: Blazor host build after this change. The sheet was not opened in the browser.
+
+## 2026-11-17 — Passport wait list on extend_visa_wp Application result
+
+- **Need**: After every work permit is issued on Wiza we Iş Rugsatnamasyny Uzaltmak, Application result should list the people whose passports are still needed for the visa, and show the days left to issue those visas.
+- **Fix**: `VisaIssuePassportWait` uses the same gate and counter as the list (`VisaIssueWindowCalculator`, Configuration → Wiza berilmeli möhlet). The card sits on Application result under the coverage board. Names are active-roster people with a work permit and no visa. They are plain text. When every visa is issued the names go away and the counter stays frozen.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open the case → Application result. The card is absent until every work permit is in. Then it shows the day counter and the names. After the last visa, only the frozen counter remains.
+- **Prevent**: Do not show this on other profiles. Do not show it before work-permit coverage is complete. Do not keep the names after every visa exists. Do not make a name open Issue visa.
+- **Verify**: `VisaIssueWindowCalculatorTests` 13 passed. Blazor host build succeeded. Application result was not opened in the browser.
+
+## 2026-11-17 — Ýagdaý syny groups people under one invitation or work permit
+
+- **Need**: The same invitation number was repeated on every person. The same for a work permit.
+- **Fix**: Invitation and work-permit sections group by the issued header. The number is one link for that document. An invitation also shows its period once; each person keeps a state. A work permit shows the number once; each person keeps a period and a state. People who were not issued are names under Entäk berilmedi, after the groups. Visas stay one row per person. The group number still opens the side copy preview.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Ýagdaý syny, one invitation number heads its people. Click that number for the scan.
+- **Prevent**: Do not repeat the invitation or work-permit number on every person. Do not move a person’s work-permit period onto the group header. Do not drop the not-issued names.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 21 passed. Blazor host build succeeded. The sheet was not opened in the browser.
+
+## 2026-11-17 — Issued numbers on Ýagdaý syny open the copy preview
+
+- **Need**: Officers still need the scan that the list circles opened, without putting those circles back on the list.
+- **Fix**: On the sheet, the number of an issued invitation, work permit, visa, border zone, or work location is the click target. It calls the same header-copies preview (`OpenPreviewOnly` + `PreviewAllCopies`, invitation life and person when it is an invitation). “Entäk berilmedi” and the state pill stay plain. The dialog stays open and its right edge stops at the preview slot. Çap et prints the number as text.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Ýagdaý syny, click an issued number. The scan opens on the right and the sheet stays on the left. Close the scan and the sheet remains. A row that says Entäk berilmedi does not open anything.
+- **Prevent**: Do not put the circles back on the list. Do not make the state pill or a not-issued row open a preview. Do not close the sheet when the preview opens.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 18 passed. Blazor host build succeeded. The list was not opened in the browser.
+
+## 2026-11-17 — List state detail moves to the Ýagdaý syny A4 dialog
+
+- **Need**: The instance list was too wide. Progress steps, document states, Seretmezlik cards, and the completion percent belong on one A4 sheet. Color tabs, row background, identity columns, and plain people names stay on the list.
+- **Fix**: Each row has a **Ýagdaý syny** link. It opens a centered read-only dialog. The sheet scrolls and prints onto further A4 pages. Sections follow the profile code and drop documents that profile does not issue. Visa-only, registration, change, cancellation, and Seretmezlik profiles show progress only. Granted border zones nest under the invitation, or under the visa when there is no invitation section. Granted work locations nest under the work permit.
+- **Officer**: Stop F5, rebuild the Blazor host, hard-refresh. The wide progress column is a link. People names have no circles or pink cards. Color tabs and row color are unchanged. Click the link for the sheet. Print uses the dialog’s Çap et button.
+- **Prevent**: Do not put the stepper, result chips, document marks, or the completion column back on the list. Do not add empty document sections on progress-only profiles. Issued numbers on the sheet open the side preview (see the entry above this one). “Entäk berilmedi” stays plain text.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 17 passed. Blazor host build succeeded. The list was not opened in the browser.
+
 ## 2026-11-16 — extend_visa_wp list turns green at visa-window day 0
 
 - **Need**: This profile has no Resmileşdirildi step. The last stored step is CO belgisi alyndy. The list should treat the case as finished when every work permit is in the result and either every visa is in or the visa-issue counter has reached 0.

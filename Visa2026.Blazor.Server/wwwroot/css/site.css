@@ -4656,6 +4656,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     padding-top: 5px;
 }
 
+
+
 .lv-people__marks {
     display: inline-flex;
     flex: 0 0 auto;
@@ -5527,4 +5529,741 @@ button.lv-progress-step__files {
 
 .dxbl-theme-fluent-mode-light .visa-roster-search-bar__clear:hover:not(:disabled) {
     background: rgba(20, 32, 51, 0.06);
+}
+
+/* Person intake wizard (Employee / Family member detail) */
+.visa-person-intake-wizard-host {
+    width: 100%;
+    min-height: 32rem;
+}
+
+.visa-person-intake-detail,
+.visa-person-intake-detail .xaf-detail-view,
+.visa-person-intake-detail .layout-main,
+.visa-person-intake-detail .layout-item-PersonIntakeWizardUi,
+.visa-person-intake-detail .layout-item-PersonIntakeWizardUi .dxbl-fl-ctrl {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.visa-person-intake-detail .layout-item-PersonIntakeWizardUi .dxbl-fl-ctrl > * {
+    flex: 1 1 auto;
+    min-height: 28rem;
+    width: 100%;
+}
+
+/* Nested collection tabs stay hidden; SimpleEditors hosts the wizard (org-catalogs pattern). */
+.visa-person-intake-detail .layout-PersonCollectionSections,
+.visa-person-intake-detail .layout-item-PersonCollectionSections,
+.visa-person-intake-detail .layout-Documents,
+.visa-person-intake-detail .visa-person-record-tabs,
+.visa-person-intake-detail .visa-person-issued-tabs,
+.visa-person-intake-detail .visa-person-new-record-issued-hint {
+    display: none !important;
+}
+
+.visa-person-intake-detail .layout-SimpleEditors,
+.visa-person-intake-detail .layout-PersonIntakeWizardHost,
+.visa-person-intake-detail .layout-item-PersonIntakeWizardUi {
+    display: flex !important;
+    flex: 1 1 auto;
+    width: 100% !important;
+    min-height: 28rem;
+}
+
+.person-intake-wizard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.25rem 0.5rem 1rem;
+    color: var(--bs-body-color, #f4f5f7);
+}
+
+.person-intake-wizard__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.person-intake-wizard__title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.person-intake-wizard__sub {
+    margin: 0.25rem 0 0;
+    opacity: 0.75;
+    font-size: 0.9rem;
+}
+
+.person-intake-wizard__pending-pill {
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.45);
+    font-size: 0.85rem;
+}
+
+.person-intake-wizard__status {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.35rem;
+    font-size: 0.9rem;
+}
+
+.person-intake-wizard__status.is-error {
+    background: rgba(220, 53, 69, 0.15);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+.person-intake-wizard__status.is-ok {
+    background: rgba(25, 135, 84, 0.15);
+    border: 1px solid rgba(25, 135, 84, 0.35);
+}
+
+.person-intake-wizard__layout {
+    display: grid;
+    grid-template-columns: minmax(12rem, 16rem) 1fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .person-intake-wizard__layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.person-intake-wizard__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.person-intake-wizard__nav-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.4rem;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.person-intake-wizard__nav-item.is-active {
+    border-color: rgba(13, 110, 253, 0.55);
+    background: rgba(13, 110, 253, 0.12);
+}
+
+.person-intake-wizard__nav-badge {
+    flex: 0 0 auto;
+    width: 1.4rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.person-intake-wizard__nav-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+.person-intake-wizard__nav-status {
+    display: block;
+    font-size: 0.78rem;
+    opacity: 0.72;
+}
+
+.person-intake-wizard__panel {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem 1.1rem 1.25rem;
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.person-intake-wizard__panel-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+}
+
+.person-intake-wizard__panel-hint {
+    margin: 0 0 1rem;
+    opacity: 0.72;
+    font-size: 0.88rem;
+}
+
+.person-intake-wizard__field-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 11rem) 1fr auto;
+    gap: 0.6rem 1rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 700px) {
+    .person-intake-wizard__field-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.person-intake-wizard__input,
+.person-intake-wizard__field-row select {
+    width: 100%;
+    padding: 0.4rem 0.55rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
+}
+
+.person-intake-wizard__input.is-pending {
+    opacity: 0.55;
+}
+
+.person-intake-wizard__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.person-intake-wizard__record-card,
+.person-intake-wizard__other-row {
+    padding: 0.75rem;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.person-intake-wizard__other-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.person-intake-wizard__other-row p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.person-intake-wizard__passport-form {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.person-intake-wizard__record-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    opacity: 0.78;
+}
+
+.person-intake-wizard__review-block {
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.35rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.person-intake-wizard__review-block ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.2rem;
+}
+
+.person-intake-wizard__review-block.is-error {
+    border: 1px solid rgba(220, 53, 69, 0.45);
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.person-intake-wizard__review-block.is-pending {
+    border: 1px solid rgba(255, 193, 7, 0.45);
+    background: rgba(255, 193, 7, 0.08);
+}
+
+.person-intake-wizard__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.person-intake-wizard__footer-right {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.person-intake-wizard__btn {
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.person-intake-wizard__btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.person-intake-wizard__btn--primary {
+    border-color: rgba(13, 110, 253, 0.6);
+    background: rgba(13, 110, 253, 0.85);
+    color: #fff;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__panel {
+    background: #f8f9fb;
+    border-color: rgba(20, 32, 51, 0.12);
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__input,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__field-row select {
+    background: #fff;
+    border-color: rgba(20, 32, 51, 0.16);
+    color: #142033;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item {
+    border-color: rgba(20, 32, 51, 0.12);
+}
+
+.lv-state-preview-link {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #1d4ed8;
+    font: inherit;
+    font-weight: 650;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.state-preview-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: rgba(28, 25, 23, .45);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 12px;
+    overflow: auto;
+}
+
+/* The sheet stays open and moves left of the copy preview. */
+#visa-app-shell.visa-app-shell--preview-open .state-preview-overlay {
+    right: var(--visa-preview-slot-width, var(--visa-preview-slot-default, max(320px, 50vw)));
+}
+
+button.state-preview-doc {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #1d4ed8;
+    font: inherit;
+    font-weight: 650;
+    text-align: left;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.state-preview-dialog {
+    width: min(860px, 100%);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f4;
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+    color: #1c1917;
+}
+
+.state-preview-dialog__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #292524;
+    color: #fafaf9;
+    border-radius: 10px 10px 0 0;
+}
+
+.state-preview-dialog__bar span {
+    color: #d6d3d1;
+    font-weight: 400;
+    margin-left: 8px;
+}
+
+.state-preview-dialog__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.state-preview-dialog__print,
+.state-preview-dialog__close {
+    border: 0;
+    border-radius: 6px;
+    background: #44403c;
+    color: #fafaf9;
+    cursor: pointer;
+}
+
+.state-preview-dialog__print {
+    padding: 6px 10px;
+}
+
+.state-preview-dialog__close {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+}
+
+.state-preview-dialog__scroll {
+    overflow: auto;
+    padding: 16px;
+}
+
+.state-preview-sheet {
+    width: 794px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #fffef9;
+    padding: 28px 32px 24px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .12);
+}
+
+.state-preview-case {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 16px;
+    border-bottom: 2px solid #1c1917;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.state-preview-kicker {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #57534e;
+    margin: 0 0 2px;
+}
+
+.state-preview-sheet h1 {
+    font-size: 26px;
+    margin: 0;
+    font-weight: 650;
+}
+
+.state-preview-profile {
+    margin: 2px 0 0;
+    font-size: 15px;
+}
+
+.state-preview-meta {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    color: #57534e;
+}
+
+.state-preview-meta b {
+    color: #1c1917;
+    font-weight: 600;
+}
+
+.state-preview-ring {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    align-self: center;
+}
+
+.state-preview-ring span {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fffef9;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.state-preview-ring small {
+    display: block;
+    font-size: 9px;
+    font-weight: 600;
+    color: #57534e;
+    text-align: center;
+}
+
+.state-preview-sheet h2 {
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin: 18px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e7e5e4;
+}
+
+.state-preview-sheet h2 span {
+    color: #57534e;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-left: 8px;
+}
+
+.state-preview-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.state-preview-step {
+    flex: 1 1 110px;
+    border: 1px solid #e7e5e4;
+    border-radius: 8px;
+    padding: 8px 6px 7px;
+    background: #fff;
+    min-height: 88px;
+}
+
+.state-preview-step__dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    background: #e7e5e4;
+}
+
+.state-preview-step--done .state-preview-step__dot,
+.state-preview-step--issued .state-preview-step__dot {
+    background: #86efac;
+}
+
+.state-preview-step--current .state-preview-step__dot {
+    background: #fff59d;
+}
+
+.state-preview-step.is-co {
+    background: #fff8d6;
+    border-color: #e6c200;
+}
+
+.state-preview-step.is-co .state-preview-step__dot {
+    background: #fed700;
+}
+
+.state-preview-step--rej .state-preview-step__dot,
+.state-preview-step--cancel .state-preview-step__dot {
+    background: #fecaca;
+}
+
+.state-preview-step__name {
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.25;
+}
+
+.state-preview-step__date {
+    font-size: 11px;
+    color: #57534e;
+    margin-top: 4px;
+}
+
+.state-preview-seret {
+    background: #fbcfe8;
+    border: 1px solid #f9a8d4;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    font-size: 12.5px;
+    margin-bottom: 6px;
+}
+
+.state-preview-seret b {
+    color: #9d174d;
+}
+
+.state-preview-group {
+    margin: 0 0 12px;
+}
+
+.state-preview-group__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 2px 6px 6px;
+    font-size: 13px;
+}
+
+.state-preview-group__period {
+    color: #57534e;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.state-preview-waiting {
+    margin: 4px 0 8px;
+}
+
+.state-preview-waiting__title {
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #57534e;
+}
+
+.state-preview-waiting ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.state-preview-waiting li {
+    padding: 6px;
+    border-bottom: 1px solid #f5f5f4;
+    font-size: 12.5px;
+    font-weight: 650;
+}
+
+.state-preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.state-preview-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 650;
+    color: #57534e;
+    padding: 4px 6px;
+    border-bottom: 1px solid #e7e5e4;
+}
+
+.state-preview-table td {
+    padding: 7px 6px;
+    border-bottom: 1px solid #f5f5f4;
+    vertical-align: top;
+}
+
+.state-preview-table tr.is-nested td {
+    background: #f7f6f1;
+    color: #44403c;
+    font-size: 12px;
+}
+
+.state-preview-who {
+    font-weight: 650;
+}
+
+.state-preview-successor {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 650;
+    color: #6b21a8;
+}
+
+.state-preview-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.state-preview-pill--inforce { background: #86efac; color: #166534; }
+.state-preview-pill--changed { background: #e9d5ff; color: #581c87; }
+.state-preview-pill--used { background: #d9f99d; color: #365314; }
+.state-preview-pill--expired { background: #fecdd3; color: #9f1239; }
+.state-preview-pill--cancelled { background: #fecaca; color: #991b1b; }
+.state-preview-pill--waiting { background: #e7e5e4; color: #44403c; }
+
+.state-preview-empty,
+.state-preview-loading,
+.state-preview-error {
+    margin: 0;
+    color: #57534e;
+}
+
+.state-preview-error {
+    color: #991b1b;
+}
+
+@media print {
+    body.state-preview-printing * {
+        visibility: hidden;
+    }
+
+    body.state-preview-printing .state-preview-sheet,
+    body.state-preview-printing .state-preview-sheet * {
+        visibility: visible;
+    }
+
+    body.state-preview-printing .state-preview-overlay {
+        position: static;
+        background: #fff;
+        padding: 0;
+        overflow: visible;
+    }
+
+    body.state-preview-printing .state-preview-dialog,
+    body.state-preview-printing .state-preview-dialog__scroll {
+        max-height: none;
+        overflow: visible;
+        box-shadow: none;
+        background: #fff;
+    }
+
+    body.state-preview-printing .state-preview-dialog__bar {
+        display: none;
+    }
+
+    body.state-preview-printing .state-preview-sheet {
+        box-shadow: none;
+        width: auto;
+    }
+
+    body.state-preview-printing .state-preview-doc {
+        color: inherit;
+        font-weight: inherit;
+        text-decoration: none;
+    }
 }

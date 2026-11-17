@@ -13,6 +13,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | # | Slice | Status | Notes |
 |---|--------|--------|-------|
 | 0 | Plan + UX prototypes | **Done** | `docs/prototypes/*.png` (22 mockups, 2026-08-10) |
+| LV-state | Instance list Ýagdaý syny A4 dialog | **Done** (2026-11-17) | List keeps identity, people names, color tabs, row color. Progress, document states, Seretmezlik, completion % open from **Ýagdaý syny**. Issued document numbers on the sheet open the side copy preview; the dialog shifts left while that preview is open. Prototype `application-profile-instance-state-preview-a4.png`. |
 | 1 | Deprecate `ApplicationType` (registry, UI, dual-read) | **Done** | `docs/DEPRECATED.md` — Application Profile cutover section (2026-08-07) |
 | 2 | `ApplicationProfile` BO + legs + nested templates | **Done** | `ApplicationProfile.cs` v1 scalars/collections |
 | 3 | `Application.ApplicationProfile` FK + default seeding | **Done** | Optional during dual-read; `ApplyDefaultsForApplicationProfile` |

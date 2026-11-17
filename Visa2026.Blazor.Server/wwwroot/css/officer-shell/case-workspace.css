@@ -1289,6 +1289,21 @@ select.cw-summary-field__input option {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
   margin-bottom: 12px;
 }
+.cw-passport-wait { padding: 18px 18px 8px; }
+.cw-passport-wait__head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.cw-passport-wait__head .cw-card__title { margin: 0; }
+.cw-passport-wait__names {
+  margin: 0; padding: 0; list-style: none;
+}
+.cw-passport-wait__names li {
+  padding: 7px 2px;
+  border-top: 1px solid color-mix(in srgb, var(--os-ink, #1c1917) 8%, transparent);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
 .cw-result-board__head .cw-card__title { margin-bottom: 2px; }
 .cw-result-board__head .cw-card__sub { margin: 0; }
 .cw-result-board__badge {

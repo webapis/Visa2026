@@ -1,4 +1,3 @@
-using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
@@ -7,14 +6,12 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Model;
 
 /// <summary>
-/// Places <see cref="ApplicationProfileInstance.CompletionPercentage"/> immediately
-/// after the compact progress stepper on instance ListViews.
+/// Keeps CompletionPercentage off instance ListViews. The percent is on the state preview.
 /// </summary>
 public sealed class ApplicationProfileInstanceCompletionPercentageColumnUpdater
     : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
     public const string ColumnId = nameof(ApplicationProfileInstance.CompletionPercentage);
-    public const string ProgressColumnId = nameof(ApplicationProfileInstance.ProgressStepsDisplay);
 
     private static readonly string[] ApplicationInstanceListViewIds =
     [
@@ -45,19 +42,6 @@ public sealed class ApplicationProfileInstanceCompletionPercentageColumnUpdater
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
         column.PropertyName = ColumnId;
         column.Width = 90;
-
-        var progress = listView.Columns[ProgressColumnId];
-        if (progress != null && progress.Index >= 0)
-        {
-            column.Index = progress.Index + 1;
-            return;
-        }
-
-        var lastVisible = listView.Columns
-            .Where(c => !ReferenceEquals(c, column) && c.Index >= 0)
-            .Select(c => c.Index)
-            .DefaultIfEmpty(-1)
-            .Max();
-        column.Index = lastVisible + 1;
+        column.Index = -1;
     }
 }

@@ -299,6 +299,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IOfficerShellStartProcessService, OfficerShellStartProcessService>();
             services.AddScoped<IOfficerShellCaseProgressService, OfficerShellCaseProgressService>();
             services.AddScoped<IApplicationProfileInstanceExclusionService, ApplicationProfileInstanceExclusionService>();
+            services.AddScoped<IApplicationProfileInstanceStatePreviewService, ApplicationProfileInstanceStatePreviewService>();
             services.AddScoped<IApplicationProfileInstancePersonLinkQueryService, ApplicationProfileInstancePersonLinkQueryService>();
             services.AddScoped<ApplicationWorkspacePersonUiActions>();
             services.AddScoped<IApplicationWorkspacePersonUiActions>(sp =>

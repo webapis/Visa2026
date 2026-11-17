@@ -17666,6 +17666,202 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýer rugsady resminama nusgalary",
             ["ru-RU"] = "Копии разрешения на место",
         },
+        ["ApplicationProfileInstance.Workspace.PassportWaitTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Waiting for passports",
+            ["tr-TR"] = "Vize için pasaport bekleniyor",
+            ["tk-TM"] = "Wiza üçin pasport garaşylýar",
+            ["ru-RU"] = "Ожидание паспортов для визы",
+        },
+        ["ApplicationProfileInstance.Workspace.PassportWaitDone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visas issued",
+            ["tr-TR"] = "Vizeler verildi",
+            ["tk-TM"] = "Wizalar berildi",
+            ["ru-RU"] = "Визы выданы",
+        },
+        ["ApplicationProfileInstance.Workspace.PassportWaitDays"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "days",
+            ["tr-TR"] = "gün",
+            ["tk-TM"] = "gün",
+            ["ru-RU"] = "дн.",
+        },
+        ["ApplicationProfileInstance.StatePreview.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State preview",
+            ["tr-TR"] = "Durum önizleme",
+            ["tk-TM"] = "Ýagdaý syny",
+            ["ru-RU"] = "Просмотр состояния",
+        },
+        ["ApplicationProfileInstance.StatePreview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State preview",
+            ["tr-TR"] = "Durum önizleme",
+            ["tk-TM"] = "Ýagdaý syny",
+            ["ru-RU"] = "Просмотр состояния",
+        },
+        ["ApplicationProfileInstance.StatePreview.Print"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Print",
+            ["tr-TR"] = "Yazdır",
+            ["tk-TM"] = "Çap et",
+            ["ru-RU"] = "Печать",
+        },
+        ["ApplicationProfileInstance.StatePreview.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["ApplicationProfileInstance.StatePreview.ScrollHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scrolls on screen. Print continues on the next page.",
+            ["tr-TR"] = "Ekranda kayar. Yazdırma sonraki sayfada sürer.",
+            ["tk-TM"] = "Ekranda süýşürilýär, çapda indiki sahypa",
+            ["ru-RU"] = "На экране прокручивается. Печать продолжается на следующей странице.",
+        },
+        ["ApplicationProfileInstance.StatePreview.Progress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application progress",
+            ["tr-TR"] = "Başvuru durumu",
+            ["tk-TM"] = "Ýüzlenmäniň ýagdaýy",
+            ["ru-RU"] = "Ход заявления",
+        },
+        ["ApplicationProfileInstance.StatePreview.Seretmezlik"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Seretmezlik",
+            ["tr-TR"] = "Seretmezlik",
+            ["tk-TM"] = "Seretmezlik",
+            ["ru-RU"] = "Seretmezlik",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued invitations",
+            ["tr-TR"] = "Verilen davetiyeler",
+            ["tk-TM"] = "Berlen çakylyklar",
+            ["ru-RU"] = "Выданные приглашения",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.WorkPermits"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued work permits",
+            ["tr-TR"] = "Verilen çalışma izinleri",
+            ["tk-TM"] = "Berlen iş rugsatnamalary",
+            ["ru-RU"] = "Выданные разрешения на работу",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.Visas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued visas",
+            ["tr-TR"] = "Verilen vizeler",
+            ["tk-TM"] = "Berlen wizalar",
+            ["ru-RU"] = "Выданные визы",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.BorderZones"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Granted border zones",
+            ["tr-TR"] = "Verilen sınır bölgeleri",
+            ["tk-TM"] = "Berlen serhet ýaka",
+            ["ru-RU"] = "Выданные приграничные зоны",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.Locations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Granted work locations",
+            ["tr-TR"] = "Verilen çalışma yerleri",
+            ["tk-TM"] = "Berlen iş ýerleri",
+            ["ru-RU"] = "Выданные места работы",
+        },
+        ["ApplicationProfileInstance.StatePreview.Hint.BorderZoneUnderInvitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "border zone inside the invitation",
+            ["tr-TR"] = "davetiyenin içinde sınır bölgesi",
+            ["tk-TM"] = "serhet ýaka çakylygyň içinde",
+            ["ru-RU"] = "приграничная зона внутри приглашения",
+        },
+        ["ApplicationProfileInstance.StatePreview.Hint.LocationsUnderWorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "locations inside the work permit",
+            ["tr-TR"] = "çalışma izninin içinde yerler",
+            ["tk-TM"] = "iş ýerleri iş rugsadynyň içinde",
+            ["ru-RU"] = "места внутри разрешения на работу",
+        },
+        ["ApplicationProfileInstance.StatePreview.Hint.BorderZoneUnderVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "border zone inside the visa",
+            ["tr-TR"] = "vizenin içinde sınır bölgesi",
+            ["tk-TM"] = "serhet ýaka wizanyň içinde",
+            ["ru-RU"] = "приграничная зона внутри визы",
+        },
+        ["ApplicationProfileInstance.StatePreview.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Adam",
+            ["ru-RU"] = "Человек",
+        },
+        ["ApplicationProfileInstance.StatePreview.Period"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Period",
+            ["tr-TR"] = "Süre",
+            ["tk-TM"] = "Möhlet",
+            ["ru-RU"] = "Срок",
+        },
+        ["ApplicationProfileInstance.StatePreview.State"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaý",
+            ["ru-RU"] = "Состояние",
+        },
+        ["ApplicationProfileInstance.StatePreview.Completion"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "done",
+            ["tr-TR"] = "tamam",
+            ["tk-TM"] = "tamam",
+            ["ru-RU"] = "готово",
+        },
+        ["ApplicationProfileInstance.StatePreview.Meta.Process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "CD",
+            ["tr-TR"] = "CD",
+            ["tk-TM"] = "CD",
+            ["ru-RU"] = "CD",
+        },
+        ["ApplicationProfileInstance.StatePreview.Meta.Date"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date",
+            ["tr-TR"] = "Tarih",
+            ["tk-TM"] = "Sene",
+            ["ru-RU"] = "Дата",
+        },
+        ["ApplicationProfileInstance.StatePreview.Meta.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["ApplicationProfileInstance.StatePreview.Meta.Project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project",
+            ["tr-TR"] = "Proje",
+            ["tk-TM"] = "Taslama",
+            ["ru-RU"] = "Проект",
+        },
+        ["ApplicationProfileInstance.StatePreview.Meta.Urgency"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Urgency",
+            ["tr-TR"] = "Aciliyet",
+            ["tk-TM"] = "Gysgaçylyk",
+            ["ru-RU"] = "Срочность",
+        },
+        ["ApplicationProfileInstance.StatePreview.Meta.People"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "People",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Adam",
+            ["ru-RU"] = "Люди",
+        },
     };
 
     public static bool TryGet(string culture, string key, out string? message)

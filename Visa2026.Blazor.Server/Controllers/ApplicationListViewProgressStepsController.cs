@@ -8,10 +8,11 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Visa2026.Blazor.Server.Editors;
+using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Model;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Controllers;
@@ -280,6 +281,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             PlaceProgressThenPercent(gridListEditor, columnModel);
             Frame.GetController<ApplicationListViewCompletionPercentageController>()?.ApplyPercentTemplate();
 
+            columnModel.Caption = VisaUiMessages.Get("ApplicationProfileInstance.StatePreview.Open");
             columnModel.CellDisplayTemplate = context => builder =>
             {
                 if (context.DataItem is not ApplicationProfileInstance application)
@@ -288,186 +290,24 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
                     return;
                 }
 
-                var steps = application.ListViewProgressSteps;
-                if (steps.Count == 0)
-                    steps = Frame.GetController<ApplicationListViewPreloadController>()?.ProgressStepsFor(application.ID)
-                        ?? steps;
-                if (steps.Count == 0)
-                {
-                    builder.AddContent(0, application.ProgressStepsDisplay);
-                    return;
-                }
-
-                var chips = application.ListViewResultCoverageChips;
-                if (chips.Count == 0)
-                {
-                    chips = Frame.GetController<ApplicationListViewPreloadController>()?.ResultChipsFor(application.ID)
-                        ?? chips;
-                }
-
-                chips = ApplicationWorkspaceIssuedResultListCoverage.ForDisplay(chips);
-                var showResultChips = ApplicationWorkspaceListProgressSteps.ShouldShowResultChips(steps, chips);
-                if (!showResultChips)
-                    chips = Array.Empty<ApplicationWorkspaceIssuedResultListCoverage.Chip>();
-
-                var alignViaMinistry = string.Equals(
-                    View.Id,
-                    ApplicationProfileInstanceProgressRouteNavigation.ListViewViaMinistries,
-                    StringComparison.Ordinal);
-                if (alignViaMinistry)
-                    steps = ApplicationWorkspaceListProgressSteps.ExpandViaMinistryTail(steps);
-
-                var tailAt = alignViaMinistry
-                    ? steps.ToList().FindIndex(step => ApplicationWorkspaceListProgressSteps.IsViaMinistryTailStep(step.Key))
-                    : -1;
-                if (tailAt < 0)
-                    alignViaMinistry = false;
-
-                var wrapperClass = showResultChips && chips.Count > 0
-                    ? "lv-progress-with-result"
-                    : "lv-progress-with-result lv-progress-with-result--steps-only";
-                if (alignViaMinistry)
-                    wrapperClass += " lv-progress-with-result--via-ministry";
-
-                builder.OpenElement(0, "div");
-                builder.AddAttribute(1, "class", wrapperClass);
-                builder.OpenElement(2, "div");
-                var stepperClass = showResultChips && chips.Count > 0
-                    ? "lv-progress-stepper lv-progress-stepper--with-stems"
-                    : "lv-progress-stepper";
-                if (alignViaMinistry)
-                    stepperClass += " lv-progress-stepper--via-ministry";
-                builder.AddAttribute(3, "class", stepperClass);
-                var seq = 4;
-                var ownerViewId = View.Id;
-                var applicationId = application.ID;
-
-                void RenderSteps(IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> group, int numberFrom, bool lineAfterLast)
-                {
-                    for (var i = 0; i < group.Count; i++)
-                    {
-                        var step = group[i];
-                        var tone = ApplicationWorkspaceListProgressSteps.Tone(step);
-                        var drawLine = i < group.Count - 1 || lineAfterLast;
-                        builder.OpenElement(seq++, "div");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step lv-progress-step--" + tone);
-                        builder.OpenElement(seq++, "div");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__track");
-                        builder.OpenElement(seq++, "span");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__dot");
-                        builder.AddContent(seq++, ApplicationWorkspaceListProgressSteps.Glyph(step, numberFrom + i));
-                        builder.CloseElement();
-                        if (drawLine)
-                        {
-                            var lineTone = string.Equals(step.State, "done", StringComparison.OrdinalIgnoreCase)
-                                ? "done"
-                                : "pending";
-                            builder.OpenElement(seq++, "span");
-                            builder.AddAttribute(seq++, "class", "lv-progress-step__line lv-progress-step__line--" + lineTone);
-                            builder.CloseElement();
-                        }
-
-                        builder.CloseElement();
-                        builder.OpenElement(seq++, "div");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__meta");
-                        builder.OpenElement(seq++, "div");
-                        builder.AddAttribute(seq++, "class", "lv-progress-step__label");
-                        RenderStackedWords(builder, ref seq, step.Label);
-                        builder.CloseElement();
-                        if (!string.IsNullOrWhiteSpace(step.Date))
-                        {
-                            builder.OpenElement(seq++, "span");
-                            builder.AddAttribute(seq++, "class", "lv-progress-step__date");
-                            builder.AddContent(seq++, step.Date);
-                            builder.CloseElement();
-                        }
-
-                        if (!string.IsNullOrWhiteSpace(step.StatusLabel))
-                        {
-                            builder.OpenElement(seq++, "span");
-                            builder.AddAttribute(seq++, "class", "lv-progress-step__status");
-                            var statusText = step.StatusLabel;
-                            var split = statusText.IndexOf(" /", StringComparison.Ordinal);
-                            if (split > 0)
-                            {
-                                builder.AddContent(seq++, statusText[..split]);
-                                builder.OpenElement(seq++, "span");
-                                builder.AddAttribute(seq++, "class", "lv-progress-step__status-no");
-                                builder.AddContent(seq++, statusText[(split + 1)..]);
-                                builder.CloseElement();
-                            }
-                            else
-                            {
-                                builder.AddContent(seq++, statusText);
-                            }
-
-                            builder.CloseElement();
-                        }
-
-                        if (step.HasDocuments)
-                        {
-                            var viewFiles = VisaUiMessages.Get("PersonDossier.Progress.ViewFile");
-                            builder.OpenComponent<ProgressMinistryLetterPreviewLink>(seq++);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.ApplicationProfileInstanceId), applicationId);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.ProgressId), (Guid?)step.DocumentProgressId);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.PreviewAll), true);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.LinkText), viewFiles);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.FileName), viewFiles);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.OwnerViewId), ownerViewId);
-                            builder.AddAttribute(seq++, nameof(ProgressMinistryLetterPreviewLink.CssClass), "lv-progress-step__files");
-                            builder.CloseComponent();
-                        }
-
-                        builder.CloseElement();
-                        builder.CloseElement();
-                    }
-                }
-
-                if (alignViaMinistry)
-                {
-                    var lead = steps.Take(tailAt).ToList();
-                    var tail = steps.Skip(tailAt).ToList();
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-progress-stepper__lead");
-                    RenderSteps(lead, 1, lineAfterLast: lead.Count > 0 && tail.Count > 0);
-                    builder.CloseElement();
-                    builder.OpenElement(seq++, "div");
-                    builder.AddAttribute(seq++, "class", "lv-progress-stepper__tail");
-                    RenderSteps(tail, lead.Count + 1, lineAfterLast: false);
-                    builder.CloseElement();
-                }
-                else
-                {
-                    RenderSteps(steps, 1, lineAfterLast: false);
-                }
-
-                builder.CloseElement();
-
-                if (alignViaMinistry || (showResultChips && chips.Count > 0))
-                {
-                    if (alignViaMinistry)
-                    {
-                        builder.OpenElement(seq++, "div");
-                        builder.AddAttribute(seq++, "class", "lv-result-slot");
-                    }
-
-                    if (showResultChips && chips.Count > 0)
-                    {
-                        builder.OpenElement(seq++, "div");
-                        builder.AddAttribute(seq++, "class", "lv-result-neck");
-                        builder.CloseElement();
-                        var visaWindow = application.ListViewVisaIssueWindow
-                            ?? Frame.GetController<ApplicationListViewPreloadController>()?.VisaWindowFor(application.ID);
-                        ApplicationListViewResultChipRender.AppendStacked(builder, ref seq, chips, visaWindow);
-                    }
-
-                    if (alignViaMinistry)
-                        builder.CloseElement();
-                }
-
+                var id = application.ID;
+                var label = VisaUiMessages.Get("ApplicationProfileInstance.StatePreview.Open");
+                builder.OpenElement(0, "button");
+                builder.AddAttribute(1, "type", "button");
+                builder.AddAttribute(2, "class", "lv-state-preview-link");
+                builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(this, () => OpenStatePreview(id)));
+                builder.AddContent(4, label);
                 builder.CloseElement();
             };
         }
+    }
+
+    private void OpenStatePreview(Guid instanceId)
+    {
+        ApplicationListRowActivationGate.SuppressBriefly();
+        Application?.ServiceProvider
+            ?.GetService<IApplicationProfileInstanceStatePreviewService>()
+            ?.Open(instanceId, View?.Id);
     }
 
     private static void PlaceProgressThenPercent(DxGridListEditor gridListEditor, DxGridDataColumnModel progressColumn)
@@ -532,25 +372,4 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             || string.Equals(fieldName, nameof(ApplicationProfileInstance.LatestPrimaryStateCode), StringComparison.Ordinal);
     }
 
-    /// <summary>
-    /// One word per line so long step titles (e.g. Submitted to migration service)
-    /// stay inside the step column and clear of result chips.
-    /// </summary>
-    private static void RenderStackedWords(RenderTreeBuilder builder, ref int seq, string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return;
-
-        var words = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        for (var i = 0; i < words.Length; i++)
-        {
-            if (i > 0)
-                builder.AddMarkupContent(seq++, "<br />");
-
-            builder.OpenElement(seq++, "span");
-            builder.AddAttribute(seq++, "class", "lv-progress-step__label-word");
-            builder.AddContent(seq++, words[i]);
-            builder.CloseElement();
-        }
-    }
 }

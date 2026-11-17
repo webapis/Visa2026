@@ -1,0 +1,486 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.HeaderLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
+@implements IDisposable
+@inject IApplicationProfileInstanceStatePreviewService Dialog
+@inject IVisaPreviewSlotService Preview
+@inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
+@inject IJSRuntime JS
+
+@if (Dialog.CurrentId != null)
+{
+    <div class="state-preview-overlay" @onclick="Close">
+        <section class="state-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="state-preview-title" @onclick:stopPropagation>
+            <header class="state-preview-dialog__bar">
+                <div id="state-preview-title">
+                    @Msg("ApplicationProfileInstance.StatePreview.Title")
+                    @if (_sheet != null && !string.IsNullOrWhiteSpace(_sheet.Number))
+                    {
+                        <span>@_sheet.Number</span>
+                    }
+                    <span>@Msg("ApplicationProfileInstance.StatePreview.ScrollHint")</span>
+                </div>
+                <div class="state-preview-dialog__actions">
+                    <button type="button" class="state-preview-dialog__print" @onclick="Print">@Msg("ApplicationProfileInstance.StatePreview.Print")</button>
+                    <button type="button" class="state-preview-dialog__close" @onclick="Close" aria-label="@Msg("ApplicationProfileInstance.StatePreview.Close")">×</button>
+                </div>
+            </header>
+            <div class="state-preview-dialog__scroll">
+                @if (_error != null)
+                {
+                    <p class="state-preview-error">@_error</p>
+                }
+                else if (_sheet == null)
+                {
+                    <p class="state-preview-loading">…</p>
+                }
+                else
+                {
+                    <article class="state-preview-sheet">
+                        <header class="state-preview-case">
+                            <div>
+                                <p class="state-preview-kicker">@Msg("ApplicationProfileInstance.StatePreview.Title")</p>
+                                <h1>@Display(_sheet.Number)</h1>
+                                @if (!string.IsNullOrWhiteSpace(_sheet.ProfileName))
+                                {
+                                    <p class="state-preview-profile">@_sheet.ProfileName</p>
+                                }
+                                <p class="state-preview-meta">
+                                    @Meta("ApplicationProfileInstance.StatePreview.Meta.Process", _sheet.ProcessNumber)
+                                    @Meta("ApplicationProfileInstance.StatePreview.Meta.Date", _sheet.Date)
+                                    @Meta("ApplicationProfileInstance.StatePreview.Meta.Visa", Join(_sheet.VisaType, _sheet.VisaPeriod))
+                                    <br />
+                                    @Meta("ApplicationProfileInstance.StatePreview.Meta.Project", _sheet.Project)
+                                    @Meta("ApplicationProfileInstance.StatePreview.Meta.Urgency", _sheet.Urgency)
+                                    <b>@Msg("ApplicationProfileInstance.StatePreview.Meta.People")</b> @_sheet.PersonCount
+                                </p>
+                            </div>
+                            <div class="state-preview-ring" style="@RingStyle(_sheet.CompletionPercent)" title="@Msg("ApplicationProfileInstance.StatePreview.Completion")">
+                                <span>@_sheet.CompletionPercent%<small>@Msg("ApplicationProfileInstance.StatePreview.Completion")</small></span>
+                            </div>
+                        </header>
+
+                        <h2>@Msg("ApplicationProfileInstance.StatePreview.Progress")</h2>
+                        @if (_sheet.Steps.Count == 0)
+                        {
+                            <p class="state-preview-empty">—</p>
+                        }
+                        else
+                        {
+                            <div class="state-preview-steps">
+                                @for (var i = 0; i < _sheet.Steps.Count; i++)
+                                {
+                                    var step = _sheet.Steps[i];
+                                    var tone = ApplicationWorkspaceListProgressSteps.Tone(step);
+                                    <div class="state-preview-step state-preview-step--@tone @(step.AsNumberReceived ? "is-co" : null)">
+                                        <div class="state-preview-step__dot">@ApplicationWorkspaceListProgressSteps.Glyph(step, i + 1)</div>
+                                        <div class="state-preview-step__name">@step.Label</div>
+                                        @if (!string.IsNullOrWhiteSpace(step.Date))
+                                        {
+                                            <div class="state-preview-step__date">@step.Date</div>
+                                        }
+                                        @if (step.HasDocuments && step.DocumentProgressId != Guid.Empty)
+                                        {
+                                            <div class="state-preview-step__date">
+                                                <button type="button" class="state-preview-doc" @onclick="() => OpenApprovalCopies(step)">@ApprovalLinkText(step)</button>
+                                            </div>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(step.StatusLabel))
+                                        {
+                                            <div class="state-preview-step__date">@step.StatusLabel</div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (_sheet.Seretmezlik.Count > 0)
+                        {
+                            <h2>@Msg("ApplicationProfileInstance.StatePreview.Seretmezlik")</h2>
+                            @foreach (var line in _sheet.Seretmezlik)
+                            {
+                                <div class="state-preview-seret">
+                                    <div><b>@Msg("ApplicationProfileInstance.StatePreview.Seretmezlik")</b> · @line.PersonName · № @line.LetterNumber</div>
+                                    <div>@line.Period</div>
+                                </div>
+                            }
+                        }
+
+                        @foreach (var section in _sheet.Sections)
+                        {
+                            <h2>
+                                @Msg(SectionTitle(section.Id))
+                                @if (HintKey(section) is string hint)
+                                {
+                                    <span>@Msg(hint)</span>
+                                }
+                            </h2>
+                            @if (section.GroupsByHeader)
+                            {
+                                var groups = section.Groups ?? Array.Empty<ApplicationProfileInstanceStatePreview.HeaderGroup>();
+                                var waiting = section.NotIssuedNames ?? Array.Empty<string>();
+                                if (groups.Count == 0 && waiting.Count == 0)
+                                {
+                                    <p class="state-preview-empty">—</p>
+                                }
+                                else
+                                {
+                                    foreach (var group in groups)
+                                    {
+                                        <section class="state-preview-group">
+                                            <div class="state-preview-group__head">
+                                                @if (group.CanPreview)
+                                                {
+                                                    <button type="button" class="state-preview-doc" @onclick="() => OpenGroup(group)">@group.Number</button>
+                                                }
+                                                else
+                                                {
+                                                    <b>@group.Number</b>
+                                                }
+                                                @if (group.PeriodOnHeader && !IsBlank(group.Period))
+                                                {
+                                                    <span class="state-preview-group__period">@group.Period</span>
+                                                }
+                                            </div>
+                                            <table class="state-preview-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>@Msg("ApplicationProfileInstance.StatePreview.Person")</th>
+                                                        @if (!group.PeriodOnHeader)
+                                                        {
+                                                            <th>@Msg("ApplicationProfileInstance.StatePreview.Period")</th>
+                                                        }
+                                                        <th>@Msg("ApplicationProfileInstance.StatePreview.State")</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var person in group.People)
+                                                    {
+                                                        <tr>
+                                                            <td class="state-preview-who">
+                                                                @person.PersonName
+                                                                @if (group.PeriodOnHeader && !string.IsNullOrWhiteSpace(person.SuccessorNumber))
+                                                                {
+                                                                    <div class="state-preview-successor">
+                                                                        @Msg("ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle")
+                                                                        @if (!string.IsNullOrWhiteSpace(person.SuccessorLifeKey))
+                                                                        {
+                                                                            <span> · @Msg(InvitationLaterLife.BannerMessageKey(person.SuccessorLifeKey))</span>
+                                                                        }
+                                                                        <span> · </span>
+                                                                        @if (person.SuccessorDocumentId != Guid.Empty)
+                                                                        {
+                                                                            <button type="button" class="state-preview-doc" @onclick="() => OpenSuccessor(person)">@person.SuccessorNumber</button>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            @person.SuccessorNumber
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </td>
+                                                            @if (!group.PeriodOnHeader)
+                                                            {
+                                                                <td>@person.Period</td>
+                                                            }
+                                                            <td><span class="state-preview-pill state-preview-pill--@person.Tone">@Msg(person.StateKey)</span></td>
+                                                        </tr>
+                                                        @foreach (var nested in person.Nested)
+                                                        {
+                                                            <tr class="is-nested">
+                                                                <td>
+                                                                    @if (nested.CanPreview)
+                                                                    {
+                                                                        <button type="button" class="state-preview-doc" @onclick="() => OpenCopy(nested)">@NestedLabel(section, nested)</button>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @NestedLabel(section, nested)
+                                                                    }
+                                                                </td>
+                                                                @if (!group.PeriodOnHeader)
+                                                                {
+                                                                    <td>@nested.Period</td>
+                                                                }
+                                                                <td><span class="state-preview-pill state-preview-pill--@nested.Tone">@Msg(nested.StateKey)</span></td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </section>
+                                    }
+                                    @if (waiting.Count > 0)
+                                    {
+                                        <div class="state-preview-waiting">
+                                            <div class="state-preview-waiting__title">@Msg("ApplicationProfileInstance.List.Mark.NotIssuedTitle")</div>
+                                            <ul>
+                                                @foreach (var name in waiting)
+                                                {
+                                                    <li>@name</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else if (section.Rows.Count == 0)
+                            {
+                                <p class="state-preview-empty">—</p>
+                            }
+                            else
+                            {
+                                <table class="state-preview-table">
+                                    <thead>
+                                        <tr>
+                                            <th>@Msg("ApplicationProfileInstance.StatePreview.Person")</th>
+                                            <th>@Msg(SectionTitle(section.Id))</th>
+                                            <th>@Msg("ApplicationProfileInstance.StatePreview.Period")</th>
+                                            <th>@Msg("ApplicationProfileInstance.StatePreview.State")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in section.Rows)
+                                        {
+                                            <tr class="@(row.Nested ? "is-nested" : null)">
+                                                <td class="state-preview-who">@row.PersonName</td>
+                                                <td>
+                                                    @if (row.CanPreview)
+                                                    {
+                                                        <button type="button" class="state-preview-doc" @onclick="() => OpenCopy(row)">@DocumentText(section, row)</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        @DocumentText(section, row)
+                                                    }
+                                                </td>
+                                                <td>@row.Period</td>
+                                                <td><span class="state-preview-pill state-preview-pill--@row.Tone">@Msg(row.StateKey)</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        }
+                    </article>
+                }
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    private ApplicationProfileInstanceStatePreview.Sheet? _sheet;
+    private string? _error;
+    private Guid? _loadedId;
+
+    protected override void OnInitialized()
+    {
+        Dialog.Changed += OnChanged;
+        if (Dialog.CurrentId != null)
+            Load(Dialog.CurrentId.Value);
+    }
+
+    private void OnChanged() => _ = InvokeAsync(Reload);
+
+    private void Reload()
+    {
+        if (Dialog.CurrentId is Guid id)
+            Load(id);
+        else
+        {
+            _sheet = null;
+            _error = null;
+            _loadedId = null;
+        }
+
+        StateHasChanged();
+    }
+
+    private void Load(Guid id)
+    {
+        if (_loadedId == id && _sheet != null)
+            return;
+
+        _loadedId = id;
+        _sheet = null;
+        _error = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            _sheet = ApplicationProfileInstanceStatePreview.Load(objectSpace, id);
+            if (_sheet == null)
+                _error = "—";
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void Close() => Dialog.Close();
+
+    private Task OpenSuccessor(ApplicationProfileInstanceStatePreview.GroupPerson person)
+    {
+        if (person.SuccessorDocumentId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return Preview.OpenHeaderDocumentCopiesAsync(
+            new HeaderDocumentCopiesSlotRequest
+            {
+                Family = HeaderDocumentCopiesFamily.Invitation,
+                ParentId = person.SuccessorDocumentId,
+                OpenPreviewOnly = true,
+                PreviewAllCopies = true,
+                InvitationLifeKey = person.SuccessorLifeKey,
+                PersonId = person.SuccessorPersonId == Guid.Empty ? null : person.SuccessorPersonId,
+            },
+            Dialog.OwnerViewId);
+    }
+
+    private Task OpenApprovalCopies(ApplicationWorkspaceListProgressSteps.Step step)
+    {
+        if (!step.HasDocuments || step.DocumentProgressId == Guid.Empty || Dialog.CurrentId is not Guid applicationId)
+            return Task.CompletedTask;
+
+        return Preview.OpenProgressLettersAsync(
+            new ProgressLettersSlotRequest
+            {
+                ApplicationProfileInstanceId = applicationId,
+                FocusProgressId = step.DocumentProgressId,
+                FocusDisplayName = ApprovalLinkText(step),
+                PreviewAllFiles = true,
+                OpenPreviewOnly = true,
+            },
+            Dialog.OwnerViewId);
+    }
+
+    private static string ApprovalLinkText(ApplicationWorkspaceListProgressSteps.Step step) =>
+        string.IsNullOrWhiteSpace(step.StatusLabel)
+            ? Msg("ApplicationProfileInstance.Workspace.PreviewCopy")
+            : step.StatusLabel.Trim();
+
+    private Task OpenGroup(ApplicationProfileInstanceStatePreview.HeaderGroup group)
+    {
+        if (!group.CanPreview || group.PreviewFamily is not HeaderDocumentCopiesFamily family)
+            return Task.CompletedTask;
+
+        return Preview.OpenHeaderDocumentCopiesAsync(
+            new HeaderDocumentCopiesSlotRequest
+            {
+                Family = family,
+                ParentId = group.PreviewParentId,
+                OpenPreviewOnly = true,
+                PreviewAllCopies = true,
+                InvitationLifeKey = family == HeaderDocumentCopiesFamily.Invitation ? group.InvitationLifeKey : null,
+                PersonId = group.PreviewPersonId == Guid.Empty ? null : group.PreviewPersonId,
+            },
+            Dialog.OwnerViewId);
+    }
+
+    private Task OpenCopy(ApplicationProfileInstanceStatePreview.Row row)
+    {
+        if (!row.CanPreview || row.PreviewFamily is not HeaderDocumentCopiesFamily family)
+            return Task.CompletedTask;
+
+        return Preview.OpenHeaderDocumentCopiesAsync(
+            new HeaderDocumentCopiesSlotRequest
+            {
+                Family = family,
+                ParentId = row.PreviewParentId,
+                OpenPreviewOnly = true,
+                PreviewAllCopies = true,
+                InvitationLifeKey = family == HeaderDocumentCopiesFamily.Invitation ? row.InvitationLifeKey : null,
+                PersonId = row.PreviewPersonId == Guid.Empty ? null : row.PreviewPersonId,
+            },
+            Dialog.OwnerViewId);
+    }
+
+    private async Task Print() =>
+        await JS.InvokeVoidAsync("visaStatePreviewPrint");
+
+    private static string Msg(string key) => VisaUiMessages.Get(key);
+
+    private static string Display(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
+
+    private static string Join(string? left, string? right)
+    {
+        var a = string.IsNullOrWhiteSpace(left) ? null : left.Trim();
+        var b = string.IsNullOrWhiteSpace(right) ? null : right.Trim();
+        if (a == null)
+            return b ?? "—";
+        if (b == null)
+            return a;
+        return a + " · " + b;
+    }
+
+    private static RenderFragment Meta(string key, string? value) => builder =>
+    {
+        builder.OpenElement(0, "span");
+        builder.AddContent(1, Msg(key));
+        builder.AddContent(2, " ");
+        builder.OpenElement(3, "b");
+        builder.AddContent(4, Display(value));
+        builder.CloseElement();
+        builder.AddContent(5, " · ");
+        builder.CloseElement();
+    };
+
+    private static string RingStyle(int percent)
+    {
+        var clamped = Math.Clamp(percent, 0, 100);
+        return "background:conic-gradient(#15803d " + clamped.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%, #e7e5e4 0)";
+    }
+
+    private static string SectionTitle(ApplicationProfileInstanceStatePreview.SectionId id) => id switch
+    {
+        ApplicationProfileInstanceStatePreview.SectionId.Invitation => "ApplicationProfileInstance.StatePreview.Section.Invitations",
+        ApplicationProfileInstanceStatePreview.SectionId.WorkPermit => "ApplicationProfileInstance.StatePreview.Section.WorkPermits",
+        ApplicationProfileInstanceStatePreview.SectionId.Visa => "ApplicationProfileInstance.StatePreview.Section.Visas",
+        ApplicationProfileInstanceStatePreview.SectionId.BorderZone => "ApplicationProfileInstance.StatePreview.Section.BorderZones",
+        ApplicationProfileInstanceStatePreview.SectionId.Location => "ApplicationProfileInstance.StatePreview.Section.Locations",
+        _ => "ApplicationProfileInstance.StatePreview.Title",
+    };
+
+    private static string? HintKey(ApplicationProfileInstanceStatePreview.Section section)
+    {
+        if (section.NestBorderZone && section.Id == ApplicationProfileInstanceStatePreview.SectionId.Invitation)
+            return "ApplicationProfileInstance.StatePreview.Hint.BorderZoneUnderInvitation";
+        if (section.NestLocations && section.Id == ApplicationProfileInstanceStatePreview.SectionId.WorkPermit)
+            return "ApplicationProfileInstance.StatePreview.Hint.LocationsUnderWorkPermit";
+        if (section.NestBorderZone && section.Id == ApplicationProfileInstanceStatePreview.SectionId.Visa)
+            return "ApplicationProfileInstance.StatePreview.Hint.BorderZoneUnderVisa";
+        return null;
+    }
+
+    private static bool IsBlank(string? value) =>
+        string.IsNullOrWhiteSpace(value) || value.Trim() == "—";
+
+    private static string NestedLabel(ApplicationProfileInstanceStatePreview.Section section, ApplicationProfileInstanceStatePreview.Row row)
+    {
+        var text = DocumentText(section, row);
+        if (section.Id != ApplicationProfileInstanceStatePreview.SectionId.Invitation || IsBlank(row.Period))
+            return text;
+        return text + " · " + row.Period;
+    }
+
+    private static string DocumentText(ApplicationProfileInstanceStatePreview.Section section, ApplicationProfileInstanceStatePreview.Row row)
+    {
+        if (!row.Nested)
+            return row.Document;
+
+        var prefix = section.Id == ApplicationProfileInstanceStatePreview.SectionId.WorkPermit
+            ? Msg("ApplicationProfileInstance.StatePreview.Section.Locations")
+            : Msg("ApplicationProfileInstance.StatePreview.Section.BorderZones");
+        if (string.IsNullOrWhiteSpace(row.Document) || row.Document == "—")
+            return prefix;
+        return prefix + " · " + row.Document;
+    }
+
+    public void Dispose() => Dialog.Changed -= OnChanged;
+}

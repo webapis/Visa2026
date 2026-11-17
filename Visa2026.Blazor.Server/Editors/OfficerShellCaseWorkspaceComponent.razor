@@ -2354,6 +2354,29 @@
                     }
                 </div>
             </section>
+            @if (view.VisaPassportWait is { } passportWait)
+            {
+                <section class="cw-card cw-passport-wait">
+                    <header class="cw-passport-wait__head">
+                        <h2 class="cw-card__title">@Msg(passportWait.Names.Count > 0
+                            ? "ApplicationProfileInstance.Workspace.PassportWaitTitle"
+                            : "ApplicationProfileInstance.Workspace.PassportWaitDone")</h2>
+                        <span class="lv-visa-window lv-visa-window--@passportWait.Counter.Tone" title="@passportWait.Counter.Title">
+                            @passportWait.Counter.Days
+                            <small>@Msg("ApplicationProfileInstance.Workspace.PassportWaitDays")</small>
+                        </span>
+                    </header>
+                    @if (passportWait.Names.Count > 0)
+                    {
+                        <ul class="cw-passport-wait__names">
+                            @foreach (var name in passportWait.Names)
+                            {
+                                <li>@name</li>
+                            }
+                        </ul>
+                    }
+                </section>
+            }
             <section class="cw-card cw-result-actions">
                 <h2 class="cw-card__title">@Msg("ApplicationProfileInstance.Workspace.ApplicationResultActions")</h2>
                 <p class="cw-card__sub">@Msg("ApplicationProfileInstance.Workspace.IssuedSub")</p>
