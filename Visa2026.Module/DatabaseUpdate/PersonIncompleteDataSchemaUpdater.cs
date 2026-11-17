@@ -30,8 +30,14 @@ public sealed class PersonIncompleteDataSchemaUpdater : ModuleUpdater
     private void ApplySchemaSql()
     {
         if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+        {
             ExecuteNonQueryCommand(PersonIncompleteDataSchemaSql.EnsureColumnsPostgres, false);
+            ExecuteNonQueryCommand(PersonPendingItemSchemaSql.EnsureTablePostgres, false);
+        }
         else
+        {
             ExecuteNonQueryCommand(PersonIncompleteDataSchemaSql.EnsureColumnsSqlServer, false);
+            ExecuteNonQueryCommand(PersonPendingItemSchemaSql.EnsureTableSqlServer, false);
+        }
     }
 }
