@@ -190,7 +190,8 @@ public static class ApplicationProfileInstanceProgressColorTab
         IEnumerable<ApplicationProfileInstance> applications,
         string selectedKey,
         bool includeSearchTab = false,
-        int searchMatchCount = 0)
+        int searchMatchCount = 0,
+        ISet<Guid>? specialFollowUpIds = null)
     {
         var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var total = 0;
@@ -200,7 +201,10 @@ public static class ApplicationProfileInstanceProgressColorTab
             if (app == null)
                 continue;
             total++;
-            if (app.IsSpecialFollowUp)
+            var isFollowUp = specialFollowUpIds != null
+                ? specialFollowUpIds.Contains(app.ID)
+                : app.IsSpecialFollowUp;
+            if (isFollowUp)
                 followCount++;
             var key = ResolveBucketKey(app);
             counts[key] = counts.TryGetValue(key, out var n) ? n + 1 : 1;

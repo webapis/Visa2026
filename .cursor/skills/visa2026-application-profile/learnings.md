@@ -1,3 +1,10 @@
+## 2026-11-17 — Special follow-up counter stays 1 on empty grid
+
+- **Need**: After clearing all Special follow-up flags, the Ýörite gözegçilik tab still showed 1 while the grid was empty.
+- **Fix**: Tab count uses a live ObjectSpace query of flagged IDs (not stale list-entity properties). Color-tabs controller also rebuilds on `SpecialFollowUpChanged`.
+- **Officer**: Stop F5, rebuild, hard-refresh. With no cases flagged, the last tab shows 0 and an empty grid.
+- **Prevent**: Do not count `IsSpecialFollowUp` only from the list ObjectSpace snapshot after the flag was saved on another ObjectSpace.
+- **Verify**: `ApplicationProfileInstanceProgressColorTabTests` (live-ids override). Isolated `spf-fix-21`.
 ## 2026-11-17 — Green list row is always 100% complete
 
 - **Need**: Officers read a green Application Profile Instance row as finished, but Ýagdaý syny could still show a partial ring (for example 68%).

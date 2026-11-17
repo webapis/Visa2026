@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using Visa2026.Module.BusinessObjects;
@@ -150,6 +152,20 @@ public class ApplicationProfileInstanceProgressColorTabTests
             ApplicationProfileInstanceProgressColorTab.NormalizeSelection(
                 ApplicationProfileInstanceProgressColorTab.SpecialFollowUp,
                 tabs));
+    }
+
+    [Fact]
+    public void BuildTabs_special_follow_up_live_ids_override_stale_property()
+    {
+        var stale = AppWithAppearance("PROCESS_ISSUED");
+        stale.IsSpecialFollowUp = true;
+
+        var tabs = ApplicationProfileInstanceProgressColorTab.BuildTabs(
+            [stale],
+            selectedKey: ApplicationProfileInstanceProgressColorTab.SpecialFollowUp,
+            specialFollowUpIds: new HashSet<Guid>());
+
+        Assert.Equal(0, tabs[^1].Count);
     }
 
     [Fact]

@@ -11,7 +11,9 @@ using DevExpress.ExpressApp.SystemModule;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Visa2026.Blazor.Server.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
@@ -37,6 +39,7 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
     private bool storageLoaded;
     private bool suppressCollectionHandler;
     private RenderFragment<GridToolbarTemplateContext>? previousToolbarTemplate;
+    private IApplicationProfileInstanceDeletedNotifier? _followUpNotifier;
 
     public ApplicationProfileInstanceProgressColorTabsController()
     {
@@ -67,6 +70,9 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
         base.OnActivated();
         View.CollectionSource.CollectionChanged += CollectionSource_CollectionChanged;
         View.CollectionSource.CollectionReloaded += CollectionSource_CollectionReloaded;
+        _followUpNotifier = Application?.ServiceProvider?.GetService<IApplicationProfileInstanceDeletedNotifier>();
+        if (_followUpNotifier != null)
+            _followUpNotifier.SpecialFollowUpChanged += OnSpecialFollowUpChanged;
         _ = InitializeAsync();
     }
 
@@ -80,12 +86,39 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
     {
         View.CollectionSource.CollectionChanged -= CollectionSource_CollectionChanged;
         View.CollectionSource.CollectionReloaded -= CollectionSource_CollectionReloaded;
+        if (_followUpNotifier != null)
+        {
+            _followUpNotifier.SpecialFollowUpChanged -= OnSpecialFollowUpChanged;
+            _followUpNotifier = null;
+        }
+
         RestoreToolbar();
         storageLoaded = false;
         searchTabSticky = false;
         searchText = string.Empty;
         countCache = [];
         base.OnDeactivated();
+    }
+
+    private void OnSpecialFollowUpChanged(Guid instanceId, bool enabled)
+    {
+        if (View is not { IsDisposed: false } || ObjectSpace == null || ObjectSpace.IsDisposed)
+            return;
+
+        var local = ObjectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+        if (local != null)
+        {
+            try
+            {
+                ObjectSpace.ReloadObject(local);
+            }
+            catch
+            {
+                // Reload is best-effort; live follow-up query still corrects the tab count.
+            }
+        }
+
+        RebuildCountCacheAndApply(reloadToolbar: true);
     }
 
     private async Task InitializeAsync()
@@ -209,6 +242,22 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
             application.SetListViewHasApplicationResultRejection(withRejection.Contains(application.ID));
     }
 
+    /// <summary>
+    /// Special-follow-up is saved on a separate ObjectSpace; list entities can keep a stale flag.
+    /// Count from a live query so the tab clears when no row is flagged.
+    /// </summary>
+    private HashSet<Guid> ResolveLiveSpecialFollowUpIds()
+    {
+        if (ObjectSpace == null || ObjectSpace.IsDisposed || countCache.Count == 0)
+            return [];
+
+        var ids = countCache.Select(a => a.ID).ToList();
+        return ObjectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+            .Where(a => a.IsSpecialFollowUp && ids.Contains(a.ID))
+            .Select(a => a.ID)
+            .ToHashSet();
+    }
+
     private void RebuildTabsFromCache()
     {
         var includeSearch = searchTabSticky || !string.IsNullOrEmpty(searchText);
@@ -226,7 +275,8 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
             countCache,
             selectedKey,
             includeSearchTab: includeSearch,
-            searchMatchCount: searchCount);
+            searchMatchCount: searchCount,
+            specialFollowUpIds: ResolveLiveSpecialFollowUpIds());
 
         selectedKey = ApplicationProfileInstanceProgressColorTab.NormalizeSelection(selectedKey, tabs);
     }
