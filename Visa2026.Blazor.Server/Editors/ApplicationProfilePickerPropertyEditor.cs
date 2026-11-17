@@ -344,24 +344,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
         if (options == null || options.Count == 0)
         {
             // Direct load when draft field was skipped (route not stamped yet).
-            options = objectSpace.GetObjectsQuery<ApprovingMinistry>()
-                .AsEnumerable()
-                .Select(m =>
-                {
-                    var name = string.IsNullOrWhiteSpace(m.ShortNameTm) ? m.NameTm : m.ShortNameTm;
-                    name = name?.Trim() ?? string.Empty;
-                    return new ApplicationWorkspaceLookupOption
-                    {
-                        Id = m.ID,
-                        DisplayName = string.IsNullOrWhiteSpace(name) ? m.ID.ToString("D") : name,
-                        Detail = "ministry",
-                        SearchText = ApplicationProfileSubmitToOrganizationHelper.MinistryValuePrefix
-                            + m.ID.ToString("D"),
-                    };
-                })
-                .Where(o => !string.IsNullOrWhiteSpace(o.DisplayName))
-                .OrderBy(o => o.DisplayName, StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
+            options = ApplicationProfileSubmitToOrganizationHelper.ListLookupOptions(objectSpace);
         }
 
         model.SubmitToOrganizationOptions = options

@@ -97,4 +97,53 @@ public class ApplicationProfileSubmitToOrganizationTests
             ApplicationMigrationSubmission.TimelineLabel,
             ApplicationProfileSubmitToOrganizationHelper.TimelineSubmissionLabel(app));
     }
+
+    [Fact]
+    public void ListLookupOptions_NullObjectSpace_ReturnsEmpty()
+    {
+        Assert.Empty(ApplicationProfileSubmitToOrganizationHelper.ListLookupOptions(null!));
+    }
+
+    [Fact]
+    public void EncodeValue_UsesMinistryPrefixAndGenericMigrationKey()
+    {
+        var ministryId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var migrationId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var withMinistry = new ApplicationProfileInstance { SubmitToApprovingMinistryId = ministryId };
+        var withMigration = new ApplicationProfileInstance { SubmitToMigrationServiceId = migrationId };
+
+        Assert.Equal(
+            ApplicationProfileSubmitToOrganizationHelper.MinistryValuePrefix + ministryId.ToString("D"),
+            ApplicationProfileSubmitToOrganizationHelper.EncodeValue(withMinistry));
+        Assert.Equal(
+            ApplicationProfileSubmitToOrganizationHelper.MigrationGenericValue,
+            ApplicationProfileSubmitToOrganizationHelper.EncodeValue(withMigration));
+    }
+
+    [Fact]
+    public void FormatDestinationLabel_Migration_UsesStaticLocalizedName()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            SubmitToMigrationService = new MigrationService
+            {
+                NameTm = "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine",
+            },
+        };
+
+        Assert.Equal(
+            ApplicationProfileSubmitToOrganizationHelper.StaticMigrationServiceDisplayName(),
+            ApplicationProfileSubmitToOrganizationHelper.FormatDestinationLabel(app));
+    }
+
+    [Fact]
+    public void TryParseValue_AcceptsGenericMigrationToken()
+    {
+        Assert.True(ApplicationProfileSubmitToOrganizationHelper.TryParseValue(
+            ApplicationProfileSubmitToOrganizationHelper.MigrationGenericValue,
+            out var kind,
+            out var id));
+        Assert.Equal("migration", kind);
+        Assert.Equal(Guid.Empty, id);
+    }
 }

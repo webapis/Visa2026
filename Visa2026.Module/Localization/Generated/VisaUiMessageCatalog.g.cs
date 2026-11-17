@@ -4781,10 +4781,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfileInstance.Picker.SubmitToOrganizationSub"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Choose the ministry this letter is submitted to. Progress shows Submitted to that ministry.",
-            ["tr-TR"] = "Bu mektubun gönderileceği bakanlığı seçin. İlerleme o bakana gönderildi olarak görünür.",
-            ["tk-TM"] = "Bu hatyň iberiljek ministrligini saýlaň. Progress şol ministrlige iberildi diýip görkezýär.",
-            ["ru-RU"] = "Выберите министерство, куда подаётся письмо. В прогрессе будет «Отправлено в …».",
+            ["en-US"] = "Choose the ministry or migration service this letter is submitted to. Progress shows Submitted to that organization.",
+            ["tr-TR"] = "Bu mektubun gönderileceği bakanlık veya göç hizmetini seçin. İlerleme o kuruma gönderildi olarak görünür.",
+            ["tk-TM"] = "Bu hatyň iberiljek ministrligini ýa-da migrasiýa gullugyny saýlaň. Progress şol gurama iberildi diýip görkezýär.",
+            ["ru-RU"] = "Выберите министерство или службу миграции, куда подаётся письмо. В прогрессе будет «Отправлено в …».",
         },
         ["ApplicationProfileInstance.Picker.Tab.All"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

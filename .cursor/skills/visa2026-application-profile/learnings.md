@@ -1,3 +1,9 @@
+## 2026-11-17 — Submit-to Migration service is one localized card
+
+- **Need**: Migration services listed every department “müdirine” name; officers only need one Migration service choice.
+- **Fix**: Submit-to options expose a single migration card with localized “Migration service” / “Migrasiýa gullugy”. Destination key is `migration:any` for all migration offices. Labels use the static name, not department NameTm.
+- **Officer**: Stop F5, rebuild, hard-refresh. Under Migration services you see one card: Migrasiýa gullugy.
+- **Prevent**: Do not list MigrationService catalog rows as separate Submit-to cards.
 ## 2026-11-17 — Submit-to lists Migration services again
 
 - **Need**: Seretmezlik Submit to organization showed only ministries; officers also need Migrasiýa gullugy.

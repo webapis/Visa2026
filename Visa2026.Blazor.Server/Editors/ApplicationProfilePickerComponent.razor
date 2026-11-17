@@ -40,6 +40,25 @@
             }
         </div>
 
+        @if (SubmitToOrganizationOptions.Any(o => string.Equals(o.Kind, "migration", StringComparison.OrdinalIgnoreCase)))
+        {
+            <div class="ap-picker__section-head">
+                <h2 class="ap-picker__section-title">@Msg("ApplicationProfileInstance.Picker.SubmitToOrganizationMigrations")</h2>
+            </div>
+            <div class="ap-picker__versions">
+                @foreach (var option in SubmitToOrganizationOptions.Where(o => string.Equals(o.Kind, "migration", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var selected = string.Equals(option.Value, SelectedSubmitToOrganizationValue, StringComparison.OrdinalIgnoreCase);
+                    <div class="ap-picker__version @(selected ? "is-selected" : null)"
+                         role="button"
+                         tabindex="0"
+                         @onclick="() => SelectSubmitToOrganizationAndContinueAsync(option.Value)">
+                        <span class="ap-picker__version-title">@option.Name</span>
+                    </div>
+                }
+            </div>
+        }
+
         <div class="ap-picker__actions">
             @RenderAdvance()
             <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>

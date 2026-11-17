@@ -1805,27 +1805,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .ToList();
         }
 
-        /// <summary>Via Submit-to-organization: ApprovingMinistry only (no MigrationService).</summary>
+        /// <summary>Submit-to-organization: ApprovingMinistry and MigrationService cards.</summary>
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadSubmitToOrganizationOptions(
             IObjectSpace objectSpace) =>
-            objectSpace.GetObjectsQuery<ApprovingMinistry>()
-                .AsEnumerable()
-                .Select(m =>
-                {
-                    var name = string.IsNullOrWhiteSpace(m.ShortNameTm) ? m.NameTm : m.ShortNameTm;
-                    name = name?.Trim() ?? string.Empty;
-                    return new ApplicationWorkspaceLookupOption
-                    {
-                        Id = m.ID,
-                        DisplayName = string.IsNullOrWhiteSpace(name) ? m.ID.ToString("D") : name,
-                        Detail = "ministry",
-                        SearchText = ApplicationProfileSubmitToOrganizationHelper
-                            .MinistryValuePrefix + m.ID.ToString("D"),
-                    };
-                })
-                .Where(o => !string.IsNullOrWhiteSpace(o.DisplayName))
-                .OrderBy(o => o.DisplayName, StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
+            ApplicationProfileSubmitToOrganizationHelper.ListLookupOptions(objectSpace);
 
         private static IReadOnlyList<SiteCatalogOption> LoadLodgings(IObjectSpace objectSpace) =>
             LoadSites(

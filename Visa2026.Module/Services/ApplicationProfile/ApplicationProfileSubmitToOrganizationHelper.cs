@@ -1,25 +1,35 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
-
+using Visa2026.Module.Localization;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Destination for profiles with <see cref="ApplicationProfile.RequireSubmitToOrganization"/>:
-/// one ApprovingMinistry or one MigrationService (not Approval legs).
+/// one ApprovingMinistry or Migration service (not Approval legs).
 /// </summary>
 public static class ApplicationProfileSubmitToOrganizationHelper
 {
     public const string MinistryValuePrefix = "ministry:";
     public const string MigrationValuePrefix = "migration:";
 
+    /// <summary>Single Submit-to card for any migration office (not per-department rows).</summary>
+    public const string MigrationGenericValue = MigrationValuePrefix + "any";
+
+    private const string MigrationServiceDisplayKey = "ApplicationProfileInstance.Workspace.MigrationService";
+
     public static bool IsRequired(ApplicationProfile? profile) =>
         profile?.RequireSubmitToOrganization == true;
 
     public static bool IsRequired(ApplicationProfileInstance? application) =>
         IsRequired(application?.ApplicationProfile);
+
+    public static string StaticMigrationServiceDisplayName() =>
+        VisaUiMessages.Get(MigrationServiceDisplayKey);
 
     public static string? FormatDestinationLabel(ApplicationProfileInstance? application)
     {
@@ -35,7 +45,11 @@ public static class ApplicationProfileSubmitToOrganizationHelper
             return ministry.NameTm?.Trim();
         }
 
-        return application.SubmitToMigrationService?.NameTm?.Trim();
+        if (application.SubmitToMigrationService != null
+            || application.SubmitToMigrationServiceId is Guid mid && mid != Guid.Empty)
+            return StaticMigrationServiceDisplayName();
+
+        return null;
     }
 
     public static string TimelineSubmissionLabel(ApplicationProfileInstance? application)
@@ -51,12 +65,15 @@ public static class ApplicationProfileSubmitToOrganizationHelper
     {
         if (application?.SubmitToApprovingMinistryId is Guid ministryId && ministryId != Guid.Empty)
             return MinistryValuePrefix + ministryId.ToString("D");
-        if (application?.SubmitToMigrationServiceId is Guid migrationId && migrationId != Guid.Empty)
-            return MigrationValuePrefix + migrationId.ToString("D");
         if (application?.SubmitToApprovingMinistry?.ID is Guid mid && mid != Guid.Empty)
             return MinistryValuePrefix + mid.ToString("D");
+
+        // Any migration office shares one destination key (one localized card).
+        if (application?.SubmitToMigrationServiceId is Guid migrationId && migrationId != Guid.Empty)
+            return MigrationGenericValue;
         if (application?.SubmitToMigrationService?.ID is Guid sid && sid != Guid.Empty)
-            return MigrationValuePrefix + sid.ToString("D");
+            return MigrationGenericValue;
+
         return string.Empty;
     }
 
@@ -72,6 +89,14 @@ public static class ApplicationProfileSubmitToOrganizationHelper
             && Guid.TryParse(trimmed[MinistryValuePrefix.Length..], out id))
         {
             kind = "ministry";
+            return true;
+        }
+
+        if (string.Equals(trimmed, MigrationGenericValue, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, MigrationValuePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            kind = "migration";
+            id = Guid.Empty;
             return true;
         }
 
@@ -118,7 +143,7 @@ public static class ApplicationProfileSubmitToOrganizationHelper
             return true;
         }
 
-        if (!TryParseValue(value, out var kind, out var id) || id == Guid.Empty)
+        if (!TryParseValue(value, out var kind, out var id))
         {
             error = "Select a ministry or migration service.";
             return false;
@@ -127,6 +152,12 @@ public static class ApplicationProfileSubmitToOrganizationHelper
         if (kind == "ministry"
             || (kind == "unknown" && objectSpace.GetObjectByKey<ApprovingMinistry>(id) != null))
         {
+            if (id == Guid.Empty)
+            {
+                error = "Select a ministry or migration service.";
+                return false;
+            }
+
             var ministry = objectSpace.GetObjectByKey<ApprovingMinistry>(id);
             if (ministry == null)
             {
@@ -146,16 +177,17 @@ public static class ApplicationProfileSubmitToOrganizationHelper
             return true;
         }
 
-        var migration = objectSpace.GetObjectByKey<MigrationService>(id);
+        var migration = id != Guid.Empty
+            ? objectSpace.GetObjectByKey<MigrationService>(id)
+            : ResolveCanonicalMigrationService(objectSpace);
         if (migration == null)
         {
             error = "Migration service not found.";
             return false;
         }
 
-        var migrationValue = MigrationValuePrefix + migration.ID.ToString("D");
         if (!ApplicationProfileInstanceSeretmezlikRosterHelper.TryValidateSubmitToChange(
-                objectSpace, application, migrationValue, out error))
+                objectSpace, application, MigrationGenericValue, out error))
             return false;
 
         application.SubmitToMigrationService = migration;
@@ -165,6 +197,51 @@ public static class ApplicationProfileSubmitToOrganizationHelper
         return true;
     }
 
+    /// <summary>Ministry cards plus one localized Migration service card.</summary>
+    public static IReadOnlyList<ApplicationWorkspaceLookupOption> ListLookupOptions(IObjectSpace objectSpace)
+    {
+        if (objectSpace == null)
+            return Array.Empty<ApplicationWorkspaceLookupOption>();
+
+        var ministries = objectSpace.GetObjectsQuery<ApprovingMinistry>()
+            .AsEnumerable()
+            .Select(m =>
+            {
+                var name = string.IsNullOrWhiteSpace(m.ShortNameTm) ? m.NameTm : m.ShortNameTm;
+                name = name?.Trim() ?? string.Empty;
+                return new ApplicationWorkspaceLookupOption
+                {
+                    Id = m.ID,
+                    DisplayName = string.IsNullOrWhiteSpace(name) ? m.ID.ToString("D") : name,
+                    Detail = "ministry",
+                    SearchText = MinistryValuePrefix + m.ID.ToString("D"),
+                };
+            })
+            .Where(o => !string.IsNullOrWhiteSpace(o.DisplayName))
+            .OrderBy(o => o.DisplayName, StringComparer.CurrentCultureIgnoreCase);
+
+        var options = ministries.ToList();
+        var canonical = ResolveCanonicalMigrationService(objectSpace);
+        if (canonical != null)
+        {
+            options.Add(new ApplicationWorkspaceLookupOption
+            {
+                Id = canonical.ID,
+                DisplayName = StaticMigrationServiceDisplayName(),
+                Detail = "migration",
+                SearchText = MigrationGenericValue,
+            });
+        }
+
+        return options;
+    }
+
     public static bool HasDestination(ApplicationProfileInstance? application) =>
         !string.IsNullOrWhiteSpace(FormatDestinationLabel(application));
+
+    private static MigrationService? ResolveCanonicalMigrationService(IObjectSpace objectSpace) =>
+        objectSpace.GetObjectsQuery<MigrationService>()
+            .AsEnumerable()
+            .OrderBy(m => m.NameTm ?? m.Code ?? string.Empty, StringComparer.CurrentCultureIgnoreCase)
+            .FirstOrDefault();
 }
