@@ -193,6 +193,9 @@ public static class ApplicationProfileInstanceStatePreview
             sections.Add(new Section(plan.Id, plan.NestBorderZone, plan.NestLocations, rows, groups, notIssued));
         }
 
+        // Same clock as the list and Application result. Null until every work permit is in.
+        var visaWindow = VisaIssuePassportWait.TryLoad(objectSpace, application);
+
         return new Sheet(
             Number: DisplayNumber(application),
             ProfileName: application.ApplicationProfile?.Name ?? string.Empty,
@@ -206,7 +209,8 @@ public static class ApplicationProfileInstanceStatePreview
             CompletionPercent: application.CompletionPercentage,
             Steps: application.ListViewProgressSteps,
             Seretmezlik: SeretmezlikRows(objectSpace, application.ID, excluded, people),
-            Sections: sections);
+            Sections: sections,
+            VisaPassportWait: visaWindow);
     }
 
     public sealed record Sheet(
@@ -222,7 +226,8 @@ public static class ApplicationProfileInstanceStatePreview
         int CompletionPercent,
         IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step> Steps,
         IReadOnlyList<SeretmezlikLine> Seretmezlik,
-        IReadOnlyList<Section> Sections);
+        IReadOnlyList<Section> Sections,
+        VisaIssuePassportWait? VisaPassportWait = null);
 
     public sealed record Section(
         SectionId Id,

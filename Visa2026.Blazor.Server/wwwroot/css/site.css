@@ -6097,6 +6097,14 @@ button.state-preview-doc {
     margin: 4px 0 8px;
 }
 
+.state-preview-waiting__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-right: 6px;
+}
+
 .state-preview-waiting__title {
     padding: 2px 6px;
     font-size: 11px;
@@ -6104,6 +6112,10 @@ button.state-preview-doc {
     letter-spacing: .06em;
     text-transform: uppercase;
     color: #57534e;
+}
+
+.state-preview-waiting__head .lv-visa-window {
+    flex: 0 0 auto;
 }
 
 .state-preview-waiting ul {

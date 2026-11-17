@@ -1,3 +1,17 @@
+## 2026-11-17 — Green list row is always 100% complete
+
+- **Need**: Officers read a green Application Profile Instance row as finished, but Ýagdaý syny could still show a partial ring (for example 68%).
+- **Fix**: Completion percentage is 100 whenever the same green rule as the list is true (Via-ministry issuance gate, including extend_visa_wp day 0, stored Issued, or a finished hand-in route). The formula path is unchanged when the row is not green.
+- **Officer**: Stop F5, rebuild, hard-refresh. A green row’s Ýagdaý syny ring is 100%.
+- **Prevent**: Do not compute a partial ring for a green Via-ministry row. Do not change the day-0 green gate itself.
+- **Verify**: ApplicationProfileInstanceCompletionPercentageTests 15 passed. The sheet was not opened in the browser.
+## 2026-11-17 — Visa issue counter on Ýagdaý syny Entäk berilmedi
+
+- **Need**: Wiza we Iş Rugsatnamasyny Uzaltmak showed Entäk berilmedi · Pasportyna garaşylýar on the sheet, but not the day counter from the list.
+- **Fix**: The sheet loads the same VisaIssuePassportWait clock as the list. The chip sits on the visa waiting heading while passports are waited, and under the issued-visa table as Wizalar berildi when every visa is in. Only that profile, and only after every work permit is in.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Ýagdaý syny for an extend_visa_wp case with all work permits issued. The visa waiting heading shows the day chip.
+- **Prevent**: Do not invent a second clock for the sheet. Do not put the chip on invitation or work-permit waiting lists.
+- **Verify**: `ApplicationProfileInstanceStatePreviewTests` 34 passed. Blazor host build succeeded. The sheet was not opened in the browser.
 ## 2026-11-17 — Submit-to Migration service is one localized card
 
 - **Need**: Migration services listed every department “müdirine” name; officers only need one Migration service choice.

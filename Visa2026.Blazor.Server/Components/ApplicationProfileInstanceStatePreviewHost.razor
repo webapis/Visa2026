@@ -234,13 +234,18 @@
                                     }
                                 }
                             }
-                            else if (section.Rows.Count == 0 && (section.NotIssuedNames == null || section.NotIssuedNames.Count == 0))
+                            else if (section.Rows.Count == 0
+                                && (section.NotIssuedNames == null || section.NotIssuedNames.Count == 0)
+                                && !ShowVisaWindow(section))
                             {
                                 <p class="state-preview-empty">—</p>
                             }
                             else
                             {
                                 var waiting = section.NotIssuedNames ?? Array.Empty<string>();
+                                var visaWindow = section.Id == ApplicationProfileInstanceStatePreview.SectionId.Visa
+                                    ? _sheet?.VisaPassportWait
+                                    : null;
                                 @if (section.Rows.Count > 0)
                                 {
                                 <table class="state-preview-table">
@@ -277,13 +282,34 @@
                                 @if (waiting.Count > 0)
                                 {
                                     <div class="state-preview-waiting">
-                                        <div class="state-preview-waiting__title">@Msg(WaitingTitle(section.Id))</div>
+                                        <div class="state-preview-waiting__head">
+                                            <div class="state-preview-waiting__title">@Msg(WaitingTitle(section.Id))</div>
+                                            @if (visaWindow != null)
+                                            {
+                                                <span class="lv-visa-window lv-visa-window--@visaWindow.Counter.Tone" title="@visaWindow.Counter.Title">
+                                                    @visaWindow.Counter.Days
+                                                    <small>@Msg("ApplicationProfileInstance.Workspace.PassportWaitDays")</small>
+                                                </span>
+                                            }
+                                        </div>
                                         <ul>
                                             @foreach (var name in waiting)
                                             {
                                                 <li>@name</li>
                                             }
                                         </ul>
+                                    </div>
+                                }
+                                else if (visaWindow != null)
+                                {
+                                    <div class="state-preview-waiting">
+                                        <div class="state-preview-waiting__head">
+                                            <div class="state-preview-waiting__title">@Msg("ApplicationProfileInstance.Workspace.PassportWaitDone")</div>
+                                            <span class="lv-visa-window lv-visa-window--@visaWindow.Counter.Tone" title="@visaWindow.Counter.Title">
+                                                @visaWindow.Counter.Days
+                                                <small>@Msg("ApplicationProfileInstance.Workspace.PassportWaitDays")</small>
+                                            </span>
+                                        </div>
                                     </div>
                                 }
                             }
@@ -468,6 +494,10 @@
         id == ApplicationProfileInstanceStatePreview.SectionId.Visa
             ? "ApplicationProfileInstance.StatePreview.VisaNotIssued"
             : "ApplicationProfileInstance.List.Mark.NotIssuedTitle";
+
+    private bool ShowVisaWindow(ApplicationProfileInstanceStatePreview.Section section) =>
+        section.Id == ApplicationProfileInstanceStatePreview.SectionId.Visa
+        && _sheet?.VisaPassportWait != null;
 
     private static string SectionTitle(ApplicationProfileInstanceStatePreview.SectionId id) => id switch
     {

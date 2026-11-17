@@ -1,6 +1,6 @@
 # Ýagdaý syny — visa issue counter on Entäk berilmedi
 
-Proposed. Not implemented. Image text can be misread; this file is the source of truth.
+Implemented (2026-11-17). Image text can be misread; this file is the source of truth.
 
 | File | What it shows |
 |------|----------------|

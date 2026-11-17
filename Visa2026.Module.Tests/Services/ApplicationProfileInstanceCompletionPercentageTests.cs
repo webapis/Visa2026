@@ -292,4 +292,61 @@ public class ApplicationProfileInstanceCompletionPercentageTests
 
         Assert.Equal(27, application.CompletionPercentage); // round(2/3 * 40), gate closed
     }
+
+    [Fact]
+    public void Green_row_is_always_100_percent()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+                ProduceInvitation = false,
+                ProduceVisa = true,
+                ProduceWorkPermit = false,
+            },
+        };
+        application.SetListViewProgressSteps(new[]
+        {
+            Step("office", "done"),
+            Step("migration-submitted", "current"),
+            Step("migration", "pending"),
+        });
+        application.SetListViewResultCoverage(new[]
+        {
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, 2, 2),
+        });
+
+        Assert.True(ApplicationProfileInstanceCompletionPercentage.IsProcessComplete(application));
+        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(application));
+    }
+
+    [Fact]
+    public void Extend_visa_wp_day_zero_green_is_100_percent_even_when_visas_missing()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            LatestPrimaryStateCode = ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfile = new ApplicationProfile
+            {
+                Code = VisaIssueWindowCalculator.ProfileCode,
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.ViaMinistries,
+                ProduceInvitation = false,
+                ProduceVisa = true,
+                ProduceWorkPermit = true,
+            },
+        };
+        application.SetListViewResultCoverage(new[]
+        {
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.WorkPermit, 2, 2),
+            Chip(ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, 0, 2),
+        });
+        application.SetListViewVisaIssueWindow(new VisaIssueWindowCalculator.Badge(0, "warn", true, "0"));
+
+        Assert.True(ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(
+            application,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.Equal(100, ApplicationProfileInstanceCompletionPercentage.Calculate(application));
+    }
 }

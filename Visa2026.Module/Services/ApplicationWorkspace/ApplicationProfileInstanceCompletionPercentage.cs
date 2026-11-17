@@ -6,11 +6,10 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
 /// Process completion 0–100 for an instance ListView.
-/// Direct routes that end at hand-in (Ofisde taýýarlyk, then Migrasiýa gullugyna tabşyryldy)
-/// have no ministry legs and no visa / work permit / invitation result, so the two steps are the whole score.
-/// Routes that continue to the CO / AS step use Phase 1 (max 40) for the real steps on that track.
-/// That migration step counts once the CO / AS number is received, above "AS (CO) belgisine garaşylýar".
-/// Phase 2 issued-document coverage (max 60) starts only after that number.
+/// A green list row is always 100%: the same Via-ministry issuance gate (and finished Issued /
+/// hand-in routes) that paints the row green.
+/// Otherwise: Direct routes that end at hand-in score the two steps alone.
+/// Routes that continue to the CO / AS step use Phase 1 (max 40) then Phase 2 coverage (max 60).
 /// Rejection chips are excluded from Phase 2. Empty roster (0/0) earns no Phase 2 points.
 /// </summary>
 public static class ApplicationProfileInstanceCompletionPercentage
@@ -34,11 +33,51 @@ public static class ApplicationProfileInstanceCompletionPercentage
         return ApplicationProcessNumberHelper.HasProcessStartedStep(application);
     }
 
-    public static int Calculate(ApplicationProfileInstance? application) =>
-        Calculate(
-            application?.ListViewProgressSteps,
-            application?.ListViewResultCoverageChips,
+    public static int Calculate(ApplicationProfileInstance? application)
+    {
+        if (application == null)
+            return 0;
+
+        if (IsProcessComplete(application))
+            return 100;
+
+        return Calculate(
+            application.ListViewProgressSteps,
+            application.ListViewResultCoverageChips,
             HasPassedAsGate(application));
+    }
+
+    /// <summary>
+    /// Same rule as a green list row: Via-ministry issuance complete, stored Issued,
+    /// or a finished hand-in route (for example Seretmezlik).
+    /// </summary>
+    public static bool IsProcessComplete(ApplicationProfileInstance? application)
+    {
+        if (application == null)
+            return false;
+
+        var primary = PrimaryStateCode(application);
+        if (string.Equals(
+                primary,
+                ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(application, primary))
+            return true;
+
+        return ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(primary, application)
+            && ApplicationMigrationSubmission.IsState(primary);
+    }
+
+    private static string PrimaryStateCode(ApplicationProfileInstance application)
+    {
+        if (!string.IsNullOrWhiteSpace(application.LatestPrimaryStateCode))
+            return application.LatestPrimaryStateCode.Trim();
+
+        var latest = ApplicationLatestProgressSyncHelper.ResolveLatestForDisplay(application);
+        return ApplicationProfileInstanceProgressPrimaryStateCodeResolver.ResolveFromLatest(latest) ?? string.Empty;
+    }
 
     public static int Calculate(
         IReadOnlyList<ApplicationWorkspaceListProgressSteps.Step>? steps,

@@ -131,6 +131,33 @@ public class ApplicationProfileInstanceStatePreviewTests
     }
 
     [Fact]
+    public void Sheet_keeps_the_visa_issue_window_for_the_waiting_heading()
+    {
+        var counter = new VisaIssueWindowCalculator.Badge(32, "ok", false, "title");
+        var wait = new VisaIssuePassportWait(counter, new[] { "Caner Faki" });
+        var sheet = new ApplicationProfileInstanceStatePreview.Sheet(
+            Number: "8/-1",
+            ProfileName: "extend",
+            ProcessNumber: "",
+            Date: "01.01.2026",
+            VisaType: "",
+            VisaPeriod: "",
+            Project: "",
+            Urgency: "",
+            PersonCount: 1,
+            CompletionPercent: 0,
+            Steps: Array.Empty<ApplicationWorkspaceListProgressSteps.Step>(),
+            Seretmezlik: Array.Empty<ApplicationProfileInstanceStatePreview.SeretmezlikLine>(),
+            Sections: Array.Empty<ApplicationProfileInstanceStatePreview.Section>(),
+            VisaPassportWait: wait);
+
+        Assert.NotNull(sheet.VisaPassportWait);
+        Assert.Equal(32, sheet.VisaPassportWait!.Counter.Days);
+        Assert.Equal("ok", sheet.VisaPassportWait.Counter.Tone);
+        Assert.Equal(new[] { "Caner Faki" }, sheet.VisaPassportWait.Names);
+    }
+
+    [Fact]
     public void Issued_visas_are_listed_apart_from_visas_not_issued_yet()
     {
         var visa = Guid.NewGuid();
