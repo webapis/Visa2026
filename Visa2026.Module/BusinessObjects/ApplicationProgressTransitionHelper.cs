@@ -409,6 +409,12 @@ public static class ApplicationProfileInstanceProgressTransitionHelper
                     // Legacy mid-flight: cases already at PROCESS_STARTED can still finish.
                     edges.Add(new ProgressTransition(processStarted, processIssued));
                 }
+                else
+                {
+                    // Outcomes hidden (e.g. change_invitation): hand-in → PROCESS_STARTED with CO,
+                    // same as via-ministry when Issued/Rejected/Cancelled steps are off.
+                    edges.Add(new ProgressTransition(submittedToMigration, processStarted));
+                }
 
                 if (includeRejected)
                     edges.Add(new ProgressTransition(processStarted, Step(ApplicationProfileInstanceProgressStateCodes.ProcessRejected)));

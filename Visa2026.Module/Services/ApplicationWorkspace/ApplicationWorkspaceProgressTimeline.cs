@@ -233,23 +233,25 @@ internal static class ApplicationWorkspaceProgressTimeline
             var migrationStatusLabel = isDirect
                 ? ResolveDirectMigrationStatusLabel(migrationRow, migrationState)
                 : ResolveMigrationStatusLabel(migrationRow, migrationState);
-            // Direct Issuance/Change after hand-in: auto Issued (no Result).
-            // Via ministry when Issued/Rejected/Cancelled steps are hidden: CO number + date only (no Netije).
+            // Direct Issuance/Change with Issued visible: hand-in → PROCESS_ISSUED (CO on Advance).
+            // Via ministry or Direct with outcomes hidden: CO number + date → PROCESS_STARTED (no Netije).
+            var hideOutcomeResults = !showIssued && !showRejected && !showCancelled;
+            var atCoRecording = ApplicationMigrationSubmission.IsState(slotCode)
+                || ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(slotCode);
             var directFinalAdvance = isDirect
+                && !hideOutcomeResults
                 && migrationCurrent
                 && canAdvance
                 && ApplicationMigrationSubmission.IsState(slotCode);
-            var viaCoAdvance = !isDirect
-                && migrationCurrent
+            var coOnlyAdvance = migrationCurrent
                 && canAdvance
-                && (
-                    ApplicationMigrationSubmission.IsState(slotCode)
-                    || ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(slotCode));
-            var hideOutcomeResults = !showIssued && !showRejected && !showCancelled;
-            var suppressResult = directFinalAdvance || (viaCoAdvance && hideOutcomeResults);
-            var requireCoNumber = directFinalAdvance || viaCoAdvance;
+                && hideOutcomeResults
+                && atCoRecording;
+            var suppressResult = directFinalAdvance || coOnlyAdvance;
+            var requireCoNumber = directFinalAdvance || coOnlyAdvance
+                || (!isDirect && migrationCurrent && canAdvance && atCoRecording);
             var migrationAdvance = migrationCurrent
-                ? (suppressResult && viaCoAdvance
+                ? (coOnlyAdvance
                     ? FilterViaCoAdvanceOptions(advanceOptions)
                     : advanceOptions)
                 : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();

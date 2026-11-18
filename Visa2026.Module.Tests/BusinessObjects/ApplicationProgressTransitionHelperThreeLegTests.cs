@@ -130,6 +130,33 @@ public class ApplicationProfileInstanceProgressTransitionHelperThreeLegTests
     }
 
     [Fact]
+    public void DirectChange_HiddenOutcomeSteps_HandInGoesToProcessStarted()
+    {
+        var app = BuildDirectApplication(ApplicationProfileActionFamily.Change);
+        app.ApplicationProfile.ProduceInvitation = true;
+        app.ApplicationProfile.ProduceVisa = true;
+        app.ApplicationProfile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            app.ApplicationProfile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.AsNumber, true),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Rejected, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Cancelled, false),
+            ]);
+
+        Assert.True(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted));
+        Assert.False(IsAllowed(app,
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued));
+    }
+
+    [Fact]
     public void DirectMigration_Registration_SubmittedIsTerminal()
     {
         var app = BuildDirectApplication(ApplicationProfileActionFamily.Registration);

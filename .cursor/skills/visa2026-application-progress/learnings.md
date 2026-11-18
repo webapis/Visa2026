@@ -6,6 +6,16 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-18 — Direct Change CO step hid the CO Number field
+
+- **Symptom**: **Çakylygy üýtgetmek** showed **CO belgisi alyndy** but no **CO belgesi** input. Via-ministry templates already recorded CO via `PROCESS_STARTED`.
+- **Cause**: Change profiles hide Issued/Rejected/Cancelled in `ProgressSteps`. Direct transitions then had no edge from hand-in except Cancelled, so Advance never selected `PROCESS_STARTED`/`PROCESS_ISSUED` and `ShowProcessNumberOnAdvance` stayed false.
+- **Fix**: When Direct Issuance/Change has outcome steps hidden, allow hand-in → `PROCESS_STARTED` and treat that node like via-ministry CO-only Advance (require CO, no Result picker). Issued-visible Direct Change still goes hand-in → `PROCESS_ISSUED`.
+- **Officer**: Rebuild Module, hard-refresh. On Change Invitation after hand-in, CO step shows **CO belgesi**; Advance saves the number.
+- **Prevent**: Do not leave Direct Change with Mig on and Issued off without a `PROCESS_STARTED` edge.
+- **Test**: `Build_DirectChange_HiddenOutcomeSteps_RequiresCoNumber_ViaProcessStarted`, `DirectChange_HiddenOutcomeSteps_HandInGoesToProcessStarted` passed.
+- **Cross-skill**: visa2026-application-profile
+
 ### 2026-11-17 — Seretmezlik hand-in locked when Office is hidden
 
 - **Symptom**: Seretmezlik Progress showed only **Migrasiýa gullugyna tabşyryldy** as **Garaşylýar** (locked), subtitle still **Ofisde taýýarlyk**, and the standing Advance hint said terminal even though the case had no progress yet.

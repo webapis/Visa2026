@@ -1025,6 +1025,80 @@ public class ApplicationWorkspaceProgressTimelineTests
     }
 
     [Fact]
+    public void Build_DirectChange_HiddenOutcomeSteps_RequiresCoNumber_ViaProcessStarted()
+    {
+        // change_invitation-style: Mig on, Issued/Rejected/Cancelled off.
+        var profile = new ApplicationProfile
+        {
+            ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+            ActionFamily = ApplicationProfileActionFamily.Change,
+            ProduceInvitation = true,
+            ProduceVisa = true,
+            MigrationSlaDays = 2,
+        };
+        profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
+            profile,
+            [
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Office, true),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Ministry, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Submission, true),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.AsNumber, true),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Issued, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Rejected, false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Cancelled, false),
+            ]);
+
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            ApplicationDate = DateTime.Today,
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+        };
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 1,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressLegCodes.ReviewStarted(1) },
+        });
+        application.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = application,
+            Order = 2,
+            Date = DateTime.Today,
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration },
+        });
+
+        var steps = ApplicationWorkspaceProgressTimeline.Build(application, profile, default, objectSpace: null);
+        var migration = Assert.Single(steps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+
+        Assert.Equal("current", migration.State);
+        Assert.True(migration.CanAdvance);
+        Assert.Empty(migration.ResultOptions);
+        Assert.True(migration.RequireProcessNumberOnAdvance);
+        Assert.Contains(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessStarted);
+        Assert.DoesNotContain(
+            migration.AdvanceOptions,
+            o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
+        Assert.Contains(
+            ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
+            ApplicationProfileInstanceProgressTransitionHelper.GetAllowedNextStateCodes(
+                application,
+                application.ProgressHistory.Last()));
+    }
+
+    [Fact]
     public void Build_Issued_KeepsDocumentCopiesStoredWhileWaitingForTheProcessNumber()
     {
         var profile = ThreeLegProfile();
