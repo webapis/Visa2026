@@ -202,27 +202,36 @@ internal static class ApplicationWorkspaceProgressTimeline
         }
 
         // Direct Registration/Cancellation/Business trip ends at hand-in — no AS/Issued node.
-        // A hidden last-step result (Issued, Rejected, Cancelled) drops the node once that result is saved.
+        // Via ministry / Direct Change: keep the CO/AS node when Issued/Rejected/Cancelled
+        // timeline steps are hidden — terminal PROCESS_ISSUED must still show the CO number.
         if (!directEndsAtSubmission && showAsNumber)
         {
             var migrationRow = LatestMigrationRow(history);
-            if (!IsHiddenSavedLastStep(migrationRow?.State?.Code, showIssued, showRejected, showCancelled))
-            {
             var migrationState = ResolveMigrationSlotState(
                 atOffice,
                 latestOnMigration,
                 slotCode,
                 submissionRecorded,
                 cancelledOnCurrent);
-            // Via ministry: AS number received is the last step. Once the number is saved, close it.
+            // Via ministry: AS number received is the last visible step. Close once CO is saved
+            // (PROCESS_STARTED) or a terminal migration outcome exists while outcome steps stay hidden.
             if (string.Equals(migrationState, "current", StringComparison.OrdinalIgnoreCase)
                 && !showIssued
                 && !showRejected
                 && !showCancelled
-                && string.Equals(
-                    migrationRow?.State?.Code,
-                    ApplicationProfileInstanceProgressStateCodes.ProcessStarted,
-                    StringComparison.OrdinalIgnoreCase))
+                && (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(migrationRow?.State?.Code)
+                    || string.Equals(
+                        migrationRow?.State?.Code,
+                        ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+                        StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(
+                        migrationRow?.State?.Code,
+                        ApplicationProfileInstanceProgressStateCodes.ProcessRejected,
+                        StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(
+                        migrationRow?.State?.Code,
+                        ApplicationProfileInstanceProgressStateCodes.ProcessCancelled,
+                        StringComparison.OrdinalIgnoreCase)))
                 migrationState = "done";
             var migrationCurrent = migrationState == "current";
             if (cancelledOnCurrent && migrationCurrent)
@@ -273,7 +282,6 @@ internal static class ApplicationWorkspaceProgressTimeline
                 requireProcessNumberOnAdvance: requireCoNumber,
                 showOptionalOutcomeFiles: requireCoNumber,
                 allowProcessNumberCorrection: allowProcessNumberCorrection));
-            }
         }
 
         // Cancellation templates: last step is Işlendi. Date and Advance, no AS number.
@@ -309,21 +317,6 @@ internal static class ApplicationWorkspaceProgressTimeline
 
         ApplyDateBounds(steps);
         return steps;
-    }
-
-    private static bool IsHiddenSavedLastStep(
-        string? stateCode,
-        bool showIssued,
-        bool showRejected,
-        bool showCancelled)
-    {
-        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
-            return !showIssued;
-        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase))
-            return !showRejected;
-        if (string.Equals(stateCode, ApplicationProfileInstanceProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
-            return !showCancelled;
-        return false;
     }
 
     /// <summary>

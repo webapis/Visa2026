@@ -887,7 +887,7 @@ public class ApplicationWorkspaceProgressTimelineTests
     }
 
     [Fact]
-    public void Build_ViaMinistry_HiddenIssued_KeepsAsNumberUntilThatResultIsSaved()
+    public void Build_ViaMinistry_HiddenIssued_KeepsAsNumberAfterProcessIssued()
     {
         var profile = ThreeLegProfile();
         profile.ProgressStepVisibility = ApplicationProfileProgressStepVisibility.Normalize(
@@ -895,6 +895,12 @@ public class ApplicationWorkspaceProgressTimelineTests
             [
                 new ApplicationProfileProgressStepVisibility.Step(
                     ApplicationProfileProgressStepVisibility.Issued,
+                    false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Rejected,
+                    false),
+                new ApplicationProfileProgressStepVisibility.Step(
+                    ApplicationProfileProgressStepVisibility.Cancelled,
                     false),
             ]);
 
@@ -920,27 +926,43 @@ public class ApplicationWorkspaceProgressTimelineTests
         Assert.Equal("ok", migration.OutcomeKind);
         Assert.False(migration.CanAdvance);
         Assert.Equal("Processing", migration.CurrentStateLabel);
+        Assert.Equal("7/4047", migration.ProcessNumber);
         Assert.DoesNotContain(
             migration.AdvanceOptions,
             o => o.StateCode == ApplicationProfileInstanceProgressStateCodes.ProcessIssued);
 
+        // Green / Resmileşdirildi (PROCESS_ISSUED) with Issued step hidden must still show CO/AS.
         var issued = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
             ApplicationDate = DateTime.Today,
             ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>(),
+            ProcessNumber = "CO0236783",
         };
         issued.ProgressHistory.Add(new ApplicationProfileInstanceProgress
         {
             ID = Guid.NewGuid(),
             ApplicationProfileInstance = issued,
             Order = 1,
+            Date = DateTime.Today.AddDays(-7),
+            State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessStarted },
+            ProcessNumber = "CO0236783",
+        });
+        issued.ProgressHistory.Add(new ApplicationProfileInstanceProgress
+        {
+            ID = Guid.NewGuid(),
+            ApplicationProfileInstance = issued,
+            Order = 2,
             Date = DateTime.Today,
             State = new ApplicationState { Code = ApplicationProfileInstanceProgressStateCodes.ProcessIssued },
         });
 
         var issuedSteps = ApplicationWorkspaceProgressTimeline.Build(issued, profile, default, objectSpace: null);
-        Assert.DoesNotContain(issuedSteps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+        var issuedMigration = Assert.Single(issuedSteps, s => s.Key == ApplicationWorkspaceProgressTimeline.MigrationKey);
+        Assert.Equal("done", issuedMigration.State);
+        Assert.Equal(ApplicationWorkspaceProgressTimeline.AsNumberReceivedLabel, issuedMigration.Label);
+        Assert.Equal("CO0236783", issuedMigration.ProcessNumber);
+        Assert.False(issuedMigration.CanAdvance);
         Assert.Contains(issuedSteps, s => s.Key == ApplicationMigrationSubmission.TimelineKey);
     }
 

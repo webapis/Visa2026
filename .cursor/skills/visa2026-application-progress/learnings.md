@@ -6,6 +6,17 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-11-18 — Invitation CO step vanished on green (Resmileşdirildi)
+
+- **Symptom**: Via-ministry **Çakylyk Almak** showed **CO belgisi alyndy** while on that step, but after deploy the CO/AS node disappeared for green **Resmileşdirildi** cases (and looked missing once `PROCESS_ISSUED` was in history).
+- **Cause**: `ProgressSteps` hide Issued/Rejected/Cancelled for via-ministry issuance. `IsHiddenSavedLastStep` then dropped the entire migration/CO node whenever latest migration row was `PROCESS_ISSUED` / rejected / cancelled.
+- **Fix**: Stop dropping the CO/AS node when outcome steps are hidden; keep it `done` and still show the process number (from `PROCESS_STARTED` or `Application.ProcessNumber`).
+- **Officer**: Redeploy Module, hard-refresh. Open a green Invitation instance — Progress still lists **CO belgisi alyndy** with the CO number.
+- **Prevent**: Do not hide the AsNumber timeline node just because Issued is off; Issued off means no separate Issued step, not "erase CO after formalization".
+- **Test**: `Build_ViaMinistry_HiddenIssued_KeepsAsNumberAfterProcessIssued`.
+- **Cross-skill**: visa2026-application-profile
+
+
 ### 2026-11-18 — Direct Change CO step hid the CO Number field
 
 - **Symptom**: **Çakylygy üýtgetmek** showed **CO belgisi alyndy** but no **CO belgesi** input. Via-ministry templates already recorded CO via `PROCESS_STARTED`.
