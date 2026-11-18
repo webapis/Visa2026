@@ -6436,6 +6436,18 @@
     "tk-TM": "Ýatyr",
     "ru-RU": "Отмена"
   },
+  "ReportDashboard.Chrome.ExcludeExcelRosterSummary": {
+    "en": "Exclude Excel summary",
+    "tr-TR": "Excel özetini gizle",
+    "tk-TM": "Excel gysgaça maglumatyny gizle",
+    "ru-RU": "Скрыть сводку Excel"
+  },
+  "ReportDashboard.Chrome.ExcludeExcelRosterSummaryTitle": {
+    "en": "Skip the change summary rows at the top of roster Excel sheets. The dashboard change log stays on.",
+    "tr-TR": "Excel sayfalarındaki üst özet satırlarını atla. Gösterge paneli değişiklik günlüğü açık kalır.",
+    "tk-TM": "Excel sahypalarynyň ýokarky gysgaça maglumat setirlerini geç. Dolandyryş paneli üýtgeşmeler žurnaly açyk galýar.",
+    "ru-RU": "Не добавлять строки сводки изменений вверху листов Excel. Журнал изменений на панели остаётся включённым."
+  },
   "ReportDashboard.Chrome.DownloadTemplate": {
     "en": "Download template",
     "tr-TR": "Şablonu indir",
@@ -6730,7 +6742,113 @@
     "tk-TM": "Diňe güýjündäki wiza",
     "ru-RU": "Только действующая виза"
   },
-    "ReportDashboard.Chrome.ExcludeNonPositiveDaysRemaining": {
+  "ReportDashboard.Chrome.RosterDiffTableMissing": {
+    "en": "Roster change log is not ready yet. Refresh the page after the app recreates the table, then open Excel again.",
+    "tr-TR": "Rapor değişiklik tablosu yok. Tablonun oluşması için uygulamayı bir kez yeniden başlatın, sonra Excel’i tekrar deneyin.",
+    "tk-TM": "Hasabat üýtgeşme tablisasy ýok. Döremegi üçin programmamy bir gezek täzeden başladyň, soň Excel-i synap görüň.",
+    "ru-RU": "Таблица журнала изменений отчёта отсутствует. Перезапустите приложение один раз для создания таблицы, затем снова откройте Excel."
+  },
+  "ReportDashboard.Chrome.RosterDiffNeedBaseline": {
+    "en": "Open in Excel once to start tracking who is added or removed on the next export.",
+    "tr-TR": "Sonraki Excel’de kimlerin eklendiğini/çıktığını izlemek için bir kez Excel’de açın.",
+    "tk-TM": "Indiki Excel-de kim goşulandygyny/aýrylandygyny yzarlamak üçin bir gezek Excel-de açyň.",
+    "ru-RU": "Откройте в Excel один раз, чтобы отслеживать добавления и удаления при следующем экспорте."
+  },
+  "ReportDashboard.Chrome.RosterDiffBaselineSaved": {
+    "en": "Excel baseline saved. After the roster changes, open Excel again to see who moved.",
+    "tr-TR": "Excel tabanı kaydedildi. Liste değişince tekrar Excel’de açın; kimlerin değiştiğini görün.",
+    "tk-TM": "Excel bazasy ýazdy. Sanaw üýtgände ýene Excel-de açyň — kim üýtgänini görersiňiz.",
+    "ru-RU": "База Excel сохранена. После изменения списка снова откройте Excel, чтобы увидеть, кто изменился."
+  },
+  "ReportDashboard.Chrome.RosterDiffLastChange": {
+    "en": "Last change",
+    "tr-TR": "Son değişiklik",
+    "tk-TM": "Soňky üýtgeme",
+    "ru-RU": "Последнее изменение"
+  },  "ReportDashboard.Chrome.RosterDiffDataBucket": {
+    "en": "Data changes",
+    "tr-TR": "Veri değişiklikleri",
+    "tk-TM": "Maglumat üýtgeşmeleri",
+    "ru-RU": "Изменения данных"
+  },
+  "ReportDashboard.Chrome.RosterDiffDateBucket": {
+    "en": "Date / filter changes",
+    "tr-TR": "Tarih / filtre değişiklikleri",
+    "tk-TM": "Sene / filtr üýtgeşmeleri",
+    "ru-RU": "Изменения даты / фильтра"
+  },  "ReportDashboard.Chrome.RosterDiffNoMoves": {
+    "en": "No membership changes",
+    "tr-TR": "Üyelik değişikliği yok",
+    "tk-TM": "Agzalyk üýtgemesi ýok",
+    "ru-RU": "Состав не изменился"
+  },
+  "ReportDashboard.Chrome.RosterDiffExportId": {
+    "en": "Export",
+    "tr-TR": "Dışa aktarma",
+    "tk-TM": "Eksport",
+    "ru-RU": "Экспорт"
+  },
+  "ReportDashboard.Chrome.RosterDiffBanner": {
+    "en": "Changes since last Excel",
+    "tr-TR": "Son Excel’den bu yana değişiklikler",
+    "tk-TM": "Soňky Excel-den bäri üýtgeşmeler",
+    "ru-RU": "Изменения с прошлого Excel"
+  },
+  "ReportDashboard.Chrome.RosterDiffView": {
+    "en": "View changes",
+    "tr-TR": "Değişiklikleri gör",
+    "tk-TM": "Üýtgeşmeleri gör",
+    "ru-RU": "Смотреть изменения"
+  },
+  "ReportDashboard.Chrome.RosterDiffTitle": {
+    "en": "Changes since last Excel",
+    "tr-TR": "Son Excel’den bu yana değişiklikler",
+    "tk-TM": "Soňky Excel-den bäri üýtgeşmeler",
+    "ru-RU": "Изменения с прошлого Excel"
+  },
+  "ReportDashboard.Chrome.RosterDiffAdded": {
+    "en": "Added",
+    "tr-TR": "Eklenen",
+    "tk-TM": "Goşulan",
+    "ru-RU": "Добавлены"
+  },
+  "ReportDashboard.Chrome.RosterDiffRemoved": {
+    "en": "Removed",
+    "tr-TR": "Çıkan",
+    "tk-TM": "Aýrylan",
+    "ru-RU": "Удалены"
+  },
+  "ReportDashboard.Chrome.RosterDiffNoneAdded": {
+    "en": "No people added",
+    "tr-TR": "Eklenen kişi yok",
+    "tk-TM": "Goşulan adam ýok",
+    "ru-RU": "Никто не добавлен"
+  },
+  "ReportDashboard.Chrome.RosterDiffNoneRemoved": {
+    "en": "No people removed",
+    "tr-TR": "Çıkan kişi yok",
+    "tk-TM": "Aýrylan adam ýok",
+    "ru-RU": "Никто не удалён"
+  },
+  "ReportDashboard.Chrome.RosterDiffMembershipNote": {
+    "en": "Membership only — field edits are not listed.",
+    "tr-TR": "Yalnız üyelik — alan değişiklikleri listelenmez.",
+    "tk-TM": "Diňe agzalyk — meýdan üýtgeşmeleri görkezilmeýär.",
+    "ru-RU": "Только состав — правки полей не показаны."
+  },
+  "ReportDashboard.Chrome.RosterDiffClose": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "ReportDashboard.Chrome.RosterDiffVsLast": {
+    "en": "vs last Excel",
+    "tr-TR": "son Excel’e göre",
+    "tk-TM": "soňky Excel bilen",
+    "ru-RU": "к прошлому Excel"
+  },
+  "ReportDashboard.Chrome.ExcludeNonPositiveDaysRemaining": {
     "en": "Exclude 0 days remaining",
     "tr-TR": "0 kalan günü hariç tut",
     "tk-TM": "0 galan güni aýyr",

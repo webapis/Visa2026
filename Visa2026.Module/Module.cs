@@ -94,6 +94,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.WorkPermitQuotaSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaIssueWindowSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardExcelBundleSettingsSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ReportDashboardRosterSnapshotSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
 

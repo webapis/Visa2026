@@ -482,6 +482,14 @@
                                 }
                                 </div>
                             }
+                            @if (ShowRosterDiffChrome)
+                            {
+                                <label class="rd-excel-summary-toggle"
+                                       title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcludeExcelRosterSummaryTitle")">
+                                    <input type="checkbox" @bind="_excludeExcelRosterSummary" disabled="@ShowLoading" />
+                                    <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcludeExcelRosterSummary")</span>
+                                </label>
+                            }
                             <button type="button"
                                     class="rd-excel-link @((Panel.ExcelConfigured || IsExcelTemplateReport) ? null : "disabled")"
                                     disabled="@((!Panel.ExcelConfigured && !IsExcelTemplateReport) || ShowLoading || (IsExcelTemplateReport && DisplayedRows.Count == 0))"
@@ -509,6 +517,13 @@
                             {
                                 <span class="rd-template-notice">@_templateNotice</span>
                             }
+                            @if (ShowRosterDiffChrome && _rosterDiff?.HasPrevious == true && _rosterDiff.Delta != 0)
+                            {
+                                <span class="rd-roster-delta @(_rosterDiff.Delta < 0 ? "down" : "up")">
+                                    @(_rosterDiff.Delta > 0 ? "+" : "")@_rosterDiff.Delta
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffVsLast")
+                                </span>
+                            }
                             <button type="button"
                                     class="rd-list-link"
                                     disabled="@ShowLoading"
@@ -516,6 +531,60 @@
                                 @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
                             </button>
                         </div>
+                        @if (ShowRosterDiffChrome && _rosterDiff?.HasPrevious == true)
+                        {
+                            <div class="rd-roster-diff-banner @(_rosterDiff.HasMembershipMoves ? null : "rd-roster-diff-banner--hint")">
+                                <div class="rd-roster-diff-banner-msg">
+                                    <strong>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffBanner")</strong>
+                                    @if (_rosterDiff.HasMembershipMoves)
+                                    {
+                                        <text>
+                                            (@FormatRosterDiffAsOfRange(_rosterDiff)) —
+                                            <strong>@_rosterDiff.DataAdded.Count</strong>/<strong>@_rosterDiff.DataRemoved.Count</strong>
+                                            @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffDataBucket").ToLowerInvariant()
+                                            ·
+                                            <strong>@_rosterDiff.DateFilterAdded.Count</strong>/<strong>@_rosterDiff.DateFilterRemoved.Count</strong>
+                                            @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffDateBucket").ToLowerInvariant()
+                                            (@_rosterDiff.PreviousTotalCount → @_rosterDiff.CurrentTotalCount).
+                                        </text>
+                                    }
+                                    else if (_rosterLastChange?.HasMembershipMoves == true)
+                                    {
+                                        <text>
+                                            @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoMoves")
+                                            (@_rosterDiff.PreviousTotalCount → @_rosterDiff.CurrentTotalCount).
+                                            · @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffLastChange"):
+                                            @FormatRosterDiffAsOfRange(_rosterLastChange)
+                                            (@_rosterLastChange.PreviousTotalCount → @_rosterLastChange.CurrentTotalCount).
+                                        </text>
+                                    }
+                                    else
+                                    {
+                                        <text>
+                                            @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoMoves")
+                                            (@_rosterDiff.PreviousTotalCount → @_rosterDiff.CurrentTotalCount).
+                                        </text>
+                                    }
+                                </div>
+                                <button type="button" class="rd-roster-diff-link" @onclick="() => _rosterDiffDialogOpen = true">
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffView")
+                                </button>
+                            </div>
+                        }
+                        else if (ShowRosterDiffChrome && _rosterDiff?.HasPrevious != true && string.IsNullOrEmpty(_rosterDiffNotice))
+                        {
+                            <div class="rd-roster-diff-banner rd-roster-diff-banner--hint">
+                                <div class="rd-roster-diff-banner-msg">
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNeedBaseline")
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(_rosterDiffNotice))
+                        {
+                            <div class="rd-roster-diff-banner @(IsRosterDiffErrorNotice ? "rd-roster-diff-banner--error" : "rd-roster-diff-banner--hint")">
+                                <div class="rd-roster-diff-banner-msg">@_rosterDiffNotice</div>
+                            </div>
+                        }
                         <div class="rd-listview-scroll @(IsOfficerFillTable ? "rd-listview-scroll--fill" : null)">
                             <table class="@((IsOfficerFillTable ? "rd-invitation-table" : "") + (IsInvitationOfficerTable ? " rd-invitation-officer" : "") + ((IsInvitationReadyTable || IsInvitationExpiredTable || IsInvitationProcessTable || IsVisaUzatilanlarTable) ? " rd-invitation-active" : "") + (IsWorkPermitMaglumatTable ? " rd-maglumat-table" : "") + (IsWorkPermitSanawTable ? " rd-sanaw-table" : ""))">
                                 <thead>
@@ -1253,15 +1322,151 @@
                 }
             </div>
             <div class="rd-bundle-actions">
-                <button type="button" class="rd-refresh-btn" @onclick="CloseExcelBundle">
-                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleCancel")
-                </button>
-                <button type="button"
-                        class="rd-refresh-btn"
-                        disabled="@(!_excelBundle.Any(item => item.Selected))"
-                        @onclick="DownloadExcelBundleAsync">
-                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleCreate")
-                </button>
+                <label class="rd-excel-summary-toggle"
+                       title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcludeExcelRosterSummaryTitle")">
+                    <input type="checkbox" @bind="_excelBundleExcludeSummary" />
+                    <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcludeExcelRosterSummary")</span>
+                </label>
+                <div class="rd-bundle-actions-buttons">
+                    <button type="button" class="rd-refresh-btn" @onclick="CloseExcelBundle">
+                        @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleCancel")
+                    </button>
+                    <button type="button"
+                            class="rd-refresh-btn"
+                            disabled="@(!_excelBundle.Any(item => item.Selected))"
+                            @onclick="DownloadExcelBundleAsync">
+                        @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelBundleCreate")
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (_rosterDiffDialogOpen && _rosterDiff?.HasPrevious == true)
+    {
+        <div class="rd-roster-diff-backdrop" @onclick="CloseRosterDiffDialog">
+            <div class="rd-roster-diff-dialog" @onclick:stopPropagation="true">
+                @{
+                    var showingStickyLastChange = !_rosterDiff.HasMembershipMoves
+                        && _rosterLastChange?.HasMembershipMoves == true;
+                    var displayDiff = showingStickyLastChange ? _rosterLastChange! : _rosterDiff;
+                }
+                <header>
+                    <h2>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffTitle")</h2>
+                    <p>
+                        @(Panel?.Title ?? SubReport)
+                        · @_rosterDiff.PreviousTotalCount → @_rosterDiff.CurrentTotalCount
+                        @if (showingStickyLastChange)
+                        {
+                            <text>
+                                · @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoMoves")
+                                · @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffLastChange")
+                                @FormatRosterDiffAsOfRange(displayDiff)
+                                (@displayDiff.PreviousTotalCount → @displayDiff.CurrentTotalCount)
+                            </text>
+                        }
+                        else
+                        {
+                            <text> · @FormatRosterDiffAsOfRange(displayDiff)</text>
+                        }
+                    </p>
+                </header>
+                <div class="rd-roster-diff-bucket">
+                    <h3 class="rd-roster-diff-bucket-title">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffDataBucket")</h3>
+                    <div class="rd-roster-diff-cols">
+                        <div class="rd-roster-diff-col removed">
+                            <h3>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffRemoved") (@displayDiff.DataRemoved.Count)</h3>
+                            @if (displayDiff.DataRemoved.Count == 0)
+                            {
+                                <div class="rd-roster-diff-empty">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoneRemoved")</div>
+                            }
+                            else
+                            {
+                                @foreach (var person in displayDiff.DataRemoved)
+                                {
+                                    <div class="rd-roster-diff-person">
+                                        <span>@person.Name</span>
+                                        @if (!string.IsNullOrWhiteSpace(person.PassportOrKey))
+                                        {
+                                            <small>@person.PassportOrKey</small>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <div class="rd-roster-diff-col added">
+                            <h3>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffAdded") (@displayDiff.DataAdded.Count)</h3>
+                            @if (displayDiff.DataAdded.Count == 0)
+                            {
+                                <div class="rd-roster-diff-empty">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoneAdded")</div>
+                            }
+                            else
+                            {
+                                @foreach (var person in displayDiff.DataAdded)
+                                {
+                                    <div class="rd-roster-diff-person">
+                                        <span>@person.Name</span>
+                                        @if (!string.IsNullOrWhiteSpace(person.PassportOrKey))
+                                        {
+                                            <small>@person.PassportOrKey</small>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="rd-roster-diff-bucket">
+                    <h3 class="rd-roster-diff-bucket-title">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffDateBucket")</h3>
+                    <div class="rd-roster-diff-cols">
+                        <div class="rd-roster-diff-col removed">
+                            <h3>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffRemoved") (@displayDiff.DateFilterRemoved.Count)</h3>
+                            @if (displayDiff.DateFilterRemoved.Count == 0)
+                            {
+                                <div class="rd-roster-diff-empty">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoneRemoved")</div>
+                            }
+                            else
+                            {
+                                @foreach (var person in displayDiff.DateFilterRemoved)
+                                {
+                                    <div class="rd-roster-diff-person">
+                                        <span>@person.Name</span>
+                                        @if (!string.IsNullOrWhiteSpace(person.PassportOrKey))
+                                        {
+                                            <small>@person.PassportOrKey</small>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <div class="rd-roster-diff-col added">
+                            <h3>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffAdded") (@displayDiff.DateFilterAdded.Count)</h3>
+                            @if (displayDiff.DateFilterAdded.Count == 0)
+                            {
+                                <div class="rd-roster-diff-empty">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffNoneAdded")</div>
+                            }
+                            else
+                            {
+                                @foreach (var person in displayDiff.DateFilterAdded)
+                                {
+                                    <div class="rd-roster-diff-person">
+                                        <span>@person.Name</span>
+                                        @if (!string.IsNullOrWhiteSpace(person.PassportOrKey))
+                                        {
+                                            <small>@person.PassportOrKey</small>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <footer>
+                    <span class="rd-roster-diff-note">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffMembershipNote")</span>
+                    <button type="button" class="rd-refresh-btn" @onclick="CloseRosterDiffDialog">
+                        @ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffClose")
+                    </button>
+                </footer>
             </div>
         </div>
     }
@@ -1348,7 +1553,7 @@
         if (IsLoading)
             _localLoading = false;
 
-        var key = $"{Category}|{SubReport}|{ProjectKey}|{PersonType}|{Panel?.SubReport}|{Panel?.TotalCount}|{FilteredRows.Count}";
+        var key = $"{Category}|{SubReport}|{ProjectKey}|{PersonType}|{Panel?.SubReport}|{Panel?.TotalCount}|{FilteredRows.Count}|{ExcludeNonPositiveDaysRemaining}|{OneLastValidVisaPerPerson}";
         if (!string.Equals(key, _previewContextKey, StringComparison.Ordinal))
         {
             _previewContextKey = key;
@@ -1362,6 +1567,7 @@
                 _templateNotice = string.Empty;
             }
             RebuildColumnClasses();
+            RefreshRosterDiff();
         }
 
         EnsurePreviewPageInRange();
@@ -1799,6 +2005,10 @@
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private bool _excelBundleOpen;
     private bool _excelBundleFamilyMembers;
+    /// <summary>Per Create file only — reset each time the bundle dialog opens. Hides Excel preamble only.</summary>
+    private bool _excelBundleExcludeSummary;
+    /// <summary>Per single-sheet Open in Excel — not remembered across sessions. Hides Excel preamble only.</summary>
+    private bool _excludeExcelRosterSummary;
     private readonly List<ExcelBundleChoice> _excelBundle = [];
     /// <summary>Source index for the active drag. Kept until drop finishes — dragend must not clear it first (Blazor Server).</summary>
     private int _bundleDragFromIndex = -1;
@@ -1810,6 +2020,7 @@
             return;
 
         _excelBundleFamilyMembers = familyMembers;
+        _excelBundleExcludeSummary = false;
         _excelBundle.Clear();
         _bundleDragFromIndex = -1;
         _bundleDragOverIndex = -1;
@@ -1913,8 +2124,10 @@
         try
         {
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
-            var bytes = ExportExcelBundleItem(objectSpace, item);
-            var fileName = SanitizeExcelFileName(item.Label) + ".xlsx";
+            var bytes = ExportExcelBundleItem(objectSpace, item, out var rosterFileName);
+            var fileName = string.IsNullOrWhiteSpace(rosterFileName)
+                ? SanitizeExcelFileName(item.Label) + ".xlsx"
+                : rosterFileName;
             var previewId = ExcelPreviewStore.Put(bytes, fileName, item.Label);
             await PreviewSlot.OpenFileAsync(ReportDashboardExcelFilePreviewSource.Key, previewId);
         }
@@ -1941,7 +2154,7 @@
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardExcelTemplate>();
             var parts = new List<(string SheetName, byte[] Workbook)>(selected.Count);
             foreach (var item in selected)
-                parts.Add((item.Label, ExportExcelBundleItem(objectSpace, item)));
+                parts.Add((item.Label, ExportExcelBundleItem(objectSpace, item, out _)));
 
             var combined = ReportDashboardExcelTemplateWorkbook.Combine(parts);
             await using var stream = new MemoryStream(combined);
@@ -1960,8 +2173,9 @@
         }
     }
 
-    private byte[] ExportExcelBundleItem(IObjectSpace objectSpace, ExcelBundleChoice item)
+    private byte[] ExportExcelBundleItem(IObjectSpace objectSpace, ExcelBundleChoice item, out string? rosterFileName)
     {
+        rosterFileName = null;
         var audience = (_excelBundleFamilyMembers
             || ReportDashboardCatalog.IsFamilySubReport(item.Key))
             ? ReportDashboardPersonType.FamilyMembers
@@ -1981,7 +2195,7 @@
             ValidVisaPersonsOnly,
             searchTerm: null,
             ExcludeNonPositiveDaysRemaining);
-        return ReportDashboardExcelTemplateService.Export(
+        var bytes = ReportDashboardExcelTemplateService.Export(
             objectSpace,
             item.Category,
             item.Key,
@@ -1989,6 +2203,18 @@
             panel.TableHeaders,
             panel.PreviewRows,
             includeChartColumn: false);
+        bytes = ApplyRosterExcelSnapshotAndPreamble(
+            item.Category,
+            item.Key,
+            panel.PreviewRows,
+            audience,
+            SanitizeExcelFileName(item.Label),
+            bytes,
+            includeExcelSummary: !_excelBundleExcludeSummary,
+            out var downloadName);
+        if (ReportDashboardRosterDiffService.Supports(item.Category, item.Key))
+            rosterFileName = downloadName;
+        return bytes;
     }
 
     private static string SanitizeExcelFileName(string? label)
@@ -2066,6 +2292,12 @@
     private string _invitationChartSubReport = string.Empty;
     private string _invitationTableSearch = string.Empty;
     private string _templateNotice = string.Empty;
+    private ReportDashboardRosterDiff? _rosterDiff;
+    /// <summary>Sticky last membership move (survives no-change Excel). Not shown in Excel preamble.</summary>
+    private ReportDashboardRosterDiff? _rosterLastChange;
+    private bool _rosterDiffDialogOpen;
+    private string _rosterDiffNotice = string.Empty;
+    private bool _rosterDiffNoticeIsError;
 
     private bool ShowChartBody => !IsOfficerFillTable || _invitationChartOpen;
 
@@ -2202,8 +2434,22 @@
             : IsWorkPermitMaglumatTable
             ? (templateOnly ? "A.Maglumat template" : "A.Maglumat")
             : SafeFileName(templateOnly ? label + " template" : label);
+        var downloadName = fileName + ".xlsx";
+        if (!templateOnly)
+        {
+            bytes = ApplyRosterExcelSnapshotAndPreamble(
+                Category,
+                subReport,
+                FilteredRows,
+                audienceOverride: null,
+                fileName,
+                bytes,
+                includeExcelSummary: !_excludeExcelRosterSummary,
+                out downloadName);
+        }
+
         await using var stream = new MemoryStream(bytes);
-        await FileDownloader.DownloadAsync(fileName + ".xlsx", stream, ReportDashboardInvitationTableExcel.ContentType);
+        await FileDownloader.DownloadAsync(downloadName, stream, ReportDashboardInvitationTableExcel.ContentType);
     }
 
     private async Task DownloadInvitationTemplate()
@@ -2296,6 +2542,12 @@
     private bool IsVisaUzatilanlarTable =>
         Category == ReportDashboardCategory.VisaExtension
         && ReportDashboardCatalog.IsVisaUzatilanlarSubReport(Panel?.SubReport ?? SubReport);
+
+    private bool ShowRosterDiffChrome =>
+        ReportDashboardRosterDiffService.Supports(Category, Panel?.SubReport ?? SubReport);
+
+    private bool IsRosterDiffErrorNotice =>
+        _rosterDiffNoticeIsError && !string.IsNullOrEmpty(_rosterDiffNotice);
 
     private bool IsVisaAktivTable =>
         Category == ReportDashboardCategory.VisaExtension
@@ -2594,6 +2846,163 @@
             _ => true
         };
         await ExcludeNonPositiveDaysRemainingChanged.InvokeAsync(exclude);
+    }
+
+    private void CloseRosterDiffDialog() => _rosterDiffDialogOpen = false;
+
+    private static string FormatRosterDiffWhen(DateTime? utc)
+    {
+        if (utc is not { } value)
+            return string.Empty;
+        return value.ToLocalTime().ToString("dd.MM.yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private void RefreshRosterDiff()
+    {
+        _rosterDiff = null;
+        _rosterLastChange = null;
+        _rosterDiffDialogOpen = false;
+        _rosterDiffNotice = string.Empty;
+        _rosterDiffNoticeIsError = false;
+        var subReport = Panel?.SubReport ?? SubReport;
+        if (!ReportDashboardRosterDiffService.Supports(Category, subReport))
+            return;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardRosterSnapshot>();
+            var audience = ReportDashboardCatalog.ResolveEffectivePersonType(Category, PersonType, subReport);
+            var fingerprint = ReportDashboardRosterDiffService.BuildFingerprint(
+                ProjectKey, audience, ExcludeNonPositiveDaysRemaining, OneLastValidVisaPerPerson);
+            var previous = ReportDashboardRosterDiffService.TryGetLatest(
+                objectSpace, Category, subReport, fingerprint);
+            var asOf = ReportDashboardRosterDiffService.TodayAsOfDate();
+            var current = ReportDashboardRosterDiffService.MembersFromRows(
+                FilteredRows, asOf, ExcludeNonPositiveDaysRemaining);
+            _rosterDiff = ReportDashboardRosterDiffService.Diff(
+                current, previous, asOf, ExcludeNonPositiveDaysRemaining);
+            _rosterLastChange = _rosterDiff.HasMembershipMoves
+                ? _rosterDiff
+                : ReportDashboardRosterDiffService.TryDeserializeLastChange(previous?.LastChangeJson);
+        }
+        catch (Exception ex)
+        {
+            _rosterDiff = null;
+            _rosterDiffNoticeIsError = true;
+            _rosterDiffNotice = FormatRosterDiffError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Diff vs previous snapshot, stamp ExportId/filename, optionally write Excel preamble, then save baseline.
+    /// Keeps the pre-save diff on screen (auto-opens dialog only when membership moved).
+    /// </summary>
+    private byte[] ApplyRosterExcelSnapshotAndPreamble(
+        ReportDashboardCategory category,
+        string subReport,
+        IReadOnlyList<ReportDashboardPreviewRow> rows,
+        ReportDashboardPersonType? audienceOverride,
+        string baseFileNameWithoutExtension,
+        byte[] bytes,
+        bool includeExcelSummary,
+        out string downloadFileName)
+    {
+        var stem = string.IsNullOrWhiteSpace(baseFileNameWithoutExtension)
+            ? "report"
+            : baseFileNameWithoutExtension.Trim();
+        if (stem.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            stem = stem.Substring(0, stem.Length - 5);
+        downloadFileName = stem + ".xlsx";
+
+        if (!ReportDashboardRosterDiffService.Supports(category, subReport))
+            return bytes;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ReportDashboardRosterSnapshot>();
+            var audience = audienceOverride
+                ?? ReportDashboardCatalog.ResolveEffectivePersonType(category, PersonType, subReport);
+            var fingerprint = ReportDashboardRosterDiffService.BuildFingerprint(
+                ProjectKey, audience, ExcludeNonPositiveDaysRemaining, OneLastValidVisaPerPerson);
+            var asOf = ReportDashboardRosterDiffService.TodayAsOfDate();
+            var members = ReportDashboardRosterDiffService.MembersFromRows(
+                rows, asOf, ExcludeNonPositiveDaysRemaining);
+            var previous = ReportDashboardRosterDiffService.TryGetLatest(
+                objectSpace, category, subReport, fingerprint);
+            var diff = ReportDashboardRosterDiffService.Diff(
+                members, previous, asOf, ExcludeNonPositiveDaysRemaining);
+            var exportId = ReportDashboardRosterDiffService.NewExportId();
+            downloadFileName = ReportDashboardRosterDiffService.AppendExportIdToFileName(stem, exportId);
+            diff.CurrentExportId = exportId;
+            diff.CurrentFileName = downloadFileName;
+
+            if (includeExcelSummary)
+                bytes = ReportDashboardRosterExcelPreamble.Apply(bytes, diff, exportId);
+
+            ReportDashboardRosterDiffService.Save(
+                objectSpace,
+                category,
+                subReport,
+                fingerprint,
+                members,
+                ReportDashboardRosterDiffService.CurrentUserName(),
+                exportId,
+                downloadFileName,
+                asOf,
+                diff,
+                previous);
+
+            _rosterDiff = diff;
+            _rosterLastChange = diff.HasMembershipMoves
+                ? diff
+                : ReportDashboardRosterDiffService.TryDeserializeLastChange(
+                    ReportDashboardRosterDiffService.ResolveLastChangeJson(diff, previous))
+                  ?? _rosterLastChange;
+            _rosterDiffNotice = string.Empty;
+            _rosterDiffNoticeIsError = false;
+            _rosterDiffDialogOpen = diff.HasPrevious && diff.HasMembershipMoves;
+            if (!diff.HasPrevious)
+                _rosterDiffNotice = ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffBaselineSaved");
+        }
+        catch (Exception ex)
+        {
+            _rosterDiffNoticeIsError = true;
+            _rosterDiffNotice = FormatRosterDiffError(ex);
+        }
+
+        return bytes;
+    }
+
+    private static string FormatRosterDiffExportSuffix(Guid? exportId)
+    {
+        if (exportId is not { } id || id == Guid.Empty)
+            return string.Empty;
+        return " · " + ReportDashboardRosterDiffService.FormatExportShortId(id);
+    }
+
+    private static string FormatRosterDiffAsOfRange(ReportDashboardRosterDiff diff)
+    {
+        var prev = ReportDashboardRosterDiffService.FormatAsOfDate(diff.PreviousAsOfDate);
+        var curr = ReportDashboardRosterDiffService.FormatAsOfDate(diff.CurrentAsOfDate);
+        if (string.IsNullOrEmpty(prev) && string.IsNullOrEmpty(curr))
+            return string.Empty;
+        if (string.IsNullOrEmpty(prev))
+            return curr;
+        if (string.IsNullOrEmpty(curr))
+            return prev;
+        return prev + " → " + curr;
+    }
+
+    private static string FormatRosterDiffError(Exception ex)
+    {
+        var text = ex.GetBaseException().Message ?? ex.Message;
+        if (text.Contains("ReportDashboardRosterSnapshot", StringComparison.OrdinalIgnoreCase)
+            && text.Contains("does not exist", StringComparison.OrdinalIgnoreCase))
+        {
+            return ReportDashboardLocalization.Get("ReportDashboard.Chrome.RosterDiffTableMissing");
+        }
+
+        return text;
     }
 
     private async Task OnIncludeCompletedApplicationChanged(ChangeEventArgs e)

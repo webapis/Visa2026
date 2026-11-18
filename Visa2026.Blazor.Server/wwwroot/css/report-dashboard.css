@@ -1716,6 +1716,197 @@ button.rd-overview-card {
 
 .rd-bundle-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rd-bundle-actions-buttons {
+  display: flex;
   gap: 8px;
+  margin-left: auto;
+}
+
+.rd-excel-summary-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--rd-muted, var(--rd-text-muted, #9ca3af));
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.rd-excel-summary-toggle input {
+  margin: 0;
+  accent-color: var(--rd-accent, #3b82f6);
+}
+
+.rd-roster-delta {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rd-roster-delta.down { color: color-mix(in srgb, var(--rd-hue-red) 72%, var(--rd-text)); }
+.rd-roster-delta.up { color: color-mix(in srgb, var(--rd-hue-green) 72%, var(--rd-text)); }
+
+.rd-roster-diff-banner {
+  margin: 0 0 10px;
+  border: 1px solid color-mix(in srgb, var(--rd-hue-amber) 35%, var(--rd-border));
+  background: color-mix(in srgb, var(--rd-hue-amber) 14%, var(--rd-surface));
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rd-roster-diff-banner--hint {
+  border-color: var(--rd-border);
+  background: var(--rd-surface-2);
+}
+.rd-roster-diff-banner--error {
+  border-color: color-mix(in srgb, var(--rd-hue-red) 40%, var(--rd-border));
+  background: color-mix(in srgb, var(--rd-hue-red) 12%, var(--rd-surface));
+}
+.rd-roster-diff-export {
+  color: var(--rd-muted);
+  font-weight: 500;
+}
+.rd-roster-diff-banner-msg {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--rd-text);
+}
+.rd-roster-diff-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--rd-accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.rd-roster-diff-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, #000000 45%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 80;
+}
+.rd-roster-diff-dialog {
+  width: min(820px, 100%);
+  background: var(--rd-surface);
+  color: var(--rd-text);
+  border-radius: 10px;
+  border: 1px solid var(--rd-border);
+  box-shadow: 0 16px 40px color-mix(in srgb, #000000 35%, transparent);
+  overflow: hidden;
+}
+.rd-roster-diff-dialog header {
+  padding: 16px 18px 10px;
+  border-bottom: 1px solid var(--rd-border);
+}
+.rd-roster-diff-dialog header h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--rd-text);
+}
+.rd-roster-diff-dialog header p {
+  margin: 0;
+  color: var(--rd-muted);
+  font-size: 13px;
+}
+.rd-roster-diff-bucket {
+  border-top: 1px solid var(--rd-border);
+}
+.rd-roster-diff-bucket-title {
+  margin: 12px 18px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rd-text);
+}
+.rd-roster-diff-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 220px;
+}
+.rd-roster-diff-col {
+  padding: 14px 18px 18px;
+}
+.rd-roster-diff-col + .rd-roster-diff-col {
+  border-left: 1px solid var(--rd-border);
+}
+.rd-roster-diff-col h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+.rd-roster-diff-col.removed h3 { color: color-mix(in srgb, var(--rd-hue-red) 75%, var(--rd-text)); }
+.rd-roster-diff-col.added h3 { color: color-mix(in srgb, var(--rd-hue-green) 75%, var(--rd-text)); }
+.rd-roster-diff-person {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--rd-text);
+}
+.rd-roster-diff-col.removed .rd-roster-diff-person {
+  background: color-mix(in srgb, var(--rd-hue-red) 14%, var(--rd-surface));
+}
+.rd-roster-diff-col.added .rd-roster-diff-person {
+  background: color-mix(in srgb, var(--rd-hue-green) 14%, var(--rd-surface));
+}
+.rd-roster-diff-person small { color: var(--rd-muted); }
+.rd-roster-diff-empty {
+  color: var(--rd-muted);
+  font-size: 13px;
+  padding: 18px 10px;
+  border: 1px dashed var(--rd-border);
+  border-radius: 6px;
+  text-align: center;
+}
+.rd-roster-diff-dialog footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  border-top: 1px solid var(--rd-border);
+  background: var(--rd-surface-2);
+  align-items: center;
+}
+.rd-roster-diff-note {
+  font-size: 12px;
+  color: var(--rd-muted);
+}
+
+@media (max-width: 720px) {
+  .rd-roster-diff-bucket {
+  border-top: 1px solid var(--rd-border);
+}
+.rd-roster-diff-bucket-title {
+  margin: 12px 18px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rd-text);
+}
+.rd-roster-diff-cols { grid-template-columns: 1fr; }
+  .rd-roster-diff-col + .rd-roster-diff-col {
+    border-left: 0;
+    border-top: 1px solid var(--rd-border);
+  }
 }

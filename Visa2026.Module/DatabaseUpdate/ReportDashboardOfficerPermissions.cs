@@ -79,6 +79,7 @@ public static class ReportDashboardOfficerPermissions
         EnsureViewReadPermission<VwRdWorkPermitPersonelSayi>(role);
         EnsureViewReadPermission<WorkPermitQuotaSettings>(role);
         EnsureViewReadPermission<ReportDashboardExcelBundleSettings>(role);
+        EnsureRosterSnapshotWritePermission(role);
         EnsureViewReadPermission<VwRdWorkPermitAppProgress>(role);
 
         EnsureViewReadPermission<VwRdPassport>(role);
@@ -134,5 +135,32 @@ public static class ReportDashboardOfficerPermissions
         newPerm.WriteState = SecurityPermissionState.Deny;
         newPerm.CreateState = SecurityPermissionState.Deny;
         newPerm.DeleteState = SecurityPermissionState.Deny;
+    }
+
+    /// <summary>
+    /// Officers need Create/Write so Excel can persist a roster snapshot (NonSecured also used).
+    /// </summary>
+    private static void EnsureRosterSnapshotWritePermission(PermissionPolicyRole role)
+    {
+        var targetType = typeof(ReportDashboardRosterSnapshot);
+        var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+        const string ops = $"{SecurityOperations.Read};{SecurityOperations.Write};{SecurityOperations.Create}";
+        if (existingPerm != null)
+        {
+            existingPerm.ReadState = SecurityPermissionState.Allow;
+            existingPerm.WriteState = SecurityPermissionState.Allow;
+            existingPerm.CreateState = SecurityPermissionState.Allow;
+            existingPerm.DeleteState = SecurityPermissionState.Deny;
+            existingPerm.NavigateState = null;
+            return;
+        }
+
+        role.AddTypePermission<ReportDashboardRosterSnapshot>(ops, SecurityPermissionState.Allow);
+        var newPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+        if (newPerm != null)
+        {
+            newPerm.DeleteState = SecurityPermissionState.Deny;
+            newPerm.NavigateState = null;
+        }
     }
 }

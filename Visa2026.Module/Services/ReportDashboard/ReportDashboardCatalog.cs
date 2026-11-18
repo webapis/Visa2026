@@ -124,6 +124,34 @@ public static class ReportDashboardCatalog
         false;
 
     /// <summary>
+    /// Excel-time roster change log (added/removed people vs previous Excel) for person-row
+    /// Employees / Family Members bundle sheets. Aggregates (kota, Personel sayi, Oturum) stay out.
+    /// </summary>
+    public static bool SupportsRosterChangeLog(ReportDashboardCategory category, string? subReport)
+    {
+        if (string.IsNullOrWhiteSpace(subReport))
+            return false;
+
+        return category switch
+        {
+            ReportDashboardCategory.VisaExtension =>
+                IsVisaAktivPersonellerSubReport(subReport)
+                || IsVisaUzatilanlarSubReport(subReport),
+            ReportDashboardCategory.WorkPermit =>
+                string.Equals(subReport, WorkPermitCalismaIzniListesiKey, StringComparison.OrdinalIgnoreCase)
+                || IsWorkPermitMaglumatSubReport(subReport)
+                || string.Equals(subReport, WorkPermitSanawKey, StringComparison.OrdinalIgnoreCase),
+            ReportDashboardCategory.Invitation =>
+                IsInvitationReadySubReport(subReport)
+                || IsInvitationExpiredSubReport(subReport)
+                || IsInvitationCancelledSubReport(subReport)
+                || IsInvitationProcessSubReport(subReport)
+                || IsInvitationUsedSubReport(subReport),
+            _ => false
+        };
+    }
+
+    /// <summary>
     /// Sub-reports that expose a days-remaining count and can hide non-positive values
     /// (blank / 0 / negative). Invitation ready/expired are excluded (NOT / geçerli gün).
     /// </summary>

@@ -230,6 +230,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkPermitQuotaSettings> WorkPermitQuotaSettings { get; set; }
         public DbSet<VisaIssueWindowSettings> VisaIssueWindowSettings { get; set; }
         public DbSet<ReportDashboardExcelBundleSettings> ReportDashboardExcelBundleSettings { get; set; }
+        public DbSet<ReportDashboardRosterSnapshot> ReportDashboardRosterSnapshots { get; set; }
         public DbSet<ExpirationAlertRule> ExpirationAlertRules { get; set; }
         public DbSet<CompanyProfile> CompanyProfiles { get; set; }
         public DbSet<ApplicationNumberingProfile> ApplicationNumberingProfiles { get; set; }
@@ -1259,6 +1260,11 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<SystemSettings>()
                 .Property(s => s.ExpirationWarningThreshold)
                 .HasPrecision(5, 4);
+
+            modelBuilder.Entity<ReportDashboardRosterSnapshot>(b =>
+            {
+                b.ToTable("ReportDashboardRosterSnapshots");
+            });
 
             modelBuilder.Entity<BoStateSnapshot>(b => {
                 b.HasIndex(s => new { s.OwnerType, s.OwnerId, s.StateCode }).IsUnique();

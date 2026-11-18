@@ -2771,3 +2771,87 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 **Prevent:** Do not filter Invitation NOT / geçerli gün. Do not treat Days Since Entry (To Be Checked In) as days-remaining.
 
 **Files:** ReportDashboardCatalog/Models/QueryService/Hybrid/Mock, ReportDashboardComponent/Model/PropertyEditor, UiStrings.messages.json, VisaUiMessageCatalog.g.cs, REPORT_DASHBOARD.md
+
+## 2026-11-17 — Roster change log (Excel membership diff)
+
+**Ask:** Track who was added/removed between Excel generations for aktiv / çalışma days-remaining sheets so officers know why the total changed.
+
+**Now:** `ReportDashboardRosterSnapshot` + `ReportDashboardRosterDiffService`. Snapshot on Open in Excel / Open selected in Excel. Banner + View changes dialog on those three subreports. Invitation not in scope. Prototype: `docs/prototypes/report-dashboard-roster-diff.html`.
+
+**Prevent:** Do not snapshot Invitation or Resminamalar in v1. Do not use table search rows for the snapshot — use full FilteredRows / LoadPanel PreviewRows under dashboard filters.
+
+**Files:** ReportDashboardRosterSnapshot*, RosterDiffService/Models, Catalog.SupportsRosterChangeLog, ReportDashboardComponent, report-dashboard.css, Startup/Module heal, officer permissions, REPORT_DASHBOARD.md, prototypes
+
+## 2026-11-17 — Roster diff banner empty after Excel
+
+**Symptom:** Officer Excel’d aktiv personeller after data changes; no “who moved” banner.
+
+**Cause:** `TrySaveRosterSnapshot` saved then `RefreshRosterDiff` against the new snapshot → always 0/0. Silent catch also hid table/schema failures. First Excel has no previous baseline.
+
+**Fix:** Diff against previous snapshot *before* save; keep that diff on screen and open the dialog when adds/removes exist. Hint banner when no baseline yet. Surface save errors in `_rosterDiffNotice`.
+
+**Test:** (1) Excel once → hint/baseline saved. (2) Change roster + Refresh. (3) Excel again → dialog lists added/removed.
+## 2026-11-18 — Roster snapshot 42P01 + dark theme
+
+**Symptom:** Excel on aktiv/çalışma showed `42P01: relation "ReportDashboardRosterSnapshot" does not exist`; cream banner on dark theme.
+
+**Cause:** Startup heal skipped or process predated the DDL; banner CSS used hardcoded light colors (`#fff8e8` etc.).
+
+**Fix:** `EnsureFromObjectSpace` + `EnsureSchema` before TryGetLatest/Save; map missing-table errors to `RosterDiffTableMissing`; roster banner/dialog CSS via `--rd-*` / `color-mix` with `--error` banner flag.
+
+**Test:** Restart F5 (or heal DDL). Excel once → baseline hint. Change roster → Excel again → View changes. Toggle dark theme → banner/dialog readable.
+
+## 2026-11-18 — Roster 42P01 despite table present
+
+**Symptom:** Banner "Roster change log table is missing" after restart; singular `ReportDashboardRosterSnapshot` existed in Postgres.
+
+**Cause:** EF/XAF maps `ReportDashboardRosterSnapshot` → plural table `ReportDashboardRosterSnapshots` (same pattern as `BoStateSnapshots`). Heal DDL created the singular name, so queries still raised 42P01.
+
+**Fix:** DDL creates/renames to `ReportDashboardRosterSnapshots`; explicit `ToTable("ReportDashboardRosterSnapshots")`; local DBs renamed.
+
+**Test:** Refresh Report Dashboard aktiv sheet — baseline hint (no red banner). Excel twice after a roster change → View changes.
+
+## 2026-11-18 — Roster always-on banner + ExportId + Excel preamble
+
+**Ask:** Keep change log visible when next Excel has no membership change; track each export; show prev→current on the Excel sheet.
+
+**Now:** Banner always when HasPrevious (including 0/0). Snapshot has ExportId + FileName; download name ends with `_` + 8-hex. `ReportDashboardRosterExcelPreamble` inserts two summary rows above the header on aktiv / çalışma sheets. Dialog auto-opens only on membership moves.
+
+**Prevent:** Do not hide the banner on a no-change export. Do not freeze a prior non-zero diff after a later identical export. Do not print full name lists into Excel.
+
+**Files:** ReportDashboardRosterSnapshot, SchemaSql, RosterDiffService/Models, RosterExcelPreamble, ReportDashboardComponent, REPORT_DASHBOARD.md
+
+## 2026-11-18 — Excel preamble missing + colored counts
+
+**Symptom:** aktiv Excel had export id in the file name but no rows above the header.
+
+**Cause:** Preamble looked up Header/Sample; workbook uses DashboardHeader/DashboardSample.
+
+**Fix:** Use correct defined names; always insert Previous/Current totals, green Added + red Removed (incl. 0/0), export line.
+
+## 2026-11-18 — Excel preamble name lists
+
+**Ask:** Summary above Excel header should list who was added/removed, not only counts.
+
+**Now:** Four-row preamble: totals; green Added: N — names (passport); red Removed: M — names; export line. Empty lists keep a 0 line.
+
+## 2026-11-18 — Date / filter changes buckets
+
+**Ask:** Track roster moves from calendar/filter (aktiv not expired) separately from officer data edits; store as-of date.
+
+**Now:** Snapshot.AsOfDate; member JSON vs/ve; Diff buckets Data* vs DateFilter*; UI dialog two sections; Excel preamble as-of + both buckets. Same calendar day => all data. Missing visa window => data.
+
+## 2026-11-18 — Sticky last membership change
+
+**Ask:** No-change Excel cleared the change dialog; keep last real change visible. Do not put change history in Excel preamble.
+
+**Now:** Snapshot.LastChangeJson — written on moves, copied forward on unchanged Excel. UI banner/dialog show last change when current export is 0/0. Excel preamble stays current-export only.
+## 2026-11-18 — Roster on all person-row bundle sheets + Exclude Excel summary
+
+**Ask:** Enable change-log + Excel summary for all person-row Employees/FM bundle sheets (not kota / Personel sayi / Oturum). Global turn-off hides Excel preamble only; switch on Reports in this file (per Create file) and on single-sheet Open in Excel.
+
+**Now:** `SupportsRosterChangeLog` covers Invitation lists, Maglumat/Sanaw/çalışma, uzatımlar, aktiv (Emp+FM). Bundle dialog + panel checkbox **Exclude Excel summary**; skip `ReportDashboardRosterExcelPreamble` when checked; snapshots + UI banner stay on. Bundle checkbox resets each dialog open.
+
+**Prevent:** Do not persist Exclude Excel summary. Do not disable UI change log when the Excel summary is excluded. Do not track aggregates as membership.
+
+**Files:** ReportDashboardCatalog, ReportDashboardComponent, report-dashboard.css, UiStrings + VisaUiMessageCatalog, REPORT_DASHBOARD.md

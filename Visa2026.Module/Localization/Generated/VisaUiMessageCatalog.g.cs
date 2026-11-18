@@ -12262,6 +12262,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýatyr",
             ["ru-RU"] = "Отмена",
         },
+        ["ReportDashboard.Chrome.ExcludeExcelRosterSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exclude Excel summary",
+            ["tr-TR"] = "Excel özetini gizle",
+            ["tk-TM"] = "Excel gysgaça maglumatyny gizle",
+            ["ru-RU"] = "Скрыть сводку Excel",
+        },
+        ["ReportDashboard.Chrome.ExcludeExcelRosterSummaryTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Skip the change summary rows at the top of roster Excel sheets. The dashboard change log stays on.",
+            ["tr-TR"] = "Excel sayfalarındaki üst özet satırlarını atla. Gösterge paneli değişiklik günlüğü açık kalır.",
+            ["tk-TM"] = "Excel sahypalarynyň ýokarky gysgaça maglumat setirlerini geç. Dolandyryş paneli üýtgeşmeler žurnaly açyk galýar.",
+            ["ru-RU"] = "Не добавлять строки сводки изменений вверху листов Excel. Журнал изменений на панели остаётся включённым.",
+        },
         ["ReportDashboard.Chrome.ExcelBundleCreate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Create file",
@@ -12324,6 +12338,132 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu tabloyu Excel olarak indir",
             ["tk-TM"] = "Bu tablisany Excel edip göçür",
             ["ru-RU"] = "Скачать эту таблицу в Excel",
+        },
+        ["ReportDashboard.Chrome.RosterDiffTableMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Roster change log is not ready yet. Refresh the page after the app recreates the table, then open Excel again.",
+            ["tr-TR"] = "Rapor değişiklik tablosu yok. Tablonun oluşması için uygulamayı bir kez yeniden başlatın, sonra Excel’i tekrar deneyin.",
+            ["tk-TM"] = "Hasabat üýtgeşme tablisasy ýok. Döremegi üçin programmamy bir gezek täzeden başladyň, soň Excel-i synap görüň.",
+            ["ru-RU"] = "Таблица журнала изменений отчёта отсутствует. Перезапустите приложение один раз для создания таблицы, затем снова откройте Excel.",
+        },
+        ["ReportDashboard.Chrome.RosterDiffNeedBaseline"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open in Excel once to start tracking who is added or removed on the next export.",
+            ["tr-TR"] = "Sonraki Excel’de kimlerin eklendiğini/çıktığını izlemek için bir kez Excel’de açın.",
+            ["tk-TM"] = "Indiki Excel-de kim goşulandygyny/aýrylandygyny yzarlamak üçin bir gezek Excel-de açyň.",
+            ["ru-RU"] = "Откройте в Excel один раз, чтобы отслеживать добавления и удаления при следующем экспорте.",
+        },
+        ["ReportDashboard.Chrome.RosterDiffBaselineSaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excel baseline saved. After the roster changes, open Excel again to see who moved.",
+            ["tr-TR"] = "Excel tabanı kaydedildi. Liste değişince tekrar Excel’de açın; kimlerin değiştiğini görün.",
+            ["tk-TM"] = "Excel bazasy ýazdy. Sanaw üýtgände ýene Excel-de açyň — kim üýtgänini görersiňiz.",
+            ["ru-RU"] = "База Excel сохранена. После изменения списка снова откройте Excel, чтобы увидеть, кто изменился.",
+        },
+        ["ReportDashboard.Chrome.RosterDiffLastChange"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Last change",
+            ["tr-TR"] = "Son değişiklik",
+            ["tk-TM"] = "Soňky üýtgeme",
+            ["ru-RU"] = "Последнее изменение",
+        },
+        ["ReportDashboard.Chrome.RosterDiffDataBucket"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Data changes",
+            ["tr-TR"] = "Veri değişiklikleri",
+            ["tk-TM"] = "Maglumat üýtgeşmeleri",
+            ["ru-RU"] = "Изменения данных",
+        },
+        ["ReportDashboard.Chrome.RosterDiffDateBucket"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date / filter changes",
+            ["tr-TR"] = "Tarih / filtre değişiklikleri",
+            ["tk-TM"] = "Sene / filtr üýtgeşmeleri",
+            ["ru-RU"] = "Изменения даты / фильтра",
+        },
+        ["ReportDashboard.Chrome.RosterDiffNoMoves"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No membership changes",
+            ["tr-TR"] = "Üyelik değişikliği yok",
+            ["tk-TM"] = "Agzalyk üýtgemesi ýok",
+            ["ru-RU"] = "Состав не изменился",
+        },
+        ["ReportDashboard.Chrome.RosterDiffExportId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Export",
+            ["tr-TR"] = "Dışa aktarma",
+            ["tk-TM"] = "Eksport",
+            ["ru-RU"] = "Экспорт",
+        },
+        ["ReportDashboard.Chrome.RosterDiffBanner"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changes since last Excel",
+            ["tr-TR"] = "Son Excel’den bu yana değişiklikler",
+            ["tk-TM"] = "Soňky Excel-den bäri üýtgeşmeler",
+            ["ru-RU"] = "Изменения с прошлого Excel",
+        },
+        ["ReportDashboard.Chrome.RosterDiffView"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View changes",
+            ["tr-TR"] = "Değişiklikleri gör",
+            ["tk-TM"] = "Üýtgeşmeleri gör",
+            ["ru-RU"] = "Смотреть изменения",
+        },
+        ["ReportDashboard.Chrome.RosterDiffTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changes since last Excel",
+            ["tr-TR"] = "Son Excel’den bu yana değişiklikler",
+            ["tk-TM"] = "Soňky Excel-den bäri üýtgeşmeler",
+            ["ru-RU"] = "Изменения с прошлого Excel",
+        },
+        ["ReportDashboard.Chrome.RosterDiffAdded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Added",
+            ["tr-TR"] = "Eklenen",
+            ["tk-TM"] = "Goşulan",
+            ["ru-RU"] = "Добавлены",
+        },
+        ["ReportDashboard.Chrome.RosterDiffRemoved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Removed",
+            ["tr-TR"] = "Çıkan",
+            ["tk-TM"] = "Aýrylan",
+            ["ru-RU"] = "Удалены",
+        },
+        ["ReportDashboard.Chrome.RosterDiffNoneAdded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No people added",
+            ["tr-TR"] = "Eklenen kişi yok",
+            ["tk-TM"] = "Goşulan adam ýok",
+            ["ru-RU"] = "Никто не добавлен",
+        },
+        ["ReportDashboard.Chrome.RosterDiffNoneRemoved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No people removed",
+            ["tr-TR"] = "Çıkan kişi yok",
+            ["tk-TM"] = "Aýrylan adam ýok",
+            ["ru-RU"] = "Никто не удалён",
+        },
+        ["ReportDashboard.Chrome.RosterDiffMembershipNote"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Membership only — field edits are not listed.",
+            ["tr-TR"] = "Yalnız üyelik — alan değişiklikleri listelenmez.",
+            ["tk-TM"] = "Diňe agzalyk — meýdan üýtgeşmeleri görkezilmeýär.",
+            ["ru-RU"] = "Только состав — правки полей не показаны.",
+        },
+        ["ReportDashboard.Chrome.RosterDiffClose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["ReportDashboard.Chrome.RosterDiffVsLast"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "vs last Excel",
+            ["tr-TR"] = "son Excel’e göre",
+            ["tk-TM"] = "soňky Excel bilen",
+            ["ru-RU"] = "к прошлому Excel",
         },
         ["ReportDashboard.Chrome.ExcludeNonPositiveDaysRemaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
