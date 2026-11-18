@@ -350,6 +350,84 @@ public class ApplicationProfileInstancePersonValidItemsTests
     }
 
     [Fact]
+    public void PassportChoices_ActiveOnlyHidesExpired()
+    {
+        var live = new Passport
+        {
+            ID = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            PassportNumber = "U1",
+            IssueDate = Today.AddYears(-1),
+            ExpirationDate = Today.AddYears(5),
+        };
+        var expired = new Passport
+        {
+            ID = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            PassportNumber = "U2",
+            IssueDate = Today.AddYears(-10),
+            ExpirationDate = Today.AddDays(-1),
+        };
+
+        var choices = PersonLinkReview.PassportChoices(new[] { expired, live });
+        Assert.True(choices.Single(c => c.ObjectId == live.ID).Active);
+        Assert.False(choices.Single(c => c.ObjectId == expired.ID).Active);
+
+        var line = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.Passport,
+            ObjectId = live.ID,
+            Choices = choices,
+        };
+        Assert.Equal(1, PersonLinkReview.ChoicesForManualPick(line, activeOnly: true).Count);
+        Assert.Equal(2, PersonLinkReview.ChoicesForManualPick(line, activeOnly: false).Count);
+    }
+
+    [Fact]
+    public void InvitationChoices_ActiveUsesLinkableRule()
+    {
+        var live = new InvitationItem
+        {
+            ID = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+            InvitationItemName = "Live invitation",
+            Invitation = new Invitation
+            {
+                IssuedDate = Today.AddMonths(-1),
+                ExpirationDate = Today.AddMonths(6),
+            },
+        };
+        var expired = new InvitationItem
+        {
+            ID = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+            InvitationItemName = "Expired invitation",
+            Invitation = new Invitation
+            {
+                IssuedDate = Today.AddYears(-1),
+                ExpirationDate = Today.AddDays(-1),
+            },
+        };
+
+        var choices = PersonLinkReview.InvitationChoices(new[] { expired, live });
+        Assert.True(choices.Single(c => c.ObjectId == live.ID).Active);
+        Assert.False(choices.Single(c => c.ObjectId == expired.ID).Active);
+
+        var educationLine = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.Education,
+            ObjectId = Guid.NewGuid(),
+            Choices = new[]
+            {
+                new PersonLinkReviewChoice { ObjectId = Guid.NewGuid(), Label = "A", Active = true },
+                new PersonLinkReviewChoice { ObjectId = Guid.NewGuid(), Label = "B", Active = false },
+            },
+        };
+        Assert.Equal(2, PersonLinkReview.ChoicesForManualPick(educationLine, activeOnly: true).Count);
+        Assert.False(PersonLinkReview.ManualActiveFilterApplies(educationLine));
+        Assert.True(PersonLinkReview.ManualActiveFilterApplies(new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.InvitationItem,
+        }));
+    }
+
+    [Fact]
     public void ResolveVisas_TakesLastTwoValidSkipsExpiredAndCancelled()
     {
         var person = new Person();

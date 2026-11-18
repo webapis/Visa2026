@@ -761,12 +761,10 @@ public static partial class PersonLinkReview
         ApplicationProfileInstancePersonLinkKind kind,
         Guid personId) => kind switch
     {
-        ApplicationProfileInstancePersonLinkKind.Passport => objectSpace.GetObjectsQuery<Passport>()
-            .Where(row => row.Person != null && row.Person.ID == personId)
-            .OrderByDescending(row => row.ID)
-            .AsEnumerable()
-            .Select(row => Choice(row.ID, PassportSummary(row).Summary, PassportFields(row)))
-            .ToList(),
+        ApplicationProfileInstancePersonLinkKind.Passport => PassportChoices(
+            objectSpace.GetObjectsQuery<Passport>()
+                .Where(row => row.Person != null && row.Person.ID == personId)
+                .ToList()),
         ApplicationProfileInstancePersonLinkKind.Education => objectSpace.GetObjectsQuery<Education>()
             .Where(row => row.Person != null && row.Person.ID == personId)
             .OrderByDescending(row => row.ID)
@@ -783,12 +781,39 @@ public static partial class PersonLinkReview
             objectSpace.GetObjectsQuery<Visa>()
                 .Where(row => row.Passport != null && row.Passport.Person != null && row.Passport.Person.ID == personId)
                 .ToList()),
+        ApplicationProfileInstancePersonLinkKind.InvitationItem => InvitationChoices(
+            objectSpace.GetObjectsQuery<InvitationItem>()
+                .Where(row => row.Person != null && row.Person.ID == personId)
+                .ToList()),
         ApplicationProfileInstancePersonLinkKind.WorkPermitItem => WorkPermitChoices(
             objectSpace.GetObjectsQuery<WorkPermitItem>()
                 .Where(row => row.Person != null && row.Person.ID == personId)
                 .ToList()),
+        ApplicationProfileInstancePersonLinkKind.BorderZoneItem => BorderZoneChoices(
+            objectSpace.GetObjectsQuery<BorderZoneItem>()
+                .Where(row => row.Person != null && row.Person.ID == personId)
+                .ToList()),
+        ApplicationProfileInstancePersonLinkKind.MedicalRecord => MedicalChoices(
+            objectSpace.GetObjectsQuery<MedicalRecord>()
+                .Where(row => row.Person != null && row.Person.ID == personId)
+                .ToList()),
         _ => Array.Empty<PersonLinkReviewChoice>(),
     };
+
+    /// <summary>
+    /// Every passport for the manual dropdown. Active means expiration empty or still in date.
+    /// Auto-link may still pick an expired booklet; Active only hides those until cleared.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> PassportChoices(IEnumerable<Passport>? items) =>
+        (items ?? Array.Empty<Passport>())
+            .OrderByDescending(row => row.IssueDate ?? DateTime.MinValue)
+            .ThenByDescending(row => row.ID)
+            .Select(row => Choice(
+                row.ID,
+                PassportSummary(row).Summary,
+                PassportFields(row),
+                IsPassportInDate(row)))
+            .ToList();
 
     /// <summary>
     /// Every visa for the manual dropdown. <see cref="PersonLinkReviewChoice.Active"/> is the default filter.
@@ -803,6 +828,21 @@ public static partial class PersonLinkReview
                 VisaSummary(row).Summary,
                 VisaFields(row),
                 ApplicationProfileInstancePersonValidItems.CanLinkVisa(row)))
+            .ToList();
+
+    /// <summary>
+    /// Every invitation line for the manual dropdown.
+    /// Active means still linkable: not cancelled, not changed, not used, and not expired.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> InvitationChoices(IEnumerable<InvitationItem>? items) =>
+        (items ?? Array.Empty<InvitationItem>())
+            .OrderByDescending(row => row.Invitation?.IssuedDate ?? default)
+            .ThenByDescending(row => row.ID)
+            .Select(row => Choice(
+                row.ID,
+                InvitationSummary(row).Summary,
+                TextFields(ApplicationProfileLocalization.LinkedRecordLabel("Invitation"), InvitationSummary(row).Summary),
+                ApplicationProfileInstancePersonValidItems.CanLinkInvitationItem(row)))
             .ToList();
 
     /// <summary>
@@ -824,16 +864,59 @@ public static partial class PersonLinkReview
     public static IReadOnlyList<PersonLinkReviewChoice> ActiveWorkPermitChoices(IEnumerable<WorkPermitItem>? items) =>
         WorkPermitChoices(items).Where(choice => choice.Active).ToList();
 
-    /// <summary>Visa and work permit rows can be narrowed while the officer picks by hand.</summary>
+    /// <summary>
+    /// Every border-zone item for the manual dropdown.
+    /// Active means still linkable: not cancelled, not changed, and not expired.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> BorderZoneChoices(IEnumerable<BorderZoneItem>? items) =>
+        (items ?? Array.Empty<BorderZoneItem>())
+            .OrderByDescending(row => row.ID)
+            .Select(row =>
+            {
+                var summary = JoinParts(row.Passport?.PassportNumber, DateText(row.BorderZone?.ExpirationDate));
+                return Choice(
+                    row.ID,
+                    summary,
+                    TextFields(ApplicationProfileLocalization.LinkedRecordLabel("Border zone"), summary),
+                    ApplicationProfileInstancePersonValidItems.CanLinkBorderZoneItem(row));
+            })
+            .ToList();
+
+    /// <summary>
+    /// Every medical record for the manual dropdown. Active means not expired.
+    /// </summary>
+    public static IReadOnlyList<PersonLinkReviewChoice> MedicalChoices(IEnumerable<MedicalRecord>? items) =>
+        (items ?? Array.Empty<MedicalRecord>())
+            .OrderByDescending(row => row.IssueDate)
+            .ThenByDescending(row => row.ID)
+            .Select(row =>
+            {
+                var summary = DateText(row.IssueDate) ?? "—";
+                return Choice(
+                    row.ID,
+                    summary,
+                    TextFields(ApplicationProfileLocalization.LinkedRecordLabel("Medical"), summary == "—" ? string.Empty : summary),
+                    ApplicationProfileInstancePersonValidItems.CanLinkMedicalRecord(row));
+            })
+            .ToList();
+
+    /// <summary>
+    /// Dated / lifecycle rows can be narrowed while the officer picks by hand.
+    /// Education, position, address, and other undated rows always list every choice.
+    /// </summary>
     public static bool ManualActiveFilterApplies(PersonLinkReviewLine? line) =>
         line != null
         && !line.OmitFromJoin
-        && line.Kind is ApplicationProfileInstancePersonLinkKind.Visa
-            or ApplicationProfileInstancePersonLinkKind.WorkPermitItem;
+        && line.Kind is ApplicationProfileInstancePersonLinkKind.Passport
+            or ApplicationProfileInstancePersonLinkKind.Visa
+            or ApplicationProfileInstancePersonLinkKind.InvitationItem
+            or ApplicationProfileInstancePersonLinkKind.WorkPermitItem
+            or ApplicationProfileInstancePersonLinkKind.BorderZoneItem
+            or ApplicationProfileInstancePersonLinkKind.MedicalRecord;
 
     /// <summary>
     /// Gear-on dropdown. Active-only keeps active rows and the value already selected.
-    /// Other record types, and an unchecked box, list every choice.
+    /// Education / position / address, and an unchecked box, list every choice.
     /// </summary>
     public static IReadOnlyList<PersonLinkReviewChoice> ChoicesForManualPick(PersonLinkReviewLine? line, bool activeOnly)
     {
@@ -846,6 +929,18 @@ public static partial class PersonLinkReview
             .Where(choice => choice.Active || choice.ObjectId == line.ObjectId)
             .ToList();
     }
+
+    private static bool IsPassportInDate(Passport? passport, DateTime? asOf = null)
+    {
+        if (passport == null)
+            return false;
+        if (!passport.ExpirationDate.HasValue || passport.ExpirationDate.Value == default)
+            return true;
+        return passport.ExpirationDate.Value.Date >= (asOf ?? DateTime.Today).Date;
+    }
+
+    private static (string Summary, Guid? Id) InvitationSummary(InvitationItem? item) =>
+        (item?.InvitationItemName?.Trim() ?? "—", item?.ID);
 
     public static PersonLinkReviewLine? FindChoiceLine(
         IEnumerable<PersonLinkReviewLine>? lines,
@@ -888,7 +983,7 @@ public static partial class PersonLinkReview
         {
             case ApplicationProfileInstancePersonLinkKind.Passport:
                 var passport = objectSpace.GetObjectByKey<Passport>(objectId);
-                return passport == null ? null : Choice(passport.ID, PassportSummary(passport).Summary, PassportFields(passport));
+                return passport == null ? null : PassportChoices(new[] { passport }).FirstOrDefault();
             case ApplicationProfileInstancePersonLinkKind.Education:
                 var education = objectSpace.GetObjectByKey<Education>(objectId);
                 return education == null ? null : Choice(education.ID, EducationSummary(education).Summary, EducationFields(education));
@@ -898,9 +993,18 @@ public static partial class PersonLinkReview
             case ApplicationProfileInstancePersonLinkKind.Visa:
                 var visa = objectSpace.GetObjectByKey<Visa>(objectId);
                 return visa == null ? null : VisaChoices(new[] { visa }).FirstOrDefault();
+            case ApplicationProfileInstancePersonLinkKind.InvitationItem:
+                var invitation = objectSpace.GetObjectByKey<InvitationItem>(objectId);
+                return invitation == null ? null : InvitationChoices(new[] { invitation }).FirstOrDefault();
             case ApplicationProfileInstancePersonLinkKind.WorkPermitItem:
                 var workPermit = objectSpace.GetObjectByKey<WorkPermitItem>(objectId);
                 return workPermit == null ? null : WorkPermitChoices(new[] { workPermit }).FirstOrDefault();
+            case ApplicationProfileInstancePersonLinkKind.BorderZoneItem:
+                var borderZone = objectSpace.GetObjectByKey<BorderZoneItem>(objectId);
+                return borderZone == null ? null : BorderZoneChoices(new[] { borderZone }).FirstOrDefault();
+            case ApplicationProfileInstancePersonLinkKind.MedicalRecord:
+                var medical = objectSpace.GetObjectByKey<MedicalRecord>(objectId);
+                return medical == null ? null : MedicalChoices(new[] { medical }).FirstOrDefault();
             case ApplicationProfileInstancePersonLinkKind.AddressOfResidence:
                 var address = objectSpace.GetObjectByKey<AddressOfResidence>(objectId);
                 return address == null ? null : Choice(address.ID, AddressSummary(address), AddressFields(address));

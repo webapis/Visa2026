@@ -183,6 +183,13 @@
 - **Fix**: Link allow-list no longer drops all excluded people — only same **Submit to organization** destination blocks a second link. Submit-to is required before Link. Changing Submit-to to a conflicting destination (or clearing it while people are linked) fails save. Picker shows “Already on Seretmezlik …”. Target ListView / People badges list both numbers on one chip with double overline when count > 1. Application Result exclusion unchanged.
 - **Officer**: Set Submit-to on the second Seretmezlik first, then Link existing — Alperen appears with a note. Target list shows both Seretmezlik numbers on one red chip.
 - **Prevent**: Do not reintroduce “already excluded on target → cannot link”. Do not allow same destination twice for the same person+target.
+## 2026-11-18 — Active only on every Linked records gear, including Change invitation
+
+- **Need**: Change invitation (Passport / Education / Position / Invitation) had no **Active only** box. The control only appeared when Visa or Work permit rows were present.
+- **Fix**: With the gear on, **Active only** always shows. It filters Passport (not expired), Invitation / Visa / Work permit / Border zone / Medical (same linkable rules). Education and Position keep every record. Invitation dropdown lists every invitation line, not only the auto-picked one.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Change invitation → Linked records → gear. **Active only** is beside the gear. Invitation lists linkable lines; clear the box for history.
+- **Prevent**: Do not gate the checkbox on Visa/Work permit kinds only.
+
 ## 2026-11-13 — Manual Linked records lists can show active visas and work permits only
 
 - **Need**: Gear on Linked records is how an officer sets Visa or Work permit by hand. Those dropdowns listed one auto-picked permit, or every historical visa. Join without the gear still uses the automatic Last-N value.

@@ -2823,7 +2823,7 @@
                         }
                         <span class="os-link-review-person__name">@(string.IsNullOrWhiteSpace(PersonLinkReviewPersonName) ? "—" : PersonLinkReviewPersonName)</span>
                         <span class="os-link-review-person__tools">
-                            @if (_reviewGearOn && PersonLinkReviewLines.Any(PersonLinkReview.ManualActiveFilterApplies))
+                            @if (_reviewGearOn)
                             {
                                 <label class="os-link-review-active">
                                     <input type="checkbox"
