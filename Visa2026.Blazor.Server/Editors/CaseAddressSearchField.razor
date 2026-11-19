@@ -1,0 +1,142 @@
+@using DevExpress.Blazor
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.ReportDashboard
+
+<div class="cw-summary-address-block">
+    @if (ReadOnly)
+    {
+        <div class="cw-summary-field__input cw-summary-address-edit-label">
+            @(string.IsNullOrWhiteSpace(DisplayValue) || DisplayValue == "—" ? "—" : DisplayValue)
+        </div>
+    }
+    else
+    {
+        <div class="cw-summary-lookup-row cw-summary-lookup-row--address">
+            <DxComboBox Data="@_filtered"
+                        Value="@BoundValue"
+                        ValueChanged="@(EventCallback.Factory.Create<Guid>(this, HandleValueChanged))"
+                        ValueFieldName="@nameof(ApplicationWorkspaceLookupOption.Id)"
+                        TextFieldName="@nameof(ApplicationWorkspaceLookupOption.DisplayName)"
+                        CssClass="cw-summary-field__input cw-summary-address-search"
+                        DropDownCssClass="cw-summary-address-search-drop"
+                        NullText="@NullText"
+                        AllowUserInput="true"
+                        SearchMode="ListSearchMode.None"
+                        SearchText="@_search"
+                        SearchTextChanged="OnSearchTextChanged"
+                        DropDownVisibleChanged="OnDropDownVisibleChanged"
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                        DropDownWidthMode="DropDownWidthMode.ContentOrEditorWidth"
+                        Enabled="@Enabled"
+                        ReadOnly="@ReadOnly">
+                <EditBoxDisplayTemplate Context="editContext">
+                    @{
+                        var selected = editContext.DataItem as ApplicationWorkspaceLookupOption;
+                        var label = !string.IsNullOrWhiteSpace(selected?.DisplayName)
+                            ? selected!.DisplayName
+                            : DisplayValue;
+                    }
+                    <div class="cw-summary-address-combo-edit">
+                        @if (!string.IsNullOrWhiteSpace(label) && label != "—")
+                        {
+                            <div class="cw-summary-address-edit-label">@label</div>
+                        }
+                        <DxInputBox />
+                    </div>
+                </EditBoxDisplayTemplate>
+                <ItemDisplayTemplate Context="itemContext">
+                    @{
+                        var option = itemContext.DataItem as ApplicationWorkspaceLookupOption;
+                    }
+                    <div class="cw-summary-address-item">@(option?.DisplayName ?? "—")</div>
+                </ItemDisplayTemplate>
+            </DxComboBox>
+            @Actions
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<ApplicationWorkspaceLookupOption> Options { get; set; } =
+        Array.Empty<ApplicationWorkspaceLookupOption>();
+    [Parameter] public Guid? Value { get; set; }
+    [Parameter] public EventCallback<Guid?> ValueChanged { get; set; }
+    [Parameter] public string? DisplayValue { get; set; }
+    [Parameter] public string NullText { get; set; } = "— Select —";
+    [Parameter] public bool Enabled { get; set; } = true;
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+
+    private Guid BoundValue => Value ?? Guid.Empty;
+    private string _search = string.Empty;
+    private List<ApplicationWorkspaceLookupOption> _filtered = new();
+    private IReadOnlyList<ApplicationWorkspaceLookupOption>? _lastOptions;
+
+    protected override void OnParametersSet()
+    {
+        if (!ReferenceEquals(Options, _lastOptions))
+        {
+            _lastOptions = Options;
+            ApplyFilter();
+        }
+    }
+
+    private void OnSearchTextChanged(string searchText)
+    {
+        // Ignore echoes of the selected DisplayName so opening the field does not filter to one row.
+        if (!string.IsNullOrWhiteSpace(searchText)
+            && (string.Equals(searchText, DisplayValue, StringComparison.Ordinal)
+                || Options.Any(option => string.Equals(option.DisplayName, searchText, StringComparison.Ordinal))))
+        {
+            _search = string.Empty;
+            ApplyFilter();
+            return;
+        }
+
+        _search = searchText ?? string.Empty;
+        ApplyFilter();
+    }
+
+    private void OnDropDownVisibleChanged(bool visible)
+    {
+        if (!visible)
+            return;
+        _search = string.Empty;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var source = Options?.ToList() ?? new List<ApplicationWorkspaceLookupOption>();
+        if (string.IsNullOrWhiteSpace(_search))
+        {
+            _filtered = source;
+            return;
+        }
+
+        var needle = PersonSearchTextNormalizer.Fold(_search);
+        _filtered = source
+            .Where(option =>
+            {
+                var display = option.DisplayName ?? string.Empty;
+                var folded = PersonSearchTextNormalizer.Fold(display);
+                if (!string.IsNullOrEmpty(needle) && folded.Contains(needle, StringComparison.Ordinal))
+                    return true;
+                if (display.Contains(_search, StringComparison.OrdinalIgnoreCase))
+                    return true;
+                var haystack = option.SearchText ?? string.Empty;
+                return !string.IsNullOrEmpty(needle)
+                    && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+            })
+            .ToList();
+    }
+
+    private Task HandleValueChanged(Guid id)
+    {
+        _search = string.Empty;
+        ApplyFilter();
+        return ValueChanged.HasDelegate
+            ? ValueChanged.InvokeAsync(id == Guid.Empty ? null : id)
+            : Task.CompletedTask;
+    }
+}

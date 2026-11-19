@@ -1600,6 +1600,20 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInLookupListView(false)]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
 
+        /// <summary>Case summary Address 1 (owned AoR with RosterPerson null).</summary>
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Address 1")]
+        public virtual AddressOfResidence? Address1 { get; set; }
+
+        /// <summary>Case summary Address 2 (owned AoR with RosterPerson null).</summary>
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Address 2")]
+        public virtual AddressOfResidence? Address2 { get; set; }
+
         /// <summary>First stay plus optional alternative-address text. One row per case.</summary>
         [Aggregated]
         [InverseProperty(nameof(InvitationAddress.ApplicationProfileInstance))]

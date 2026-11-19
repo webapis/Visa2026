@@ -1580,6 +1580,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Soralýan serhet sebiti ýeri",
             ["ru-RU"] = "Запрашиваемая пограничная зона",
         },
+        ["ApplicationProfile.Field.Address1"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address 1",
+            ["tr-TR"] = "Adres 1",
+            ["tk-TM"] = "Salgy 1",
+            ["ru-RU"] = "Адрес 1",
+        },
+        ["ApplicationProfile.Field.Address2"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address 2",
+            ["tr-TR"] = "Adres 2",
+            ["tk-TM"] = "Salgy 2",
+            ["ru-RU"] = "Адрес 2",
+        },
+        ["ApplicationProfile.Field.AddressCaseDefault"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Case default",
+            ["tr-TR"] = "Dosya varsayılanı",
+            ["tk-TM"] = "Iş boýunça standart",
+            ["ru-RU"] = "По умолчанию для дела",
+        },
         ["ApplicationProfile.Field.BusinessTripAddress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Business trip address",
@@ -2119,6 +2140,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýaşaýyş salgysy",
             ["ru-RU"] = "Адрес проживания",
         },
+        ["ApplicationProfile.Person.AddressOfResidence1"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address 1",
+            ["tr-TR"] = "Adres 1",
+            ["tk-TM"] = "Salgysy 1",
+            ["ru-RU"] = "Адрес 1",
+        },
+        ["ApplicationProfile.Person.AddressOfResidence2"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address 2",
+            ["tr-TR"] = "Adres 2",
+            ["tk-TM"] = "Salgysy 2",
+            ["ru-RU"] = "Адрес 2",
+        },
         ["ApplicationProfile.Person.BorderZoneItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Border zone item",
@@ -2576,10 +2611,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProfile.Wizard.PersonHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Last 1–3 is only for Passport, Visa, Invitation, Work permit, and Border zone. Other types stay one current row. Missing rows are flagged; they do not block create.",
-            ["tr-TR"] = "Son 1–3 yalnızca Pasaport, Vize, Davet, Çalışma izni ve Sınır bölgesi içindir. Diğer türler tek güncel satır kalır. Eksikler işaretlenir; oluşturmayı engellemez.",
-            ["tk-TM"] = "Soňky 1–3 diňe Pasport, Wiza, Çakylyk, Iş rugsady we Serhet sebiti üçin. Beýlekiler bir häzirki setir. Ýetmezçilikler bellenýär; döretmegi gadagan etmeýär.",
-            ["ru-RU"] = "Последние 1–3 только для паспорта, визы, приглашения, РНТ и погранзоны. Остальные — одна текущая запись. Недостаток помечается и не блокирует создание.",
+            ["en-US"] = "Last 1–3 is for Passport, Visa, Invitation, Work permit, and Border zone. Address of residence allows Last 1–2 (slot 2 optional). Other types stay one current row. Missing required rows are flagged; they do not block create.",
+            ["tr-TR"] = "Son 1–3 Pasaport, Vize, Davet, Çalışma izni ve Sınır bölgesi içindir. İkamet adresi Son 1–2 (2. slot isteğe bağlı). Diğer türler tek güncel satır. Zorunlu eksikler işaretlenir; oluşturmayı engellemez.",
+            ["tk-TM"] = "Soňky 1–3 Pasport, Wiza, Çakylyk, Iş rugsady we Serhet sebiti üçin. Ýaşaýyş salgysy Soňky 1–2 (2-nji slot islege bagly). Beýlekiler bir häzirki setir. Hökmany ýetmezçilikler bellenýär; döretmegi gadagan etmeýär.",
+            ["ru-RU"] = "Последние 1–3 для паспорта, визы, приглашения, РНТ и погранзоны. Адрес проживания — 1–2 (слот 2 необязателен). Остальные — одна текущая. Недостаток обязательных помечается и не блокирует создание.",
         },
         ["ApplicationProfile.Wizard.PersonIntro"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -44,10 +44,17 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
             trackedPerson?.ID ?? Guid.Empty);
 
         var idsByKind = new Dictionary<ApplicationProfileInstancePersonLinkKind, List<Guid>>();
+        var addressBySlot = new Dictionary<int, Guid>();
         foreach (var link in links)
         {
             if (link?.LinkKind is not { } kind || link.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
                 continue;
+            if (kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            {
+                var slot = link.LinkSlotIndex > 0 ? link.LinkSlotIndex : 1;
+                addressBySlot[slot] = linkedId;
+            }
+
             if (!idsByKind.TryGetValue(kind, out var ids))
             {
                 ids = [];
@@ -63,7 +70,7 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
         AssignWorkPermits(objectSpace, item, idsByKind);
         item.CurrentEducation = First<Education>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Education)
             ?? PersonCurrentItems.GetCurrentEducation(trackedPerson);
-        item.CurrentAddressOfResidence = First<AddressOfResidence>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.AddressOfResidence);
+        AssignAddresses(objectSpace, item, addressBySlot, idsByKind);
         item.CurrentPositionHistory = FamilyMemberSponsorPositionCaption.UsesSponsorPosition(trackedPerson)
             ? PersonCurrentItems.GetCurrentPositionHistory(trackedPerson.SponsoringEmployee)
             : First<EmployeePositionHistory>(objectSpace, idsByKind, ApplicationProfileInstancePersonLinkKind.Position);
@@ -76,6 +83,29 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
             .FirstOrDefault();
 
         return item;
+    }
+
+    private static void AssignAddresses(
+        IObjectSpace objectSpace,
+        ApplicationRosterMergeLine item,
+        Dictionary<int, Guid> addressBySlot,
+        Dictionary<ApplicationProfileInstancePersonLinkKind, List<Guid>> idsByKind)
+    {
+        _ = idsByKind;
+        var application = item.ApplicationProfileInstance;
+        var person = item.Person;
+
+        if (addressBySlot.TryGetValue(1, out var slot1Id))
+            item.CurrentAddressOfResidence = objectSpace.GetObjectByKey<AddressOfResidence>(slot1Id);
+        else
+            item.CurrentAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+                application, person, ApplicationProfileInstanceAddressResolver.Slot1, objectSpace);
+
+        if (addressBySlot.TryGetValue(2, out var slot2Id))
+            item.SecondAddressOfResidence = objectSpace.GetObjectByKey<AddressOfResidence>(slot2Id);
+        else
+            item.SecondAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+                application, person, ApplicationProfileInstanceAddressResolver.Slot2, objectSpace);
     }
 
     private static void AssignPassports(

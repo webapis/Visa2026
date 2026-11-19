@@ -658,8 +658,16 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<MedicalRecord> MedicalRecords { get; set; }
 
+        /// <summary>
+        /// Legacy Person inventory of addresses. Officer UI removed — addresses are case-owned
+        /// (<see cref="AddressOfResidence.OwningApplicationProfileInstance"/>).
+        /// </summary>
         [InverseProperty(nameof(AddressOfResidence.Person))]
         [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [Browsable(false)]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
 
         /// <summary>Employee person file copies (e.g. CV); hidden for family members. May be empty.</summary>

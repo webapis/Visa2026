@@ -177,6 +177,16 @@ public partial class ApplicationProfileInstance
 
     [Browsable(false)]
     [NotMapped]
+    public bool CfgShowAddress1 =>
+        ApplicationProfileConfigurationResolver.ShowAddress1(this);
+
+    [Browsable(false)]
+    [NotMapped]
+    public bool CfgShowAddress2 =>
+        ApplicationProfileConfigurationResolver.ShowAddress2(this);
+
+    [Browsable(false)]
+    [NotMapped]
     public bool CfgShowCurrentAddressOfResidence =>
         ApplicationProfileConfigurationResolver.ShowCurrentAddressOfResidence(this);
 

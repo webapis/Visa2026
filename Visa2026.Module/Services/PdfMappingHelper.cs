@@ -358,13 +358,28 @@ namespace Visa2026.Module.Services
         internal const string InvitationStayAddressKey = "topmostSubform[0].Page2[0]._35[0]";
 
         /// <summary>
-        /// When the profile shows Invitation address, fields 33–35 come from the case stay.
+        /// Fields 33–35: case Address 1 when required; legacy InvitationAddress only as dual-read fallback.
         /// Otherwise the seeded address-of-residence mappings are left as they were.
         /// </summary>
         private static void ApplyInvitationStayFields(Dictionary<string, object> data, ApplicationProfileInstance application)
         {
-            if (application?.ApplicationProfile?.RequireInvitationAddress != true)
+            var profile = application?.ApplicationProfile;
+            if (profile == null)
                 return;
+
+            var address1 = application.Address1;
+            if (profile.RequireAddress1 && address1 != null)
+            {
+                SetInvitationStayField(data, InvitationStayRegionKey, address1.Region?.PdfForm_Code);
+                SetInvitationStayField(data, InvitationStayCityKey, address1.City?.PdfForm_Code);
+                SetInvitationStayField(data, InvitationStayAddressKey, address1.FullAddress);
+                return;
+            }
+
+#pragma warning disable CS0618
+            if (profile.RequireInvitationAddress != true)
+                return;
+#pragma warning restore CS0618
 
             var stay = application.InvitationAddress;
             SetInvitationStayField(data, InvitationStayRegionKey, stay?.Region?.PdfForm_Code);

@@ -64,5 +64,23 @@ public class ApplicationProfileCalikPersonLastCountSeedsTests
         ApplicationProfileCalikPersonLastCountSeeds.Apply(row);
         Assert.Equal(1, row.PersonPassportLastCount);
         Assert.Equal(1, row.PersonVisaLastCount);
+        Assert.Equal(1, row.PersonAddressOfResidenceMaxCount);
+    }
+
+    [Fact]
+    public void Apply_GetInvitation_AddressMaxTwo()
+    {
+        var row = new ApplicationProfileTenantCatalogRow { Code = "get_invitation" };
+        ApplicationProfileCalikPersonLastCountSeeds.Apply(row);
+        Assert.Equal(2, row.PersonAddressOfResidenceMaxCount);
+        Assert.Equal(1, row.PersonPassportLastCount);
+    }
+
+    [Fact]
+    public void Apply_GetInvitationWp_AddressMaxStaysOne()
+    {
+        var row = new ApplicationProfileTenantCatalogRow { Code = "get_invitation_wp" };
+        ApplicationProfileCalikPersonLastCountSeeds.Apply(row);
+        Assert.Equal(1, row.PersonAddressOfResidenceMaxCount);
     }
 }

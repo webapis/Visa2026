@@ -775,6 +775,16 @@ namespace Visa2026.Module.BusinessObjects
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
 #pragma warning restore CS0618
+                b.HasOne(a => a.Address1)
+                    .WithMany()
+                    .HasForeignKey("Address1Id")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.Address2)
+                    .WithMany()
+                    .HasForeignKey("Address2Id")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(a => a.BusinessTripLodging)
                     .WithMany()
                     .HasForeignKey("BusinessTripLodgingId")
@@ -1076,6 +1086,30 @@ namespace Visa2026.Module.BusinessObjects
             ConfigureInstanceChildSkipNav(modelBuilder, a => a.Visas, v => v.ApplicationProfileInstances, "ApplicationProfileInstanceVisas", "VisaId");
             ConfigureInstanceChildSkipNav(modelBuilder, a => a.Educations, e => e.ApplicationProfileInstances, "ApplicationProfileInstanceEducations", "EducationId");
             ConfigureInstanceChildSkipNav(modelBuilder, a => a.AddressesOfResidence, aor => aor.ApplicationProfileInstances, "ApplicationProfileInstanceAddressesOfResidence", "AddressOfResidenceId");
+
+            modelBuilder.Entity<AddressOfResidence>(b =>
+            {
+#pragma warning disable CS0618
+                b.HasOne(a => a.Person)
+                    .WithMany(p => p.AddressesOfResidence)
+                    .HasForeignKey("PersonID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+#pragma warning restore CS0618
+                b.HasOne(a => a.OwningApplicationProfileInstance)
+                    .WithMany()
+                    .HasForeignKey("OwningApplicationProfileInstanceId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.RosterPerson)
+                    .WithMany()
+                    .HasForeignKey("RosterPersonId")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex("OwningApplicationProfileInstanceId");
+                b.HasIndex("RosterPersonId");
+            });
+
             ConfigureInstanceChildSkipNav(modelBuilder, a => a.PositionHistories, p => p.ApplicationProfileInstances, "ApplicationProfileInstanceEmployeePositionHistories", "EmployeePositionHistoryId");
             ConfigureInstanceChildSkipNav(modelBuilder, a => a.Salaries, s => s.ApplicationProfileInstances, "ApplicationProfileInstanceEmployeeSalaries", "EmployeeSalaryId");
             ConfigureInstanceChildSkipNav(modelBuilder, a => a.MedicalRecords, m => m.ApplicationProfileInstances, "ApplicationProfileInstanceMedicalRecords", "MedicalRecordId");

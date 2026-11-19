@@ -54,6 +54,7 @@ public static class ApplicationProfileInstancePersonResolver
             link.ApplicationProfileInstance = trackedApplication;
             link.Person = trackedPerson;
             link.LinkKind = kind;
+            link.LinkSlotIndex = 1;
             link.LinkedObjectId = linkedObjectId;
             trackedApplication.PersonResolvedLinks?.Add(link);
             ApplicationProfileInstanceChildMembership.Add(objectSpace, trackedApplication, kind, linkedObjectId);
@@ -466,7 +467,8 @@ public static class ApplicationProfileInstancePersonResolver
         ApplicationProfileInstance application,
         Person person,
         ApplicationProfileInstancePersonLinkKind kind,
-        Guid linkedObjectId)
+        Guid linkedObjectId,
+        int linkSlotIndex = 1)
     {
         if (objectSpace == null || application == null || person == null || linkedObjectId == Guid.Empty)
             return;
@@ -486,6 +488,13 @@ public static class ApplicationProfileInstancePersonResolver
             && IssuedDocumentLifecycle.IsInvitationItemUsedById(objectSpace, linkedObjectId))
             return;
 
+        if (kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+        {
+            EnsureAddressResolvedLink(
+                objectSpace, trackedApplication, trackedPerson, linkedObjectId, linkSlotIndex);
+            return;
+        }
+
         var existing = LoadLinks(objectSpace, trackedApplication, trackedPerson.ID);
         var lastCount = ApplicationProfilePersonLastCount.For(trackedApplication, kind);
         if (lastCount <= 0)
@@ -498,6 +507,7 @@ public static class ApplicationProfileInstancePersonResolver
         if (decision == EnsureResolvedLinkDecision.FillEmpty && emptyRow != null)
         {
             emptyRow.LinkedObjectId = linkedObjectId;
+            emptyRow.LinkSlotIndex = Math.Max(1, linkSlotIndex);
             ApplicationProfileInstanceChildMembership.Add(objectSpace, trackedApplication, kind, linkedObjectId);
             return;
         }
@@ -506,9 +516,91 @@ public static class ApplicationProfileInstancePersonResolver
         link.ApplicationProfileInstance = trackedApplication;
         link.Person = trackedPerson;
         link.LinkKind = kind;
+        link.LinkSlotIndex = Math.Max(1, linkSlotIndex);
         link.LinkedObjectId = linkedObjectId;
         trackedApplication.PersonResolvedLinks?.Add(link);
         ApplicationProfileInstanceChildMembership.Add(objectSpace, trackedApplication, kind, linkedObjectId);
+    }
+
+    /// <summary>
+    /// Pins an address into a stable slot (1 required, 2 optional). Does not auto-fill slot 2.
+    /// Keeps a slot-2 row when the profile later drops to max 1 (UI hides it).
+    /// </summary>
+    public static void EnsureAddressResolvedLink(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person,
+        Guid linkedObjectId,
+        int linkSlotIndex)
+    {
+        if (objectSpace == null || application == null || person == null || linkedObjectId == Guid.Empty)
+            return;
+
+        var maxSlots = ApplicationProfilePersonAddressMaxCount.For(application);
+        var slot = Math.Max(1, linkSlotIndex);
+        // Allow writing slot 2 even when max is later reduced to 1 only via existing rows;
+        // new slot-2 pins require max >= 2.
+        if (slot > 1 && maxSlots < slot)
+            return;
+        if (slot > ApplicationProfilePersonAddressMaxCount.Max)
+            return;
+
+        var existing = LoadLinks(objectSpace, application, person.ID)
+            .Where(link => link?.LinkKind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            .ToList();
+
+        if (existing.Any(link => link.LinkedObjectId == linkedObjectId
+                && link.LinkSlotIndex != slot))
+        {
+            // Same address cannot occupy two slots.
+            return;
+        }
+
+        var atSlot = existing.FirstOrDefault(link => link.LinkSlotIndex == slot)
+            ?? (slot == 1
+                ? existing.FirstOrDefault(link => link.LinkSlotIndex <= 1)
+                : null);
+
+        if (atSlot != null)
+        {
+            if (atSlot.LinkedObjectId == linkedObjectId)
+            {
+                atSlot.LinkSlotIndex = slot;
+                return;
+            }
+
+            if (!objectSpace.IsNewObject(atSlot))
+                objectSpace.ReloadObject(atSlot);
+
+            if (atSlot.LinkedObjectId is Guid previous && previous != Guid.Empty)
+                ApplicationProfileInstanceChildMembership.Remove(
+                    application,
+                    ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+                    previous,
+                    objectSpace);
+
+            atSlot.LinkSlotIndex = slot;
+            atSlot.LinkedObjectId = linkedObjectId;
+            ApplicationProfileInstanceChildMembership.Add(
+                objectSpace,
+                application,
+                ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+                linkedObjectId);
+            return;
+        }
+
+        var link = objectSpace.CreateObject<ApplicationProfileInstancePersonResolvedLink>();
+        link.ApplicationProfileInstance = application;
+        link.Person = person;
+        link.LinkKind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence;
+        link.LinkSlotIndex = slot;
+        link.LinkedObjectId = linkedObjectId;
+        application.PersonResolvedLinks?.Add(link);
+        ApplicationProfileInstanceChildMembership.Add(
+            objectSpace,
+            application,
+            ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+            linkedObjectId);
     }
 
     public static IReadOnlyList<(ApplicationProfileInstancePersonLinkKind Kind, object? Entity)> ResolveEntities(

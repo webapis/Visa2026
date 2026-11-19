@@ -16,6 +16,11 @@ public static class ApplicationProfilePlaceholderPackMap
     {
         ArgumentNullException.ThrowIfNull(profile);
 
+#pragma warning disable CS0618
+        var addressEnabled = profile.RequireAddress1 || profile.RequirePersonAddressOfResidence;
+        var invitationStayEnabled = profile.RequireAddress1 || profile.RequireInvitationAddress;
+#pragma warning restore CS0618
+
         return pack switch
         {
             UserReportPlaceholderPack.Core => true,
@@ -24,8 +29,8 @@ public static class ApplicationProfilePlaceholderPackMap
             // Education lives on Person. Cancel-visa hides the People & links tile
             // (RequirePersonEducation / AllowsPersonEducation) but sanaw still maps EGLV/EGIN/EGSP.
             UserReportPlaceholderPack.PersonEducation => true,
-            UserReportPlaceholderPack.PersonAddressOfResidence => profile.RequirePersonAddressOfResidence,
-            UserReportPlaceholderPack.InvitationAddress => profile.RequireInvitationAddress,
+            UserReportPlaceholderPack.PersonAddressOfResidence => addressEnabled,
+            UserReportPlaceholderPack.InvitationAddress => invitationStayEnabled,
             UserReportPlaceholderPack.PersonPosition => profile.RequirePersonPosition,
             UserReportPlaceholderPack.PersonSalary => profile.RequirePersonSalary,
             UserReportPlaceholderPack.PersonMedical => profile.RequirePersonMedical,

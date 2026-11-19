@@ -16,7 +16,9 @@ public static class ApplicationProfilePickerCaseSummaryDraft
     public static bool IsHiddenOnCreate(string? key) =>
         string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber, StringComparison.Ordinal)
         || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber, StringComparison.Ordinal)
-        || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate, StringComparison.Ordinal);
+        || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceDate, StringComparison.Ordinal)
+        // Create wizard uses case Address 1/2 (AddressOfResidence), not invitation stay breakdown.
+        || ApplicationWorkspaceCaseHeaderFieldsHelper.IsInvitationAddressGroupField(key);
 
     public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> ForCreate(
         IEnumerable<ApplicationWorkspaceCaseHeaderField>? fields)

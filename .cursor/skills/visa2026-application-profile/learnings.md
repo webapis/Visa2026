@@ -8,10 +8,17 @@
 ### 2026-11-19 — Recently used unique per Project + per profile storage
 
 - **Need**: Duplicate same Project cards; each Application Profile template must have its own recent list (different Case summary fields).
-- **Fix**: Uniqueness by Project id (else field fingerprint); Deduplicate on load/save; localStorage key per user+profile (+ v4 leg); clear legacy caches.
+- **Fix**: Uniqueness by Project id (else field fingerprint); Deduplicate on load/save; localStorage **v3** key per user+profileId; clear legacy v1/v2.
 - **Officer**: F5 / hard-refresh. Same Project create bumps one card. Invitation and WP profiles keep separate lists.
 - **Prevent**: Do not share one unscoped cache across profiles. Do not list the same Project twice.
 - **Cross-skill**: —
+## 2026-11-19 — Address of residence slots 1–2 (optional Address 2)
+
+- **Need**: Invitation Linked Records may need a second optional AddressOfResidence. Configure in wizard Person data; show Address 1 / Address 2; do not flag missing for slot 2.
+- **Fix**: `PersonAddressOfResidenceMaxCount` (1–2) on `ApplicationProfile`; `LinkSlotIndex` on ResolvedLinks; `ApplicationProfilePersonAddressMaxCount` helper (completeness still expects 1). Wizard Last 1/2 on Address. Link review `AddressSlotLines`; People tiles `address:1` / `address:2` (expected 0 on slot 2). Merge `Address1_*` / `Address2_*` + hydrator by slot. Seed only `get_invitation` = 2. Profile 2→1 hides Address 2 UI but keeps slot-2 link in DB.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Çakylyk Almak (`get_invitation`) wizard Person data — Address Last 2. Link a person — Linked Records shows Address 1 (auto) and empty Address 2. People & links: Address 2 empty is not red.
+- **Prevent**: Do not treat Address max 2 as Passport Last-N expected quota. Do not auto-fill slot 2. Do not delete slot-2 links when max drops to 1.
+- **Verify**: Module/Blazor build (`addr2slots`, analyzers off). Tests: `ApplicationProfilePersonAddressMaxCount` + Calik seed `get_invitation` (15 passed).
 ## 2026-11-17 — Progress color tab selection stuck + spinner
 
 - **Need**: Switching color tabs left the previous tab highlighted; officers needed loading feedback without strip flicker.
@@ -4594,3 +4601,8 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Officer**: Open case → same tab places; thinner underlines; quieter People actions.
 - **Prevent**: Do not relocate right-anchored utilities or hybrid record tabs when polishing visuals.
 - **Verify**: Hard-refresh case workspace (CSS); switch Application/Progress and People tabs.
+## 2026-11-19 — Case summary: drop Invitation region/city/type/place UI
+
+- **Symptom**: Case overview still showed Invitation region / city / Address type / Other invitation places and completeness gate listed them as Missing, while Address 1/2 already collected stay.
+- **Cause**: `ShowInvitationAddress` / `ShowInvitationPlace` followed `RequireInvitation*`; Calik catalog + tenant sync forced those flags true for invitation-receiving profiles.
+- **Fix**: Always hide invitation-stay header fields; seed/sync force `RequireInvitationAddress`/`RequireInvitationPlace` false; type mapper sets `RequireAddress1` instead; wizard Results rows removed; PDF fields 33–35 prefer Address 1; `DEPRECATED.md` updated. Columns retained for dual-read.

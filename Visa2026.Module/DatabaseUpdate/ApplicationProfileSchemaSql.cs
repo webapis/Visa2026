@@ -62,6 +62,8 @@ public static class ApplicationProfileSchemaSql
             "RequireBusinessTripAddress" boolean NOT NULL DEFAULT false,
             "RequireInvitationAddress" boolean NOT NULL DEFAULT false,
             "RequireInvitationPlace" boolean NOT NULL DEFAULT false,
+            "RequireAddress1" boolean NOT NULL DEFAULT false,
+            "RequireAddress2" boolean NOT NULL DEFAULT false,
             "DefaultBusinessTripAddressId" uuid NULL,
             "RequirePurpose" boolean NOT NULL DEFAULT false,
             "DefaultPurpose" character varying(700) NULL,
@@ -99,6 +101,7 @@ public static class ApplicationProfileSchemaSql
             "PersonInvitationItemLastCount" integer NOT NULL DEFAULT 1,
             "PersonWorkPermitItemLastCount" integer NOT NULL DEFAULT 1,
             "PersonBorderZoneItemLastCount" integer NOT NULL DEFAULT 1,
+            "PersonAddressOfResidenceMaxCount" integer NOT NULL DEFAULT 1,
             "ApplicabilityCriteria" text NULL,
             "IsActive" boolean NOT NULL DEFAULT true,
             CONSTRAINT "PK_ApplicationProfiles" PRIMARY KEY ("ID")
@@ -239,6 +242,8 @@ public static class ApplicationProfileSchemaSql
                 RequireBusinessTripAddress bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireBusinessTripAddress DEFAULT (0),
                 RequireInvitationAddress bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireInvitationAddress DEFAULT (0),
                 RequireInvitationPlace bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireInvitationPlace DEFAULT (0),
+                RequireAddress1 bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireAddress1 DEFAULT (0),
+                RequireAddress2 bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequireAddress2 DEFAULT (0),
                 DefaultBusinessTripAddressId uniqueidentifier NULL,
                 RequirePurpose bit NOT NULL CONSTRAINT DF_ApplicationProfiles_RequirePurpose DEFAULT (0),
                 DefaultPurpose nvarchar(700) NULL,
@@ -274,6 +279,7 @@ public static class ApplicationProfileSchemaSql
                 PersonInvitationItemLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonInvitationItemLastCount DEFAULT (1),
                 PersonWorkPermitItemLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonWorkPermitItemLastCount DEFAULT (1),
                 PersonBorderZoneItemLastCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonBorderZoneItemLastCount DEFAULT (1),
+                PersonAddressOfResidenceMaxCount int NOT NULL CONSTRAINT DF_ApplicationProfiles_PersonAddressOfResidenceMaxCount DEFAULT (1),
                 ApplicabilityCriteria nvarchar(max) NULL,
                 IsActive bit NOT NULL CONSTRAINT DF_ApplicationProfiles_IsActive DEFAULT (1)
             );
@@ -721,6 +727,57 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsurePersonBorderZoneItemLastCountPostgres =
         """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonBorderZoneItemLastCount" integer NOT NULL DEFAULT 1;""";
 
+    internal const string EnsurePersonAddressOfResidenceMaxCountPostgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "PersonAddressOfResidenceMaxCount" integer NOT NULL DEFAULT 1;""";
+
+    internal const string EnsureRequireAddress1Postgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireAddress1" boolean NOT NULL DEFAULT false;""";
+
+    internal const string EnsureRequireAddress2Postgres =
+        """ALTER TABLE "ApplicationProfiles" ADD COLUMN IF NOT EXISTS "RequireAddress2" boolean NOT NULL DEFAULT false;""";
+
+    /// <summary>One-time map from legacy person-step address flags onto RequireAddress1/2 when both new flags are still false.</summary>
+    internal const string BackfillRequireAddressFlagsFromLegacyPostgres = """
+        UPDATE "ApplicationProfiles"
+        SET
+            "RequireAddress1" = true,
+            "RequireAddress2" = CASE WHEN COALESCE("PersonAddressOfResidenceMaxCount", 1) >= 2 THEN true ELSE false END
+        WHERE COALESCE("RequirePersonAddressOfResidence", false) = true
+          AND COALESCE("RequireAddress1", false) = false
+          AND COALESCE("RequireAddress2", false) = false;
+        """;
+
+    internal const string EnsureInstanceAddress1IdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "Address1Id" uuid NULL;""";
+
+    internal const string EnsureInstanceAddress2IdPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "Address2Id" uuid NULL;""";
+
+    internal const string EnsureAddressOfResidenceOwningInstancePostgres =
+        """ALTER TABLE "AddressesOfResidence" ADD COLUMN IF NOT EXISTS "OwningApplicationProfileInstanceId" uuid NULL;""";
+
+    internal const string EnsureAddressOfResidenceRosterPersonPostgres =
+        """ALTER TABLE "AddressesOfResidence" ADD COLUMN IF NOT EXISTS "RosterPersonId" uuid NULL;""";
+
+    /// <summary>Person inventory owner is optional after case-owned addresses.</summary>
+    internal const string EnsureAddressOfResidencePersonNullablePostgres = """
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'AddressesOfResidence'
+              AND column_name = 'PersonID'
+              AND is_nullable = 'NO')
+          THEN
+            ALTER TABLE "AddressesOfResidence" ALTER COLUMN "PersonID" DROP NOT NULL;
+          END IF;
+        END $$;
+        """;
+
+    internal const string EnsureResolvedLinkSlotIndexPostgres =
+        """ALTER TABLE "ApplicationProfileInstancePersonResolvedLinks" ADD COLUMN IF NOT EXISTS "LinkSlotIndex" integer NOT NULL DEFAULT 1;""";
+
     internal const string EnsureBorderZoneItemBorderZoneLocationPostgres =
         """ALTER TABLE "BorderZoneItems" ADD COLUMN IF NOT EXISTS "BorderZoneLocation" character varying(500) NULL;""";
     internal const string EnsureDefaultWorkPermitLocationPostgres =
@@ -976,6 +1033,16 @@ public static class ApplicationProfileSchemaSql
         EnsurePersonInvitationItemLastCountPostgres,
         EnsurePersonWorkPermitItemLastCountPostgres,
         EnsurePersonBorderZoneItemLastCountPostgres,
+        EnsurePersonAddressOfResidenceMaxCountPostgres,
+        EnsureRequireAddress1Postgres,
+        EnsureRequireAddress2Postgres,
+        BackfillRequireAddressFlagsFromLegacyPostgres,
+        EnsureInstanceAddress1IdPostgres,
+        EnsureInstanceAddress2IdPostgres,
+        EnsureAddressOfResidenceOwningInstancePostgres,
+        EnsureAddressOfResidenceRosterPersonPostgres,
+        EnsureAddressOfResidencePersonNullablePostgres,
+        EnsureResolvedLinkSlotIndexPostgres,
         ConvertInstanceMovementPermitLocationToStringPostgres,
     ];
 
@@ -1145,6 +1212,16 @@ public static class ApplicationProfileSchemaSql
                 CONSTRAINT DF_ApplicationProfiles_PersonBorderZoneItemLastCount DEFAULT (1);
 
         IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'PersonAddressOfResidenceMaxCount') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD PersonAddressOfResidenceMaxCount int NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_PersonAddressOfResidenceMaxCount DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstancePersonResolvedLinks', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstancePersonResolvedLinks', N'LinkSlotIndex') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstancePersonResolvedLinks ADD LinkSlotIndex int NOT NULL
+                CONSTRAINT DF_ApplicationProfileInstancePersonResolvedLinks_LinkSlotIndex DEFAULT (1);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireProcessNumber') IS NULL
             ALTER TABLE dbo.ApplicationProfiles ADD RequireProcessNumber bit NOT NULL
                 CONSTRAINT DF_ApplicationProfiles_RequireProcessNumber DEFAULT (0);
@@ -1272,6 +1349,51 @@ public static class ApplicationProfileSchemaSql
             WHERE RequireRegion = 1 OR RequireCity = 1
                OR DefaultRegionId IS NOT NULL OR DefaultCityId IS NOT NULL;
         END
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireAddress1') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequireAddress1 bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequireAddress1 DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfiles', N'RequireAddress2') IS NULL
+            ALTER TABLE dbo.ApplicationProfiles ADD RequireAddress2 bit NOT NULL
+                CONSTRAINT DF_ApplicationProfiles_RequireAddress2 DEFAULT (0);
+
+        IF OBJECT_ID(N'dbo.ApplicationProfiles', N'U') IS NOT NULL
+        BEGIN
+            UPDATE dbo.ApplicationProfiles
+            SET RequireAddress1 = 1,
+                RequireAddress2 = CASE WHEN COALESCE(PersonAddressOfResidenceMaxCount, 1) >= 2 THEN 1 ELSE 0 END
+            WHERE COALESCE(RequirePersonAddressOfResidence, 0) = 1
+              AND COALESCE(RequireAddress1, 0) = 0
+              AND COALESCE(RequireAddress2, 0) = 0;
+        END
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'Address1Id') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD Address1Id uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'Address2Id') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD Address2Id uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.AddressesOfResidence', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.AddressesOfResidence', N'OwningApplicationProfileInstanceId') IS NULL
+            ALTER TABLE dbo.AddressesOfResidence ADD OwningApplicationProfileInstanceId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.AddressesOfResidence', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.AddressesOfResidence', N'RosterPersonId') IS NULL
+            ALTER TABLE dbo.AddressesOfResidence ADD RosterPersonId uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.AddressesOfResidence', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.AddressesOfResidence', N'PersonID') IS NOT NULL
+           AND EXISTS (
+               SELECT 1 FROM sys.columns
+               WHERE object_id = OBJECT_ID(N'dbo.AddressesOfResidence')
+                 AND name = N'PersonID'
+                 AND is_nullable = 0)
+            ALTER TABLE dbo.AddressesOfResidence ALTER COLUMN PersonID uniqueidentifier NULL;
         """;
 
     public static void ApplyIfMissing(string connectionString)

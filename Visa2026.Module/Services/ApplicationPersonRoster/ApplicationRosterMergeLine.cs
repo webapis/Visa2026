@@ -349,6 +349,7 @@ namespace Visa2026.Module.BusinessObjects
                 NextVisa = null;
                 NextVisaId = null;
                 CurrentAddressOfResidence = null;
+                SecondAddressOfResidence = null;
                 CurrentMedicalRecord = null;
                 CurrentEducation = null;
                 CurrentInvitationItem = null;
@@ -401,7 +402,10 @@ namespace Visa2026.Module.BusinessObjects
                 NextVisaId = null;
             }
 
-            CurrentAddressOfResidence = PersonCurrentItems.GetCurrentAddressOfResidence(p);
+            CurrentAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+                ApplicationProfileInstance, p, ApplicationProfileInstanceAddressResolver.Slot1);
+            SecondAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+                ApplicationProfileInstance, p, ApplicationProfileInstanceAddressResolver.Slot2);
             CurrentMedicalRecord = PersonCurrentItems.GetCurrentMedicalRecord(p);
             CurrentInvitationItem = PersonCurrentItems.GetCurrentInvitationItem(p);
             PreviousInvitationItem = null;
@@ -855,6 +859,45 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
+
+        // Address 1 aliases (slot 1 / current)
+        [XafDisplayName("Address1 Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address1_FullAddress => Address_FullAddress;
+
+        [XafDisplayName("Address1 Type"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address1_Type => Address_Type;
+
+        [XafDisplayName("Address1 Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Address1_ExpirationDate => Address_ExpirationDate;
+
+        [XafDisplayName("Address1 Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address1_ExpirationDateText => Address_ExpirationDateText;
+
+        [XafDisplayName("Address1 Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address1_RegionTm => Address_RegionTm;
+
+        [XafDisplayName("Address1 City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address1_CityTm => Address_CityTm;
+
+        // Address 2 (optional slot)
+        [XafDisplayName("Address2 Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address2_FullAddress =>
+            AddressOfResidenceReportText.CityAndStreet(SecondAddressOfResidence);
+
+        [XafDisplayName("Address2 Type"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address2_Type => SecondAddressOfResidence?.Type?.ToString();
+
+        [XafDisplayName("Address2 Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Address2_ExpirationDate => SecondAddressOfResidence?.ExpirationDate;
+
+        [XafDisplayName("Address2 Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address2_ExpirationDateText => $"{SecondAddressOfResidence?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Address2 Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address2_RegionTm => SecondAddressOfResidence?.Region?.NameTm;
+
+        [XafDisplayName("Address2 City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address2_CityTm => SecondAddressOfResidence?.City?.NameTm;
         #endregion
 
         #region Travel
@@ -1892,6 +1935,11 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = ShowCurrentAddressOfResidenceRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableAddressesOfResidence))]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
+
+        /// <summary>Optional Linked Records Address 2 (profile max slots = 2).</summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public virtual AddressOfResidence? SecondAddressOfResidence { get; set; }
 
         [Appearance("CurrentWorkDutyEmployeeOnly", Visibility = ViewItemVisibility.Hide,
             Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]

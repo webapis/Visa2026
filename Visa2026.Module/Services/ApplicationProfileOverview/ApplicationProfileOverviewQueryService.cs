@@ -255,8 +255,8 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         Add("Region", LookupLabel(profile.DefaultRegion), profile.RequireRegion);
         Add("City", LookupLabel(profile.DefaultCity), profile.RequireCity);
         Add("Business trip address", FormatDefaultBusinessTripDestination(profile), profile.RequireBusinessTripAddress);
-        Add("Invitation address", null, profile.RequireInvitationAddress);
-        Add("Invitation place", null, profile.RequireInvitationPlace);
+        Add("Address 1", null, profile.RequireAddress1);
+        Add("Address 2", null, profile.RequireAddress2);
         Add("Purpose", profile.DefaultPurpose, profile.RequirePurpose);
         Add("Work permit location", profile.DefaultWorkPermitLocation,
             ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
@@ -318,7 +318,7 @@ public sealed class ApplicationProfileOverviewQueryService : IApplicationProfile
         if (profile.RequirePersonPosition)
             toggles.Add("Position");
         if (profile.RequirePersonAddressOfResidence)
-            toggles.Add("Address of residence");
+            toggles.Add(FormatPersonToggle("Address of residence", profile.PersonAddressOfResidenceMaxCount));
         if (profile.RequirePersonVisa)
             toggles.Add(FormatPersonToggle("Visa", profile.PersonVisaLastCount));
         if (profile.RequirePersonInvitationItem)

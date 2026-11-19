@@ -126,6 +126,8 @@ namespace Visa2026.Module.BusinessObjects
                 .FirstOrDefault();
 
         /// <summary>
+        /// Legacy Person inventory current address. Officer Person DetailView/intake no longer edit addresses;
+        /// case roster/merge use <c>ApplicationProfileInstanceAddressResolver.ResolveAddressSlot</c>.
         /// Prefer the address still valid on <paramref name="asOf"/> (no expiration or expiration on/after that date);
         /// among those, latest expiration then newest ID. If none are valid, fall back to latest expiration.
         /// </summary>

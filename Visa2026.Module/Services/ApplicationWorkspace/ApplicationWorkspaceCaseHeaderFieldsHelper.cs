@@ -10,7 +10,9 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.ReportDashboard;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -29,6 +31,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string ToRegion = "ToRegion";
     public const string Region = "Region";
     public const string City = "City";
+    public const string Address1 = "Address1";
+    public const string Address2 = "Address2";
     public const string BusinessTripAddress = "BusinessTripAddress";
     public const string BusinessTripAddressType = "BusinessTripAddressType";
     public const string BusinessTripLodging = "BusinessTripLodging";
@@ -408,6 +412,21 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 ApplicationWorkspaceCaseSummaryFillState.Officer);
         }
 
+        AddAddressObject(
+            fields,
+            Address1,
+            ApplicationProfileLocalization.Field("Address1"),
+            ApplicationProfileConfigurationResolver.ShowAddress1(application),
+            application.Address1,
+            catalogs.AddressesOfResidence);
+        AddAddressObject(
+            fields,
+            Address2,
+            ApplicationProfileLocalization.Field("Address2"),
+            ApplicationProfileConfigurationResolver.ShowAddress2(application),
+            application.Address2,
+            catalogs.AddressesOfResidence);
+
         AddText(fields, Purpose, ApplicationProfileLocalization.Field("Purpose"), "blue", "📝",
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
             application.Purpose,
@@ -649,6 +668,14 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         stay.Region = item.Region;
                     ClearInvitationSitesIfCityMismatch(stay, item);
                 }, out error));
+            case Address1:
+                if (!Visible(profile, p => p.RequireAddress1, ApplicationProfileConfigurationResolver.ShowAddress1, application))
+                    return false;
+                return Edited(EnsureAndAssignSummaryAddress(objectSpace, application, slot: 1, value, out error));
+            case Address2:
+                if (!Visible(profile, p => p.RequireAddress2, ApplicationProfileConfigurationResolver.ShowAddress2, application))
+                    return false;
+                return Edited(EnsureAndAssignSummaryAddress(objectSpace, application, slot: 2, value, out error));
             case InvitationAddressType:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
@@ -738,11 +765,25 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         }
     }
 
-    private static bool ShowInvitationAddress(ApplicationProfile? profile, ApplicationProfileInstance application) =>
-        Visible(profile, p => p.RequireInvitationAddress, static _ => false, application);
+    /// <summary>
+    /// Legacy Invitation region/city/type/place UI — replaced by Address 1 / Address 2.
+    /// </summary>
+    private static bool ShowInvitationAddress(ApplicationProfile? profile, ApplicationProfileInstance application)
+    {
+        _ = profile;
+        _ = application;
+        return false;
+    }
 
-    private static bool ShowInvitationPlace(ApplicationProfile? profile, ApplicationProfileInstance application) =>
-        Visible(profile, p => p.RequireInvitationPlace, static _ => false, application);
+    /// <summary>
+    /// Legacy invitation stay type/site UI — replaced by Address 1 / Address 2.
+    /// </summary>
+    private static bool ShowInvitationPlace(ApplicationProfile? profile, ApplicationProfileInstance application)
+    {
+        _ = profile;
+        _ = application;
+        return false;
+    }
 
     private static string ResidenceTypeLabel(ResidenceType type) =>
         type switch
@@ -875,6 +916,36 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             stay.OtherSite = null;
     }
 
+    private static bool EnsureAndAssignSummaryAddress(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        int slot,
+        string? value,
+        out string? error)
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(value) || !Guid.TryParse(value, out var id) || id == Guid.Empty)
+        {
+            ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(application, slot, null);
+            return true;
+        }
+
+        var existing = objectSpace.GetObjectByKey<AddressOfResidence>(id);
+        if (existing == null)
+        {
+            error = "Address was not found.";
+            return false;
+        }
+
+        existing.OwningApplicationProfileInstance = application;
+        existing.RosterPerson = null;
+#pragma warning disable CS0618
+        existing.Person = null;
+#pragma warning restore CS0618
+        ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(application, slot, existing);
+        return true;
+    }
+
     private static InvitationAddress EnsureInvitationAddress(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application)
@@ -987,6 +1058,122 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             ReadOnly = false,
             FillState = fillState,
         });
+    }
+
+    private static void AddAddressObject(
+        List<ApplicationWorkspaceCaseHeaderField> fields,
+        string key,
+        string label,
+        bool visible,
+        AddressOfResidence? address,
+        IReadOnlyList<ApplicationWorkspaceLookupOption> addressOptions)
+    {
+        if (!visible)
+            return;
+
+        var display = AddressOfResidenceReportText.CityAndStreet(address);
+        // Address 2 is optional completeness; Address 1 is required when shown empty.
+        var requiredSlot = string.Equals(key, Address1, StringComparison.Ordinal);
+        var fillState = address != null
+            ? ApplicationWorkspaceCaseSummaryFillState.Officer
+            : requiredSlot
+                ? ApplicationWorkspaceCaseSummaryFillState.Empty
+                : ApplicationWorkspaceCaseSummaryFillState.Default;
+
+        var options = addressOptions ?? Array.Empty<ApplicationWorkspaceLookupOption>();
+        if (address != null && options.All(option => option.Id != address.ID))
+        {
+            var selectedLabel = string.IsNullOrWhiteSpace(display) ? "—" : display;
+            options = options
+                .Prepend(new ApplicationWorkspaceLookupOption
+                {
+                    Id = address.ID,
+                    DisplayName = selectedLabel,
+                    SearchText = BuildDiacriticSearchHaystack(selectedLabel),
+                })
+                .ToList();
+        }
+
+        fields.Add(new ApplicationWorkspaceCaseHeaderField
+        {
+            Key = key,
+            Label = ResolveAddressFieldLabel(key, label),
+            Kind = ApplicationWorkspaceCaseHeaderFieldKind.AddressObject,
+            Tone = "purple",
+            Glyph = "📍",
+            SelectedId = address?.ID,
+            Value = address?.ID.ToString("D") ?? string.Empty,
+            DisplayValue = string.IsNullOrWhiteSpace(display) ? "—" : display,
+            Options = options,
+            ReadOnly = false,
+            FillState = fillState,
+        });
+    }
+
+    private static string ResolveAddressFieldLabel(string key, string label)
+    {
+        if (!string.IsNullOrWhiteSpace(label)
+            && !label.StartsWith("ApplicationProfile.Field.", StringComparison.Ordinal))
+            return label;
+
+        if (string.Equals(key, Address2, StringComparison.Ordinal))
+            return "Address 2";
+        return "Address 1";
+    }
+
+    public static bool IsAddressObjectField(string? key) =>
+        string.Equals(key, Address1, StringComparison.Ordinal)
+        || string.Equals(key, Address2, StringComparison.Ordinal);
+
+    public static int AddressSlotForKey(string? key) =>
+        string.Equals(key, Address2, StringComparison.Ordinal) ? 2 : 1;
+
+    /// <summary>
+    /// Haystack for DxComboBox AutoSearch: folded ASCII + original so "turk" and "türk" both hit.
+    /// </summary>
+    public static string BuildDiacriticSearchHaystack(string? displayName)
+    {
+        var raw = (displayName ?? string.Empty).Trim();
+        if (raw.Length == 0)
+            return string.Empty;
+
+        var folded = PersonSearchTextNormalizer.Fold(raw);
+        if (string.IsNullOrEmpty(folded))
+            return raw;
+
+        return string.Equals(folded, raw, StringComparison.OrdinalIgnoreCase)
+            ? folded
+            : folded + " " + raw;
+    }
+
+    /// <summary>
+    /// Upsert case-summary Address 1/2 from the Linked Records address edit shape.
+    /// </summary>
+    public static bool TryUpsertSummaryAddress(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        string fieldKey,
+        AddressOfResidenceEdit edit,
+        out string? error)
+    {
+        error = null;
+        if (objectSpace == null || application == null || edit == null)
+        {
+            error = "Address was not found.";
+            return false;
+        }
+
+        var slot = AddressSlotForKey(fieldKey);
+        var address = ApplicationProfileInstanceAddressResolver.EnsureSummaryAddress(objectSpace, application, slot);
+        if (!InvitationStayAddressCopy.TryUpdate(objectSpace, address.ID, edit, out error))
+            return false;
+
+        address.OwningApplicationProfileInstance = application;
+        address.RosterPerson = null;
+#pragma warning disable CS0618
+        address.Person = null;
+#pragma warning restore CS0618
+        return true;
     }
 
     private static void AddText(
@@ -1670,6 +1857,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<ApplicationWorkspaceLookupOption> BusinessTripAddresses { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> CheckPoints { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> AlternativeAddresses { get; init; } = [];
+        public IReadOnlyList<ApplicationWorkspaceLookupOption> AddressesOfResidence { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> TargetApplicationProfileInstances { get; init; } = [];
         public IReadOnlyList<ApplicationWorkspaceLookupOption> SubmitToOrganizations { get; init; } = [];
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
@@ -1699,6 +1887,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 #pragma warning restore CS0618
                 CheckPoints = LoadItems<CheckPoint>(objectSpace),
                 AlternativeAddresses = LoadAlternativeAddresses(objectSpace),
+                AddressesOfResidence = LoadAddressesOfResidence(objectSpace),
                 TargetApplicationProfileInstances = LoadTargetApplicationProfileInstances(objectSpace),
                 SubmitToOrganizations = LoadSubmitToOrganizationOptions(objectSpace),
                 BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
@@ -1710,6 +1899,40 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     typeof(WorkPermittedLocationName),
                     string.Empty),
             };
+        }
+
+        /// <summary>
+        /// Case-summary candidates: addresses not tied to a roster-person override.
+        /// </summary>
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadAddressesOfResidence(IObjectSpace objectSpace)
+        {
+            return objectSpace.GetObjectsQuery<AddressOfResidence>()
+                .AsNoTracking()
+                .Include(row => row.Region)
+                .Include(row => row.City)
+                .Include(row => row.Lodging)
+                .Include(row => row.Hotel)
+                .Include(row => row.Hospital)
+                .Include(row => row.OtherSite)
+                .Where(row => row.RosterPerson == null)
+                .OrderByDescending(row => row.ID)
+                .Take(400)
+                .AsEnumerable()
+                .Select(row =>
+                {
+                    var label = AddressOfResidenceReportText.CityAndStreet(row);
+                    if (string.IsNullOrWhiteSpace(label))
+                        label = row.DisplayAddress;
+                    if (string.IsNullOrWhiteSpace(label))
+                        label = "—";
+                    return new ApplicationWorkspaceLookupOption
+                    {
+                        Id = row.ID,
+                        DisplayName = label,
+                        SearchText = BuildDiacriticSearchHaystack(label),
+                    };
+                })
+                .ToList();
         }
 
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadTargetApplicationProfileInstances(

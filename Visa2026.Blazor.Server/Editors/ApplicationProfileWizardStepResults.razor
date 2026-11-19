@@ -4,6 +4,7 @@
 @using Visa2026.Module.Editors
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.ApplicationProfileWizard
 
 <div class="ap-wizard__panel-head">
@@ -187,13 +188,13 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireInvitationAddress" disabled="@Disabled" /></td>
-                    <td>@Field("InvitationAddress")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindLookup")</span></td>
+                    <td><input type="checkbox" @bind="Profile.RequireAddress1" disabled="@Disabled" @bind:after="OnAddressRequireChanged" /></td>
+                    <td>@Field("Address1")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindTypeSite")</span></td>
                     <td>—</td><td>—</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireInvitationPlace" disabled="@Disabled" /></td>
-                    <td>@Field("InvitationPlace")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindTypeSite")</span></td>
+                    <td><input type="checkbox" @bind="Profile.RequireAddress2" disabled="@Disabled" @bind:after="OnAddressRequireChanged" /></td>
+                    <td>@Field("Address2")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindTypeSite")</span></td>
                     <td>—</td><td>—</td>
                 </tr>
                 <tr>
@@ -558,6 +559,11 @@
     {
         if (!Profile.RequirePurpose)
             Profile.DefaultPurpose = null;
+    }
+
+    private void OnAddressRequireChanged()
+    {
+        ApplicationProfilePersonAddressMaxCount.SyncRequireFlagsFromLegacy(Profile);
     }
 
     private void OnWorkPermitLocationUseChanged()

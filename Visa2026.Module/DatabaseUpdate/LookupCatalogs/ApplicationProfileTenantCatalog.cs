@@ -126,6 +126,10 @@ public sealed class ApplicationProfileTenantCatalogRow
 
     public bool RequireBusinessTripAddress { get; set; }
 
+    public bool RequireAddress1 { get; set; }
+
+    public bool RequireAddress2 { get; set; }
+
     public bool RequireInvitationAddress { get; set; }
 
     public bool RequireInvitationPlace { get; set; }
@@ -185,6 +189,8 @@ public sealed class ApplicationProfileTenantCatalogRow
     public int PersonWorkPermitItemLastCount { get; set; } = 1;
 
     public int PersonBorderZoneItemLastCount { get; set; } = 1;
+
+    public int PersonAddressOfResidenceMaxCount { get; set; } = 1;
 
     public bool IsActive { get; set; } = true;
 
@@ -280,8 +286,12 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequireToCity = profile.RequireToCity,
             DefaultToCityLocalizationKey = NullIfEmpty(profile.DefaultToCity?.LocalizationKey),
             RequireBusinessTripAddress = profile.RequireBusinessTripAddress,
-            RequireInvitationAddress = profile.RequireInvitationAddress,
-            RequireInvitationPlace = profile.RequireInvitationPlace,
+            RequireAddress1 = profile.RequireAddress1,
+            RequireAddress2 = profile.RequireAddress2,
+#pragma warning disable CS0618
+            RequireInvitationAddress = false,
+            RequireInvitationPlace = false,
+#pragma warning restore CS0618
             RequirePurpose = profile.RequirePurpose,
             DefaultPurpose = NullIfEmpty(profile.DefaultPurpose),
             RequireProject = profile.RequireProject,
@@ -296,7 +306,9 @@ public sealed class ApplicationProfileTenantCatalogRow
             RequirePersonPassport = profile.RequirePersonPassport,
             RequirePersonEducation = profile.RequirePersonEducation,
             RequirePersonPosition = profile.RequirePersonPosition,
+#pragma warning disable CS0618
             RequirePersonAddressOfResidence = profile.RequirePersonAddressOfResidence,
+#pragma warning restore CS0618
             RequirePersonVisa = profile.RequirePersonVisa,
             RequirePersonInvitationItem = profile.RequirePersonInvitationItem,
             RequirePersonWorkPermitItem = profile.RequirePersonWorkPermitItem,
@@ -310,6 +322,9 @@ public sealed class ApplicationProfileTenantCatalogRow
             PersonInvitationItemLastCount = profile.PersonInvitationItemLastCount,
             PersonWorkPermitItemLastCount = profile.PersonWorkPermitItemLastCount,
             PersonBorderZoneItemLastCount = profile.PersonBorderZoneItemLastCount,
+#pragma warning disable CS0618
+            PersonAddressOfResidenceMaxCount = profile.PersonAddressOfResidenceMaxCount,
+#pragma warning restore CS0618
             IsActive = profile.IsActive,
             SignOff = string.Empty,
             DefaultProjectContractCode = string.IsNullOrWhiteSpace(projectContractCode)
@@ -600,17 +615,13 @@ internal static class ApplicationProfileTenantCatalogSync
             profile.DefaultToCity = profile.DefaultCity;
 #pragma warning restore CS0618
         profile.RequireBusinessTripAddress = row.RequireBusinessTripAddress;
-        if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(row.ProfileCatalogKey, row.Code))
-        {
-            profile.RequireInvitationAddress = true;
-            profile.RequireInvitationPlace = true;
-        }
-        else
-        {
-            // Catalog is source of truth (e.g. change_invitation turns stay off).
-            profile.RequireInvitationAddress = row.RequireInvitationAddress;
-            profile.RequireInvitationPlace = row.RequireInvitationPlace;
-        }
+        profile.RequireAddress1 = row.RequireAddress1;
+        profile.RequireAddress2 = row.RequireAddress2;
+        // Invitation region/city/type/place removed from case summary — use Address 1/2.
+#pragma warning disable CS0618
+        profile.RequireInvitationAddress = false;
+        profile.RequireInvitationPlace = false;
+#pragma warning restore CS0618
         profile.RequirePurpose = row.RequirePurpose;
         profile.DefaultPurpose = string.IsNullOrWhiteSpace(row.DefaultPurpose) ? null : row.DefaultPurpose.Trim();
         profile.RequireProject = row.RequireProject;
@@ -635,7 +646,9 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.RequirePersonEducation = row.RequirePersonEducation
             && ApplicationProfileEducationPolicy.AllowsPersonEducation(profile);
         profile.RequirePersonPosition = true;
+#pragma warning disable CS0618
         profile.RequirePersonAddressOfResidence = row.RequirePersonAddressOfResidence;
+#pragma warning restore CS0618
         profile.RequirePersonVisa = row.RequirePersonVisa;
         profile.RequirePersonInvitationItem = row.RequirePersonInvitationItem;
         profile.RequirePersonWorkPermitItem = row.RequirePersonWorkPermitItem;
@@ -650,6 +663,11 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.PersonInvitationItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonInvitationItemLastCount);
         profile.PersonWorkPermitItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonWorkPermitItemLastCount);
         profile.PersonBorderZoneItemLastCount = ApplicationProfilePersonLastCount.Clamp(row.PersonBorderZoneItemLastCount);
+#pragma warning disable CS0618
+        profile.PersonAddressOfResidenceMaxCount =
+            ApplicationProfilePersonAddressMaxCount.Clamp(row.PersonAddressOfResidenceMaxCount);
+#pragma warning restore CS0618
+        ApplicationProfilePersonAddressMaxCount.SyncRequireFlagsFromLegacy(profile);
         ApplicationProfileRegistrationKindHelper.ApplyRegistrationPersonDefaults(profile);
 
         profile.IsActive = row.IsActive;

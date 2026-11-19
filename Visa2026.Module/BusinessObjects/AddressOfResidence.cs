@@ -493,9 +493,53 @@ namespace Visa2026.Module.BusinessObjects
 
 
 
-        [RuleRequiredField]
+        /// <summary>
 
-        public virtual Person Person { get; set; }
+        /// Legacy Person inventory owner. Nullable after case-owned addresses;
+
+        /// prefer <see cref="OwningApplicationProfileInstance"/> + optional <see cref="RosterPerson"/>.
+
+        /// </summary>
+
+        [Browsable(false)]
+
+        [VisibleInDetailView(false)]
+
+        [VisibleInListView(false)]
+
+        [Obsolete("Addresses are case-owned. Use OwningApplicationProfileInstance / RosterPerson.")]
+
+        public virtual Person? Person { get; set; }
+
+
+
+        /// <summary>Case that owns this address (summary or Linked Records override).</summary>
+
+        [Browsable(false)]
+
+        [VisibleInDetailView(false)]
+
+        [VisibleInListView(false)]
+
+        public virtual ApplicationProfileInstance? OwningApplicationProfileInstance { get; set; }
+
+
+
+        /// <summary>
+
+        /// When set, this row is a Linked Records override for that roster person on the owning case.
+
+        /// Null = case summary Address 1/2 row.
+
+        /// </summary>
+
+        [Browsable(false)]
+
+        [VisibleInDetailView(false)]
+
+        [VisibleInListView(false)]
+
+        public virtual Person? RosterPerson { get; set; }
 
 
 

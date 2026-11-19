@@ -101,6 +101,8 @@ public enum ApplicationWorkspaceCaseHeaderFieldKind
     Text = 2,
     CommaSeparatedMultiSelect = 3,
     ShortText = 4,
+    /// <summary>Case summary Address 1/2 — display + pen/plus create-edit.</summary>
+    AddressObject = 5,
 }
 
 public sealed class ApplicationWorkspaceLookupOption
@@ -113,8 +115,8 @@ public sealed class ApplicationWorkspaceLookupOption
     public string Detail { get; init; } = string.Empty;
 
     /// <summary>
-    /// Free-text index for client search dialogs (application number, profile name, people names).
-    /// When empty, UIs fall back to <see cref="DisplayName"/>.
+    /// Free-text index for client search dialogs (application number, profile name, people names,
+    /// address diacritic haystack). When empty, UIs fall back to <see cref="DisplayName"/>.
     /// </summary>
     public string SearchText { get; init; } = string.Empty;
 }

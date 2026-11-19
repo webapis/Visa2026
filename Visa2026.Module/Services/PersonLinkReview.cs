@@ -106,6 +106,8 @@ public sealed class PersonLinkReviewCreateForm
 {
     public ApplicationProfileInstancePersonLinkKind Kind { get; set; }
     public Guid ObjectId { get; set; }
+    /// <summary>Linked Records slot (Address 1 / Address 2). 0 = single row.</summary>
+    public int SlotIndex { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Error { get; set; }
     public bool Saved { get; set; }
@@ -138,7 +140,7 @@ public static partial class PersonLinkReview
 
             if (definition.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
             {
-                lines.Add(AddressLine(objectSpace, application, person, definition.Label));
+                lines.AddRange(AddressSlotLines(objectSpace, application, person, definition.Label));
             }
             else if (ApplicationProfilePersonLastCount.SupportsLastCount(definition.Kind))
             {
@@ -179,29 +181,35 @@ public static partial class PersonLinkReview
     }
 
     /// <summary>
-    /// Address the officer can edit from the pen. Uses the newest address, or creates one
-    /// from the Case summary stay when the person has none. The caller commits.
+    /// Address the officer can edit from the pen: existing override for this person on the case,
+    /// else a new case-owned override row (RosterPerson set). Caller commits.
     /// </summary>
     public static Guid EnsureAddressToEdit(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         Person person)
     {
-        if (objectSpace == null || person == null || person.ID == Guid.Empty)
+        if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
             return Guid.Empty;
 
-        var last = objectSpace.GetObjectsQuery<AddressOfResidence>()
-            .Where(address => address.Person != null && address.Person.ID == person.ID)
+        var existingOverride = objectSpace.GetObjectsQuery<AddressOfResidence>()
+            .Where(address =>
+                address.OwningApplicationProfileInstance != null
+                && address.OwningApplicationProfileInstance.ID == application.ID
+                && address.RosterPerson != null
+                && address.RosterPerson.ID == person.ID)
             .OrderByDescending(address => address.ID)
             .FirstOrDefault();
-        if (last != null)
-            return last.ID;
+        if (existingOverride != null)
+            return existingOverride.ID;
 
-        var stay = application?.InvitationAddress;
-        if (!InvitationStayAddressCopy.IsComplete(stay))
-            return Guid.Empty;
-
-        return InvitationStayAddressCopy.CreateFromStay(objectSpace, person, stay!)?.ID ?? Guid.Empty;
+        var address = objectSpace.CreateObject<AddressOfResidence>();
+        address.OwningApplicationProfileInstance = application;
+        address.RosterPerson = person;
+#pragma warning disable CS0618
+        address.Person = null;
+#pragma warning restore CS0618
+        return address.ID;
     }
 
     public static void ApplyChoice(PersonLinkReviewLine line, Guid objectId, IObjectSpace? objectSpace = null)
@@ -209,7 +217,26 @@ public static partial class PersonLinkReview
         if (line == null)
             return;
 
+        if (objectId == Guid.Empty)
+        {
+            line.ObjectId = Guid.Empty;
+            line.Summary = "—";
+            line.Fields = Array.Empty<PersonLinkReviewField>();
+            return;
+        }
+
         var choice = line.Choices.FirstOrDefault(item => item.ObjectId == objectId);
+        if (choice == null && objectSpace != null)
+        {
+            choice = ChoiceForObject(objectSpace, line.Kind, line.Label, objectId);
+            if (choice != null)
+            {
+                var mutable = line.Choices.ToList();
+                mutable.Add(choice);
+                line.Choices = mutable;
+            }
+        }
+
         if (choice == null)
             return;
 
@@ -236,13 +263,29 @@ public static partial class PersonLinkReview
         if (application != null)
             ApplicationProfileInstancePersonResolver.EnsureApplicationProfileLoaded(objectSpace, application);
 
-        var choices = line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
-            ? AddressChoicesFor(objectSpace, application, person)
-            : ChoicesFor(objectSpace, line.Kind, person.ID).ToList();
+        IReadOnlyList<PersonLinkReviewChoice> choices;
+        if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+        {
+            var slot = line.SlotIndex > 0 ? line.SlotIndex : 1;
+            choices = application == null
+                ? Array.Empty<PersonLinkReviewChoice>()
+                : AddressChoicesForCase(objectSpace, application, person, slot, excludeObjectId: Guid.Empty);
+        }
+        else
+        {
+            choices = ChoicesFor(objectSpace, line.Kind, person.ID).ToList();
+        }
 
-        if (choices.All(choice => choice.ObjectId != savedId)
-            && ChoiceForObject(objectSpace, line.Kind, line.Label, savedId) is { } extra)
-            choices.Add(extra);
+        if (choices.All(choice => choice.ObjectId != savedId))
+        {
+            var extra = ChoiceForObject(objectSpace, line.Kind, line.Label, savedId);
+            if (extra != null)
+            {
+                var mutable = choices.ToList();
+                mutable.Add(extra);
+                choices = mutable;
+            }
+        }
 
         line.Choices = choices;
         ApplyChoice(line, savedId, objectSpace);
@@ -256,7 +299,8 @@ public static partial class PersonLinkReview
         ApplicationProfileInstance application,
         Person person,
         ApplicationProfileInstancePersonLinkKind kind,
-        Guid objectId)
+        Guid objectId,
+        int slotIndex = 0)
     {
         if (objectSpace == null || application == null || person == null || objectId == Guid.Empty)
             return;
@@ -264,6 +308,14 @@ public static partial class PersonLinkReview
         var type = ObjectType(kind);
         if (type == null || objectSpace.GetObjectByKey(type, objectId) == null)
             return;
+
+        if (kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+        {
+            var slot = slotIndex > 0 ? slotIndex : 1;
+            ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
+                objectSpace, application, person, kind, objectId, slot);
+            return;
+        }
 
         var links = ApplicationProfileInstancePersonResolver.LoadLinks(objectSpace, application, person.ID)
             .Where(row => row.LinkKind == kind
@@ -315,6 +367,12 @@ public static partial class PersonLinkReview
         {
             var kind = group.Key;
             var kindLines = group.OrderBy(line => line.SlotIndex).ToList();
+            if (kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            {
+                PreferCaseAddressLinks(objectSpace, application, person, kindLines, pinned);
+                continue;
+            }
+
             var pinnedIds = pinned
                 .Where(link => link.LinkKind == kind && link.LinkedObjectId is Guid id && id != Guid.Empty)
                 .Select(link => link.LinkedObjectId!.Value)
@@ -349,14 +407,7 @@ public static partial class PersonLinkReview
         {
             if (group.Key == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
             {
-                foreach (var line in group)
-                {
-                    if (line.ObjectId == Guid.Empty)
-                        InvitationStayAddressCopy.AcceptOnJoin(objectSpace, application, person);
-                    else
-                        LinkSelected(objectSpace, application, person, line.Kind, line.ObjectId);
-                }
-
+                ApplyJoinAddressLinks(objectSpace, application, person, group);
                 continue;
             }
 
@@ -664,43 +715,7 @@ public static partial class PersonLinkReview
 
         return objectSpace.GetObjectByKey<BorderZoneItem>(id);
     }
-    private static PersonLinkReviewLine AddressLine(
-        IObjectSpace objectSpace,
-        ApplicationProfileInstance application,
-        Person person,
-        string label)
-    {
-        var stay = application.InvitationAddress;
-        if (InvitationStayAddressCopy.IsComplete(stay)
-            && ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(application.ApplicationProfile))
-        {
-            var last = objectSpace.GetObjectsQuery<AddressOfResidence>()
-                .Where(address => address.Person != null && address.Person.ID == person.ID)
-                .OrderByDescending(address => address.ID)
-                .FirstOrDefault();
-            var matches = InvitationStayAddressCopy.Matches(last, stay);
-            var stayLine = new PersonLinkReviewLine
-            {
-                Kind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
-                Label = "Address of residence",
-                Summary = StaySummary(stay!),
-                ObjectId = matches ? last!.ID : Guid.Empty,
-            };
-            Attach(stayLine, AddressChoices(objectSpace, person.ID, stay, includeStayChoice: !matches));
-            return stayLine;
-        }
-
-        var current = ApplicationProfileInstancePersonValidItems.ResolveAddress(person);
-        var currentLine = new PersonLinkReviewLine
-        {
-            Kind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
-            Label = "Address of residence",
-            Summary = AddressSummary(current),
-            ObjectId = current?.ID ?? Guid.Empty,
-        };
-        Attach(currentLine, AddressChoices(objectSpace, person.ID, stay: null, includeStayChoice: false));
-        return currentLine;
-    }
+    // Address slot lines live in PersonLinkReview.AddressSlots.cs (case summary + overrides).
 
     private static PersonLinkReviewLine Line(
         IObjectSpace objectSpace,
@@ -1217,11 +1232,13 @@ public static partial class PersonLinkReview
     public static PersonLinkReviewCreateForm BuildCreateForm(
         IObjectSpace objectSpace,
         ApplicationProfileInstancePersonLinkKind kind,
-        string title)
+        string title,
+        int slotIndex = 0)
     {
         var form = new PersonLinkReviewCreateForm
         {
             Kind = kind,
+            SlotIndex = slotIndex,
             Title = ApplicationProfileLocalization.LinkedRecordLabel(title),
         };
         form.Fields = kind switch
@@ -1248,13 +1265,21 @@ public static partial class PersonLinkReview
         Person? person,
         PersonLinkReviewLine line)
     {
-        var form = BuildCreateForm(objectSpace, line.Kind, line.Label);
+        var form = BuildCreateForm(objectSpace, line.Kind, line.Label, line.SlotIndex);
         if (form.Fields.Count == 0)
             return form;
 
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && line.ObjectId == Guid.Empty)
         {
-            FillAddress(form, application?.InvitationAddress);
+            var slot = line.SlotIndex > 0 ? line.SlotIndex : 1;
+            var summary = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot);
+            if (summary != null)
+            {
+                form.ObjectId = Guid.Empty; // editing creates/updates override from case default values
+                FillAddress(form, summary);
+            }
+            else
+                FillAddress(form, application?.InvitationAddress);
             return form;
         }
 
@@ -1275,7 +1300,8 @@ public static partial class PersonLinkReview
         Person person,
         PersonLinkReviewCreateForm form,
         Guid passportId,
-        out string? error)
+        out string? error,
+        ApplicationProfileInstance? application = null)
     {
         error = null;
         if (objectSpace == null || person == null || form == null)
@@ -1296,7 +1322,7 @@ public static partial class PersonLinkReview
             ApplicationProfileInstancePersonLinkKind.Passport => CreatePassport(objectSpace, person, form, out error),
             ApplicationProfileInstancePersonLinkKind.Education => CreateEducation(objectSpace, person, form, out error),
             ApplicationProfileInstancePersonLinkKind.Position => CreatePosition(objectSpace, person, form, out error),
-            ApplicationProfileInstancePersonLinkKind.AddressOfResidence => CreateAddress(objectSpace, person, form, out error),
+            ApplicationProfileInstancePersonLinkKind.AddressOfResidence => CreateAddress(objectSpace, person, form, application, out error),
             ApplicationProfileInstancePersonLinkKind.Visa => CreateVisa(objectSpace, person, form, passportId, out error),
             _ => null,
         };
@@ -1345,7 +1371,14 @@ public static partial class PersonLinkReview
                 return true;
             case ApplicationProfileInstancePersonLinkKind.AddressOfResidence:
                 var address = objectSpace.GetObjectByKey<AddressOfResidence>(line.ObjectId);
-                if (address == null || address.Person?.ID != person?.ID)
+                if (address == null)
+                    return false;
+                var ownsOverride = address.RosterPerson != null && person != null && address.RosterPerson.ID == person.ID;
+#pragma warning disable CS0618
+                var ownsLegacy = address.Person != null && person != null && address.Person.ID == person.ID;
+#pragma warning restore CS0618
+                var isCaseSummary = address.RosterPerson == null && address.OwningApplicationProfileInstance != null;
+                if (!ownsOverride && !ownsLegacy && !isCaseSummary)
                     return false;
                 FillAddress(form, address);
                 return true;
@@ -1625,7 +1658,12 @@ public static partial class PersonLinkReview
         return position;
     }
 
-    private static AddressOfResidence? CreateAddress(IObjectSpace objectSpace, Person person, PersonLinkReviewCreateForm form, out string? error)
+    private static AddressOfResidence? CreateAddress(
+        IObjectSpace objectSpace,
+        Person person,
+        PersonLinkReviewCreateForm form,
+        ApplicationProfileInstance? application,
+        out string? error)
     {
         error = null;
         if (!Enum.TryParse<ResidenceType>(Value(form, "type"), out var type))
@@ -1637,14 +1675,37 @@ public static partial class PersonLinkReview
         var address = form.ObjectId == Guid.Empty
             ? objectSpace.CreateObject<AddressOfResidence>()
             : objectSpace.GetObjectByKey<AddressOfResidence>(form.ObjectId);
-        if (address == null || (form.ObjectId != Guid.Empty && address.Person?.ID != person.ID))
+        if (address == null)
+        {
+            error = T("NotFound");
+            return null;
+        }
+
+        if (form.ObjectId != Guid.Empty
+            && address.RosterPerson != null
+            && address.RosterPerson.ID != person.ID
+#pragma warning disable CS0618
+            && address.Person?.ID != person.ID)
+#pragma warning restore CS0618
         {
             error = T("NotFound");
             return null;
         }
 
         if (form.ObjectId == Guid.Empty)
-            address.Person = person;
+        {
+            // Linked Records create = case-owned override for this roster person.
+            address.OwningApplicationProfileInstance = application;
+            address.RosterPerson = person;
+#pragma warning disable CS0618
+            address.Person = null;
+#pragma warning restore CS0618
+        }
+        else if (address.OwningApplicationProfileInstance == null && application != null)
+        {
+            address.OwningApplicationProfileInstance = application;
+        }
+
         address.Region = Lookup<Region>(objectSpace, Value(form, "region"));
         address.City = Lookup<City>(objectSpace, Value(form, "city"));
         address.Type = type;

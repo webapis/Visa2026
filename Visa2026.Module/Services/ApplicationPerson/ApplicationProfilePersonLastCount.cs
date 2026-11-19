@@ -5,6 +5,8 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 /// <summary>
 /// How many latest person-owned rows to auto-link for dated document types
 /// (Passport, Visa, Invitation item, Work permit item, Border zone item).
+/// Address of residence uses <see cref="ApplicationProfilePersonAddressMaxCount"/>
+/// for visible slots; this helper still returns 1 for address completeness.
 /// Other person types stay at one current row.
 /// </summary>
 public static class ApplicationProfilePersonLastCount

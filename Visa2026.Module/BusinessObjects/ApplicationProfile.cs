@@ -224,17 +224,15 @@ public class ApplicationProfile : BaseObject
 
     public virtual bool RequireBusinessTripAddress { get; set; }
 
-    /// <summary>
-    /// Case summary collects one <see cref="InvitationAddress"/> (first region and city, plus optional alternative text).
-    /// Seeded on for Çakylyk Almak. Other templates stay off until the wizard turns it on.
-    /// </summary>
+    /// <summary>Deprecated — use <see cref="RequireAddress1"/> / <see cref="RequireAddress2"/>.</summary>
+    [Obsolete("Use RequireAddress1 / RequireAddress2. Invitation region/city/type/place removed from case summary.")]
+    [Browsable(false)]
     [XafDisplayName("Invitation address")]
     public virtual bool RequireInvitationAddress { get; set; }
 
-    /// <summary>
-    /// Case summary collects the invitation stay type and the matching lodging, hotel, hospital, other site, or private house.
-    /// Seeded on for Çakylyk Almak. Other templates stay off until the wizard turns it on.
-    /// </summary>
+    /// <summary>Deprecated — use <see cref="RequireAddress1"/> / <see cref="RequireAddress2"/>.</summary>
+    [Obsolete("Use RequireAddress1 / RequireAddress2. Invitation stay type/site removed from case summary.")]
+    [Browsable(false)]
     [XafDisplayName("Invitation place")]
     public virtual bool RequireInvitationPlace { get; set; }
 
@@ -344,6 +342,23 @@ public class ApplicationProfile : BaseObject
     public virtual bool RequirePersonPassport { get; set; } = true;
     public virtual bool RequirePersonEducation { get; set; }
     public virtual bool RequirePersonPosition { get; set; } = true;
+
+    /// <summary>
+    /// Case summary / Linked Records Address 1 (required completeness when on).
+    /// Replaces person-step <see cref="RequirePersonAddressOfResidence"/>.
+    /// </summary>
+    [XafDisplayName("Address 1")]
+    public virtual bool RequireAddress1 { get; set; }
+
+    /// <summary>
+    /// Case summary / Linked Records Address 2 (optional completeness when on).
+    /// </summary>
+    [XafDisplayName("Address 2")]
+    public virtual bool RequireAddress2 { get; set; }
+
+    /// <summary>Obsolete person-step address toggle — use <see cref="RequireAddress1"/>.</summary>
+    [Obsolete("Use RequireAddress1 (and RequireAddress2). Dual-read via ApplicationProfilePersonAddressMaxCount.")]
+    [Browsable(false)]
     public virtual bool RequirePersonAddressOfResidence { get; set; } = true;
     public virtual bool RequirePersonVisa { get; set; }
     public virtual bool RequirePersonInvitationItem { get; set; }
@@ -368,6 +383,13 @@ public class ApplicationProfile : BaseObject
 
     /// <summary>Latest valid border-zone items to auto-link (1–3). Used only when <see cref="RequirePersonBorderZoneItem"/> is on.</summary>
     public virtual int PersonBorderZoneItemLastCount { get; set; } = 1;
+
+    /// <summary>
+    /// Obsolete address slot max (1–2). Prefer <see cref="RequireAddress1"/> / <see cref="RequireAddress2"/>.
+    /// </summary>
+    [Obsolete("Use RequireAddress1 / RequireAddress2.")]
+    [Browsable(false)]
+    public virtual int PersonAddressOfResidenceMaxCount { get; set; } = 1;
 
     // --- Templates ---
 
@@ -1086,8 +1108,12 @@ public static class ApplicationProfileLockHelper
         || original.RequireRegionCity != current.RequireRegionCity
 #pragma warning restore CS0618
         || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
+#pragma warning disable CS0618
         || original.RequireInvitationAddress != current.RequireInvitationAddress
         || original.RequireInvitationPlace != current.RequireInvitationPlace
+#pragma warning restore CS0618
+        || original.RequireAddress1 != current.RequireAddress1
+        || original.RequireAddress2 != current.RequireAddress2
         || original.DefaultBusinessTripAddressType != current.DefaultBusinessTripAddressType
         || original.DefaultBusinessTripLodgingId != current.DefaultBusinessTripLodgingId
         || original.DefaultBusinessTripHotelId != current.DefaultBusinessTripHotelId
@@ -1118,7 +1144,9 @@ public static class ApplicationProfileLockHelper
         || original.RequirePersonPassport != current.RequirePersonPassport
         || original.RequirePersonEducation != current.RequirePersonEducation
         || original.RequirePersonPosition != current.RequirePersonPosition
+#pragma warning disable CS0618
         || original.RequirePersonAddressOfResidence != current.RequirePersonAddressOfResidence
+#pragma warning restore CS0618
         || original.RequirePersonVisa != current.RequirePersonVisa
         || original.RequirePersonInvitationItem != current.RequirePersonInvitationItem
         || original.RequirePersonWorkPermitItem != current.RequirePersonWorkPermitItem
@@ -1132,6 +1160,9 @@ public static class ApplicationProfileLockHelper
         || original.PersonInvitationItemLastCount != current.PersonInvitationItemLastCount
         || original.PersonWorkPermitItemLastCount != current.PersonWorkPermitItemLastCount
         || original.PersonBorderZoneItemLastCount != current.PersonBorderZoneItemLastCount
+#pragma warning disable CS0618
+        || original.PersonAddressOfResidenceMaxCount != current.PersonAddressOfResidenceMaxCount
+#pragma warning restore CS0618
         || !string.Equals(original.ProgressStepVisibility, current.ProgressStepVisibility, StringComparison.Ordinal)
         || !string.Equals(original.ApplicabilityCriteria, current.ApplicabilityCriteria, StringComparison.Ordinal);
 }

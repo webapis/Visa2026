@@ -36,40 +36,40 @@ public class InvitationStayAddressCopyTests
             new ApplicationType { Name = "App_Change_Inv", Code = "change_invitation" });
 #pragma warning restore CS0618
 
+#pragma warning disable CS0618
         Assert.False(profile.RequireInvitationAddress);
         Assert.False(profile.RequireInvitationPlace);
         Assert.False(profile.RequirePersonAddressOfResidence);
+#pragma warning restore CS0618
         Assert.True(profile.RequirePersonPosition);
     }
 
     [Fact]
-    public void Mapper_turns_invitation_stay_and_address_of_residence_on_for_caklyk_almak()
+    public void Mapper_turns_address1_on_for_caklyk_almak_not_legacy_invitation_stay()
     {
         var profile = new ApplicationProfile();
 #pragma warning disable CS0618
         ApplicationProfileFromApplicationTypeMapper.Apply(
             profile,
             new ApplicationType { Name = "App_Inv", Code = "get_invitation" });
+        Assert.False(profile.RequireInvitationAddress);
+        Assert.False(profile.RequireInvitationPlace);
 #pragma warning restore CS0618
-
-        Assert.True(profile.RequireInvitationAddress);
-        Assert.True(profile.RequireInvitationPlace);
-        Assert.True(profile.RequirePersonAddressOfResidence);
+        Assert.True(profile.RequireAddress1);
     }
 
     [Fact]
-    public void Mapper_turns_invitation_stay_on_for_invitation_and_work_permit()
+    public void Mapper_turns_address1_on_for_invitation_and_work_permit()
     {
         var profile = new ApplicationProfile();
 #pragma warning disable CS0618
         ApplicationProfileFromApplicationTypeMapper.Apply(
             profile,
             new ApplicationType { Name = "App_Inv_And_WP", Code = "get_invitation_wp" });
+        Assert.False(profile.RequireInvitationAddress);
+        Assert.False(profile.RequireInvitationPlace);
 #pragma warning restore CS0618
-
-        Assert.True(profile.RequireInvitationAddress);
-        Assert.True(profile.RequireInvitationPlace);
-        Assert.True(profile.RequirePersonAddressOfResidence);
+        Assert.True(profile.RequireAddress1);
     }
 
     [Fact]

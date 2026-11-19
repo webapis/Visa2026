@@ -33,6 +33,12 @@ public class ApplicationProfileInstancePersonResolvedLink : BaseObject
     [RuleRequiredField]
     public virtual ApplicationProfileInstancePersonLinkKind? LinkKind { get; set; }
 
+    /// <summary>
+    /// 1-based slot for kinds that use stable slots (Address of residence).
+    /// Last-N document kinds leave this at 1; uniqueness stays on <see cref="LinkedObjectId"/>.
+    /// </summary>
+    public virtual int LinkSlotIndex { get; set; } = 1;
+
     [RuleRequiredField]
     public virtual Guid? LinkedObjectId { get; set; }
 }

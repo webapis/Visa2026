@@ -468,8 +468,37 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowPreviousInvitationItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonInvitationItem, t => t.ShowPreviousInvitationItem);
 
+    public static bool ShowAddress1(ApplicationProfileInstance? application) =>
+        Resolve(application, ProfileRequiresAddress1, t => t.ShowCurrentAddressOfResidence);
+
+    public static bool ShowAddress2(ApplicationProfileInstance? application) =>
+        Resolve(application, ProfileRequiresAddress2, t => t.ShowCurrentAddressOfResidence);
+
     public static bool ShowCurrentAddressOfResidence(ApplicationProfileInstance? application) =>
-        Resolve(application, p => p.RequirePersonAddressOfResidence, t => t.ShowCurrentAddressOfResidence);
+        ShowAddress1(application);
+
+    private static bool ProfileRequiresAddress1(ApplicationProfile p)
+    {
+        if (p.RequireAddress1)
+            return true;
+        if (p.RequireAddress2)
+            return false;
+#pragma warning disable CS0618
+        return p.RequirePersonAddressOfResidence;
+#pragma warning restore CS0618
+    }
+
+    private static bool ProfileRequiresAddress2(ApplicationProfile p)
+    {
+        if (p.RequireAddress2)
+            return true;
+        if (p.RequireAddress1)
+            return false;
+#pragma warning disable CS0618
+        return p.RequirePersonAddressOfResidence
+            && p.PersonAddressOfResidenceMaxCount >= 2;
+#pragma warning restore CS0618
+    }
 
     /// <summary>
     /// Employee position history tile / auto-link. Profile <see cref="ApplicationProfile.RequirePersonPosition"/>;

@@ -93,6 +93,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 |-----------------|----------|--------|-------------|--------|
 | **ApplicationProfileInstance** | `Region` / `City` | Deprecated | `ToRegion` / `ToCity` (dual-read fallback) | Keep columns; UI/import stop writing (From/To geo 2026-09) |
 | **ApplicationProfile** | `RequireRegion` / `RequireCity` / `RequireRegionCity` / `DefaultRegion` / `DefaultCity` | Deprecated | `RequireFrom*` / `RequireTo*` / `DefaultFrom*` / `DefaultTo*` | Keep columns for seed dual-read (From/To geo 2026-09) |
+| **ApplicationProfile** | `RequireInvitationAddress` / `RequireInvitationPlace` | Deprecated | **`RequireAddress1`** / **`RequireAddress2`** (case Address 1/2) | Columns retained; case summary UI hidden 2026-11-19 |
 | **UserReportTemplate** | `ApplicabilityMode` | Deprecated | Applicable type/contract links + `VisibilityCriteria` | Column retained |
 | **ApplicationProfile** | `DefaultAuthorizedSignatory` / `DefaultVisaRepresentative` | Retained (hidden) | Tenant catalog **`IsDefault`**; instance FKs `OrganizationSignatoryId` / `OrganizationRepresentativeId` | Columns kept; UI hidden 2026-09-03. Not profile config — do not drop in this change. |
 | **Application** | `ApplicationType` | Deprecated | **`Application.ApplicationProfile`** (live FK; set only at create) | FK retained during dual-read |
@@ -200,7 +201,8 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 
 ## Change log
 
-| 2026-09-15 | From/To Region+City geo: obsolete bare `Region`/`City`; use From*/To* on BT + internal registration. |
+|
+| 2026-11-19 | Case summary: Invitation region/city/Address type/Other invitation places removed; use Address 1/2 (`RequireAddress1`/`RequireAddress2`). | 2026-09-15 | From/To Region+City geo: obsolete bare `Region`/`City`; use From*/To* on BT + internal registration. |
 | 2026-08-14 | Officer workspace Progress/Advance steps come from Application Profile Approval legs + Process & SLA; `1_REVIEW_STARTED` / ApplicationProgress transition graph is storage-only for that UI. |
 | 2026-08-07 | Application Profile cutover registry: type config seed/UX, group/template links, `ApplicationItem` / `IssuingApplicationItem` (slice 10 pending), progress **configuration** vs `ApplicationProgress` BO clarified. |
 | 2026-07-31 | Registration→TravelHistory auto-sync removed; `SourceApplicationItemID` cleared/dropped; manual TravelHistory CRUD only. |

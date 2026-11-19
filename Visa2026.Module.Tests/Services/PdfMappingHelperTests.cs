@@ -200,22 +200,17 @@ public class PdfMappingHelperTests
     }
 
     [Fact]
-    public void MapApplicationData_UsesInvitationStayWhenTheProfileShowsInvitationAddress()
+    public void MapApplicationData_UsesAddress1WhenRequireAddress1()
     {
         var application = new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType { ShowCurrentAddressOfResidence = true },
-            ApplicationProfile = new ApplicationProfile { RequireInvitationAddress = true },
-            InvitationAddress = new InvitationAddress
+            ApplicationProfile = new ApplicationProfile { RequireAddress1 = true },
+            Address1 = new AddressOfResidence
             {
                 Region = new Region { PdfForm_Code = "AH" },
                 City = new City { PdfForm_Code = "AKB" },
-                Type = ResidenceType.Hotel,
-                Hotel = new Hotel { Name = "Ýyldyz myhmanhanasy" },
-                AlternativeAddress = new AlternativeAddressesForInvitation
-                {
-                    AddressLine = "ýa-da Balkan welaýatynyň",
-                },
+                FullAddress = "YYLDYZ MYHMANHANASY, YA-DA BALKAN WELAYATYNYNG",
             },
         };
         var item = new ApplicationRosterMergeLine
@@ -258,14 +253,14 @@ public class PdfMappingHelperTests
         Assert.Equal("AKB", data[PdfMappingHelper.InvitationStayCityKey]);
         Assert.Equal("YYLDYZ MYHMANHANASY, YA-DA BALKAN WELAYATYNYNG", data[PdfMappingHelper.InvitationStayAddressKey]);
     }
-
-    [Fact]
     public void MapApplicationData_KeepsAddressOfResidenceWhenInvitationAddressIsOff()
     {
         var application = new ApplicationProfileInstance
         {
             ApplicationType = new ApplicationType { ShowCurrentAddressOfResidence = true },
+#pragma warning disable CS0618
             ApplicationProfile = new ApplicationProfile { RequireInvitationAddress = false },
+#pragma warning restore CS0618
             InvitationAddress = new InvitationAddress
             {
                 Region = new Region { PdfForm_Code = "AH" },

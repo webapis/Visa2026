@@ -66,6 +66,30 @@ public static class ApplicationWorkspaceLinkedRecordsCatalog
         ApplicationProfileInstancePersonLinkKind kind) =>
         DistinctLinkedObjectIds(links, personId, kind);
 
+    /// <summary>1 when the person has a resolved link in the given address slot; otherwise 0.</summary>
+    public static int CountResolvedForPersonSlot(
+        IEnumerable<ApplicationProfileInstancePersonResolvedLink> links,
+        Guid personId,
+        ApplicationProfileInstancePersonLinkKind kind,
+        int linkSlotIndex)
+    {
+        if (personId == Guid.Empty || linkSlotIndex < 1)
+            return 0;
+
+        foreach (var link in links ?? [])
+        {
+            if (link.PersonId != personId)
+                continue;
+            if (!HasResolvedLink(link, kind))
+                continue;
+            var slot = link.LinkSlotIndex > 0 ? link.LinkSlotIndex : 1;
+            if (slot == linkSlotIndex)
+                return 1;
+        }
+
+        return 0;
+    }
+
     private static int DistinctLinkedObjectIds(
         IEnumerable<ApplicationProfileInstancePersonResolvedLink> links,
         Guid? personId,

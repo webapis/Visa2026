@@ -170,8 +170,12 @@ public static class ApplicationProfileFromApplicationTypeMapper
             !ApplicationProfileInvitationAddressPolicy.IsChangeInvitationType(type);
         if (ApplicationProfileInvitationAddressPolicy.CollectsInvitationStayType(type))
         {
-            profile.RequireInvitationAddress = true;
-            profile.RequireInvitationPlace = true;
+            // Stay used to be Invitation region/city/place; officers now use Address 1/2.
+#pragma warning disable CS0618
+            profile.RequireInvitationAddress = false;
+            profile.RequireInvitationPlace = false;
+#pragma warning restore CS0618
+            profile.RequireAddress1 = true;
         }
         profile.RequirePersonVisa = type.ShowCurrentVisa || type.ShowNextVisa;
         profile.RequirePersonInvitationItem = type.ShowCurrentInvitationItem || type.ShowPreviousInvitationItem;

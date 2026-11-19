@@ -740,6 +740,13 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             PersonLinkReview.ApplyChoice(line, request.ObjectId, objectSpace);
+            if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            {
+                var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
+                var person = objectSpace.GetObjectByKey<Person>(model.PersonLinkReviewPersonId);
+                if (application != null && person != null)
+                    PersonLinkReview.RefreshAddressSlot2Choices(objectSpace, application, person, model.PersonLinkReviewLines);
+            }
         }
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
         {
@@ -758,7 +765,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return Task.CompletedTask;
 
         using var objectSpace = _application.CreateObjectSpace(typeof(Person));
-        model.PersonLinkReviewCreateForm = PersonLinkReview.BuildCreateForm(objectSpace, line.Kind, line.Label);
+        model.PersonLinkReviewCreateForm = PersonLinkReview.BuildCreateForm(
+            objectSpace, line.Kind, line.Label, line.SlotIndex);
         return Task.CompletedTask;
     }
 
@@ -782,7 +790,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
             var passportId = model.PersonLinkReviewLines
                 .FirstOrDefault(item => item.Kind == ApplicationProfileInstancePersonLinkKind.Passport)?.ObjectId ?? Guid.Empty;
-            var savedId = PersonLinkReview.TryCreate(objectSpace, person, form, passportId, out var error);
+            var savedId = PersonLinkReview.TryCreate(objectSpace, person, form, passportId, out var error, application);
             if (savedId == Guid.Empty)
             {
                 form.Error = error ?? VisaUiMessages.Get("ApplicationProfileInstance.LinkReview.CouldNotSave");
@@ -791,11 +799,16 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             }
 
             objectSpace.CommitChanges();
-            var line = model.PersonLinkReviewLines.FirstOrDefault(item => item.Kind == form.Kind);
+            var line = PersonLinkReview.FindChoiceLine(
+                model.PersonLinkReviewLines,
+                new PersonLinkReviewChoiceRequest(form.Kind, savedId, form.SlotIndex))
+                ?? model.PersonLinkReviewLines.FirstOrDefault(item => item.Kind == form.Kind);
             if (line != null)
                 PersonLinkReview.SelectSaved(objectSpace, application, person, line, savedId);
-            if (form.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+            if (form.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
+                && application != null)
             {
+                PersonLinkReview.RefreshAddressSlot2Choices(objectSpace, application, person, model.PersonLinkReviewLines);
                 model.PersonLinkReviewDeclineCaseSummaryAddress = true;
                 model.PersonLinkReviewEditedAddressId = savedId;
             }
@@ -828,14 +841,16 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return Task.CompletedTask;
 
         PersonLinkReview.SelectSaved(objectSpace, application, person, line, savedId);
+        if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
+            && application != null)
+            PersonLinkReview.RefreshAddressSlot2Choices(objectSpace, application, person, model.PersonLinkReviewLines);
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && line.ObjectId != Guid.Empty)
         {
             model.PersonLinkReviewDeclineCaseSummaryAddress = true;
             model.PersonLinkReviewEditedAddressId = line.ObjectId;
         }
 
-        model.PersonLinkReviewLines = model.PersonLinkReviewLines.ToArray();
-        return Task.CompletedTask;
+        model.PersonLinkReviewLines = model.PersonLinkReviewLines.ToArray();        return Task.CompletedTask;
     }
 
     private Task EditPersonLinkReviewAsync(PersonLinkReviewLine line)

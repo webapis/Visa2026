@@ -37,7 +37,7 @@ internal static class ApplicationWorkspaceTabBuilder
             VisaTab(application, people, linksByPerson, linkedEntities),
             VisaBorderZoneLocationTab(application, people, requestedLocations),
             EducationTab(application, people, linksByPerson, linkedEntities),
-            AddressTab(application, people, linksByPerson, linkedEntities),
+            AddressTab(objectSpace, application, people, linksByPerson, linkedEntities),
             WorkPermitTab(application, people, linksByPerson, linkedEntities),
             WorkPermitLocationTab(application, people, requestedLocations),
             InvitationTab(application, people, linksByPerson, linkedEntities),
@@ -269,22 +269,94 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No education record linked.");
 
     private static ApplicationWorkspaceTab AddressTab(
+        IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         IReadOnlyList<Person> people,
         Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
         Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities) =>
         Tab("address", "Address", ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, ApplicationProfileInstancePersonLinkKind.AddressOfResidence),
-            ["Person", "Type", "Region", "City", "Address"],
-            RowsForKind<AddressOfResidence>(people, linksByPerson, linkedEntities, ApplicationProfileInstancePersonLinkKind.AddressOfResidence, (person, addr) =>
-            [
-                PersonName(person),
-                AddressTypeLabel(addr.Type),
-                addr.Region?.NameTm ?? "—",
-                addr.City?.NameTm ?? "—",
-                addr.FullAddress ?? "—",
-            ],
-            addr => InvitationStayAddressCopy.OfferTick(application.InvitationAddress, addr)),
+            ["Person", "Address"],
+            RowsForAddressSlots(objectSpace, application, people, linksByPerson, linkedEntities),
             emptyMessage: "No address linked.");
+
+    /// <summary>
+    /// One row per person/slot (Address 1 then Address 2). Uses override ResolvedLink when present,
+    /// otherwise case summary Address1/Address2 so People & links matches Case summary.
+    /// </summary>
+    private static KindRows RowsForAddressSlots(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        IReadOnlyList<Person> people,
+        Dictionary<Guid, List<ApplicationProfileInstancePersonResolvedLink>> linksByPerson,
+        Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities)
+    {
+        _ = linksByPerson;
+        var rows = new List<IReadOnlyList<string>>();
+        var personIds = new List<Guid>();
+        var linkedObjectIds = new List<Guid>();
+        var offers = new List<bool>();
+        var maxSlots = Math.Max(1, ApplicationProfilePersonAddressMaxCount.For(application));
+
+        foreach (var person in people)
+        {
+            if (person == null || person.ID == Guid.Empty)
+                continue;
+
+            for (var slot = 1; slot <= maxSlots; slot++)
+            {
+                var addr = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+                    application, person, slot, objectSpace);
+                if (addr != null)
+                {
+                    addr = LoadAddressForDisplay(objectSpace, linkedEntities, addr);
+                }
+
+                var text = FormatAddressCell(addr);
+                rows.Add([PersonName(person), text]);
+                personIds.Add(person.ID);
+                linkedObjectIds.Add(addr?.ID ?? Guid.Empty);
+                offers.Add(false);
+            }
+        }
+
+        return new KindRows(rows, personIds, linkedObjectIds, offers);
+    }
+
+    private static AddressOfResidence LoadAddressForDisplay(
+        IObjectSpace objectSpace,
+        Dictionary<(ApplicationProfileInstancePersonLinkKind Kind, Guid Id), object> linkedEntities,
+        AddressOfResidence address)
+    {
+        var key = (ApplicationProfileInstancePersonLinkKind.AddressOfResidence, address.ID);
+        if (linkedEntities.TryGetValue(key, out var cached) && cached is AddressOfResidence cachedAddress)
+            return cachedAddress;
+
+        var loaded = objectSpace.GetObjectsQuery<AddressOfResidence>()
+            .AsNoTracking()
+            .Include(row => row.Region)
+            .Include(row => row.City)
+            .Include(row => row.Lodging)
+            .Include(row => row.Hotel)
+            .Include(row => row.Hospital)
+            .Include(row => row.OtherSite)
+            .FirstOrDefault(row => row.ID == address.ID)
+            ?? address;
+        linkedEntities[key] = loaded;
+        return loaded;
+    }
+
+    private static string FormatAddressCell(AddressOfResidence? address)
+    {
+        if (address == null)
+            return "—";
+
+        var text = AddressOfResidenceReportText.CityAndStreet(address);
+        if (string.IsNullOrWhiteSpace(text))
+            text = address.DisplayAddress;
+        if (string.IsNullOrWhiteSpace(text))
+            text = address.FullAddress;
+        return string.IsNullOrWhiteSpace(text) ? "—" : text.Trim();
+    }
 
     private static ApplicationWorkspaceTab WorkPermitTab(
         ApplicationProfileInstance application,
@@ -501,7 +573,10 @@ internal static class ApplicationWorkspaceTabBuilder
                 continue;
 
             var seen = new HashSet<Guid>();
-            foreach (var link in links.Where(l => l.LinkKind == kind))
+            foreach (var link in links
+                .Where(l => l.LinkKind == kind)
+                .OrderBy(l => l.LinkSlotIndex <= 0 ? 1 : l.LinkSlotIndex)
+                .ThenBy(l => l.LinkedObjectId))
             {
                 if (link?.LinkedObjectId is not Guid linkedId || linkedId == Guid.Empty)
                     continue;

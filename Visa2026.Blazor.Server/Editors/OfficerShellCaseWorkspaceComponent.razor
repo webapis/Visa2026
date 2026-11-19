@@ -10,6 +10,7 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.OfficerShell
@@ -772,10 +773,12 @@
             return;
 
         var needsCatalogs = view.HeaderFields.Any(field =>
-            field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
-                or ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect
-            && field.Options.Count == 0
-            && field.MultiSelectOptions.Count == 0);
+            (field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+                    or ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect
+                && field.Options.Count == 0
+                && field.MultiSelectOptions.Count == 0)
+            || (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject
+                && field.Options.Count == 0));
         if (!needsCatalogs)
             return;
 
@@ -1155,6 +1158,9 @@
         ApplyHeaderDraft(key, value, null);
         return Task.CompletedTask;
     }
+
+    private Task OnHeaderAddressSelected(string key, Guid id) =>
+        OnHeaderFieldChanged(key, id == Guid.Empty ? string.Empty : id.ToString("D"));
 
     private void ApplyStagedHeaderSelection()
     {
@@ -1929,6 +1935,33 @@
                           disabled="@readOnly"
                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
             }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject)
+            {
+                <CaseAddressSearchField Options="@field.Options"
+                                        Value="@field.SelectedId"
+                                        DisplayValue="@field.DisplayValue"
+                                        NullText="— Select —"
+                                        Enabled="@(!readOnly)"
+                                        ReadOnly="@readOnly"
+                                        ValueChanged="id => OnHeaderAddressSelected(field.Key, id ?? Guid.Empty)">
+                    <Actions>
+                        @if (!readOnly)
+                        {
+                            <span class="os-link-review__icons">
+                                <button type="button"
+                                        class="cw-addr-icon cw-addr-icon--plus"
+                                        title="@Msg("ApplicationProfileInstance.Picker.New")"
+                                        @onclick="() => StartSummaryAddressEditAsync(field.Key, createNew: true)">+</button>
+                                <button type="button"
+                                        class="cw-addr-icon cw-addr-icon--pen"
+                                        title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
+                                        disabled="@(field.SelectedId is not Guid selectedId || selectedId == Guid.Empty)"
+                                        @onclick="() => StartSummaryAddressEditAsync(field.Key, createNew: false)">✎</button>
+                            </span>
+                        }
+                    </Actions>
+                </CaseAddressSearchField>
+            }
             else
             {
                 <input type="text"
@@ -2150,6 +2183,50 @@
                     @if (IsCaseSummaryEditing)
                     {
                         <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.SummaryFoot")</p>
+                    }
+                    @if (_summaryAddressForm is { } summaryAddressDraft)
+                    {
+                        <div class="os-link-review-form" role="dialog" aria-label="@summaryAddressDraft.Title">
+                            <h3 class="os-link-review-form__title">@summaryAddressDraft.Title</h3>
+                            @if (!string.IsNullOrWhiteSpace(summaryAddressDraft.Error))
+                            {
+                                <div class="os-banner os-banner--warn">@summaryAddressDraft.Error</div>
+                            }
+                            @foreach (var field in summaryAddressDraft.Fields.Where(item => IsCreateFieldShown(summaryAddressDraft, item)))
+                            {
+                                <div class="os-link-review-form__row">
+                                    <span class="os-link-review-form__label">
+                                        @field.Label
+                                        @if (field.Required)
+                                        {
+                                            <span class="os-link-review-form__req" aria-hidden="true">*</span>
+                                        }
+                                    </span>
+                                    @if (field.Editor == "lookup")
+                                    {
+                                        <select class="os-link-review__select"
+                                                value="@field.Value"
+                                                @onchange="e => OnCreateFieldChanged(summaryAddressDraft, field, e)">
+                                            <option value=""></option>
+                                            @foreach (var option in CreateOptions(summaryAddressDraft, field))
+                                            {
+                                                <option value="@option.Id">@option.Label</option>
+                                            }
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <input class="os-link-review__select"
+                                               value="@field.Value"
+                                               @onchange="e => OnCreateFieldChanged(summaryAddressDraft, field, e)" />
+                                    }
+                                </div>
+                            }
+                            <div class="os-link-review__actions">
+                                <button type="button" class="os-btn os-btn--primary" disabled="@_summaryAddressSaving" @onclick="SaveSummaryAddressAsync">@Msg("ApplicationProfileInstance.Issued.Save")</button>
+                                <button type="button" class="os-btn" disabled="@_summaryAddressSaving" @onclick="CancelSummaryAddressEdit">@Msg("ApplicationProfileInstance.Issued.Cancel")</button>
+                            </div>
+                        </div>
                     }
                 }
                 else
@@ -2933,27 +3010,55 @@
                                     }
                                     else if (_reviewGearOn && line.Choices.Count > 0)
                                     {
-                                        <select class="os-link-review__select"
-                                                value="@line.ObjectId"
-                                                @onchange="e => OnReviewChoiceChanged(line, e)">
-                                            @foreach (var choice in PersonLinkReview.ChoicesForManualPick(line, _reviewActiveOnly))
-                                            {
-                                                <option value="@choice.ObjectId">@choice.Label</option>
-                                            }
-                                        </select>
+                                        @* Same CaseAddressSearchField as create wizard / Case summary Address 1–2. *@
+                                        @if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                                        {
+                                            <CaseAddressSearchField Options="@LinkReviewAddressOptions(line)"
+                                                                    Value="@(line.ObjectId == Guid.Empty ? null : line.ObjectId)"
+                                                                    DisplayValue="@LinkReviewAddressDisplay(line)"
+                                                                    NullText="—"
+                                                                    Enabled="true"
+                                                                    ValueChanged="id => OnReviewAddressChoiceChanged(line, id ?? Guid.Empty)">
+                                                <Actions>
+                                                    <span class="os-link-review__icons">
+                                                        <button type="button"
+                                                                class="cw-addr-icon cw-addr-icon--plus"
+                                                                title="@Msg("ApplicationProfileInstance.Issued.AddPerson")"
+                                                                @onclick="() => StartCreateAsync(line)">+</button>
+                                                        <button type="button"
+                                                                class="cw-addr-icon cw-addr-icon--pen"
+                                                                title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
+                                                                @onclick="() => StartEditAsync(line)">✎</button>
+                                                    </span>
+                                                </Actions>
+                                            </CaseAddressSearchField>
+                                        }
+                                        else
+                                        {
+                                            <select class="os-link-review__select"
+                                                    value="@line.ObjectId"
+                                                    @onchange="e => OnReviewChoiceChanged(line, e)">
+                                                @foreach (var choice in PersonLinkReview.ChoicesForManualPick(line, _reviewActiveOnly))
+                                                {
+                                                    <option value="@choice.ObjectId">@choice.Label</option>
+                                                }
+                                            </select>
+                                        }
                                     }
                                     else
                                     {
                                         <span class="os-link-review__value">@line.Summary</span>
                                     }
-                                    @if (_reviewGearOn && !line.OmitFromJoin)
+                                    @if (_reviewGearOn
+                                        && !line.OmitFromJoin
+                                        && line.Kind != ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
                                     {
                                         <span class="os-link-review__icons">
                                             <button type="button"
                                                     class="cw-addr-icon cw-addr-icon--plus"
                                                     title="@Msg("ApplicationProfileInstance.Issued.AddPerson")"
                                                     @onclick="() => StartCreateAsync(line)">+</button>
-                                            @if (line.ObjectId != Guid.Empty || line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                                            @if (line.ObjectId != Guid.Empty)
                                             {
                                                 <button type="button"
                                                         class="cw-addr-icon cw-addr-icon--pen"
@@ -3968,21 +4073,166 @@
         _peopleRecordPersonIndex = personIndex;
     }
 
+    /// <summary>
+    /// People-column keys may be <c>address:1</c> / <c>address:2</c> while the workspace tab
+    /// stays <c>address</c>. Strip a trailing <c>:N</c> slot when resolving the tab.
+    /// </summary>
+    private static bool TrySplitPeopleRecordKey(string? key, out string tabKey, out int slotIndex)
+    {
+        tabKey = key?.Trim() ?? string.Empty;
+        slotIndex = 0;
+        if (string.IsNullOrEmpty(tabKey))
+            return false;
+
+        var colon = tabKey.LastIndexOf(':');
+        if (colon <= 0 || colon >= tabKey.Length - 1)
+            return true;
+        if (!int.TryParse(tabKey.AsSpan(colon + 1), out var slot) || slot < 1)
+            return true;
+
+        tabKey = tabKey[..colon];
+        slotIndex = slot;
+        return true;
+    }
+
     private ApplicationWorkspaceTab? FindLinkedTab(string? key)
     {
         if (string.IsNullOrWhiteSpace(key) || Snapshot?.Tabs == null)
             return null;
+        TrySplitPeopleRecordKey(key, out var tabKey, out _);
         return Snapshot.Tabs.FirstOrDefault(tab =>
-            string.Equals(tab.Key, key, StringComparison.OrdinalIgnoreCase));
+            string.Equals(tab.Key, tabKey, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(tab.Key, key, StringComparison.OrdinalIgnoreCase));
     }
 
     private Guid _addressEditorId;
     private string? _addressActionError;
+    private PersonLinkReviewCreateForm? _summaryAddressForm;
+    private string? _summaryAddressFieldKey;
+    private bool _summaryAddressSaving;
+
+    private async Task StartSummaryAddressEditAsync(string fieldKey, bool createNew)
+    {
+        if (Snapshot == null || string.IsNullOrWhiteSpace(fieldKey))
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(Snapshot.ApplicationProfileInstanceId);
+        if (application == null)
+            return;
+
+        var slot = ApplicationWorkspaceCaseHeaderFieldsHelper.AddressSlotForKey(fieldKey);
+        AddressOfResidence? address;
+        if (createNew)
+        {
+            address = objectSpace.CreateObject<AddressOfResidence>();
+            address.OwningApplicationProfileInstance = application;
+            address.RosterPerson = null;
+#pragma warning disable CS0618
+            address.Person = null;
+#pragma warning restore CS0618
+            ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(application, slot, address);
+        }
+        else
+        {
+            address = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot);
+            if (address == null)
+                return;
+        }
+
+        if (objectSpace.IsModified)
+            objectSpace.CommitChanges();
+
+        var line = new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+            Label = fieldKey,
+            ObjectId = address.ID,
+            SlotIndex = slot,
+        };
+        _summaryAddressFieldKey = fieldKey;
+        _summaryAddressForm = PersonLinkReview.BuildEditForm(objectSpace, application, person: null, line);
+        if (_summaryAddressForm != null)
+            _summaryAddressForm.Title = ApplicationProfileLocalization.Field(fieldKey);
+        await Task.CompletedTask;
+    }
+
+    private void CancelSummaryAddressEdit()
+    {
+        _summaryAddressForm = null;
+        _summaryAddressFieldKey = null;
+    }
+
+    private async Task SaveSummaryAddressAsync()
+    {
+        if (_summaryAddressForm == null || string.IsNullOrWhiteSpace(_summaryAddressFieldKey) || Snapshot == null || _summaryAddressSaving)
+            return;
+
+        _summaryAddressSaving = true;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(Snapshot.ApplicationProfileInstanceId);
+            if (application == null)
+            {
+                _summaryAddressForm.Error = Msg("ApplicationProfileInstance.LinkReview.CouldNotSave");
+                return;
+            }
+
+            var form = _summaryAddressForm;
+            if (!Enum.TryParse<ResidenceType>(form.Fields.FirstOrDefault(f => f.Key == "type")?.Value, out var type))
+            {
+                form.Error = Msg("ApplicationProfileInstance.LinkReview.TypeRequired");
+                return;
+            }
+
+            Guid? ParseId(string key)
+            {
+                var raw = form.Fields.FirstOrDefault(f => f.Key == key)?.Value;
+                return Guid.TryParse(raw, out var id) ? id : null;
+            }
+
+            var edit = new AddressOfResidenceEdit
+            {
+                Type = type,
+                RegionId = ParseId("region"),
+                CityId = ParseId("city"),
+                SiteId = type switch
+                {
+                    ResidenceType.Lodging => ParseId("lodging"),
+                    ResidenceType.Hotel => ParseId("hotel"),
+                    ResidenceType.Hospital => ParseId("hospital"),
+                    ResidenceType.Other => ParseId("other"),
+                    _ => null,
+                },
+                PrivateHouseAddress = form.Fields.FirstOrDefault(f => f.Key == "private")?.Value,
+            };
+
+            if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryUpsertSummaryAddress(
+                    objectSpace, application, _summaryAddressFieldKey, edit, out var error))
+            {
+                form.Error = error ?? Msg("ApplicationProfileInstance.LinkReview.CouldNotSave");
+                return;
+            }
+
+            objectSpace.CommitChanges();
+            _summaryAddressForm = null;
+            _summaryAddressFieldKey = null;
+            WorkspaceActions.NotifyWorkspaceChanged();
+        }
+        finally
+        {
+            _summaryAddressSaving = false;
+        }
+
+        await Task.CompletedTask;
+    }
 
     private sealed record PersonLinkedRow(IReadOnlyList<string> Cells, Guid LinkedObjectId, bool OfferCaseAddress);
 
     private IReadOnlyList<PersonLinkedRow> PersonLinkedRows(ApplicationWorkspaceCasePerson person, string recordKey)
     {
+        TrySplitPeopleRecordKey(recordKey, out _, out var slotIndex);
         var tab = FindLinkedTab(recordKey);
         if (tab == null || tab.Rows.Count == 0)
             return Array.Empty<PersonLinkedRow>();
@@ -3998,14 +4248,23 @@
                 var offer = i < tab.RowOfferCaseAddress.Count && tab.RowOfferCaseAddress[i];
                 rows.Add(new PersonLinkedRow(LinkedRecordCells(tab, tab.Rows[i]), linkedId, offer));
             }
-            return rows;
+        }
+        else
+        {
+            foreach (var row in tab.Rows.Where(row => row.Count > 0
+                         && string.Equals(row[0], person.Name, StringComparison.Ordinal)))
+            {
+                rows.Add(new PersonLinkedRow(LinkedRecordCells(tab, row), Guid.Empty, false));
+            }
         }
 
-        foreach (var row in tab.Rows.Where(row => row.Count > 0
-                     && string.Equals(row[0], person.Name, StringComparison.Ordinal)))
+        if (slotIndex > 0)
         {
-            rows.Add(new PersonLinkedRow(LinkedRecordCells(tab, row), Guid.Empty, false));
+            if (rows.Count < slotIndex)
+                return Array.Empty<PersonLinkedRow>();
+            return new[] { rows[slotIndex - 1] };
         }
+
         return rows;
     }
 
@@ -4465,6 +4724,35 @@
         return SelectPersonLinkReviewRequested.InvokeAsync(new PersonLinkReviewChoiceRequest(line.Kind, objectId, line.SlotIndex));
     }
 
+    private Task OnReviewAddressChoiceChanged(PersonLinkReviewLine line, Guid objectId) =>
+        SelectPersonLinkReviewRequested.InvokeAsync(new PersonLinkReviewChoiceRequest(line.Kind, objectId, line.SlotIndex));
+
+    private static IReadOnlyList<ApplicationWorkspaceLookupOption> LinkReviewAddressOptions(PersonLinkReviewLine line)
+    {
+        var choices = PersonLinkReview.ChoicesForManualPick(line, activeOnly: false);
+        var options = new List<ApplicationWorkspaceLookupOption>(choices.Count);
+        foreach (var choice in choices)
+        {
+            var label = string.IsNullOrWhiteSpace(choice.Label) ? "—" : choice.Label;
+            options.Add(new ApplicationWorkspaceLookupOption
+            {
+                Id = choice.ObjectId,
+                DisplayName = label,
+                SearchText = ApplicationWorkspaceCaseHeaderFieldsHelper.BuildDiacriticSearchHaystack(label),
+            });
+        }
+
+        return options;
+    }
+
+    private static string LinkReviewAddressDisplay(PersonLinkReviewLine line)
+    {
+        if (!string.IsNullOrWhiteSpace(line.Summary) && line.Summary != "—")
+            return line.Summary;
+        var selected = line.Choices.FirstOrDefault(choice => choice.ObjectId == line.ObjectId);
+        return string.IsNullOrWhiteSpace(selected?.Label) ? "—" : selected!.Label;
+    }
+
     private Task CancelPersonLinkReviewAsync() => CancelPersonLinkReviewRequested.InvokeAsync();
 
     private Task OnPersonLinkReviewVisibleChanged(bool visible)
@@ -4738,10 +5026,11 @@
         if (rows.Count == 0)
             return "—";
 
+        var preferAddressText = record.Key.StartsWith("address", StringComparison.OrdinalIgnoreCase);
         var lines = new List<string>();
         foreach (var row in rows)
         {
-            var primary = row.Cells.Count > 0 ? row.Cells[0]?.Trim() : null;
+            var primary = PreferPeopleLinkPrimary(row.Cells, preferAddressText);
             if (string.IsNullOrWhiteSpace(primary) || primary == "—")
                 continue;
             if (!lines.Contains(primary, StringComparer.OrdinalIgnoreCase))
@@ -4749,6 +5038,26 @@
         }
 
         return lines.Count == 0 ? "—" : string.Join("\n", lines);
+    }
+
+    /// <summary>
+    /// Address tab cells are Type / Region / City / Address — prefer the full address for people columns.
+    /// </summary>
+    private static string? PreferPeopleLinkPrimary(IReadOnlyList<string> cells, bool preferAddressText)
+    {
+        if (cells == null || cells.Count == 0)
+            return null;
+        if (preferAddressText)
+        {
+            for (var i = cells.Count - 1; i >= 0; i--)
+            {
+                var value = cells[i]?.Trim();
+                if (!string.IsNullOrWhiteSpace(value) && value != "—")
+                    return value;
+            }
+        }
+
+        return cells[0]?.Trim();
     }
 
 

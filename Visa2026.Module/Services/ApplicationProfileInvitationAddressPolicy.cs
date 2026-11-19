@@ -4,8 +4,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// Invitation-receiving templates collect the case stay (region, city, address type, place).
-/// Other invitation places stay optional. Çakylyk Almak still has its own person-link exceptions.
+/// Invitation-receiving template keys (Çakylyk Almak family). Case stay UI moved to Address 1/2;
+/// this policy still identifies those templates for person-link exceptions and seeding.
 /// </summary>
 public static class ApplicationProfileInvitationAddressPolicy
 {
@@ -29,7 +29,8 @@ public static class ApplicationProfileInvitationAddressPolicy
     };
 
     /// <summary>
-    /// Case summary shows Invitation region, city, address type, and other invitation places.
+    /// Invitation-receiving templates that used to collect Invitation region/city/place.
+    /// Case summary now uses Address 1/2 instead.
     /// </summary>
     public static bool CollectsInvitationStay(string? profileCatalogKey, string? code) =>
         IsStayKey(profileCatalogKey) || IsStayKey(code);

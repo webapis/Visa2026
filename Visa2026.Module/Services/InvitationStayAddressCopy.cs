@@ -61,39 +61,60 @@ public static class InvitationStayAddressCopy
         IsComplete(stay) && address != null && !Matches(address, stay);
 
     /// <summary>
-    /// When the stay is complete, people on this case who have no address of residence
-    /// get one created from the stay and linked. People who already have an address are left alone.
-    /// Case summary save uses this. Link / Relink uses <see cref="EnsureForPersonWithoutAddress"/>.
+    /// When invitation stay is complete and case Address 1 is empty, copy stay onto case summary Address 1.
+    /// Does not create Person-owned AddressOfResidence children.
     /// </summary>
     public static void EnsureForPeopleWithoutAddress(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
-        if (!CanCopy(objectSpace, application, out var stay))
+        if (!CanCopy(objectSpace, application, out var stay) || stay == null)
             return;
 
-        var people = application.People?.Where(p => p != null && p.ID != Guid.Empty).ToList() ?? [];
-        if (people.Count == 0)
+        if (application.Address1 != null)
             return;
 
-        var withAddress = PeopleWithAddress(objectSpace, people.Select(p => p.ID));
-        foreach (var person in people)
+        var address = objectSpace.CreateObject<AddressOfResidence>();
+        address.OwningApplicationProfileInstance = application;
+        address.RosterPerson = null;
+#pragma warning disable CS0618
+        address.Person = null;
+#pragma warning restore CS0618
+        address.Region = stay.Region;
+        address.City = stay.City;
+        address.Type = stay.Type;
+        switch (stay.Type)
         {
-            if (withAddress.Contains(person.ID))
-                continue;
-            LinkCreatedStayAddress(objectSpace, application, person, stay!);
+            case ResidenceType.Lodging:
+                address.Lodging = stay.Lodging;
+                break;
+            case ResidenceType.Hotel:
+                address.Hotel = stay.Hotel;
+                break;
+            case ResidenceType.Hospital:
+                address.Hospital = stay.Hospital;
+                break;
+            case ResidenceType.Other:
+                address.OtherSite = stay.OtherSite;
+                break;
+            case ResidenceType.PrivateHouse:
+                address.FullAddress = stay.PrivateHouseAddress?.Trim();
+                address.DeferPrivateHouseExpiration = true;
+                break;
         }
+
+        application.Address1 = address;
     }
 
-    /// <summary>Same copy as <see cref="EnsureForPeopleWithoutAddress"/>, for the person being linked.</summary>
+    /// <summary>
+    /// Linked Records inherit case Address 1/2 — no Person child copy on join/link.
+    /// </summary>
     public static void EnsureForPersonWithoutAddress(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         Person person)
     {
-        if (!CanCopy(objectSpace, application, out var stay) || person == null || person.ID == Guid.Empty)
-            return;
-        if (PersonHasAddress(objectSpace, person.ID))
-            return;
-        LinkCreatedStayAddress(objectSpace, application, person, stay!);
+        _ = objectSpace;
+        _ = application;
+        _ = person;
     }
 
     private static void LinkCreatedStayAddress(
@@ -128,27 +149,15 @@ public static class InvitationStayAddressCopy
     }
 
     /// <summary>
-    /// Join accepts the Case summary stay. Creates a new address and links it unless the
-    /// person's newest address already matches that stay.
+    /// Join no longer copies invitation stay onto Person-owned AddressOfResidence.
+    /// Linked Records inherit case Address 1/2 unless an override ResolvedLink exists.
     /// </summary>
     public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
-        if (!CanCopy(objectSpace, application, out var stay) || person == null || person.ID == Guid.Empty)
-            return false;
-
-        var last = objectSpace.GetObjectsQuery<AddressOfResidence>()
-            .Where(address => address.Person != null && address.Person.ID == person.ID)
-            .OrderByDescending(address => address.ID)
-            .FirstOrDefault();
-        if (!ShouldInsertFromStay(last, stay))
-            return false;
-
-        var created = CreateFromStay(objectSpace, person, stay!);
-        if (created == null || created.ID == Guid.Empty)
-            return false;
-
-        RetargetAddressLink(objectSpace, application, person, created);
-        return true;
+        _ = objectSpace;
+        _ = application;
+        _ = person;
+        return false;
     }
 
     public static bool ShouldInsertFromStay(AddressOfResidence? last, InvitationAddress? stay) =>
@@ -379,8 +388,13 @@ public static class InvitationStayAddressCopy
         if (objectSpace == null || person == null || !IsComplete(stay))
             return null;
 
+        var application = stay.ApplicationProfileInstance;
         var address = objectSpace.CreateObject<AddressOfResidence>();
-        address.Person = person;
+        address.OwningApplicationProfileInstance = application;
+        address.RosterPerson = person;
+#pragma warning disable CS0618
+        address.Person = null;
+#pragma warning restore CS0618
         address.Region = stay.Region;
         address.City = stay.City;
         address.Type = stay.Type;
@@ -403,10 +417,6 @@ public static class InvitationStayAddressCopy
                 address.DeferPrivateHouseExpiration = true;
                 break;
         }
-
-        person.AddressesOfResidence ??= new System.Collections.ObjectModel.ObservableCollection<AddressOfResidence>();
-        if (!person.AddressesOfResidence.Contains(address))
-            person.AddressesOfResidence.Add(address);
 
         return address;
     }

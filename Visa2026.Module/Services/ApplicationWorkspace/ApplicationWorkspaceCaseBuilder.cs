@@ -255,8 +255,17 @@ internal static class ApplicationWorkspaceCaseBuilder
                 if (!ApplicationWorkspaceLinkedRecordsCatalog.IsConfigured(application, def.Kind))
                     continue;
 
+                var addressSlots = def.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
+                    && ApplicationProfilePersonAddressMaxCount.For(application) >= 2;
                 var expected = people.Sum(p =>
                 {
+                    if (addressSlots)
+                    {
+                        var slot1 = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, def.PersonRecordKey + ":1", StringComparison.OrdinalIgnoreCase));
+                        return slot1 is { IsCaptionOnly: false } ? slot1.ExpectedCount : 0;
+                    }
+
                     var record = p.Records.FirstOrDefault(r =>
                         string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase));
                     if (record == null || record.IsCaptionOnly)
@@ -272,6 +281,13 @@ internal static class ApplicationWorkspaceCaseBuilder
 
                 var count = people.Sum(p =>
                 {
+                    if (addressSlots)
+                    {
+                        var slot1 = p.Records.FirstOrDefault(r =>
+                            string.Equals(r.Key, def.PersonRecordKey + ":1", StringComparison.OrdinalIgnoreCase));
+                        return slot1 is { IsCaptionOnly: false } ? slot1.Count : 0;
+                    }
+
                     var record = p.Records.FirstOrDefault(r =>
                         string.Equals(r.Key, def.PersonRecordKey, StringComparison.OrdinalIgnoreCase));
                     if (record == null || record.IsCaptionOnly)
@@ -1045,6 +1061,19 @@ internal static class ApplicationWorkspaceCaseBuilder
         return people;
     }
 
+    private static bool PersonHasResolvedAddress(
+        ApplicationProfileInstance? application,
+        Person? person,
+        int slot)
+    {
+        if (application == null)
+            return false;
+        if (person == null || person.ID == Guid.Empty)
+            return ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot) != null;
+
+        return ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(application, person, slot) != null;
+    }
+
     private static string FormatRoleLabel(string role)
     {
         if (string.IsNullOrWhiteSpace(role) || role == "—")
@@ -1163,33 +1192,84 @@ internal static class ApplicationWorkspaceCaseBuilder
                 }
             }
 
-            var available = personId != Guid.Empty
-                ? linkableCounts.Get(personId, def.Kind)
-                : 0;
-            var expected = ApplicationWorkspaceLastNExpected.Resolve(
-                def.Kind,
-                lastN,
-                available,
-                linksLocked,
-                importedManualEntry: application?.IsManualEntry == true);
-            var count = personId != Guid.Empty
-                ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, personId, def.Kind)
-                : tabs.TryGetValue(def.TabKey, out var tab)
-                    ? tab.Rows.Count(r => r.Count > 0 && string.Equals(r[0], personName, StringComparison.Ordinal))
-                    : 0;
-
-            records.Add(new ApplicationWorkspaceCasePersonRecord
+            int count;
+            if (def.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
             {
-                Key = def.PersonRecordKey,
-                Label = def.Label,
-                Count = count,
-                ExpectedCount = expected,
-                State = count >= expected ? "valid" : "empty",
-                Glyph = def.Glyph,
-                Tone = LinkedTones[toneIndex % LinkedTones.Length],
-            });
-            toneIndex++;
-        
+                var maxSlots = Math.Max(1, ApplicationProfilePersonAddressMaxCount.For(application));
+                if (maxSlots >= 2)
+                {
+                    var slot1Has = PersonHasResolvedAddress(application, rosterPerson, 1);
+                    var slot2Has = PersonHasResolvedAddress(application, rosterPerson, 2);
+                    count = (slot1Has ? 1 : 0) + (slot2Has ? 1 : 0);
+                    records.Add(new ApplicationWorkspaceCasePersonRecord
+                    {
+                        Key = def.PersonRecordKey + ":1",
+                        Label = "Address 1",
+                        Count = slot1Has ? 1 : 0,
+                        ExpectedCount = 1,
+                        State = slot1Has ? "valid" : "empty",
+                        Glyph = def.Glyph,
+                        Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    });
+                    toneIndex++;
+                    records.Add(new ApplicationWorkspaceCasePersonRecord
+                    {
+                        Key = def.PersonRecordKey + ":2",
+                        Label = "Address 2",
+                        Count = slot2Has ? 1 : 0,
+                        ExpectedCount = 0,
+                        State = slot2Has ? "valid" : "empty",
+                        Glyph = def.Glyph,
+                        Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    });
+                    toneIndex++;
+                }
+                else
+                {
+                    var hasAddress = PersonHasResolvedAddress(application, rosterPerson, 1);
+                    count = hasAddress ? 1 : 0;
+                    records.Add(new ApplicationWorkspaceCasePersonRecord
+                    {
+                        Key = def.PersonRecordKey,
+                        Label = def.Label,
+                        Count = count,
+                        ExpectedCount = 1,
+                        State = hasAddress ? "valid" : "empty",
+                        Glyph = def.Glyph,
+                        Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    });
+                    toneIndex++;
+                }
+            }
+            else
+            {
+                var available = personId != Guid.Empty
+                    ? linkableCounts.Get(personId, def.Kind)
+                    : 0;
+                var expected = ApplicationWorkspaceLastNExpected.Resolve(
+                    def.Kind,
+                    lastN,
+                    available,
+                    linksLocked,
+                    importedManualEntry: application?.IsManualEntry == true);
+                count = personId != Guid.Empty
+                    ? ApplicationWorkspaceLinkedRecordsCatalog.CountResolvedForPerson(rosterLinks, personId, def.Kind)
+                    : tabs.TryGetValue(def.TabKey, out var tab)
+                        ? tab.Rows.Count(r => r.Count > 0 && string.Equals(r[0], personName, StringComparison.Ordinal))
+                        : 0;
+
+                records.Add(new ApplicationWorkspaceCasePersonRecord
+                {
+                    Key = def.PersonRecordKey,
+                    Label = def.Label,
+                    Count = count,
+                    ExpectedCount = expected,
+                    State = count >= expected ? "valid" : "empty",
+                    Glyph = def.Glyph,
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                });
+                toneIndex++;
+            }
 
             if (def.Kind == ApplicationProfileInstancePersonLinkKind.WorkPermitItem
                 && CaseWorkPermitLocationCopy.ShowInLinkReview(application))
