@@ -928,17 +928,30 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             // Drop pre-profile-scope cache so Invitation cannot see WP / extension cards.
             await js.InvokeAsync<bool>(
                 "visaCaseSummaryRecent.save",
-                ApplicationProfilePickerCaseSummaryRecentHelper.LegacyStorageKey(userKey),
+                ApplicationProfilePickerCaseSummaryRecentHelper.LegacyStorageKeyV1(userKey),
                 null);
+            await js.InvokeAsync<bool>(
+                "visaCaseSummaryRecent.save",
+                ApplicationProfilePickerCaseSummaryRecentHelper.LegacyStorageKeyV2(userKey),
+                null);
+            await js.InvokeAsync<int>(
+                "visaCaseSummaryRecent.clearPrefix",
+                ApplicationProfilePickerCaseSummaryRecentHelper.LegacyStorageKeyPrefixV3);
 
             if (model.SelectedProfileId == Guid.Empty)
                 return;
 
-            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(userKey);
+            var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(
+                userKey,
+                model.SelectedProfileId,
+                model.SelectedVersionId);
             var json = await js.InvokeAsync<string>("visaCaseSummaryRecent.load", key);
             var all = ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(json);
             model.CaseSummaryRecentEntries =
-                ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(all, model.SelectedProfileId);
+                ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(
+                    all,
+                    model.SelectedProfileId,
+                    model.SelectedVersionId);
         }
         catch (JSException)
         {
@@ -961,6 +974,7 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             ?.DisplayName;
         var entry = ApplicationProfilePickerCaseSummaryRecentHelper.CreateFromFields(
             model.SelectedProfileId,
+            model.SelectedVersionId,
             model.CaseSummaryFields,
             companyLabel);
         if (entry.Updates.Count == 0
@@ -969,7 +983,10 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         var userKey = CurrentUserStorageKey();
-        var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(userKey);
+        var key = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey(
+            userKey,
+            model.SelectedProfileId,
+            model.SelectedVersionId);
 
         try
         {
@@ -979,7 +996,10 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             var json = ApplicationProfilePickerCaseSummaryRecentHelper.Serialize(nextAll);
             await js.InvokeAsync<bool>("visaCaseSummaryRecent.save", key, json);
             model.CaseSummaryRecentEntries =
-                ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(nextAll, model.SelectedProfileId);
+                ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(
+                    nextAll,
+                    model.SelectedProfileId,
+                    model.SelectedVersionId);
             model.SelectedCaseSummaryRecentId = entry.Id;
         }
         catch (JSException)

@@ -1,13 +1,17 @@
 @using System.Linq
+@using DevExpress.Blazor
+@using DevExpress.ExpressApp
 @using Visa2026.Blazor.Server.Components
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Editors
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.ApplicationProfilePicker
 @using Visa2026.Module.Services.ApplicationWorkspace
+@inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
 
-<div class="ap-picker @(Step == 2 ? "ap-picker--wide" : null)" aria-busy="@(IsAdvancing || _busyVersionId != Guid.Empty)">
+<div class="ap-picker @(Step == 2 || Step == 4 ? "ap-picker--wide" : null) @(Step == 4 ? "ap-picker--case-summary" : null)" aria-busy="@(IsAdvancing || _busyVersionId != Guid.Empty)">
     @if (IsLoading)
     {
         <div class="ap-picker__loading" role="status">@Msg("ApplicationProfileInstance.Picker.Loading")</div>
@@ -197,15 +201,67 @@
         @if (CaseSummaryFields.Count == 0)
         {
             <p class="ap-picker__hint">@Msg("ApplicationProfileInstance.Picker.NoRequiredProps")</p>
+            <div class="ap-picker__callout" role="note">
+                @Msg("ApplicationProfileInstance.Picker.CreateOpensPeople")
+            </div>
+            @if (missing.Count > 0)
+            {
+                <div class="ap-picker__status is-error" role="status">@ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(missing)</div>
+            }
+            <div class="ap-picker__actions">
+                @RenderAdvance()
+                <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+                <button type="button"
+                        class="ap-picker__btn ap-picker__btn--primary"
+                        disabled="@(IsAdvancing || !CanCreateOnCaseSummaryStep)"
+                        @onclick="UseProfileAsync">
+                    @Msg("ApplicationProfileInstance.Picker.Create")
+                </button>
+            </div>
+            <p class="ap-picker__foot-note">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.FootNoteLast", SelectedProfileName)</p>
         }
         else
         {
-            <div class="ap-picker__summary">
-                <div class="ap-picker__summary-form">
-                    @foreach (var field in CaseSummaryFields)
-                    {
-                        @RenderSummaryField(field)
+            <div class="ap-picker__case-body">
+                <div class="ap-picker__case-main">
+                    <div class="ap-picker__summary-form">
+                        @foreach (var field in CaseSummaryFields.Where(item => item.Kind != ApplicationWorkspaceCaseHeaderFieldKind.AddressObject))
+                        {
+                            @RenderSummaryField(field)
+                        }
+                    </div>
+                    @{
+                        var addressFields = CaseSummaryFields
+                            .Where(item => item.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject)
+                            .ToList();
                     }
+                    @if (addressFields.Count > 0)
+                    {
+                        <div class="ap-picker__summary-addresses">
+                            @foreach (var field in addressFields)
+                            {
+                                @RenderSummaryField(field)
+                            }
+                        </div>
+                    }
+                    <div class="ap-picker__callout" role="note">
+                        @Msg("ApplicationProfileInstance.Picker.CreateOpensPeople")
+                    </div>
+                    @if (missing.Count > 0)
+                    {
+                        <div class="ap-picker__status is-error" role="status">@ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(missing)</div>
+                    }
+                    <div class="ap-picker__actions">
+                        @RenderAdvance()
+                        <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
+                        <button type="button"
+                                class="ap-picker__btn ap-picker__btn--primary"
+                                disabled="@(IsAdvancing || !CanCreateOnCaseSummaryStep)"
+                                @onclick="UseProfileAsync">
+                            @Msg("ApplicationProfileInstance.Picker.Create")
+                        </button>
+                    </div>
+                    <p class="ap-picker__foot-note">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.FootNoteLast", SelectedProfileName)</p>
                 </div>
                 <aside class="ap-picker__recent" aria-label="@Msg("ApplicationProfileInstance.Picker.Recent.Title")">
                     <div class="ap-picker__recent-head">
@@ -247,27 +303,19 @@
                     }
                 </aside>
             </div>
+            @if (_summaryAddressEditorId != Guid.Empty)
+            {
+                <div class="ap-picker__address-overlay"
+                     role="presentation"
+                     @onclick="CloseSummaryAddressEditor">
+                    <div class="ap-picker__address-dialog" @onclick:stopPropagation="true">
+                        <CaseAddressOfResidenceEditor AddressId="@_summaryAddressEditorId"
+                                                      Saved="OnSummaryAddressSavedAsync"
+                                                      Closed="CloseSummaryAddressEditor" />
+                    </div>
+                </div>
+            }
         }
-
-        <div class="ap-picker__callout" role="note">
-            @Msg("ApplicationProfileInstance.Picker.CreateOpensPeople")
-        </div>
-        @if (missing.Count > 0)
-        {
-            <div class="ap-picker__status is-error" role="status">@ApplicationWorkspaceCaseSummaryCompletenessGate.FormatBannerMessage(missing)</div>
-        }
-
-        <div class="ap-picker__actions">
-            @RenderAdvance()
-            <button type="button" class="ap-picker__btn" disabled="@IsAdvancing" @onclick="BackStepAsync">@Msg("ApplicationProfileInstance.Picker.Back")</button>
-            <button type="button"
-                    class="ap-picker__btn ap-picker__btn--primary"
-                    disabled="@(IsAdvancing || !CanCreateOnCaseSummaryStep)"
-                    @onclick="UseProfileAsync">
-                @Msg("ApplicationProfileInstance.Picker.Create")
-            </button>
-        </div>
-        <p class="ap-picker__foot-note">@VisaUiMessages.Format("ApplicationProfileInstance.Picker.FootNoteLast", SelectedProfileName)</p>
     }
     else
     {
@@ -854,6 +902,33 @@
                     }
                 </div>
             }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject)
+            {
+                <CaseAddressSearchField Options="@field.Options"
+                                        Value="@field.SelectedId"
+                                        DisplayValue="@field.DisplayValue"
+                                        NullText="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"
+                                        Enabled="@(!field.ReadOnly)"
+                                        ReadOnly="@field.ReadOnly"
+                                        ValueChanged="id => OnCaseSummaryAddressSelected(field.Key, id ?? Guid.Empty)">
+                    <Actions>
+                        @if (!field.ReadOnly)
+                        {
+                            <span class="os-link-review__icons">
+                                <button type="button"
+                                        class="cw-addr-icon cw-addr-icon--plus"
+                                        title="@Msg("ApplicationProfileInstance.Picker.New")"
+                                        @onclick="() => StartSummaryAddressEditAsync(field, createNew: true)">+</button>
+                                <button type="button"
+                                        class="cw-addr-icon cw-addr-icon--pen"
+                                        title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
+                                        disabled="@(field.SelectedId is not Guid selectedId || selectedId == Guid.Empty)"
+                                        @onclick="() => StartSummaryAddressEditAsync(field, createNew: false)">✎</button>
+                            </span>
+                        }
+                    </Actions>
+                </CaseAddressSearchField>
+            }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
             {
                 <input type="text"
@@ -924,6 +999,59 @@
             Key = key,
             Value = value,
         });
+    }
+
+    private Task OnCaseSummaryAddressSelected(string key, Guid id) =>
+        OnCaseSummaryFieldChanged(key, id == Guid.Empty ? string.Empty : id.ToString("D"));
+
+    private Guid _summaryAddressEditorId;
+    private string? _summaryAddressFieldKey;
+
+    private async Task StartSummaryAddressEditAsync(ApplicationWorkspaceCaseHeaderField field, bool createNew)
+    {
+        if (field == null || string.IsNullOrWhiteSpace(field.Key))
+            return;
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<AddressOfResidence>();
+        AddressOfResidence? address = null;
+        if (!createNew)
+        {
+            if (field.SelectedId is not Guid existingId || existingId == Guid.Empty)
+                return;
+            address = objectSpace.GetObjectByKey<AddressOfResidence>(existingId);
+            if (address == null)
+                return;
+
+            _summaryAddressFieldKey = field.Key;
+            _summaryAddressEditorId = address.ID;
+            return;
+        }
+
+        address = objectSpace.CreateObject<AddressOfResidence>();
+#pragma warning disable CS0618
+        address.Person = null;
+#pragma warning restore CS0618
+        address.RosterPerson = null;
+        objectSpace.CommitChanges();
+
+        _summaryAddressFieldKey = field.Key;
+        _summaryAddressEditorId = address.ID;
+        await OnCaseSummaryFieldChanged(field.Key, address.ID.ToString("D"));
+    }
+
+    private void CloseSummaryAddressEditor()
+    {
+        _summaryAddressEditorId = Guid.Empty;
+        _summaryAddressFieldKey = null;
+    }
+
+    private async Task OnSummaryAddressSavedAsync()
+    {
+        var key = _summaryAddressFieldKey;
+        var id = _summaryAddressEditorId;
+        CloseSummaryAddressEditor();
+        if (!string.IsNullOrWhiteSpace(key) && id != Guid.Empty)
+            await OnCaseSummaryFieldChanged(key, id.ToString("D"));
     }
 
     private async Task OnVersionKey(KeyboardEventArgs e, Guid versionId)

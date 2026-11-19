@@ -9,100 +9,87 @@ public class ApplicationProfilePickerCaseSummaryRecentHelperTests
 {
     private static readonly Guid ProfileA = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static readonly Guid ProfileB = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+    private static readonly Guid Leg1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid Leg2 = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
     [Fact]
-    public void Push_dedupes_same_updates_and_caps_per_profile()
+    public void Push_replaces_same_project_keeps_unique_only()
     {
-        var first = Entry(ProfileA, "A", "p1");
-        var second = Entry(ProfileA, "B", "p1");
-        var third = Entry(ProfileA, "C", "p2");
+        var first = Entry(ProfileA, Leg1, "A", "p1");
+        var sameProjectNewer = Entry(ProfileA, Leg1, "A-updated", "p1");
+        var other = Entry(ProfileA, Leg1, "C", "p2");
 
-        var list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(null, first, cap: 2);
-        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, second, cap: 2);
-        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, third, cap: 2);
+        var list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(null, first, cap: 6);
+        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, sameProjectNewer, cap: 6);
+        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, other, cap: 6);
 
-        var forA = ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA, cap: 2);
-        Assert.Equal(2, forA.Count);
-        Assert.Equal(third.Id, forA[0].Id);
-        Assert.Equal(second.Id, forA[1].Id);
+        Assert.Equal(2, list.Count);
+        Assert.Equal(other.Id, list[0].Id);
+        Assert.Equal(sameProjectNewer.Id, list[1].Id);
+        Assert.DoesNotContain(list, e => e.Id == first.Id);
     }
 
     [Fact]
-    public void Push_keeps_other_profiles_when_capping()
+    public void Push_keeps_separate_lists_per_approval_leg()
     {
-        var a1 = Entry(ProfileA, "A1", "a1");
-        var b1 = Entry(ProfileB, "B1", "b1");
-        var a2 = Entry(ProfileA, "A2", "a2");
+        var leg1 = Entry(ProfileA, Leg1, "A", "p1");
+        var leg2 = Entry(ProfileA, Leg2, "A", "p1");
 
-        var list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(null, a1, cap: 1);
-        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, b1, cap: 1);
-        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, a2, cap: 1);
+        var list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(null, leg1, cap: 6);
+        list = ApplicationProfilePickerCaseSummaryRecentHelper.Push(list, leg2, cap: 6);
 
-        Assert.Equal(a2.Id, Assert.Single(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA)).Id);
-        Assert.Equal(b1.Id, Assert.Single(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileB)).Id);
+        Assert.Equal(leg1.Id, Assert.Single(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA, Leg1)).Id);
+        Assert.Equal(leg2.Id, Assert.Single(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA, Leg2)).Id);
     }
 
     [Fact]
-    public void Deserialize_drops_unscoped_entries()
+    public void StorageKey_is_per_profile_and_approval_leg()
     {
-        var scoped = Entry(ProfileA, "X", "abc");
-        var scopedJson = ApplicationProfilePickerCaseSummaryRecentHelper.Serialize(new[] { scoped });
-        var unscopedId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-        var json =
-            "[{\"id\":\"" + unscopedId + "\",\"profileId\":\"00000000-0000-0000-0000-000000000000\"," +
-            "\"usedAtUtc\":\"2026-11-05T00:00:00Z\",\"projectLabel\":\"Old\",\"updates\":[]}," +
-            scopedJson.Trim().TrimStart('[') ;
-
-        var loaded = ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(json);
-        var one = Assert.Single(loaded);
-        Assert.Equal(scoped.Id, one.Id);
-        Assert.Equal(ProfileA, one.ProfileId);
+        var a1 = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey("user", ProfileA, Leg1);
+        var a2 = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey("user", ProfileA, Leg2);
+        var b1 = ApplicationProfilePickerCaseSummaryRecentHelper.StorageKey("user", ProfileB, Leg1);
+        Assert.NotEqual(a1, a2);
+        Assert.NotEqual(a1, b1);
+        Assert.Contains(Leg1.ToString("D"), a1, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("v4.", a1, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ForProfile_filters_to_selected_profile()
+    public void ForProfile_filters_to_selected_profile_and_leg()
     {
         var list = new[]
         {
-            Entry(ProfileA, "A", "a"),
-            Entry(ProfileB, "B", "b"),
+            Entry(ProfileA, Leg1, "A", "a"),
+            Entry(ProfileA, Leg2, "B", "b"),
+            Entry(ProfileB, Leg1, "C", "c"),
         };
-        Assert.Equal("Proj A", Assert.Single(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA)).ProjectLabel);
-        Assert.Empty(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, Guid.NewGuid()));
+        Assert.Equal("Proj A", Assert.Single(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA, Leg1)).ProjectLabel);
+        Assert.Empty(ApplicationProfilePickerCaseSummaryRecentHelper.ForProfile(list, ProfileA, Guid.NewGuid()));
     }
 
     [Fact]
-    public void Serialize_round_trips_profile_and_updates()
+    public void Serialize_round_trips_profile_leg_and_updates()
     {
-        var entry = Entry(ProfileA, "X", "abc");
+        var entry = Entry(ProfileA, Leg1, "X", "abc");
         var json = ApplicationProfilePickerCaseSummaryRecentHelper.Serialize(new[] { entry });
         var loaded = ApplicationProfilePickerCaseSummaryRecentHelper.Deserialize(json);
         var one = Assert.Single(loaded);
         Assert.Equal(entry.Id, one.Id);
         Assert.Equal(ProfileA, one.ProfileId);
+        Assert.Equal(Leg1, one.ApprovalLegVersionId);
         Assert.Equal("abc", Assert.Single(one.Updates).Value);
     }
 
-    [Fact]
-    public void CaptureUpdates_skips_hidden_create_fields()
-    {
-        var updates = ApplicationProfilePickerCaseSummaryRecentHelper.CaptureUpdates(
-        [
-            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.Project, Guid.Parse("11111111-1111-1111-1111-111111111111"), "P"),
-            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.InstanceNumber, null, "1"),
-            Field(ApplicationWorkspaceCaseHeaderFieldsHelper.ProcessNumber, null, "2"),
-        ]);
-
-        var one = Assert.Single(updates);
-        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldsHelper.Project, one.Key);
-        Assert.Equal("11111111-1111-1111-1111-111111111111", one.Value);
-    }
-
-    private static ApplicationProfilePickerCaseSummaryRecentEntry Entry(Guid profileId, string project, string projectId) =>
+    private static ApplicationProfilePickerCaseSummaryRecentEntry Entry(
+        Guid profileId,
+        Guid approvalLegVersionId,
+        string project,
+        string projectId) =>
         new()
         {
             Id = Guid.NewGuid(),
             ProfileId = profileId,
+            ApprovalLegVersionId = approvalLegVersionId,
             UsedAtUtc = DateTime.UtcNow,
             ProjectLabel = "Proj " + project,
             CompanyLabel = "Co",
@@ -116,17 +103,5 @@ public class ApplicationProfilePickerCaseSummaryRecentHelperTests
                     Value = projectId,
                 },
             ],
-        };
-
-    private static ApplicationWorkspaceCaseHeaderField Field(string key, Guid? selectedId, string value) =>
-        new()
-        {
-            Key = key,
-            SelectedId = selectedId,
-            Value = value,
-            DisplayValue = value,
-            Kind = selectedId.HasValue
-                ? ApplicationWorkspaceCaseHeaderFieldKind.Lookup
-                : ApplicationWorkspaceCaseHeaderFieldKind.ShortText,
         };
 }
