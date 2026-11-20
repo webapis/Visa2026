@@ -561,6 +561,11 @@
             _linkReviewWidth = null;
             _linkReviewHeight = null;
             EnsureLinkReviewBesidePreview();
+            ReloadAddress2Recents();
+        }
+        else if (!ShowPersonLinkReview && _reviewWasOpen)
+        {
+            _address2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
         }
 
         _reviewWasOpen = ShowPersonLinkReview;
@@ -1927,6 +1932,44 @@
                        disabled="@readOnly"
                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
             }
+            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text
+                     && ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress2DefaultTextField(field.Key))
+            {
+                EnsureCaseSummaryAddress2RecentsLoaded();
+                <div class="os-link-review__address2">
+                    <textarea class="cw-summary-field__input cw-summary-field__textarea"
+                              maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.Address2DefaultTextMaxLength"
+                              rows="4"
+                              disabled="@readOnly"
+                              @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
+                    @if (_caseSummaryAddress2Recents.Count > 0 && !readOnly)
+                    {
+                        var first = _caseSummaryAddress2Recents[0];
+                        <div class="os-link-review__a2-recent" aria-label="Recently used">
+                            <div class="os-link-review__a2-recent-head">Recently used</div>
+                            <button type="button"
+                                    class="os-link-review__a2-recent-card @(string.Equals(CasePersonAddress2Recent.NormalizeDisplay(field.Value), CasePersonAddress2Recent.NormalizeDisplay(first.Text), StringComparison.Ordinal) ? "is-selected" : null)"
+                                    title="Click to fill Address 2"
+                                    @onclick="() => OnHeaderFieldChanged(field.Key, first.Text)">
+                                <span class="os-link-review__a2-recent-text">@TruncateAddress2Recent(first.Text)</span>
+                                <span class="os-link-review__a2-recent-time">@FormatAddress2RecentAge(first.UsedAtUtc)</span>
+                            </button>
+                            @if (_caseSummaryAddress2Recents.Count > 1)
+                            {
+                                <select class="os-link-review__select os-link-review__a2-recent-more"
+                                        @onchange="e => OnCaseSummaryAddress2RecentIndexPicked(field.Key, e)">
+                                    <option value="">Choose another…</option>
+                                    @for (var ri = 1; ri < _caseSummaryAddress2Recents.Count; ri++)
+                                    {
+                                        var entry = _caseSummaryAddress2Recents[ri];
+                                        <option value="@ri">@TruncateAddress2Recent(entry.Text, 80)</option>
+                                    }
+                                </select>
+                            }
+                        </div>
+                    }
+                </div>
+            }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
             {
                 <textarea class="cw-summary-field__input cw-summary-field__textarea"
@@ -2939,16 +2982,7 @@
                     {
                         <div class="os-link-review" role="tabpanel" aria-label="@Msg("ApplicationProfileInstance.Workspace.Overview")">
                             
-                            @if (PersonLinkReviewLines.Any(IsRequestedLocationReviewLine))
-                            {
-                                <div class="os-loc-chips-legend" aria-label="@Msg("ApplicationProfileInstance.LinkReview.LocationChipLegend")">
-                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-joined"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Joined")</span>
-                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-case"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Case")</span>
-                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-visa"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Visa")</span>
-                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-wp"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.WorkPermitItem")</span>
-                                    <span class="os-loc-chips-legend__item"><span class="os-loc-chips-legend__swatch is-manual"></span>@Msg("ApplicationProfileInstance.LinkReview.LocationSource.Manual")</span>
-                                </div>
-                            }@foreach (var line in PersonLinkReviewLines)
+                            @foreach (var line in PersonLinkReviewLines)
                             {
                                 <div class="os-link-review__row">
                                     <span class="os-link-review__label">
@@ -2975,43 +3009,55 @@
                                     {
                                         <span class="os-link-review__eye-spacer" aria-hidden="true"></span>
                                     }
-                                    @if (IsRequestedLocationReviewLine(line))
+                                    @if (line.UsesMultilineText)
                                     {
-                                        <div class="os-link-review__value os-link-review__value--chips">
-                                            <div class="os-loc-chips" role="list">
-                                                @foreach (var chip in line.LocationChips.Where(c => !c.Hidden))
-                                                {
-                                                    <span class="os-loc-chip @LinkReviewLocationChips.SourceCssClass(chip.Source)"
-                                                          role="listitem"
-                                                          title="@LocationChipSourceTitle(chip.Source)">
-                                                        <span class="os-loc-chip__text">@chip.Value</span>
-                                                        <button type="button"
-                                                                class="os-loc-chip__remove"
-                                                                title="@Msg("ApplicationProfileInstance.LinkReview.RemoveLocationChip")"
-                                                                @onclick="() => HideLocationChip(line, chip)">×</button>
-                                                    </span>
-                                                }
-                                                @if (!line.LocationChips.Any(c => !c.Hidden))
-                                                {
-                                                    <span class="os-link-review__value">—</span>
-                                                }
-                                            </div>
-                                            @if (_reviewGearOn)
+                                        <div class="os-link-review__address2">
+                                            <textarea class="os-link-review__select os-link-review__textarea"
+                                                      rows="4"
+                                                      value="@line.TextValue"
+                                                      @onchange="e => SetAddress2Text(line, e.Value?.ToString())"></textarea>
+                                            @if (_address2Recents.Count > 0)
                                             {
-                                                <div class="os-link-review__value--multiselect os-loc-chips__add">
-                                                    <BorderZoneLocationField @key="_locationChipAddNonce"
-                                                                             Value="@null"
-                                                                             EditorAlias="@(IsWorkPermitLocationReviewLine(line) ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation : CommaSeparatedMultiSelectEditorAliases.BorderZone)"
-                                                                             ReadOnly="false"
-                                                                             ValueChanged="value => AddManualLocationChips(line, value)" />
+                                                var first = _address2Recents[0];
+                                                <div class="os-link-review__a2-recent" aria-label="Recently used">
+                                                    <div class="os-link-review__a2-recent-head">Recently used</div>
+                                                    <button type="button"
+                                                            class="os-link-review__a2-recent-card @(IsAddress2RecentSelected(line, first.Text) ? "is-selected" : null)"
+                                                            title="Click to fill Address 2"
+                                                            @onclick="() => ApplyAddress2Recent(line, first.Text)">
+                                                        <span class="os-link-review__a2-recent-text">@TruncateAddress2Recent(first.Text)</span>
+                                                        <span class="os-link-review__a2-recent-time">@FormatAddress2RecentAge(first.UsedAtUtc)</span>
+                                                    </button>
+                                                    @if (_address2Recents.Count > 1)
+                                                    {
+                                                        <select class="os-link-review__select os-link-review__a2-recent-more"
+                                                                @onchange="e => OnAddress2RecentIndexPicked(line, e)">
+                                                            <option value="">Choose another…</option>
+                                                            @for (var ri = 1; ri < _address2Recents.Count; ri++)
+                                                            {
+                                                                var entry = _address2Recents[ri];
+                                                                <option value="@ri">@TruncateAddress2Recent(entry.Text, 80)</option>
+                                                            }
+                                                        </select>
+                                                    }
                                                 </div>
                                             }
+                                        </div>
+                                    }
+                                    else if (IsRequestedLocationReviewLine(line))
+                                    {
+                                        <div class="os-link-review__value os-link-review__value--multiselect">
+                                            <BorderZoneLocationField @key="@($"{PersonLinkReviewPersonId:N}:{line.ResolveTabKey()}:loc")"
+                                                                     Value="@RequestedLocationFieldValue(line)"
+                                                                     EditorAlias="@(IsWorkPermitLocationReviewLine(line) ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation : CommaSeparatedMultiSelectEditorAliases.BorderZone)"
+                                                                     ReadOnly="false"
+                                                                     ValueChanged="value => SetRequestedLocations(line, value)" />
                                         </div>
                                     }
                                     else if (_reviewGearOn && line.Choices.Count > 0)
                                     {
                                         @* Same CaseAddressSearchField as create wizard / Case summary Address 1–2. *@
-                                        @if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                                        @if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && !line.UsesMultilineText)
                                         {
                                             <CaseAddressSearchField Options="@LinkReviewAddressOptions(line)"
                                                                     Value="@(line.ObjectId == Guid.Empty ? null : line.ObjectId)"
@@ -4125,12 +4171,9 @@
         AddressOfResidence? address;
         if (createNew)
         {
+            // Draft shared catalog row; save upserts by dedupe key and sets Address1/2 FK.
             address = objectSpace.CreateObject<AddressOfResidence>();
-            address.OwningApplicationProfileInstance = application;
-            address.RosterPerson = null;
-#pragma warning disable CS0618
-            address.Person = null;
-#pragma warning restore CS0618
+            AddressOfResidenceCatalogHelper.ClearOwnership(address);
             ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(application, slot, address);
         }
         else
@@ -4331,31 +4374,161 @@
     private static bool IsRequestedLocationReviewLine(PersonLinkReviewLine line) =>
         IsWorkPermitLocationReviewLine(line) || IsBorderZoneLocationReviewLine(line);
 
-    private void HideLocationChip(PersonLinkReviewLine line, PersonLinkReviewLocationChip chip)
+    private static string? RequestedLocationFieldValue(PersonLinkReviewLine line)
     {
-        LinkReviewLocationChips.Hide(chip);
-        line.Summary = LinkReviewLocationChips.DisplaySummary(line.LocationChips);
-        StateHasChanged();
+        var merged = LinkReviewLocationChips.JoinVisible(line.LocationChips);
+        return string.IsNullOrWhiteSpace(merged) ? null : merged;
     }
 
-    private void AddManualLocationChips(PersonLinkReviewLine line, string? value)
+    private IReadOnlyList<CasePersonAddress2Recent.Entry> _address2Recents =
+        Array.Empty<CasePersonAddress2Recent.Entry>();
+
+    private IReadOnlyList<CasePersonAddress2Recent.Entry> _caseSummaryAddress2Recents =
+        Array.Empty<CasePersonAddress2Recent.Entry>();
+
+    private void EnsureCaseSummaryAddress2RecentsLoaded()
     {
-        if (string.IsNullOrWhiteSpace(value))
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+        {
+            _caseSummaryAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
             return;
-        LinkReviewLocationChips.AddManual(line.LocationChips, value);
-        line.Summary = LinkReviewLocationChips.DisplaySummary(line.LocationChips);
-        _locationChipAddNonce++;
+        }
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+            if (application == null)
+            {
+                _caseSummaryAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+                return;
+            }
+
+            _ = application.ApplicationProfile;
+            _ = application.ProjectContract;
+            _caseSummaryAddress2Recents = CasePersonAddress2Recent.ListForReview(
+                objectSpace, application, excludePersonId: Guid.Empty);
+        }
+        catch
+        {
+            _caseSummaryAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+        }
+    }
+
+    private void OnCaseSummaryAddress2RecentIndexPicked(string key, ChangeEventArgs change)
+    {
+        if (!int.TryParse(change?.Value?.ToString(), out var index))
+            return;
+        if (index < 0 || index >= _caseSummaryAddress2Recents.Count)
+            return;
+        OnHeaderFieldChanged(key, _caseSummaryAddress2Recents[index].Text);
+    }
+
+    private void SetAddress2Text(PersonLinkReviewLine line, string? value)
+    {
+        line.TextValue = value;
+        line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
         StateHasChanged();
     }
 
-    private static string LocationChipSourceTitle(LinkReviewLocationChipSource source) => source switch
+    private void ReloadAddress2Recents()
     {
-        LinkReviewLocationChipSource.Joined => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Joined"),
-        LinkReviewLocationChipSource.Case => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Case"),
-        LinkReviewLocationChipSource.Visa => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Visa"),
-        LinkReviewLocationChipSource.WorkPermitItem => Msg("ApplicationProfileInstance.LinkReview.LocationSource.WorkPermitItem"),
-        _ => Msg("ApplicationProfileInstance.LinkReview.LocationSource.Manual"),
-    };
+        _address2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty || PersonLinkReviewPersonId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+            if (application == null)
+                return;
+            _ = application.ApplicationProfile;
+            _ = application.ProjectContract;
+            _address2Recents = CasePersonAddress2Recent.ListForReview(
+                objectSpace, application, PersonLinkReviewPersonId);
+        }
+        catch
+        {
+            _address2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+        }
+    }
+
+    private void ApplyAddress2Recent(PersonLinkReviewLine line, string? text)
+    {
+        if (line == null || string.IsNullOrWhiteSpace(text))
+            return;
+        SetAddress2Text(line, text);
+    }
+
+    private void OnAddress2RecentIndexPicked(PersonLinkReviewLine line, ChangeEventArgs change)
+    {
+        if (!int.TryParse(change?.Value?.ToString(), out var index))
+            return;
+        if (index < 0 || index >= _address2Recents.Count)
+            return;
+        ApplyAddress2Recent(line, _address2Recents[index].Text);
+    }
+
+    private static bool IsAddress2RecentSelected(PersonLinkReviewLine line, string text) =>
+        string.Equals(
+            CasePersonAddress2Recent.NormalizeDisplay(line?.TextValue),
+            CasePersonAddress2Recent.NormalizeDisplay(text),
+            StringComparison.Ordinal);
+
+    private static string TruncateAddress2Recent(string? text, int max = 120)
+    {
+        var value = text?.Trim() ?? string.Empty;
+        if (value.Length <= max)
+            return value;
+        return value[..(max - 1)].TrimEnd() + "…";
+    }
+
+    private static string FormatAddress2RecentAge(DateTime usedAtUtc)
+    {
+        var utc = usedAtUtc.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(usedAtUtc, DateTimeKind.Utc)
+            : usedAtUtc.ToUniversalTime();
+        var age = DateTime.UtcNow - utc;
+        if (age.TotalMinutes < 1)
+            return "just now";
+        if (age.TotalHours < 1)
+            return $"{Math.Max(1, (int)age.TotalMinutes)} min ago";
+        if (age.TotalDays < 1)
+            return $"{Math.Max(1, (int)age.TotalHours)} hours ago";
+        if (age.TotalDays < 2)
+            return "yesterday";
+        return $"{Math.Max(1, (int)age.TotalDays)} days ago";
+    }
+    /// <summary>
+    /// Replaces the session value for requested WP/BZ locations. Empty means "not edited" for Join
+    /// (chips cleared so Accept path skips and does not wipe a prior DB row).
+    /// </summary>
+    private void SetRequestedLocations(PersonLinkReviewLine line, string? value)
+    {
+        line.LocationChips.Clear();
+        if (!string.IsNullOrWhiteSpace(value))
+            LinkReviewLocationChips.AddManual(line.LocationChips, value);
+        line.Summary = LinkReviewLocationChips.DisplaySummary(line.LocationChips);
+        if (line.Fields.Count > 0)
+        {
+            var first = line.Fields[0];
+            line.Fields = new List<PersonLinkReviewField>
+            {
+                new()
+                {
+                    Label = first.Label,
+                    Value = line.Summary,
+                    Required = first.Required,
+                    Lookup = first.Lookup,
+                },
+            };
+        }
+
+        StateHasChanged();
+    }
     private async Task UseCaseWorkPermitLocationAsync(Guid personId, Guid workPermitItemId)
     {
         _addressActionError = null;
@@ -4607,7 +4780,6 @@
     private bool _reviewWasOpen;
     private bool _reviewGearOn;
     private bool _reviewActiveOnly = true;
-    private int _locationChipAddNonce;
     private bool _reviewCreating;
     private bool _reviewCreateSaving;
     private string _reviewTab = "overview";
@@ -4616,6 +4788,8 @@
 
     private async Task StartCreateAsync(PersonLinkReviewLine line)
     {
+        if (line.UsesMultilineText)
+            return;
         _reviewCreating = true;
         _reviewTab = line.Kind.ToString();
         await CreatePersonLinkReviewRequested.InvokeAsync(line);
@@ -4742,7 +4916,9 @@
             });
         }
 
-        return options;
+        return ApplicationWorkspaceCaseHeaderFieldsHelper.DeduplicateAddressOptions(
+            options,
+            preferId: line.ObjectId == Guid.Empty ? null : line.ObjectId);
     }
 
     private static string LinkReviewAddressDisplay(PersonLinkReviewLine line)

@@ -79,7 +79,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             rosterPeople,
             application,
             includeNotYetStartedVisas: true);
-        var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked);
+        var people = BuildPeople(tabMap, chrome.PeopleNames, application, rosterPeople, rosterLinks, linkableCounts, chrome.ResolvedLinksLocked, objectSpace);
         if (application != null)
             ApplySeretmezlikExclusions(people, application, objectSpace);
         var linkedSummary = BuildLinkedSummary(application, rosterLinks, people);
@@ -1011,10 +1011,16 @@ internal static class ApplicationWorkspaceCaseBuilder
         IReadOnlyList<Person> rosterPeople,
         IReadOnlyList<ApplicationProfileInstancePersonResolvedLink> rosterLinks,
         ApplicationWorkspaceLinkableActiveCounts linkableCounts,
-        bool linksLocked)
+        bool linksLocked,
+        IObjectSpace? objectSpace = null)
     {
         if (!tabs.TryGetValue("person", out var personTab) || personTab.Rows.Count == 0)
             return Array.Empty<ApplicationWorkspaceCasePerson>();
+
+        var address2Notes = application != null && objectSpace != null
+            && ApplicationProfilePersonAddressMaxCount.For(application) >= 2
+            ? CasePersonAddress2Note.LoadForApplication(objectSpace, application)
+            : new Dictionary<Guid, string>();
 
         var people = new List<ApplicationWorkspaceCasePerson>();
         for (var i = 0; i < personTab.Rows.Count; i++)
@@ -1036,7 +1042,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 VisaNumber = JoinCellsForPerson(tabs, "visa", name, 1),
                 WorkPermitNumber = JoinCellsForPerson(tabs, "wp", name, 1),
                 Records = BuildPersonRecords(
-                    application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
+                    application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked, address2Notes),
             });
         }
 
@@ -1053,7 +1059,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     Name = name,
                     RoleLabel = i == 0 ? "Primary applicant" : "Dependent",
                     Records = BuildPersonRecords(
-                        application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked),
+                        application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked, address2Notes),
                 });
             }
         }
@@ -1068,10 +1074,23 @@ internal static class ApplicationWorkspaceCaseBuilder
     {
         if (application == null)
             return false;
+        if (slot >= 2)
+            return false;
         if (person == null || person.ID == Guid.Empty)
             return ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot) != null;
 
         return ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(application, person, slot) != null;
+    }
+
+    private static bool PersonHasAddress2Note(
+        Guid personId,
+        IReadOnlyDictionary<Guid, string> address2Notes)
+    {
+        if (personId == Guid.Empty || address2Notes == null || address2Notes.Count == 0)
+            return false;
+        return address2Notes.TryGetValue(personId, out var text)
+            && !string.IsNullOrWhiteSpace(text)
+            && !string.Equals(text.Trim(), "—", StringComparison.Ordinal);
     }
 
     private static string FormatRoleLabel(string role)
@@ -1126,7 +1145,8 @@ internal static class ApplicationWorkspaceCaseBuilder
         string personName,
         Guid personId,
         ApplicationWorkspaceLinkableActiveCounts linkableCounts,
-        bool linksLocked)
+        bool linksLocked,
+        IReadOnlyDictionary<Guid, string>? address2Notes = null)
     {
         var records = new List<ApplicationWorkspaceCasePersonRecord>();
         var toneIndex = 0;
@@ -1199,7 +1219,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 if (maxSlots >= 2)
                 {
                     var slot1Has = PersonHasResolvedAddress(application, rosterPerson, 1);
-                    var slot2Has = PersonHasResolvedAddress(application, rosterPerson, 2);
+                    var slot2Has = PersonHasAddress2Note(personId, address2Notes ?? new Dictionary<Guid, string>());
                     count = (slot1Has ? 1 : 0) + (slot2Has ? 1 : 0);
                     records.Add(new ApplicationWorkspaceCasePersonRecord
                     {

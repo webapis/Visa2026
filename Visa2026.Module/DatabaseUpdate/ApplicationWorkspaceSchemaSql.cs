@@ -71,6 +71,26 @@ public static class ApplicationWorkspaceSchemaSql
                 ON "ApplicationProfileInstancePersonRequestedLocations" ("ApplicationProfileInstanceId", "PersonId", "Kind")
                 WHERE "GCRecord" IS NULL;
           END IF;
+          IF to_regclass('public."ApplicationProfileInstancePersonAddress2Notes"') IS NULL
+             AND to_regclass('public."ApplicationProfileInstances"') IS NOT NULL
+             AND to_regclass('public."People"') IS NOT NULL THEN
+            CREATE TABLE "ApplicationProfileInstancePersonAddress2Notes" (
+                "ID" uuid NOT NULL,
+                "GCRecord" integer NOT NULL DEFAULT 0,
+                "OptimisticLockField" integer NOT NULL DEFAULT 0,
+                "ApplicationProfileInstanceId" uuid NOT NULL,
+                "PersonId" uuid NOT NULL,
+                "Address2Text" text NULL,
+                CONSTRAINT "PK_ApplicationProfileInstancePersonAddress2Notes" PRIMARY KEY ("ID"),
+                CONSTRAINT "FK_ApplicationProfileInstancePersonAddress2Notes_ApplicationProfileInstances_ApplicationProfileInstanceId"
+                    FOREIGN KEY ("ApplicationProfileInstanceId") REFERENCES "ApplicationProfileInstances" ("ID") ON DELETE CASCADE,
+                CONSTRAINT "FK_ApplicationProfileInstancePersonAddress2Notes_People_PersonId"
+                    FOREIGN KEY ("PersonId") REFERENCES "People" ("ID") ON DELETE RESTRICT
+            );
+            CREATE UNIQUE INDEX "IX_ApplicationProfileInstancePersonAddress2Notes_Instance_Person"
+                ON "ApplicationProfileInstancePersonAddress2Notes" ("ApplicationProfileInstanceId", "PersonId")
+                WHERE "GCRecord" IS NULL;
+          END IF;
         END $$;
         """;
 
@@ -134,6 +154,26 @@ public static class ApplicationWorkspaceSchemaSql
                 ON dbo.ApplicationProfileInstancePersonRequestedLocations (ApplicationProfileInstanceId, PersonId, Kind)
                 WHERE [GCRecord] IS NULL;
         END;
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstancePersonAddress2Notes', N'U') IS NULL
+           AND OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND OBJECT_ID(N'dbo.People', N'U') IS NOT NULL
+        BEGIN
+            CREATE TABLE dbo.ApplicationProfileInstancePersonAddress2Notes (
+                ID uniqueidentifier NOT NULL CONSTRAINT PK_ApplicationProfileInstancePersonAddress2Notes PRIMARY KEY,
+                GCRecord int NOT NULL CONSTRAINT DF_ApplicationProfileInstancePersonAddress2Notes_GCRecord DEFAULT (0),
+                OptimisticLockField int NOT NULL CONSTRAINT DF_ApplicationProfileInstancePersonAddress2Notes_OLF DEFAULT (0),
+                ApplicationProfileInstanceId uniqueidentifier NOT NULL,
+                PersonId uniqueidentifier NOT NULL,
+                Address2Text nvarchar(max) NULL,
+                CONSTRAINT FK_ApplicationProfileInstancePersonAddress2Notes_ApplicationProfileInstances_ApplicationProfileInstanceId
+                    FOREIGN KEY (ApplicationProfileInstanceId) REFERENCES dbo.ApplicationProfileInstances(ID) ON DELETE CASCADE,
+                CONSTRAINT FK_ApplicationProfileInstancePersonAddress2Notes_People_PersonId
+                    FOREIGN KEY (PersonId) REFERENCES dbo.People(ID)
+            );
+            CREATE UNIQUE INDEX IX_ApplicationProfileInstancePersonAddress2Notes_Instance_Person
+                ON dbo.ApplicationProfileInstancePersonAddress2Notes (ApplicationProfileInstanceId, PersonId)
+                WHERE [GCRecord] IS NULL;
+        END;
         """;
 
     /// <summary>
@@ -179,6 +219,25 @@ public static class ApplicationWorkspaceSchemaSql
             ALTER COLUMN "OptimisticLockField" SET NOT NULL;
         END $$;
         """;
+
+    internal const string HealAddress2NotesGcRecordPostgres = """
+        DO $$
+        BEGIN
+          IF to_regclass('public."ApplicationProfileInstancePersonAddress2Notes"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          UPDATE "ApplicationProfileInstancePersonAddress2Notes" SET "GCRecord" = 0 WHERE "GCRecord" IS NULL;
+          UPDATE "ApplicationProfileInstancePersonAddress2Notes" SET "OptimisticLockField" = 0 WHERE "OptimisticLockField" IS NULL;
+
+          ALTER TABLE "ApplicationProfileInstancePersonAddress2Notes"
+            ALTER COLUMN "GCRecord" SET DEFAULT 0,
+            ALTER COLUMN "GCRecord" SET NOT NULL,
+            ALTER COLUMN "OptimisticLockField" SET DEFAULT 0,
+            ALTER COLUMN "OptimisticLockField" SET NOT NULL;
+        END $$;
+        """;
+
     public static void ApplyIfMissing(string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
@@ -192,6 +251,7 @@ public static class ApplicationWorkspaceSchemaSql
             Execute(connection, EnsureSchemaPostgres);
             Execute(connection, HealResolvedLinksUniqueIndexPostgres);
             Execute(connection, HealRequestedLocationsGcRecordPostgres);
+            Execute(connection, HealAddress2NotesGcRecordPostgres);
             return;
         }
 

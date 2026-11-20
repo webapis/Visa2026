@@ -6,12 +6,13 @@ using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ReportDashboard;
 
 namespace Visa2026.Module.Services;
 
 public static partial class PersonLinkReview
 {
-    private static IReadOnlyList<PersonLinkReviewLine> AddressSlotLines(
+    internal static IReadOnlyList<PersonLinkReviewLine> AddressSlotLines(
         IObjectSpace objectSpace,
         ApplicationProfileInstance application,
         Person person,
@@ -33,10 +34,34 @@ public static partial class PersonLinkReview
         slot1.SlotIndex = 1;
         slot1.SlotCount = maxSlots;
 
-        var slot2 = AddressSlotLine(objectSpace, application, person, slot: 2, label: "Address 2");
+        var slot2 = Address2TextNoteLine(objectSpace, application, person);
         slot2.SlotIndex = 2;
         slot2.SlotCount = maxSlots;
         return new[] { slot1, slot2 };
+    }
+
+    internal static PersonLinkReviewLine Address2TextNoteLine(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application,
+        Person person)
+    {
+        var text = CasePersonAddress2Note.GetText(objectSpace, application.ID, person.ID);
+        // Prefill UI from case default when person has no note (copy-on-Join writes it).
+        if (string.IsNullOrWhiteSpace(text))
+            text = CasePersonAddress2Recent.NormalizeDisplay(application.Address2DefaultText);
+
+        var summary = string.IsNullOrWhiteSpace(text) ? "—" : text!;
+        return new PersonLinkReviewLine
+        {
+            Kind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+            Label = "Address 2",
+            Summary = summary,
+            ObjectId = Guid.Empty,
+            UsesMultilineText = true,
+            TextValue = text,
+            Choices = Array.Empty<PersonLinkReviewChoice>(),
+            Fields = Array.Empty<PersonLinkReviewField>(),
+        };
     }
 
     private static PersonLinkReviewLine AddressSlotLine(
@@ -60,7 +85,7 @@ public static partial class PersonLinkReview
     }
 
     /// <summary>
-    /// Rebuild Address 2 choices with case context (instance Address1/2 + person overrides).
+    /// Obsolete: Address 2 is free text. Kept as no-op for older call sites.
     /// </summary>
     public static void RefreshAddressSlot2Choices(
         IObjectSpace objectSpace,
@@ -68,40 +93,10 @@ public static partial class PersonLinkReview
         Person person,
         IReadOnlyList<PersonLinkReviewLine>? lines)
     {
-        if (objectSpace == null || application == null || person == null || lines == null)
-            return;
-
-        var slot1 = lines.FirstOrDefault(line =>
-            line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
-            && line.SlotIndex == 1);
-        var slot2 = lines.FirstOrDefault(line =>
-            line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence
-            && line.SlotIndex == 2);
-        if (slot2 == null)
-            return;
-
-        var exclude = slot1?.ObjectId ?? Guid.Empty;
-        var selected = slot2.ObjectId;
-        if (selected != Guid.Empty && selected == exclude)
-        {
-            slot2.ObjectId = Guid.Empty;
-            slot2.Summary = "—";
-            selected = Guid.Empty;
-        }
-
-        var choices = AddressChoicesForCase(objectSpace, application, person, slot: 2, excludeObjectId: exclude).ToList();
-        if (selected != Guid.Empty
-            && choices.All(choice => choice.ObjectId != selected)
-            && objectSpace.GetObjectByKey<AddressOfResidence>(selected) is { } extra)
-        {
-            choices.Insert(0, Choice(extra.ID, AddressChoiceLabelCaseOwned(extra, isCaseDefault: false), AddressFields(extra)));
-        }
-
-        slot2.Choices = choices;
-        if (selected != Guid.Empty)
-            ApplyChoice(slot2, selected, objectSpace);
-        else
-            slot2.Fields = Array.Empty<PersonLinkReviewField>();
+        _ = objectSpace;
+        _ = application;
+        _ = person;
+        _ = lines;
     }
 
     private static void PreferCaseAddressLinks(
@@ -118,16 +113,16 @@ public static partial class PersonLinkReview
             .OrderBy(link => link.LinkSlotIndex)
             .ToList();
         if (addressPinned.Count == 0)
-        {
-            RefreshAddressSlot2Choices(objectSpace, application, person, addressLines);
             return;
-        }
 
-        foreach (var line in addressLines.OrderBy(l => l.SlotIndex))
+        foreach (var line in addressLines.Where(l => !l.UsesMultilineText).OrderBy(l => l.SlotIndex))
         {
             var slot = line.SlotIndex > 0 ? line.SlotIndex : 1;
+            if (slot >= 2)
+                continue;
+
             var match = addressPinned.FirstOrDefault(link => link.LinkSlotIndex == slot)
-                ?? (slot == 1 ? addressPinned.FirstOrDefault() : null);
+                ?? addressPinned.FirstOrDefault();
             if (match?.LinkedObjectId is not Guid objectId || objectId == Guid.Empty)
                 continue;
 
@@ -141,8 +136,6 @@ public static partial class PersonLinkReview
             line.Choices = choices;
             ApplyChoice(line, objectId, objectSpace);
         }
-
-        RefreshAddressSlot2Choices(objectSpace, application, person, addressLines);
     }
 
     private static void ApplyJoinAddressLinks(
@@ -152,20 +145,27 @@ public static partial class PersonLinkReview
         IEnumerable<PersonLinkReviewLine> addressLines)
     {
         var list = addressLines.OrderBy(l => l.SlotIndex).ToList();
-        Guid slot1Id = Guid.Empty;
         foreach (var line in list)
         {
+            if (line.UsesMultilineText)
+            {
+                var incoming = CasePersonAddress2Recent.NormalizeDisplay(line.TextValue);
+                var existing = CasePersonAddress2Note.GetText(objectSpace, application.ID, person.ID);
+                if (incoming == null && existing == null)
+                    incoming = CasePersonAddress2Recent.NormalizeDisplay(application.Address2DefaultText);
+
+                CasePersonAddress2Note.Upsert(objectSpace, application, person, incoming);
+                CasePersonAddress2Recent.Remember(objectSpace, application, incoming);
+                continue;
+            }
+
             var slot = line.SlotIndex > 0 ? line.SlotIndex : 1;
+            if (slot >= 2)
+                continue;
+
             if (line.ObjectId == Guid.Empty)
             {
-                // Inherit case summary Address1/2 — no Person child copy.
-                var summary = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot);
-                if (summary != null && summary.ID != Guid.Empty)
-                {
-                    // Default = no override ResolvedLink; leave empty so hydrate uses instance FK.
-                    continue;
-                }
-
+                // Inherit case summary Address1 — no Person child copy / override link.
                 continue;
             }
 
@@ -176,18 +176,13 @@ public static partial class PersonLinkReview
                 continue;
             }
 
-            if (slot == 1)
-                slot1Id = line.ObjectId;
-            else if (slot >= 2 && line.ObjectId == slot1Id)
-                continue;
-
             ApplicationProfileInstancePersonResolver.EnsureResolvedLink(
                 objectSpace, application, person, line.Kind, line.ObjectId, slot);
         }
     }
 
     /// <summary>
-    /// Choices = instance Address1/2 labeled Case default + this person's override rows for the case.
+    /// Choices = instance Address1 labeled Case default + shared catalog (Address 1 only).
     /// </summary>
     private static IReadOnlyList<PersonLinkReviewChoice> AddressChoicesForCase(
         IObjectSpace objectSpace,
@@ -201,11 +196,15 @@ public static partial class PersonLinkReview
             Choice(Guid.Empty, "—", Array.Empty<PersonLinkReviewField>())
         };
 
+        // Address 2 is free text — catalog choices only for Address 1.
+        if (slot >= 2)
+            return choices;
+
         var caseDefaultLabel = ApplicationProfileLocalization.Field("AddressCaseDefault");
         if (string.IsNullOrWhiteSpace(caseDefaultLabel) || caseDefaultLabel.StartsWith("ApplicationProfile.", StringComparison.Ordinal))
             caseDefaultLabel = "Case default";
 
-        var summary = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot);
+        var summary = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot: 1);
         if (summary != null && summary.ID != Guid.Empty && summary.ID != excludeObjectId)
         {
             choices.Add(Choice(
@@ -214,41 +213,16 @@ public static partial class PersonLinkReview
                 AddressFields(summary)));
         }
 
-        // Other summary slot as optional pick when max is 2.
-        var otherSlot = slot >= 2 ? 1 : 2;
-        if (ApplicationProfilePersonAddressMaxCount.For(application) >= 2)
+        var linked = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+            application, person, slot: 1, objectSpace);
+        if (linked != null && linked.ID != Guid.Empty && linked.ID != excludeObjectId
+            && choices.All(c => c.ObjectId != linked.ID))
         {
-            var other = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, otherSlot);
-            if (other != null && other.ID != Guid.Empty && other.ID != excludeObjectId
-                && other.ID != summary?.ID
-                && choices.All(c => c.ObjectId != other.ID))
-            {
-                choices.Add(Choice(
-                    other.ID,
-                    caseDefaultLabel + " — " + AddressSummary(other),
-                    AddressFields(other)));
-            }
+            choices.Add(Choice(linked.ID, AddressSummary(linked), AddressFields(linked)));
         }
 
-        var overrides = objectSpace.GetObjectsQuery<AddressOfResidence>()
-            .Where(row => row.OwningApplicationProfileInstance != null
-                && row.OwningApplicationProfileInstance.ID == application.ID
-                && row.RosterPerson != null
-                && row.RosterPerson.ID == person.ID)
-            .OrderByDescending(row => row.ID)
-            .AsEnumerable()
-            .Where(row => row.ID != excludeObjectId && row.ID != summary?.ID)
-            .ToList();
-
-        foreach (var row in overrides)
-        {
-            if (choices.Any(c => c.ObjectId == row.ID))
-                continue;
-            choices.Add(Choice(row.ID, AddressChoiceLabelCaseOwned(row, isCaseDefault: false), AddressFields(row)));
-        }
-
-        // Same shared catalog as Case summary / create-wizard Address picker (searchable).
-        AppendSharedAddressCatalog(choices, objectSpace, excludeObjectId);
+        if (objectSpace != null)
+            AppendSharedAddressCatalog(choices, objectSpace, excludeObjectId);
         return choices;
     }
 
@@ -257,7 +231,13 @@ public static partial class PersonLinkReview
         IObjectSpace objectSpace,
         Guid excludeObjectId)
     {
-        var seen = new HashSet<Guid>(choices.Select(c => c.ObjectId));
+        var seenIds = new HashSet<Guid>(choices.Select(c => c.ObjectId));
+        var seenLabels = new HashSet<string>(
+            choices
+                .Select(c => PersonSearchTextNormalizer.Fold(
+                    (c.Label ?? string.Empty).Trim()))
+                .Where(key => key.Length > 0),
+            StringComparer.Ordinal);
         var rows = objectSpace.GetObjectsQuery<AddressOfResidence>()
             .AsNoTracking()
             .Include(row => row.Region)
@@ -266,15 +246,14 @@ public static partial class PersonLinkReview
             .Include(row => row.Hotel)
             .Include(row => row.Hospital)
             .Include(row => row.OtherSite)
-            .Where(row => row.RosterPerson == null)
             .OrderByDescending(row => row.ID)
-            .Take(400)
+            .Take(1500)
             .AsEnumerable()
             .ToList();
 
         foreach (var row in rows)
         {
-            if (row.ID == Guid.Empty || row.ID == excludeObjectId || !seen.Add(row.ID))
+            if (row.ID == Guid.Empty || row.ID == excludeObjectId || !seenIds.Add(row.ID))
                 continue;
 
             var label = AddressOfResidenceReportText.CityAndStreet(row);
@@ -282,6 +261,12 @@ public static partial class PersonLinkReview
                 label = row.DisplayAddress;
             if (string.IsNullOrWhiteSpace(label))
                 label = AddressSummary(row);
+
+            var dedupKey = PersonSearchTextNormalizer.Fold(
+                (label ?? string.Empty).Trim());
+            if (dedupKey.Length > 0 && !seenLabels.Add(dedupKey))
+                continue;
+
             choices.Add(Choice(row.ID, label, AddressFields(row)));
         }
     }

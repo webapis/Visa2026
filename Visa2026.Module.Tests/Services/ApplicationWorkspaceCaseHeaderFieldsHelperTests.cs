@@ -80,9 +80,9 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
-    public void Build_IncludesBorderZoneAsCommaSeparatedMultiSelectWhenRequired()
+    public void Build_IncludesBorderZoneAsCommaSeparatedMultiSelectWhenProduceBorderZone()
     {
-        var profile = new ApplicationProfile { RequireBorderZone = true };
+        var profile = new ApplicationProfile { ProduceBorderZone = true, RequireBorderZone = true };
         var application = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
@@ -97,9 +97,25 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
-    public void Build_IncludesWorkPermitLocationAsCommaSeparatedMultiSelectWhenRequired()
+    public void Build_HidesBorderZoneWhenInvitationOrVisaWithoutProduceBorderZone()
     {
-        var profile = new ApplicationProfile { RequireWorkPermitLocation = true };
+        var profile = new ApplicationProfile
+        {
+            ProduceInvitation = true,
+            ProduceVisa = true,
+            RequireBorderZone = true,
+        };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+
+        Assert.DoesNotContain(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
+    }
+
+    [Fact]
+    public void Build_IncludesWorkPermitLocationAsCommaSeparatedMultiSelectWhenProduceWorkLocation()
+    {
+        var profile = new ApplicationProfile { ProduceWorkLocation = true, RequireWorkPermitLocation = true };
         var application = new ApplicationProfileInstance
         {
             ApplicationProfile = profile,
@@ -111,6 +127,21 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
         var field = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
         Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect, field.Kind);
         Assert.Equal("Ashgabat, Mary", field.Value);
+    }
+
+    [Fact]
+    public void Build_HidesWorkPermitLocationWhenProduceWorkPermitWithoutProduceWorkLocation()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProduceWorkPermit = true,
+            RequireWorkPermitLocation = true,
+        };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+
+        Assert.DoesNotContain(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
     }
 
     [Fact]
@@ -263,6 +294,7 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     {
         var profile = new ApplicationProfile
         {
+            ProduceBorderZone = true,
             RequireBorderZone = true,
             DefaultBorderZoneLocation = "Zone B, Zone A",
         };
@@ -297,6 +329,7 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     {
         var profile = new ApplicationProfile
         {
+            ProduceBorderZone = true,
             RequireBorderZone = true,
             DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue,
         };
@@ -666,5 +699,51 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
                 ReadOnly = true,
             },
             withCity));
+    }
+
+    [Fact]
+    public void Build_Address1_EmptyWhenRequiredAndNoRosterLink()
+    {
+        var profile = new ApplicationProfile { RequireAddress1 = true };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var field = Assert.Single(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null),
+            item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address1);
+
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Empty, field.FillState);
+    }
+
+    [Fact]
+    public void Build_Address1_SoftSuppressesEmptyWhenRosterHasLinkedAddress()
+    {
+        var profile = new ApplicationProfile { RequireAddress1 = true };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+        application.PersonResolvedLinks.Add(new ApplicationProfileInstancePersonResolvedLink
+        {
+            LinkKind = ApplicationProfileInstancePersonLinkKind.AddressOfResidence,
+            LinkedObjectId = Guid.NewGuid(),
+            LinkSlotIndex = 1,
+        });
+
+        var field = Assert.Single(
+            ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null),
+            item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address1);
+
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, field.FillState);
+    }
+
+    [Fact]
+    public void Build_Address1_HiddenWhenOnlyPersonAddressRequired()
+    {
+        var profile = new ApplicationProfile { RequireAddress1 = false, RequireAddress2 = false };
+#pragma warning disable CS0618
+        profile.RequirePersonAddressOfResidence = true;
+#pragma warning restore CS0618
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+        Assert.DoesNotContain(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address1);
+        Assert.True(ApplicationProfileConfigurationResolver.ShowCurrentAddressOfResidence(application));
     }
 }

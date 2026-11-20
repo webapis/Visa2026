@@ -206,6 +206,11 @@ internal static class LookupCatalogEntitySync
                 HasNonEmpty(row, "Name")
                 && (HasNonEmpty(row, "City") || HasNonEmpty(row, "NameTm"))
                 && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
+            LookupCatalogMatchKey.TypeAndCityAndFullAddress =>
+                HasNonEmpty(row, "Type")
+                && HasNonEmpty(row, "FullAddress")
+                && (HasNonEmpty(row, "City") || HasNonEmpty(row, "NameTm"))
+                && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
             _ => HasNonEmpty(row, "Name"),
         };
 
@@ -232,6 +237,7 @@ internal static class LookupCatalogEntitySync
                 FindByProperty(objectSpace, entityType, "ShortNameTm", GetString(row, "ShortNameTm")),
             LookupCatalogMatchKey.CityAndFullAddress => FindByCityAndProperty(objectSpace, entityType, row, "FullAddress"),
             LookupCatalogMatchKey.CityAndName => FindByCityAndProperty(objectSpace, entityType, row, "Name"),
+            LookupCatalogMatchKey.TypeAndCityAndFullAddress => FindAddressOfResidence(objectSpace, row),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
@@ -546,6 +552,9 @@ internal static class LookupCatalogEntitySync
 
         if (definition.MatchKey == LookupCatalogMatchKey.CityAndName)
             return BuildCityAndScalarSyncKey(row, "Name");
+
+        if (definition.MatchKey == LookupCatalogMatchKey.TypeAndCityAndFullAddress)
+            return BuildAddressOfResidenceSyncKey(row);
 
         if (definition.MatchKey == LookupCatalogMatchKey.NameAndRegion && row is City city)
         {
@@ -903,6 +912,16 @@ internal static class LookupCatalogEntitySync
             }
         }
 
+        if (target is AddressOfResidence address)
+        {
+            ApplyAddressOfResidenceSites(objectSpace, address, row);
+#pragma warning disable CS0618
+            address.Person = null;
+            address.OwningApplicationProfileInstance = null;
+            address.RosterPerson = null;
+#pragma warning restore CS0618
+        }
+
         ApplyLocalizationKey(target, row);
     }
 
@@ -1034,6 +1053,102 @@ internal static class LookupCatalogEntitySync
         prop.SetValue(target, city);
     }
 
+
+    private static object? FindAddressOfResidence(IObjectSpace objectSpace, Dictionary<string, JsonElement> row)
+    {
+        var typeText = GetString(row, "Type");
+        var fullAddress = GetString(row, "FullAddress");
+        if (string.IsNullOrWhiteSpace(typeText) || string.IsNullOrWhiteSpace(fullAddress))
+            return null;
+        if (!Enum.TryParse<ResidenceType>(typeText, ignoreCase: true, out var type))
+            return null;
+
+        var city = FindCityReference(objectSpace, row);
+        var key = BuildAddressOfResidenceKey(type, city, fullAddress);
+        return objectSpace.GetObjects(typeof(AddressOfResidence)).Cast<AddressOfResidence>()
+            .FirstOrDefault(address =>
+                string.Equals(BuildAddressOfResidenceKey(address.Type, address.City, EffectiveAddressStreet(address)), key, StringComparison.Ordinal));
+    }
+
+    private static string BuildAddressOfResidenceSyncKey(object row)
+    {
+        if (row is AddressOfResidence address)
+            return BuildAddressOfResidenceKey(address.Type, address.City, EffectiveAddressStreet(address));
+
+        var typeText = GetPropertyString(row, "Type") ?? string.Empty;
+        if (!Enum.TryParse<ResidenceType>(typeText, ignoreCase: true, out var type))
+            return string.Empty;
+        var cityProp = row.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public);
+        var city = cityProp?.GetValue(row) as City;
+        var fullAddress = GetPropertyString(row, "FullAddress");
+        return BuildAddressOfResidenceKey(type, city, fullAddress);
+    }
+
+    private static string BuildAddressOfResidenceKey(ResidenceType? type, City? city, string? street)
+    {
+        var typeKey = LookupCatalogMatchHelper.NormalizeKey(type?.ToString() ?? string.Empty);
+        var cityKey = city == null
+            ? string.Empty
+            : LookupCatalogMatchHelper.NormalizeKey(city.NameTm ?? city.Name);
+        var streetKey = LookupCatalogMatchHelper.NormalizeKey(street ?? string.Empty);
+        if (typeKey.Length == 0 || streetKey.Length == 0)
+            return string.Empty;
+        return "TY:" + typeKey + "|C:" + cityKey + "|A:" + streetKey;
+    }
+
+    private static string EffectiveAddressStreet(AddressOfResidence address)
+    {
+        if (!string.IsNullOrWhiteSpace(address.FullAddress))
+            return address.FullAddress.Trim();
+        return address.Type switch
+        {
+            ResidenceType.Lodging => address.Lodging?.FullAddress?.Trim() ?? string.Empty,
+            ResidenceType.Hotel => address.Hotel?.Name?.Trim() ?? string.Empty,
+            ResidenceType.Hospital => address.Hospital?.Name?.Trim() ?? string.Empty,
+            ResidenceType.Other => address.OtherSite?.FullAddress?.Trim() ?? string.Empty,
+            _ => string.Empty,
+        };
+    }
+
+    private static void ApplyAddressOfResidenceSites(
+        IObjectSpace objectSpace,
+        AddressOfResidence address,
+        Dictionary<string, JsonElement> row)
+    {
+        var siteText = GetString(row, "Lodging")
+            ?? GetString(row, "Hotel")
+            ?? GetString(row, "Hospital")
+            ?? GetString(row, "OtherSite")
+            ?? GetString(row, "FullAddress");
+        if (string.IsNullOrWhiteSpace(siteText))
+            return;
+
+        var siteRow = CloneRowWithProperty(row, "FullAddress", siteText);
+        var nameRow = CloneRowWithProperty(row, "Name", siteText);
+
+        if (address.Type == ResidenceType.Lodging)
+            address.Lodging = FindByCityAndProperty(objectSpace, typeof(Lodging), siteRow, "FullAddress") as Lodging;
+        else if (address.Type == ResidenceType.Hotel)
+            address.Hotel = FindByCityAndProperty(objectSpace, typeof(Hotel), nameRow, "Name") as Hotel;
+        else if (address.Type == ResidenceType.Hospital)
+            address.Hospital = FindByCityAndProperty(objectSpace, typeof(Hospital), nameRow, "Name") as Hospital;
+        else if (address.Type == ResidenceType.Other)
+            address.OtherSite = FindByCityAndProperty(objectSpace, typeof(OtherSite), siteRow, "FullAddress") as OtherSite;
+    }
+
+    private static Dictionary<string, JsonElement> CloneRowWithProperty(
+        Dictionary<string, JsonElement> row,
+        string propertyName,
+        string? value)
+    {
+        var clone = new Dictionary<string, JsonElement>(row, StringComparer.OrdinalIgnoreCase);
+        var json = "\"" + (value ?? string.Empty)
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"") + "\"";
+        using var doc = JsonDocument.Parse(json);
+        clone[propertyName] = doc.RootElement.Clone();
+        return clone;
+    }
     private static void ApplyNavigation(IObjectSpace objectSpace, object target, string key, JsonElement value)
     {
         var refName = value.ValueKind == JsonValueKind.String ? value.GetString() : null;

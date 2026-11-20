@@ -807,6 +807,11 @@ button.cw-person:focus-visible {
   width: 100%;
   margin: 0 0 10px;
 }
+/* Address 1/2 use full summary width — same as create-wizard. */
+.cw-summary-form > .cw-summary-field[data-summary-kind="AddressObject"] {
+  column-span: all;
+  max-width: min(52rem, 100%);
+}
 .cw-summary-form--stack,
 .cw-summary-identity .cw-summary-form {
   column-count: 1;
@@ -950,6 +955,162 @@ button.cw-person:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.cw-summary-lookup-row--address {
+  align-items: flex-start;
+}
+.cw-summary-lookup-row > .cw-summary-address-search,
+.cw-summary-lookup-row > .cw-summary-address-search.dxbl-combo-box {
+  flex: 1 1 10rem;
+  min-width: 0;
+  padding: 0;
+  /* Keep field chrome in edit mode (was borderless → looked like a label). */
+  border: 1px solid var(--os-line);
+  border-radius: 6px;
+  background: var(--os-panel);
+  color: var(--os-ink);
+  box-sizing: border-box;
+}
+.cw-summary-address-search .dxbl-text-edit,
+.cw-summary-address-search.dxbl-combo-box {
+  width: 100%;
+  min-height: 34px;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--os-line);
+  background: var(--os-panel);
+  color: var(--os-ink);
+}
+.cw-summary-lookup-row > .cw-summary-address-search .dxbl-text-edit,
+.cw-summary-lookup-row > .cw-summary-address-search .dxbl-text-edit:focus,
+.cw-summary-lookup-row > .cw-summary-address-search .dxbl-text-edit:focus-within {
+  /* Outer combo already draws the border. */
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+.cw-summary-address-search .dxbl-text-edit-input,
+.cw-summary-address-search-input {
+  color: var(--os-ink);
+}
+.cw-summary-address-combo-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  position: relative;
+}
+.cw-summary-address-edit-label {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  color: inherit;
+  font-size: 0.9rem;
+}
+.cw-summary-address-search:not(:focus-within) .cw-summary-address-combo-edit:not(:has(.cw-summary-address-edit-label))::before {
+  content: "— Select —";
+  display: block;
+  padding: 8px 10px;
+  color: var(--os-muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+.cw-summary-address-search:not(:focus-within) .cw-summary-address-combo-edit .dxbl-text-edit,
+.cw-summary-address-search:not(:focus-within) .cw-summary-address-combo-edit .dxbl-text-edit-input {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  background: transparent !important;
+}
+.cw-summary-address-search:focus-within .cw-summary-address-edit-label {
+  display: none;
+}
+.cw-summary-address-search:focus-within .cw-summary-address-combo-edit .dxbl-text-edit {
+  position: static !important;
+  opacity: 1 !important;
+  min-height: 34px;
+  width: 100%;
+}
+/* Selected address: keep full wrapping label even while combo still focused after pick. */
+.cw-summary-address-search--committed:focus-within .cw-summary-address-edit-label {
+    display: block;
+}
+.cw-summary-address-search--committed:focus-within .cw-summary-address-combo-edit .dxbl-text-edit,
+.cw-summary-address-search--committed:focus-within .cw-summary-address-combo-edit .dxbl-text-edit-input {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    background: transparent !important;
+}
+.cw-summary-address-item {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Full address after pick — button swaps out of DxComboBox so no focus truncation. */
+.cw-summary-address-committed {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    cursor: pointer;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+    min-height: 36px;
+}
+.cw-summary-address-committed .cw-summary-address-edit-label {
+    padding: 8px 10px;
+}
+.cw-addr-icon--clear {
+    flex: 0 0 auto;
+    align-self: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 0.35rem;
+}
+.cw-addr-icon--clear:hover {
+    opacity: 1;
+}
+.cw-summary-address-search-drop {
+  max-width: min(52rem, 96vw);
+  min-width: min(28rem, 96vw);
+}
+.cw-summary-address-search-drop .dxbl-listbox-item {
+  white-space: normal;
+  line-height: 1.35;
+  align-items: flex-start;
+  height: auto;
+  min-height: 2rem;
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
 }
 .cw-summary-lookup-row > .cw-summary-field__input {
   flex: 1 1 10rem;
@@ -2752,6 +2913,12 @@ select.cw-summary-field__input option {
 }
 .os-link-review__gear.is-on { border-color: var(--os-accent); color: var(--os-accent); }
 .os-link-review-popup .os-link-review-form__date { width: 100%; }
+.os-link-review__textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
 .os-link-review__select {
   width: 100%;
   min-width: 0;
@@ -2760,6 +2927,34 @@ select.cw-summary-field__input option {
   border: 1px solid var(--os-line);
   background: var(--os-panel);
   color: var(--os-ink);
+}
+/* Linked records Address 1/2 — same CaseAddressSearchField as create wizard / Case summary. */
+.os-link-review__row .cw-summary-address-block {
+  width: 100%;
+  min-width: 0;
+  grid-column: 3 / 5;
+}
+.os-link-review__row .cw-summary-lookup-row--address {
+  width: 100%;
+  min-width: 0;
+}
+.os-link-review__row .cw-summary-address-search,
+.os-link-review__row .cw-summary-address-search.dxbl-combo-box {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 1px solid var(--os-line);
+  border-radius: 6px;
+  background: var(--os-panel);
+  color: var(--os-ink);
+  box-sizing: border-box;
+}
+.os-link-review__row .cw-summary-address-search-drop {
+  max-width: min(720px, 92vw);
+}
+.os-link-review__row .cw-summary-address-search-drop .dxbl-listbox-item,
+.os-link-review__row .cw-summary-address-item {
+  white-space: normal;
+  line-height: 1.25;
 }
 .os-link-review-form__title { margin: 0 0 14px; font-size: 1.05rem; }
 .os-link-review-form__row {
@@ -3194,8 +3389,14 @@ select.cw-summary-field__input option {
 }
 .cw-people-links-scroll .os-table--people-links .os-people-doc-cell {
   white-space: normal;
-  min-width: 9rem;
-  max-width: 16rem;
+  min-width: 12rem;
+  max-width: 28rem;
+}
+.cw-people-links-scroll .os-table--people-links .os-people-doc {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
 }
 .cw-people-toolbar {
   gap: 8px;
@@ -3246,3 +3447,88 @@ select.cw-summary-field__input option {
   border-color: rgba(148, 163, 184, 0.28);
 }
 .os-person-link-picker__note { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--os-muted, #64748b); font-weight: 600; }
+
+/* Address 2: full-width textarea, Recently used in a horizontal strip below */
+.os-link-review__address2 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.os-link-review__address2 .os-link-review__textarea,
+.os-link-review__address2 .cw-summary-field__textarea {
+  width: 100%;
+  min-width: 0;
+}
+.os-link-review__a2-recent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--os-line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--os-ink) 6%, var(--os-panel));
+  box-shadow: inset 3px 0 0 var(--os-accent);
+}
+.os-link-review__a2-recent-head {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--os-ink);
+  white-space: nowrap;
+}
+.os-link-review__a2-recent-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: 1px solid var(--os-line);
+  border-radius: 8px;
+  background: var(--os-panel);
+  color: var(--os-ink);
+  cursor: pointer;
+}
+.os-link-review__a2-recent-card:hover {
+  border-color: color-mix(in srgb, var(--os-accent) 45%, var(--os-line));
+}
+.os-link-review__a2-recent-card.is-selected {
+  border-color: var(--os-accent);
+  box-shadow: inset 3px 0 0 var(--os-accent);
+}
+.os-link-review__a2-recent-text {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.os-link-review__a2-recent-time {
+  font-size: 0.72rem;
+  color: var(--os-muted, var(--os-ink));
+  white-space: nowrap;
+}
+.os-link-review__a2-recent-more {
+  flex: 0 1 12rem;
+  min-width: 8rem;
+  max-width: 100%;
+  width: auto;
+  font-size: 0.8rem;
+}
+.cw-summary-field--address2,
+.cw-summary-field:has(.os-link-review__address2) {
+  break-inside: avoid;
+  width: 100%;
+}
+.ap-picker__summary-addresses .cw-summary-field--address2 {
+  margin-top: 8px;
+}

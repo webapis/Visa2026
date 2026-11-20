@@ -753,6 +753,9 @@ public static class ApplicationProfileSchemaSql
     internal const string EnsureInstanceAddress2IdPostgres =
         """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "Address2Id" uuid NULL;""";
 
+    internal const string EnsureInstanceAddress2DefaultTextPostgres =
+        """ALTER TABLE "ApplicationProfileInstances" ADD COLUMN IF NOT EXISTS "Address2DefaultText" text NULL;""";
+
     internal const string EnsureAddressOfResidenceOwningInstancePostgres =
         """ALTER TABLE "AddressesOfResidence" ADD COLUMN IF NOT EXISTS "OwningApplicationProfileInstanceId" uuid NULL;""";
 
@@ -1039,6 +1042,7 @@ public static class ApplicationProfileSchemaSql
         BackfillRequireAddressFlagsFromLegacyPostgres,
         EnsureInstanceAddress1IdPostgres,
         EnsureInstanceAddress2IdPostgres,
+        EnsureInstanceAddress2DefaultTextPostgres,
         EnsureAddressOfResidenceOwningInstancePostgres,
         EnsureAddressOfResidenceRosterPersonPostgres,
         EnsureAddressOfResidencePersonNullablePostgres,
@@ -1377,6 +1381,10 @@ public static class ApplicationProfileSchemaSql
         IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'Address2Id') IS NULL
             ALTER TABLE dbo.ApplicationProfileInstances ADD Address2Id uniqueidentifier NULL;
+
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstances', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstances', N'Address2DefaultText') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstances ADD Address2DefaultText nvarchar(max) NULL;
 
         IF OBJECT_ID(N'dbo.AddressesOfResidence', N'U') IS NOT NULL
            AND COL_LENGTH(N'dbo.AddressesOfResidence', N'OwningApplicationProfileInstanceId') IS NULL

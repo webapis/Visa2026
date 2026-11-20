@@ -72,35 +72,7 @@ public static class InvitationStayAddressCopy
         if (application.Address1 != null)
             return;
 
-        var address = objectSpace.CreateObject<AddressOfResidence>();
-        address.OwningApplicationProfileInstance = application;
-        address.RosterPerson = null;
-#pragma warning disable CS0618
-        address.Person = null;
-#pragma warning restore CS0618
-        address.Region = stay.Region;
-        address.City = stay.City;
-        address.Type = stay.Type;
-        switch (stay.Type)
-        {
-            case ResidenceType.Lodging:
-                address.Lodging = stay.Lodging;
-                break;
-            case ResidenceType.Hotel:
-                address.Hotel = stay.Hotel;
-                break;
-            case ResidenceType.Hospital:
-                address.Hospital = stay.Hospital;
-                break;
-            case ResidenceType.Other:
-                address.OtherSite = stay.OtherSite;
-                break;
-            case ResidenceType.PrivateHouse:
-                address.FullAddress = stay.PrivateHouseAddress?.Trim();
-                address.DeferPrivateHouseExpiration = true;
-                break;
-        }
-
+        var address = AddressOfResidenceCatalogHelper.UpsertFromStay(objectSpace, stay);
         application.Address1 = address;
     }
 
@@ -388,37 +360,8 @@ public static class InvitationStayAddressCopy
         if (objectSpace == null || person == null || !IsComplete(stay))
             return null;
 
-        var application = stay.ApplicationProfileInstance;
-        var address = objectSpace.CreateObject<AddressOfResidence>();
-        address.OwningApplicationProfileInstance = application;
-        address.RosterPerson = person;
-#pragma warning disable CS0618
-        address.Person = null;
-#pragma warning restore CS0618
-        address.Region = stay.Region;
-        address.City = stay.City;
-        address.Type = stay.Type;
-        switch (stay.Type)
-        {
-            case ResidenceType.Lodging:
-                address.Lodging = stay.Lodging;
-                break;
-            case ResidenceType.Hotel:
-                address.Hotel = stay.Hotel;
-                break;
-            case ResidenceType.Hospital:
-                address.Hospital = stay.Hospital;
-                break;
-            case ResidenceType.Other:
-                address.OtherSite = stay.OtherSite;
-                break;
-            case ResidenceType.PrivateHouse:
-                address.FullAddress = stay.PrivateHouseAddress?.Trim();
-                address.DeferPrivateHouseExpiration = true;
-                break;
-        }
-
-        return address;
+        _ = person;
+        return AddressOfResidenceCatalogHelper.UpsertFromStay(objectSpace, stay);
     }
 
     private static bool CanCopy(IObjectSpace? objectSpace, ApplicationProfileInstance? application, out InvitationAddress? stay)

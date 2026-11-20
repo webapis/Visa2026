@@ -91,6 +91,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 
 | Business object | Property | Status | Replacement | Schema |
 |-----------------|----------|--------|-------------|--------|
+| **ApplicationProfileInstance** | `Address2` (catalog FK) | Deprecated | **`Address2DefaultText`** (case) + **`ApplicationProfileInstancePersonAddress2Note`** (people) | Catalog FK retained; case UI uses free-text default 2026-11-20 |
 | **ApplicationProfileInstance** | `Region` / `City` | Deprecated | `ToRegion` / `ToCity` (dual-read fallback) | Keep columns; UI/import stop writing (From/To geo 2026-09) |
 | **ApplicationProfile** | `RequireRegion` / `RequireCity` / `RequireRegionCity` / `DefaultRegion` / `DefaultCity` | Deprecated | `RequireFrom*` / `RequireTo*` / `DefaultFrom*` / `DefaultTo*` | Keep columns for seed dual-read (From/To geo 2026-09) |
 | **ApplicationProfile** | `RequireInvitationAddress` / `RequireInvitationPlace` | Deprecated | **`RequireAddress1`** / **`RequireAddress2`** (case Address 1/2) | Columns retained; case summary UI hidden 2026-11-19 |
@@ -202,7 +203,7 @@ Only **configuration** that used to live on `ApplicationType` (and type-driven i
 ## Change log
 
 |
-| 2026-11-19 | Case summary: Invitation region/city/Address type/Other invitation places removed; use Address 1/2 (`RequireAddress1`/`RequireAddress2`). | 2026-09-15 | From/To Region+City geo: obsolete bare `Region`/`City`; use From*/To* on BT + internal registration. |
+| 2026-11-20 | Case summary Address 2 catalog removed; People Address 2 is free-text Address2Text per roster person. | 2026-11-19 | Case summary: Invitation region/city/Address type/Other invitation places removed; use Address 1/2 (`RequireAddress1`/`RequireAddress2`). | 2026-09-15 | From/To Region+City geo: obsolete bare `Region`/`City`; use From*/To* on BT + internal registration. |
 | 2026-08-14 | Officer workspace Progress/Advance steps come from Application Profile Approval legs + Process & SLA; `1_REVIEW_STARTED` / ApplicationProgress transition graph is storage-only for that UI. |
 | 2026-08-07 | Application Profile cutover registry: type config seed/UX, group/template links, `ApplicationItem` / `IssuingApplicationItem` (slice 10 pending), progress **configuration** vs `ApplicationProgress` BO clarified. |
 | 2026-07-31 | Registration→TravelHistory auto-sync removed; `SourceApplicationItemID` cleared/dropped; manual TravelHistory CRUD only. |

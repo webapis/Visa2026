@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
@@ -52,6 +53,9 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
             if (kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
             {
                 var slot = link.LinkSlotIndex > 0 ? link.LinkSlotIndex : 1;
+                // Slot 2 catalog links are obsolete (Address2Text notes).
+                if (slot >= 2)
+                    continue;
                 addressBySlot[slot] = linkedId;
             }
 
@@ -101,11 +105,11 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
             item.CurrentAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
                 application, person, ApplicationProfileInstanceAddressResolver.Slot1, objectSpace);
 
-        if (addressBySlot.TryGetValue(2, out var slot2Id))
-            item.SecondAddressOfResidence = objectSpace.GetObjectByKey<AddressOfResidence>(slot2Id);
-        else
-            item.SecondAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
-                application, person, ApplicationProfileInstanceAddressResolver.Slot2, objectSpace);
+#pragma warning disable CS0618
+        item.SecondAddressOfResidence = null;
+#pragma warning restore CS0618
+        if (application != null && person != null)
+            item.Address2Text = CasePersonAddress2Note.GetText(objectSpace, application.ID, person.ID);
     }
 
     private static void AssignPassports(

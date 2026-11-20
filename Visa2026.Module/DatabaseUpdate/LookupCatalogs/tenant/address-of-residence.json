@@ -1,0 +1,1285 @@
+{
+  "rows": [
+    {
+      "Type": "Lodging",
+      "Region": "Ahal welaýaty",
+      "City": "Akbugdaý etraby",
+      "FullAddress": "Aýlow awtomobil ýolunyň D/G-G/D tarapynda ýerleşýän Çalyk Enerji UÝJ",
+      "Lodging": "Aýlow awtomobil ýolunyň D/G-G/D tarapynda ýerleşýän Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Ahal welaýaty",
+      "City": "Akbugdaý etraby",
+      "FullAddress": "UÝJ., Mary etr. S.Türkmenbaşy şäherçesi Senagat zolagy.,UÝJ",
+      "Lodging": "UÝJ., Mary etr. S.Türkmenbaşy şäherçesi Senagat zolagy.,UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Ahal welaýaty",
+      "City": "Kaka etraby",
+      "FullAddress": "Dokma toplumynyň UYJ",
+      "Lodging": "Dokma toplumynyň UYJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Ahal welaýaty",
+      "City": "Sarahs etraby",
+      "FullAddress": "Döwletabatgazçykaryş müdirliginiň ýaşaýyş jaý toplumy",
+      "Lodging": "Döwletabatgazçykaryş müdirliginiň ýaşaýyş jaý toplumy"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç. 70/1 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç. 70/1 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/1 GAP Inşaat kompaniýasynyň UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/1 GAP Inşaat kompaniýasynyň UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/12 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/12 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/13 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/13 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/14 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/14 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/16 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/16 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/17 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/17 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/18 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/18 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "1932 (A.Garlyýew) köç.№70/19 UÝJ",
+      "Lodging": "1932 (A.Garlyýew) köç.№70/19 UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Büzmeýin DES çägindäki ýerleşýän Çalyk Enerji UÝJ",
+      "Lodging": "Büzmeýin DES çägindäki ýerleşýän Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Görogly ýaşaýyş toplumynyň 2230/4 köçesi, jaý-17",
+      "Lodging": "Görogly ýaşaýyş toplumynyň 2230/4 köçesi, jaý-17"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Howdan “W” ýaşaýyş toplumynyň jaý-44 öý-35",
+      "Lodging": "Howdan “W” ýaşaýyş toplumynyň jaý-44 öý-35"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Türkmenbaşy şäherçesi, Senagat zolagy, Mary Döwlet elektrik stansiýa UÝJ",
+      "Lodging": "Türkmenbaşy şäherçesi, Senagat zolagy, Mary Döwlet elektrik stansiýa UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Balkanabat şäheri",
+      "FullAddress": "Döwlet elektrik stansiýasy Çalyk Enerji ÜYJ",
+      "Lodging": "Döwlet elektrik stansiýasy Çalyk Enerji ÜYJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Balkanabat şäheri",
+      "FullAddress": "Gumdag şäherçesinde ýerleşýän Gumdag gurluşyk meýdançayndaky Çalyk Enerji UÝJ",
+      "Lodging": "Gumdag şäherçesinde ýerleşýän Gumdag gurluşyk meýdançayndaky Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Balkanabat şäheri",
+      "FullAddress": "Gündogar tarapynda ýerleşýän Çalyk Enerjy UÝJ",
+      "Lodging": "Gündogar tarapynda ýerleşýän Çalyk Enerjy UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Garabogaz şäheri",
+      "FullAddress": "Gap İnşaat UÝJ",
+      "Lodging": "Gap İnşaat UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Garabogaz şäheri",
+      "FullAddress": "T-başy-Garabogaz awtomobil ýol-ň 6-7-nji km.günbatar tarapynda ýerleşýän Çalyk Enerji UÝJ",
+      "Lodging": "T-başy-Garabogaz awtomobil ýol-ň 6-7-nji km.günbatar tarapynda ýerleşýän Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Gumdag şäheri",
+      "FullAddress": "Jebel şäherçesinde ýerleşýän Jebel gurluşyk meýdançayndaky UÝJ",
+      "Lodging": "Jebel şäherçesinde ýerleşýän Jebel gurluşyk meýdançayndaky UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Gumdag şäheri",
+      "FullAddress": "Ýerleşýän Gumdag gurluşyk meýdançayndaky UÝJ",
+      "Lodging": "Ýerleşýän Gumdag gurluşyk meýdançayndaky UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Serdar etraby",
+      "FullAddress": "Gyzylarbat etr-ň Arkaç geň-ň çäginde ýerleşýän \"Altyn asyr\" kölüniň kenarynda UÝJ",
+      "Lodging": "Gyzylarbat etr-ň Arkaç geň-ň çäginde ýerleşýän \"Altyn asyr\" kölüniň kenarynda UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Türkmenbaşy - Aşgabat gara ýolunyň 9-njy km. \"Çalyk Enerji\" türk kompaniýasynyň UÝJ topl",
+      "Lodging": "Türkmenbaşy - Aşgabat gara ýolunyň 9-njy km. \"Çalyk Enerji\" türk kompaniýasynyň UÝJ topl"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "“Rysgally Zähmet” hususy kärhanasynyň UÝJ",
+      "Lodging": "“Rysgally Zähmet” hususy kärhanasynyň UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Çalık Enerji UÝJ(Janga)",
+      "Lodging": "Çalık Enerji UÝJ(Janga)"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Gap İnşaat UÝJ",
+      "Lodging": "Gap İnşaat UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Gap İnşaat UÝJ(Janga)",
+      "Lodging": "Gap İnşaat UÝJ(Janga)"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Guwlymaýak ş-çesi.,Gyýanlydaky polimer zawodynyň çäklerinde ýerleşýän UÝJ",
+      "Lodging": "Guwlymaýak ş-çesi.,Gyýanlydaky polimer zawodynyň çäklerinde ýerleşýän UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Hyundai engineering\" UÝJ",
+      "Lodging": "Hyundai engineering\" UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Karbamid zawody UÝJ",
+      "Lodging": "Karbamid zawody UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Karbamid zawodynyň çäklerinde ýerleşýän Gap inşaat UÝJ",
+      "Lodging": "Karbamid zawodynyň çäklerinde ýerleşýän Gap inşaat UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "T-başy-Garabogaz awtomobil ýol-ň 6-7-nji km.günbatar tarapynda ýerleşýän Çalyk Enerji UÝJ",
+      "Lodging": "T-başy-Garabogaz awtomobil ýol-ň 6-7-nji km.günbatar tarapynda ýerleşýän Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Beýik Saparmyrat Türkmenbaşy ad. etraby",
+      "FullAddress": "Beýik Saparmyrat Türkmenbaşy etr, Watan Elektrik bekedi UÝJ",
+      "Lodging": "Beýik Saparmyrat Türkmenbaşy etr, Watan Elektrik bekedi UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Döwletli etraby",
+      "FullAddress": "Watan Elektrik bekedi UÝJ",
+      "Lodging": "Watan Elektrik bekedi UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Hojambaz etraby",
+      "FullAddress": "Bagtyýarlyk önümçilik meýdançasynyň çägindäki UÝJ",
+      "Lodging": "Bagtyýarlyk önümçilik meýdançasynyň çägindäki UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Serdarabat etraby",
+      "FullAddress": "“ Parahat 220/110/10 kw tok peseldiji bekedi, Çalik Enerji UÝJ",
+      "Lodging": "“ Parahat 220/110/10 kw tok peseldiji bekedi, Çalik Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Merkezi etrapçasynyň 1/7-nji jaýynyň 23-nji ýaşaýyş öýi",
+      "Lodging": "Merkezi etrapçasynyň 1/7-nji jaýynyň 23-nji ýaşaýyş öýi"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Zerger geň-iň çägindäki Ronesans Endüstri komp-yň, şahamçasynyň UÝJ",
+      "Lodging": "Zerger geň-iň çägindäki Ronesans Endüstri komp-yň, şahamçasynyň UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Gumdag şäheri",
+      "FullAddress": "Gumdag şäherçesinde ýerleşýän Gumdag gurluşyk meýdançayndaky UÝJ",
+      "Lodging": "Gumdag şäherçesinde ýerleşýän Gumdag gurluşyk meýdançayndaky UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Azatlyk ýaşaýyş jaýlar toplumynyň Azatlyk köçesiniň No:1-nji jaýy",
+      "Lodging": "Azatlyk ýaşaýyş jaýlar toplumynyň Azatlyk köçesiniň No:1-nji jaýy"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Gündogar-Günbatar gaz gysyjy desgasynyň çägindäki UÝJ",
+      "Lodging": "Gündogar-Günbatar gaz gysyjy desgasynyň çägindäki UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Şapak yaşaýyş jaýlar toplumynyň 2-nji jaýynyň 6-njy otagy",
+      "Lodging": "Şapak yaşaýyş jaýlar toplumynyň 2-nji jaýynyň 6-njy otagy"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Mülkbagşy ýaşaýyş jaýlar toplumynyň N.Balkanow köçesiniň 2-nji jaýy",
+      "Lodging": "Mülkbagşy ýaşaýyş jaýlar toplumynyň N.Balkanow köçesiniň 2-nji jaýy"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Mülkbagşy ýaşaýyş jaýlar toplumynyň Tebigat köçesiniň 69-njy öýi",
+      "Lodging": "Mülkbagşy ýaşaýyş jaýlar toplumynyň Tebigat köçesiniň 69-njy öýi"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Şapak ýaşaýyş jaýlar toplumynyň 1-nji jaýy,65-nji otag",
+      "Lodging": "Şapak ýaşaýyş jaýlar toplumynyň 1-nji jaýy,65-nji otag"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Şapak ýaşaýyş jaýlar toplumynyň 20-nji ‘A’ jaýynyň 54-nji öyi",
+      "Lodging": "Şapak ýaşaýyş jaýlar toplumynyň 20-nji ‘A’ jaýynyň 54-nji öyi"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Şapak ýaşaýyş jaýlar toplumynyň 20-nji “A” jaýynyň 38-nji öýi",
+      "Lodging": "Şapak ýaşaýyş jaýlar toplumynyň 20-nji “A” jaýynyň 38-nji öýi"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Şapak ýaşaýyş jaýlar toplumynyň 2-nji jaýynyň 6-njy öýi",
+      "Lodging": "Şapak ýaşaýyş jaýlar toplumynyň 2-nji jaýynyň 6-njy öýi"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Şatlyk Gurbandurdy ýolunyň 57 km. Ýerleşýän Çalyk Enerji UÝJ",
+      "Lodging": "Şatlyk Gurbandurdy ýolunyň 57 km. Ýerleşýän Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Türkmenbaşy şäherçesi, Senagat zolagy, Mary Döwlet elektrik stansiýa UÝJ",
+      "Lodging": "Türkmenbaşy şäherçesi, Senagat zolagy, Mary Döwlet elektrik stansiýa UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Mary-2 döwlet elektrik stansiýa Çalik Enerji UÝJ",
+      "Lodging": "Mary-2 döwlet elektrik stansiýa Çalik Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Şapak ýaşaýyş jaý Toplumy 20-nji A jaýy 34-nji öýi",
+      "Lodging": "Şapak ýaşaýyş jaý Toplumy 20-nji A jaýy 34-nji öýi"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Şapak ýaşaýyş jaýlar toplumunyň Jaý 3 Öý 3",
+      "Lodging": "Şapak ýaşaýyş jaýlar toplumunyň Jaý 3 Öý 3"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Şapak ýaşaýyş jaýlar toplumunyň Jaý 3 Öý 40",
+      "Lodging": "Şapak ýaşaýyş jaýlar toplumunyň Jaý 3 Öý 40"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Türkmenbaşy şäherçesi, Senagat zolagy, Mary Döwlet elektrik stansiýa UÝJ",
+      "Lodging": "Türkmenbaşy şäherçesi, Senagat zolagy, Mary Döwlet elektrik stansiýa UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Serhetabat etraby",
+      "FullAddress": "Çemenabat obasyna 35 km uzaklykda ýerleşýän Çalyk enerji UÝJ",
+      "Lodging": "Çemenabat obasyna 35 km uzaklykda ýerleşýän Çalyk enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Serhetabat etraby",
+      "FullAddress": "Çemendag obasyndan 35 km uzaklykda ýerleşýän Çalyk enerji UÝJ",
+      "Lodging": "Çemendag obasyndan 35 km uzaklykda ýerleşýän Çalyk enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Ýolöten etraby",
+      "FullAddress": "Çemenabad obasyndan 35 km.uzaklykta yerleşýän Çalyk Enerji UÝJ",
+      "Lodging": "Çemenabad obasyndan 35 km.uzaklykta yerleşýän Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Mary welaýaty",
+      "City": "Ýolöten etraby",
+      "FullAddress": "Ymambaba geňeşligi Çalyk Enerji UÝJ",
+      "Lodging": "Ymambaba geňeşligi Çalyk Enerji UÝJ"
+    },
+    {
+      "Type": "Lodging",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Himiki ýaşaýyş toplumynyň 94-nji jaýy 90-njy öýi",
+      "Lodging": "Himiki ýaşaýyş toplumynyň 94-nji jaýy 90-njy öýi"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "10 ýyl Abadançylyk köçesi Olimpiýa Şäherçesi Sport myhmanhanasy",
+      "Hotel": "10 ýyl Abadançylyk köçesi Olimpiýa Şäherçesi Sport myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Ak-Altyn myhmanhanasy",
+      "Hotel": "Ak-Altyn myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Arçabil myhmanhanasy",
+      "Hotel": "Arçabil myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Aşgabat ,Aşgabat myhmanhanasy",
+      "Hotel": "Aşgabat ,Aşgabat myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Aşgabat Grand Türkmen oteli",
+      "Hotel": "Aşgabat Grand Türkmen oteli"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Aşkabat .Mizan Myhmanhanasy",
+      "Hotel": "Aşkabat .Mizan Myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "DIWAN myhmanhanasy",
+      "Hotel": "DIWAN myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Grand Otel",
+      "Hotel": "Grand Otel"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "GRAND Türkmen myhmanhanasy",
+      "Hotel": "GRAND Türkmen myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Köpetdag Myhmanhanasy",
+      "Hotel": "Köpetdag Myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Laçyn myhmanhanasy",
+      "Hotel": "Laçyn myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Nusaý myhmanhanasy",
+      "Hotel": "Nusaý myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Oguzkent myhmanhanasy",
+      "Hotel": "Oguzkent myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "ş Aşgabat myhmanhanasy",
+      "Hotel": "ş Aşgabat myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Ýyldyz myhmanhanasy",
+      "Hotel": "Ýyldyz myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Balkanabat şäheri",
+      "FullAddress": "Balkanabat ş, Nebitçi myhmanhanasy",
+      "Hotel": "Balkanabat ş, Nebitçi myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Balkanabat şäheri",
+      "FullAddress": "Balkanabat ş, Nebitçi myhmanhanasy,Türkmenbaşy ş. Çarlak myhmanhanasy",
+      "Hotel": "Balkanabat ş, Nebitçi myhmanhanasy,Türkmenbaşy ş. Çarlak myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Serdar şäheri",
+      "FullAddress": "Serdar, Türkmenbaşy garaýoly, Çynar myhmanhanasy",
+      "Hotel": "Serdar, Türkmenbaşy garaýoly, Çynar myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Ýüpek ýol myhmanhanasy",
+      "Hotel": "Ýüpek ýol myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "“Gämi” myhmanhanasy “Awaza” milli syýahatçylyk zolagy",
+      "Hotel": "“Gämi” myhmanhanasy “Awaza” milli syýahatçylyk zolagy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Beýik Ýüpek Ýoly myhmanhanasy",
+      "Hotel": "Beýik Ýüpek Ýoly myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Çarlak myhmanhanasy",
+      "Hotel": "Çarlak myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Milli syýahatçylyk zolagy Awaza Berkakar myhmanhanasy",
+      "Hotel": "Milli syýahatçylyk zolagy Awaza Berkakar myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Ýelken Ýahta kuluby HJ. myhmanhanasy “Awaza” milli syýahatçylyk zolagy",
+      "Hotel": "Ýelken Ýahta kuluby HJ. myhmanhanasy “Awaza” milli syýahatçylyk zolagy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Daşoguz Myhmanhanasy",
+      "Hotel": "Daşoguz Myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Hazyna myhmanhanasy",
+      "Hotel": "Hazyna myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Kerwen myhmanhanasy",
+      "Hotel": "Kerwen myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Kuwwat myhmanhanasy",
+      "Hotel": "Kuwwat myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "ş Deňiz myhmanhanasy",
+      "Hotel": "ş Deňiz myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Türkmenbaşy myhmanhanasy",
+      "Hotel": "Türkmenbaşy myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Ýelken myhmanhanasy",
+      "Hotel": "Ýelken myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Daşoguz welaýaty",
+      "City": "Daşoguz şäheri",
+      "FullAddress": "Daşoguz myhmanhanasy",
+      "Hotel": "Daşoguz myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Atamyrat ş, Baýram myhmanhanasy",
+      "Hotel": "Atamyrat ş, Baýram myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Jeýhun myhmanhanasy",
+      "Hotel": "Jeýhun myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Lebap myhmanhanasy",
+      "Hotel": "Lebap myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "ş; Jeýhun myhmanhanasy",
+      "Hotel": "ş; Jeýhun myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Türkmenabat halkara howa menziliniň myhmanhanasy",
+      "Hotel": "Türkmenabat halkara howa menziliniň myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Türkmenabat myhmanhansy",
+      "Hotel": "Türkmenabat myhmanhansy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Ýüpek ýoly myhmanhanasy",
+      "Hotel": "Ýüpek ýoly myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Ýüpekýol myhmanhanasy",
+      "Hotel": "Ýüpekýol myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Mary myhmanhanasy",
+      "Hotel": "Mary myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Marguş myhmanhanasy",
+      "Hotel": "Marguş myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Mary myhmanhana",
+      "Hotel": "Mary myhmanhana"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Mary myhmanhanasy",
+      "Hotel": "Mary myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Mary myhymanhanasy",
+      "Hotel": "Mary myhymanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "ş; Marguş myhmanhanasy",
+      "Hotel": "ş; Marguş myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "ş; Rahatlyk myhmanhanasy",
+      "Hotel": "ş; Rahatlyk myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Yrysgal myhmanhanasy",
+      "Hotel": "Yrysgal myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Serhetabat etraby",
+      "FullAddress": "Owganystan Hyrat we Kabul şäheri",
+      "Hotel": "Owganystan Hyrat we Kabul şäheri"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Tagtabazar etraby",
+      "FullAddress": "Guşgy myhmanhanasy",
+      "Hotel": "Guşgy myhmanhanasy"
+    },
+    {
+      "Type": "Hotel",
+      "Region": "Mary welaýaty",
+      "City": "Ýolöten etraby",
+      "FullAddress": "Galkynyş gaz käniniň 2-nji işçiler şäherçesiň myhmanhanasy",
+      "Hotel": "Galkynyş gaz käniniň 2-nji işçiler şäherçesiň myhmanhanasy"
+    },
+    {
+      "Type": "Hospital",
+      "Region": "Ahal welaýaty",
+      "City": "Gökdepe etraby",
+      "FullAddress": "Yzgant obasyndaky ýokanç keseller hassahanasy",
+      "Hospital": "Yzgant obasyndaky ýokanç keseller hassahanasy"
+    },
+    {
+      "Type": "Hospital",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Ýokanç keselleri bejeriş we öňüni alyş merkezi",
+      "Hospital": "Ýokanç keselleri bejeriş we öňüni alyş merkezi"
+    },
+    {
+      "Type": "Hospital",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Ýokanç keselleri bejeriş we öňüni alyş merkezi hassahanasy",
+      "Hospital": "Ýokanç keselleri bejeriş we öňüni alyş merkezi hassahanasy"
+    },
+    {
+      "Type": "Hospital",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "içki kesel hassahanasy",
+      "Hospital": "içki kesel hassahanasy"
+    },
+    {
+      "Type": "Other",
+      "Region": "Ahal welaýaty",
+      "City": "Akbugdaý etraby",
+      "FullAddress": "aýlow awtomobil ýolunyň D/G-G/D tarapynda ýerleşýän Çalyk Enerj",
+      "OtherSite": "aýlow awtomobil ýolunyň D/G-G/D tarapynda ýerleşýän Çalyk Enerj"
+    },
+    {
+      "Type": "Other",
+      "Region": "Ahal welaýaty",
+      "City": "Akbugdaý etraby",
+      "FullAddress": "e Telekeçiler birleşmesiniň \"Senagat zolagynyň\" günorta tarapynda ýerleşýän \"Nur önümçilik",
+      "OtherSite": "e Telekeçiler birleşmesiniň \"Senagat zolagynyň\" günorta tarapynda ýerleşýän \"Nur önümçilik"
+    },
+    {
+      "Type": "Other",
+      "Region": "Ahal welaýaty",
+      "City": "Tejen şäheri",
+      "FullAddress": "Karbomid zawody",
+      "OtherSite": "Karbomid zawody"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "10 mkr, A. Nyýazow köçe, 5-nji geçelge, jaý-94, öý-16",
+      "OtherSite": "10 mkr, A. Nyýazow köçe, 5-nji geçelge, jaý-94, öý-16"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "10-ýyl Abadançylyk köçesiniň 160-njy jaýynyň 3-nji öýi",
+      "OtherSite": "10-ýyl Abadançylyk köçesiniň 160-njy jaýynyň 3-nji öýi"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "2009 (Görogly) köçesi jay – 77",
+      "OtherSite": "2009 (Görogly) köçesi jay – 77"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "2127/17",
+      "OtherSite": "2127/17"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "aýlow awtomobil ýolunyň D/G-G/D tarapynda ýerleşýän Çalyk Enerji",
+      "OtherSite": "aýlow awtomobil ýolunyň D/G-G/D tarapynda ýerleşýän Çalyk Enerji"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "gara ýolunyň ugrunda",
+      "OtherSite": "gara ýolunyň ugrunda"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Göroglu köçesi jaý-30, öý-13",
+      "OtherSite": "Göroglu köçesi jaý-30, öý-13"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Göroglu köçesi jaý-30, öý-3",
+      "OtherSite": "Göroglu köçesi jaý-30, öý-3"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Howdan B,jaý-27,otag-30",
+      "OtherSite": "Howdan B,jaý-27,otag-30"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Nnesimi köçesiniň 16-njy jaýynyň 15-nji öýi",
+      "OtherSite": "Nnesimi köçesiniň 16-njy jaýynyň 15-nji öýi"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Parahat 2/1.jaý-4,öý-12",
+      "OtherSite": "Parahat 2/1.jaý-4,öý-12"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Parahat 2/1.jaý-4.öý-12",
+      "OtherSite": "Parahat 2/1.jaý-4.öý-12"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Parahat 2/4 kiçi etrapça, jaý-25, öý-5",
+      "OtherSite": "Parahat 2/4 kiçi etrapça, jaý-25, öý-5"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Parahat 3/2 kiçi etrapça, jaý-29, öý-27",
+      "OtherSite": "Parahat 3/2 kiçi etrapça, jaý-29, öý-27"
+    },
+    {
+      "Type": "Other",
+      "Region": "Aşgabat şäheri",
+      "City": "Aşgabat şäheri",
+      "FullAddress": "Parahat kiçi etrapça, 2/1 jaý-23, öý-22",
+      "OtherSite": "Parahat kiçi etrapça, 2/1 jaý-23, öý-22"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Serdar etraby",
+      "FullAddress": "Arkaç geňeşliginin çäginde ýerleşýän \"Altyn asyr\" kölüniň ke",
+      "OtherSite": "Arkaç geňeşliginin çäginde ýerleşýän \"Altyn asyr\" kölüniň ke"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Serdar etraby",
+      "FullAddress": "Arkaç geňeşliginin çäginde ýerleşýän \"Altyn asyr\" kölüniň kenary",
+      "OtherSite": "Arkaç geňeşliginin çäginde ýerleşýän \"Altyn asyr\" kölüniň kenary"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Serdar etraby",
+      "FullAddress": "Gallotta",
+      "OtherSite": "Gallotta"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Serdar etraby",
+      "FullAddress": "Gyzylarbat etr-ň Arkaç geňeş-ň çäginde ýerleşýän \"Altyn asyr\" kölüniň kenarynda Desganyň",
+      "OtherSite": "Gyzylarbat etr-ň Arkaç geňeş-ň çäginde ýerleşýän \"Altyn asyr\" kölüniň kenarynda Desganyň"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "“GAP Inşaat Yatyrym we Dyş Tijaret A.Ş.” Türk kompaniýasynyň Türkmenbaşy-Aşgabat gara ýolunyň 9-njy",
+      "OtherSite": "“GAP Inşaat Yatyrym we Dyş Tijaret A.Ş.” Türk kompaniýasynyň Türkmenbaşy-Aşgabat gara ýolunyň 9-njy"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Arkaç geňeşliginin çäginde ýerleşýän \"Altyn asyr\" kölüniň ke",
+      "OtherSite": "Arkaç geňeşliginin çäginde ýerleşýän \"Altyn asyr\" kölüniň ke"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy etraby",
+      "FullAddress": "Beýik Ýüpek ýol harytlar hojalyk jemgyýetiniň(köne Hundaýyň)karantin no",
+      "OtherSite": "Beýik Ýüpek ýol harytlar hojalyk jemgyýetiniň(köne Hundaýyň)karantin no"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Annatäç Magtymowa köçe, jaý-66",
+      "OtherSite": "Annatäç Magtymowa köçe, jaý-66"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Azady köçe, jaý-30, öý-2",
+      "OtherSite": "Azady köçe, jaý-30, öý-2"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Gahryman Atamyrat Nyýazow köçe, jaý-29, öý-7",
+      "OtherSite": "Gahryman Atamyrat Nyýazow köçe, jaý-29, öý-7"
+    },
+    {
+      "Type": "Other",
+      "Region": "Balkan welaýaty",
+      "City": "Türkmenbaşy şäheri",
+      "FullAddress": "Jülge köçe, jaý-5A",
+      "OtherSite": "Jülge köçe, jaý-5A"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Boldumsaz etraby",
+      "FullAddress": "Boýrabap oba Hojamiresen daýhan birleşigi Owadan köçe jaý 77",
+      "OtherSite": "Boýrabap oba Hojamiresen daýhan birleşigi Owadan köçe jaý 77"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Amyderýanyň üstünden geçýän Türkmenabat-Farap aralygyndaky awtomobil köprüsüniň al",
+      "OtherSite": "Amyderýanyň üstünden geçýän Türkmenabat-Farap aralygyndaky awtomobil köprüsüniň al"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Asudalyk köçesi, jaý-1, öý-5",
+      "OtherSite": "Asudalyk köçesi, jaý-1, öý-5"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Azat Diýar köçesi, jaý-13 A, öý-29",
+      "OtherSite": "Azat Diýar köçesi, jaý-13 A, öý-29"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Azat Diýar köçesi, jaý-13 A, öý-30",
+      "OtherSite": "Azat Diýar köçesi, jaý-13 A, öý-30"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Azat Diýar köçesi, jaý-13 A, öý-9",
+      "OtherSite": "Azat Diýar köçesi, jaý-13 A, öý-9"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Azatdiýar köçe, jaý-13A, öý-17-18",
+      "OtherSite": "Azatdiýar köçe, jaý-13A, öý-17-18"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Gagarin Kiçi Etrapçasy Jay: 15 Öy:34",
+      "OtherSite": "Gagarin Kiçi Etrapçasy Jay: 15 Öy:34"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Gurbansoltan eje etr, Ak Altyn kwartal, jaý-3, öý-6",
+      "OtherSite": "Gurbansoltan eje etr, Ak Altyn kwartal, jaý-3, öý-6"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Gurbansoltan eje etr, Asudalyk köçe, jaý-2, öý-4",
+      "OtherSite": "Gurbansoltan eje etr, Asudalyk köçe, jaý-2, öý-4"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Gurbansoltan eje etr, Himik kiçi etrapça, jaý- 85, öý-26",
+      "OtherSite": "Gurbansoltan eje etr, Himik kiçi etrapça, jaý- 85, öý-26"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "ş; Gurbansoltan eje etr. Asudaluk köçe, jaý-1, öý- 3",
+      "OtherSite": "ş; Gurbansoltan eje etr. Asudaluk köçe, jaý-1, öý- 3"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "ş; Gurbansoltan eje etr. Asudaluk köçe, jaý-2, öý-12",
+      "OtherSite": "ş; Gurbansoltan eje etr. Asudaluk köçe, jaý-2, öý-12"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "ş; S.A.Niýazow şaýoly, 4-A kwartal, jaý-7, öý-17",
+      "OtherSite": "ş; S.A.Niýazow şaýoly, 4-A kwartal, jaý-7, öý-17"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "welayatı, Türkmenabat şaheri, hojamiresen oba (lenin kalhoz), owadan köçe, jay 77",
+      "OtherSite": "welayatı, Türkmenabat şaheri, hojamiresen oba (lenin kalhoz), owadan köçe, jay 77"
+    },
+    {
+      "Type": "Other",
+      "Region": "Lebap welaýaty",
+      "City": "Türkmenabat şäheri",
+      "FullAddress": "Zerger geňeşliginiň çägindäki Ronesans Endüstri kompaniýasynyň, şahamçasynyň",
+      "OtherSite": "Zerger geňeşliginiň çägindäki Ronesans Endüstri kompaniýasynyň, şahamçasynyň"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "ki Sakarçäge etrap ‘‘Maldar” maldarçylyk hojalygynyň ýerlerinde ýerl",
+      "OtherSite": "ki Sakarçäge etrap ‘‘Maldar” maldarçylyk hojalygynyň ýerlerinde ýerl"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Oguzhan ýaýlasynyň çäginde “Şatlyk-1” gaz gysyjy desganyň g",
+      "OtherSite": "Oguzhan ýaýlasynyň çäginde “Şatlyk-1” gaz gysyjy desganyň g"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Senagat zolagyn nda Mary DES-nyň çäginde ýerleşýän \"Ça",
+      "OtherSite": "Senagat zolagyn nda Mary DES-nyň çäginde ýerleşýän \"Ça"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary etraby",
+      "FullAddress": "Türkmenbaşy şäherç-ň Senagat zolagynda ýerleşýän Mary Döwlet elektrik stansi",
+      "OtherSite": "Türkmenbaşy şäherç-ň Senagat zolagynda ýerleşýän Mary Döwlet elektrik stansi"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "A.Niýazow Şaýoly, jaý- 41, öý-19",
+      "OtherSite": "A.Niýazow Şaýoly, jaý- 41, öý-19"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Aga Hanjayew köçe, jaý-11, öý-25",
+      "OtherSite": "Aga Hanjayew köçe, jaý-11, öý-25"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Garagum köçe, jaý-9, öý-14",
+      "OtherSite": "Garagum köçe, jaý-9, öý-14"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Gorkut Ata köçe, jaý-16/2, öý-32",
+      "OtherSite": "Gorkut Ata köçe, jaý-16/2, öý-32"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Hazar köçesi, 11-njı jay, 30-njy öy",
+      "OtherSite": "Hazar köçesi, 11-njı jay, 30-njy öy"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "myhymanhanasy",
+      "OtherSite": "myhymanhanasy"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "ş; Gorkut ata köç, jaý-2, öý-17",
+      "OtherSite": "ş; Gorkut ata köç, jaý-2, öý-17"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "ş; Mary etrabynyň, G.Azalow daýhan birleşigi",
+      "OtherSite": "ş; Mary etrabynyň, G.Azalow daýhan birleşigi"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "ş; S.Türkmenbaşy şäherçesiň senagat zolagy, gurulýan Mary-2 döwlet elektrik stansiýa Çalik En",
+      "OtherSite": "ş; S.Türkmenbaşy şäherçesiň senagat zolagy, gurulýan Mary-2 döwlet elektrik stansiýa Çalik En"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Şapak Kiçi Etrap jaý-1, öý-60",
+      "OtherSite": "Şapak Kiçi Etrap jaý-1, öý-60"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Mary şäheri",
+      "FullAddress": "Zaman köçe, jaý-76, öý-25",
+      "OtherSite": "Zaman köçe, jaý-76, öý-25"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Serhetabat etraby",
+      "FullAddress": "Çemenabat obasyna 35 km uzaklykda meýilnama boýunça geçiriljek TAP taslama",
+      "OtherSite": "Çemenabat obasyna 35 km uzaklykda meýilnama boýunça geçiriljek TAP taslama"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Serhetabat etraby",
+      "FullAddress": "Owganystan Hyrat we Kabul şäheri",
+      "OtherSite": "Owganystan Hyrat we Kabul şäheri"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Serhetabat etraby",
+      "FullAddress": "ýerleşýän Serhetabat gözegçilik geçiriş ýeriniň ýanynd",
+      "OtherSite": "ýerleşýän Serhetabat gözegçilik geçiriş ýeriniň ýanynd"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Ýolöten etraby",
+      "FullAddress": "welayat, Yolöten etrap, Jelaletdin jay 1 otak 20",
+      "OtherSite": "welayat, Yolöten etrap, Jelaletdin jay 1 otak 20"
+    },
+    {
+      "Type": "Other",
+      "Region": "Mary welaýaty",
+      "City": "Ýolöten şäheri",
+      "FullAddress": "Atabaýew köçesiniň 15-nji jaýy",
+      "OtherSite": "Atabaýew köçesiniň 15-nji jaýy"
+    }
+  ]
+}

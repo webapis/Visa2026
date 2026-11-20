@@ -753,7 +753,13 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             objectSpace,
             model.SelectedProfileId,
             _caseSummaryUpdates,
-            OpenContext?.CreationProgressRoute);
+            OpenContext?.CreationProgressRoute,
+            out var applyError);
+        if (!string.IsNullOrWhiteSpace(applyError))
+        {
+            model.StatusMessage = applyError;
+            model.IsStatusError = true;
+        }
     }
 
     private static async Task<bool> ShowAdvanceAsync(

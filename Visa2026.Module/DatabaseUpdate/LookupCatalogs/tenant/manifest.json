@@ -1,149 +1,157 @@
 {
-  "version": 48,
-  "catalogs": [
-    {
-      "id": "position",
-      "entity": "Position",
-      "file": "position.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "specialty",
-      "entity": "Specialty",
-      "file": "specialty.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "education-institution",
-      "entity": "EducationInstitution",
-      "file": "education-institution.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "department",
-      "entity": "Department",
-      "file": "department.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "company-profile",
-      "entity": "CompanyProfile",
-      "file": "company-profile.json",
-      "matchKey": "Name",
-      "syncMode": "InsertOnly",
-      "optional": true
-    },
-    {
-      "id": "application-numbering",
-      "entity": "ApplicationNumberingProfile",
-      "file": "application-numbering.json",
-      "matchKey": "Name",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "authorized-signatory",
-      "entity": "AuthorizedSignatory",
-      "file": "authorized-signatory.json",
-      "matchKey": "FullName",
-      "syncMode": "InsertOnly",
-      "optional": true
-    },
-    {
-      "id": "authorized-representative",
-      "entity": "AuthorizedRepresentative",
-      "file": "authorized-representative.json",
-      "matchKey": "FullName",
-      "syncMode": "InsertOnly",
-      "optional": true
-    },
-    {
-      "id": "project-contract",
-      "entity": "ProjectContract",
-      "file": "project-contract.json",
-      "matchKey": "NameTmTitle",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "approving-ministry",
-      "entity": "ApprovingMinistry",
-      "file": "approving-ministry.json",
-      "matchKey": "ShortNameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "subcontractor",
-      "entity": "Subcontractor",
-      "file": "subcontractor.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "expiration-alert-rules",
-      "entity": "ExpirationAlertRule",
-      "file": "expiration-alert-rules.json",
-      "matchKey": "BusinessObjectKey",
-      "syncMode": "InsertOnly",
-      "optional": true
-    },
-    {
-      "id": "border-zone-name",
-      "entity": "BorderZoneName",
-      "file": "border-zone-name.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "work-permitted-location-name",
-      "entity": "WorkPermittedLocationName",
-      "file": "work-permitted-location-name.json",
-      "matchKey": "NameTm",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "lodging",
-      "entity": "Lodging",
-      "file": "lodging.json",
-      "matchKey": "CityAndFullAddress",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "hotel",
-      "entity": "Hotel",
-      "file": "hotel.json",
-      "matchKey": "CityAndName",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "hospital",
-      "entity": "Hospital",
-      "file": "hospital.json",
-      "matchKey": "CityAndName",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
-      "id": "other-site",
-      "entity": "OtherSite",
-      "file": "other-site.json",
-      "matchKey": "CityAndFullAddress",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    }
-  ]
+    "version":  49,
+    "catalogs":  [
+                     {
+                         "id":  "position",
+                         "entity":  "Position",
+                         "file":  "position.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "specialty",
+                         "entity":  "Specialty",
+                         "file":  "specialty.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "education-institution",
+                         "entity":  "EducationInstitution",
+                         "file":  "education-institution.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "department",
+                         "entity":  "Department",
+                         "file":  "department.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "company-profile",
+                         "entity":  "CompanyProfile",
+                         "file":  "company-profile.json",
+                         "matchKey":  "Name",
+                         "syncMode":  "InsertOnly",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "application-numbering",
+                         "entity":  "ApplicationNumberingProfile",
+                         "file":  "application-numbering.json",
+                         "matchKey":  "Name",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "authorized-signatory",
+                         "entity":  "AuthorizedSignatory",
+                         "file":  "authorized-signatory.json",
+                         "matchKey":  "FullName",
+                         "syncMode":  "InsertOnly",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "authorized-representative",
+                         "entity":  "AuthorizedRepresentative",
+                         "file":  "authorized-representative.json",
+                         "matchKey":  "FullName",
+                         "syncMode":  "InsertOnly",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "project-contract",
+                         "entity":  "ProjectContract",
+                         "file":  "project-contract.json",
+                         "matchKey":  "NameTmTitle",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "approving-ministry",
+                         "entity":  "ApprovingMinistry",
+                         "file":  "approving-ministry.json",
+                         "matchKey":  "ShortNameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "subcontractor",
+                         "entity":  "Subcontractor",
+                         "file":  "subcontractor.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "expiration-alert-rules",
+                         "entity":  "ExpirationAlertRule",
+                         "file":  "expiration-alert-rules.json",
+                         "matchKey":  "BusinessObjectKey",
+                         "syncMode":  "InsertOnly",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "border-zone-name",
+                         "entity":  "BorderZoneName",
+                         "file":  "border-zone-name.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "work-permitted-location-name",
+                         "entity":  "WorkPermittedLocationName",
+                         "file":  "work-permitted-location-name.json",
+                         "matchKey":  "NameTm",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "lodging",
+                         "entity":  "Lodging",
+                         "file":  "lodging.json",
+                         "matchKey":  "CityAndFullAddress",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "hotel",
+                         "entity":  "Hotel",
+                         "file":  "hotel.json",
+                         "matchKey":  "CityAndName",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "hospital",
+                         "entity":  "Hospital",
+                         "file":  "hospital.json",
+                         "matchKey":  "CityAndName",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "other-site",
+                         "entity":  "OtherSite",
+                         "file":  "other-site.json",
+                         "matchKey":  "CityAndFullAddress",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     },
+                     {
+                         "id":  "address-of-residence",
+                         "entity":  "AddressOfResidence",
+                         "file":  "address-of-residence.json",
+                         "matchKey":  "TypeAndCityAndFullAddress",
+                         "syncMode":  "OverwriteScalars",
+                         "optional":  true
+                     }
+                 ]
 }

@@ -105,6 +105,7 @@ namespace Visa2026.Module.BusinessObjects
             TravelHistories = new ObservableCollection<TravelHistory>();
             PersonResolvedLinks = new ObservableCollection<ApplicationProfileInstancePersonResolvedLink>();
             PersonRequestedLocations = new ObservableCollection<ApplicationProfileInstancePersonRequestedLocation>();
+            PersonAddress2Notes = new ObservableCollection<ApplicationProfileInstancePersonAddress2Note>();
             Invitations = new ObservableCollection<Invitation>();
             Rejections = new ObservableCollection<Rejection>();
             IssuedVisas = new ObservableCollection<Visa>();
@@ -1607,12 +1608,23 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Address 1")]
         public virtual AddressOfResidence? Address1 { get; set; }
 
-        /// <summary>Case summary Address 2 (owned AoR with RosterPerson null).</summary>
+        /// <summary>Obsolete catalog Address 2 FK. Prefer <see cref="Address2DefaultText"/> + person notes.</summary>
         [VisibleInListView(false)]
         [VisibleInDetailView(false)]
         [VisibleInLookupListView(false)]
-        [XafDisplayName("Address 2")]
+        [Obsolete("Use Address2DefaultText (case) and ApplicationProfileInstancePersonAddress2Note (people).")]
+        [XafDisplayName("Address 2 (catalog)")]
         public virtual AddressOfResidence? Address2 { get; set; }
+
+        /// <summary>
+        /// Case-level Address 2 default (free text). Copied into a person note on Join when that person has no note yet.
+        /// </summary>
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        [XafDisplayName("Address 2")]
+        public virtual string? Address2DefaultText { get; set; }
 
         /// <summary>First stay plus optional alternative-address text. One row per case.</summary>
         [Aggregated]
@@ -1676,6 +1688,13 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInDetailView(false)]
         public virtual IList<ApplicationProfileInstancePersonRequestedLocation> PersonRequestedLocations { get; set; }
+
+        /// <summary>Case↔person Address 2 free-text notes (People &amp; links; not case-summary catalog).</summary>
+        [Browsable(false)]
+        [Aggregated]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        public virtual IList<ApplicationProfileInstancePersonAddress2Note> PersonAddress2Notes { get; set; }
 
         /// <summary>Invitations this case may produce (1:N via <see cref="Invitation.ApplicationProfileInstance"/>). Visible when the profile <c>May produce invitation</c> is on.</summary>
         [Aggregated]

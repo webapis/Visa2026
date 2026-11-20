@@ -52,6 +52,9 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     public const string InvitationAlternativeAddress = "InvitationAlternativeAddress";
     public const string Purpose = "Purpose";
     public const int PurposeMaxLength = 700;
+
+    /// <summary>Case Address 2 default — large notes; keep a hard ceiling for SetText.</summary>
+    public const int Address2DefaultTextMaxLength = 8000;
     public const string Project = "Project";
     public const string Urgency = "Urgency";
     public const string WorkPermitLocation = "WorkPermitLocation";
@@ -136,7 +139,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 
         // Lookup catalogs (cities, contracts, …) are only needed for Edit dropdowns.
         var catalogs = loadLookupCatalogs && objectSpace != null
-            ? Catalogs.Load(objectSpace)
+            ? Catalogs.Load(objectSpace, application)
             : Catalogs.Empty;
         var fields = new List<ApplicationWorkspaceCaseHeaderField>();
         var instanceNumber = FormatInstanceNumber(application);
@@ -226,9 +229,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false,
             LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
+        // Case summary only — Linked-records person rows still use EffectiveRequireBorderZone / Visa copy.
         AddCommaSeparatedMultiSelect(fields, BorderZone, ApplicationProfileLocalization.Field("BorderZone"), "teal", "📍",
-            Visible(profile, ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone,
-                ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application),
+            Visible(profile, p => p.ProduceBorderZone,
+                ApplicationProfileConfigurationResolver.CanIssueBorderZone, application),
             application.BorderZoneLocation,
             FormatBorderZoneDisplay(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
             catalogs.BorderZoneNames, readOnly: false,
@@ -412,30 +416,38 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 ApplicationWorkspaceCaseSummaryFillState.Officer);
         }
 
+        var rosterHasLinkedAddress = RosterHasLinkedAddressOfResidence(application);
         AddAddressObject(
             fields,
             Address1,
             ApplicationProfileLocalization.Field("Address1"),
             ApplicationProfileConfigurationResolver.ShowAddress1(application),
             application.Address1,
-            catalogs.AddressesOfResidence);
-        AddAddressObject(
+            catalogs.AddressesOfResidence,
+            rosterHasLinkedAddress);
+
+        // Optional case-level Address 2 default (free text) — copy-on-Join into person notes.
+        AddText(
             fields,
             Address2,
-            ApplicationProfileLocalization.Field("Address2"),
+            ResolveAddressFieldLabel(Address2, ApplicationProfileLocalization.Field("Address2")),
+            "purple",
+            "📍",
             ApplicationProfileConfigurationResolver.ShowAddress2(application),
-            application.Address2,
-            catalogs.AddressesOfResidence);
+            application.Address2DefaultText,
+            string.IsNullOrWhiteSpace(application.Address2DefaultText)
+                ? ApplicationWorkspaceCaseSummaryFillState.Default
+                : ApplicationWorkspaceCaseSummaryFillState.Officer);
 
         AddText(fields, Purpose, ApplicationProfileLocalization.Field("Purpose"), "blue", "📝",
             Visible(profile, p => p.RequirePurpose, ApplicationProfileConfigurationResolver.ShowPurpose, application),
             application.Purpose,
             TextFill(application.Purpose, profile?.DefaultPurpose));
 
+        // Case summary only — Linked-records WP rows still use RequireWorkPermitLocationWhenProducingWorkPermit.
         AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, ApplicationProfileLocalization.Field("WorkPermitLocation"), "blue", "🏢",
-            Visible(profile, p => ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
-                    p.ProduceWorkPermit, p.RequireWorkPermitLocation),
-                ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application),
+            Visible(profile, p => p.ProduceWorkLocation,
+                ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant, application),
             application.MovementPermitLocation,
             application.MovementPermitLocation_NameTm,
             catalogs.WorkPermittedLocationNames, readOnly: false,
@@ -506,8 +518,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<VisaPeriod>(objectSpace, value, item => application.VisaPeriod = item!, out error);
             case BorderZone:
-                if (!Visible(profile, ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone,
-                    ApplicationProfileConfigurationResolver.ShowBorderZoneLocation, application))
+                if (!Visible(profile, p => p.ProduceBorderZone,
+                    ApplicationProfileConfigurationResolver.CanIssueBorderZone, application))
                     return Hidden(out error);
                 if (!SetBorderZone(value, application, out error))
                     return false;
@@ -670,12 +682,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 }, out error));
             case Address1:
                 if (!Visible(profile, p => p.RequireAddress1, ApplicationProfileConfigurationResolver.ShowAddress1, application))
-                    return false;
+                    return true;
                 return Edited(EnsureAndAssignSummaryAddress(objectSpace, application, slot: 1, value, out error));
             case Address2:
                 if (!Visible(profile, p => p.RequireAddress2, ApplicationProfileConfigurationResolver.ShowAddress2, application))
+                    return true;
+                if (!SetText(value, Address2DefaultTextMaxLength, text => application.Address2DefaultText = text, out error))
                     return false;
-                return Edited(EnsureAndAssignSummaryAddress(objectSpace, application, slot: 2, value, out error));
+                CasePersonAddress2Recent.Remember(objectSpace, application, application.Address2DefaultText);
+                return true;
             case InvitationAddressType:
                 if (!ShowInvitationPlace(profile, application))
                     return Hidden(out error);
@@ -751,9 +766,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<Urgency>(objectSpace, value, item => application.Urgency = item!, out error);
             case WorkPermitLocation:
-                if (!Visible(profile, p => ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
-                        p.ProduceWorkPermit, p.RequireWorkPermitLocation),
-                    ApplicationProfileConfigurationResolver.ShowMovementPermitLocation, application))
+                if (!Visible(profile, p => p.ProduceWorkLocation,
+                    ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant, application))
                     return Hidden(out error);
                 if (!SetWorkPermitLocation(value, application, out error))
                     return false;
@@ -930,20 +944,36 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             return true;
         }
 
-        var existing = objectSpace.GetObjectByKey<AddressOfResidence>(id);
+        var existing = ResolveAddressOfResidence(objectSpace, id);
         if (existing == null)
         {
             error = "Address was not found.";
             return false;
         }
 
-        existing.OwningApplicationProfileInstance = application;
-        existing.RosterPerson = null;
-#pragma warning disable CS0618
-        existing.Person = null;
-#pragma warning restore CS0618
         ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(application, slot, existing);
         return true;
+    }
+
+    /// <summary>
+    /// Catalog rows may be loaded AsNoTracking for pickers; GetObjectByKey alone can miss them
+    /// depending on ObjectSpace state. Query then attach so Address1/2 FKs stick on create draft.
+    /// </summary>
+    private static AddressOfResidence? ResolveAddressOfResidence(IObjectSpace objectSpace, Guid id)
+    {
+        if (objectSpace == null || id == Guid.Empty)
+            return null;
+
+        var existing = objectSpace.GetObjectByKey<AddressOfResidence>(id);
+        if (existing != null)
+            return existing;
+
+        var match = objectSpace.GetObjectsQuery<AddressOfResidence>()
+            .FirstOrDefault(row => row.ID == id);
+        if (match == null)
+            return null;
+
+        return objectSpace.GetObject(match) as AddressOfResidence ?? match;
     }
 
     private static InvitationAddress EnsureInvitationAddress(
@@ -1060,23 +1090,47 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         });
     }
 
+    /// <summary>
+    /// Soft-suppress Case summary Address 1 Empty when People &amp; links already has a
+    /// resolved AddressOfResidence (common on extend / legacy apps without case Address1).
+    /// </summary>
+    public static bool RosterHasLinkedAddressOfResidence(ApplicationProfileInstance? application)
+    {
+        if (application?.PersonResolvedLinks == null)
+            return false;
+
+        foreach (var link in application.PersonResolvedLinks)
+        {
+            if (link == null)
+                continue;
+            if (link.LinkKind != ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
+                continue;
+            if (link.LinkedObjectId is Guid id && id != Guid.Empty)
+                return true;
+        }
+
+        return false;
+    }
+
     private static void AddAddressObject(
         List<ApplicationWorkspaceCaseHeaderField> fields,
         string key,
         string label,
         bool visible,
         AddressOfResidence? address,
-        IReadOnlyList<ApplicationWorkspaceLookupOption> addressOptions)
+        IReadOnlyList<ApplicationWorkspaceLookupOption> addressOptions,
+        bool rosterSatisfiesRequiredSlot = false)
     {
         if (!visible)
             return;
 
         var display = AddressOfResidenceReportText.CityAndStreet(address);
-        // Address 2 is optional completeness; Address 1 is required when shown empty.
+        // Address 2 is optional completeness; Address 1 is required when shown empty
+        // unless roster already linked an address (soft suppress).
         var requiredSlot = string.Equals(key, Address1, StringComparison.Ordinal);
         var fillState = address != null
             ? ApplicationWorkspaceCaseSummaryFillState.Officer
-            : requiredSlot
+            : requiredSlot && !rosterSatisfiesRequiredSlot
                 ? ApplicationWorkspaceCaseSummaryFillState.Empty
                 : ApplicationWorkspaceCaseSummaryFillState.Default;
 
@@ -1122,8 +1176,11 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     }
 
     public static bool IsAddressObjectField(string? key) =>
-        string.Equals(key, Address1, StringComparison.Ordinal)
-        || string.Equals(key, Address2, StringComparison.Ordinal);
+        string.Equals(key, Address1, StringComparison.Ordinal);
+
+    /// <summary>Case-level free-text Address 2 default (not catalog AddressObject).</summary>
+    public static bool IsAddress2DefaultTextField(string? key) =>
+        string.Equals(key, Address2, StringComparison.Ordinal);
 
     public static int AddressSlotForKey(string? key) =>
         string.Equals(key, Address2, StringComparison.Ordinal) ? 2 : 1;
@@ -1147,6 +1204,77 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     }
 
     /// <summary>
+    /// Folded display label used to collapse duplicate residence rows in pickers.
+    /// </summary>
+    public static string AddressOptionDedupKey(ApplicationWorkspaceLookupOption? option)
+    {
+        if (option == null)
+            return string.Empty;
+        var label = (option.DisplayName ?? string.Empty).Trim();
+        if (label.Length == 0 || label == "—")
+            return string.Empty;
+        return PersonSearchTextNormalizer.Fold(label);
+    }
+
+    /// <summary>
+    /// Keeps one option per folded display label. Prefer <paramref name="preferId"/> when set.
+    /// </summary>
+    public static IReadOnlyList<ApplicationWorkspaceLookupOption> DeduplicateAddressOptions(
+        IEnumerable<ApplicationWorkspaceLookupOption>? options,
+        Guid? preferId = null)
+    {
+        var list = options?.Where(option => option != null).ToList()
+            ?? new List<ApplicationWorkspaceLookupOption>();
+        if (list.Count <= 1)
+            return list;
+
+        var result = new List<ApplicationWorkspaceLookupOption>(list.Count);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        void TryAdd(ApplicationWorkspaceLookupOption option)
+        {
+            var key = AddressOptionDedupKey(option);
+            if (!seen.Add(key))
+                return;
+            result.Add(option);
+        }
+
+        if (preferId is Guid preferred && preferred != Guid.Empty)
+        {
+            var match = list.FirstOrDefault(option => option.Id == preferred);
+            if (match != null)
+                TryAdd(match);
+        }
+
+        foreach (var option in list)
+            TryAdd(option);
+
+        return result;
+    }
+
+    public static bool AddressOptionMatchesSearch(
+        ApplicationWorkspaceLookupOption option,
+        string rawSearch,
+        string? foldedNeedle = null)
+    {
+        if (option == null)
+            return false;
+        if (string.IsNullOrWhiteSpace(rawSearch))
+            return true;
+
+        var needle = foldedNeedle ?? PersonSearchTextNormalizer.Fold(rawSearch);
+        var display = option.DisplayName ?? string.Empty;
+        var folded = PersonSearchTextNormalizer.Fold(display);
+        if (!string.IsNullOrEmpty(needle) && folded.Contains(needle, StringComparison.Ordinal))
+            return true;
+        if (display.Contains(rawSearch, StringComparison.OrdinalIgnoreCase))
+            return true;
+        var haystack = option.SearchText ?? string.Empty;
+        return !string.IsNullOrEmpty(needle)
+            && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Upsert case-summary Address 1/2 from the Linked Records address edit shape.
     /// </summary>
     public static bool TryUpsertSummaryAddress(
@@ -1164,15 +1292,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         }
 
         var slot = AddressSlotForKey(fieldKey);
-        var address = ApplicationProfileInstanceAddressResolver.EnsureSummaryAddress(objectSpace, application, slot);
-        if (!InvitationStayAddressCopy.TryUpdate(objectSpace, address.ID, edit, out error))
+        var preferId = ApplicationProfileInstanceAddressResolver.GetInstanceSummaryAddress(application, slot)?.ID;
+        if (!AddressOfResidenceCatalogHelper.TryUpsertFromEdit(
+                objectSpace, edit, preferId, out var address, out error)
+            || address == null)
             return false;
 
-        address.OwningApplicationProfileInstance = application;
-        address.RosterPerson = null;
-#pragma warning disable CS0618
-        address.Person = null;
-#pragma warning restore CS0618
+        ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(application, slot, address);
         return true;
     }
 
@@ -1863,7 +1989,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         public IReadOnlyList<string> BorderZoneNames { get; init; } = [];
         public IReadOnlyList<string> WorkPermittedLocationNames { get; init; } = [];
 
-        public static Catalogs Load(IObjectSpace objectSpace)
+        public static Catalogs Load(IObjectSpace objectSpace, ApplicationProfileInstance? application = null)
         {
             var regions = ApplicationProfileWizardLookupData.LoadRegions(objectSpace);
             return new()
@@ -1887,7 +2013,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
 #pragma warning restore CS0618
                 CheckPoints = LoadItems<CheckPoint>(objectSpace),
                 AlternativeAddresses = LoadAlternativeAddresses(objectSpace),
-                AddressesOfResidence = LoadAddressesOfResidence(objectSpace),
+                AddressesOfResidence = LoadAddressesOfResidence(objectSpace, application),
                 TargetApplicationProfileInstances = LoadTargetApplicationProfileInstances(objectSpace),
                 SubmitToOrganizations = LoadSubmitToOrganizationOptions(objectSpace),
                 BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
@@ -1902,11 +2028,12 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         }
 
         /// <summary>
-        /// Case-summary candidates: addresses not tied to a roster-person override.
+        /// Case-summary / wizard address picker: recent residences (shared + person-linked),
+        /// collapsed by folded display label so duplicate streets appear once.
         /// </summary>
-        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadAddressesOfResidence(IObjectSpace objectSpace)
+        private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadAddressesOfResidence(IObjectSpace objectSpace, ApplicationProfileInstance? application)
         {
-            return objectSpace.GetObjectsQuery<AddressOfResidence>()
+            var mapped = objectSpace.GetObjectsQuery<AddressOfResidence>()
                 .AsNoTracking()
                 .Include(row => row.Region)
                 .Include(row => row.City)
@@ -1914,9 +2041,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 .Include(row => row.Hotel)
                 .Include(row => row.Hospital)
                 .Include(row => row.OtherSite)
-                .Where(row => row.RosterPerson == null)
                 .OrderByDescending(row => row.ID)
-                .Take(400)
+                .Take(1500)
                 .AsEnumerable()
                 .Select(row =>
                 {
@@ -1931,8 +2057,10 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                         DisplayName = label,
                         SearchText = BuildDiacriticSearchHaystack(label),
                     };
-                })
-                .ToList();
+                });
+
+            Guid? preferId = application?.Address1?.ID;
+            return DeduplicateAddressOptions(mapped, preferId);
         }
 
         private static IReadOnlyList<ApplicationWorkspaceLookupOption> LoadTargetApplicationProfileInstances(

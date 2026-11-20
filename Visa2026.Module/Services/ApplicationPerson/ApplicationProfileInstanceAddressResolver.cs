@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using DevExpress.ExpressApp;
-using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
-/// Case-owned address resolution: Linked Records override ResolvedLink, else instance Address1/Address2.
+/// Shared-catalog address resolution: Linked Records override ResolvedLink, else instance Address1/Address2.
 /// </summary>
 public static class ApplicationProfileInstanceAddressResolver
 {
@@ -17,7 +18,9 @@ public static class ApplicationProfileInstanceAddressResolver
     {
         if (instance == null)
             return null;
+        #pragma warning disable CS0618
         return slot >= Slot2 ? instance.Address2 : instance.Address1;
+#pragma warning restore CS0618
     }
 
     public static void SetInstanceSummaryAddress(
@@ -26,10 +29,18 @@ public static class ApplicationProfileInstanceAddressResolver
         AddressOfResidence? address)
     {
         ArgumentNullException.ThrowIfNull(instance);
+        if (address != null)
+            AddressOfResidenceCatalogHelper.ClearOwnership(address);
         if (slot >= Slot2)
-            instance.Address2 = address;
-        else
-            instance.Address1 = address;
+        {
+            // Case summary Address 2 catalog FK is obsolete (People Address2Text notes).
+#pragma warning disable CS0618
+            instance.Address2 = null;
+#pragma warning restore CS0618
+            return;
+        }
+
+        instance.Address1 = address;
     }
 
     /// <summary>
@@ -111,7 +122,8 @@ public static class ApplicationProfileInstanceAddressResolver
     }
 
     /// <summary>
-    /// Upsert a case-summary AddressOfResidence (RosterPerson null) and set Address1 or Address2.
+    /// Return existing summary FK or create a blank shared catalog draft (ownership cleared).
+    /// Prefer <see cref="AddressOfResidenceCatalogHelper.TryUpsertFromEdit"/> for officer saves.
     /// </summary>
     public static AddressOfResidence EnsureSummaryAddress(
         IObjectSpace objectSpace,
@@ -125,24 +137,18 @@ public static class ApplicationProfileInstanceAddressResolver
         var existing = GetInstanceSummaryAddress(instance, normalizedSlot);
         if (existing != null)
         {
-            existing.OwningApplicationProfileInstance = instance;
-            existing.RosterPerson = null;
+            AddressOfResidenceCatalogHelper.ClearOwnership(existing);
             return existing;
         }
 
         var address = objectSpace.CreateObject<AddressOfResidence>();
-        address.OwningApplicationProfileInstance = instance;
-        address.RosterPerson = null;
-#pragma warning disable CS0618
-        address.Person = null;
-#pragma warning restore CS0618
-
+        AddressOfResidenceCatalogHelper.ClearOwnership(address);
         SetInstanceSummaryAddress(instance, normalizedSlot, address);
         return address;
     }
 
     /// <summary>
-    /// Create a Linked Records override row owned by the case for this roster person.
+    /// Create a shared catalog draft for Linked Records edit (no case ownership).
     /// </summary>
     public static AddressOfResidence CreateOverrideAddress(
         IObjectSpace objectSpace,
@@ -154,11 +160,7 @@ public static class ApplicationProfileInstanceAddressResolver
         ArgumentNullException.ThrowIfNull(person);
 
         var address = objectSpace.CreateObject<AddressOfResidence>();
-        address.OwningApplicationProfileInstance = instance;
-        address.RosterPerson = person;
-#pragma warning disable CS0618
-        address.Person = null;
-#pragma warning restore CS0618
+        AddressOfResidenceCatalogHelper.ClearOwnership(address);
         return address;
     }
 }

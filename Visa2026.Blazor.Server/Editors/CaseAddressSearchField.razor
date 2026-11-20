@@ -6,15 +6,37 @@
     @if (ReadOnly)
     {
         <div class="cw-summary-field__input cw-summary-address-edit-label">
-            @(string.IsNullOrWhiteSpace(DisplayValue) || DisplayValue == "—" ? "—" : DisplayValue)
+            @CommittedLabel
+        </div>
+    }
+    else if (ShowCommittedDisplay)
+    {
+        <div class="cw-summary-lookup-row cw-summary-lookup-row--address">
+            <button type="button"
+                    class="cw-summary-field__input cw-summary-address-committed"
+                    title="@NullText"
+                    disabled="@(!Enabled)"
+                    @onclick="BeginSearchAsync">
+                <span class="cw-summary-address-edit-label">@CommittedLabel</span>
+            </button>
+            @if (ShowClearButton)
+            {
+                <button type="button"
+                        class="cw-addr-icon cw-addr-icon--clear"
+                        title="Clear"
+                        disabled="@(!Enabled)"
+                        @onclick="ClearAsync">×</button>
+            }
+            @Actions
         </div>
     }
     else
     {
         <div class="cw-summary-lookup-row cw-summary-lookup-row--address">
-            <DxComboBox Data="@_filtered"
+            <DxComboBox @key="@($"addr-search-{_comboEpoch}")"
+                        Data="@_filtered"
                         Value="@BoundValue"
-                        ValueChanged="@(EventCallback.Factory.Create<Guid>(this, HandleValueChanged))"
+                        ValueChanged="@(EventCallback.Factory.Create<Guid>(this, HandleValueChangedAsync))"
                         ValueFieldName="@nameof(ApplicationWorkspaceLookupOption.Id)"
                         TextFieldName="@nameof(ApplicationWorkspaceLookupOption.DisplayName)"
                         CssClass="cw-summary-field__input cw-summary-address-search"
@@ -25,22 +47,12 @@
                         SearchText="@_search"
                         SearchTextChanged="OnSearchTextChanged"
                         DropDownVisibleChanged="OnDropDownVisibleChanged"
-                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                        ClearButtonDisplayMode="@(ShowClearButton ? DataEditorClearButtonDisplayMode.Auto : DataEditorClearButtonDisplayMode.Never)"
                         DropDownWidthMode="DropDownWidthMode.ContentOrEditorWidth"
                         Enabled="@Enabled"
                         ReadOnly="@ReadOnly">
-                <EditBoxDisplayTemplate Context="editContext">
-                    @{
-                        var selected = editContext.DataItem as ApplicationWorkspaceLookupOption;
-                        var label = !string.IsNullOrWhiteSpace(selected?.DisplayName)
-                            ? selected!.DisplayName
-                            : DisplayValue;
-                    }
+                <EditBoxDisplayTemplate>
                     <div class="cw-summary-address-combo-edit">
-                        @if (!string.IsNullOrWhiteSpace(label) && label != "—")
-                        {
-                            <div class="cw-summary-address-edit-label">@label</div>
-                        }
                         <DxInputBox />
                     </div>
                 </EditBoxDisplayTemplate>
@@ -65,12 +77,43 @@
     [Parameter] public string NullText { get; set; } = "— Select —";
     [Parameter] public bool Enabled { get; set; } = true;
     [Parameter] public bool ReadOnly { get; set; }
+    /// <summary>When false, hides the committed-display × and combo clear (create-wizard gear gate).</summary>
+    [Parameter] public bool ShowClearButton { get; set; } = true;
     [Parameter] public RenderFragment? Actions { get; set; }
 
-    private Guid BoundValue => Value ?? Guid.Empty;
+    private Guid BoundValue => EffectiveId ?? Guid.Empty;
     private string _search = string.Empty;
     private List<ApplicationWorkspaceLookupOption> _filtered = new();
     private IReadOnlyList<ApplicationWorkspaceLookupOption>? _lastOptions;
+    private bool _searching;
+    private int _comboEpoch;
+    private Guid? _optimisticId;
+    private string? _optimisticLabel;
+    private bool _applyInFlight;
+
+    private Guid? EffectiveId => _optimisticId ?? Value;
+    private bool HasSelection => EffectiveId is Guid id && id != Guid.Empty;
+    private bool ShowCommittedDisplay => !_searching && HasSelection;
+
+    private string CommittedLabel
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_optimisticLabel))
+                return _optimisticLabel!;
+
+            if (EffectiveId is Guid id && id != Guid.Empty)
+            {
+                var fromOptions = Options?.FirstOrDefault(option => option.Id == id)?.DisplayName;
+                if (!string.IsNullOrWhiteSpace(fromOptions))
+                    return fromOptions!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(DisplayValue) && DisplayValue != "—")
+                return DisplayValue!;
+            return "—";
+        }
+    }
 
     protected override void OnParametersSet()
     {
@@ -79,30 +122,108 @@
             _lastOptions = Options;
             ApplyFilter();
         }
+
+        SyncOptimisticWithParentValue();
     }
 
-    private void OnSearchTextChanged(string searchText)
+    private void SyncOptimisticWithParentValue()
     {
-        // Ignore echoes of the selected DisplayName so opening the field does not filter to one row.
-        if (!string.IsNullOrWhiteSpace(searchText)
-            && (string.Equals(searchText, DisplayValue, StringComparison.Ordinal)
-                || Options.Any(option => string.Equals(option.DisplayName, searchText, StringComparison.Ordinal))))
+        if (_applyInFlight)
+            return;
+
+        if (_optimisticId is not Guid optimistic)
+        {
+            if (!HasSelection)
+                _searching = false;
+            return;
+        }
+
+        if (Value == optimistic)
+        {
+            _optimisticId = null;
+            _optimisticLabel = null;
+            return;
+        }
+
+        if (Value is Guid actual && actual != Guid.Empty && actual != optimistic)
+        {
+            _optimisticId = null;
+            _optimisticLabel = null;
+            return;
+        }
+
+        if (Value is null || Value == Guid.Empty)
+        {
+            _optimisticId = null;
+            _optimisticLabel = null;
+        }
+    }
+
+    private Task BeginSearchAsync()
+    {
+        if (!Enabled || ReadOnly)
+            return Task.CompletedTask;
+
+        _searching = true;
+        _search = string.Empty;
+        _comboEpoch++;
+        ApplyFilter();
+        return Task.CompletedTask;
+    }
+
+    private async Task ClearAsync()
+    {
+        if (!Enabled || ReadOnly)
+            return;
+
+        _search = string.Empty;
+        _searching = false;
+        _optimisticId = null;
+        _optimisticLabel = null;
+        ApplyFilter();
+        if (ValueChanged.HasDelegate)
+            await ValueChanged.InvokeAsync(null);
+    }
+
+    private Task OnSearchTextChanged(string searchText)
+    {
+        if (IsSelectedLabelEcho(searchText))
         {
             _search = string.Empty;
             ApplyFilter();
-            return;
+            return Task.CompletedTask;
         }
 
         _search = searchText ?? string.Empty;
         ApplyFilter();
+        return Task.CompletedTask;
     }
 
     private void OnDropDownVisibleChanged(bool visible)
     {
         if (!visible)
+        {
+            if (HasSelection && string.IsNullOrWhiteSpace(_search))
+                _searching = false;
             return;
-        _search = string.Empty;
-        ApplyFilter();
+        }
+
+        if (IsSelectedLabelEcho(_search))
+        {
+            _search = string.Empty;
+            ApplyFilter();
+        }
+    }
+
+    private bool IsSelectedLabelEcho(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+        if (string.Equals(text, DisplayValue, StringComparison.Ordinal))
+            return true;
+        if (string.Equals(text, CommittedLabel, StringComparison.Ordinal))
+            return true;
+        return Options.Any(option => string.Equals(option.DisplayName, text, StringComparison.Ordinal));
     }
 
     private void ApplyFilter()
@@ -116,27 +237,44 @@
 
         var needle = PersonSearchTextNormalizer.Fold(_search);
         _filtered = source
-            .Where(option =>
-            {
-                var display = option.DisplayName ?? string.Empty;
-                var folded = PersonSearchTextNormalizer.Fold(display);
-                if (!string.IsNullOrEmpty(needle) && folded.Contains(needle, StringComparison.Ordinal))
-                    return true;
-                if (display.Contains(_search, StringComparison.OrdinalIgnoreCase))
-                    return true;
-                var haystack = option.SearchText ?? string.Empty;
-                return !string.IsNullOrEmpty(needle)
-                    && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
-            })
+            .Where(option => ApplicationWorkspaceCaseHeaderFieldsHelper.AddressOptionMatchesSearch(option, _search, needle))
             .ToList();
     }
 
-    private Task HandleValueChanged(Guid id)
+    private async Task HandleValueChangedAsync(Guid id)
     {
         _search = string.Empty;
         ApplyFilter();
-        return ValueChanged.HasDelegate
-            ? ValueChanged.InvokeAsync(id == Guid.Empty ? null : id)
-            : Task.CompletedTask;
+
+        if (id == Guid.Empty)
+        {
+            _optimisticId = null;
+            _optimisticLabel = null;
+            _searching = true;
+            if (ValueChanged.HasDelegate)
+                await ValueChanged.InvokeAsync(null);
+            return;
+        }
+
+        var label = Options?.FirstOrDefault(option => option.Id == id)?.DisplayName;
+        _optimisticId = id;
+        _optimisticLabel = string.IsNullOrWhiteSpace(label) ? null : label;
+        _searching = false;
+        _comboEpoch++;
+        _applyInFlight = true;
+
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+
+            if (ValueChanged.HasDelegate)
+                await ValueChanged.InvokeAsync(id);
+        }
+        finally
+        {
+            _applyInFlight = false;
+            SyncOptimisticWithParentValue();
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }

@@ -56,8 +56,17 @@ public static class ApplicationProfilePickerCaseSummaryDraft
         IObjectSpace objectSpace,
         Guid profileId,
         IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? updates = null,
-        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute = null)
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute = null) =>
+        Build(objectSpace, profileId, updates, creationProgressRoute, out _);
+
+    public static IReadOnlyList<ApplicationWorkspaceCaseHeaderField> Build(
+        IObjectSpace objectSpace,
+        Guid profileId,
+        IReadOnlyList<ApplicationWorkspaceCaseHeaderFieldUpdate>? updates,
+        ApplicationProfileInstanceProgressRouteKind? creationProgressRoute,
+        out string? applyError)
     {
+        applyError = null;
         ArgumentNullException.ThrowIfNull(objectSpace);
         if (profileId == Guid.Empty)
             return Array.Empty<ApplicationWorkspaceCaseHeaderField>();
@@ -74,7 +83,11 @@ public static class ApplicationProfilePickerCaseSummaryDraft
             draft,
             profile,
             creationProgressRoute);
-        TryApplyUpdates(draft, objectSpace, updates, out _);
+        if (!TryApplyUpdates(draft, objectSpace, updates, out applyError))
+        {
+            // Keep building fields so the officer still sees the form; caller may surface applyError.
+        }
+
         return ForCreate(ApplicationWorkspaceCaseHeaderFieldsHelper.Build(
             draft,
             profile,
@@ -99,8 +112,17 @@ public static class ApplicationProfilePickerCaseSummaryDraft
             if (update == null || IsHiddenOnCreate(update.Key))
                 continue;
 
-            if (!ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out error))
-                return false;
+            if (ApplicationWorkspaceCaseHeaderFieldsHelper.TryApply(application, objectSpace, update, out error))
+                continue;
+
+            // Hidden-field updates must not abort later keys (e.g. Address1 after Project).
+            if (string.Equals(error, "That field is not required on this profile.", StringComparison.Ordinal))
+            {
+                error = null;
+                continue;
+            }
+
+            return false;
         }
 
         return true;

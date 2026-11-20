@@ -493,12 +493,23 @@ namespace Visa2026.Module.BusinessObjects
 
 
 
+        /// <summary>Legacy Person inventory owner. Shared catalog rows leave this null.</summary>
+
+        [Browsable(false)]
+
+        [VisibleInDetailView(false)]
+
+        [VisibleInListView(false)]
+
+        [Obsolete("AddressOfResidence is a shared lookup. Case Address1/2 and People links are FKs only.")]
+
+        public virtual Person? Person { get; set; }
+
+
+
         /// <summary>
-
-        /// Legacy Person inventory owner. Nullable after case-owned addresses;
-
-        /// prefer <see cref="OwningApplicationProfileInstance"/> + optional <see cref="RosterPerson"/>.
-
+        /// Obsolete case-ownership column. Shared catalog rows leave this null;
+        /// Case Address1/2 hold the FK instead.
         /// </summary>
 
         [Browsable(false)]
@@ -507,30 +518,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [VisibleInListView(false)]
 
-        [Obsolete("Addresses are case-owned. Use OwningApplicationProfileInstance / RosterPerson.")]
-
-        public virtual Person? Person { get; set; }
-
-
-
-        /// <summary>Case that owns this address (summary or Linked Records override).</summary>
-
-        [Browsable(false)]
-
-        [VisibleInDetailView(false)]
-
-        [VisibleInListView(false)]
+        [Obsolete("AddressOfResidence is a shared lookup. Do not stamp case ownership.")]
 
         public virtual ApplicationProfileInstance? OwningApplicationProfileInstance { get; set; }
 
 
 
         /// <summary>
-
-        /// When set, this row is a Linked Records override for that roster person on the owning case.
-
-        /// Null = case summary Address 1/2 row.
-
+        /// Obsolete per-person override owner. Shared catalog rows leave this null;
+        /// People links use ResolvedLink to a catalog FK.
         /// </summary>
 
         [Browsable(false)]
@@ -538,6 +534,8 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
 
         [VisibleInListView(false)]
+
+        [Obsolete("AddressOfResidence is a shared lookup. Do not stamp RosterPerson ownership.")]
 
         public virtual Person? RosterPerson { get; set; }
 

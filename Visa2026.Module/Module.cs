@@ -100,6 +100,7 @@ namespace Visa2026.Module
 
                 new DatabaseUpdate.LookupBaseNameTmBackfillUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.AddressOfResidenceCatalogDedupeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractTitleDescriptionMergeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),

@@ -1,3 +1,43 @@
+### 2026-11-20 — Case Address2DefaultText on create + Case summary
+
+- **Need**: Optional case-level Address 2 free text under Address 1 (create + open case), template RequireAddress2 visibility, Recently used, copy-on-Join into empty person notes.
+- **Fix**: `Address2DefaultText` on instance; Case header Text field (not catalog); Remember on save; Join copies default only when person note empty; clearing case default does not wipe person notes. Prototype `docs/prototypes/case-summary-address2-recently-used-prototype.jpg`.
+- **Officer**: Stop F5, rebuild. Profiles with Address Last 2 — Case summary shows Address 2 under Address 1. Fill once; Join people — empty Address 2 gets the default.
+- **Prevent**: Do not treat Address 2 as required Create gate. Do not reintroduce catalog Address2 FK for case UI.
+- **Verify**: Column exists; Module/Blazor build; CasePersonAddress2NoteTests Address2 text field.
+- **Cross-skill**: —
+### 2026-11-20 — Address 2 Recently used (server, profile+ProjectContract)
+
+- **Need**: Reuse Address 2 text across linked people without retyping; shared across officers; isolated by Application Profile template + ProjectContract.
+- **Fix**: `ApplicationProfileAddress2Recent` + `CasePersonAddress2Recent` (cap 6). Remember on Linked-records Save. List merges same-case notes + shared. Compact UI next to Address 2 textarea (first card + Choose another…). Schema `ApplicationProfileAddress2RecentSchemaSql`. Prototype `docs/prototypes/people-link-address2-recently-used-prototype.jpg`.
+- **Officer**: Stop F5, rebuild, hard-refresh. Save Address 2 on one person; open Linked records on another (same profile+project) — Recently used shows the text.
+- **Prevent**: Do not use localStorage for this list. Do not key only by profile without ProjectContractId. Do not stretch a full-height panel beside all Linked-records fields.
+- **Verify**: Table exists; Module/Blazor build; `CasePersonAddress2RecentTests`.
+- **Cross-skill**: —
+### 2026-11-20 — People row Address 2 reads note text (not catalog slot)
+
+- **Need**: Saved Address2Text showed in Linked records modal but People & links row stayed "—".
+- **Fix**: `RowsForAddressSlots` slot 2 ← `CasePersonAddress2Note.LoadForApplication`; `BuildPersonRecords` slot2Has ← note map (not ResolveAddressSlot).
+- **Officer**: Stop F5, rebuild Module, hard-refresh. Open case with Address 2 note — ADDRESS 2 column shows the text.
+- **Prevent**: Do not fill address:2 people cells from AddressOfResidence / instance Address2 FK.
+- **Verify**: Note in DB + People row after refresh.
+- **Cross-skill**: —
+### 2026-11-20 — Address 2 is People free-text notes (not case catalog)
+
+- **Need**: Optional second address as multiple free-text lines per person on the case; not a second catalog FK on Case summary.
+- **Fix**: Removed Case summary / create Address 2 picker. New `ApplicationProfileInstancePersonAddress2Note.Address2Text` (instance+person). People & links Address 2 = multiline textarea when `RequireAddress2` / max-count 2. Instance `Address2` FK obsolete. Merge `Address2_FullAddress` ← note text; structured Address2_* empty. Slot-2 AddressOfResidence ResolvedLinks no longer written.
+- **Officer**: Stop F5, rebuild, hard-refresh. Create wizard Case summary — only Address 1. Open Çakylyk Almak People & links with Address Last 2 — Address 2 is a textarea; Join saves notes. Create still does not require Address 2.
+- **Prevent**: Do not re-add Case summary Address 2 catalog. Do not store Address 2 notes on Person master. Do not treat Address2Text as required completeness.
+- **Verify**: Module/Blazor build; `CasePersonAddress2NoteTests` / case summary omits Address2.
+- **Cross-skill**: —
+### 2026-11-20 — Case requested locations only on grant templates
+
+- **Need**: Case summary “Requested border zone / work permit location” only on Serhet Ýaka (`get_border_zone`) and Iş Rugsatnama goşmaça ýeri (`change_workpermit`); hide on invitation/visa/WP and other templates; create must not require them; Linked records per-person rows stay.
+- **Fix**: Case header `Visible` / `TryApply` gated on `ProduceBorderZone` / `ProduceWorkLocation` (not `EffectiveRequire*` / Produce WorkPermit force). Calik JSON `RequireBorderZone`/`RequireWorkPermitLocation` false except those two codes. Tenant seed no longer forces Require* from Produce Invitation/Visa/WorkPermit. Completeness uses built fields only. Linked records still use `EffectiveRequireBorderZone` / `RequireWorkPermitLocationWhenProducingWorkPermit`.
+- **Officer**: Stop F5, rebuild, hard-refresh (profile catalog sync). Open Çakylyk we Iş Rugsatnamasyny Almak create/Case summary — those two Case fields gone. Open get_border_zone / change_workpermit — Case fields remain. Linked records requested locations unchanged on WP/visa profiles.
+- **Prevent**: Do not show Case location Use via EffectiveRequire or ProduceWorkPermit. Do not remove Linked-records ShowInLinkReview force helpers when hiding Case fields.
+- **Verify**: Module build; `ApplicationWorkspaceCaseHeaderFieldsHelperTests` 29 passed.
+- **Cross-skill**: —
 ### 2026-11-19 — Recently used isolated per Approval leg
 
 - **Need**: Via-ministry create: Türkmengaz vs TNGIZ should not share Case summary recent cards.
@@ -4606,3 +4646,26 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Symptom**: Case overview still showed Invitation region / city / Address type / Other invitation places and completeness gate listed them as Missing, while Address 1/2 already collected stay.
 - **Cause**: `ShowInvitationAddress` / `ShowInvitationPlace` followed `RequireInvitation*`; Calik catalog + tenant sync forced those flags true for invitation-receiving profiles.
 - **Fix**: Always hide invitation-stay header fields; seed/sync force `RequireInvitationAddress`/`RequireInvitationPlace` false; type mapper sets `RequireAddress1` instead; wizard Results rows removed; PDF fields 33–35 prefer Address 1; `DEPRECATED.md` updated. Columns retained for dual-read.
+### 2026-11-19 — Case summary Address 1: invitation-stay only + roster soft-suppress
+
+- **Symptom**: Extend / cancel / WP-visa apps (e.g. `extend_visa_wp`) blocked on Case summary **Missing: Address 1** while People & links already had a linked address.
+- **Cause**: Calik catalog + `SyncRequireFlagsFromLegacy` / Calik Last-N seed promoted `RequirePersonAddressOfResidence` → `RequireAddress1`, and `ShowAddress1` dual-read the People toggle; empty case `Address1` always filled as Empty.
+- **Fix**: Case summary `ShowAddress1`/`ShowAddress2` follow catalog Requires only; People tiles use `ShowCurrentAddressOfResidence` via `EffectiveRequireAddress*`. Seeds force `RequireAddress1` only for `CollectsInvitationStay`. Soft-suppress Address 1 Empty when `PersonResolvedLinks` already has AddressOfResidence.
+- **Officer**: Invitation-stay profiles still show required Address 1 on Case summary; extend/etc. keep address on People only; existing invitation apps with People-linked address no longer gate on empty case Address 1.
+- **Prevent**: Do not re-promote People address toggle onto Case summary RequireAddress1 in Sync/Calik seeds.
+- **Verify**: Unit tests above; F5 extend_visa_wp case with linked People address — no Missing Address 1; get_invitation still requires Case Address 1 when roster has no link.
+### 2026-11-19 — Case Address 1 search + duplicate rows
+
+- **Symptom**: Typing in Case summary Address 1 (e.g. `garabo`) left an unfiltered dropdown; identical address strings appeared twice.
+- **Cause**: `CaseAddressSearchField.OnDropDownVisibleChanged` cleared the typed filter whenever the list opened; catalog loaded many `AddressOfResidence` rows with the same folded display label.
+- **Fix**: Keep typed search on open (only strip selection-label echo); `DeduplicateAddressOptions` by folded label; shared catalog no longer excludes roster-linked rows; match helper for diacritic contains.
+- **Officer**: Type a street fragment → list narrows; duplicates collapse to one row.
+- **Prevent**: Do not clear `_search` on every dropdown-open in `CaseAddressSearchField`.
+- **Verify**: Unit tests `ApplicationWorkspaceAddressLookupTests`; F5 Address 1 type `garabo` / open list without duplicate identical lines.
+### 2026-11-19 — AddressOfResidence shared lookup catalog
+
+- **Need**: Deduplicate addresses and seed them as tenant lookup JSON; Case Address1/2 + People links are FKs only (no case-owned copies).
+- **Fix**: `AddressOfResidenceCatalogHelper` upsert/dedupe; stop stamping `OwningApplicationProfileInstance`/`RosterPerson`; tenant `address-of-residence.json` + Calik pack; `matchKey TypeAndCityAndFullAddress`; `AddressOfResidenceCatalogDedupeUpdater` merges duplicates and clears ownership.
+- **Officer**: Pick from searchable catalog; `+` create upserts a shared row (reuse if same Type+street).
+- **Prevent**: Do not create per-case AddressOfResidence copies for Linked Records overrides.
+- **Verify**: Unit tests `AddressOfResidenceCatalogHelperTests`; F5 after manifest bump — catalog list has unique streets; search filters.

@@ -541,12 +541,12 @@
 }
 
 .ap-picker--case-summary {
-    max-width: min(64rem, 100%);
+    max-width: min(72rem, 100%);
 }
 
 .ap-picker__case-body {
     display: grid;
-    grid-template-columns: minmax(16rem, 28rem) minmax(16rem, 22rem);
+    grid-template-columns: minmax(18rem, 34rem) minmax(16rem, 22rem);
     gap: 0 1.75rem;
     align-items: stretch;
     margin: 0 0 14px;
@@ -606,7 +606,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-width: 28rem;
+    max-width: 34rem;
 }
 
 .ap-picker__summary-addresses {
@@ -733,6 +733,58 @@
     min-height: 36px;
     width: 100%;
 }
+/* Selected address: keep full wrapping label even while combo still focused after pick. */
+.ap-picker .cw-summary-address-search--committed:focus-within .cw-summary-address-edit-label,
+.cw-summary-address-search--committed:focus-within .cw-summary-address-edit-label {
+    display: block;
+}
+.ap-picker .cw-summary-address-search--committed:focus-within .cw-summary-address-combo-edit .dxbl-text-edit,
+.ap-picker .cw-summary-address-search--committed:focus-within .cw-summary-address-combo-edit .dxbl-text-edit-input,
+.cw-summary-address-search--committed:focus-within .cw-summary-address-combo-edit .dxbl-text-edit,
+.cw-summary-address-search--committed:focus-within .cw-summary-address-combo-edit .dxbl-text-edit-input {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    background: transparent !important;
+}
+
+/* Full address after pick — button swaps out of DxComboBox so no focus truncation. */
+.cw-summary-address-committed {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    cursor: pointer;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+    min-height: 36px;
+}
+.cw-summary-address-committed .cw-summary-address-edit-label {
+    padding: 8px 10px;
+}
+.cw-addr-icon--clear {
+    flex: 0 0 auto;
+    align-self: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 0.35rem;
+}
+.cw-addr-icon--clear:hover {
+    opacity: 1;
+}
 .cw-summary-address-search-drop {
     max-width: min(52rem, 96vw);
     min-width: min(28rem, 96vw);
@@ -750,6 +802,57 @@
 /* Case summary fields are shared with the case workspace, which still paints
    light fills. Inside the create wizard they follow this palette. */
 .ap-picker .cw-summary-field__label { color: var(--ap-muted); }
+/* Address2 "Recently used" uses .os-link-review__* classes (shared with case
+   workspace). Those default to light --os-* tokens; remap to --ap-* here. */
+.ap-picker .os-link-review__a2-recent {
+    border-color: var(--ap-line);
+    background: var(--ap-sunken);
+    box-shadow: inset 3px 0 0 var(--ap-accent);
+    color: var(--ap-ink);
+}
+.ap-picker .os-link-review__a2-recent-head {
+    color: var(--ap-ink);
+}
+.ap-picker .os-link-review__a2-recent-card {
+    border-color: var(--ap-line);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-picker .os-link-review__a2-recent-card:hover {
+    background: var(--ap-hover);
+    border-color: color-mix(in srgb, var(--ap-accent) 45%, var(--ap-line));
+}
+.ap-picker .os-link-review__a2-recent-card.is-selected {
+    background: var(--ap-accent-soft);
+    border-color: var(--ap-accent);
+    box-shadow: inset 3px 0 0 var(--ap-accent);
+}
+.ap-picker .os-link-review__a2-recent-text {
+    color: var(--ap-ink);
+}
+.ap-picker .os-link-review__a2-recent-time {
+    color: var(--ap-muted);
+}
+.ap-picker .os-link-review__a2-recent-more,
+.ap-picker select.os-link-review__select {
+    border-color: var(--ap-line);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+    -webkit-text-fill-color: var(--ap-ink);
+    color-scheme: inherit;
+}
+.ap-picker .os-link-review__a2-recent-more option,
+.ap-picker select.os-link-review__select option {
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+}
+.ap-picker .os-link-review__textarea,
+.ap-picker .cw-summary-field__textarea {
+    border-color: var(--ap-line);
+    background: var(--ap-panel);
+    color: var(--ap-ink);
+    -webkit-text-fill-color: var(--ap-ink);
+}
 .ap-picker .cw-summary-field__input,
 .ap-picker select.cw-summary-field__input,
 .ap-picker select.cw-summary-field__input option {

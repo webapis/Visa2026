@@ -47,6 +47,7 @@ internal enum LookupCatalogMatchKey
     BusinessObjectKey,
     CityAndFullAddress,
     CityAndName,
+    TypeAndCityAndFullAddress,
 }
 
 internal enum LookupCatalogSyncMode

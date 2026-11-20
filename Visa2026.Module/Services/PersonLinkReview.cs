@@ -40,6 +40,12 @@ public sealed class PersonLinkReviewLine
     /// <summary>How many slots of this kind are shown (0/1 = no "n of m" caption).</summary>
     public int SlotCount { get; set; }
 
+    /// <summary>People Address 2 free-text notes (not catalog AddressOfResidence).</summary>
+    public bool UsesMultilineText { get; set; }
+
+    /// <summary>Editable multiline value when <see cref="UsesMultilineText"/>.</summary>
+    public string? TextValue { get; set; }
+
     public string ResolveTabKey()
     {
         if (!string.IsNullOrWhiteSpace(TabKey))
@@ -181,8 +187,8 @@ public static partial class PersonLinkReview
     }
 
     /// <summary>
-    /// Address the officer can edit from the pen: existing override for this person on the case,
-    /// else a new case-owned override row (RosterPerson set). Caller commits.
+    /// Address the officer can edit from the pen: linked shared catalog row for this person,
+    /// else Guid.Empty so save creates/upserts a shared catalog row. Caller commits.
     /// </summary>
     public static Guid EnsureAddressToEdit(
         IObjectSpace objectSpace,
@@ -192,24 +198,9 @@ public static partial class PersonLinkReview
         if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
             return Guid.Empty;
 
-        var existingOverride = objectSpace.GetObjectsQuery<AddressOfResidence>()
-            .Where(address =>
-                address.OwningApplicationProfileInstance != null
-                && address.OwningApplicationProfileInstance.ID == application.ID
-                && address.RosterPerson != null
-                && address.RosterPerson.ID == person.ID)
-            .OrderByDescending(address => address.ID)
-            .FirstOrDefault();
-        if (existingOverride != null)
-            return existingOverride.ID;
-
-        var address = objectSpace.CreateObject<AddressOfResidence>();
-        address.OwningApplicationProfileInstance = application;
-        address.RosterPerson = person;
-#pragma warning disable CS0618
-        address.Person = null;
-#pragma warning restore CS0618
-        return address.ID;
+        var linked = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
+            application, person, slot: 1, objectSpace);
+        return linked?.ID ?? Guid.Empty;
     }
 
     public static void ApplyChoice(PersonLinkReviewLine line, Guid objectId, IObjectSpace? objectSpace = null)
@@ -432,13 +423,8 @@ public static partial class PersonLinkReview
             }
         }
 
-        CaseWorkPermitLocationCopy.AcceptOnJoin(objectSpace, application, person);
-        CaseBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
-        CaseVisaBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
-
-        // Only push chip edits. An empty chip list means "no officer edits" — not "clear
-        // locations". Treating "—" as clear deleted AcceptOnJoin rows and tripped
-        // OptimisticLockField (expected 1 row, affected 0) on Join/Bagla.
+        // Requested WP/BZ locations are officer-entered on Linked records only — no Case/Visa/WP
+        // AcceptOnJoin prefill. Empty chip list means "not edited this open" (do not clear).
         foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
         {
             if (!line.OmitFromJoin)
@@ -507,38 +493,13 @@ public static partial class PersonLinkReview
     {
         var item = ResolveLinkedWorkPermitItem(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
-        var visa = ResolveLinkedVisa(objectSpace, application, person)
-            ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
-        var caseLocations = CaseWorkPermitLocationCopy.ResolveCaseLocations(application);
-        var joinedLocations = CasePersonRequestedLocation.GetLocations(
-            objectSpace,
-            application.ID,
-            person.ID,
-            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit);
-        var itemLocations = item?.WorkPermittedLocations?.Trim();
-        var visaLocations = BorderZoneSelectionHelper.IsNoneValue(visa?.BorderZoneLocation)
-            ? null
-            : visa?.BorderZoneLocation?.Trim();
-        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, visaLocations, itemLocations).ToList();
-        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
-
-        var line = new PersonLinkReviewLine
-        {
-            Kind = ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
-            TabKey = "WorkPermitLocation",
-            OmitFromJoin = true,
-            Label = "Work permit location",
-            Summary = summary,
-            ObjectId = item?.ID ?? Guid.Empty,
-            LocationChips = chips,
-        };
-
-        line.Fields = new List<PersonLinkReviewField>
-        {
-            Field(ApplicationProfileLocalization.Field("WorkPermitLocation"), summary, true, false),
-        };
-        line.Choices = Array.Empty<PersonLinkReviewChoice>();
-        return line;
+        // Always start empty — officer sets requested WP locations manually (no Case/Visa/WP/Joined chips).
+        return EmptyRequestedLocationLine(
+            ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
+            "WorkPermitLocation",
+            "Work permit location",
+            ApplicationProfileLocalization.Field("WorkPermitLocation"),
+            item?.ID ?? Guid.Empty);
     }
 
     private static WorkPermitItem? ResolveLinkedWorkPermitItem(
@@ -569,38 +530,12 @@ public static partial class PersonLinkReview
     {
         var visa = ResolveLinkedVisa(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
-        var wpItem = ResolveLinkedWorkPermitItem(objectSpace, application, person)
-            ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
-        var caseLocations = CaseVisaBorderZoneLocationCopy.ResolveCaseLocations(application);
-        var joinedLocations = CasePersonRequestedLocation.GetLocations(
-            objectSpace,
-            application.ID,
-            person.ID,
-            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
-        var visaLocations = BorderZoneSelectionHelper.IsNoneValue(visa?.BorderZoneLocation)
-            ? null
-            : visa?.BorderZoneLocation?.Trim();
-        var wpLocations = wpItem?.WorkPermittedLocations?.Trim();
-        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, visaLocations, wpLocations).ToList();
-        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
-
-        var line = new PersonLinkReviewLine
-        {
-            Kind = ApplicationProfileInstancePersonLinkKind.Visa,
-            TabKey = "VisaBorderZoneLocation",
-            OmitFromJoin = true,
-            Label = "Border zone location",
-            Summary = summary,
-            ObjectId = visa?.ID ?? Guid.Empty,
-            LocationChips = chips,
-        };
-
-        line.Fields = new List<PersonLinkReviewField>
-        {
-            Field(ApplicationProfileLocalization.Field("BorderZoneLocation"), summary, true, false),
-        };
-        line.Choices = Array.Empty<PersonLinkReviewChoice>();
-        return line;
+        return EmptyRequestedLocationLine(
+            ApplicationProfileInstancePersonLinkKind.Visa,
+            "VisaBorderZoneLocation",
+            "Border zone location",
+            ApplicationProfileLocalization.Field("BorderZoneLocation"),
+            visa?.ID ?? Guid.Empty);
     }
 
     private static Visa? ResolveLinkedVisa(
@@ -631,53 +566,37 @@ public static partial class PersonLinkReview
     {
         var item = ResolveLinkedBorderZoneItem(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItem(objectSpace, person);
-        var visa = ResolveLinkedVisa(objectSpace, application, person)
-            ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
-        var wpItem = ResolveLinkedWorkPermitItem(objectSpace, application, person)
-            ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
-        var caseLocations = CaseBorderZoneLocationCopy.ResolveCaseLocations(application);
-        var joinedLocations = CasePersonRequestedLocation.GetLocations(
-            objectSpace,
-            application.ID,
-            person.ID,
-            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
-        var visaLocations = BorderZoneSelectionHelper.IsNoneValue(visa?.BorderZoneLocation)
-            ? null
-            : visa?.BorderZoneLocation?.Trim();
-        var itemLocations = BorderZoneSelectionHelper.IsNoneValue(item?.BorderZoneLocation)
-            ? null
-            : item?.BorderZoneLocation?.Trim();
-        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, visaLocations, itemLocations).ToList();
-        // Only suggest WP tokens before the first Join; after Join chips are the persisted row only.
-        if (string.IsNullOrWhiteSpace(joinedLocations))
-        {
-            foreach (var token in SplitLocationTokens(wpItem?.WorkPermittedLocations))
-            {
-                if (chips.Any(c => string.Equals(c.Value, token, StringComparison.Ordinal)))
-                    continue;
-                chips.Add(new PersonLinkReviewLocationChip
-                {
-                    Value = token,
-                    Source = LinkReviewLocationChipSource.WorkPermitItem,
-                });
-            }
-        }
-        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
+        return EmptyRequestedLocationLine(
+            ApplicationProfileInstancePersonLinkKind.BorderZoneItem,
+            "BorderZoneLocation",
+            "Border zone location",
+            ApplicationProfileLocalization.Field("BorderZoneLocation"),
+            item?.ID ?? Guid.Empty);
+    }
 
+    /// <summary>
+    /// Requested WP/BZ location rows start blank each open; officer enters values in the multi-select.
+    /// </summary>
+    private static PersonLinkReviewLine EmptyRequestedLocationLine(
+        ApplicationProfileInstancePersonLinkKind kind,
+        string tabKey,
+        string label,
+        string fieldLabel,
+        Guid objectId)
+    {
         var line = new PersonLinkReviewLine
         {
-            Kind = ApplicationProfileInstancePersonLinkKind.BorderZoneItem,
-            TabKey = "BorderZoneLocation",
+            Kind = kind,
+            TabKey = tabKey,
             OmitFromJoin = true,
-            Label = "Border zone location",
-            Summary = summary,
-            ObjectId = item?.ID ?? Guid.Empty,
-            LocationChips = chips,
+            Label = label,
+            Summary = "—",
+            ObjectId = objectId,
+            LocationChips = new List<PersonLinkReviewLocationChip>(),
         };
-
         line.Fields = new List<PersonLinkReviewField>
         {
-            Field(ApplicationProfileLocalization.Field("BorderZoneLocation"), summary, true, false),
+            Field(fieldLabel, "—", true, false),
         };
         line.Choices = Array.Empty<PersonLinkReviewChoice>();
         return line;
@@ -1373,13 +1292,7 @@ public static partial class PersonLinkReview
                 var address = objectSpace.GetObjectByKey<AddressOfResidence>(line.ObjectId);
                 if (address == null)
                     return false;
-                var ownsOverride = address.RosterPerson != null && person != null && address.RosterPerson.ID == person.ID;
-#pragma warning disable CS0618
-                var ownsLegacy = address.Person != null && person != null && address.Person.ID == person.ID;
-#pragma warning restore CS0618
-                var isCaseSummary = address.RosterPerson == null && address.OwningApplicationProfileInstance != null;
-                if (!ownsOverride && !ownsLegacy && !isCaseSummary)
-                    return false;
+                // Shared catalog — any AddressOfResidence may be edited/linked.
                 FillAddress(form, address);
                 return true;
             case ApplicationProfileInstancePersonLinkKind.Visa:
@@ -1665,6 +1578,8 @@ public static partial class PersonLinkReview
         ApplicationProfileInstance? application,
         out string? error)
     {
+        _ = person;
+        _ = application;
         error = null;
         if (!Enum.TryParse<ResidenceType>(Value(form, "type"), out var type))
         {
@@ -1672,65 +1587,34 @@ public static partial class PersonLinkReview
             return null;
         }
 
-        var address = form.ObjectId == Guid.Empty
-            ? objectSpace.CreateObject<AddressOfResidence>()
-            : objectSpace.GetObjectByKey<AddressOfResidence>(form.ObjectId);
-        if (address == null)
+        Guid? ParseId(string key)
         {
-            error = T("NotFound");
+            var raw = Value(form, key);
+            return Guid.TryParse(raw, out var id) && id != Guid.Empty ? id : null;
+        }
+
+        var edit = new AddressOfResidenceEdit
+        {
+            Type = type,
+            RegionId = ParseId("region"),
+            CityId = ParseId("city"),
+            SiteId = type switch
+            {
+                ResidenceType.Lodging => ParseId("lodging"),
+                ResidenceType.Hotel => ParseId("hotel"),
+                ResidenceType.Hospital => ParseId("hospital"),
+                ResidenceType.Other => ParseId("other"),
+                _ => null,
+            },
+            PrivateHouseAddress = Value(form, "private"),
+            ExpirationDate = TryDate(Value(form, "expiration"), out var exp) ? exp : null,
+        };
+
+        Guid? preferId = form.ObjectId == Guid.Empty ? null : form.ObjectId;
+        if (!AddressOfResidenceCatalogHelper.TryUpsertFromEdit(
+                objectSpace, edit, preferId, out var address, out error)
+            || address == null)
             return null;
-        }
-
-        if (form.ObjectId != Guid.Empty
-            && address.RosterPerson != null
-            && address.RosterPerson.ID != person.ID
-#pragma warning disable CS0618
-            && address.Person?.ID != person.ID)
-#pragma warning restore CS0618
-        {
-            error = T("NotFound");
-            return null;
-        }
-
-        if (form.ObjectId == Guid.Empty)
-        {
-            // Linked Records create = case-owned override for this roster person.
-            address.OwningApplicationProfileInstance = application;
-            address.RosterPerson = person;
-#pragma warning disable CS0618
-            address.Person = null;
-#pragma warning restore CS0618
-        }
-        else if (address.OwningApplicationProfileInstance == null && application != null)
-        {
-            address.OwningApplicationProfileInstance = application;
-        }
-
-        address.Region = Lookup<Region>(objectSpace, Value(form, "region"));
-        address.City = Lookup<City>(objectSpace, Value(form, "city"));
-        address.Type = type;
-        address.Lodging = null;
-        address.Hotel = null;
-        address.Hospital = null;
-        address.OtherSite = null;
-        switch (type)
-        {
-            case ResidenceType.Lodging:
-                address.Lodging = Lookup<Lodging>(objectSpace, Value(form, "lodging"));
-                break;
-            case ResidenceType.Hotel:
-                address.Hotel = Lookup<Hotel>(objectSpace, Value(form, "hotel"));
-                break;
-            case ResidenceType.Hospital:
-                address.Hospital = Lookup<Hospital>(objectSpace, Value(form, "hospital"));
-                break;
-            case ResidenceType.Other:
-                address.OtherSite = Lookup<OtherSite>(objectSpace, Value(form, "other"));
-                break;
-            case ResidenceType.PrivateHouse:
-                address.FullAddress = Value(form, "private");
-                break;
-        }
 
         return address;
     }

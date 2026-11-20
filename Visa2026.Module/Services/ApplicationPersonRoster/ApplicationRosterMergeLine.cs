@@ -339,7 +339,7 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         private void ApplyCurrentFieldsFromSelectedPerson()
         {
-            if (null == null)
+            if (SuppressPersonCurrentFieldSync)
                 return;
 
             if (person == null)
@@ -350,6 +350,7 @@ namespace Visa2026.Module.BusinessObjects
                 NextVisaId = null;
                 CurrentAddressOfResidence = null;
                 SecondAddressOfResidence = null;
+                Address2Text = null;
                 CurrentMedicalRecord = null;
                 CurrentEducation = null;
                 CurrentInvitationItem = null;
@@ -404,8 +405,9 @@ namespace Visa2026.Module.BusinessObjects
 
             CurrentAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
                 ApplicationProfileInstance, p, ApplicationProfileInstanceAddressResolver.Slot1);
-            SecondAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
-                ApplicationProfileInstance, p, ApplicationProfileInstanceAddressResolver.Slot2);
+            SecondAddressOfResidence = null;
+            Address2Text = ApplicationProfileInstance?.PersonAddress2Notes?
+                .FirstOrDefault(n => n != null && n.PersonId == p.ID)?.Address2Text;
             CurrentMedicalRecord = PersonCurrentItems.GetCurrentMedicalRecord(p);
             CurrentInvitationItem = PersonCurrentItems.GetCurrentInvitationItem(p);
             PreviousInvitationItem = null;
@@ -881,23 +883,22 @@ namespace Visa2026.Module.BusinessObjects
 
         // Address 2 (optional slot)
         [XafDisplayName("Address2 Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address2_FullAddress =>
-            AddressOfResidenceReportText.CityAndStreet(SecondAddressOfResidence);
+        public string Address2_FullAddress => Address2Text ?? string.Empty;
 
         [XafDisplayName("Address2 Type"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address2_Type => SecondAddressOfResidence?.Type?.ToString();
+        public string Address2_Type => string.Empty;
 
         [XafDisplayName("Address2 Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? Address2_ExpirationDate => SecondAddressOfResidence?.ExpirationDate;
+        public DateTime? Address2_ExpirationDate => null;
 
         [XafDisplayName("Address2 Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address2_ExpirationDateText => $"{SecondAddressOfResidence?.ExpirationDate:dd.MM.yyyy}";
+        public string Address2_ExpirationDateText => string.Empty;
 
         [XafDisplayName("Address2 Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address2_RegionTm => SecondAddressOfResidence?.Region?.NameTm;
+        public string Address2_RegionTm => string.Empty;
 
         [XafDisplayName("Address2 City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address2_CityTm => SecondAddressOfResidence?.City?.NameTm;
+        public string Address2_CityTm => string.Empty;
         #endregion
 
         #region Travel
@@ -1936,10 +1937,16 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailableAddressesOfResidence))]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
-        /// <summary>Optional Linked Records Address 2 (profile max slots = 2).</summary>
+        /// <summary>Obsolete catalog Address 2; prefer <see cref="Address2Text"/>.</summary>
         [Browsable(false)]
         [VisibleInDetailView(false), VisibleInListView(false)]
+        [Obsolete("Address 2 is free text on ApplicationProfileInstancePersonAddress2Note.")]
         public virtual AddressOfResidence? SecondAddressOfResidence { get; set; }
+
+        /// <summary>People &amp; links Address 2 free-text notes for this roster person.</summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string? Address2Text { get; set; }
 
         [Appearance("CurrentWorkDutyEmployeeOnly", Visibility = ViewItemVisibility.Hide,
             Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]

@@ -145,6 +145,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationProfileProgressStateSetting> ApplicationProfileProgressStateSettings { get; set; }
         public DbSet<ApplicationProfileInstancePersonResolvedLink> ApplicationProfileInstancePersonResolvedLinks { get; set; }
         public DbSet<ApplicationProfileInstancePersonRequestedLocation> ApplicationProfileInstancePersonRequestedLocations { get; set; }
+        public DbSet<ApplicationProfileInstancePersonAddress2Note> ApplicationProfileInstancePersonAddress2Notes { get; set; }
+        public DbSet<ApplicationProfileAddress2Recent> ApplicationProfileAddress2Recents { get; set; }
         public DbSet<ApplicationProfileInstanceExclusion> ApplicationProfileInstanceExclusions { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionPerson> ApplicationProfileInstanceExclusionPeople { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionTemplate> ApplicationProfileInstanceExclusionTemplates { get; set; }
@@ -1227,6 +1229,37 @@ namespace Visa2026.Module.BusinessObjects
                     .IsUnique()
                     .HasFilter(IndexFilter("[GCRecord] IS NULL"))
                     .HasDatabaseName("IX_ApplicationProfileInstancePersonRequestedLocations_Instance_Person_Kind");
+            });
+
+            modelBuilder.Entity<ApplicationProfileInstancePersonAddress2Note>(b =>
+            {
+                b.HasOne(l => l.ApplicationProfileInstance)
+                    .WithMany(a => a.PersonAddress2Notes)
+                    .HasForeignKey(l => l.ApplicationProfileInstanceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.Person)
+                    .WithMany()
+                    .HasForeignKey(l => l.PersonId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.Property(l => l.Address2Text).HasColumnType("text");
+                b.HasIndex(l => new { l.ApplicationProfileInstanceId, l.PersonId })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"))
+                    .HasDatabaseName("IX_ApplicationProfileInstancePersonAddress2Notes_Instance_Person");
+            });
+
+            modelBuilder.Entity<ApplicationProfileAddress2Recent>(b =>
+            {
+                b.HasOne(r => r.ApplicationProfile)
+                    .WithMany()
+                    .HasForeignKey(r => r.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.Property(r => r.Address2Text).HasColumnType("text");
+                b.Property(r => r.TextKey).HasMaxLength(450);
+                b.HasIndex(r => new { r.ApplicationProfileId, r.ProjectContractId, r.TextKey })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"))
+                    .HasDatabaseName("IX_ApplicationProfileAddress2Recents_Profile_Project_Text");
             });
             modelBuilder.Entity<ApplicationProfileInstanceExclusion>(b =>
             {
