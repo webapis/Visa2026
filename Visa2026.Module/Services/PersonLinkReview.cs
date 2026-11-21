@@ -40,7 +40,7 @@ public sealed class PersonLinkReviewLine
     /// <summary>How many slots of this kind are shown (0/1 = no "n of m" caption).</summary>
     public int SlotCount { get; set; }
 
-    /// <summary>People Address 2 free-text notes (not catalog AddressOfResidence).</summary>
+    /// <summary>People Address 1/2 free-text notes (not catalog AddressOfResidence).</summary>
     public bool UsesMultilineText { get; set; }
 
     /// <summary>Editable multiline value when <see cref="UsesMultilineText"/>.</summary>
@@ -257,10 +257,11 @@ public static partial class PersonLinkReview
         IReadOnlyList<PersonLinkReviewChoice> choices;
         if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence)
         {
-            var slot = line.SlotIndex > 0 ? line.SlotIndex : 1;
-            choices = application == null
-                ? Array.Empty<PersonLinkReviewChoice>()
-                : AddressChoicesForCase(objectSpace, application, person, slot, excludeObjectId: Guid.Empty);
+            // Address 1/2 are free-text notes — plus/create catalog select no longer applies.
+            if (line.UsesMultilineText)
+                return;
+
+            choices = Array.Empty<PersonLinkReviewChoice>();
         }
         else
         {

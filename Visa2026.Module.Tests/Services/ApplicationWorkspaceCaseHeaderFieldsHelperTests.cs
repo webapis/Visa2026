@@ -97,7 +97,7 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
-    public void Build_HidesBorderZoneWhenInvitationOrVisaWithoutProduceBorderZone()
+    public void Build_IncludesBorderZoneWhenRequireBorderZoneEvenWithoutProduceBorderZone()
     {
         var profile = new ApplicationProfile
         {
@@ -109,11 +109,28 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
 
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
+        var field = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, field.FillState);
+    }
+
+    [Fact]
+    public void Build_HidesBorderZoneWhenRequireBorderZoneOffDespiteProduceInvitation()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProduceInvitation = true,
+            ProduceVisa = true,
+            RequireBorderZone = false,
+        };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+
         Assert.DoesNotContain(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
     }
 
     [Fact]
-    public void Build_IncludesWorkPermitLocationAsCommaSeparatedMultiSelectWhenProduceWorkLocation()
+    public void Build_IncludesWorkPermitLocationAsCommaSeparatedMultiSelectWhenRequireWorkPermitLocation()
     {
         var profile = new ApplicationProfile { ProduceWorkLocation = true, RequireWorkPermitLocation = true };
         var application = new ApplicationProfileInstance
@@ -130,17 +147,37 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
     }
 
     [Fact]
-    public void Build_HidesWorkPermitLocationWhenProduceWorkPermitWithoutProduceWorkLocation()
+    public void Build_IncludesWorkPermitLocationWhenRequireOnEvenWithoutProduceWorkLocation()
     {
         var profile = new ApplicationProfile
         {
             ProduceWorkPermit = true,
             RequireWorkPermitLocation = true,
+            ProduceWorkLocation = false,
         };
         var application = new ApplicationProfileInstance { ApplicationProfile = profile };
 
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
+        var field = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Default, field.FillState);
+    }
+
+    [Fact]
+    public void Build_HidesRequestedLocationsWhenRequireFlagsOff()
+    {
+        var profile = new ApplicationProfile
+        {
+            ProduceInvitation = true,
+            ProduceWorkPermit = true,
+            RequireBorderZone = false,
+            RequireWorkPermitLocation = false,
+        };
+        var application = new ApplicationProfileInstance { ApplicationProfile = profile };
+
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+
+        Assert.DoesNotContain(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
         Assert.DoesNotContain(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
     }
 
@@ -308,7 +345,7 @@ public class ApplicationWorkspaceCaseHeaderFieldsHelperTests
             profile,
             null);
         Assert.Equal(
-            ApplicationWorkspaceCaseSummaryFillState.Empty,
+            ApplicationWorkspaceCaseSummaryFillState.Default,
             Assert.Single(none, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone).FillState);
 
         var matched = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(

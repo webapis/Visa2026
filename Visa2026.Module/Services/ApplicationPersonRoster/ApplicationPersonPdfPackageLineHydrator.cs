@@ -109,6 +109,7 @@ public static class ApplicationProfileInstancePersonPdfPackageLineHydrator
         item.SecondAddressOfResidence = null;
 #pragma warning restore CS0618
         if (application != null && person != null)
+            item.Address1Text = CasePersonAddress2Note.GetAddress1Text(objectSpace, application.ID, person.ID);
             item.Address2Text = CasePersonAddress2Note.GetText(objectSpace, application.ID, person.ID);
     }
 

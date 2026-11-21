@@ -367,13 +367,25 @@ namespace Visa2026.Module.Services
             if (profile == null)
                 return;
 
-            var address1 = application.Address1;
-            if (profile.RequireAddress1 && address1 != null)
+            if (profile.RequireAddress1)
             {
-                SetInvitationStayField(data, InvitationStayRegionKey, address1.Region?.PdfForm_Code);
-                SetInvitationStayField(data, InvitationStayCityKey, address1.City?.PdfForm_Code);
-                SetInvitationStayField(data, InvitationStayAddressKey, address1.FullAddress);
-                return;
+                var freeText = CaseAddressAutocomplete.NormalizeDisplay(application.Address1DefaultText);
+                if (!string.IsNullOrEmpty(freeText))
+                {
+                    SetInvitationStayField(data, InvitationStayAddressKey, freeText);
+                    return;
+                }
+
+#pragma warning disable CS0618
+                var address1 = application.Address1;
+#pragma warning restore CS0618
+                if (address1 != null)
+                {
+                    SetInvitationStayField(data, InvitationStayRegionKey, address1.Region?.PdfForm_Code);
+                    SetInvitationStayField(data, InvitationStayCityKey, address1.City?.PdfForm_Code);
+                    SetInvitationStayField(data, InvitationStayAddressKey, address1.FullAddress);
+                    return;
+                }
             }
 
 #pragma warning disable CS0618

@@ -80,6 +80,7 @@ public static class ApplicationWorkspaceSchemaSql
                 "OptimisticLockField" integer NOT NULL DEFAULT 0,
                 "ApplicationProfileInstanceId" uuid NOT NULL,
                 "PersonId" uuid NOT NULL,
+                "Address1Text" text NULL,
                 "Address2Text" text NULL,
                 CONSTRAINT "PK_ApplicationProfileInstancePersonAddress2Notes" PRIMARY KEY ("ID"),
                 CONSTRAINT "FK_ApplicationProfileInstancePersonAddress2Notes_ApplicationProfileInstances_ApplicationProfileInstanceId"
@@ -164,6 +165,7 @@ public static class ApplicationWorkspaceSchemaSql
                 OptimisticLockField int NOT NULL CONSTRAINT DF_ApplicationProfileInstancePersonAddress2Notes_OLF DEFAULT (0),
                 ApplicationProfileInstanceId uniqueidentifier NOT NULL,
                 PersonId uniqueidentifier NOT NULL,
+                Address1Text nvarchar(max) NULL,
                 Address2Text nvarchar(max) NULL,
                 CONSTRAINT FK_ApplicationProfileInstancePersonAddress2Notes_ApplicationProfileInstances_ApplicationProfileInstanceId
                     FOREIGN KEY (ApplicationProfileInstanceId) REFERENCES dbo.ApplicationProfileInstances(ID) ON DELETE CASCADE,
@@ -235,7 +237,16 @@ public static class ApplicationWorkspaceSchemaSql
             ALTER COLUMN "GCRecord" SET NOT NULL,
             ALTER COLUMN "OptimisticLockField" SET DEFAULT 0,
             ALTER COLUMN "OptimisticLockField" SET NOT NULL;
+
+          ALTER TABLE "ApplicationProfileInstancePersonAddress2Notes"
+            ADD COLUMN IF NOT EXISTS "Address1Text" text NULL;
         END $$;
+        """;
+
+    internal const string EnsureAddress1TextSqlServer = """
+        IF OBJECT_ID(N'dbo.ApplicationProfileInstancePersonAddress2Notes', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.ApplicationProfileInstancePersonAddress2Notes', N'Address1Text') IS NULL
+            ALTER TABLE dbo.ApplicationProfileInstancePersonAddress2Notes ADD Address1Text nvarchar(max) NULL;
         """;
 
     public static void ApplyIfMissing(string connectionString)
@@ -258,6 +269,7 @@ public static class ApplicationWorkspaceSchemaSql
         using var sqlConnection = new SqlConnection(cleaned);
         sqlConnection.Open();
         Execute(sqlConnection, EnsureSchemaSqlServer);
+        Execute(sqlConnection, EnsureAddress1TextSqlServer);
     }
 
     private static void Execute(System.Data.Common.DbConnection connection, string sql)

@@ -195,19 +195,7 @@
                     <strong>@Msg("ApplicationProfileInstance.Picker.CaseSummary")</strong>
                 </p>
             </div>
-            @if (CaseSummaryFields.Any(f => f.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject && !f.ReadOnly))
-            {
-                <button type="button"
-                        class="@(_address1ToolsGearOn ? "cs-multi-select-popup__gear-btn cs-multi-select-popup__gear-btn--active" : "cs-multi-select-popup__gear-btn")"
-                        title="@Msg(_address1ToolsGearOn ? "Action.ToggleOptionalFields.Hide" : "Action.ToggleOptionalFields.Show")"
-                        aria-label="@Msg(_address1ToolsGearOn ? "Action.ToggleOptionalFields.Hide" : "Action.ToggleOptionalFields.Show")"
-                        aria-pressed="@_address1ToolsGearOn"
-                        @onclick="ToggleAddress1ToolsGear">
-                    <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0 .12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
-                    </svg>
-                </button>
-            }
+
         </header>
 
         @RenderStatus()
@@ -240,29 +228,22 @@
                 <div class="ap-picker__case-main">
                     <div class="ap-picker__summary-form">
                         @foreach (var field in CaseSummaryFields.Where(item =>
-                            item.Kind != ApplicationWorkspaceCaseHeaderFieldKind.AddressObject
-                            && !ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress2DefaultTextField(item.Key)))
+                            !ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(item.Key)))
                         {
                             @RenderSummaryField(field)
                         }
                     </div>
                     @{
-                        var addressFields = CaseSummaryFields
-                            .Where(item => item.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject)
+                        var addressDefaultFields = CaseSummaryFields
+                            .Where(item => ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(item.Key))
                             .ToList();
-                        var address2Field = CaseSummaryFields
-                            .FirstOrDefault(item => ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress2DefaultTextField(item.Key));
                     }
-                    @if (addressFields.Count > 0 || address2Field != null)
+                    @if (addressDefaultFields.Count > 0)
                     {
                         <div class="ap-picker__summary-addresses">
-                            @foreach (var field in addressFields)
+                            @foreach (var field in addressDefaultFields)
                             {
-                                @RenderSummaryField(field)
-                            }
-                            @if (address2Field != null)
-                            {
-                                @RenderAddress2DefaultField(address2Field)
+                                @RenderAddressDefaultField(field)
                             }
                         </div>
                     }
@@ -943,34 +924,6 @@
                     }
                 </div>
             }
-            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject)
-            {
-                <CaseAddressSearchField Options="@field.Options"
-                                        Value="@field.SelectedId"
-                                        DisplayValue="@field.DisplayValue"
-                                        NullText="@Msg("ApplicationProfileInstance.Picker.SelectPlaceholder")"
-                                        Enabled="@(!field.ReadOnly)"
-                                        ReadOnly="@field.ReadOnly"
-                                        ShowClearButton="@_address1ToolsGearOn"
-                                        ValueChanged="id => OnCaseSummaryAddressSelected(field.Key, id ?? Guid.Empty)">
-                    <Actions>
-                        @if (!field.ReadOnly && _address1ToolsGearOn)
-                        {
-                            <span class="os-link-review__icons">
-                                <button type="button"
-                                        class="cw-addr-icon cw-addr-icon--plus"
-                                        title="@Msg("ApplicationProfileInstance.Picker.New")"
-                                        @onclick="() => StartSummaryAddressEditAsync(field, createNew: true)">+</button>
-                                <button type="button"
-                                        class="cw-addr-icon cw-addr-icon--pen"
-                                        title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
-                                        disabled="@(field.SelectedId is not Guid selectedId || selectedId == Guid.Empty)"
-                                        @onclick="() => StartSummaryAddressEditAsync(field, createNew: false)">✎</button>
-                            </span>
-                        }
-                    </Actions>
-                </CaseAddressSearchField>
-            }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.ShortText)
             {
                 <input type="text"
@@ -1036,6 +989,10 @@
         if (!CaseSummaryFieldChanged.HasDelegate || string.IsNullOrWhiteSpace(key))
             return Task.CompletedTask;
 
+        if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(key)
+            || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.Project, StringComparison.Ordinal))
+            _caseSavedAddressCache.Clear();
+
         return CaseSummaryFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
         {
             Key = key,
@@ -1046,16 +1003,14 @@
     private Task OnCaseSummaryAddressSelected(string key, Guid id) =>
         OnCaseSummaryFieldChanged(key, id == Guid.Empty ? string.Empty : id.ToString("D"));
 
-    private IReadOnlyList<CasePersonAddress2Recent.Entry> _caseAddress2Recents =
-        Array.Empty<CasePersonAddress2Recent.Entry>();
-    private Guid _caseAddress2RecentsProfileId;
-    private Guid _caseAddress2RecentsProjectId;
-
-    private RenderFragment RenderAddress2DefaultField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
+    private RenderFragment RenderAddressDefaultField(ApplicationWorkspaceCaseHeaderField field) => __builder =>
     {
-        EnsureCaseAddress2RecentsLoaded();
+        var isAddress1 = ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress1DefaultTextField(field.Key);
+        var suggestions = LoadCaseSavedAddresses(isAddress1
+            ? ApplicationProfileSavedAddressField.Address1
+            : ApplicationProfileSavedAddressField.Address2);
         var required = field.FillState == ApplicationWorkspaceCaseSummaryFillState.Empty;
-        <label class="cw-summary-field cw-summary-field--fill-@ApplicationWorkspaceCaseSummaryFill.CssToken(field.FillState) cw-summary-field--address2">
+        <label class="cw-summary-field cw-summary-field--fill-@ApplicationWorkspaceCaseSummaryFill.CssToken(field.FillState) cw-summary-field--address-ac">
             <span class="cw-summary-field__label">
                 @field.Label
                 @if (required)
@@ -1063,106 +1018,39 @@
                     <span class="ap-picker__req" aria-hidden="true"> *</span>
                 }
             </span>
-            <div class="os-link-review__address2">
-                <textarea class="cw-summary-field__input cw-summary-field__textarea"
-                          rows="4"
-                          maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.Address2DefaultTextMaxLength"
-                          disabled="@field.ReadOnly"
-                          @onchange="e => OnCaseSummaryFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
-                @if (_caseAddress2Recents.Count > 0 && !field.ReadOnly)
-                {
-                    var first = _caseAddress2Recents[0];
-                    <div class="os-link-review__a2-recent" aria-label="Recently used">
-                        <div class="os-link-review__a2-recent-head">Recently used</div>
-                        <button type="button"
-                                class="os-link-review__a2-recent-card @(string.Equals(CasePersonAddress2Recent.NormalizeDisplay(field.Value), CasePersonAddress2Recent.NormalizeDisplay(first.Text), StringComparison.Ordinal) ? "is-selected" : null)"
-                                title="Click to fill Address 2"
-                                @onclick="() => OnCaseSummaryFieldChanged(field.Key, first.Text)">
-                            <span class="os-link-review__a2-recent-text">@TruncateCaseAddress2Recent(first.Text)</span>
-                            <span class="os-link-review__a2-recent-time">@FormatCaseAddress2RecentAge(first.UsedAtUtc)</span>
-                        </button>
-                        @if (_caseAddress2Recents.Count > 1)
-                        {
-                            <select class="os-link-review__select os-link-review__a2-recent-more"
-                                    @onchange="e => OnCaseAddress2RecentIndexPicked(field.Key, e)">
-                                <option value="">Choose another…</option>
-                                @for (var ri = 1; ri < _caseAddress2Recents.Count; ri++)
-                                {
-                                    var entry = _caseAddress2Recents[ri];
-                                    <option value="@ri">@TruncateCaseAddress2Recent(entry.Text, 80)</option>
-                                }
-                            </select>
-                        }
-                    </div>
-                }
-            </div>
+            <AddressAutocompleteField Value="@field.Value"
+                                      Required="@required"
+                                      Enabled="@(!field.ReadOnly)"
+                                      ReadOnly="@field.ReadOnly"
+                                      Suggestions="@suggestions"
+                                      EmptyHint="@(isAddress1
+                                          ? "Start typing to search saved addresses."
+                                          : "Optional. Start typing to search saved entries.")"
+                                      ValueChanged="text => OnCaseSummaryFieldChanged(field.Key, text)" />
         </label>
     };
+    private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _caseSavedAddressCache = new(StringComparer.Ordinal);
 
-    private void EnsureCaseAddress2RecentsLoaded()
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadCaseSavedAddresses(ApplicationProfileSavedAddressField field)
     {
-        if (SelectedProfileId == Guid.Empty)
-        {
-            _caseAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
-            _caseAddress2RecentsProfileId = Guid.Empty;
-            _caseAddress2RecentsProjectId = Guid.Empty;
-            return;
-        }
+        var cacheKey = field.ToString();
+        if (_caseSavedAddressCache.TryGetValue(cacheKey, out var cached))
+            return cached;
 
-        var projectId = CaseSummaryFields
-            .FirstOrDefault(f => string.Equals(f.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.Project, StringComparison.Ordinal))
-            ?.SelectedId ?? Guid.Empty;
-        if (_caseAddress2RecentsProfileId == SelectedProfileId
-            && _caseAddress2RecentsProjectId == projectId)
-            return;
-
-        _caseAddress2RecentsProfileId = SelectedProfileId;
-        _caseAddress2RecentsProjectId = projectId;
         try
         {
+            // Tenant-wide: not scoped by selected profile or project.
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfile>();
-            _caseAddress2Recents = CasePersonAddress2Recent.ListShared(objectSpace, SelectedProfileId, projectId);
+            cached = CaseSavedAddress.List(objectSpace, field);
         }
         catch
         {
-            _caseAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+            cached = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
         }
-    }
 
-    private Task OnCaseAddress2RecentIndexPicked(string key, ChangeEventArgs change)
-    {
-        if (!int.TryParse(change?.Value?.ToString(), out var index))
-            return Task.CompletedTask;
-        if (index < 0 || index >= _caseAddress2Recents.Count)
-            return Task.CompletedTask;
-        return OnCaseSummaryFieldChanged(key, _caseAddress2Recents[index].Text);
+        _caseSavedAddressCache[cacheKey] = cached;
+        return cached;
     }
-
-    private static string TruncateCaseAddress2Recent(string? text, int max = 120)
-    {
-        var value = text?.Trim() ?? string.Empty;
-        if (value.Length <= max)
-            return value;
-        return value[..(max - 1)].TrimEnd() + "…";
-    }
-
-    private static string FormatCaseAddress2RecentAge(DateTime usedAtUtc)
-    {
-        var utc = usedAtUtc.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(usedAtUtc, DateTimeKind.Utc)
-            : usedAtUtc.ToUniversalTime();
-        var age = DateTime.UtcNow - utc;
-        if (age.TotalMinutes < 1)
-            return "just now";
-        if (age.TotalHours < 1)
-            return $"{Math.Max(1, (int)age.TotalMinutes)} min ago";
-        if (age.TotalDays < 1)
-            return $"{Math.Max(1, (int)age.TotalHours)} hours ago";
-        if (age.TotalDays < 2)
-            return "yesterday";
-        return $"{Math.Max(1, (int)age.TotalDays)} days ago";
-    }
-
     private Guid _summaryAddressEditorId;
     private string? _summaryAddressFieldKey;
 

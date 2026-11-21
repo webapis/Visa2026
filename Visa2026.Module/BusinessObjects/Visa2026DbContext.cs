@@ -147,6 +147,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationProfileInstancePersonRequestedLocation> ApplicationProfileInstancePersonRequestedLocations { get; set; }
         public DbSet<ApplicationProfileInstancePersonAddress2Note> ApplicationProfileInstancePersonAddress2Notes { get; set; }
         public DbSet<ApplicationProfileAddress2Recent> ApplicationProfileAddress2Recents { get; set; }
+        public DbSet<ApplicationProfileSavedAddress> ApplicationProfileSavedAddresses { get; set; }
         public DbSet<ApplicationProfileInstanceExclusion> ApplicationProfileInstanceExclusions { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionPerson> ApplicationProfileInstanceExclusionPeople { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionTemplate> ApplicationProfileInstanceExclusionTemplates { get; set; }
@@ -777,16 +778,22 @@ namespace Visa2026.Module.BusinessObjects
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
 #pragma warning restore CS0618
+#pragma warning disable CS0618
                 b.HasOne(a => a.Address1)
                     .WithMany()
                     .HasForeignKey("Address1Id")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+#pragma warning restore CS0618
+                b.Property(a => a.Address1DefaultText).HasColumnType("text");
+#pragma warning disable CS0618
                 b.HasOne(a => a.Address2)
                     .WithMany()
                     .HasForeignKey("Address2Id")
                     .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
+#pragma warning restore CS0618
+                b.Property(a => a.Address2DefaultText).HasColumnType("text");
                 b.HasOne(a => a.BusinessTripLodging)
                     .WithMany()
                     .HasForeignKey("BusinessTripLodgingId")
@@ -1248,6 +1255,24 @@ namespace Visa2026.Module.BusinessObjects
                     .HasDatabaseName("IX_ApplicationProfileInstancePersonAddress2Notes_Instance_Person");
             });
 
+
+            modelBuilder.Entity<ApplicationProfileSavedAddress>(b =>
+            {
+                b.HasOne(r => r.ApplicationProfile)
+                    .WithMany()
+                    .HasForeignKey(r => r.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.Property(r => r.Text).HasColumnType("text");
+                b.Property(r => r.TextKey).HasMaxLength(450);
+                // Tenant-wide Address 1/2: unique Field+TextKey (not profile/project).
+                // Avoid IndexFilter("= 0") — that helper maps "= 0" to "= FALSE" for bools.
+                b.HasIndex(r => new { r.Field, r.TextKey })
+                    .IsUnique()
+                    .HasFilter((Database.ProviderName ?? string.Empty).Contains("Npgsql", StringComparison.OrdinalIgnoreCase)
+                        ? "\"GCRecord\" = 0"
+                        : "[GCRecord] = 0")
+                    .HasDatabaseName("IX_ApplicationProfileSavedAddresses_Field_Text");
+            });
             modelBuilder.Entity<ApplicationProfileAddress2Recent>(b =>
             {
                 b.HasOne(r => r.ApplicationProfile)

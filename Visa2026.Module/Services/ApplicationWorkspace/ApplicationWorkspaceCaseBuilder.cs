@@ -1017,8 +1017,14 @@ internal static class ApplicationWorkspaceCaseBuilder
         if (!tabs.TryGetValue("person", out var personTab) || personTab.Rows.Count == 0)
             return Array.Empty<ApplicationWorkspaceCasePerson>();
 
-        var address2Notes = application != null && objectSpace != null
-            && ApplicationProfilePersonAddressMaxCount.For(application) >= 2
+
+        var addressMax = application != null
+            ? ApplicationProfilePersonAddressMaxCount.For(application)
+            : 0;
+        var address1Notes = application != null && objectSpace != null && addressMax >= 1
+            ? CasePersonAddress2Note.LoadAddress1ForApplication(objectSpace, application)
+            : new Dictionary<Guid, string>();
+        var address2Notes = application != null && objectSpace != null && addressMax >= 2
             ? CasePersonAddress2Note.LoadForApplication(objectSpace, application)
             : new Dictionary<Guid, string>();
 
@@ -1042,7 +1048,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 VisaNumber = JoinCellsForPerson(tabs, "visa", name, 1),
                 WorkPermitNumber = JoinCellsForPerson(tabs, "wp", name, 1),
                 Records = BuildPersonRecords(
-                    application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked, address2Notes),
+                    application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked, address1Notes, address2Notes),
             });
         }
 
@@ -1059,7 +1065,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                     Name = name,
                     RoleLabel = i == 0 ? "Primary applicant" : "Dependent",
                     Records = BuildPersonRecords(
-                        application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked, address2Notes),
+                        application, rosterPeople, rosterLinks, tabs, name, personId, linkableCounts, linksLocked, address1Notes, address2Notes),
                 });
             }
         }
@@ -1082,16 +1088,21 @@ internal static class ApplicationWorkspaceCaseBuilder
         return ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(application, person, slot) != null;
     }
 
-    private static bool PersonHasAddress2Note(
+    private static bool PersonHasAddressNote(
         Guid personId,
-        IReadOnlyDictionary<Guid, string> address2Notes)
+        IReadOnlyDictionary<Guid, string> notes)
     {
-        if (personId == Guid.Empty || address2Notes == null || address2Notes.Count == 0)
+        if (personId == Guid.Empty || notes == null || notes.Count == 0)
             return false;
-        return address2Notes.TryGetValue(personId, out var text)
+        return notes.TryGetValue(personId, out var text)
             && !string.IsNullOrWhiteSpace(text)
             && !string.Equals(text.Trim(), "—", StringComparison.Ordinal);
     }
+
+    private static bool PersonHasAddress2Note(
+        Guid personId,
+        IReadOnlyDictionary<Guid, string> address2Notes) =>
+        PersonHasAddressNote(personId, address2Notes);
 
     private static string FormatRoleLabel(string role)
     {
@@ -1146,6 +1157,7 @@ internal static class ApplicationWorkspaceCaseBuilder
         Guid personId,
         ApplicationWorkspaceLinkableActiveCounts linkableCounts,
         bool linksLocked,
+        IReadOnlyDictionary<Guid, string>? address1Notes = null,
         IReadOnlyDictionary<Guid, string>? address2Notes = null)
     {
         var records = new List<ApplicationWorkspaceCasePersonRecord>();
@@ -1218,7 +1230,8 @@ internal static class ApplicationWorkspaceCaseBuilder
                 var maxSlots = Math.Max(1, ApplicationProfilePersonAddressMaxCount.For(application));
                 if (maxSlots >= 2)
                 {
-                    var slot1Has = PersonHasResolvedAddress(application, rosterPerson, 1);
+                    var slot1Has = PersonHasAddressNote(personId, address1Notes ?? new Dictionary<Guid, string>())
+                        || PersonHasResolvedAddress(application, rosterPerson, 1);
                     var slot2Has = PersonHasAddress2Note(personId, address2Notes ?? new Dictionary<Guid, string>());
                     count = (slot1Has ? 1 : 0) + (slot2Has ? 1 : 0);
                     records.Add(new ApplicationWorkspaceCasePersonRecord
@@ -1246,7 +1259,7 @@ internal static class ApplicationWorkspaceCaseBuilder
                 }
                 else
                 {
-                    var hasAddress = PersonHasResolvedAddress(application, rosterPerson, 1);
+                    var hasAddress = PersonHasAddressNote(personId, address1Notes ?? new Dictionary<Guid, string>()) || PersonHasResolvedAddress(application, rosterPerson, 1);
                     count = hasAddress ? 1 : 0;
                     records.Add(new ApplicationWorkspaceCasePersonRecord
                     {

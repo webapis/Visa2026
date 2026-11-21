@@ -1,3 +1,67 @@
+### 2026-11-21 — AddressAutocompleteField pick did not replace draft
+
+- **Symptom**: Linked Records (and same control elsewhere) — typing a letter, clicking a saved match left the short draft (e.g. `B`) instead of the full address.
+- **Cause**: Option used `@onclick` after blur closed the list; parent `Value` could also re-enter `OnParametersSet` stale and stomp `_draft` after Commit set `_lastExternal`.
+- **Fix**: Select on `@onmousedown` (with preventDefault); `_pickInFlight` skips focus-out commit; `OnParametersSet` ignores stale parent Value while focused after a local commit.
+- **Verify**: Blazor-only isolated build. Stop F5, rebuild, F5 — Linked Records Address 2 type `B`, click match — field becomes the full saved address.
+- **Prevent**: Do not bind pick to `@onclick` only for this combobox; do not blindly sync `Value` → `_draft` while focused after commit.
+- **Cross-skill**: —
+### 2026-11-21 — Linked Records Address 1/2 same typeahead as Case summary
+
+- **Need**: Linked Records dialog Address 1/2 should use the same free-text autocomplete + tenant-wide saved list as Case summary (not AoR picker / Recently used strip).
+- **Cause**: Address 2 used textarea + `CasePersonAddress2Recent`; Address 1 used `CaseAddressSearchField` / catalog `AddressOfResidence` when gear on.
+- **Fix**: Both slots are free-text notes (`Address1Text` + `Address2Text` on person note row). Overview uses `AddressAutocompleteField` + `CaseSavedAddress.List`. Join Remembers into shared pool. Dropped Recently used UI from the dialog. Legacy AoR dual-read when Address 1 note empty.
+- **Verify**: CasePersonAddress2NoteTests + saved-address tests (18). Isolated Module/Blazor build. Local `Address1Text` column added. Stop F5, rebuild, F5 — Linked Records Address 1/2 typeahead shares Case summary suggestions.
+- **Prevent**: Do not reintroduce Recently used strip or AoR picker for Linked Records Address 1/2.
+- **Cross-skill**: —
+### 2026-11-21 — Address 1/2 reusable across all applications (tenant-wide)
+
+- **Need**: Saved Address 1/2 suggestions must work for every application regardless of profile, project, type, or other parameters (not isolated per project/profile).
+- **Cause**: Unique key and `CaseSavedAddress.List`/`Remember` were scoped by ApplicationProfileId + ProjectContractId. Empty-project rows fixed Case Edit for one path but still hid suggestions across profiles/projects.
+- **Fix**: `List`/`Remember`/`Prune` key only on Field + TextKey. Unique index `IX_ApplicationProfileSavedAddresses_Field_Text` on (`Field`,`TextKey`) WHERE GCRecord=0 (dedupe soft-deletes extras). EF DbContext index matches. Blazor picker + case workspace call `List(objectSpace, field)` only. `ProjectContractId` stays Empty on insert; ApplicationProfileId kept as required FK for last writer only.
+- **Verify**: Schema SQL tests (3). Isolated Module + Blazor build. Local `visa2026` index healed. Stop F5, rebuild, F5 — save Address 1 on one case, open another profile/project — same suggestions appear.
+- **Prevent**: Do not reintroduce profile/project filters on Address 1/2 suggestion list or unique index.
+- **Cross-skill**: —
+### 2026-11-21 — Case Edit Address 1/2 autocomplete empty (wizard works)
+
+- **Symptom**: Case workspace Edit Address 1/2 showed "Start typing…" but never suggested previously saved addresses. Create wizard suggestions worked.
+- **Cause**: Saved rows were stored with `ProjectContractId = Empty` (address typed while Project still empty on create). Case Edit lists by the case’s real project only, so scoped count was 0. Wizard still used Empty project SelectedId while Project was required/empty, so it matched.
+- **Fix**: `CaseSavedAddress.List` / `Remember` / prune include Empty-scoped rows for the profile; dedupe by fold key preferring exact-project. Remember promotes Empty → current project on reuse. Case workspace loader force-loads ApplicationProfile / ProjectContract before List.
+- **Verify**: `CaseSavedAddressTests` + `CaseAddressAutocompleteTests` (5 passed). Stop F5, rebuild, F5. Open case 11/-069 Edit → type `A` in Address 1 — should suggest `Aşgabat şäheri Tegeran 8-2.`
+- **Prevent**: Do not require exact ProjectContractId match alone for suggestion list; Empty means “saved before project was set.”
+- **Cross-skill**: —
+### 2026-11-21 — Address 1 autocomplete unreadable on dark theme
+
+- **Symptom**: Create Case summary Address 1 suggestions showed light text on a light/white dropdown (nearly invisible) under Fluent dark.
+- **Cause**: `.cw-addr-ac__list` used `:root` light `--os-surface` / inherited light ink fallbacks. `.ap-picker` sets `--ap-*` from Fluent tokens but did not remap `--os-*`, so the shared `AddressAutocompleteField` kept the light shell palette while option text inherited dark-theme `--ap-ink`.
+- **Fix**: Alias `--os-panel/ink/muted/line/surface/border/accent` to `--ap-*` on `.ap-picker`. Dropdown uses panel + explicit ink, hover uses surface/hover, mark/meta use accent/muted. Same list rules in `case-workspace.css` for in-case edit.
+- **Verify**: Hard-refresh create wizard → type in Address 1 — suggestion list matches dark panel with readable text. Light theme still readable.
+- **Prevent**: Do not style shared `cw-addr-ac*` widgets with bare `--os-surface` fallbacks inside the picker without aliasing or `--ap-*` first.
+- **Cross-skill**: —
+### 2026-11-21 — Picker create: Column 'GCRecord' is null on Address 1/2
+
+- **Symptom**: Create Application Profile Instance from the picker failed on `CommitChanges` with `DbUpdateException` / `InvalidCastException: Column 'GCRecord' is null` at `ApplicationProfilePickerCompletionHelper.TryCommitNewApplication`.
+- **Cause**: Case summary Address 1/2 calls `CaseSavedAddress.Remember`, which inserts `ApplicationProfileSavedAddresses`. Host-start SQL created that table with nullable `GCRecord` / `OptimisticLockField`. XAF omits those columns on insert; Postgres stored NULL; Npgsql RETURNING failed the int read. Same pattern as ApprovalLegVersions (2026-08-18) and picker shelves (2026-10-30).
+- **Fix**: `ApplicationProfileSavedAddressSchemaSql` creates and heals both columns as `NOT NULL DEFAULT 0`, and recreates the unique index as `WHERE "GCRecord" = 0`. Local `visa2026` healed in this session. Next host start applies the same heal via `Startup` `ApplyIfMissing`.
+- **Verify**: `ApplicationProfileSavedAddressSchemaSqlTests` (2 passed). Isolated Module.Tests build. Stop F5, rebuild, F5. Create a profile that uses Address 1 or 2 on Case summary — commit succeeds.
+- **Prevent**: Do not create new XAF tables with `"GCRecord" integer NULL`. Match Application Profiles: `"GCRecord" integer NOT NULL DEFAULT 0`. After healing to 0, filtered unique indexes must use `= 0`, not `IS NULL`.
+- **Cross-skill**: visa2026-runtime-error-tracking
+### 2026-11-20 — Case requested location visibility via Require* (JSON / USE)
+
+- **Need**: Requested border zone / work permit location Case visibility configurable per template (not hard-coded May produce).
+- **Fix**: Case show/copy gates on `RequireBorderZone` / `RequireWorkPermitLocation`. Unlocked Results & fields USE (no Produce force). Calik `application-profile.calik-energi.json` sets both true when May produce Inv/WP/Visa/BZ/WorkLocation. Still optional Create fill.
+- **Officer**: Sync lookup catalogs / restart. Toggle USE on Results & fields to show/hide Case fields. Çakylyk templates now seed USE on.
+- **Prevent**: Do not re-force Require* from Produce in wizard OnParametersSet. Do not treat USE as Create-required.
+- **Verify**: CaseHeaderFieldsHelper + Case*LocationCopy tests; JSON Require* for get_invitation / get_border_zone / change_workpermit.
+- **Cross-skill**: —
+### 2026-11-20 — Case requested BZ/WP location defaults (May produce Inv/WP/Visa/BZ)
+
+- **Need**: Optional case defaults for Requested border zone + work permit location on create/Case summary whenever May produce Invitation, Work permit, Visa, or Border zone (not only grant templates); copy into empty person requested rows; never block Create.
+- **Fix**: `ShowCaseRequestedLocationDefaults` (also keeps ProduceWorkLocation for goşmaça). Case header visibility/TryApply use that gate; optional fill (empty = Default). `AcceptOnJoin` / `EnsureForPeopleWithEmptyLocations` copy only when person empty; clear case does not wipe people. Linked-records ShowInLinkReview unchanged.
+- **Officer**: Stop F5, rebuild. Çakylyk create/Case summary shows both location multi-selects (optional). Set case values → Join people with empty requested locations get them; edit per person in Linked records when those rows show.
+- **Prevent**: Do not require Results&fields USE / Require* for Case visibility. Do not clear person requested locations when case is cleared.
+- **Verify**: Module tests CaseHeaderFieldsHelper + Case*LocationCopy CanApplyCaseDefault.
+- **Cross-skill**: —
 ### 2026-11-20 — Case Address2DefaultText on create + Case summary
 
 - **Need**: Optional case-level Address 2 free text under Address 1 (create + open case), template RequireAddress2 visibility, Recently used, copy-on-Join into empty person notes.
@@ -4669,3 +4733,9 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Officer**: Pick from searchable catalog; `+` create upserts a shared row (reuse if same Type+street).
 - **Prevent**: Do not create per-case AddressOfResidence copies for Linked Records overrides.
 - **Verify**: Unit tests `AddressOfResidenceCatalogHelperTests`; F5 after manifest bump — catalog list has unique streets; search filters.
+
+## 2026-11-21 — Case Address 1 free text (no instance AoR)
+- **Symptom**: Address 1 on Application Profile instances was catalog `AddressOfResidence` FK; officers needed free text + autocomplete like Address 2.
+- **Cause**: Instance summary used AoR lookup UI (`CaseAddressSearchField` / `Address1` FK).
+- **Fix**: `Address1DefaultText` on instance; obsolete `Address1` FK (dual-read); `ApplicationProfileSavedAddress` + `CaseAddressAutocomplete` / `CaseSavedAddress`; create wizard + case summary use `AddressAutocompleteField`. Invitation stay copy writes free text. Linked-records person AoR picker unchanged for now.
+- **Prevent**: Do not reintroduce case summary `AddressOfResidence` FKs for Address 1/2 on instances.

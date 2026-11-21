@@ -7,7 +7,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
-/// Shared-catalog address resolution: Linked Records override ResolvedLink, else instance Address1/Address2.
+/// Shared-catalog address resolution for Linked Records overrides. Case summary Address 1/2 are free text (not AoR FKs).
 /// </summary>
 public static class ApplicationProfileInstanceAddressResolver
 {
@@ -40,7 +40,11 @@ public static class ApplicationProfileInstanceAddressResolver
             return;
         }
 
-        instance.Address1 = address;
+        // Case summary Address 1 catalog FK is obsolete (Address1DefaultText free text).
+#pragma warning disable CS0618
+        instance.Address1 = null;
+#pragma warning restore CS0618
+        _ = address;
     }
 
     /// <summary>

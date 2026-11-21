@@ -171,6 +171,9 @@ flowchart LR
 | Link existing pins only one visa; Relink then makes 2/2 | First Link only Refresh'd the picker person. Restart, Link again — both valid visas should appear without Relink | `LinkPerson` → `RelinkPerson` + profile Last-N load |
 | Unlink then Link existing fails “saving entity changes” | Soft-deleted ResolvedLinks occupied the unique index. Restart after rebuild so the GCRecord-filtered index heals. Then Link again | `ApplicationProfileInstancePersonResolvedLink` unique + unlink |
 | Picker shelf seed: Column 'GCRecord' is null | Host-start created `ApplicationProfilePickerShelves` with nullable `GCRecord`. Stop F5, rebuild, F5 so the heal sets NOT NULL DEFAULT 0 before the shelf insert | `ApplicationProfilePickerShelfSchemaSql` |
+| Picker create: Column ''GCRecord'' is null (Address 1/2) | Host-start created `ApplicationProfileSavedAddresses` with nullable `GCRecord`. Local heal applied; stop F5, rebuild, F5 so create-with-address succeeds | `ApplicationProfileSavedAddressSchemaSql` |
+| Address 1/2 suggestions missing across apps/profiles | Suggestions are tenant-wide (Field+TextKey). Rebuild + F5 so unique index heal runs; do not filter List by profile/project | `CaseSavedAddress` + `ApplicationProfileSavedAddressSchemaSql` |
+| Linked Records Address 1/2 still shows Recently used / AoR picker | Free-text autocomplete ships in this change; stop F5, rebuild, F5 | AddressAutocompleteField + CasePersonAddress2Note |
 | Overview silent when Case summary has empty required fields | Empty tiles already red; Overview nav was blank | `ResolveOverviewNav` / `MissingRequiredCount`; same red-count / green-check as People |
 | Case workspace stays on “Loading case workspace…” for several seconds | Split EF query (`AsSplitQuery`); do not load org catalogs / document-copy nav on first paint | `ApplicationWorkspaceQueryService.LoadInstance`; `ApplicationWorkspaceLinkableActiveCounts` |
 

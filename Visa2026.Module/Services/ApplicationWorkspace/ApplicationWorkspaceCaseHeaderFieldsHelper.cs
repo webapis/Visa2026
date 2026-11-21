@@ -229,14 +229,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false,
             LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
-        // Case summary only — Linked-records person rows still use EffectiveRequireBorderZone / Visa copy.
+        // Optional case defaults — USE RequireBorderZone (JSON / Results & fields); Linked-records keep own gates.
         AddCommaSeparatedMultiSelect(fields, BorderZone, ApplicationProfileLocalization.Field("BorderZone"), "teal", "📍",
-            Visible(profile, p => p.ProduceBorderZone,
-                ApplicationProfileConfigurationResolver.CanIssueBorderZone, application),
+            ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application),
             application.BorderZoneLocation,
             FormatBorderZoneDisplay(application.BorderZoneLocation_NameTm, application.BorderZoneLocation),
             catalogs.BorderZoneNames, readOnly: false,
-            BorderZoneFill(application.BorderZoneLocation, profile?.DefaultBorderZoneLocation));
+            OptionalRequestedLocationFill(application.BorderZoneLocation, profile?.DefaultBorderZoneLocation));
 
         AddDate(fields, EndDate, ApplicationProfileLocalization.Field("EndDate"), "green", "📅",
             Visible(profile, p => p.RequireEndDate, ApplicationProfileConfigurationResolver.ShowBusinessTrips, application),
@@ -416,15 +415,22 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 ApplicationWorkspaceCaseSummaryFillState.Officer);
         }
 
+        var address1Text = ResolveAddress1DefaultText(application);
         var rosterHasLinkedAddress = RosterHasLinkedAddressOfResidence(application);
-        AddAddressObject(
+        var address1Fill = string.IsNullOrWhiteSpace(address1Text)
+            ? (rosterHasLinkedAddress
+                ? ApplicationWorkspaceCaseSummaryFillState.Default
+                : ApplicationWorkspaceCaseSummaryFillState.Empty)
+            : ApplicationWorkspaceCaseSummaryFillState.Officer;
+        AddText(
             fields,
             Address1,
-            ApplicationProfileLocalization.Field("Address1"),
+            ResolveAddressFieldLabel(Address1, ApplicationProfileLocalization.Field("Address1")),
+            "purple",
+            "📍",
             ApplicationProfileConfigurationResolver.ShowAddress1(application),
-            application.Address1,
-            catalogs.AddressesOfResidence,
-            rosterHasLinkedAddress);
+            address1Text,
+            address1Fill);
 
         // Optional case-level Address 2 default (free text) — copy-on-Join into person notes.
         AddText(
@@ -444,14 +450,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             application.Purpose,
             TextFill(application.Purpose, profile?.DefaultPurpose));
 
-        // Case summary only — Linked-records WP rows still use RequireWorkPermitLocationWhenProducingWorkPermit.
+        // Optional case defaults — USE RequireWorkPermitLocation (JSON / Results & fields); Linked-records keep own gates.
         AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, ApplicationProfileLocalization.Field("WorkPermitLocation"), "blue", "🏢",
-            Visible(profile, p => p.ProduceWorkLocation,
-                ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant, application),
+            ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation(application),
             application.MovementPermitLocation,
             application.MovementPermitLocation_NameTm,
             catalogs.WorkPermittedLocationNames, readOnly: false,
-            MultiSelectFill(application.MovementPermitLocation, profile?.DefaultWorkPermitLocation));
+            OptionalRequestedLocationFill(application.MovementPermitLocation, profile?.DefaultWorkPermitLocation));
 
         return fields;
     }
@@ -518,8 +523,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<VisaPeriod>(objectSpace, value, item => application.VisaPeriod = item!, out error);
             case BorderZone:
-                if (!Visible(profile, p => p.ProduceBorderZone,
-                    ApplicationProfileConfigurationResolver.CanIssueBorderZone, application))
+                if (!ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application))
                     return Hidden(out error);
                 if (!SetBorderZone(value, application, out error))
                     return false;
@@ -683,13 +687,19 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             case Address1:
                 if (!Visible(profile, p => p.RequireAddress1, ApplicationProfileConfigurationResolver.ShowAddress1, application))
                     return true;
-                return Edited(EnsureAndAssignSummaryAddress(objectSpace, application, slot: 1, value, out error));
+                if (!SetText(value, CaseAddressAutocomplete.MaxLength, text => application.Address1DefaultText = text, out error))
+                    return false;
+#pragma warning disable CS0618
+                application.Address1 = null;
+#pragma warning restore CS0618
+                CaseSavedAddress.Remember(objectSpace, application, ApplicationProfileSavedAddressField.Address1, application.Address1DefaultText);
+                return true;
             case Address2:
                 if (!Visible(profile, p => p.RequireAddress2, ApplicationProfileConfigurationResolver.ShowAddress2, application))
                     return true;
-                if (!SetText(value, Address2DefaultTextMaxLength, text => application.Address2DefaultText = text, out error))
+                if (!SetText(value, CaseAddressAutocomplete.MaxLength, text => application.Address2DefaultText = text, out error))
                     return false;
-                CasePersonAddress2Recent.Remember(objectSpace, application, application.Address2DefaultText);
+                CaseSavedAddress.Remember(objectSpace, application, ApplicationProfileSavedAddressField.Address2, application.Address2DefaultText);
                 return true;
             case InvitationAddressType:
                 if (!ShowInvitationPlace(profile, application))
@@ -766,8 +776,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 return SetLookup<Urgency>(objectSpace, value, item => application.Urgency = item!, out error);
             case WorkPermitLocation:
-                if (!Visible(profile, p => p.ProduceWorkLocation,
-                    ApplicationProfileConfigurationResolver.CanIssueWorkPermitLocationGrant, application))
+                if (!ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation(application))
                     return Hidden(out error);
                 if (!SetWorkPermitLocation(value, application, out error))
                     return false;
@@ -1094,6 +1103,19 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
     /// Soft-suppress Case summary Address 1 Empty when People &amp; links already has a
     /// resolved AddressOfResidence (common on extend / legacy apps without case Address1).
     /// </summary>
+    /// <summary>Case Address 1 free text, with dual-read from obsolete catalog FK.</summary>
+    public static string ResolveAddress1DefaultText(ApplicationProfileInstance? application)
+    {
+        if (application == null)
+            return string.Empty;
+        var text = CaseAddressAutocomplete.NormalizeDisplay(application.Address1DefaultText);
+        if (!string.IsNullOrEmpty(text))
+            return text;
+#pragma warning disable CS0618
+        return AddressOfResidenceReportText.CityAndStreet(application.Address1);
+#pragma warning restore CS0618
+    }
+
     public static bool RosterHasLinkedAddressOfResidence(ApplicationProfileInstance? application)
     {
         if (application?.PersonResolvedLinks == null)
@@ -1175,10 +1197,15 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
         return "Address 1";
     }
 
-    public static bool IsAddressObjectField(string? key) =>
+    /// <summary>Legacy catalog AddressObject — case summary Address 1/2 are free text now.</summary>
+    public static bool IsAddressObjectField(string? key) => false;
+
+    public static bool IsAddress1DefaultTextField(string? key) =>
         string.Equals(key, Address1, StringComparison.Ordinal);
 
-    /// <summary>Case-level free-text Address 2 default (not catalog AddressObject).</summary>
+    public static bool IsAddressDefaultTextField(string? key) =>
+        IsAddress1DefaultTextField(key) || IsAddress2DefaultTextField(key);
+
     public static bool IsAddress2DefaultTextField(string? key) =>
         string.Equals(key, Address2, StringComparison.Ordinal);
 
@@ -1495,6 +1522,19 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 : ApplicationWorkspaceCaseSummaryFillState.Empty;
         }
 
+        return MultiSelectFill(stored, defaultStored);
+    }
+
+    /// <summary>
+    /// Case requested BZ / WP location defaults are optional — empty never blocks Create.
+    /// </summary>
+    private static ApplicationWorkspaceCaseSummaryFillState OptionalRequestedLocationFill(
+        string? stored,
+        string? defaultStored)
+    {
+        var selected = NormalizeMultiSelect(stored);
+        if (selected.Count == 0)
+            return ApplicationWorkspaceCaseSummaryFillState.Default;
         return MultiSelectFill(stored, defaultStored);
     }
 

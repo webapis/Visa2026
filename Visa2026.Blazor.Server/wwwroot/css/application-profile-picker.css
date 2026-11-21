@@ -42,6 +42,16 @@
     --ap-hue-bad: var(--ap-bad);
     --ap-hue-info: var(--ap-info);
 
+    /* Shared AddressAutocompleteField (and other os-* widgets) inherit light :root --os-* otherwise. */
+    --os-panel: var(--ap-panel);
+    --os-ink: var(--ap-ink);
+    --os-muted: var(--ap-muted);
+    --os-line: var(--ap-line);
+    --os-surface: var(--ap-hover);
+    --os-border: var(--ap-line);
+    --os-accent: var(--ap-accent);
+    --os-accent-soft: var(--ap-accent-soft);
+
     font-family: inherit;
     color: var(--ap-ink);
     background: transparent;
@@ -614,6 +624,52 @@
     flex-direction: column;
     gap: 12px;
     max-width: min(52rem, 100%);
+    width: 100%;
+}
+/* Address 1: same footprint as Address 2 textarea (rows=4 / 5.5rem) — fixed empty or selected. */
+.ap-picker__summary-addresses .cw-summary-field:has(.cw-summary-address-block),
+.ap-picker__summary-addresses .cw-summary-field--address2 {
+    width: 100%;
+}
+.ap-picker__summary-addresses .cw-summary-address-block,
+.ap-picker__summary-addresses .cw-summary-lookup-row--address,
+.ap-picker__summary-addresses .os-link-review__address2 {
+    width: 100%;
+    min-width: 0;
+}
+.ap-picker__summary-addresses .cw-summary-address-search,
+.ap-picker__summary-addresses .cw-summary-address-search.dxbl-combo-box,
+.ap-picker__summary-addresses .cw-summary-address-committed,
+.ap-picker__summary-addresses .cw-summary-field__textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 5.5rem;
+    height: 5.5rem;
+    max-height: 5.5rem;
+    field-sizing: fixed;
+}
+.ap-picker__summary-addresses .cw-summary-address-combo-edit,
+.ap-picker__summary-addresses .cw-summary-address-search .dxbl-text-edit,
+.ap-picker__summary-addresses .cw-summary-address-search.dxbl-combo-box {
+    min-height: 5.5rem;
+    height: 100%;
+}
+.ap-picker__summary-addresses .cw-summary-address-committed,
+.ap-picker__summary-addresses .cw-summary-address-committed .cw-summary-address-edit-label,
+.ap-picker__summary-addresses .cw-summary-address-search .cw-summary-address-edit-label {
+    overflow: auto;
+    max-height: 5.5rem;
+}
+.ap-picker__summary-addresses .cw-summary-address-committed .cw-summary-address-edit-label {
+    min-height: calc(5.5rem - 2px);
+    box-sizing: border-box;
+}
+.ap-picker__summary-addresses .cw-summary-address-search:not(:focus-within) .cw-summary-address-combo-edit:not(:has(.cw-summary-address-edit-label))::before {
+    min-height: 5.5rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
 }
 .ap-picker .cw-summary-lookup-row {
     display: flex;
@@ -1224,3 +1280,99 @@
         border-top: 3px solid var(--ap-accent);
     }
 }
+
+/* Case Address 1/2 free-text autocomplete */
+.cw-addr-ac { position: relative; width: 100%; }
+.cw-addr-ac__field { position: relative; }
+.cw-addr-ac__ta {
+  width: 100%;
+  min-height: 84px;
+  padding: 8px 32px 8px 10px;
+  resize: vertical;
+  line-height: 1.45;
+}
+.cw-addr-ac__ta.is-saved { border-color: #17804f; }
+.cw-addr-ac__clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(127, 127, 140, 0.25);
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.cw-addr-ac__list {
+  position: absolute;
+  z-index: 40;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--ap-panel, var(--os-panel, #fff));
+  color: var(--ap-ink, var(--os-ink, #1a2332));
+  border: 1px solid var(--ap-line, var(--os-line, var(--os-border, #c6c6d6)));
+  border-radius: 8px;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 22%, transparent);
+  max-height: 252px;
+  overflow-y: auto;
+}
+.cw-addr-ac__option {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: inherit;
+}
+.cw-addr-ac__option.is-active,
+.cw-addr-ac__option:hover { background: var(--ap-hover, var(--os-surface, rgba(106, 31, 176, 0.08))); }
+.cw-addr-ac__option-main { min-width: 0; overflow-wrap: anywhere; color: inherit; }
+.cw-addr-ac__option-main mark {
+  background: transparent;
+  /* Amber match highlight — not Fluent primary pink/purple. */
+  color: #d4a017;
+  font-weight: 700;
+}
+.dxbl-theme-fluent-mode-dark .cw-addr-ac__option-main mark {
+  color: #f5d76e;
+}
+.cw-addr-ac__option-meta {
+  flex: none;
+  font-size: 11px;
+  color: var(--ap-muted, var(--os-muted, #5b5b70));
+  font-variant-numeric: tabular-nums;
+}
+.cw-addr-ac__status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--ap-muted, var(--os-muted, #5b5b70));
+  min-height: 18px;
+}
+.cw-addr-ac__status::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ap-line, var(--os-line, var(--os-border, #c6c6d6)));
+}
+.cw-addr-ac__status[data-state="ok"] { color: #17804f; }
+.cw-addr-ac__status[data-state="ok"]::before { background: #17804f; }
+.cw-addr-ac__status[data-state="new"] { color: #1a56b0; }
+.cw-addr-ac__status[data-state="new"]::before { background: #1a56b0; }
+.ap-picker__summary-addresses .cw-summary-field--address-ac,
+.cw-summary-field--address-ac { width: 100%; }

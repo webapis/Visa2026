@@ -1601,11 +1601,12 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInLookupListView(false)]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
 
-        /// <summary>Case summary Address 1 (owned AoR with RosterPerson null).</summary>
+        /// <summary>Obsolete catalog Address 1 FK. Prefer <see cref="Address1DefaultText"/>.</summary>
         [VisibleInListView(false)]
         [VisibleInDetailView(false)]
         [VisibleInLookupListView(false)]
-        [XafDisplayName("Address 1")]
+        [Obsolete("Use Address1DefaultText (case free text). AddressOfResidence is not used on Application Profile instances.")]
+        [XafDisplayName("Address 1 (catalog)")]
         public virtual AddressOfResidence? Address1 { get; set; }
 
         /// <summary>Obsolete catalog Address 2 FK. Prefer <see cref="Address2DefaultText"/> + person notes.</summary>
@@ -1615,6 +1616,16 @@ namespace Visa2026.Module.BusinessObjects
         [Obsolete("Use Address2DefaultText (case) and ApplicationProfileInstancePersonAddress2Note (people).")]
         [XafDisplayName("Address 2 (catalog)")]
         public virtual AddressOfResidence? Address2 { get; set; }
+
+        /// <summary>
+        /// Case-level Address 1 (free text). Suggested via <see cref="ApplicationProfileSavedAddress"/>.
+        /// </summary>
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        [XafDisplayName("Address 1")]
+        public virtual string? Address1DefaultText { get; set; }
 
         /// <summary>
         /// Case-level Address 2 default (free text). Copied into a person note on Join when that person has no note yet.

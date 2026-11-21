@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.Services;
@@ -69,11 +70,19 @@ public static class InvitationStayAddressCopy
         if (!CanCopy(objectSpace, application, out var stay) || stay == null)
             return;
 
-        if (application.Address1 != null)
+        var existing = ApplicationWorkspaceCaseHeaderFieldsHelper.ResolveAddress1DefaultText(application);
+        if (!string.IsNullOrWhiteSpace(existing))
             return;
 
-        var address = AddressOfResidenceCatalogHelper.UpsertFromStay(objectSpace, stay);
-        application.Address1 = address;
+        var text = CaseAddressAutocomplete.NormalizeDisplay(InvitationAddressText.Format(stay));
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        application.Address1DefaultText = text;
+#pragma warning disable CS0618
+        application.Address1 = null;
+#pragma warning restore CS0618
+        CaseSavedAddress.Remember(objectSpace, application, ApplicationProfileSavedAddressField.Address1, text);
     }
 
     /// <summary>

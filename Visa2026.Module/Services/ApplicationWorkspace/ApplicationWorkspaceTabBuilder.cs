@@ -280,8 +280,8 @@ internal static class ApplicationWorkspaceTabBuilder
             emptyMessage: "No address linked.");
 
     /// <summary>
-    /// One row per person/slot (Address 1 then Address 2). Uses override ResolvedLink when present,
-    /// otherwise case summary Address1/Address2 so People & links matches Case summary.
+    /// One row per person/slot (Address 1 then Address 2). Both use free-text notes
+    /// (<see cref="CasePersonAddress2Note"/>); Address 1 dual-reads legacy AoR when note empty.
     /// </summary>
     private static KindRows RowsForAddressSlots(
         IObjectSpace objectSpace,
@@ -296,6 +296,10 @@ internal static class ApplicationWorkspaceTabBuilder
         var linkedObjectIds = new List<Guid>();
         var offers = new List<bool>();
         var maxSlots = Math.Max(1, ApplicationProfilePersonAddressMaxCount.For(application));
+        var address1Notes = CasePersonAddress2Note.LoadAddress1ForApplication(objectSpace, application);
+        var address2Notes = maxSlots >= 2
+            ? CasePersonAddress2Note.LoadForApplication(objectSpace, application)
+            : null;
 
         foreach (var person in people)
         {
@@ -304,6 +308,27 @@ internal static class ApplicationWorkspaceTabBuilder
 
             for (var slot = 1; slot <= maxSlots; slot++)
             {
+                if (slot >= 2)
+                {
+                    address2Notes!.TryGetValue(person.ID, out var noteText);
+                    var note = string.IsNullOrWhiteSpace(noteText) ? "—" : noteText.Trim();
+                    rows.Add([PersonName(person), note]);
+                    personIds.Add(person.ID);
+                    linkedObjectIds.Add(Guid.Empty);
+                    offers.Add(false);
+                    continue;
+                }
+
+                address1Notes.TryGetValue(person.ID, out var address1Note);
+                if (!string.IsNullOrWhiteSpace(address1Note))
+                {
+                    rows.Add([PersonName(person), address1Note.Trim()]);
+                    personIds.Add(person.ID);
+                    linkedObjectIds.Add(Guid.Empty);
+                    offers.Add(false);
+                    continue;
+                }
+
                 var addr = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
                     application, person, slot, objectSpace);
                 if (addr != null)
@@ -311,8 +336,8 @@ internal static class ApplicationWorkspaceTabBuilder
                     addr = LoadAddressForDisplay(objectSpace, linkedEntities, addr);
                 }
 
-                var text = FormatAddressCell(addr);
-                rows.Add([PersonName(person), text]);
+                var cell = FormatAddressCell(addr);
+                rows.Add([PersonName(person), cell]);
                 personIds.Add(person.ID);
                 linkedObjectIds.Add(addr?.ID ?? Guid.Empty);
                 offers.Add(false);

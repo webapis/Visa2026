@@ -406,8 +406,10 @@ namespace Visa2026.Module.BusinessObjects
             CurrentAddressOfResidence = ApplicationProfileInstanceAddressResolver.ResolveAddressSlot(
                 ApplicationProfileInstance, p, ApplicationProfileInstanceAddressResolver.Slot1);
             SecondAddressOfResidence = null;
-            Address2Text = ApplicationProfileInstance?.PersonAddress2Notes?
-                .FirstOrDefault(n => n != null && n.PersonId == p.ID)?.Address2Text;
+            var personNote = ApplicationProfileInstance?.PersonAddress2Notes?
+                .FirstOrDefault(n => n != null && n.PersonId == p.ID);
+            Address1Text = personNote?.Address1Text;
+            Address2Text = personNote?.Address2Text;
             CurrentMedicalRecord = PersonCurrentItems.GetCurrentMedicalRecord(p);
             CurrentInvitationItem = PersonCurrentItems.GetCurrentInvitationItem(p);
             PreviousInvitationItem = null;
@@ -844,11 +846,22 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Address
         [XafDisplayName("Address Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_FullAddress =>
-            AddressOfResidenceReportText.CityAndStreet(CurrentAddressOfResidence);
+        public string Address_FullAddress
+        {
+            get
+            {
+                var free = Address1Text?.Trim();
+                if (!string.IsNullOrWhiteSpace(free) && free != "—")
+                    return free;
+                return AddressOfResidenceReportText.CityAndStreet(CurrentAddressOfResidence);
+            }
+        }
 
         [XafDisplayName("Address Type"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_Type => CurrentAddressOfResidence?.Type?.ToString();
+        public string Address_Type =>
+            string.IsNullOrWhiteSpace(Address1Text) || Address1Text.Trim() == "—"
+                ? CurrentAddressOfResidence?.Type?.ToString()
+                : string.Empty;
 
         [XafDisplayName("Address Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Address_ExpirationDate => CurrentAddressOfResidence?.ExpirationDate;
@@ -1946,6 +1959,8 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>People &amp; links Address 2 free-text notes for this roster person.</summary>
         [Browsable(false)]
         [VisibleInDetailView(false), VisibleInListView(false)]
+        public string? Address1Text { get; set; }
+
         public string? Address2Text { get; set; }
 
         [Appearance("CurrentWorkDutyEmployeeOnly", Visibility = ViewItemVisibility.Hide,

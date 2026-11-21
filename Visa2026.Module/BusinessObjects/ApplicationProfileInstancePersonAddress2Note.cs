@@ -10,7 +10,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Case↔person optional Address 2 free-text notes (People &amp; links).
+/// Case↔person Address 1 / Address 2 free-text notes (People &amp; links).
 /// One row per (instance, person). Not a catalog AddressOfResidence FK.
 /// </summary>
 [Table("ApplicationProfileInstancePersonAddress2Notes")]
@@ -31,6 +31,10 @@ public class ApplicationProfileInstancePersonAddress2Note : BaseObject
     [RuleRequiredField]
     [ForeignKey(nameof(PersonId))]
     public virtual Person Person { get; set; } = null!;
+
+    /// <summary>Free multiline Address 1 notes for this person on this case.</summary>
+    [FieldSize(FieldSizeAttribute.Unlimited)]
+    public virtual string? Address1Text { get; set; }
 
     /// <summary>Free multiline Address 2 notes for this person on this case.</summary>
     [FieldSize(FieldSizeAttribute.Unlimited)]

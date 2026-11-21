@@ -561,11 +561,11 @@
             _linkReviewWidth = null;
             _linkReviewHeight = null;
             EnsureLinkReviewBesidePreview();
-            ReloadAddress2Recents();
+            _caseSummarySavedAddressCache.Clear();
         }
         else if (!ShowPersonLinkReview && _reviewWasOpen)
         {
-            _address2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+            _caseSummarySavedAddressCache.Clear();
         }
 
         _reviewWasOpen = ShowPersonLinkReview;
@@ -778,12 +778,10 @@
             return;
 
         var needsCatalogs = view.HeaderFields.Any(field =>
-            (field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+            field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
                     or ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect
                 && field.Options.Count == 0
-                && field.MultiSelectOptions.Count == 0)
-            || (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject
-                && field.Options.Count == 0));
+                && field.MultiSelectOptions.Count == 0);
         if (!needsCatalogs)
             return;
 
@@ -1160,6 +1158,8 @@
 
     private Task OnHeaderFieldChanged(string key, string? value)
     {
+        if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(key))
+            _caseSummarySavedAddressCache.Clear();
         ApplyHeaderDraft(key, value, null);
         return Task.CompletedTask;
     }
@@ -1933,42 +1933,21 @@
                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text
-                     && ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress2DefaultTextField(field.Key))
+                     && ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(field.Key))
             {
-                EnsureCaseSummaryAddress2RecentsLoaded();
-                <div class="os-link-review__address2">
-                    <textarea class="cw-summary-field__input cw-summary-field__textarea"
-                              maxlength="@ApplicationWorkspaceCaseHeaderFieldsHelper.Address2DefaultTextMaxLength"
-                              rows="4"
-                              disabled="@readOnly"
-                              @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
-                    @if (_caseSummaryAddress2Recents.Count > 0 && !readOnly)
-                    {
-                        var first = _caseSummaryAddress2Recents[0];
-                        <div class="os-link-review__a2-recent" aria-label="Recently used">
-                            <div class="os-link-review__a2-recent-head">Recently used</div>
-                            <button type="button"
-                                    class="os-link-review__a2-recent-card @(string.Equals(CasePersonAddress2Recent.NormalizeDisplay(field.Value), CasePersonAddress2Recent.NormalizeDisplay(first.Text), StringComparison.Ordinal) ? "is-selected" : null)"
-                                    title="Click to fill Address 2"
-                                    @onclick="() => OnHeaderFieldChanged(field.Key, first.Text)">
-                                <span class="os-link-review__a2-recent-text">@TruncateAddress2Recent(first.Text)</span>
-                                <span class="os-link-review__a2-recent-time">@FormatAddress2RecentAge(first.UsedAtUtc)</span>
-                            </button>
-                            @if (_caseSummaryAddress2Recents.Count > 1)
-                            {
-                                <select class="os-link-review__select os-link-review__a2-recent-more"
-                                        @onchange="e => OnCaseSummaryAddress2RecentIndexPicked(field.Key, e)">
-                                    <option value="">Choose another…</option>
-                                    @for (var ri = 1; ri < _caseSummaryAddress2Recents.Count; ri++)
-                                    {
-                                        var entry = _caseSummaryAddress2Recents[ri];
-                                        <option value="@ri">@TruncateAddress2Recent(entry.Text, 80)</option>
-                                    }
-                                </select>
-                            }
-                        </div>
-                    }
-                </div>
+                var isAddress1 = ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress1DefaultTextField(field.Key);
+                var suggestions = LoadCaseSummarySavedAddresses(isAddress1
+                    ? ApplicationProfileSavedAddressField.Address1
+                    : ApplicationProfileSavedAddressField.Address2);
+                <AddressAutocompleteField Value="@field.Value"
+                                          Required="@(field.FillState == ApplicationWorkspaceCaseSummaryFillState.Empty)"
+                                          Enabled="@(!readOnly)"
+                                          ReadOnly="@readOnly"
+                                          Suggestions="@suggestions"
+                                          EmptyHint="@(isAddress1
+                                              ? "Start typing to search saved addresses."
+                                              : "Optional. Start typing to search saved entries.")"
+                                          ValueChanged="text => OnHeaderFieldChanged(field.Key, text)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
             {
@@ -1977,33 +1956,6 @@
                           rows="4"
                           disabled="@readOnly"
                           @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())">@field.Value</textarea>
-            }
-            else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.AddressObject)
-            {
-                <CaseAddressSearchField Options="@field.Options"
-                                        Value="@field.SelectedId"
-                                        DisplayValue="@field.DisplayValue"
-                                        NullText="— Select —"
-                                        Enabled="@(!readOnly)"
-                                        ReadOnly="@readOnly"
-                                        ValueChanged="id => OnHeaderAddressSelected(field.Key, id ?? Guid.Empty)">
-                    <Actions>
-                        @if (!readOnly)
-                        {
-                            <span class="os-link-review__icons">
-                                <button type="button"
-                                        class="cw-addr-icon cw-addr-icon--plus"
-                                        title="@Msg("ApplicationProfileInstance.Picker.New")"
-                                        @onclick="() => StartSummaryAddressEditAsync(field.Key, createNew: true)">+</button>
-                                <button type="button"
-                                        class="cw-addr-icon cw-addr-icon--pen"
-                                        title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
-                                        disabled="@(field.SelectedId is not Guid selectedId || selectedId == Guid.Empty)"
-                                        @onclick="() => StartSummaryAddressEditAsync(field.Key, createNew: false)">✎</button>
-                            </span>
-                        }
-                    </Actions>
-                </CaseAddressSearchField>
             }
             else
             {
@@ -3011,37 +2963,19 @@
                                     }
                                     @if (line.UsesMultilineText)
                                     {
-                                        <div class="os-link-review__address2">
-                                            <textarea class="os-link-review__select os-link-review__textarea"
-                                                      rows="4"
-                                                      value="@line.TextValue"
-                                                      @onchange="e => SetAddress2Text(line, e.Value?.ToString())"></textarea>
-                                            @if (_address2Recents.Count > 0)
-                                            {
-                                                var first = _address2Recents[0];
-                                                <div class="os-link-review__a2-recent" aria-label="Recently used">
-                                                    <div class="os-link-review__a2-recent-head">Recently used</div>
-                                                    <button type="button"
-                                                            class="os-link-review__a2-recent-card @(IsAddress2RecentSelected(line, first.Text) ? "is-selected" : null)"
-                                                            title="Click to fill Address 2"
-                                                            @onclick="() => ApplyAddress2Recent(line, first.Text)">
-                                                        <span class="os-link-review__a2-recent-text">@TruncateAddress2Recent(first.Text)</span>
-                                                        <span class="os-link-review__a2-recent-time">@FormatAddress2RecentAge(first.UsedAtUtc)</span>
-                                                    </button>
-                                                    @if (_address2Recents.Count > 1)
-                                                    {
-                                                        <select class="os-link-review__select os-link-review__a2-recent-more"
-                                                                @onchange="e => OnAddress2RecentIndexPicked(line, e)">
-                                                            <option value="">Choose another…</option>
-                                                            @for (var ri = 1; ri < _address2Recents.Count; ri++)
-                                                            {
-                                                                var entry = _address2Recents[ri];
-                                                                <option value="@ri">@TruncateAddress2Recent(entry.Text, 80)</option>
-                                                            }
-                                                        </select>
-                                                    }
-                                                </div>
-                                            }
+                                        var isAddress1Line = (line.SlotIndex <= 1);
+                                        var addressField = isAddress1Line
+                                            ? ApplicationProfileSavedAddressField.Address1
+                                            : ApplicationProfileSavedAddressField.Address2;
+                                        <div class="os-link-review__address2 os-link-review__address-ac">
+                                            <AddressAutocompleteField Value="@line.TextValue"
+                                                                      Required="false"
+                                                                      Enabled="true"
+                                                                      Suggestions="@LoadCaseSummarySavedAddresses(addressField)"
+                                                                      EmptyHint="@(isAddress1Line
+                                                                          ? "Start typing to search saved addresses."
+                                                                          : "Optional. Start typing to search saved entries.")"
+                                                                      ValueChanged="text => SetAddressText(line, text)" />
                                         </div>
                                     }
                                     else if (IsRequestedLocationReviewLine(line))
@@ -3056,40 +2990,14 @@
                                     }
                                     else if (_reviewGearOn && line.Choices.Count > 0)
                                     {
-                                        @* Same CaseAddressSearchField as create wizard / Case summary Address 1–2. *@
-                                        @if (line.Kind == ApplicationProfileInstancePersonLinkKind.AddressOfResidence && !line.UsesMultilineText)
-                                        {
-                                            <CaseAddressSearchField Options="@LinkReviewAddressOptions(line)"
-                                                                    Value="@(line.ObjectId == Guid.Empty ? null : line.ObjectId)"
-                                                                    DisplayValue="@LinkReviewAddressDisplay(line)"
-                                                                    NullText="—"
-                                                                    Enabled="true"
-                                                                    ValueChanged="id => OnReviewAddressChoiceChanged(line, id ?? Guid.Empty)">
-                                                <Actions>
-                                                    <span class="os-link-review__icons">
-                                                        <button type="button"
-                                                                class="cw-addr-icon cw-addr-icon--plus"
-                                                                title="@Msg("ApplicationProfileInstance.Issued.AddPerson")"
-                                                                @onclick="() => StartCreateAsync(line)">+</button>
-                                                        <button type="button"
-                                                                class="cw-addr-icon cw-addr-icon--pen"
-                                                                title="@Msg("ApplicationProfileInstance.LinkReview.Edit")"
-                                                                @onclick="() => StartEditAsync(line)">✎</button>
-                                                    </span>
-                                                </Actions>
-                                            </CaseAddressSearchField>
-                                        }
-                                        else
-                                        {
-                                            <select class="os-link-review__select"
-                                                    value="@line.ObjectId"
-                                                    @onchange="e => OnReviewChoiceChanged(line, e)">
-                                                @foreach (var choice in PersonLinkReview.ChoicesForManualPick(line, _reviewActiveOnly))
-                                                {
-                                                    <option value="@choice.ObjectId">@choice.Label</option>
-                                                }
-                                            </select>
-                                        }
+                                        <select class="os-link-review__select"
+                                                value="@line.ObjectId"
+                                                @onchange="e => OnReviewChoiceChanged(line, e)">
+                                            @foreach (var choice in PersonLinkReview.ChoicesForManualPick(line, _reviewActiveOnly))
+                                            {
+                                                <option value="@choice.ObjectId">@choice.Label</option>
+                                            }
+                                        </select>
                                     }
                                     else
                                     {
@@ -4380,132 +4288,48 @@
         return string.IsNullOrWhiteSpace(merged) ? null : merged;
     }
 
-    private IReadOnlyList<CasePersonAddress2Recent.Entry> _address2Recents =
-        Array.Empty<CasePersonAddress2Recent.Entry>();
 
-    private IReadOnlyList<CasePersonAddress2Recent.Entry> _caseSummaryAddress2Recents =
-        Array.Empty<CasePersonAddress2Recent.Entry>();
+    private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _caseSummarySavedAddressCache = new(StringComparer.Ordinal);
+    private Guid _caseSummarySavedAddressCaseId;
 
-    private void EnsureCaseSummaryAddress2RecentsLoaded()
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadCaseSummarySavedAddresses(ApplicationProfileSavedAddressField field)
     {
-        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
-        if (instanceId == Guid.Empty)
+        var caseId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (caseId == Guid.Empty)
+            return Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+
+        if (_caseSummarySavedAddressCaseId != caseId)
         {
-            _caseSummaryAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
-            return;
+            _caseSummarySavedAddressCaseId = caseId;
+            _caseSummarySavedAddressCache.Clear();
         }
+
+        var cacheKey = field.ToString();
+        if (_caseSummarySavedAddressCache.TryGetValue(cacheKey, out var cached))
+            return cached;
 
         try
         {
+            // Tenant-wide: Address 1/2 suggestions are not scoped by case/profile/project.
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
-            if (application == null)
-            {
-                _caseSummaryAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
-                return;
-            }
-
-            _ = application.ApplicationProfile;
-            _ = application.ProjectContract;
-            _caseSummaryAddress2Recents = CasePersonAddress2Recent.ListForReview(
-                objectSpace, application, excludePersonId: Guid.Empty);
+            cached = CaseSavedAddress.List(objectSpace, field);
         }
         catch
         {
-            _caseSummaryAddress2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
+            cached = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
         }
+
+        _caseSummarySavedAddressCache[cacheKey] = cached;
+        return cached;
     }
 
-    private void OnCaseSummaryAddress2RecentIndexPicked(string key, ChangeEventArgs change)
-    {
-        if (!int.TryParse(change?.Value?.ToString(), out var index))
-            return;
-        if (index < 0 || index >= _caseSummaryAddress2Recents.Count)
-            return;
-        OnHeaderFieldChanged(key, _caseSummaryAddress2Recents[index].Text);
-    }
-
-    private void SetAddress2Text(PersonLinkReviewLine line, string? value)
+    private void SetAddressText(PersonLinkReviewLine line, string? value)
     {
         line.TextValue = value;
         line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
         StateHasChanged();
     }
 
-    private void ReloadAddress2Recents()
-    {
-        _address2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
-        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
-        if (instanceId == Guid.Empty || PersonLinkReviewPersonId == Guid.Empty)
-            return;
-
-        try
-        {
-            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
-            if (application == null)
-                return;
-            _ = application.ApplicationProfile;
-            _ = application.ProjectContract;
-            _address2Recents = CasePersonAddress2Recent.ListForReview(
-                objectSpace, application, PersonLinkReviewPersonId);
-        }
-        catch
-        {
-            _address2Recents = Array.Empty<CasePersonAddress2Recent.Entry>();
-        }
-    }
-
-    private void ApplyAddress2Recent(PersonLinkReviewLine line, string? text)
-    {
-        if (line == null || string.IsNullOrWhiteSpace(text))
-            return;
-        SetAddress2Text(line, text);
-    }
-
-    private void OnAddress2RecentIndexPicked(PersonLinkReviewLine line, ChangeEventArgs change)
-    {
-        if (!int.TryParse(change?.Value?.ToString(), out var index))
-            return;
-        if (index < 0 || index >= _address2Recents.Count)
-            return;
-        ApplyAddress2Recent(line, _address2Recents[index].Text);
-    }
-
-    private static bool IsAddress2RecentSelected(PersonLinkReviewLine line, string text) =>
-        string.Equals(
-            CasePersonAddress2Recent.NormalizeDisplay(line?.TextValue),
-            CasePersonAddress2Recent.NormalizeDisplay(text),
-            StringComparison.Ordinal);
-
-    private static string TruncateAddress2Recent(string? text, int max = 120)
-    {
-        var value = text?.Trim() ?? string.Empty;
-        if (value.Length <= max)
-            return value;
-        return value[..(max - 1)].TrimEnd() + "…";
-    }
-
-    private static string FormatAddress2RecentAge(DateTime usedAtUtc)
-    {
-        var utc = usedAtUtc.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(usedAtUtc, DateTimeKind.Utc)
-            : usedAtUtc.ToUniversalTime();
-        var age = DateTime.UtcNow - utc;
-        if (age.TotalMinutes < 1)
-            return "just now";
-        if (age.TotalHours < 1)
-            return $"{Math.Max(1, (int)age.TotalMinutes)} min ago";
-        if (age.TotalDays < 1)
-            return $"{Math.Max(1, (int)age.TotalHours)} hours ago";
-        if (age.TotalDays < 2)
-            return "yesterday";
-        return $"{Math.Max(1, (int)age.TotalDays)} days ago";
-    }
-    /// <summary>
-    /// Replaces the session value for requested WP/BZ locations. Empty means "not edited" for Join
-    /// (chips cleared so Accept path skips and does not wipe a prior DB row).
-    /// </summary>
     private void SetRequestedLocations(PersonLinkReviewLine line, string? value)
     {
         line.LocationChips.Clear();

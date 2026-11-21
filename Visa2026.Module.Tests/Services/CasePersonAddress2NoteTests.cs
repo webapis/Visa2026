@@ -27,7 +27,11 @@ public class CasePersonAddress2NoteTests
         };
         var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
 
-        Assert.Contains(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address1);
+        var address1 = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address1);
+        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Text, address1.Kind);
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress1DefaultTextField(address1.Key));
+        Assert.False(ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressObjectField(address1.Key));
+
         var address2 = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address2);
         Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Text, address2.Kind);
         Assert.Equal("Case default note", address2.Value);
@@ -50,7 +54,7 @@ public class CasePersonAddress2NoteTests
     }
 
     [Fact]
-    public void AddressSlotLines_WhenMaxSlotsTwo_EmitsMultilineAddress2Note()
+    public void AddressSlotLines_WhenMaxSlotsTwo_EmitsFreeTextAddress1And2()
     {
         var profile = new ApplicationProfile
         {
@@ -70,8 +74,11 @@ public class CasePersonAddress2NoteTests
         var lines = PersonLinkReview.AddressSlotLines(null!, application, person, "Address");
 
         Assert.Equal(2, lines.Count);
-        Assert.False(lines[0].UsesMultilineText);
+        Assert.True(lines[0].UsesMultilineText);
         Assert.Equal(1, lines[0].SlotIndex);
+        Assert.Equal("Address 1", lines[0].Label);
+        Assert.Empty(lines[0].Choices);
+        Assert.Equal(Guid.Empty, lines[0].ObjectId);
         Assert.True(lines[1].UsesMultilineText);
         Assert.Equal(2, lines[1].SlotIndex);
         Assert.Equal("Address 2", lines[1].Label);
@@ -145,5 +152,49 @@ public class CasePersonAddress2NoteTests
         Assert.Equal(string.Empty, line.Address2_CityTm);
         Assert.Null(line.Address2_ExpirationDate);
         Assert.Equal(string.Empty, line.Address2_ExpirationDateText);
+    }
+
+    [Fact]
+    public void MergeLine_Address1_FullAddress_PrefersFreeTextNote()
+    {
+        var line = new ApplicationRosterMergeLine
+        {
+            Address1Text = "Free text address one",
+        };
+        Assert.Equal("Free text address one", line.Address1_FullAddress);
+        Assert.Equal(string.Empty, line.Address1_Type);
+    }
+
+    [Fact]
+    public void Build_CaseSummary_Address1IsRequiredFreeText_NotCatalog()
+    {
+        var profile = new ApplicationProfile
+        {
+            RequireAddress1 = true,
+            RequireAddress2 = false,
+        };
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = profile,
+            Address1DefaultText = "Case address one",
+        };
+        var fields = ApplicationWorkspaceCaseHeaderFieldsHelper.Build(application, profile, null);
+        var address1 = Assert.Single(fields, item => item.Key == ApplicationWorkspaceCaseHeaderFieldsHelper.Address1);
+        Assert.Equal(ApplicationWorkspaceCaseHeaderFieldKind.Text, address1.Kind);
+        Assert.Equal("Case address one", address1.Value);
+        Assert.Equal(ApplicationWorkspaceCaseSummaryFillState.Officer, address1.FillState);
+        Assert.True(ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(address1.Key));
+    }
+
+    [Fact]
+    public void SetInstanceSummaryAddress_Slot1_ClearsObsoleteFk()
+    {
+        var application = new ApplicationProfileInstance();
+#pragma warning disable CS0618
+        application.Address1 = new AddressOfResidence();
+        ApplicationProfileInstanceAddressResolver.SetInstanceSummaryAddress(
+            application, ApplicationProfileInstanceAddressResolver.Slot1, new AddressOfResidence());
+        Assert.Null(application.Address1);
+#pragma warning restore CS0618
     }
 }
