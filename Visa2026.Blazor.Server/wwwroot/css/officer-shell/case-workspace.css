@@ -798,6 +798,7 @@ button.cw-person:focus-visible {
   display: block;
   column-count: 3;
   column-gap: 14px;
+  /* balance: distribute fields across columns (auto piles into col 1). */
   column-fill: balance;
 }
 .cw-summary-form > .cw-summary-field {
@@ -807,10 +808,22 @@ button.cw-person:focus-visible {
   width: 100%;
   margin: 0 0 10px;
 }
-/* Address 1/2 use full summary width — same as create-wizard. */
+/* Location multi-select: label top-align; overlay while typing (list is absolute). */
+.cw-summary-form > .cw-summary-field:has(.cw-loc-ms) {
+  align-items: flex-start;
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+.cw-summary-form > .cw-summary-field:has(.cw-loc-ms) .cw-summary-field__label {
+  padding-top: 8px;
+}
+.cw-summary-form > .cw-summary-field:has(.cw-loc-ms:focus-within) {
+  z-index: 8;
+}
+/* Keep Address 1/2 in the multi-column flow (no column-span) so Case properties stay 3-col. */
 .cw-summary-form > .cw-summary-field[data-summary-kind="AddressObject"] {
-  column-span: all;
-  max-width: min(52rem, 100%);
+  max-width: none;
 }
 .cw-summary-form--stack,
 .cw-summary-identity .cw-summary-form {
@@ -3539,9 +3552,15 @@ select.cw-summary-field__input option {
 .cw-addr-ac__ta {
   width: 100%;
   min-height: 84px;
+  max-height: 9.5rem;
   padding: 8px 32px 8px 10px;
   resize: vertical;
   line-height: 1.45;
+}
+.cw-summary-form .cw-addr-ac__ta {
+  /* Cap growth so Address cells do not unbalance the Case properties columns. */
+  max-height: 7.5rem;
+  overflow-y: auto;
 }
 .cw-addr-ac__ta.is-saved { border-color: #17804f; }
 .cw-addr-ac__clear {
@@ -3628,3 +3647,130 @@ select.cw-summary-field__input option {
 .cw-addr-ac__status[data-state="new"]::before { background: #1a56b0; }
 .ap-picker__summary-addresses .cw-summary-field--address-ac,
 .cw-summary-field--address-ac { width: 100%; }
+/* Location multi-select (border zone / work permit) */
+.cw-loc-ms { position: relative; width: 100%; }
+.cw-loc-ms__field { position: relative; width: 100%; }
+.cw-loc-ms__box {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  max-height: 4.75rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 3px 34px 3px 6px;
+  background: var(--ap-field, var(--os-surface, #fff));
+  border: 1px solid var(--ap-ctl, var(--os-border, #c6c6d6));
+  border-radius: 6px;
+  cursor: text;
+}
+.cw-loc-ms:focus-within .cw-loc-ms__box {
+  outline: 2px solid var(--ap-ctl, var(--os-accent, #2a78d0));
+  outline-offset: 1px;
+}
+.cw-loc-ms__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 3px 0 9px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--ap-chip-bg, rgba(106, 31, 176, 0.16));
+  color: var(--ap-chip-fg, inherit);
+  font-size: 12px;
+  font-weight: 500;
+}
+.cw-loc-ms__chip.is-new {
+  background: transparent;
+  border: 1px dashed var(--ap-info, #1a56b0);
+  color: var(--ap-info, #1a56b0);
+}
+.cw-loc-ms__chip-lbl {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cw-loc-ms__chip-x {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.8;
+  padding: 0;
+}
+.cw-loc-ms__chip-x:hover { opacity: 1; background: rgba(127, 127, 127, 0.35); }
+.cw-loc-ms__chip--more {
+  padding: 0 10px;
+  cursor: pointer;
+  background: var(--ap-hover, var(--os-surface, rgba(0,0,0,0.06)));
+}
+.cw-loc-ms__input {
+  flex: 1 1 110px;
+  min-width: 110px;
+  width: auto;
+  height: 26px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0 4px;
+}
+.cw-loc-ms__clear {
+  position: absolute;
+  right: 4px;
+  top: 3px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ap-hover, rgba(127, 127, 140, 0.25));
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0;
+}
+.cw-loc-ms__list.cw-addr-ac__list {
+  position: absolute;
+  z-index: 60;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+}
+.cw-loc-ms .cw-addr-ac__status {
+  /* Reserve one line so status text does not reflow the multi-column summary. */
+  min-height: 18px;
+  max-height: 18px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cw-loc-ms__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.dxbl-theme-fluent-mode-dark .cw-loc-ms__box {
+  background: var(--ap-field, #2f2f38);
+  border-color: var(--ap-ctl, #55556a);
+}

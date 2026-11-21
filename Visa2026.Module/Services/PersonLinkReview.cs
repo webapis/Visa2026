@@ -25,6 +25,9 @@ public sealed class PersonLinkReviewLine
     /// <summary>Source-tagged location chips for requested WP/BZ location rows. Mutable Hidden for this Join.</summary>
     public List<PersonLinkReviewLocationChip> LocationChips { get; set; } = new();
 
+    /// <summary>Comma-joined location string for the multi-select (Address TextValue pattern).</summary>
+    public string? LocationValue { get; set; }
+
     /// <summary>True when this kind stores document scans (eye shown on Overview).</summary>
     public bool SupportsDocumentCopy { get; set; }
 
@@ -176,10 +179,24 @@ public static partial class PersonLinkReview
             }
         }
 
+        // Requested locations follow Case Results flags even when Person document tiles are off
+        // (e.g. Çakylyk Almak: no Work permit item, but RequireWorkPermitLocation).
+        if (CaseWorkPermitLocationCopy.ShowInLinkReview(application)
+            && !lines.Any(line => string.Equals(line.ResolveTabKey(), "WorkPermitLocation", StringComparison.Ordinal)))
+        {
+            lines.Add(WorkPermitLocationLine(objectSpace, application, person));
+        }
+
         if (CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application)
             && !lines.Any(line => string.Equals(line.ResolveTabKey(), "VisaBorderZoneLocation", StringComparison.Ordinal)))
         {
             lines.Add(VisaBorderZoneLocationLine(objectSpace, application, person));
+        }
+
+        if (CaseBorderZoneLocationCopy.ShowInLinkReview(application)
+            && !lines.Any(line => string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal)))
+        {
+            lines.Add(BorderZoneItemLocationLine(objectSpace, application, person));
         }
 
         PersonLinkReviewDocumentCopy.RefreshAll(objectSpace, lines);
@@ -424,8 +441,8 @@ public static partial class PersonLinkReview
             }
         }
 
-        // Requested WP/BZ locations are officer-entered on Linked records only — no Case/Visa/WP
-        // AcceptOnJoin prefill. Empty chip list means "not edited this open" (do not clear).
+        // Requested WP/BZ chips may be prefilled from Joined person row or Case defaults.
+        // Empty chip list means "not edited this open" (do not clear).
         foreach (var line in lines ?? Array.Empty<PersonLinkReviewLine>())
         {
             if (!line.OmitFromJoin)
@@ -447,16 +464,31 @@ public static partial class PersonLinkReview
             {
                 CaseWorkPermitLocationCopy.TryApplyEditedLocations(
                     objectSpace, application, person, line.ObjectId, merged);
+                CaseSavedLocation.RememberAll(
+                    objectSpace,
+                    application,
+                    ApplicationProfileSavedLocationField.WorkPermitLocation,
+                    CaseLocationAutocomplete.ParseChips(merged, string.Empty));
             }
             else if (string.Equals(line.ResolveTabKey(), "BorderZoneLocation", StringComparison.Ordinal))
             {
                 CaseBorderZoneLocationCopy.TryApplyEditedLocations(
                     objectSpace, application, person, line.ObjectId, merged);
+                CaseSavedLocation.RememberAll(
+                    objectSpace,
+                    application,
+                    ApplicationProfileSavedLocationField.BorderZone,
+                    CaseLocationAutocomplete.ParseChips(merged));
             }
             else
             {
                 CaseVisaBorderZoneLocationCopy.TryApplyEditedLocations(
                     objectSpace, application, person, line.ObjectId, merged);
+                CaseSavedLocation.RememberAll(
+                    objectSpace,
+                    application,
+                    ApplicationProfileSavedLocationField.BorderZone,
+                    CaseLocationAutocomplete.ParseChips(merged));
             }
         }
     }
@@ -494,13 +526,23 @@ public static partial class PersonLinkReview
     {
         var item = ResolveLinkedWorkPermitItem(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveWorkPermitItem(person);
-        // Always start empty — officer sets requested WP locations manually (no Case/Visa/WP/Joined chips).
-        return EmptyRequestedLocationLine(
+        var joined = objectSpace != null && application.ID != Guid.Empty && person.ID != Guid.Empty
+            ? CasePersonRequestedLocation.GetLocations(
+                objectSpace,
+                application.ID,
+                person.ID,
+                ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit)
+            : null;
+        // Prefer a fresh scalar read — Case may have been saved in another ObjectSpace.
+        var caseLocations = ResolveWorkPermitCaseLocations(objectSpace, application);
+        return PrefillRequestedLocationLine(
             ApplicationProfileInstancePersonLinkKind.WorkPermitItem,
             "WorkPermitLocation",
             "Work permit location",
             ApplicationProfileLocalization.Field("WorkPermitLocation"),
-            item?.ID ?? Guid.Empty);
+            item?.ID ?? Guid.Empty,
+            joined,
+            caseLocations);
     }
 
     private static WorkPermitItem? ResolveLinkedWorkPermitItem(
@@ -531,12 +573,22 @@ public static partial class PersonLinkReview
     {
         var visa = ResolveLinkedVisa(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveVisa(person);
-        return EmptyRequestedLocationLine(
+        var joined = objectSpace != null && application.ID != Guid.Empty && person.ID != Guid.Empty
+            ? CasePersonRequestedLocation.GetLocations(
+                objectSpace,
+                application.ID,
+                person.ID,
+                ApplicationProfileInstancePersonRequestedLocationKind.BorderZone)
+            : null;
+        var caseLocations = CaseVisaBorderZoneLocationCopy.ResolveCaseLocations(application);
+        return PrefillRequestedLocationLine(
             ApplicationProfileInstancePersonLinkKind.Visa,
             "VisaBorderZoneLocation",
             "Border zone location",
             ApplicationProfileLocalization.Field("BorderZoneLocation"),
-            visa?.ID ?? Guid.Empty);
+            visa?.ID ?? Guid.Empty,
+            joined,
+            caseLocations);
     }
 
     private static Visa? ResolveLinkedVisa(
@@ -567,41 +619,131 @@ public static partial class PersonLinkReview
     {
         var item = ResolveLinkedBorderZoneItem(objectSpace, application, person)
             ?? ApplicationProfileInstancePersonValidItems.ResolveBorderZoneItem(objectSpace, person);
-        return EmptyRequestedLocationLine(
+        var joined = objectSpace != null && application.ID != Guid.Empty && person.ID != Guid.Empty
+            ? CasePersonRequestedLocation.GetLocations(
+                objectSpace,
+                application.ID,
+                person.ID,
+                ApplicationProfileInstancePersonRequestedLocationKind.BorderZone)
+            : null;
+        var caseLocations = CaseBorderZoneLocationCopy.ResolveCaseLocations(application);
+        return PrefillRequestedLocationLine(
             ApplicationProfileInstancePersonLinkKind.BorderZoneItem,
             "BorderZoneLocation",
             "Border zone location",
             ApplicationProfileLocalization.Field("BorderZoneLocation"),
-            item?.ID ?? Guid.Empty);
+            item?.ID ?? Guid.Empty,
+            joined,
+            caseLocations);
     }
 
     /// <summary>
-    /// Requested WP/BZ location rows start blank each open; officer enters values in the multi-select.
+    /// Requested WP/BZ rows: person Joined values win; else Case defaults (Address 1/2 pattern).
+    /// Officer can edit chips before Join.
     /// </summary>
-    private static PersonLinkReviewLine EmptyRequestedLocationLine(
+    private static PersonLinkReviewLine PrefillRequestedLocationLine(
         ApplicationProfileInstancePersonLinkKind kind,
         string tabKey,
         string label,
         string fieldLabel,
-        Guid objectId)
+        Guid objectId,
+        string? joinedLocations,
+        string? caseLocations)
     {
+        var chips = LinkReviewLocationChips.Build(joinedLocations, caseLocations, null, null).ToList();
+        var summary = LinkReviewLocationChips.DisplayPreferJoined(joinedLocations, chips);
+        var locationValue = string.IsNullOrWhiteSpace(summary) || summary == "—"
+            ? null
+            : summary;
         var line = new PersonLinkReviewLine
         {
             Kind = kind,
             TabKey = tabKey,
             OmitFromJoin = true,
             Label = label,
-            Summary = "—",
+            Summary = summary,
             ObjectId = objectId,
-            LocationChips = new List<PersonLinkReviewLocationChip>(),
+            LocationChips = chips,
+            LocationValue = locationValue,
         };
         line.Fields = new List<PersonLinkReviewField>
         {
-            Field(fieldLabel, "—", true, false),
+            Field(fieldLabel, summary, true, false),
         };
         line.Choices = Array.Empty<PersonLinkReviewChoice>();
         return line;
     }
+
+    /// <summary>
+    /// Fill empty Linked Records WP/BZ rows from Case summary values the officer currently sees
+    /// (persisted scalars and/or Case header draft). Does not overwrite person Joined chips.
+    /// </summary>
+    public static void ApplyCaseLocationDefaults(
+        IList<PersonLinkReviewLine> lines,
+        string? caseWorkPermitLocations,
+        string? caseBorderZoneLocations)
+    {
+        if (lines == null || lines.Count == 0)
+            return;
+
+        foreach (var line in lines)
+        {
+            if (line == null || !line.OmitFromJoin)
+                continue;
+            if (!string.IsNullOrWhiteSpace(line.LocationValue)
+                || !string.IsNullOrWhiteSpace(LinkReviewLocationChips.JoinVisible(line.LocationChips)))
+                continue;
+
+            var tab = line.ResolveTabKey();
+            string? caseLocations = null;
+            if (string.Equals(tab, "WorkPermitLocation", StringComparison.Ordinal))
+                caseLocations = caseWorkPermitLocations;
+            else if (string.Equals(tab, "BorderZoneLocation", StringComparison.Ordinal)
+                     || string.Equals(tab, "VisaBorderZoneLocation", StringComparison.Ordinal))
+                caseLocations = caseBorderZoneLocations;
+
+            if (string.IsNullOrWhiteSpace(caseLocations))
+                continue;
+
+            line.LocationChips = LinkReviewLocationChips.Build(null, caseLocations, null, null).ToList();
+            line.Summary = LinkReviewLocationChips.DisplaySummary(line.LocationChips);
+            line.LocationValue = string.IsNullOrWhiteSpace(line.Summary) || line.Summary == "—"
+                ? null
+                : line.Summary;
+            if (line.Fields.Count > 0)
+            {
+                var first = line.Fields[0];
+                line.Fields = new List<PersonLinkReviewField>
+                {
+                    Field(first.Label, line.Summary, first.Required, first.Lookup),
+                };
+            }
+        }
+    }
+
+    private static string? ResolveWorkPermitCaseLocations(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance application)
+    {
+        if (application == null)
+            return null;
+        if (objectSpace != null
+            && application.ID != Guid.Empty
+            && !objectSpace.IsNewObject(application))
+        {
+            try
+            {
+                objectSpace.ReloadObject(application);
+            }
+            catch
+            {
+                // Keep in-memory instance if reload fails.
+            }
+        }
+
+        return CaseWorkPermitLocationCopy.ResolveCaseLocations(application);
+    }
+
 
     private static IEnumerable<string> SplitLocationTokens(string? stored)
     {

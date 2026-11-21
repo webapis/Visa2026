@@ -734,10 +734,42 @@ public class ApplicationProfilePickerPropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         _caseSummaryUpdates = ApplicationProfilePickerCaseSummaryDraft.Merge(_caseSummaryUpdates, update);
+
+        // Location multi-select: patch the existing field in place. A full draft rebuild
+        // remounts LocationMultiSelectField and was dropping all but the last chip.
+        if (TryPatchCaseSummaryLocationField(model, update))
+        {
+            model.Step = 4;
+            model.StatusMessage = null;
+            model.IsStatusError = false;
+            return;
+        }
+
         LoadCaseSummaryDraft(model);
         model.Step = 4;
         model.StatusMessage = null;
         model.IsStatusError = false;
+    }
+
+    private static bool TryPatchCaseSummaryLocationField(
+        ApplicationProfilePickerModel model,
+        ApplicationWorkspaceCaseHeaderFieldUpdate update)
+    {
+        if (!string.Equals(update.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone, StringComparison.Ordinal)
+            && !string.Equals(update.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal))
+            return false;
+
+        var field = model.CaseSummaryFields?
+            .FirstOrDefault(item => string.Equals(item.Key, update.Key, StringComparison.Ordinal));
+        if (field == null || field.Kind != ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            return false;
+
+        var text = update.Value ?? string.Empty;
+        field.Value = text;
+        field.DisplayValue = string.IsNullOrWhiteSpace(text) ? "—" : text;
+        // Re-assign list so ComponentModel notifies Blazor without rebuilding from ObjectSpace.
+        model.CaseSummaryFields = model.CaseSummaryFields!.ToList();
+        return true;
     }
 
     private void LoadCaseSummaryDraft(ApplicationProfilePickerModel model)

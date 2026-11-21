@@ -105,8 +105,7 @@
                             </label>
                             <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(HeaderCueClass("header:borderZone", true, IssueComposeFieldCue.HasText(_draft.BorderZoneLocation)))">
                                 <span>@ApplicationProfileLocalization.Field("BorderZone")</span>
-                                <BorderZoneLocationField Value="@_draft.BorderZoneLocation"
-                                                         ValueChanged="OnInvitationBorderZoneChanged" />
+                                <LocationMultiSelectField Value="@_draft.BorderZoneLocation" Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.BorderZone)" NoneValue="@CommaSeparatedSelectionHelper.NoneValue" EmptyHint="Search or type a border zone location." ValueChanged="OnInvitationBorderZoneChanged" />
                             </div>
                             <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide issue-issued-header-slot__check-field">
                                 <input type="checkbox" @bind="_visaWindowDefined" />
@@ -370,9 +369,7 @@
                                                 <span>@(_draft.Kind == IssueIssuedHeaderKind.WorkPermitLocationGrant
                                                     ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.GrantedLocations")
                                                     : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermittedLocations"))</span>
-                                                <BorderZoneLocationField EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
-                                                                         Value="@person.WorkPermittedLocations"
-                                                                         ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
+                                                <LocationMultiSelectField Value="@person.WorkPermittedLocations" Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.WorkPermitLocation)" NoneValue="@string.Empty" EmptyHint="Search or type a work permit location." ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
                                             </div>
                                         </div>
                                         @if (_draft.Kind == IssueIssuedHeaderKind.WorkPermit && !string.IsNullOrWhiteSpace(person.DatePrefillNote))
@@ -461,8 +458,7 @@
                                             </label>
                                             <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(person, "locations", true, IssueComposeFieldCue.HasText(person.WorkPermittedLocations)))">
                                                 <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.GrantedBorderZoneLocations")</span>
-                                                <BorderZoneLocationField Value="@person.WorkPermittedLocations"
-                                                                         ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
+                                                <LocationMultiSelectField Value="@person.WorkPermittedLocations" Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.BorderZone)" NoneValue="@CommaSeparatedSelectionHelper.NoneValue" EmptyHint="Search or type a border zone location." ValueChanged="@(value => OnWorkPermitLocationsChanged(person, value))" />
                                             </div>
                                         </div>
                                     }
@@ -636,6 +632,27 @@
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IApplicationWorkspacePersonUiActions? WorkspaceActions { get; set; }
+
+    private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _issuedLocCache = new(StringComparer.Ordinal);
+
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadIssuedSavedLocations(ApplicationProfileSavedLocationField field)
+    {
+        var key = field.ToString();
+        if (_issuedLocCache.TryGetValue(key, out var cached))
+            return cached;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            cached = CaseSavedLocation.List(objectSpace, field);
+        }
+        catch
+        {
+            cached = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+        }
+        _issuedLocCache[key] = cached;
+        return cached;
+    }
+
 
     private IssueIssuedHeaderComposeDraft? _draft;
     private IssueIssuedHeaderCreateResult? _result;

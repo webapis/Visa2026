@@ -8,9 +8,10 @@ namespace Visa2026.Module.Services;
 
 /// <summary>
 /// Case summary border-zone locations → case↔person
-/// <see cref="ApplicationProfileInstancePersonRequestedLocation"/> (Kind BorderZone)
-/// when ProduceBorderZone. Join / tick never mutate <see cref="BorderZoneItem.BorderZoneLocation"/>.
-/// Dual gate: <c>ProduceBorderZone</c> + <c>RequirePersonBorderZoneItem</c> + <c>EffectiveRequireBorderZone</c>.
+/// <see cref="ApplicationProfileInstancePersonRequestedLocation"/> (Kind BorderZone).
+/// Join / tick never mutate <see cref="BorderZoneItem.BorderZoneLocation"/>.
+/// Linked-records rows: <c>ProduceBorderZone</c> + person BZ tile + EffectiveRequire.
+/// Case default copy: <see cref="ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone"/>.
 /// </summary>
 public static class CaseBorderZoneLocationCopy
 {
@@ -24,18 +25,20 @@ public static class CaseBorderZoneLocationCopy
         return ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile);
     }
 
+    /// <summary>Case default may copy into empty person requested BZ rows.</summary>
+    public static bool CanApplyCaseDefault(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application);
+
     /// <summary>
-    /// Link-review overview row / tiles: profile produces border zone, Case requires
-    /// border zone, and the Border zone person tile is configured.
+    /// Link-review row when the profile produces a border-zone permit and Case Results
+    /// requires border zone (same as Case). Person Border zone item = document tile only.
     /// </summary>
     public static bool ShowInLinkReview(ApplicationProfileInstance? application)
     {
         var profile = application?.ApplicationProfile;
         if (profile == null || !profile.ProduceBorderZone)
             return false;
-        if (!ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile))
-            return false;
-        return ApplicationProfileConfigurationResolver.RequirePersonBorderZoneItem(application);
+        return ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application);
     }
 
     /// <summary>
@@ -76,26 +79,39 @@ public static class CaseBorderZoneLocationCopy
     }
 
     /// <summary>
-    /// Join / Relink: fill empty requested border-zone location from Case summary.
+    /// Join / Relink: copy case BZ into person requested location only when that person row is empty.
+    /// Clearing the case value does not wipe person rows.
     /// </summary>
     public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
         if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
             return false;
-        if (!IsEnabled(application))
+        if (!CanApplyCaseDefault(application))
             return false;
 
-        return CasePersonRequestedLocation.UpsertIfEmpty(
+        var caseLocations = ResolveCaseLocations(application);
+        if (!IsComplete(caseLocations))
+            return false;
+
+        var existing = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone);
+        if (!string.IsNullOrWhiteSpace(existing))
+            return false;
+
+        return CasePersonRequestedLocation.Upsert(
             objectSpace,
             application,
             person,
             ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
-            ResolveCaseLocations(application));
+            caseLocations);
     }
 
     public static void EnsureForPeopleWithEmptyLocations(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
-        if (objectSpace == null || application == null || !IsEnabled(application))
+        if (objectSpace == null || application == null || !CanApplyCaseDefault(application))
             return;
 
         foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))

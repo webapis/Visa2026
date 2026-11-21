@@ -865,11 +865,20 @@
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
             {
-                <BorderZoneLocationField Value="@field.Value"
-                                         EditorAlias="@EditorAliasFor(field.Key)"
-                                         ReadOnly="@field.ReadOnly"
-                                         CatalogItems="@field.MultiSelectOptions"
-                                         ValueChanged="@(value => OnCaseSummaryFieldChanged(field.Key, value))" />
+                var isWp = string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal);
+                var locField = isWp
+                    ? ApplicationProfileSavedLocationField.WorkPermitLocation
+                    : ApplicationProfileSavedLocationField.BorderZone;
+                var locSuggestions = LoadCaseSavedLocations(locField);
+                <LocationMultiSelectField @key="@($"loc-{field.Key}")" Value="@field.Value"
+                                          Enabled="@(!field.ReadOnly)"
+                                          ReadOnly="@field.ReadOnly"
+                                          Suggestions="@locSuggestions"
+                                          NoneValue="@(isWp ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
+                                          EmptyHint="@(isWp
+                                              ? "Search or type a work permit location."
+                                              : "Search or type a border zone location.")"
+                                          ValueChanged="value => OnCaseSummaryFieldChanged(field.Key, value)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup
                      && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
@@ -952,10 +961,6 @@
         </label>
     };
 
-    private static string EditorAliasFor(string? fieldKey) =>
-        string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
-            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
-            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
 
     private static bool CanAddAlternativeAddress(ApplicationWorkspaceCaseHeaderField field) =>
         !field.ReadOnly
@@ -992,6 +997,10 @@
         if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(key)
             || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.Project, StringComparison.Ordinal))
             _caseSavedAddressCache.Clear();
+
+        if (string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone, StringComparison.Ordinal)
+            || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal))
+            _caseSavedLocationCache.Clear();
 
         return CaseSummaryFieldChanged.InvokeAsync(new ApplicationWorkspaceCaseHeaderFieldUpdate
         {
@@ -1049,6 +1058,27 @@
         }
 
         _caseSavedAddressCache[cacheKey] = cached;
+        return cached;
+    }
+    private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _caseSavedLocationCache = new(StringComparer.Ordinal);
+
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadCaseSavedLocations(ApplicationProfileSavedLocationField field)
+    {
+        var cacheKey = field.ToString();
+        if (_caseSavedLocationCache.TryGetValue(cacheKey, out var cached))
+            return cached;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfile>();
+            cached = CaseSavedLocation.List(objectSpace, field);
+        }
+        catch
+        {
+            cached = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+        }
+
+        _caseSavedLocationCache[cacheKey] = cached;
         return cached;
     }
     private Guid _summaryAddressEditorId;

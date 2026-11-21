@@ -629,17 +629,23 @@ namespace Visa2026.Module.BusinessObjects
             BusinessTripDestinationHelper.ApplyDefaultsFromProfile(this, applicationProfile);
             if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultPurpose))
                 Purpose = applicationProfile.DefaultPurpose.Trim();
-            if (ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(applicationProfile))
+            if (string.IsNullOrWhiteSpace(BorderZoneLocation)
+                || BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation))
             {
-                BorderZoneLocation = string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation)
-                    ? BorderZoneSelectionHelper.NoneValue
-                    : applicationProfile.DefaultBorderZoneLocation;
+                if (ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(applicationProfile))
+                {
+                    BorderZoneLocation = string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation)
+                        ? BorderZoneSelectionHelper.NoneValue
+                        : applicationProfile.DefaultBorderZoneLocation;
+                }
+                else if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
+                {
+                    BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
+                }
             }
-            else if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
-            {
-                BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
-            }
-            if (applicationProfile.DefaultWorkPermitLocation != null)
+            // Do not clobber officer multi-select when profile defaults re-apply (e.g. draft rebuild).
+            if (string.IsNullOrWhiteSpace(MovementPermitLocation)
+                && !string.IsNullOrWhiteSpace(applicationProfile.DefaultWorkPermitLocation))
                 MovementPermitLocation = applicationProfile.DefaultWorkPermitLocation;
 
             OrganizationCatalogHelper.AssignDefaultsIfEmpty(this, os);

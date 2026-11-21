@@ -1,0 +1,609 @@
+<title>Location Multi-Select</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: dark case-form column (label cell + control per row) beside the saved-locations panel, stacked on phones. */
+:root {
+  --bg: #33333c;
+  --panel: #3c3c47;
+  --label: #2c3a56;
+  --field: #2f2f38;
+  --fg: #ececf2;
+  --muted: #a8a8b9;
+  --line: #55556a;
+  --ctl: #2f7fd6;
+  --accent: #7b2cbf;
+  --accent-hi: #c79bff;
+  --accent-fg: #ffffff;
+  --chip-bg: #4b3270;
+  --chip-fg: #efe3ff;
+  --ok: #4cc38a;
+  --info-bg: #233a5e;
+  --info-fg: #7db9ff;
+  --hover: #45455a;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f3f8; --panel: #ffffff; --label: #e2e8f4; --field: #ffffff; --fg: #1d1d27; --muted: #5b5b70;
+    --line: #c6c6d6; --ctl: #2a78d0; --accent: #6a1fb0; --accent-hi: #6a1fb0; --accent-fg: #ffffff;
+    --chip-bg: #ece0f8; --chip-fg: #3f1573; --ok: #17804f; --info-bg: #e3edfb; --info-fg: #1a56b0;
+    --hover: #ecebf6; --shadow: 0 10px 30px rgba(30, 30, 60, .18);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f3f8; --panel: #ffffff; --label: #e2e8f4; --field: #ffffff; --fg: #1d1d27; --muted: #5b5b70;
+  --line: #c6c6d6; --ctl: #2a78d0; --accent: #6a1fb0; --accent-hi: #6a1fb0; --accent-fg: #ffffff;
+  --chip-bg: #ece0f8; --chip-fg: #3f1573; --ok: #17804f; --info-bg: #e3edfb; --info-fg: #1a56b0;
+  --hover: #ecebf6; --shadow: 0 10px 30px rgba(30, 30, 60, .18);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.45;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 940px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 820px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+h1 { font-size: 20px; line-height: 1.2; margin: 0; font-weight: 700; text-wrap: balance; }
+.profile { color: var(--accent-hi); font-weight: 700; font-size: 14px; margin: 2px 0 8px; }
+.lede { color: var(--muted); margin: 0 0 14px; max-width: 62ch; }
+
+form { display: flex; flex-direction: column; gap: 8px; }
+.row { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 8px; align-items: center; background: var(--label); border-radius: 8px; padding: 6px; }
+.row.top { align-items: start; }
+.row.top > label { padding-top: 9px; }
+.row > label { font-size: 11px; font-weight: 700; color: var(--muted); padding-left: 4px; }
+@media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); gap: 4px; } .row.top > label { padding-top: 0; } }
+
+select, .ta {
+  width: 100%;
+  font: inherit;
+  color: var(--fg);
+  background: var(--field);
+  border: 1px solid var(--ctl);
+  border-radius: 6px;
+}
+select { height: 34px; padding: 0 10px; }
+.ta { display: block; height: 84px; padding: 8px 10px; resize: vertical; line-height: 1.45; }
+select:focus-visible, .ta:focus-visible { outline: 2px solid var(--ctl); outline-offset: 1px; }
+
+/* multi-select */
+.ms-field { position: relative; }
+.ms-box { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 34px; padding: 3px 34px 3px 6px; background: var(--field); border: 1px solid var(--ctl); border-radius: 6px; cursor: text; }
+.ms-field:focus-within .ms-box { outline: 2px solid var(--ctl); outline-offset: 1px; }
+.chips { display: contents; }
+.chip { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; height: 24px; padding: 0 3px 0 9px; border: 1px solid transparent; border-radius: 12px; background: var(--chip-bg); color: var(--chip-fg); font-size: 12px; font-weight: 500; }
+.chip.new { background: transparent; border: 1px dashed var(--info-fg); color: var(--info-fg); }
+.chip .lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip button { flex: none; width: 18px; height: 18px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; display: grid; place-items: center; font-size: 14px; line-height: 1; opacity: .8; padding: 0; }
+.chip button:hover { opacity: 1; background: rgba(127, 127, 127, .35); }
+.chip.more { padding: 0 10px; cursor: pointer; background: var(--hover); color: var(--fg); }
+.ms-box .ms-input { flex: 1 1 110px; min-width: 110px; width: auto; height: 26px; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; padding: 0 4px; }
+.ms-box .ms-input::placeholder { color: var(--muted); }
+.ms-actions { position: absolute; right: 4px; top: 3px; display: flex; }
+.ic { width: 26px; height: 26px; border: 0; border-radius: 50%; background: var(--hover); color: var(--fg); cursor: pointer; display: grid; place-items: center; padding: 0; font-size: 15px; line-height: 1; }
+.ic[hidden] { display: none; }
+.ic:focus-visible, .chip button:focus-visible { outline: 2px solid var(--ctl); outline-offset: 1px; }
+
+.list { position: absolute; z-index: 20; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); max-height: 252px; overflow-y: auto; }
+.list li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.list li.active { background: var(--hover); }
+.list .main { min-width: 0; overflow-wrap: anywhere; }
+.list .meta { flex: none; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
+
+.status { display: flex; align-items: flex-start; gap: 7px; margin-top: 6px; font-size: 11.5px; color: var(--muted); min-height: 18px; }
+.status::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--line); }
+.status[data-state="ok"] { color: var(--ok); }
+.status[data-state="ok"]::before { background: var(--ok); }
+.status[data-state="new"] { color: var(--info-fg); }
+.status[data-state="new"]::before { background: var(--info-fg); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.banner { border-radius: 6px; padding: 9px 12px; font-size: 12px; border: 1px solid var(--ok); background: var(--info-bg); color: var(--ok); }
+.banner[hidden] { display: none; }
+.actions { display: flex; justify-content: flex-end; margin-top: 4px; }
+.btn { font: inherit; font-weight: 600; font-size: 13px; border-radius: 6px; padding: 8px 16px; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); }
+.btn:focus-visible { outline: 2px solid var(--ctl); outline-offset: 2px; }
+
+.side { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px; }
+.side h2 { font-size: 14px; margin: 0; font-weight: 700; }
+.side > p { margin: 2px 0 4px; font-size: 11.5px; color: var(--muted); }
+.side h3 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; padding-left: 8px; font-weight: 700; }
+.saved { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 232px; overflow-y: auto; }
+.saved li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 8px; border-radius: 6px; font-size: 12.5px; }
+.saved li.fresh { background: var(--info-bg); }
+.saved .n { flex: none; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.saved .txt { min-width: 0; overflow-wrap: anywhere; }
+details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--muted); }
+summary:focus-visible { outline: 2px solid var(--ctl); outline-offset: 2px; }
+pre { margin: 6px 0 0; padding: 10px; background: var(--field); border: 1px solid var(--line); border-radius: 6px; font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.link { font: inherit; font-size: 12px; color: var(--accent-hi); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.link:focus-visible { outline: 2px solid var(--ctl); outline-offset: 2px; }
+.side-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.side-foot span { font-size: 11px; color: var(--muted); }
+
+@media (prefers-reduced-motion: no-preference) { .list { animation: pop .12s ease-out; } }
+@keyframes pop { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+</style>
+
+<div class="wrap">
+  <main>
+    <h1>Application</h1>
+    <div class="profile">Çakylyk we Iş Rugsatnamasyny Almak</div>
+    <p class="lede">Both location fields now work like the address fields. Type to search saved locations and pick one, or type a new location and press Enter. New locations are saved when you create the application.</p>
+
+    <form id="form" novalidate>
+      <div class="row"><label for="urgency">Urgency</label>
+        <select id="urgency"><option>Normal priority</option><option>High priority</option></select></div>
+
+      <div class="row top"><label for="bz">Requested border zone location</label>
+        <div>
+          <div class="ms-field" id="bz-field">
+            <div class="ms-box">
+              <span class="chips" id="bz-chips"></span>
+              <input type="text" class="ms-input" id="bz" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="bz-list" aria-describedby="bz-status" autocomplete="off" spellcheck="false" maxlength="100">
+              <span class="ms-actions"><button type="button" class="ic" id="bz-clear" aria-label="Clear all border zones" tabindex="-1" hidden>×</button></span>
+            </div>
+            <ul class="list" id="bz-list" role="listbox" aria-multiselectable="true" aria-label="Saved border zones" hidden></ul>
+          </div>
+          <div class="status" id="bz-status" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="row top"><label for="wp">Requested work permit location</label>
+        <div>
+          <div class="ms-field" id="wp-field">
+            <div class="ms-box">
+              <span class="chips" id="wp-chips"></span>
+              <input type="text" class="ms-input" id="wp" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="wp-list" aria-describedby="wp-status" autocomplete="off" spellcheck="false" maxlength="100">
+              <span class="ms-actions"><button type="button" class="ic" id="wp-clear" aria-label="Clear all work permit locations" tabindex="-1" hidden>×</button></span>
+            </div>
+            <ul class="list" id="wp-list" role="listbox" aria-multiselectable="true" aria-label="Saved work permit locations" hidden></ul>
+          </div>
+          <div class="status" id="wp-status" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="row top"><label for="addr1">Address 1</label>
+        <textarea id="addr1" class="ta" rows="3"></textarea></div>
+
+      <div class="banner" id="ok" role="status" hidden></div>
+      <div class="actions"><button type="submit" class="btn">Create application</button></div>
+    </form>
+    <div class="sr" id="live" role="status" aria-live="polite"></div>
+  </main>
+
+  <aside class="side" aria-labelledby="side-h">
+    <h2 id="side-h">Saved locations</h2>
+    <p>Sample data from the old picker dialogs (partial). Locations you add are saved to their field's own list when you create the application.</p>
+    <h3>Border zones · <span id="count-bz">0</span></h3>
+    <ul class="saved" id="saved-bz"></ul>
+    <h3>Work permit locations · <span id="count-wp">0</span></h3>
+    <ul class="saved" id="saved-wp"></ul>
+    <details>
+      <summary>Form value (developer view)</summary>
+      <pre id="val-bz"></pre>
+      <pre id="val-wp"></pre>
+    </details>
+    <div class="side-foot">
+      <span>Prototype storage is this browser only. The real lists would live on the server.</span>
+      <button type="button" class="link" id="reset">Reset samples</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  var MAP = { 'ç': 'c', 'ş': 's', 'ž': 'z', 'ý': 'y', 'ň': 'n', 'ä': 'a', 'ö': 'o', 'ü': 'u', 'ı': 'i', 'ğ': 'g', 'İ': 'i' };
+  function fold(s) {
+    return s.replace(/[^\x00-\x7f]/g, function (ch) { return MAP[ch] || MAP[ch.toLowerCase()] || ch; }).toLowerCase();
+  }
+  function norm(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function $(id) { return document.getElementById(id); }
+  function tokensOf(q) { return fold(q).split(/\s+/).filter(Boolean); }
+  function clone(arr) { return arr.map(function (x) { return Object.assign({}, x); }); }
+  var LIMIT = 3;    /* chips shown while the field is not focused */
+  var MAXRES = 6;   /* suggestions shown, same as Address autocomplete */
+  var MAXLEN = 100;
+
+  function highlight(text, tk) {
+    var f = fold(text), ranges = [];
+    tk.forEach(function (t) {
+      var i = f.indexOf(t);
+      while (i !== -1) { ranges.push([i, i + t.length]); i = f.indexOf(t, i + t.length); }
+    });
+    ranges.sort(function (a, b) { return a[0] - b[0]; });
+    var merged = [];
+    ranges.forEach(function (r) {
+      var last = merged[merged.length - 1];
+      if (last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1]); else merged.push(r.slice());
+    });
+    var frag = document.createDocumentFragment(), pos = 0;
+    merged.forEach(function (r) {
+      if (r[0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, r[0])));
+      var m = document.createElement('mark');
+      m.textContent = text.slice(r[0], r[1]);
+      frag.appendChild(m);
+      pos = r[1];
+    });
+    if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+    return frag;
+  }
+
+  function seed(prefix, labels, counts) {
+    return labels.map(function (l, i) {
+      return { id: prefix + (i < 9 ? '0' : '') + (i + 1), label: l, n: counts[l] || 1, t: i + 1 };
+    });
+  }
+  var SAMPLE_BZ = seed('bz', ['Daşoguz şäher', 'Etrek etrap', 'Farap etrap', 'Garabogaz şäheri', 'Lebap', 'Sarahs etraby', 'Sarahs etrabyna', 'Serhetabat etr', 'Serhetabat etrap', 'Serhetabat şäheri', 'Tagtabazar etrap', 'Ýolöten etrap'],
+    { 'Daşoguz şäher': 5, 'Etrek etrap': 4, 'Farap etrap': 2, 'Serhetabat etrap': 2 });
+  var SAMPLE_WP = seed('wp', ['Balkanabat şäheri', 'BeýikSaparmyratTürkmenbaşyAd etraby', 'Daşoguz şäheri', 'Döwletli etraby', 'Farap etraby', 'Garabogaz şäheri', 'Gumdag şäheri', 'Mary etraby', 'Mary şäheri', 'Murgap etraby', 'Ruhabat etraby', 'Sakarçäge etraby', 'Sarahs etraby', 'Serdar etraby', 'Serdarabat etraby', 'Serhetabat etraby', 'Serhetabat şäheri', 'Seýdi şäheri', 'Tagtabazar etraby', 'Türkmenabat şäheri', 'Türkmenbaşy etraby', 'Türkmenbaşy şäheri', 'Türkmengala etraby', 'Änew şäheri', 'Ýolöten etraby', 'Ýolöten şäheri'],
+    { 'Türkmenbaşy şäheri': 6, 'Türkmenbaşy etraby': 5, 'Serdarabat etraby': 4, 'Mary şäheri': 3, 'Daşoguz şäheri': 3, 'Türkmenabat şäheri': 2 });
+
+  function load(key, samples) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (raw) { var p = JSON.parse(raw); if (Array.isArray(p) && p.length) return p; }
+    } catch (e) {}
+    return clone(samples);
+  }
+  function persist(key, store) { try { localStorage.setItem(key, JSON.stringify(store)); } catch (e) {} }
+
+  /* c = { id, key, samples, initial: [labels], emptyText, onChange } */
+  function createMulti(c) {
+    var store = load(c.key, c.samples);
+    var selected = [];            /* [{ id, label, isNew }] */
+    var results = [], total = 0, active = -1, isOpen = false, focused = false, fresh = [];
+    var field = $(c.id + '-field'), input = $(c.id), chipsEl = $(c.id + '-chips'), list = $(c.id + '-list');
+    var clearBtn = $(c.id + '-clear'), statusEl = $(c.id + '-status'), live = $('live');
+
+    function findStore(label) {
+      var f = fold(norm(label));
+      if (!f) return null;
+      for (var i = 0; i < store.length; i++) if (fold(store[i].label) === f) return store[i];
+      return null;
+    }
+    function isSelected(label) {
+      var f = fold(norm(label));
+      return selected.some(function (s) { return fold(s.label) === f; });
+    }
+    function newCount() { return selected.filter(function (s) { return s.isNew; }).length; }
+    function announce(msg) { live.textContent = ''; setTimeout(function () { live.textContent = msg; }, 30); }
+
+    function resetSelected() {
+      selected = [];
+      c.initial.forEach(function (label) {
+        var it = findStore(label);
+        selected.push(it ? { id: it.id, label: it.label, isNew: false } : { id: null, label: label, isNew: true });
+      });
+    }
+
+    function compute() {
+      var tk = tokensOf(input.value);
+      if (!tk.length) { results = []; total = 0; return; }
+      var hits = store.filter(function (o) {
+        if (isSelected(o.label)) return false;
+        var f = fold(o.label);
+        return tk.every(function (t) { return f.indexOf(t) !== -1; });
+      });
+      hits.sort(function (a, b) {
+        var as = fold(a.label).indexOf(tk[0]) === 0 ? 1 : 0;
+        var bs = fold(b.label).indexOf(tk[0]) === 0 ? 1 : 0;
+        return (bs - as) || (b.n - a.n) || (b.t - a.t);
+      });
+      total = hits.length;
+      results = hits.slice(0, MAXRES);
+    }
+
+    function renderList() {
+      var tk = tokensOf(input.value);
+      list.textContent = '';
+      results.forEach(function (o, i) {
+        var li = document.createElement('li');
+        li.id = c.id + '-opt-' + i;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', 'false');
+        var main = document.createElement('span');
+        main.className = 'main';
+        main.appendChild(highlight(o.label, tk));
+        var meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = 'Used ' + o.n + '×';
+        li.appendChild(main);
+        li.appendChild(meta);
+        li.addEventListener('mousedown', function (e) { e.preventDefault(); chooseOption(o); });
+        li.addEventListener('mousemove', function () { if (active !== i) setActive(i); });
+        list.appendChild(li);
+      });
+    }
+
+    function setOpen(open) {
+      isOpen = open;
+      list.hidden = !open;
+      input.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) { active = -1; input.removeAttribute('aria-activedescendant'); }
+    }
+    function setActive(i) {
+      active = i;
+      var items = list.children;
+      for (var k = 0; k < items.length; k++) {
+        var on = k === i;
+        items[k].classList.toggle('active', on);
+        items[k].setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+      if (i >= 0) {
+        input.setAttribute('aria-activedescendant', c.id + '-opt-' + i);
+        items[i].scrollIntoView({ block: 'nearest' });
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
+    }
+
+    function updateList() {
+      compute();
+      renderList();
+      active = -1;
+      var exact = findStore(input.value);
+      setOpen(results.length > 0 && !exact);
+    }
+
+    function updateStatus() {
+      var q = norm(input.value);
+      var st = '', text;
+      var nn = newCount();
+      if (!q) {
+        if (selected.length) {
+          st = 'ok';
+          text = selected.length + ' selected' + (nn ? ' · ' + nn + ' new, saved when you create the application' : '');
+        } else text = c.emptyText;
+      } else if (isSelected(q)) {
+        text = 'Already selected.';
+      } else if (findStore(q)) {
+        st = 'ok'; text = 'Saved location. Press Enter to add it.';
+      } else if (total > 0) {
+        text = total + ' saved ' + (total === 1 ? 'location matches' : 'locations match') + '. Pick one, or press Enter to add “' + q + '” as new.';
+      } else {
+        st = 'new'; text = 'New location. Press Enter to add “' + q + '”. It will be saved for next time when you create the application.';
+      }
+      statusEl.dataset.state = st;
+      statusEl.textContent = text;
+    }
+
+    function renderChips() {
+      chipsEl.textContent = '';
+      var collapse = !focused && selected.length > LIMIT;
+      var shown = collapse ? selected.slice(0, LIMIT) : selected;
+      shown.forEach(function (s) {
+        var chip = document.createElement('span');
+        chip.className = 'chip' + (s.isNew ? ' new' : '');
+        chip.title = s.isNew ? s.label + ' (new, saved when you create the application)' : s.label;
+        var lbl = document.createElement('span');
+        lbl.className = 'lbl';
+        lbl.textContent = s.label;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.tabIndex = -1;
+        b.setAttribute('aria-label', 'Remove ' + s.label);
+        b.textContent = '×';
+        b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        b.addEventListener('click', function () { remove(s); input.focus(); });
+        chip.appendChild(lbl);
+        chip.appendChild(b);
+        chipsEl.appendChild(chip);
+      });
+      if (collapse) {
+        var more = document.createElement('span');
+        more.className = 'chip more';
+        more.textContent = '+' + (selected.length - LIMIT);
+        chipsEl.appendChild(more);
+      }
+      clearBtn.hidden = selected.length === 0;
+      input.placeholder = selected.length ? '' : 'Search or type a new location';
+    }
+
+    function afterChange() {
+      input.value = '';
+      setOpen(false);
+      results = []; total = 0;
+      renderChips();
+      updateStatus();
+      c.onChange();
+    }
+
+    function chooseOption(o) {
+      selected.push({ id: o.id, label: o.label, isNew: false });
+      announce('Added ' + o.label + '. ' + selected.length + ' selected.');
+      afterChange();
+      input.focus();
+    }
+
+    /* Adds the typed text: an existing saved location if it matches exactly, otherwise a new one. */
+    function addTyped() {
+      var q = norm(input.value).slice(0, MAXLEN);
+      if (!q) return false;
+      if (isSelected(q)) {
+        announce(q + ' is already selected.');
+      } else {
+        var it = findStore(q);
+        if (it) {
+          selected.push({ id: it.id, label: it.label, isNew: false });
+          announce('Added ' + it.label + '. ' + selected.length + ' selected.');
+        } else {
+          selected.push({ id: null, label: q, isNew: true });
+          announce('Added new location ' + q + '. ' + selected.length + ' selected.');
+        }
+      }
+      afterChange();
+      return true;
+    }
+
+    function remove(s) {
+      var i = selected.indexOf(s);
+      if (i === -1) return;
+      selected.splice(i, 1);
+      announce('Removed ' + s.label + '. ' + selected.length + ' selected.');
+      renderChips();
+      if (norm(input.value)) updateList();
+      updateStatus();
+      c.onChange();
+    }
+    function clearAll() {
+      selected = [];
+      announce('All locations cleared.');
+      renderChips();
+      updateStatus();
+      c.onChange();
+    }
+
+    input.addEventListener('input', function () { updateList(); updateStatus(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') {
+        if (!results.length) return;
+        e.preventDefault();
+        if (!isOpen) setOpen(true);
+        setActive(active + 1 >= results.length ? 0 : active + 1);
+      } else if (e.key === 'ArrowUp') {
+        if (!isOpen) return;
+        e.preventDefault();
+        setActive(active <= 0 ? results.length - 1 : active - 1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (isOpen && active >= 0) chooseOption(results[active]);
+        else addTyped();
+      } else if (e.key === ',') {
+        e.preventDefault();
+        addTyped();
+      } else if (e.key === 'Escape') {
+        if (isOpen) { e.preventDefault(); setOpen(false); }
+      } else if (e.key === 'Backspace') {
+        if (input.value === '' && selected.length) { e.preventDefault(); remove(selected[selected.length - 1]); }
+      }
+    });
+    input.addEventListener('paste', function (e) {
+      var text = (e.clipboardData || window.clipboardData).getData('text');
+      if (!/[,\n;]/.test(text)) return;
+      e.preventDefault();
+      text.split(/[,\n;]+/).forEach(function (part) { input.value = part; addTyped(); });
+    });
+
+    field.addEventListener('mousedown', function (e) {
+      if (e.target.closest('button') || e.target.closest('.list')) return;
+      if (e.target !== input) e.preventDefault();
+      input.focus();
+    });
+    list.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    clearBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    clearBtn.addEventListener('click', function () { clearAll(); input.focus(); });
+
+    field.addEventListener('focusin', function () {
+      if (!focused) { focused = true; renderChips(); }
+      if (norm(input.value)) updateList();
+    });
+    field.addEventListener('focusout', function (e) {
+      if (e.relatedTarget && field.contains(e.relatedTarget)) return;
+      if (norm(input.value)) addTyped();   /* leaving the field adds what was typed */
+      focused = false;
+      setOpen(false);
+      renderChips();
+    });
+
+    function renderPanel() {
+      $('count-' + c.id).textContent = store.length;
+      var ul = $('saved-' + c.id);
+      ul.textContent = '';
+      store.slice().sort(function (a, b) { return b.t - a.t; }).forEach(function (it) {
+        var li = document.createElement('li');
+        if (fresh.indexOf(it.id) !== -1) li.className = 'fresh';
+        var t = document.createElement('span'); t.className = 'txt'; t.textContent = it.label;
+        var n = document.createElement('span'); n.className = 'n'; n.textContent = it.n + '×';
+        li.appendChild(t); li.appendChild(n);
+        ul.appendChild(li);
+      });
+    }
+
+    resetSelected();
+    renderChips();
+    updateStatus();
+
+    return {
+      renderPanel: renderPanel,
+      value: function () { return selected.map(function (s) { return { id: s.id, label: s.label }; }); },
+      /* Saves new locations and counts reuse of saved ones. Returns the labels that were new. */
+      commit: function () {
+        var added = [];
+        fresh = [];
+        selected.forEach(function (s) {
+          if (s.isNew) {
+            var it = { id: 'u' + Date.now() + '-' + added.length, label: s.label, n: 1, t: Date.now() };
+            store.push(it);
+            s.id = it.id; s.isNew = false;
+            added.push(s.label);
+            fresh.push(it.id);
+          } else {
+            var found = findStore(s.label);
+            if (found) { found.n += 1; found.t = Date.now(); }
+          }
+        });
+        persist(c.key, store);
+        renderChips();
+        updateStatus();
+        renderPanel();
+        c.onChange();
+        return added;
+      },
+      reset: function () {
+        store = clone(c.samples);
+        fresh = [];
+        persist(c.key, store);
+        input.value = '';
+        setOpen(false);
+        resetSelected();
+        renderChips();
+        updateStatus();
+        renderPanel();
+        c.onChange();
+      }
+    };
+  }
+
+  function fmt(m) {
+    var v = m.value();
+    var legacy = v.map(function (x) { return x.label; }).join(', ');
+    return 'value:  ' + JSON.stringify(v) + '\nlegacy: ' + (legacy || '(empty)');
+  }
+  function renderValues() {
+    $('val-bz').textContent = 'Border zones\n' + fmt(bz);
+    $('val-wp').textContent = 'Work permit locations\n' + fmt(wp);
+  }
+
+  var bz = createMulti({ id: 'bz', key: 'location-border-proto-v2', samples: SAMPLE_BZ, initial: ['Daşoguz şäher', 'Etrek etrap'], emptyText: 'Search saved locations, or type a new one and press Enter.', onChange: renderValues });
+  var wp = createMulti({ id: 'wp', key: 'location-work-proto-v2', samples: SAMPLE_WP, initial: ['Türkmenbaşy şäheri', 'Türkmenbaşy etraby', 'Serdarabat etraby'], emptyText: 'Search saved locations, or type a new one and press Enter.', onChange: renderValues });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var added = bz.commit().concat(wp.commit());
+    var ok = $('ok');
+    ok.hidden = false;
+    ok.textContent = 'Application created (prototype).' + (added.length ? ' ' + added.length + (added.length === 1 ? ' new location' : ' new locations') + ' saved for next time.' : '');
+  });
+  $('reset').addEventListener('click', function () { bz.reset(); wp.reset(); $('ok').hidden = true; });
+
+  bz.renderPanel();
+  wp.renderPanel();
+  renderValues();
+})();
+</script>

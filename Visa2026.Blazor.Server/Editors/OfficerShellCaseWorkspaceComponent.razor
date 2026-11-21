@@ -547,7 +547,7 @@
         return false;
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         if (ShowPersonLinkReview && !_reviewWasOpen)
         {
@@ -562,6 +562,8 @@
             _linkReviewHeight = null;
             EnsureLinkReviewBesidePreview();
             _caseSummarySavedAddressCache.Clear();
+            await CopyVisibleLocationChipsIntoEmptyCaseFieldsAsync();
+            ApplyLiveCaseLocationDefaultsToLinkReview();
         }
         else if (!ShowPersonLinkReview && _reviewWasOpen)
         {
@@ -874,6 +876,10 @@
         if (field == null || field.ReadOnly)
             return;
 
+        // Chip editors commit through ValueChanged. The focused node is only the search box.
+        if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            return;
+
         var value = NormalizeFocusedSummaryValue(field, focused.Value);
         if (value == null)
             return;
@@ -1125,10 +1131,6 @@
     private static string FillCss(ApplicationWorkspaceCaseSummaryFillState state) =>
         ApplicationWorkspaceCaseSummaryFill.CssToken(state);
 
-    private static string EditorAliasFor(string? fieldKey) =>
-        string.Equals(fieldKey, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal)
-            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
-            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
 
     private static bool WrapsLookupDisplay(ApplicationWorkspaceCaseHeaderField field) =>
         string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.InvitationLodging, StringComparison.Ordinal)
@@ -1160,7 +1162,12 @@
     {
         if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(key))
             _caseSummarySavedAddressCache.Clear();
-        ApplyHeaderDraft(key, value, null);
+        var locationField = string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone, StringComparison.Ordinal)
+            || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal);
+        if (locationField)
+            _caseSummarySavedLocationCache.Clear();
+        // Location chips must update the case value even in view mode, so Linked Records can prefill them.
+        ApplyHeaderDraft(key, value, null, allowWhenReadOnly: locationField);
         return Task.CompletedTask;
     }
 
@@ -1195,14 +1202,14 @@
             ApplyHeaderDraft(item.Key, item.Value, item.DisplayName);
     }
 
-    private void ApplyHeaderDraft(string key, string? value, string? displayName)
+    private void ApplyHeaderDraft(string key, string? value, string? displayName, bool allowWhenReadOnly = false)
     {
         if (_summarySaving || string.IsNullOrWhiteSpace(key))
             return;
 
         var field = Snapshot?.CaseView.HeaderFields.FirstOrDefault(item =>
             string.Equals(item.Key, key, StringComparison.Ordinal));
-        if (field == null || field.ReadOnly)
+        if (field == null || (field.ReadOnly && !allowWhenReadOnly))
             return;
 
         RememberHeaderOriginal(field);
@@ -1846,11 +1853,20 @@
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
             {
-                <BorderZoneLocationField Value="@field.Value"
-                                         EditorAlias="@EditorAliasFor(field.Key)"
-                                         ReadOnly="@readOnly"
-                                         CatalogItems="@field.MultiSelectOptions"
-                                         ValueChanged="@(value => OnHeaderFieldChanged(field.Key, value))" />
+                var isWp = string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal);
+                var locField = isWp
+                    ? ApplicationProfileSavedLocationField.WorkPermitLocation
+                    : ApplicationProfileSavedLocationField.BorderZone;
+                var locSuggestions = LoadCaseSummarySavedLocations(locField);
+                <LocationMultiSelectField @key="@($"cw-loc-{field.Key}")" Value="@field.Value"
+                                          Enabled="@(!readOnly)"
+                                          ReadOnly="@readOnly"
+                                          Suggestions="@locSuggestions"
+                                          NoneValue="@(isWp ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
+                                          EmptyHint="@(isWp
+                                              ? "Search or type a work permit location."
+                                              : "Search or type a border zone location.")"
+                                          ValueChanged="value => OnHeaderFieldChanged(field.Key, value)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup
                      && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
@@ -2981,11 +2997,21 @@
                                     else if (IsRequestedLocationReviewLine(line))
                                     {
                                         <div class="os-link-review__value os-link-review__value--multiselect">
-                                            <BorderZoneLocationField @key="@($"{PersonLinkReviewPersonId:N}:{line.ResolveTabKey()}:loc")"
-                                                                     Value="@RequestedLocationFieldValue(line)"
-                                                                     EditorAlias="@(IsWorkPermitLocationReviewLine(line) ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation : CommaSeparatedMultiSelectEditorAliases.BorderZone)"
-                                                                     ReadOnly="false"
-                                                                     ValueChanged="value => SetRequestedLocations(line, value)" />
+                                            @{
+                                                var isWpLoc = IsWorkPermitLocationReviewLine(line);
+                                                var lrField = isWpLoc
+                                                    ? ApplicationProfileSavedLocationField.WorkPermitLocation
+                                                    : ApplicationProfileSavedLocationField.BorderZone;
+                                            }
+                                            <LocationMultiSelectField @key="@($"{PersonLinkReviewPersonId:N}:{line.ResolveTabKey()}:loc")"
+                                                                      Value="@RequestedLocationFieldValue(line)"
+                                                                      Enabled="true"
+                                                                      Suggestions="@LoadCaseSummarySavedLocations(lrField)"
+                                                                      NoneValue="@(isWpLoc ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
+                                                                      EmptyHint="@(isWpLoc
+                                                                          ? "Search or type a work permit location."
+                                                                          : "Search or type a border zone location.")"
+                                                                      ValueChanged="value => SetRequestedLocations(line, value)" />
                                         </div>
                                     }
                                     else if (_reviewGearOn && line.Choices.Count > 0)
@@ -4284,6 +4310,8 @@
 
     private static string? RequestedLocationFieldValue(PersonLinkReviewLine line)
     {
+        if (!string.IsNullOrWhiteSpace(line.LocationValue) && line.LocationValue != "—")
+            return line.LocationValue;
         var merged = LinkReviewLocationChips.JoinVisible(line.LocationChips);
         return string.IsNullOrWhiteSpace(merged) ? null : merged;
     }
@@ -4323,6 +4351,34 @@
         return cached;
     }
 
+    private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _caseSummarySavedLocationCache = new(StringComparer.Ordinal);
+
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadCaseSummarySavedLocations(ApplicationProfileSavedLocationField field)
+    {
+        var caseId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (caseId != Guid.Empty && _caseSummarySavedAddressCaseId != caseId)
+            _caseSummarySavedLocationCache.Clear();
+
+        var cacheKey = field.ToString();
+        if (_caseSummarySavedLocationCache.TryGetValue(cacheKey, out var cached))
+            return cached;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            ApplicationProfileInstance? app = null;
+            if (caseId != Guid.Empty)
+                app = objectSpace.GetObjectByKey<ApplicationProfileInstance>(caseId);
+            cached = CaseSavedLocation.List(objectSpace, field, app);
+        }
+        catch
+        {
+            cached = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+        }
+
+        _caseSummarySavedLocationCache[cacheKey] = cached;
+        return cached;
+    }
     private void SetAddressText(PersonLinkReviewLine line, string? value)
     {
         line.TextValue = value;
@@ -4330,8 +4386,91 @@
         StateHasChanged();
     }
 
+
+    /// <summary>
+    /// Case Requested WP/BZ → empty Linked Records rows (same purpose as Address 1/2 defaults).
+    /// Uses the Case summary the officer currently sees (header Snapshot), not a stale ObjectSpace.
+    /// </summary>
+    private sealed class SummaryLocationChipRow
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Case location chips can still be on screen after a save that stored the empty search box.
+    /// Copy those labels into the case header before Linked Records defaults are applied.
+    /// </summary>
+    private async Task CopyVisibleLocationChipsIntoEmptyCaseFieldsAsync()
+    {
+        SummaryLocationChipRow[]? rows;
+        try
+        {
+            rows = await JS.InvokeAsync<SummaryLocationChipRow[]>("visaCaseWorkspaceNav.readSummaryLocationChips");
+        }
+        catch (JSDisconnectedException)
+        {
+            return;
+        }
+        catch (JSException)
+        {
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            return;
+        }
+
+        if (rows == null || rows.Length == 0)
+            return;
+
+        foreach (var row in rows)
+        {
+            if (row == null || string.IsNullOrWhiteSpace(row.Key) || string.IsNullOrWhiteSpace(row.Value))
+                continue;
+            var field = Snapshot?.CaseView?.HeaderFields.FirstOrDefault(item =>
+                string.Equals(item.Key, row.Key, StringComparison.Ordinal));
+            if (field == null)
+                continue;
+            if (!string.IsNullOrWhiteSpace(field.Value) && field.Value != "—")
+                continue;
+            ApplyHeaderDraft(row.Key, row.Value.Trim(), null, allowWhenReadOnly: true);
+        }
+    }
+
+    private void ApplyLiveCaseLocationDefaultsToLinkReview()
+    {
+        if (PersonLinkReviewLines == null || PersonLinkReviewLines.Count == 0)
+            return;
+
+        var headers = Snapshot?.CaseView?.HeaderFields;
+        string? HeaderValue(string key)
+        {
+            var field = headers?.FirstOrDefault(f => string.Equals(f.Key, key, StringComparison.Ordinal));
+            if (field == null)
+                return null;
+            if (!string.IsNullOrWhiteSpace(field.Value) && field.Value != "—")
+                return field.Value;
+            if (!string.IsNullOrWhiteSpace(field.DisplayValue) && field.DisplayValue != "—")
+                return field.DisplayValue;
+            return null;
+        }
+
+        var caseWp = HeaderValue(ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
+        var caseBz = HeaderValue(ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
+        if (string.IsNullOrWhiteSpace(caseWp) && string.IsNullOrWhiteSpace(caseBz))
+            return;
+
+        // PersonLinkReviewLines may be a mutable List from the PE; cast for Apply.
+        if (PersonLinkReviewLines is IList<PersonLinkReviewLine> mutable)
+            PersonLinkReview.ApplyCaseLocationDefaults(mutable, caseWp, caseBz);
+        else
+            PersonLinkReview.ApplyCaseLocationDefaults(PersonLinkReviewLines.ToList(), caseWp, caseBz);
+    }
+
     private void SetRequestedLocations(PersonLinkReviewLine line, string? value)
     {
+        line.LocationValue = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         line.LocationChips.Clear();
         if (!string.IsNullOrWhiteSpace(value))
             LinkReviewLocationChips.AddManual(line.LocationChips, value);

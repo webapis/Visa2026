@@ -23,9 +23,8 @@ public sealed class PersonLinkReviewLocationChip
 }
 
 /// <summary>
-/// Builds and merges requested-location chips for the Linked records dialog.
-/// Before the first Join: Case / Visa / WP stay separate as suggestions.
-/// After Join: only the persisted case↔person row is shown (officer can still Add).
+/// Helpers for requested-location values on the Linked records dialog.
+/// Officers enter locations in a plain multi-select; source-coloured suggestion chips are not used.
 /// </summary>
 public static class LinkReviewLocationChips
 {

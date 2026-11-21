@@ -148,6 +148,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationProfileInstancePersonAddress2Note> ApplicationProfileInstancePersonAddress2Notes { get; set; }
         public DbSet<ApplicationProfileAddress2Recent> ApplicationProfileAddress2Recents { get; set; }
         public DbSet<ApplicationProfileSavedAddress> ApplicationProfileSavedAddresses { get; set; }
+        public DbSet<ApplicationProfileSavedLocation> ApplicationProfileSavedLocations { get; set; }
         public DbSet<ApplicationProfileInstanceExclusion> ApplicationProfileInstanceExclusions { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionPerson> ApplicationProfileInstanceExclusionPeople { get; set; }
         public DbSet<ApplicationProfileInstanceExclusionTemplate> ApplicationProfileInstanceExclusionTemplates { get; set; }
@@ -1272,6 +1273,21 @@ namespace Visa2026.Module.BusinessObjects
                         ? "\"GCRecord\" = 0"
                         : "[GCRecord] = 0")
                     .HasDatabaseName("IX_ApplicationProfileSavedAddresses_Field_Text");
+            });
+            modelBuilder.Entity<ApplicationProfileSavedLocation>(b =>
+            {
+                b.HasOne(r => r.ApplicationProfile)
+                    .WithMany()
+                    .HasForeignKey(r => r.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.Property(r => r.Text).HasMaxLength(100);
+                b.Property(r => r.TextKey).HasMaxLength(450);
+                b.HasIndex(r => new { r.Field, r.TextKey })
+                    .IsUnique()
+                    .HasFilter((Database.ProviderName ?? string.Empty).Contains("Npgsql", StringComparison.OrdinalIgnoreCase)
+                        ? "\"GCRecord\" = 0"
+                        : "[GCRecord] = 0")
+                    .HasDatabaseName("IX_ApplicationProfileSavedLocations_Field_Text");
             });
             modelBuilder.Entity<ApplicationProfileAddress2Recent>(b =>
             {

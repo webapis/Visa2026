@@ -561,12 +561,11 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultVisaCategory = ResolveLookup<VisaCategory>(objectSpace, row.DefaultVisaCategoryLocalizationKey);
         profile.RequireVisaPeriod = row.RequireVisaPeriod;
         profile.DefaultVisaPeriod = ResolveLookup<VisaPeriod>(objectSpace, row.DefaultVisaPeriodLocalizationKey);
-        if (ApplicationProfileInvitationAddressPolicy.IsChangeInvitation(row.ProfileCatalogKey, row.Code))
-            profile.RequireBorderZone = row.RequireBorderZone;
-        else
-            profile.RequireBorderZone = ApplicationProfileConfigurationResolver.RequireBorderZoneWhenProducingInvitationOrVisa(
-                profile.ProduceInvitation, profile.ProduceVisa, row.RequireBorderZone);
-        if (profile.RequireBorderZone && string.IsNullOrWhiteSpace(profile.DefaultBorderZoneLocation))
+        // Case summary Requested border zone Use = RequireBorderZone from JSON (optional Case field).
+        // Linked-records still use EffectiveRequireBorderZone (invitation/visa OR).
+        profile.RequireBorderZone = row.RequireBorderZone;
+        if ((profile.RequireBorderZone || profile.ProduceBorderZone)
+            && string.IsNullOrWhiteSpace(profile.DefaultBorderZoneLocation))
             profile.DefaultBorderZoneLocation = BorderZoneSelectionHelper.NoneValue;
         profile.RequireMigrationService = row.RequireMigrationService;
         profile.RequireStartDate = row.RequireStartDate;
@@ -628,8 +627,9 @@ internal static class ApplicationProfileTenantCatalogSync
         profile.DefaultProjectContract = ResolveProjectContract(contracts, row.DefaultProjectContractCode);
         profile.RequireUrgency = row.RequireUrgency;
         profile.DefaultUrgency = ResolveLookup<Urgency>(objectSpace, row.DefaultUrgencyLocalizationKey);
-        profile.RequireWorkPermitLocation = ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
-            profile.ProduceWorkPermit, row.RequireWorkPermitLocation);
+        // Case summary + Linked Records Requested work permit location Use = RequireWorkPermitLocation (Results & fields).
+        // Person data RequirePersonWorkPermitItem is the WP document tile only.
+        profile.RequireWorkPermitLocation = row.RequireWorkPermitLocation;
         profile.RequireProcessNumber = ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
             profile.ProduceInvitation,
             profile.ProduceWorkPermit,

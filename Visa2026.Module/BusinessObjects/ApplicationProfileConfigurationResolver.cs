@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -204,6 +205,31 @@ public static class ApplicationProfileConfigurationResolver
         bool produceWorkPermit,
         bool requireWorkPermitLocation) =>
         requireWorkPermitLocation || produceWorkPermit;
+
+    /// <summary>
+    /// Case summary / create: optional Requested border zone location — visibility from profile
+    /// <see cref="ApplicationProfile.RequireBorderZone"/> (Results &amp; fields USE / template JSON).
+    /// Empty never blocks Create.
+    /// </summary>
+    public static bool ShowCaseRequestedBorderZone(ApplicationProfile? profile) =>
+        profile?.RequireBorderZone == true;
+
+    public static bool ShowCaseRequestedBorderZone(ApplicationProfileInstance? application) =>
+        Resolve(application, ShowCaseRequestedBorderZone, t => t.ShowBorderZoneLocation);
+
+    /// <summary>
+    /// Case summary / create: optional Requested work permit location — visibility from profile
+    /// <see cref="ApplicationProfile.RequireWorkPermitLocation"/> (Results &amp; fields USE / template JSON).
+    /// Empty never blocks Create.
+    /// </summary>
+    public static bool ShowCaseRequestedWorkPermitLocation(ApplicationProfile? profile) =>
+        profile?.RequireWorkPermitLocation == true;
+
+    public static bool ShowCaseRequestedWorkPermitLocation(ApplicationProfileInstance? application) =>
+        Resolve(
+            application,
+            ShowCaseRequestedWorkPermitLocation,
+            t => t.ShowMovementPermitLocation || t.ShowWorkPermittedLocations);
 
     public static bool ShowMovementPermitLocation(ApplicationProfileInstance? application) =>
         Resolve(
@@ -468,37 +494,24 @@ public static class ApplicationProfileConfigurationResolver
     public static bool ShowPreviousInvitationItem(ApplicationProfileInstance? application) =>
         Resolve(application, p => p.RequirePersonInvitationItem, t => t.ShowPreviousInvitationItem);
 
+    /// <summary>Case summary Address 1 — catalog <see cref="ApplicationProfile.RequireAddress1"/> only.</summary>
     public static bool ShowAddress1(ApplicationProfileInstance? application) =>
-        Resolve(application, ProfileRequiresAddress1, t => t.ShowCurrentAddressOfResidence);
+        Resolve(application, p => p.RequireAddress1, t => t.ShowCurrentAddressOfResidence);
 
+    /// <summary>Case summary Address 2 — catalog <see cref="ApplicationProfile.RequireAddress2"/> only.</summary>
     public static bool ShowAddress2(ApplicationProfileInstance? application) =>
-        Resolve(application, ProfileRequiresAddress2, t => t.ShowCurrentAddressOfResidence);
+        Resolve(application, p => p.RequireAddress2, t => t.ShowCurrentAddressOfResidence);
 
+    /// <summary>
+    /// People and links / Linked Records address tiles. Dual-reads Case Address flags and
+    /// obsolete <see cref="ApplicationProfile.RequirePersonAddressOfResidence"/>.
+    /// </summary>
     public static bool ShowCurrentAddressOfResidence(ApplicationProfileInstance? application) =>
-        ShowAddress1(application);
-
-    private static bool ProfileRequiresAddress1(ApplicationProfile p)
-    {
-        if (p.RequireAddress1)
-            return true;
-        if (p.RequireAddress2)
-            return false;
-#pragma warning disable CS0618
-        return p.RequirePersonAddressOfResidence;
-#pragma warning restore CS0618
-    }
-
-    private static bool ProfileRequiresAddress2(ApplicationProfile p)
-    {
-        if (p.RequireAddress2)
-            return true;
-        if (p.RequireAddress1)
-            return false;
-#pragma warning disable CS0618
-        return p.RequirePersonAddressOfResidence
-            && p.PersonAddressOfResidenceMaxCount >= 2;
-#pragma warning restore CS0618
-    }
+        Resolve(
+            application,
+            p => ApplicationProfilePersonAddressMaxCount.EffectiveRequireAddress1(p)
+                || ApplicationProfilePersonAddressMaxCount.EffectiveRequireAddress2(p),
+            t => t.ShowCurrentAddressOfResidence);
 
     /// <summary>
     /// Employee position history tile / auto-link. Profile <see cref="ApplicationProfile.RequirePersonPosition"/>;

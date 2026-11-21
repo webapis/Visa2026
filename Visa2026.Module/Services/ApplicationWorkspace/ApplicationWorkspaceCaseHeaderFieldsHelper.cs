@@ -229,7 +229,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             application.Urgency?.ID, LookupLabel(application.Urgency), catalogs.Urgencies, readOnly: false,
             LookupFill(application.Urgency?.ID, DefaultId(profile?.DefaultUrgency?.ID, profile?.DefaultUrgencyId)));
 
-        // Optional case defaults — USE RequireBorderZone (JSON / Results & fields); Linked-records keep own gates.
+        // Optional case defaults — USE RequireBorderZone (JSON / Results & fields); Linked Records uses the same gate.
         AddCommaSeparatedMultiSelect(fields, BorderZone, ApplicationProfileLocalization.Field("BorderZone"), "teal", "📍",
             ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application),
             application.BorderZoneLocation,
@@ -450,7 +450,7 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
             application.Purpose,
             TextFill(application.Purpose, profile?.DefaultPurpose));
 
-        // Optional case defaults — USE RequireWorkPermitLocation (JSON / Results & fields); Linked-records keep own gates.
+        // Optional case defaults — USE RequireWorkPermitLocation (JSON / Results & fields); Linked Records uses the same gate.
         AddCommaSeparatedMultiSelect(fields, WorkPermitLocation, ApplicationProfileLocalization.Field("WorkPermitLocation"), "blue", "🏢",
             ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation(application),
             application.MovementPermitLocation,
@@ -527,6 +527,13 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 if (!SetBorderZone(value, application, out error))
                     return false;
+                var borderZoneStored = application.BorderZoneLocation;
+                CaseSavedLocation.RememberAll(
+                    objectSpace,
+                    application,
+                    ApplicationProfileSavedLocationField.BorderZone,
+                    CaseLocationAutocomplete.ParseChips(borderZoneStored));
+                application.BorderZoneLocation = borderZoneStored;
                 CaseBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
                 CaseVisaBorderZoneLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
                 return true;
@@ -780,6 +787,14 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                     return Hidden(out error);
                 if (!SetWorkPermitLocation(value, application, out error))
                     return false;
+                var workPermitStored = application.MovementPermitLocation;
+                CaseSavedLocation.RememberAll(
+                    objectSpace,
+                    application,
+                    ApplicationProfileSavedLocationField.WorkPermitLocation,
+                    CaseLocationAutocomplete.ParseChips(workPermitStored, string.Empty));
+                // Remember / profile fix-up must not drop multi-select chips.
+                application.MovementPermitLocation = workPermitStored;
                 CaseWorkPermitLocationCopy.EnsureForPeopleWithEmptyLocations(objectSpace, application);
                 return true;
             default:

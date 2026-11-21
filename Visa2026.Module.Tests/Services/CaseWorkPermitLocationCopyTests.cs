@@ -78,4 +78,45 @@ public class CaseWorkPermitLocationCopyTests
         application.ApplicationProfile.RequirePersonWorkPermitItem = true;
         Assert.True(CaseWorkPermitLocationCopy.IsEnabled(application));
     }
+
+    [Fact]
+    public void CanApplyCaseDefault_follows_RequireWorkPermitLocation_flag()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceWorkPermit = true,
+                RequireWorkPermitLocation = false,
+                ProduceWorkLocation = false,
+                RequirePersonWorkPermitItem = false,
+            },
+        };
+
+        Assert.False(CaseWorkPermitLocationCopy.CanApplyCaseDefault(application));
+        application.ApplicationProfile.RequireWorkPermitLocation = true;
+        Assert.True(CaseWorkPermitLocationCopy.CanApplyCaseDefault(application));
+    }
+    [Fact]
+    public void ShowInLinkReview_matches_Case_Results_without_person_wp_item()
+    {
+        // Çakylyk Almak-style: Case WP Use on, Person WP item off.
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceWorkPermit = false,
+                ProduceWorkLocation = false,
+                RequireWorkPermitLocation = true,
+                RequirePersonWorkPermitItem = false,
+            },
+        };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation(application));
+        Assert.True(CaseWorkPermitLocationCopy.ShowInLinkReview(application));
+        Assert.False(CaseWorkPermitLocationCopy.IsEnabled(application));
+
+        application.ApplicationProfile.RequireWorkPermitLocation = false;
+        Assert.False(CaseWorkPermitLocationCopy.ShowInLinkReview(application));
+    }
 }

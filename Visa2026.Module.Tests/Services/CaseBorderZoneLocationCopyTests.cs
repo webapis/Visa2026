@@ -69,4 +69,60 @@ public class CaseBorderZoneLocationCopyTests
         Assert.True(CaseBorderZoneLocationCopy.IsEnabled(application));
         Assert.True(CaseBorderZoneLocationCopy.OfferTick("Mary", "Ahal"));
     }
+
+    [Fact]
+    public void CanApplyCaseDefault_follows_RequireBorderZone_flag()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceInvitation = true,
+                RequireBorderZone = false,
+                ProduceBorderZone = false,
+            },
+        };
+
+        Assert.False(CaseBorderZoneLocationCopy.CanApplyCaseDefault(application));
+        application.ApplicationProfile.RequireBorderZone = true;
+        Assert.True(CaseBorderZoneLocationCopy.CanApplyCaseDefault(application));
+    }
+    [Fact]
+    public void ShowInLinkReview_visa_path_matches_Case_RequireBorderZone_without_person_bz_item()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceVisa = true,
+                ProduceBorderZone = false,
+                RequireBorderZone = true,
+                RequirePersonBorderZoneItem = false,
+            },
+        };
+
+        Assert.True(ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application));
+        Assert.True(CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application));
+        Assert.False(CaseBorderZoneLocationCopy.ShowInLinkReview(application));
+
+        application.ApplicationProfile.RequireBorderZone = false;
+        Assert.False(CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application));
+    }
+
+    [Fact]
+    public void ShowInLinkReview_bz_permit_path_uses_Case_flag_not_person_tile()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                ProduceBorderZone = true,
+                RequireBorderZone = true,
+                RequirePersonBorderZoneItem = false,
+            },
+        };
+
+        Assert.True(CaseBorderZoneLocationCopy.ShowInLinkReview(application));
+        Assert.False(CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application));
+    }
 }

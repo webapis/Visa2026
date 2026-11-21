@@ -1084,7 +1084,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
             model.PersonLinkReviewPersonId = personId;
             model.PersonLinkReviewPersonName = person.FullName;
             model.PersonLinkReviewPhotoDataUri = PdfPersonPhotoDataUri.FromBytes(person.Photo);
-            model.PersonLinkReviewLines = PersonLinkReview.Build(objectSpace, application, person);
+            var newLines = PersonLinkReview.Build(objectSpace, application, person).ToList();
+            ApplyCaseLocationDefaultsFromSnapshot(model, application, newLines);
+            model.PersonLinkReviewLines = newLines;
             model.ShowPersonLinkPicker = false;
             model.ShowPersonLinkReview = true;
             model.PersonLinkStatusMessage = null;
@@ -1128,6 +1130,7 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
             var lines = PersonLinkReview.Build(objectSpace, application, person).ToList();
             PersonLinkReview.PreferCaseLinks(objectSpace, application, person, lines);
+            ApplyCaseLocationDefaultsFromSnapshot(model, application, lines);
             model.PersonLinkReviewExisting = true;
             model.PersonLinkReviewPersonId = personId;
             model.PersonLinkReviewPersonName = person.FullName;
@@ -1145,6 +1148,39 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         }
 
         await Task.CompletedTask;
+    }
+
+
+    private static void ApplyCaseLocationDefaultsFromSnapshot(
+        ApplicationWorkspaceModel model,
+        ApplicationProfileInstance application,
+        IList<PersonLinkReviewLine> lines)
+    {
+        if (model == null || application == null || lines == null)
+            return;
+
+        var headers = model.Snapshot?.CaseView?.HeaderFields;
+        string? HeaderValue(string key)
+        {
+            var field = headers?.FirstOrDefault(f => string.Equals(f.Key, key, StringComparison.Ordinal));
+            if (field == null)
+                return null;
+            if (!string.IsNullOrWhiteSpace(field.Value) && field.Value != "—")
+                return field.Value;
+            if (!string.IsNullOrWhiteSpace(field.DisplayValue) && field.DisplayValue != "—")
+                return field.DisplayValue;
+            return null;
+        }
+
+        var caseWp = HeaderValue(ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation);
+        if (string.IsNullOrWhiteSpace(caseWp))
+            caseWp = CaseWorkPermitLocationCopy.ResolveCaseLocations(application);
+
+        var caseBz = HeaderValue(ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone);
+        if (string.IsNullOrWhiteSpace(caseBz))
+            caseBz = CaseBorderZoneLocationCopy.ResolveCaseLocations(application);
+
+        PersonLinkReview.ApplyCaseLocationDefaults(lines, caseWp, caseBz);
     }
 
     private async Task JoinPersonLinkReviewAsync()

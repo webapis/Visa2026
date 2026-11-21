@@ -29,23 +29,17 @@ public static class CaseWorkPermitLocationCopy
             profile.RequireWorkPermitLocation);
     }
 
+    /// <summary>Case default may copy into empty person requested WP rows.</summary>
+    public static bool CanApplyCaseDefault(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation(application);
+
     /// <summary>
-    /// Link-review overview row: visible when the case produces a work permit and the
-    /// Work permit person tile is configured (profile or type dual-read).
+    /// Link-review overview row: same Results &amp; fields gate as Case
+    /// (<see cref="ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation"/>).
+    /// Person data Work permit item controls the WP document tile only.
     /// </summary>
-    public static bool ShowInLinkReview(ApplicationProfileInstance? application)
-    {
-        var profile = application?.ApplicationProfile;
-        if (profile == null)
-            return false;
-        var locationConfigured = profile.ProduceWorkLocation && profile.RequireWorkPermitLocation
-            || ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
-                profile.ProduceWorkPermit,
-                profile.RequireWorkPermitLocation);
-        if (!locationConfigured)
-            return false;
-        return ApplicationProfileConfigurationResolver.ShowCurrentWorkPermitItem(application);
-    }
+    public static bool ShowInLinkReview(ApplicationProfileInstance? application) =>
+        ApplicationProfileConfigurationResolver.ShowCaseRequestedWorkPermitLocation(application);
 
     public static bool IsComplete(string? caseLocations) =>
         !string.IsNullOrWhiteSpace(caseLocations);
@@ -82,21 +76,34 @@ public static class CaseWorkPermitLocationCopy
     }
 
     /// <summary>
-    /// Join / Relink: fill empty requested WP location from Case summary.
+    /// Join / Relink: copy case WP location into person requested location only when that person row is empty.
+    /// Clearing the case value does not wipe person rows.
     /// </summary>
     public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
     {
         if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
             return false;
-        if (!IsEnabled(application))
+        if (!CanApplyCaseDefault(application))
             return false;
 
-        return CasePersonRequestedLocation.UpsertIfEmpty(
+        var caseLocations = ResolveCaseLocations(application);
+        if (!IsComplete(caseLocations))
+            return false;
+
+        var existing = CasePersonRequestedLocation.GetLocations(
+            objectSpace,
+            application.ID,
+            person.ID,
+            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit);
+        if (!string.IsNullOrWhiteSpace(existing))
+            return false;
+
+        return CasePersonRequestedLocation.Upsert(
             objectSpace,
             application,
             person,
             ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
-            ResolveCaseLocations(application));
+            caseLocations);
     }
 
     /// <summary>
@@ -104,7 +111,7 @@ public static class CaseWorkPermitLocationCopy
     /// </summary>
     public static void EnsureForPeopleWithEmptyLocations(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
-        if (objectSpace == null || application == null || !IsEnabled(application))
+        if (objectSpace == null || application == null || !CanApplyCaseDefault(application))
             return;
 
         foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))

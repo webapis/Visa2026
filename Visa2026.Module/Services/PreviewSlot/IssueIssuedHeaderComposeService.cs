@@ -2243,12 +2243,11 @@ public static partial class IssueIssuedHeaderComposeService
         IssueIssuedHeaderPersonLineDraft line,
         ApplicationProfileInstance instance)
     {
-        line.WorkPermittedLocations = CasePersonRequestedLocation.ResolveForPrefill(
-            objectSpace,
-            instance.ID,
-            person.ID,
-            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
-            instance.BorderZoneLocation);
+        _ = objectSpace;
+        _ = person;
+        _ = instance;
+        // Officer enters granted border-zone locations on compose — no Case/Joined prefill.
+        line.WorkPermittedLocations = string.Empty;
     }
 
     private static string ResolveBorderZoneItemLocations(
@@ -2256,16 +2255,9 @@ public static partial class IssueIssuedHeaderComposeService
         ApplicationProfileInstance instance,
         IssueIssuedHeaderPersonLineDraft row)
     {
-        var onRow = MeaningfulBorderZoneLocations(row.WorkPermittedLocations);
-        if (onRow != null)
-            return onRow;
-
-        return CasePersonRequestedLocation.ResolveForPrefill(
-            objectSpace,
-            instance.ID,
-            row.PersonId,
-            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
-            instance.BorderZoneLocation)?.Trim() ?? string.Empty;
+        _ = objectSpace;
+        _ = instance;
+        return MeaningfulBorderZoneLocations(row.WorkPermittedLocations) ?? string.Empty;
     }
 
     private static string? MeaningfulBorderZoneLocations(string? stored)
@@ -2296,12 +2288,9 @@ public static partial class IssueIssuedHeaderComposeService
             line.Include = true;
         }
 
-        line.WorkPermittedLocations = CasePersonRequestedLocation.ResolveForPrefill(
-            objectSpace,
-            instance.ID,
-            person.ID,
-            ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
-            defaultLocations);
+        // Officer enters granted locations on compose — no Case/Joined prefill.
+        _ = defaultLocations;
+        line.WorkPermittedLocations = string.Empty;
         var linkedWp = ResolveLinkedWorkPermitItem(objectSpace, instance, person.ID);
         ApplySourceWorkPermitPreview(line, linkedWp);
         if (string.IsNullOrWhiteSpace(line.SourceWorkPermitCaption) || line.SourceWorkPermitId is null)

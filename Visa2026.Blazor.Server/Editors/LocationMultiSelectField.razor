@@ -1,0 +1,489 @@
+@using Visa2026.Module.Services
+
+<div class="cw-loc-ms" data-loc-value="@FormatCurrent()" @onfocusin="OnFocusIn" @onfocusout="OnFocusOut">
+    <div class="cw-loc-ms__field">
+        <div class="cw-loc-ms__box" @onclick="FocusInput">
+            @foreach (var chip in VisibleChips)
+            {
+                var chipItem = chip;
+                <span class="cw-loc-ms__chip @(chipItem.IsNew ? "is-new" : null)"
+                      title="@(chipItem.IsNew ? chipItem.Label + " (new, saved when you create the application)" : chipItem.Label)">
+                    <span class="cw-loc-ms__chip-lbl">@chipItem.Label</span>
+                    @if (Enabled && !ReadOnly)
+                    {
+                        <button type="button"
+                                class="cw-loc-ms__chip-x"
+                                tabindex="-1"
+                                title="@("Remove " + chipItem.Label)"
+                                aria-label="@("Remove " + chipItem.Label)"
+                                @onmousedown:preventDefault="true"
+                                @onclick="() => RemoveChipAsync(chipItem)"
+                                @onclick:stopPropagation="true">×</button>
+                    }
+                </span>
+            }
+            @if (ShowMoreChip)
+            {
+                <span class="cw-loc-ms__chip cw-loc-ms__chip--more" @onclick="ExpandChips" @onclick:stopPropagation="true">+@(_chips.Count - CaseLocationAutocomplete.LimitTags)</span>
+            }
+            <input id="@_inputId"
+                   class="cw-loc-ms__input"
+                   type="text"
+                   maxlength="@CaseLocationAutocomplete.MaxLength"
+                   disabled="@(!Enabled || ReadOnly)"
+                   readonly="@ReadOnly"
+                   placeholder="@(_chips.Count == 0 ? Placeholder : string.Empty)"
+                   role="combobox"
+                   aria-expanded="@(_listOpen ? "true" : "false")"
+                   aria-controls="@_listId"
+                   aria-autocomplete="list"
+                   aria-multiselectable="true"
+                   aria-activedescendant="@(_activeIndex >= 0 && _activeIndex < _hits.Count ? OptionId(_activeIndex) : null)"
+                   aria-describedby="@_statusId"
+                   value="@_draft"
+                   @ref="_inputRef"
+                   @oninput="OnInput"
+                   @onkeydown="OnKeyDown"
+                   @onpaste="OnPaste" />
+            @if (Enabled && !ReadOnly && _chips.Count > 0)
+            {
+                <button type="button"
+                        class="cw-loc-ms__clear"
+                        title="Clear all"
+                        tabindex="-1"
+                        @onmousedown:preventDefault="true"
+                        @onclick="ClearAllAsync"
+                        @onclick:stopPropagation="true">×</button>
+            }
+        </div>
+        @if (_listOpen && _hits.Count > 0)
+        {
+            <ul id="@_listId" class="cw-loc-ms__list cw-addr-ac__list" role="listbox" aria-multiselectable="true">
+                @for (var i = 0; i < _hits.Count; i++)
+                {
+                    var index = i;
+                    var item = _hits[index];
+                    <li id="@OptionId(index)"
+                        class="@(_activeIndex == index ? "cw-addr-ac__option is-active" : "cw-addr-ac__option")"
+                        role="option"
+                        aria-selected="@(_activeIndex == index)"
+                        @onmousedown:preventDefault="true"
+                        @onmousedown="() => PickAsync(item.Text)">
+                        <span class="cw-addr-ac__option-main">@Highlight(item.Text)</span>
+                        <span class="cw-addr-ac__option-meta">Used @item.UseCount×</span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+    <div id="@_statusId" class="cw-addr-ac__status" data-state="@_statusState" role="status" aria-live="polite">@_statusText</div>
+    <div class="cw-loc-ms__sr" aria-live="polite">@_liveText</div>
+</div>
+
+@code {
+    private sealed class Chip
+    {
+        public string Label { get; set; } = string.Empty;
+        public bool IsNew { get; set; }
+    }
+
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyList<CaseAddressAutocomplete.SavedEntry> Suggestions { get; set; } =
+        Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+    [Parameter] public bool Enabled { get; set; } = true;
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Search or type a new location";
+    [Parameter] public string EmptyHint { get; set; } = "Search saved locations, or type a new one and press Enter.";
+    /// <summary>Border zone uses Ýok; work permit uses empty string.</summary>
+    [Parameter] public string? NoneValue { get; set; } = CommaSeparatedSelectionHelper.NoneValue;
+
+    private readonly string _inputId = "cw-loc-ms-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _listId = "cw-loc-ms-list-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _statusId = "cw-loc-ms-status-" + Guid.NewGuid().ToString("N")[..8];
+
+    private ElementReference _inputRef;
+    private readonly List<Chip> _chips = new();
+    private string _draft = string.Empty;
+    private string? _lastExternal;
+    private bool _listOpen;
+    private bool _pickInFlight;
+    private bool _focused;
+    private bool _forceExpand;
+    private int _activeIndex = -1;
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> _hits =
+        Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+    private int _hitTotal;
+    private string _statusText = string.Empty;
+    private string _statusState = string.Empty;
+    private string _liveText = string.Empty;
+    private bool _userEdited;
+    private bool _needsPush;
+    private string? _lastPushed;
+
+    private IEnumerable<Chip> VisibleChips =>
+        (!_focused && !_forceExpand && _chips.Count > CaseLocationAutocomplete.LimitTags)
+            ? _chips.Take(CaseLocationAutocomplete.LimitTags)
+            : _chips;
+
+    private bool ShowMoreChip =>
+        !_focused && !_forceExpand && _chips.Count > CaseLocationAutocomplete.LimitTags;
+
+    protected override void OnParametersSet()
+    {
+        var incoming = Value ?? string.Empty;
+        if (string.Equals(incoming, _lastExternal, StringComparison.Ordinal))
+            return;
+
+        // After the officer edits chips, local state is authoritative. Parent draft rebuilds
+        // (create wizard) used to remount/hydrate with a single label and wipe the rest.
+        if (_userEdited || _pickInFlight)
+        {
+            var current = FormatCurrent();
+            if (string.Equals(incoming, current, StringComparison.Ordinal))
+            {
+                _lastExternal = incoming;
+                return;
+            }
+
+            // Parent value was cleared by reading this empty search box. Push the chips back.
+            if (!string.IsNullOrEmpty(current)
+                && !string.Equals(current, _lastPushed, StringComparison.Ordinal))
+                _needsPush = true;
+            return;
+        }
+
+        _lastExternal = incoming;
+        HydrateFromValue(incoming);
+        RefreshStatus(keepList: false);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_needsPush || !ValueChanged.HasDelegate)
+            return;
+
+        var current = FormatCurrent();
+        _needsPush = false;
+        if (string.IsNullOrEmpty(current)
+            || string.Equals(Value ?? string.Empty, current, StringComparison.Ordinal)
+            || string.Equals(current, _lastPushed, StringComparison.Ordinal))
+            return;
+
+        _lastPushed = current;
+        _lastExternal = current;
+        await ValueChanged.InvokeAsync(current);
+    }
+
+    private void HydrateFromValue(string? stored)
+    {
+        _chips.Clear();
+        foreach (var label in CaseLocationAutocomplete.ParseChips(stored, NoneValue))
+        {
+            var exact = Suggestions?.FirstOrDefault(s =>
+                string.Equals(CaseLocationAutocomplete.FoldKey(s.Text), CaseLocationAutocomplete.FoldKey(label), StringComparison.Ordinal));
+            _chips.Add(new Chip
+            {
+                Label = exact?.Text ?? label,
+                IsNew = exact == null,
+            });
+        }
+    }
+
+    private string FormatCurrent() =>
+        CaseLocationAutocomplete.FormatChips(_chips.Select(c => c.Label), NoneValue);
+
+    private async Task FocusInput()
+    {
+        if (!Enabled || ReadOnly)
+            return;
+        try { await _inputRef.FocusAsync(); } catch { /* ignore */ }
+    }
+
+    private void ExpandChips()
+    {
+        _forceExpand = true;
+        _ = FocusInput();
+    }
+
+    private void OnFocusIn()
+    {
+        _focused = true;
+        _forceExpand = true;
+        RefreshStatus(keepList: true);
+    }
+
+    private async Task OnFocusOut()
+    {
+        if (_pickInFlight)
+            return;
+        _focused = false;
+        _forceExpand = false;
+        _listOpen = false;
+        _activeIndex = -1;
+        if (!string.IsNullOrWhiteSpace(_draft))
+            await AddTypedAsync();
+        else
+            RefreshStatus(keepList: false);
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        _draft = e.Value?.ToString() ?? string.Empty;
+        if (_draft.Contains(',') || _draft.Contains(';'))
+        {
+            _ = SplitAndAddAsync(_draft);
+            return;
+        }
+        RefreshStatus(keepList: true);
+    }
+
+    private async Task OnPaste(ClipboardEventArgs _)
+    {
+        // Paste content arrives via oninput shortly after; handled there for commas.
+        await Task.CompletedTask;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (!Enabled || ReadOnly)
+            return;
+
+        if (e.Key == "Escape")
+        {
+            _listOpen = false;
+            _activeIndex = -1;
+            return;
+        }
+
+        if (e.Key == "ArrowDown")
+        {
+            if (_hits.Count == 0)
+                return;
+            _listOpen = true;
+            _activeIndex = _activeIndex < 0 ? 0 : Math.Min(_hits.Count - 1, _activeIndex + 1);
+            return;
+        }
+
+        if (e.Key == "ArrowUp")
+        {
+            if (_hits.Count == 0)
+                return;
+            _listOpen = true;
+            _activeIndex = _activeIndex <= 0 ? _hits.Count - 1 : _activeIndex - 1;
+            return;
+        }
+
+        if (e.Key == "Enter")
+        {
+            if (_listOpen && _activeIndex >= 0 && _activeIndex < _hits.Count)
+                await PickAsync(_hits[_activeIndex].Text);
+            else
+                await AddTypedAsync();
+            return;
+        }
+
+        if (e.Key == "Backspace" && string.IsNullOrEmpty(_draft) && _chips.Count > 0)
+        {
+            await RemoveChipAsync(_chips[^1]);
+            return;
+        }
+
+        if (e.Key == ",")
+        {
+            await AddTypedAsync();
+        }
+    }
+
+    private async Task SplitAndAddAsync(string raw)
+    {
+        var parts = CaseLocationAutocomplete.ParseChips(raw, NoneValue);
+        _draft = string.Empty;
+        foreach (var part in parts)
+            await TryAddLabelAsync(part);
+        await CommitAsync();
+    }
+
+    private async Task PickAsync(string text)
+    {
+        _pickInFlight = true;
+        try
+        {
+            await TryAddLabelAsync(text);
+            _draft = string.Empty;
+            _listOpen = false;
+            _activeIndex = -1;
+            await CommitAsync();
+        }
+        finally
+        {
+            _pickInFlight = false;
+        }
+    }
+
+    private async Task AddTypedAsync()
+    {
+        var q = CaseLocationAutocomplete.NormalizeDisplay(_draft);
+        if (string.IsNullOrEmpty(q))
+            return;
+        await TryAddLabelAsync(q);
+        _draft = string.Empty;
+        _listOpen = false;
+        _activeIndex = -1;
+        await CommitAsync();
+    }
+
+    private Task TryAddLabelAsync(string label)
+    {
+        var display = CaseLocationAutocomplete.NormalizeDisplay(label);
+        if (string.IsNullOrEmpty(display))
+            return Task.CompletedTask;
+
+        if (_chips.Any(c => string.Equals(CaseLocationAutocomplete.FoldKey(c.Label), CaseLocationAutocomplete.FoldKey(display), StringComparison.Ordinal)))
+        {
+            Announce(display + " is already selected.");
+            return Task.CompletedTask;
+        }
+
+        var exact = Suggestions?.FirstOrDefault(s =>
+            string.Equals(CaseLocationAutocomplete.FoldKey(s.Text), CaseLocationAutocomplete.FoldKey(display), StringComparison.Ordinal));
+        if (exact != null)
+        {
+            _chips.Add(new Chip { Label = exact.Text, IsNew = false });
+            Announce("Added " + exact.Text + ". " + _chips.Count + " selected.");
+        }
+        else
+        {
+            _chips.Add(new Chip { Label = display, IsNew = true });
+            Announce("Added new location " + display + ". " + _chips.Count + " selected.");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task RemoveChipAsync(Chip chip)
+    {
+        _chips.Remove(chip);
+        Announce("Removed " + chip.Label + ". " + _chips.Count + " selected.");
+        await CommitAsync();
+    }
+
+    private async Task ClearAllAsync()
+    {
+        _chips.Clear();
+        _draft = string.Empty;
+        Announce("All locations cleared.");
+        await CommitAsync();
+    }
+
+    private async Task CommitAsync()
+    {
+        _userEdited = true;
+        var formatted = FormatCurrent();
+        _lastExternal = formatted;
+        _lastPushed = formatted;
+        RefreshStatus(keepList: false);
+        if (ValueChanged.HasDelegate)
+            await ValueChanged.InvokeAsync(formatted);
+    }
+
+    private void RefreshStatus(bool keepList)
+    {
+        var q = CaseLocationAutocomplete.NormalizeDisplay(_draft);
+        var selectedLabels = _chips.Select(c => c.Label).ToList();
+        var newCount = _chips.Count(c => c.IsNew);
+
+        if (string.IsNullOrEmpty(q))
+        {
+            _hits = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+            _hitTotal = 0;
+            _listOpen = false;
+            _activeIndex = -1;
+            if (_chips.Count > 0)
+            {
+                _statusState = "ok";
+                _statusText = _chips.Count + " selected"
+                    + (newCount > 0 ? " · " + newCount + " new, saved when you create the application" : string.Empty);
+            }
+            else
+            {
+                _statusState = string.Empty;
+                _statusText = EmptyHint;
+            }
+            return;
+        }
+
+        if (selectedLabels.Any(l => string.Equals(CaseLocationAutocomplete.FoldKey(l), CaseLocationAutocomplete.FoldKey(q), StringComparison.Ordinal)))
+        {
+            _hits = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+            _hitTotal = 0;
+            _listOpen = false;
+            _statusState = string.Empty;
+            _statusText = "Already selected.";
+            return;
+        }
+
+        var result = CaseLocationAutocomplete.Search(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>(), selectedLabels);
+        _hits = result.Items;
+        _hitTotal = result.Total;
+
+        if (CaseLocationAutocomplete.IsExactSaved(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
+        {
+            _statusState = "ok";
+            _statusText = "Saved location. Press Enter to add it.";
+            _listOpen = false;
+            _activeIndex = -1;
+            return;
+        }
+
+        if (_hits.Count > 0)
+        {
+            _statusState = string.Empty;
+            _statusText = _hitTotal + " saved location" + (_hitTotal == 1 ? " matches" : "s match")
+                + ". Pick one, or press Enter to add “" + q + "” as new.";
+            _listOpen = keepList && _focused;
+            if (!_listOpen)
+                _activeIndex = -1;
+            return;
+        }
+
+        _statusState = "new";
+        _statusText = "New location. Press Enter to add “" + q + "”. It will be saved for next time when you create the application.";
+        _listOpen = false;
+        _activeIndex = -1;
+    }
+
+    private void Announce(string msg)
+    {
+        _liveText = string.Empty;
+        _liveText = msg;
+    }
+
+    private string OptionId(int index) => $"{_listId}-opt-{index}";
+
+    private RenderFragment Highlight(string text) => builder =>
+    {
+        var ranges = CaseLocationAutocomplete.HighlightRanges(text, _draft);
+        if (ranges.Count == 0)
+        {
+            builder.AddContent(0, text);
+            return;
+        }
+
+        var seq = 0;
+        var cursor = 0;
+        foreach (var (start, end) in ranges)
+        {
+            var s = Math.Max(0, Math.Min(start, text.Length));
+            var e = Math.Max(s, Math.Min(end, text.Length));
+            if (s > cursor)
+                builder.AddContent(seq++, text[cursor..s]);
+            builder.OpenElement(seq++, "mark");
+            builder.AddContent(seq++, text[s..e]);
+            builder.CloseElement();
+            cursor = e;
+        }
+        if (cursor < text.Length)
+            builder.AddContent(seq, text[cursor..]);
+    };
+}

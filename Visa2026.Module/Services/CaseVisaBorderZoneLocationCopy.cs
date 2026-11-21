@@ -19,11 +19,15 @@ public static class CaseVisaBorderZoneLocationCopy
         var profile = application?.ApplicationProfile;
         if (profile == null)
             return false;
-        if (!profile.ProduceVisa || profile.ProduceBorderZone)
+        if (profile.ProduceBorderZone)
             return false;
-        return ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(profile);
+        // Invitation / visa profiles without ProduceBorderZone: Case Results RequireBorderZone.
+        return ApplicationProfileConfigurationResolver.ShowCaseRequestedBorderZone(application);
     }
 
+    /// <summary>
+    /// Same Results &amp; fields gate as Case when the profile does not produce a border-zone permit.
+    /// </summary>
     public static bool ShowInLinkReview(ApplicationProfileInstance? application) =>
         IsEnabled(application);
 
@@ -82,26 +86,17 @@ public static class CaseVisaBorderZoneLocationCopy
     }
 
     /// <summary>
-    /// Join: fill empty requested border-zone location from Case (visa-only profiles).
+    /// Join: same empty-person copy as <see cref="CaseBorderZoneLocationCopy.AcceptOnJoin"/> when this visa path is enabled.
     /// </summary>
-    public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person)
-    {
-        if (objectSpace == null || application == null || person == null || person.ID == Guid.Empty)
-            return false;
-        if (!IsEnabled(application))
-            return false;
-
-        return CasePersonRequestedLocation.UpsertIfEmpty(
-            objectSpace,
-            application,
-            person,
-            ApplicationProfileInstancePersonRequestedLocationKind.BorderZone,
-            ResolveCaseLocations(application));
-    }
+    public static bool AcceptOnJoin(IObjectSpace objectSpace, ApplicationProfileInstance application, Person person) =>
+        CaseBorderZoneLocationCopy.AcceptOnJoin(objectSpace, application, person);
 
     public static void EnsureForPeopleWithEmptyLocations(IObjectSpace objectSpace, ApplicationProfileInstance application)
     {
-        if (objectSpace == null || application == null || !IsEnabled(application))
+        if (objectSpace == null || application == null)
+            return;
+        // Prefer the shared case-default gate; keep calling when this visa-only path was historically used.
+        if (!CaseBorderZoneLocationCopy.CanApplyCaseDefault(application) && !IsEnabled(application))
             return;
 
         foreach (var person in application.People.Where(p => p != null && p.ID != Guid.Empty))

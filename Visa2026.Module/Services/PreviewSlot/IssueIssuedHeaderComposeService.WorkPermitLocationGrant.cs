@@ -40,14 +40,7 @@ public static partial class IssueIssuedHeaderComposeService
             item.Passport = row.PassportId is Guid pid
                 ? objectSpace.GetObjectByKey<Passport>(pid)
                 : ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
-            item.GrantedLocations = string.IsNullOrWhiteSpace(row.WorkPermittedLocations)
-                ? CasePersonRequestedLocation.ResolveForPrefill(
-                    objectSpace,
-                    instance.ID,
-                    person.ID,
-                    ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
-                    instance.MovementPermitLocation)
-                : row.WorkPermittedLocations.Trim();
+            item.GrantedLocations = row.WorkPermittedLocations?.Trim() ?? string.Empty;
             item.SourceWorkPermitItem = sourceItem;
             grant.Items.Add(item);
         }

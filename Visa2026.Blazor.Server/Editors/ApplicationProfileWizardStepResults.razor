@@ -60,14 +60,17 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireBorderZone" disabled="@(Disabled || Profile.ProduceInvitation || Profile.ProduceVisa)" /></td>
+                    <td><input type="checkbox" @bind="Profile.RequireBorderZone" disabled="@Disabled" /></td>
                     <td>@Field("BorderZone")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindMulti")</span></td>
                     <td><input type="checkbox" checked="@HasBorderZoneDefault" disabled="@(Disabled || !Profile.RequireBorderZone)" @onchange="ToggleBorderZoneDefault" /></td>
                     <td>
-                        <BorderZoneLocationField Value="@Profile.DefaultBorderZoneLocation"
-                                                 ReadOnly="@(Disabled || !Profile.RequireBorderZone || !HasBorderZoneDefault)"
-                                                 ObjectSpace="@ObjectSpace"
-                                                 ValueChanged="@OnBorderZoneDefaultChanged" />
+                        <LocationMultiSelectField Value="@Profile.DefaultBorderZoneLocation"
+                                                  Enabled="@(!Disabled && Profile.RequireBorderZone && HasBorderZoneDefault)"
+                                                  ReadOnly="@(Disabled || !Profile.RequireBorderZone || !HasBorderZoneDefault)"
+                                                  Suggestions="@LoadWizardSavedLocations(ApplicationProfileSavedLocationField.BorderZone)"
+                                                  NoneValue="@CommaSeparatedSelectionHelper.NoneValue"
+                                                  EmptyHint="Search or type a border zone location."
+                                                  ValueChanged="@OnBorderZoneDefaultChanged" />
                     </td>
                 </tr>
                 <tr>
@@ -239,15 +242,17 @@
                     <td class="ap-wizard__hint">@Msg("ApplicationProfile.Wizard.ProcessNumberHint")</td>
                 </tr>
                 <tr>
-                    <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@(Disabled || Profile.ProduceWorkPermit)" @bind:after="OnWorkPermitLocationUseChanged" /></td>
+                    <td><input type="checkbox" @bind="Profile.RequireWorkPermitLocation" disabled="@Disabled" @bind:after="OnWorkPermitLocationUseChanged" /></td>
                     <td>@Field("WorkPermitLocation")</td><td><span class="ap-wizard__tag">@Msg("ApplicationProfile.Wizard.KindMulti")</span></td>
                     <td><input type="checkbox" checked="@HasWorkPermitLocationDefault" disabled="@(Disabled || !Profile.RequireWorkPermitLocation)" @onchange="ToggleWorkPermitLocationDefault" /></td>
                     <td>
-                        <BorderZoneLocationField Value="@Profile.DefaultWorkPermitLocation"
-                                                 EditorAlias="@CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation"
-                                                 ReadOnly="@(Disabled || !Profile.RequireWorkPermitLocation || !HasWorkPermitLocationDefault)"
-                                                 ObjectSpace="@ObjectSpace"
-                                                 ValueChanged="@OnWorkPermitLocationDefaultChanged" />
+                        <LocationMultiSelectField Value="@Profile.DefaultWorkPermitLocation"
+                                                  Enabled="@(!Disabled && Profile.RequireWorkPermitLocation && HasWorkPermitLocationDefault)"
+                                                  ReadOnly="@(Disabled || !Profile.RequireWorkPermitLocation || !HasWorkPermitLocationDefault)"
+                                                  Suggestions="@LoadWizardSavedLocations(ApplicationProfileSavedLocationField.WorkPermitLocation)"
+                                                  NoneValue="@string.Empty"
+                                                  EmptyHint="Search or type a work permit location."
+                                                  ValueChanged="@OnWorkPermitLocationDefaultChanged" />
                     </td>
                 </tr>
                 <tr>
@@ -282,18 +287,33 @@
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } = new();
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _wizardLocCache = new(StringComparer.Ordinal);
+
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadWizardSavedLocations(ApplicationProfileSavedLocationField field)
+    {
+        var key = field.ToString();
+        if (_wizardLocCache.TryGetValue(key, out var cached))
+            return cached;
+        try
+        {
+            cached = ObjectSpace == null
+                ? Array.Empty<CaseAddressAutocomplete.SavedEntry>()
+                : CaseSavedLocation.List(ObjectSpace, field);
+        }
+        catch
+        {
+            cached = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+        }
+        _wizardLocCache[key] = cached;
+        return cached;
+    }
 
     protected override void OnParametersSet()
     {
         if (Profile == null)
             return;
 
-        if (ApplicationProfileConfigurationResolver.EffectiveRequireBorderZone(Profile))
-            Profile.RequireBorderZone = true;
-
-        if (ApplicationProfileConfigurationResolver.RequireWorkPermitLocationWhenProducingWorkPermit(
-            Profile.ProduceWorkPermit, Profile.RequireWorkPermitLocation))
-            Profile.RequireWorkPermitLocation = true;
+        // Case requested BZ / WP location USE stays officer/JSON configurable (not forced by May produce).
 
         if (ApplicationProfileConfigurationResolver.RequireProcessNumberWhenProducingIssuedDocuments(
             Profile.ProduceInvitation, Profile.ProduceWorkPermit, Profile.ProduceVisa, Profile.RequireProcessNumber))

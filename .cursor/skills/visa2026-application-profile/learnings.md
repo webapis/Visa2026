@@ -1,3 +1,99 @@
+### 2026-11-21 — Linked Records WP location stayed empty after Case edit
+
+- **Symptom**: Case Requested work permit location showed chips, but Linked Records opened with an empty work-permit location (border zone still filled).
+- **Cause**: Done on Case summary reads `document.activeElement.value`. Inside the location editor that node is the empty search box, so the chip string was saved as blank. The control kept the chips locally (`_userEdited`), so the screen and the stored case value diverged. Linked Records defaults read the stored value.
+- **Fix**: Ignore the focused search box for location multi-select. Push chips back onto the case header when they diverge. When Linked Records opens, copy the on-screen chip string into an empty case header before applying defaults.
+- **Verify**: Blazor-only isolated build. Stop F5, rebuild, hard-refresh. Set Case WP chips, Done, Link existing — the dialog shows those chips. Border zone unchanged.
+- **Prevent**: Do not treat `.cw-loc-ms` input `.value` as the case field value.
+- **Cross-skill**: visa2026-responsive-ui —
+### 2026-11-21 — Case properties looked unprofessional after location-shift fix
+
+- **Symptom**: Case properties stacked in one left column; long WP location label misaligned; Addresses full-width with large gaps.
+- **Cause**: `column-fill: auto` fills column 1 first (empty cols 2–3). Combined with `column-span: all` on AddressObject, the balanced 3-column Case form collapsed.
+- **Fix**: Restore `column-fill: balance`; remove Address `column-span: all` so Address 1/2 stay in column flow; keep absolute location list + chip/status height caps; top-align location labels; cap summary Address textarea height.
+- **Verify**: Blazor-only isolated build. Hard-refresh. Case properties show 3 columns again; editing WP location must not push Address cells.
+- **Prevent**: Never use `column-fill: auto` on `.cw-summary-form` to fix overlay reflow — use absolute suggestion lists instead.
+- **Cross-skill**: visa2026-responsive-ui —
+### 2026-11-21 — Case WP location edit shifted Case summary layout
+
+- **Symptom**: Typing/changing Requested work permit location moved Address fields / identity column; suggestion list pushed layout.
+- **Cause**: Case summary uses CSS multi-column (`column-fill: balance`). Growing chip box / status reflowed columns. Location list was anchored to the whole control (including status), not the input box.
+- **Fix**: `column-fill: auto`; raise z-index while location focused; wrap box+list in `.cw-loc-ms__field` (absolute list like Address); cap chip box height; clamp status to one line.
+- **Verify**: Blazor-only isolated build. Hard-refresh CSS. Edit Case WP location — columns stay put; dropdown overlays.
+- **Prevent**: Do not let in-flow suggestion UIs grow Case summary multi-column cells.
+- **Cross-skill**: visa2026-responsive-ui —
+### 2026-11-21 — Case WP change still did not prefill Linked Records
+
+- **Need**: Case Requested WP/BZ (like Address 1/2) are defaults for Linked Records open — changing Case WP must show in the dialog.
+- **Cause**: Prefill relied on ObjectSpace scalars; live Case summary Snapshot (what the officer sees) was not applied when the dialog opened in the Blazor component.
+- **Fix**: `LocationValue` on link-review lines (Address `TextValue` pattern). On Linked Records open, `ApplyLiveCaseLocationDefaultsToLinkReview` fills empty WP/BZ from Case header Snapshot Value/DisplayValue.
+- **Verify**: Isolated Module + Blazor build. Stop F5, rebuild host, F5 — set Case WP chips, open Linked Records → WP field shows the same chips.
+- **Prevent**: Do not open Linked Records location defaults only from a separate ObjectSpace without reading live Case summary fields.
+- **Cross-skill**: —
+### 2026-11-21 — Linked Records WP empty after Case WP change (unlinked person)
+
+- **Symptom**: Case showed Requested WP chips; Linked Records for not-yet-joined person left WP empty (BZ could still prefill).
+- **Cause**: Prefill used only DB `MovementPermitLocation` on a fresh ObjectSpace. Case summary draft/header Snapshot can show newer WP values before/without matching what Build read; empty person Joined row → blank chips.
+- **Fix**: `ApplyCaseLocationDefaults` fills empty WP/BZ rows from Case summary Snapshot header values (fallback to persisted ResolveCaseLocations). `ReloadObject` before WP case resolve. Wired on link-review open (OfficerShell + ApplicationWorkspace).
+- **Verify**: Module test ApplyCaseLocationDefaults. Stop F5, rebuild host, F5 — set Case WP, open Linked Records for new person → WP chips match Case.
+- **Prevent**: Do not prefill Linked Records locations only from a possibly-stale OS scalar when Case header Snapshot already shows values.
+- **Cross-skill**: —
+### 2026-11-21 — Linked Records WP row missing when Person WP item off
+
+- **Symptom**: Çakylyk Almak Case showed Requested WP location; Linked Records only showed BZ.
+- **Cause**: WP location line was appended only inside the WorkPermitItem catalog loop; `IsConfigured` skips that item when `RequirePersonWorkPermitItem` is false, so the row never ran. BZ already had a post-loop Visa fallback.
+- **Fix**: After building catalog lines, add WP (and BZ permit) location rows when `ShowInLinkReview` and not already present — same pattern as Visa BZ.
+- **Verify**: Isolated Module build. Stop F5, rebuild, F5 — Invitation case Linked Records shows Requested WP + BZ.
+- **Prevent**: Do not nest requested-location rows only under Person document-tile catalog kinds.
+- **Cross-skill**: —
+### 2026-11-21 — Linked Records WP/BZ visibility = Case Results flags
+
+- **Need**: Çakylyk Almak Linked Records hid Requested WP location while Case showed it (`RequireWorkPermitLocation` true, Person WP item false).
+- **Cause**: `ShowInLinkReview` required Person data Work permit / Border zone item tiles, not Results & fields.
+- **Fix**: WP `ShowInLinkReview` → `ShowCaseRequestedWorkPermitLocation`. BZ permit path → `ShowCaseRequestedBorderZone` + `ProduceBorderZone`. Visa/invitation path → `ShowCaseRequestedBorderZone` when not `ProduceBorderZone`. Person items remain document tiles only. Invitation JSON already has `RequireWorkPermitLocation`/`RequireBorderZone` true.
+- **Verify**: Module tests for ShowInLinkReview. Stop F5, rebuild, F5 — Çakylyk Almak Linked Records shows Requested WP + BZ when Case Results Use is on.
+- **Prevent**: Do not gate Linked Records requested-location rows on `RequirePersonWorkPermitItem` / `RequirePersonBorderZoneItem`.
+- **Cross-skill**: —
+### 2026-11-21 — Linked Records WP/BZ prefill from Case (Address pattern)
+
+- **Need**: Linked Records Requested WP / border zone started empty even when Case had values (Address 1/2 already defaulted from Case).
+- **Cause**: `EmptyRequestedLocationLine` always opened with blank chips; person Joined / Case fallback ignored in the dialog.
+- **Fix**: `PrefillRequestedLocationLine` uses `LinkReviewLocationChips.Build(joined, case, …)` — person `CasePersonRequestedLocation` wins; else Case `ResolveCaseLocations`. Officer can edit before Join.
+- **Verify**: Isolated Module build + LinkReviewLocationChips tests. Stop F5, rebuild, F5 — Case with BZ/WP set, open Linked Records for new person → chips match Case; after Join with edits, reopen shows person values.
+- **Prevent**: Do not reopen Linked Records location rows blank when Case or Joined person values exist.
+- **Cross-skill**: —
+### 2026-11-21 — Remaining BorderZoneLocationField surfaces → LocationMultiSelectField
+
+- **Need**: Wizard defaults, Issue Issued (header + visa) panels, and XAF DetailView PE still used catalog popup `BorderZoneLocationField`.
+- **Cause**: First chip rollout covered picker / case workspace only; other surfaces kept the old wrapper.
+- **Fix**: `CommaSeparatedMultiSelectPropertyEditor` hosts `LocationMultiSelectEditorModel` → `LocationMultiSelectField` (Remember only on `ApplicationProfileInstance`). Wizard Results + `IssueIssuedHeaderSlotPanel` + `IssueIssuedVisaSlotPanel` use `LocationMultiSelectField` + `CaseSavedLocation.List`. Removed unused `BorderZoneLocationField.razor`.
+- **Verify**: Isolated Blazor build. Grep shows no `BorderZoneLocationField`. Stop F5, rebuild, F5 — wizard defaults, Issue Issued BZ/WP chips, Application DetailView location editors match Address-style chips.
+- **Prevent**: Do not reintroduce catalog-popup multi-select for BZ/WP free-text; do not write free-text into `BorderZoneName` / `WorkPermittedLocationName`.
+- **Cross-skill**: visa2026-preview-slot (Issue Issued panels)
+### 2026-11-21 — Location multi-select still replaced chip (create wizard rebuild)
+
+- **Symptom**: Second BZ/WP location chip still replaced the first on Choose Application Profile.
+- **Cause**: `OnCaseSummaryFieldChanged` always called `LoadCaseSummaryDraft`, replacing `CaseSummaryFields` and remounting `LocationMultiSelectField`; draft ApplyDefaults / hydrate left one label.
+- **Fix**: Patch BorderZone / WorkPermitLocation field Value in place (merge updates kept for Create). Component `_userEdited` ignores parent Value after chip edits.
+- **Verify**: Stop F5, rebuild host, F5 — add two work-permit (and border-zone) chips; both remain; Create still receives comma-joined update.
+- **Prevent**: Do not full-rebuild Case summary draft on every location chip change.
+- **Cross-skill**: —
+### 2026-11-21 — WP location multi-select second chip replaced the first
+
+- **Symptom**: Requested work permit location — adding a second chip left only the new one; border zone multi-select looked fine.
+- **Cause**: After Commit, parent draft rebuild could return a lossy/stale Value (profile `ApplyDefaultsForApplicationProfile` re-applied `DefaultWorkPermitLocation` over the multi string). `OnParametersSet` only ignored stale Value while focused; blur after pick allowed hydrate to wipe chips.
+- **Fix**: Guard local chips whenever `_lastExternal` still matches `FormatCurrent` (not only while focused) + `_pickInFlight`. ApplyDefaults only fills empty BZ/WP. Re-assign stored multi string after `RememberAll`. `@key` on location fields.
+- **Verify**: Isolated Blazor build. Stop F5, rebuild, F5 — add two work permit locations; both chips remain.
+- **Prevent**: Do not re-apply profile location defaults over non-empty officer values; do not require focus for the post-Commit Value lag guard on chip multi-select.
+- **Cross-skill**: —
+### 2026-11-21 — Location multi-select (BZ + WP) chips replace "..." picker
+
+- **Need**: Case create wizard + Case summary + Linked Records Requested border zone / work permit location should match Address-style search with multi chips, not the "..." checkbox popup.
+- **Cause**: Those surfaces used `BorderZoneLocationField` → `CommaSeparatedMultiSelectComponent`. Catalog tables must not receive free-text; storage stays comma-joined on the instance.
+- **Fix**: `ApplicationProfileSavedLocation` + `CaseSavedLocation` (seed from `BorderZoneName` / `WorkPermittedLocationName`, separate BZ/WP lists). `LocationMultiSelectField` chips + Address-like dropdown. Wire picker + case workspace Linked Records. `RememberAll` on header TryApply and link-review join. Leave XAF DetailView multi-select alone.
+- **Verify**: `CaseLocationAutocompleteTests` + `ApplicationProfileSavedLocationSchemaSqlTests`. Isolated Module + Blazor build. Stop F5, rebuild, F5 — type in Requested border zone on create / case edit; chips persist as comma string; Linked Records same control.
+- **Prevent**: Do not write free-text into `BorderZoneName` / `WorkPermittedLocationName`. Do not replace DetailView `CommaSeparatedMultiSelectPropertyEditor`. Prefer `LocationMultiSelectField` on officer-shell case paths only.
+- **Cross-skill**: —
 ### 2026-11-21 — AddressAutocompleteField pick did not replace draft
 
 - **Symptom**: Linked Records (and same control elsewhere) — typing a letter, clicking a saved match left the short draft (e.g. `B`) instead of the full address.
