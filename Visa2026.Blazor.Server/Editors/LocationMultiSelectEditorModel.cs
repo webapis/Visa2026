@@ -21,6 +21,18 @@ public sealed class LocationMultiSelectEditorModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback<string> AddSaved
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<(string Previous, string Next)> RenameSaved
+    {
+        get => GetPropertyValue<EventCallback<(string Previous, string Next)>>();
+        set => SetPropertyValue(value);
+    }
+
     public IReadOnlyList<CaseAddressAutocomplete.SavedEntry> Suggestions
     {
         get => GetPropertyValue<IReadOnlyList<CaseAddressAutocomplete.SavedEntry>>()
@@ -46,16 +58,22 @@ public sealed class LocationMultiSelectEditorModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public string FieldName
+    {
+        get => GetPropertyValue<string>() ?? "location";
+        set => SetPropertyValue(value);
+    }
+
     public string Placeholder
     {
-        get => GetPropertyValue<string>() ?? "Search or type a new location";
+        get => GetPropertyValue<string>() ?? "Start typing a location";
         set => SetPropertyValue(value);
     }
 
     public string EmptyHint
     {
         get => GetPropertyValue<string>()
-            ?? "Search saved locations, or type a new one and press Enter.";
+            ?? "Search saved locations. Use the + button to add a new one.";
         set => SetPropertyValue(value);
     }
 

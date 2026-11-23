@@ -258,8 +258,12 @@
                                             <LocationMultiSelectField Value="@card.BorderZoneLocation"
                                                                       Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.BorderZone)"
                                                                       NoneValue="@CommaSeparatedSelectionHelper.NoneValue"
-                                                                      EmptyHint="Search or type a border zone location."
-                                                                      ValueChanged="@(value => OnPersonBorderZoneChanged(card, value, zoneKey))" />
+                                                                      FieldName="border zone location"
+                                                                      Placeholder="Start typing a location"
+                                                                      EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                                      ValueChanged="@(value => OnPersonBorderZoneChanged(card, value, zoneKey))"
+                                                                      AddSaved="text => OnIssuedVisaLocationAddAsync(ApplicationProfileSavedLocationField.BorderZone, text)"
+                                                                      RenameSaved="pair => OnIssuedVisaLocationRenameAsync(ApplicationProfileSavedLocationField.BorderZone, pair)" />
                                         </div>
                                         <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(passportKey, false, IssueComposeFieldCue.HasText(card.PassportNumber), true)">
                                             <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
@@ -365,6 +369,40 @@
     [Inject] private IApplicationWorkspacePersonUiActions? WorkspaceActions { get; set; }
 
     private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _issuedLocCache = new(StringComparer.Ordinal);
+
+    private async Task OnIssuedVisaLocationAddAsync(ApplicationProfileSavedLocationField field, string text)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var instanceId = _draft?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        var profile = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId)?.ApplicationProfile;
+        if (profile == null)
+            return;
+        if (!CaseSavedLocation.TryAdd(objectSpace, profile, field, text, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        objectSpace.CommitChanges();
+        _issuedLocCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
+
+    private async Task OnIssuedVisaLocationRenameAsync(
+        ApplicationProfileSavedLocationField field,
+        (string Previous, string Next) pair)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var instanceId = _draft?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        var profile = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId)?.ApplicationProfile;
+        if (profile == null)
+            return;
+        if (!CaseSavedLocation.TryRename(objectSpace, profile, field, pair.Previous, pair.Next, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        objectSpace.CommitChanges();
+        _issuedLocCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
 
     private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadIssuedSavedLocations(ApplicationProfileSavedLocationField field)
     {

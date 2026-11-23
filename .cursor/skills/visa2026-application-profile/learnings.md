@@ -1,3 +1,32 @@
+### 2026-11-21 — Address 1 and Address 2 edit like a location chip
+
+- **Need**: A filled Address 1 or Address 2 can be corrected in place, and the next suggestion uses that spelling.
+- **Fix**: Double-click or focus opens the same box with the text still in it. Leaving the box saves. Escape restores the previous text. `CaseSavedAddress.ReplaceEdited` updates that saved row. The summary field is a `div`, so the double-click is not swallowed by a label.
+- **Verify**: Isolated Blazor build, 0 errors. Restart and hard-refresh. Fill an address, leave the field, double-click, change the text, leave again, then clear and select: the list offers the edited spelling.
+### 2026-11-21 — Edited location chip must replace the saved spelling
+
+- **Need**: After a chip is edited and the officer leaves the field, clearing the box and picking a suggestion must return the edited text.
+- **Cause**: The chip updated the case draft only. `ApplicationProfileSavedLocation` still held the previous spelling, and the next search selected that row. A fold match also rewrote the typed spelling back to the stored one.
+- **Fix**: `CaseSavedLocation.ReplaceEdited` updates that saved row to the new spelling (or remembers a newly added label). The picker, case header, detail editor, and profile defaults call it when the location value changes. The chip keeps the typed text.
+- **Verify**: Isolated Blazor build, 0 errors. Restart and hard-refresh. Edit a location chip, leave the field, clear it, type, and select: the list offers the edited spelling.
+### 2026-11-21 — Double-click a location chip to edit it
+
+- **Need**: A selected border-zone or work-permit location can be corrected without removing the chip and typing it again.
+- **Fix**: Double-click edits the chip in place. The summary field must not be a `label` around the input: a double-click inside a label clears the text. An empty parent echo must not hydrate over chips that are still on screen. Enter, a suggestion, or leaving the chip saves. Escape keeps the original text.
+- **Verify**: Isolated Blazor build, 0 errors. Restart and hard-refresh, then double-click a chip on Choose Application Profile or Case properties.
+### 2026-11-21 — Requested location suggestions no longer copy catalog JSON
+
+- **Need**: Requested border zone and work permit location suggestions ship empty and grow when officers save values, like Address 1/2. Visa and work-permit location fields use that same saved list, not the lookup catalogs.
+- **Cause**: `CaseSavedLocation.List` copied every `BorderZoneName` / `WorkPermittedLocationName` into `ApplicationProfileSavedLocations` the first time the editor opened. Issued visa, invitation, and work-permit pickers also loaded those catalogs.
+- **Fix**: List only `Source = User`. Saving a visa, invitation, work-permit, border-zone, or case location remembers that text. Those two catalogs are no longer seeded from JSON.
+- **Verify**: Isolated Blazor and Module.Tests builds, 0 errors. A new database has an empty location list. Saving a location on the Case, a visa, an invitation, or a work permit adds it for the next editor.
+### 2026-11-21 — People list hid Requested work permit location
+
+- **Symptom**: People & links showed Requested border zone location and not Requested work permit location (Çakylyk Almak: Case WP on, no Work permit item tile).
+- **Cause**: The people column was added only inside the Work permit item catalog loop. Border zone already had a post-loop fallback when Case Results show the field.
+- **Fix**: Add the `wp-location` person column and overview tile whenever `ShowInLinkReview` is true and the column is not already present.
+- **Verify**: Isolated Module build. Stop F5, rebuild, F5. People & links shows Requested work permit location beside Requested border zone location.
+- **Prevent**: Case-level requested locations must not depend on the matching person document tile to appear in the people table.
 ### 2026-11-21 — Linked Records WP location stayed empty after Case edit
 
 - **Symptom**: Case Requested work permit location showed chips, but Linked Records opened with an empty work-permit location (border zone still filled).
@@ -4835,3 +4864,46 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Cause**: Instance summary used AoR lookup UI (`CaseAddressSearchField` / `Address1` FK).
 - **Fix**: `Address1DefaultText` on instance; obsolete `Address1` FK (dual-read); `ApplicationProfileSavedAddress` + `CaseAddressAutocomplete` / `CaseSavedAddress`; create wizard + case summary use `AddressAutocompleteField`. Invitation stay copy writes free text. Linked-records person AoR picker unchanged for now.
 - **Prevent**: Do not reintroduce case summary `AddressOfResidence` FKs for Address 1/2 on instances.
+### 2026-11-23 — Address search/select + Add/Edit dialog (no freeSolo)
+- **Symptom**: AddressAutocompleteField still allowed free-text commit; officers needed search/select only with + / pen dialogs.
+- **Cause**: Earlier freeSolo-style autocomplete wrote typed text directly; Location multi-select remains freeSolo (out of scope).
+- **Fix**: SavedValueDialog (add/edit); AddressAutocompleteField search/select only; CaseSavedAddress.TryAdd / TryRename / EnsureExists; ValidateDialogText; hydrate unknown stored text on load; Remember bumps use count on create/select. Blazor: declare link-review address locals before markup (CS0103).
+- **Officer**: Type to search saved A1/A2; + adds via dialog; pen renames selected; unmatched text discarded on blur.
+- **Prevent**: Do not reintroduce freeSolo on Address fields; keep Location dialog UX for a later pass.
+- **Verify**: Isolated Blazor build 1softsup; dotnet test --filter FullyQualifiedName~CaseAddressAutocomplete (6 passed).
+### 2026-11-23 — Changing Address 1 cleared it (Missing: Address 1)
+- **Symptom**: After Add/select Address 1 then Done (or leaving edit), field went empty; banner Missing: Address 1.
+- **Cause**: `FinishCaseSummaryEdit` → `readActiveSummaryField` read the focused edit button / search box `.value` (often blank) and `ApplyFocusedSummaryField` overwrote the selected address. Location chips already skipped `.cw-loc-ms`.
+- **Fix**: Skip `.cw-addr-ac` in `readActiveSummaryField`; skip Address 1/2 keys in `ApplyFocusedSummaryField` (ValueChanged is source of truth).
+- **Officer**: Change Address via + / pen / pick; Done keeps the selected value.
+- **Prevent**: Any new search-select control must opt out of focused DOM flush like loc-ms / addr-ac.
+- **Verify**: Edit case → select/add Address 1 → Done without clicking elsewhere → Address 1 still set; no Missing banner.
+### 2026-11-23 — Location multi-select dialog-only (no freeSolo)
+- **Symptom**: Location chips still created on Enter/blur; Address already used + / pen dialogs.
+- **Cause**: LocationMultiSelectField freeSolo + inline double-click edit; CaseSavedLocation lacked TryAdd/TryRename/EnsureExists.
+- **Fix**: Search/select only; external + and chip pen via SavedValueDialog (Kind=location); CaseSavedLocation.TryAdd/TryRename/EnsureExists; ValidateDialogText; wire picker/workspace/property editor/wizard/issued; shared CSS for loc + button.
+- **Officer**: Type to search saved BZ/WP locations; + adds; chip pen renames; unmatched text discarded on blur.
+- **Prevent**: Do not reintroduce freeSolo create on LocationMultiSelectField.
+- **Verify**: Isolated Blazor build locdlgux; CaseLocationAutocomplete + CaseAddressAutocomplete tests.
+### 2026-11-23 — WP location Add: search miss vs duplicate exists
+- **Symptom**: Typing `Aşgabat şäheri` showed no match / use +; Add or rename then `already exists in this list`.
+- **Cause**: `CaseSavedLocation.List` returned only `Source=User` while `TryAdd`/`TryRename` rejected duplicates across all sources (e.g. Lookup-seeded rows).
+- **Fix**: List all sources for search; `TryAdd` reuses existing row (promote to User); + with exact saved text selects the chip instead of opening a doomed Add dialog.
+- **Officer**: Search/select `Aşgabat şäheri` from the list, or + when it exactly matches a saved name.
+- **Prevent**: Keep List and TryAdd duplicate scope aligned.
+- **Verify**: Isolated Module build; location autocomplete tests.
+### 2026-11-23 — Location suggestions are officer-added only
+- **Need**: Search/list must not offer Lookup/catalog locations; only `Source=User`.
+- **Fix**: `List` filters `Source=User` again. `TryAdd`/`EnsureExists` promote a Lookup row to User when the officer adds/hydrates that spelling (unique key); `TryRename` duplicates only against other User rows.
+- **Officer**: Search shows prior officer-added chips only; + can still introduce a name that only existed as Lookup by claiming it as User.
+- **Prevent**: Do not re-merge Lookup into `List` for search.
+- **Verify**: Module build; add `Aşgabat şäheri` via + when not in officer list.
+
+### 2026-03-23 — Officer-added only (no catalog) for location + address suggestions
+- **Trigger:** User: location multiselect and address autocomplete must not use catalog lookup; use officer-added.
+- **Rule:** `CaseSavedLocation.List` / `CaseLocationAutocomplete` → `Source == User` only. `CaseSavedAddress` has no catalog path. New rows always `User`. `SavedLocationSource.Lookup` marked obsolete; Add/Ensure may still promote a legacy Lookup row to User for unique `TextKey`.
+- **Not used:** `BorderZoneName` / `WorkPermittedLocationName` / `AddressOfResidence` catalogs for these pickers.
+### 2026-03-23 — No duplicates for officer-added address/location
+- **Rule:** `CaseSavedLocation.TryAdd` / `TryRename` reject any existing `Field+TextKey` (same as address). No Lookup promote on Add.
+- **UI:** Add dialog short-circuits to select when exact saved; location + refuses already-selected draft; dialog ValidateDialogText still blocks.
+- **EnsureExists / Remember:** upsert one row — never insert a second for the same key.

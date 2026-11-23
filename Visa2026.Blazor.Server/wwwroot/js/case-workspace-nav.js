@@ -198,8 +198,9 @@ window.visaCaseWorkspaceNav = window.visaCaseWorkspaceNav || (function () {
             var el = document.activeElement;
             if (!el || typeof el.closest !== "function")
                 return null;
-            // Location chips live outside the text box. Reading el.value would save a blank over them.
-            if (el.closest(".cw-loc-ms"))
+            // Location chips / address search-select commit via ValueChanged.
+            // Reading el.value (search box or edit button) would wipe the selected address.
+            if (el.closest(".cw-loc-ms") || el.closest(".cw-addr-ac"))
                 return null;
             var host = el.closest("[data-summary-key]");
             if (!host)
@@ -227,6 +228,32 @@ window.visaCaseWorkspaceNav = window.visaCaseWorkspaceNav || (function () {
                 });
             }
             return rows;
+        },
+        selectInput: function (id, text) {
+            var el = document.getElementById(id);
+            if (!el)
+                return;
+            if (!el._visaLocEditGuard) {
+                el._visaLocEditGuard = true;
+                el.addEventListener("mousedown", function (ev) {
+                    if (ev.detail > 1)
+                        ev.preventDefault();
+                });
+            }
+            el.focus();
+            if (typeof text === "string") {
+                var restore = function () {
+                    if (el.value !== text)
+                        el.value = text;
+                    var end = el.value.length;
+                    try { el.setSelectionRange(0, end); } catch (e) { }
+                };
+                restore();
+                setTimeout(restore, 0);
+                return;
+            }
+            if (typeof el.select === "function")
+                el.select();
         },
         scrollJustLinkedPerson: function () {
             var row = document.querySelector(".officer-case-workspace .os-person-row.is-just-linked");

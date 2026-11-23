@@ -52,4 +52,31 @@ public class CaseLocationAutocompleteTests
         Assert.DoesNotContain(result.Items, i => CaseLocationAutocomplete.FoldKey(i.Text) == CaseLocationAutocomplete.FoldKey("Aşgabat"));
         Assert.Contains(result.Items, i => CaseLocationAutocomplete.FoldKey(i.Text) == CaseLocationAutocomplete.FoldKey("Balkan"));
     }
+
+    [Fact]
+    public void ValidateDialogText_RejectsEmptyDuplicateAndLength()
+    {
+        var store = new[]
+        {
+            new CaseAddressAutocomplete.SavedEntry("Aşgabat", 1, DateTime.UtcNow),
+        };
+        Assert.Equal("Enter a location name.", CaseLocationAutocomplete.ValidateDialogText("  ", store));
+        Assert.Equal("Use at most 100 characters.", CaseLocationAutocomplete.ValidateDialogText(new string('x', 101), store));
+        Assert.Contains("already exists", CaseLocationAutocomplete.ValidateDialogText("asgabat", store));
+        Assert.Null(CaseLocationAutocomplete.ValidateDialogText("asgabat", store, excludeText: "Aşgabat"));
+        Assert.Null(CaseLocationAutocomplete.ValidateDialogText("Mary welaýaty", store));
+    }
+
+    [Fact]
+    public void Search_DiacriticToken_RanksStartsWith()
+    {
+        var store = new List<CaseAddressAutocomplete.SavedEntry>
+        {
+            new("Änew şäheri", 2, DateTime.UtcNow.AddDays(-1)),
+            new("Aşgabat", 9, DateTime.UtcNow),
+        };
+        var result = CaseLocationAutocomplete.Search("anew", store);
+        Assert.Equal(1, result.Total);
+        Assert.Equal("Änew şäheri", result.Items[0].Text);
+    }
 }

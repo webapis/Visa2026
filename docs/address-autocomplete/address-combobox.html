@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: dark case-form column on the left (label cell + control per row), saved-address lists on the right, stacked on phones. */
+/* Layout: dark case-form column (label cell + control per row) beside the saved-address lists, stacked on phones. */
 :root {
   --bg: #33333c;
   --panel: #3c3c47;
@@ -65,9 +65,9 @@ h1 { font-size: 20px; line-height: 1.2; margin: 0; font-weight: 700; text-wrap: 
 .compare { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 14px; }
 .compare button { font: inherit; font-size: 12px; font-weight: 600; color: var(--muted); background: transparent; border: 0; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
 .compare button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
-.compare button:focus-visible, .btn:focus-visible, .link:focus-visible, .clear:focus-visible { outline: 2px solid var(--ctl); outline-offset: 2px; }
+.compare button:focus-visible, .btn:focus-visible, .link:focus-visible { outline: 2px solid var(--ctl); outline-offset: 2px; }
 
-form { display: flex; flex-direction: column; gap: 8px; }
+form.main { display: flex; flex-direction: column; gap: 8px; }
 .row { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 8px; align-items: center; background: var(--label); border-radius: 8px; padding: 6px; border: 1px solid transparent; }
 .row.top { align-items: start; }
 .row.top > label { padding-top: 9px; }
@@ -85,15 +85,29 @@ select, input[type="text"], .ta {
   border-radius: 6px;
 }
 select, input[type="text"] { height: 34px; padding: 0 10px; }
-.ta { display: block; height: 84px; min-height: 84px; padding: 8px 32px 8px 10px; resize: vertical; line-height: 1.45; }
-.ta::placeholder, input::placeholder { color: var(--muted); }
+.ta { display: block; height: 84px; min-height: 84px; padding: 8px 10px; resize: vertical; line-height: 1.45; }
 select:focus-visible, input:focus-visible, .ta:focus-visible { outline: 2px solid var(--ctl); outline-offset: 1px; }
-.row.invalid select, .row.invalid .ta { border-color: var(--danger); }
-.ta[data-saved="true"] { border-color: var(--ok); }
+.row.invalid select, .row.invalid .sel-box { border-color: var(--danger); }
 
-.cb-field { position: relative; }
-.clear { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border: 0; border-radius: 50%; background: var(--hover); color: var(--fg); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
-.clear[hidden] { display: none; }
+/* single-value search field: [ search box | selected value ] [ + ] ; same size for Address 1 and Address 2 */
+.sel-line { display: flex; gap: 6px; align-items: flex-start; }
+.sel-field { position: relative; flex: 1 1 auto; min-width: 0; }
+.sel-box { min-height: 84px; background: var(--field); border: 1px solid var(--ctl); border-radius: 6px; }
+.sel-field:focus-within .sel-box { outline: 2px solid var(--ctl); outline-offset: 1px; }
+.sel-box[data-saved="true"] { border-color: var(--ok); }
+.sel-input { display: block; width: 100%; height: 82px; padding: 8px 10px; border: 0; outline: 0; resize: none; background: transparent; color: var(--fg); font: inherit; line-height: 1.45; }
+.sel-input::placeholder { color: var(--muted); }
+.sel-val { display: flex; align-items: flex-start; gap: 6px; min-height: 82px; padding: 8px 8px 8px 10px; }
+.val-edit { flex: 1 1 auto; min-width: 0; display: flex; align-items: flex-start; gap: 8px; text-align: left; font: inherit; line-height: 1.45; color: var(--fg); background: transparent; border: 0; padding: 0; cursor: pointer; border-radius: 4px; }
+.val-text { min-width: 0; overflow-wrap: anywhere; }
+.val-edit svg { flex: none; margin-top: 3px; color: var(--muted); }
+.val-edit:hover .val-text { text-decoration: underline; text-underline-offset: 2px; }
+.val-edit:hover svg, .val-edit:focus-visible svg { color: var(--fg); }
+.val-x { flex: none; width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--hover); color: var(--fg); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.val-edit:focus-visible, .val-x:focus-visible, .add-btn:focus-visible { outline: 2px solid var(--ctl); outline-offset: 2px; }
+.add-btn { flex: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--ctl); background: var(--hover); color: var(--fg); cursor: pointer; display: grid; place-items: center; padding: 0; }
+.add-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+
 .list { position: absolute; z-index: 20; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); max-height: 252px; overflow-y: auto; }
 .list li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
 .list li.active { background: var(--hover); }
@@ -101,12 +115,13 @@ select:focus-visible, input:focus-visible, .ta:focus-visible { outline: 2px soli
 .list .meta { flex: none; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
 
-.status { display: flex; align-items: center; gap: 7px; margin-top: 6px; font-size: 11.5px; color: var(--muted); min-height: 18px; }
-.status::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.status { display: flex; align-items: flex-start; gap: 7px; margin-top: 6px; font-size: 11.5px; color: var(--muted); min-height: 18px; }
+.status::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--line); }
 .status[data-state="ok"] { color: var(--ok); }
 .status[data-state="ok"]::before { background: var(--ok); }
-.status[data-state="new"] { color: var(--info-fg); }
-.status[data-state="new"]::before { background: var(--info-fg); }
+.status[data-state="info"] { color: var(--info-fg); }
+.status[data-state="info"]::before { background: var(--info-fg); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .banner { border-radius: 6px; padding: 9px 12px; font-size: 12px; border: 1px solid; }
 .banner.info { background: var(--info-bg); color: var(--info-fg); border-color: var(--info-fg); }
@@ -118,6 +133,24 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
 .btn { font: inherit; font-weight: 600; font-size: 13px; border-radius: 6px; padding: 8px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--field); color: var(--fg); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 .foot { color: var(--muted); font-size: 11px; margin: 10px 0 0; }
+
+/* dialog */
+dialog { width: min(460px, calc(100vw - 32px)); padding: 0; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); font-family: var(--font); }
+dialog::backdrop { background: rgba(10, 10, 20, .55); }
+dialog form { display: flex; flex-direction: column; }
+.dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { margin: 0; font-size: 15px; font-weight: 700; }
+.dlg-x { width: 26px; height: 26px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.dlg-x:hover { background: var(--hover); color: var(--fg); }
+.dlg-x:focus-visible { outline: 2px solid var(--ctl); outline-offset: 1px; }
+.dlg-body { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.dlg-body label { font-size: 12px; font-weight: 600; }
+.dlg-body textarea { display: block; width: 100%; height: 96px; padding: 8px 10px; resize: vertical; font: inherit; line-height: 1.45; color: var(--fg); background: var(--field); border: 1px solid var(--ctl); border-radius: 6px; }
+.dlg-body textarea[aria-invalid="true"] { border-color: var(--danger); }
+.dlg-body textarea:focus-visible { outline: 2px solid var(--ctl); outline-offset: 1px; }
+.dlg-hint { margin: 0; font-size: 11.5px; color: var(--muted); }
+.dlg-err { margin: 0; min-height: 16px; font-size: 12px; color: var(--danger); }
+.dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
 
 .side { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px; }
 .side h2 { font-size: 14px; margin: 0; font-weight: 700; }
@@ -148,7 +181,7 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
       <button type="button" id="mode-old" aria-pressed="false">Current form</button>
     </div>
 
-    <form id="form" novalidate>
+    <form class="main" id="form" novalidate>
       <div class="row"><label for="visa">Visa type</label>
         <select id="visa"><option>BS1 — Entrepreneurship</option><option>BS2 — Employment</option><option>BS3 — Study</option></select></div>
       <div class="row"><label for="category">Category</label>
@@ -164,30 +197,17 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
       <div class="row"><label for="permit">Requested work permit location</label>
         <input type="text" id="permit"></div>
 
-      <div class="row top" id="row-addr"><label for="addr1">Address 1 <i>*</i></label>
+      <div class="row top" id="row-addr"><label for="addr1" id="lbl-addr1">Address 1 <i>*</i></label>
         <div>
-          <div id="cb-wrap">
-            <div class="cb-field">
-              <textarea id="addr1" class="ta" rows="3" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="addr1-list" aria-required="true" aria-describedby="addr1-status" placeholder="Start typing a street, district or city" autocomplete="off" spellcheck="false"></textarea>
-              <button type="button" class="clear" id="addr1-clear" aria-label="Clear Address 1" hidden>×</button>
-              <ul class="list" id="addr1-list" role="listbox" aria-label="Saved Address 1 entries" hidden></ul>
-            </div>
-            <div class="status" id="addr1-status" role="status" aria-live="polite"></div>
-          </div>
-          <div id="sel-wrap" hidden>
-            <select id="addr1-old" aria-label="Address 1"></select>
-          </div>
+          <div id="addr1-mount"></div>
+          <div id="addr1-old-wrap" hidden><select id="addr1-old" aria-label="Address 1"></select></div>
         </div>
       </div>
 
-      <div class="row top"><label for="addr2">Address 2</label>
+      <div class="row top"><label for="addr2" id="lbl-addr2">Address 2</label>
         <div>
-          <div class="cb-field">
-            <textarea id="addr2" class="ta" rows="3" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="addr2-list" aria-describedby="addr2-status" placeholder="Apartment, building, floor or landmark" autocomplete="off" spellcheck="false"></textarea>
-            <button type="button" class="clear" id="addr2-clear" aria-label="Clear Address 2" hidden>×</button>
-            <ul class="list" id="addr2-list" role="listbox" aria-label="Saved Address 2 entries" hidden></ul>
-          </div>
-          <div class="status" id="addr2-status" role="status" aria-live="polite"></div>
+          <div id="addr2-mount"></div>
+          <div id="addr2-old-wrap" hidden><textarea id="addr2-old" class="ta" rows="3" aria-label="Address 2"></textarea></div>
         </div>
       </div>
 
@@ -201,11 +221,12 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
       </div>
     </form>
     <p class="foot">Application Profile: Çakylyk Almak · last step before create</p>
+    <div class="sr" id="live" role="status" aria-live="polite"></div>
   </main>
 
   <aside class="side" aria-labelledby="side-h">
     <h2 id="side-h">Saved addresses</h2>
-    <p>Sample data. New text typed in Address 1 or Address 2 is added to its own list when you create the application.</p>
+    <p>Sample data. Anything added or renamed in the dialog appears here right away. Usage counts change when you create the application.</p>
     <h3>Address 1 · <span id="count1">0</span></h3>
     <ul class="saved" id="saved1"></ul>
     <h3>Address 2 · <span id="count2">0</span></h3>
@@ -217,6 +238,25 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
   </aside>
 </div>
 
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <form id="dlg-form" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlg-title">Add address</h2>
+      <button type="button" class="dlg-x" id="dlg-x" aria-label="Close">×</button>
+    </div>
+    <div class="dlg-body">
+      <label for="dlg-input">Address</label>
+      <textarea id="dlg-input" maxlength="500" autocomplete="off" spellcheck="false" aria-describedby="dlg-hint dlg-err"></textarea>
+      <p class="dlg-hint" id="dlg-hint"></p>
+      <p class="dlg-err" id="dlg-err" role="alert"></p>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn" id="dlg-cancel">Cancel</button>
+      <button type="submit" class="btn primary" id="dlg-save">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 (function () {
   var MAP = { 'ç': 'c', 'ş': 's', 'ž': 'z', 'ý': 'y', 'ň': 'n', 'ä': 'a', 'ö': 'o', 'ü': 'u', 'ı': 'i', 'ğ': 'g', 'İ': 'i' };
@@ -227,6 +267,10 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
   function $(id) { return document.getElementById(id); }
   function tokensOf(q) { return fold(q).split(/\s+/).filter(Boolean); }
   function clone(arr) { return arr.map(function (x) { return Object.assign({}, x); }); }
+  var MAXRES = 6;
+  var MAXLEN = 500;
+  var PEN = '<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+  var PLUS = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
 
   var SAMPLE1 = [
     { id: 's1', text: 'Garaşsyzlyk şaýoly 12, Bagtyýarlyk etraby, Aşgabat', n: 6, t: 10 },
@@ -257,7 +301,7 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
     } catch (e) {}
     return clone(samples);
   }
-  function save(key, store) { try { localStorage.setItem(key, JSON.stringify(store)); } catch (e) {} }
+  function persist(key, store) { try { localStorage.setItem(key, JSON.stringify(store)); } catch (e) {} }
 
   function highlight(text, tk) {
     var f = fold(text), ranges = [];
@@ -283,22 +327,85 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
     return frag;
   }
 
-  /* One reusable type-ahead field: c = { id, key, samples, countId, savedId, emptyText, onChange } */
+  function fieldHTML(id, name, placeholder) {
+    return '<div class="sel-line"><div class="sel-field" id="' + id + '-field"><div class="sel-box">' +
+      '<textarea id="' + id + '" class="sel-input" rows="3" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="' + id + '-list" aria-describedby="' + id + '-status" placeholder="' + placeholder + '" autocomplete="off" spellcheck="false" maxlength="' + MAXLEN + '"></textarea>' +
+      '<div class="sel-val" id="' + id + '-val" hidden>' +
+      '<button type="button" class="val-edit" id="' + id + '-edit"><span class="val-text" id="' + id + '-text"></span>' + PEN + '</button>' +
+      '<button type="button" class="val-x" id="' + id + '-x" aria-label="Clear ' + name + '">×</button></div>' +
+      '</div><ul class="list" id="' + id + '-list" role="listbox" aria-label="Saved ' + name + ' entries" hidden></ul></div>' +
+      '<button type="button" class="add-btn" id="' + id + '-add" aria-label="Add new ' + name + '" title="Add new">' + PLUS + '</button></div>' +
+      '<div class="status" id="' + id + '-status" role="status" aria-live="polite"></div>';
+  }
+  $('addr1-mount').innerHTML = fieldHTML('addr1', 'Address 1', 'Start typing a street, district or city');
+  $('addr2-mount').innerHTML = fieldHTML('addr2', 'Address 2', 'Apartment, building, floor or landmark');
+
+  /* ---------- the one shared dialog ---------- */
+  var dlg = $('dlg'), dlgForm = $('dlg-form'), dlgInput = $('dlg-input'), dlgErr = $('dlg-err'), dlgHint = $('dlg-hint');
+  var ctx = null;
+
+  function setErr(msg) {
+    dlgErr.textContent = msg;
+    dlgInput.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  }
+  function openDialog(combo, mode, prefill) {
+    ctx = { combo: combo, mode: mode };
+    var item = mode === 'edit' ? combo.current() : null;
+    $('dlg-title').textContent = (mode === 'edit' ? 'Edit ' : 'Add ') + combo.noun;
+    $('dlg-save').textContent = mode === 'edit' ? 'Save changes' : 'Add address';
+    dlgHint.textContent = mode === 'edit'
+      ? 'Used ' + item.n + '×. Renaming changes this address wherever it is selected. Line breaks become spaces.'
+      : 'It is saved to the list right away and selected in this field. Line breaks become spaces.';
+    dlgInput.value = mode === 'edit' ? item.text : (prefill || '');
+    setErr('');
+    dlg.showModal();
+    dlgInput.focus();
+    dlgInput.select();
+  }
+  dlgForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!ctx) return;
+    var text = norm(dlgInput.value);
+    var err = ctx.combo.validate(text, ctx.mode === 'edit');
+    if (err) { setErr(err); dlgInput.focus(); return; }
+    if (ctx.mode === 'edit') ctx.combo.rename(text); else ctx.combo.addNew(text);
+    dlg.close();
+  });
+  dlgInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); dlgForm.requestSubmit(); }
+  });
+  dlgInput.addEventListener('input', function () { if (dlgErr.textContent) setErr(''); });
+  $('dlg-cancel').addEventListener('click', function () { dlg.close(); });
+  $('dlg-x').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('mousedown', function (e) { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', function () {
+    var c = ctx; ctx = null;
+    if (c) c.combo.focusBack();
+  });
+
+  /* c = { id, key, noun, samples, emptyText, onChange } */
   function createCombo(c) {
     var store = load(c.key, c.samples);
-    var results = [], total = 0, active = -1, fresh = null, enabled = true;
-    var ta = $(c.id), list = $(c.id + '-list'), clearBtn = $(c.id + '-clear'), statusEl = $(c.id + '-status');
+    var selectedId = null;
+    var results = [], total = 0, active = -1, isOpen = false, fresh = null;
+    var ta = $(c.id), field = $(c.id + '-field'), val = $(c.id + '-val'), valText = $(c.id + '-text');
+    var editBtn = $(c.id + '-edit'), xBtn = $(c.id + '-x'), addBtn = $(c.id + '-add');
+    var list = $(c.id + '-list'), statusEl = $(c.id + '-status'), box = field.querySelector('.sel-box'), live = $('live');
 
-    function findExact(text) {
+    function byId(id) { for (var i = 0; i < store.length; i++) if (store[i].id === id) return store[i]; return null; }
+    function current() { return selectedId ? byId(selectedId) : null; }
+    function findText(text) {
       var f = fold(norm(text));
       if (!f) return null;
       for (var i = 0; i < store.length; i++) if (fold(store[i].text) === f) return store[i];
       return null;
     }
+    function announce(msg) { live.textContent = ''; setTimeout(function () { live.textContent = msg; }, 30); }
 
     function search(q) {
       var tk = tokensOf(q);
       var hits = store.filter(function (it) {
+        if (it.id === selectedId) return false;
         var f = fold(it.text);
         return tk.every(function (t) { return f.indexOf(t) !== -1; });
       });
@@ -308,7 +415,7 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
         return (bs - as) || (b.n - a.n) || (b.t - a.t);
       });
       total = hits.length;
-      return hits.slice(0, 6);
+      return hits.slice(0, MAXRES);
     }
 
     function renderList() {
@@ -324,7 +431,7 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
         main.appendChild(highlight(it.text, tk));
         var meta = document.createElement('span');
         meta.className = 'meta';
-        meta.textContent = 'Used ' + it.n + '×';
+        meta.textContent = it.n ? 'Used ' + it.n + '×' : 'New';
         li.appendChild(main);
         li.appendChild(meta);
         li.addEventListener('mousedown', function (e) { e.preventDefault(); choose(it); });
@@ -334,11 +441,11 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
     }
 
     function setOpen(open) {
+      isOpen = open;
       list.hidden = !open;
       ta.setAttribute('aria-expanded', open ? 'true' : 'false');
       if (!open) { active = -1; ta.removeAttribute('aria-activedescendant'); }
     }
-
     function setActive(i) {
       active = i;
       var items = list.children;
@@ -355,71 +462,87 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
       }
     }
 
-    function setStatus(state, text) { statusEl.dataset.state = state; statusEl.textContent = text; }
-
-    function updateStatus() {
-      var t = norm(ta.value);
-      var exact = findExact(t);
-      ta.dataset.saved = enabled && exact ? 'true' : 'false';
-      if (!t) setStatus('', c.emptyText);
-      else if (exact) setStatus('ok', 'Saved address');
-      else if (total > 0) setStatus('', total + ' saved ' + (total === 1 ? 'address matches' : 'addresses match') + '. Pick one, or keep typing a new address.');
-      else setStatus('new', 'New address. It will be saved for next time when you create the application.');
+    function updateList() {
+      var q = ta.value;
+      if (!norm(q)) { results = []; total = 0; setOpen(false); return; }
+      results = search(q);
+      renderList();
+      active = -1;
+      setOpen(results.length > 0 && !findText(q));
     }
 
+    function setStatus(state, text) { statusEl.dataset.state = state; statusEl.textContent = text; }
+    function updateStatus() {
+      var q = norm(ta.value), ex;
+      if (selectedId) { setStatus('ok', 'Saved address. Click it to edit, or × to choose another.'); return; }
+      if (!q) setStatus('', c.emptyText);
+      else if ((ex = findText(q))) setStatus('ok', 'Saved address. Press Enter to select it.');
+      else if (total > 0) setStatus('', total + ' saved ' + (total === 1 ? 'address matches' : 'addresses match') + '. Pick one from the list.');
+      else setStatus('info', 'No saved address matches “' + (q.length > 40 ? q.slice(0, 40) + '…' : q) + '”. Use the + button to add it as a new address.');
+    }
+
+    /* two visual states: search (nothing selected) and value (one address selected) */
+    function render() {
+      var it = current();
+      if (selectedId && !it) selectedId = null;
+      ta.hidden = !!it;
+      val.hidden = !it;
+      box.dataset.saved = it ? 'true' : 'false';
+      if (it) {
+        valText.textContent = it.text;
+        editBtn.setAttribute('aria-label', 'Edit ' + c.noun + ': ' + it.text);
+        editBtn.title = 'Edit this address';
+      }
+    }
+
+    function changed() { render(); updateStatus(); renderPanel(); c.onChange(); }
+
     function choose(it) {
-      ta.value = it.text;
-      results = []; total = 0;
-      setOpen(false);
-      clearBtn.hidden = false;
-      updateStatus();
-      c.onChange();
+      selectedId = it.id;
+      ta.value = '';
+      setOpen(false); results = []; total = 0;
+      announce('Selected ' + it.text + '.');
+      changed();
+      editBtn.focus();
+    }
+    function clearValue() {
+      selectedId = null;
+      announce(c.noun + ' cleared.');
+      changed();
       ta.focus();
     }
 
-    function onInput() {
-      if (!enabled) { c.onChange(); return; }
-      var q = ta.value;
-      clearBtn.hidden = !q;
-      if (!norm(q)) { results = []; total = 0; setOpen(false); }
-      else {
-        results = search(q);
-        renderList();
-        active = -1;
-        setOpen(results.length > 0 && !findExact(q));
-      }
-      updateStatus();
-      c.onChange();
-    }
-
-    ta.addEventListener('input', onInput);
-    ta.addEventListener('focus', function () { if (enabled && norm(ta.value) && results.length && !findExact(ta.value)) setOpen(true); });
-    ta.addEventListener('blur', function () { setOpen(false); });
+    ta.addEventListener('input', function () { updateList(); updateStatus(); });
     ta.addEventListener('keydown', function (e) {
-      if (!enabled) return;
-      var open = !list.hidden;
       if (e.key === 'ArrowDown') {
         if (!results.length) return;
         e.preventDefault();
-        if (!open) setOpen(true);
+        if (!isOpen) setOpen(true);
         setActive(active + 1 >= results.length ? 0 : active + 1);
       } else if (e.key === 'ArrowUp') {
-        if (!open) return;
+        if (!isOpen) return;
         e.preventDefault();
         setActive(active <= 0 ? results.length - 1 : active - 1);
-      } else if (e.key === 'Enter' && open && active >= 0) {
-        e.preventDefault();
-        choose(results[active]);
-      } else if (e.key === 'Escape' && open) {
-        e.preventDefault();
-        setOpen(false);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();   /* Enter never creates anything and never inserts a line break */
+        if (isOpen && active >= 0) choose(results[active]);
+        else { var ex = findText(ta.value); if (ex) choose(ex); }
+      } else if (e.key === 'Escape') {
+        if (isOpen) { e.preventDefault(); setOpen(false); }
       }
     });
-    clearBtn.addEventListener('click', function () {
-      ta.value = '';
-      onInput();
-      ta.focus();
+    ta.addEventListener('focus', function () { if (norm(ta.value)) updateList(); });
+    field.addEventListener('focusout', function (e) {
+      if (e.relatedTarget && field.contains(e.relatedTarget)) return;
+      if (dlg.open) return;               /* focus moved into the dialog; keep typed text for Cancel */
+      ta.value = '';                      /* typed text that was not picked is discarded */
+      setOpen(false);
+      updateStatus();
     });
+    list.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    editBtn.addEventListener('click', function () { openDialog(api, 'edit'); });
+    xBtn.addEventListener('click', clearValue);
+    addBtn.addEventListener('click', function () { setOpen(false); openDialog(api, 'add', norm(ta.value)); });
 
     function renderPanel() {
       $(c.countId).textContent = store.length;
@@ -429,59 +552,75 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
         var li = document.createElement('li');
         if (it.id === fresh) li.className = 'fresh';
         var t = document.createElement('span'); t.className = 'txt'; t.textContent = it.text;
-        var n = document.createElement('span'); n.className = 'n'; n.textContent = it.n + '×';
+        var n = document.createElement('span'); n.className = 'n'; n.textContent = it.n ? it.n + '×' : 'new';
         li.appendChild(t); li.appendChild(n);
         ul.appendChild(li);
       });
     }
 
-    function settle() {
-      results = []; total = 0;
-      setOpen(false);
-      updateStatus();
-      renderPanel();
-    }
-
-    renderPanel();
-    updateStatus();
-
-    return {
-      el: ta,
-      value: function () { return norm(ta.value); },
-      items: function () { return store; },
-      setEnabled: function (v) {
-        enabled = v;
-        statusEl.hidden = !v;
-        clearBtn.hidden = !v || !ta.value;
-        if (v) { ta.setAttribute('role', 'combobox'); } else { ta.removeAttribute('role'); setOpen(false); }
-        updateStatus();
+    var api = {
+      noun: c.noun,
+      current: current,
+      /* returns an error message, or '' when the text is acceptable */
+      validate: function (text, editing) {
+        if (!text) return 'Enter an address.';
+        if (text.length > MAXLEN) return 'Use at most ' + MAXLEN + ' characters.';
+        var dup = findText(text);
+        if (dup && !(editing && dup.id === selectedId)) return 'This address already exists in the list. Close this dialog and search for it.';
+        return '';
       },
-      /* Saves a new entry or counts a reuse. Returns { isNew } or null when text is empty. */
-      commit: function (text) {
-        text = norm(text);
-        if (!text) return null;
-        var found = findExact(text), isNew = !found;
-        if (found) { found.n += 1; found.t = Date.now(); fresh = found.id; }
-        else { var it = { id: 'u' + Date.now(), text: text, n: 1, t: Date.now() }; store.push(it); fresh = it.id; }
-        save(c.key, store);
-        settle();
-        return { isNew: isNew };
+      rename: function (text) {
+        var it = current();
+        it.text = text; it.t = Date.now();
+        fresh = it.id;
+        persist(c.key, store);
+        announce('Address updated.');
+        changed();
+      },
+      addNew: function (text) {
+        var it = { id: 'u' + Date.now(), text: text, n: 0, t: Date.now() };
+        store.push(it);
+        selectedId = it.id;
+        fresh = it.id;
+        ta.value = '';
+        persist(c.key, store);
+        announce('New address added and selected.');
+        changed();
+      },
+      focusBack: function () { if (selectedId) editBtn.focus(); else ta.focus(); },
+      focusField: function () { if (selectedId) editBtn.focus(); else ta.focus(); },
+      value: function () { var it = current(); return it ? it.text : ''; },
+      items: function () { return store; },
+      /* Create application: count one more use for the selected address. */
+      commit: function () {
+        var it = current();
+        if (it) { it.n += 1; it.t = Date.now(); persist(c.key, store); }
+        changed();
       },
       reset: function () {
         store = clone(c.samples);
+        selectedId = null;
         fresh = null;
-        save(c.key, store);
-        settle();
-      }
+        ta.value = '';
+        persist(c.key, store);
+        setOpen(false);
+        changed();
+      },
+      setEnabled: function (v) { field.parentNode.parentNode.hidden = !v; }
     };
+
+    render();
+    updateStatus();
+    renderPanel();
+    return api;
   }
 
   var mode = 'new';
   var errorShown = false;
   var oldSel = $('addr1-old'), project = $('project');
 
-  var c1 = createCombo({ id: 'addr1', key: 'address1-combobox-proto-v1', samples: SAMPLE1, countId: 'count1', savedId: 'saved1', emptyText: 'Start typing to search saved addresses.', onChange: afterChange });
-  var c2 = createCombo({ id: 'addr2', key: 'address2-combobox-proto-v1', samples: SAMPLE2, countId: 'count2', savedId: 'saved2', emptyText: 'Optional. Start typing to search saved entries.', onChange: afterChange });
+  var c1 = createCombo({ id: 'addr1', key: 'address1-combobox-proto-v2', noun: 'Address 1', samples: SAMPLE1, countId: 'count1', savedId: 'saved1', emptyText: 'Start typing to search saved addresses. Use the + button to add a new one.', onChange: afterChange });
+  var c2 = createCombo({ id: 'addr2', key: 'address2-combobox-proto-v2', noun: 'Address 2', samples: SAMPLE2, countId: 'count2', savedId: 'saved2', emptyText: 'Optional. Start typing to search saved entries. Use the + button to add a new one.', onChange: afterChange });
 
   function populateOld() {
     var cur = oldSel.value;
@@ -500,13 +639,13 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
 
   function setMode(m) {
     mode = m;
-    $('cb-wrap').hidden = m !== 'new';
-    $('sel-wrap').hidden = m !== 'old';
+    ['addr1', 'addr2'].forEach(function (id) { $(id + '-mount').hidden = m !== 'new'; });
+    $('addr1-old-wrap').hidden = m !== 'old';
+    $('addr2-old-wrap').hidden = m !== 'old';
     $('mode-new').setAttribute('aria-pressed', m === 'new' ? 'true' : 'false');
     $('mode-old').setAttribute('aria-pressed', m === 'old' ? 'true' : 'false');
-    $('row-addr').querySelector('label').setAttribute('for', m === 'new' ? 'addr1' : 'addr1-old');
-    c1.setEnabled(m === 'new');
-    c2.setEnabled(m === 'new');
+    $('lbl-addr1').setAttribute('for', m === 'new' ? 'addr1' : 'addr1-old');
+    $('lbl-addr2').setAttribute('for', m === 'new' ? 'addr2' : 'addr2-old');
     populateOld();
     afterChange();
   }
@@ -540,18 +679,13 @@ mark { background: transparent; color: var(--accent-hi); font-weight: 700; }
     var m = renderErrors();
     if (m.length) {
       if (m.indexOf('Project') !== -1) project.focus();
-      else if (mode === 'new') c1.el.focus(); else oldSel.focus();
+      else if (mode === 'new') c1.focusField(); else oldSel.focus();
       return;
     }
-    var r1 = c1.commit(getAddr1());
-    var r2 = mode === 'new' ? c2.commit(c2.value()) : null;
+    if (mode === 'new') { c1.commit(); c2.commit(); }
     populateOld();
-    if (mode === 'old') oldSel.value = getAddr1();
-    var added = [];
-    if (r1 && r1.isNew) added.push('Address 1');
-    if (r2 && r2.isNew) added.push('Address 2');
     $('ok').hidden = false;
-    $('ok').textContent = 'Application created (prototype).' + (added.length ? ' New ' + added.join(' and ') + ' saved for next time.' : '');
+    $('ok').textContent = 'Application created (prototype).' + (mode === 'new' ? ' Usage counts updated.' : '');
   });
 
   $('reset').addEventListener('click', function () {

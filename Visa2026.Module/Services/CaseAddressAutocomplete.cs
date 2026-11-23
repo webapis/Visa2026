@@ -37,7 +37,7 @@ public static class CaseAddressAutocomplete
         return folded;
     }
 
-    public static SearchResult Search(string? query, IEnumerable<SavedEntry> store)
+    public static SearchResult Search(string? query, IEnumerable<SavedEntry> store, string? excludeText = null)
     {
         var q = NormalizeDisplay(query);
         if (string.IsNullOrEmpty(q))
@@ -47,10 +47,14 @@ public static class CaseAddressAutocomplete
         if (tokens.Count == 0)
             return new SearchResult(Array.Empty<SavedEntry>(), 0);
 
+        var excludeKey = string.IsNullOrWhiteSpace(excludeText) ? null : FoldKey(excludeText);
         var first = tokens[0];
         var hits = store
             .Where(item =>
             {
+                if (excludeKey != null
+                    && string.Equals(FoldKey(item.Text), excludeKey, StringComparison.Ordinal))
+                    return false;
                 var f = FoldKey(item.Text);
                 return tokens.All(t => f.Contains(t, StringComparison.Ordinal));
             })
@@ -60,6 +64,34 @@ public static class CaseAddressAutocomplete
             .ToList();
 
         return new SearchResult(hits.Take(MaxResults).ToList(), hits.Count);
+    }
+
+    /// <summary>Dialog validation (empty / length / duplicate). Returns null when valid.</summary>
+    public static string? ValidateDialogText(
+        string? text,
+        IEnumerable<SavedEntry> store,
+        string? excludeText = null)
+    {
+        var display = NormalizeDisplay(text);
+        if (string.IsNullOrEmpty(display))
+            return "Enter an address.";
+        if (display.Length > MaxLength)
+            return "Use at most 500 characters.";
+        if (text != null && text.Any(ch => char.IsControl(ch) && !char.IsWhiteSpace(ch)))
+            return "Enter an address.";
+
+        var key = FoldKey(display);
+        var excludeKey = string.IsNullOrWhiteSpace(excludeText) ? null : FoldKey(excludeText);
+        foreach (var item in store)
+        {
+            var itemKey = FoldKey(item.Text);
+            if (excludeKey != null && string.Equals(itemKey, excludeKey, StringComparison.Ordinal))
+                continue;
+            if (string.Equals(itemKey, key, StringComparison.Ordinal))
+                return "\u201c" + display + "\u201d already exists in this list. Close this dialog and search for it.";
+        }
+
+        return null;
     }
 
     public static bool IsExactSaved(string? text, IEnumerable<SavedEntry> store)

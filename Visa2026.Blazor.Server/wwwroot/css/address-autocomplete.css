@@ -1,0 +1,253 @@
+/* Shared AddressAutocompleteField + SavedValueDialog.
+   Source of truth for size/look: Application Profile create wizard (ap-picker).
+   Applied to: create wizard, case summary, People & links review. */
+
+/* --- Pale placeholders (case dark theme sets --os-muted = --os-ink) --- */
+.cw-addr-ac__ta::placeholder,
+.officer-case-workspace .cw-addr-ac__ta::placeholder,
+.os-link-review .cw-addr-ac__ta::placeholder,
+.ap-picker .cw-addr-ac__ta::placeholder,
+.ap-picker .cw-summary-field__textarea.cw-addr-ac__ta::placeholder,
+.dxbl-theme-fluent-mode-dark .cw-addr-ac__ta::placeholder,
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-addr-ac__ta::placeholder,
+.cw-svd__input::placeholder {
+  color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 48%, transparent);
+  -webkit-text-fill-color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 48%, transparent);
+  opacity: 1;
+}
+
+/* --- Canonical chrome: same height/width/background everywhere --- */
+.cw-addr-ac,
+.officer-case-workspace .cw-addr-ac,
+.os-link-review .cw-addr-ac,
+.ap-picker .cw-addr-ac {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.cw-addr-ac__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.cw-addr-ac__row .cw-addr-ac__field {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  position: relative;
+}
+
+/* Search textarea + selected box: wizard footprint (5.5rem), panel fill, shared border */
+.cw-addr-ac__ta,
+.cw-addr-ac__selected,
+.cw-summary-form .cw-addr-ac__ta,
+.cw-summary-form .cw-addr-ac__selected,
+.officer-case-workspace .cw-addr-ac__ta,
+.officer-case-workspace .cw-addr-ac__selected,
+.officer-case-workspace .cw-summary-form .cw-addr-ac__ta,
+.officer-case-workspace .cw-summary-form .cw-addr-ac__selected,
+.os-link-review .cw-addr-ac__ta,
+.os-link-review .cw-addr-ac__selected,
+.os-link-review__address-ac .cw-addr-ac__ta,
+.os-link-review__address-ac .cw-addr-ac__selected,
+.ap-picker .cw-addr-ac__ta,
+.ap-picker .cw-addr-ac__selected,
+.ap-picker__summary-addresses .cw-addr-ac__ta,
+.ap-picker__summary-addresses .cw-addr-ac__selected,
+.ap-picker__summary-addresses .cw-summary-field__textarea.cw-addr-ac__ta {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 5.5rem;
+  height: 5.5rem;
+  max-height: 5.5rem;
+  field-sizing: fixed;
+  padding: 8px 32px 8px 10px;
+  margin: 0;
+  border: 1px solid var(--ap-line, var(--os-line, #c6c6d6));
+  border-radius: 8px;
+  background: var(--ap-panel, var(--os-panel, #fff)) !important;
+  color: var(--ap-ink, var(--os-ink, #1a2332));
+  -webkit-text-fill-color: var(--ap-ink, var(--os-ink, #1a2332));
+  font: inherit;
+  line-height: 1.45;
+  resize: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color-scheme: inherit;
+}
+
+.cw-addr-ac__ta.is-saved,
+.cw-addr-ac__selected,
+.cw-addr-ac__selected.is-saved {
+  border-color: #17804f;
+}
+
+.cw-addr-ac__add,
+.officer-case-workspace .cw-addr-ac__add,
+.os-link-review .cw-addr-ac__add,
+.ap-picker .cw-addr-ac__add {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-top: 0;
+  border: 1px solid var(--ap-line, var(--os-line, #c6c6d6));
+  border-radius: 8px;
+  background: var(--ap-panel, var(--os-panel, #fff));
+  color: var(--ap-ink, var(--os-ink, #1a2332));
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.cw-addr-ac__add:hover {
+  background: var(--ap-hover, var(--os-surface, rgba(0, 0, 0, 0.04)));
+}
+
+.cw-addr-ac__clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(127, 127, 140, 0.25);
+  color: var(--ap-ink, var(--os-ink, inherit));
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+
+.cw-addr-ac__edit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: calc(5.5rem - 16px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  -webkit-text-fill-color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cw-addr-ac__edit-text {
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+.cw-addr-ac__pen {
+  flex: none;
+  margin-top: 2px;
+  opacity: 0.75;
+}
+
+.cw-addr-ac__status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 55%, transparent);
+  min-height: 18px;
+}
+
+.cw-addr-ac__status[data-state="ok"] {
+  color: #17804f;
+}
+
+/* Host wrappers stay full width of their column */
+.cw-summary-field--address-ac,
+.ap-picker__summary-addresses .cw-summary-field--address-ac,
+.os-link-review__address-ac,
+.os-link-review__address2.os-link-review__address-ac {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Location multi-select: same + outside row as Address */
+.cw-loc-ms__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+.cw-loc-ms__row .cw-loc-ms__field {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  position: relative;
+}
+.cw-loc-ms__add {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-top: 0;
+  border: 1px solid var(--ap-line, var(--os-line, #c6c6d6));
+  border-radius: 8px;
+  background: var(--ap-panel, var(--os-panel, #fff));
+  color: var(--ap-ink, var(--os-ink, #1a2332));
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.cw-loc-ms__add:hover {
+  background: var(--ap-hover, var(--os-surface, rgba(0, 0, 0, 0.04)));
+}
+.cw-loc-ms__chip-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.cw-loc-ms__chip-edit-btn:hover .cw-loc-ms__chip-lbl {
+  text-decoration: underline;
+}
+.cw-loc-ms__pen {
+  flex: none;
+  opacity: 0.75;
+}
+.cw-loc-ms__box {
+  background: var(--ap-panel, var(--os-panel, #fff));
+  border-color: var(--ap-line, var(--os-line, #c6c6d6));
+  color: var(--ap-ink, var(--os-ink, #1a2332));
+}
+.cw-loc-ms__input::placeholder {
+  color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 48%, transparent);
+  -webkit-text-fill-color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 48%, transparent);
+  opacity: 1;
+}
+.officer-case-workspace .cw-loc-ms__input::placeholder,
+.ap-picker .cw-loc-ms__input::placeholder,
+.dxbl-theme-fluent-mode-dark .cw-loc-ms__input::placeholder {
+  color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 48%, transparent);
+  -webkit-text-fill-color: color-mix(in srgb, var(--ap-ink, var(--os-ink, #1a2332)) 48%, transparent);
+  opacity: 1;
+}

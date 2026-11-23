@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
@@ -41,11 +42,12 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         var model = new LocationMultiSelectEditorModel
         {
             NoneValue = _settings.NoneValue,
-            Placeholder = "Search or type a new location",
-            EmptyHint = IsWorkPermit(_settings)
-                ? "Search or type a work permit location."
-                : "Search or type a border zone location.",
+            FieldName = IsWorkPermit(_settings) ? "work permit location" : "border zone location",
+            Placeholder = "Start typing a location",
+            EmptyHint = "Search saved locations. Use the + button to add a new one.",
             ValueChanged = EventCallback.Factory.Create<string?>(this, OnValueChanged),
+            AddSaved = EventCallback.Factory.Create<string>(this, OnAddSavedAsync),
+            RenameSaved = EventCallback.Factory.Create<(string Previous, string Next)>(this, OnRenameSavedAsync),
         };
         return model;
     }
@@ -62,9 +64,9 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         ComponentModel.ReadOnly = !AllowEdit;
         ComponentModel.Enabled = AllowEdit;
         ComponentModel.Suggestions = LoadSuggestions();
-        ComponentModel.EmptyHint = IsWorkPermit(_settings)
-            ? "Search or type a work permit location."
-            : "Search or type a border zone location.";
+        ComponentModel.FieldName = IsWorkPermit(_settings) ? "work permit location" : "border zone location";
+        ComponentModel.EmptyHint = "Search saved locations. Use the + button to add a new one.";
+        EnsureHydrated(ComponentModel.Value);
     }
 
     protected override object GetControlValueCore() => ComponentModel?.Value ?? string.Empty;
@@ -88,25 +90,88 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         var formatted = CaseLocationAutocomplete.FormatChips(
             CaseLocationAutocomplete.ParseChips(value, none),
             none);
+        var previous = ComponentModel.Value;
         ComponentModel.Value = formatted;
         PropertyValue = formatted;
-        TryRemember(formatted);
+        TryRemember(previous, formatted);
+        ComponentModel.Suggestions = LoadSuggestions();
         OnControlValueChanged();
     }
 
-    private void TryRemember(string? stored)
+    private void TryRemember(string? previous, string? stored)
     {
         if (_objectSpace == null || _settings == null)
+            return;
+        if (string.Equals(previous ?? string.Empty, stored ?? string.Empty, StringComparison.Ordinal))
             return;
 
         var field = IsWorkPermit(_settings)
             ? ApplicationProfileSavedLocationField.WorkPermitLocation
             : ApplicationProfileSavedLocationField.BorderZone;
-        var labels = CaseLocationAutocomplete.ParseChips(stored, _settings.NoneValue);
+        var application = ResolveApplication(CurrentObject);
+        if (application?.ApplicationProfile == null)
+            return;
 
-        if (CurrentObject is ApplicationProfileInstance application)
-            CaseSavedLocation.RememberAll(_objectSpace, application, field, labels);
+        CaseSavedLocation.ReplaceEdited(
+            _objectSpace,
+            application.ApplicationProfile,
+            field,
+            previous,
+            stored,
+            _settings.NoneValue);
+    }
 
+    private void EnsureHydrated(string? stored)
+    {
+        if (_objectSpace == null || _settings == null)
+            return;
+        var field = IsWorkPermit(_settings)
+            ? ApplicationProfileSavedLocationField.WorkPermitLocation
+            : ApplicationProfileSavedLocationField.BorderZone;
+        var application = ResolveApplication(CurrentObject);
+        if (application?.ApplicationProfile == null)
+            return;
+        var changed = false;
+        foreach (var label in CaseLocationAutocomplete.ParseChips(stored, _settings.NoneValue))
+        {
+            if (CaseSavedLocation.EnsureExists(_objectSpace, application.ApplicationProfile, field, label))
+                changed = true;
+        }
+        if (changed)
+            ComponentModel.Suggestions = LoadSuggestions();
+    }
+
+    private Task OnAddSavedAsync(string text)
+    {
+        if (_objectSpace == null || _settings == null)
+            return Task.CompletedTask;
+        var field = IsWorkPermit(_settings)
+            ? ApplicationProfileSavedLocationField.WorkPermitLocation
+            : ApplicationProfileSavedLocationField.BorderZone;
+        var application = ResolveApplication(CurrentObject);
+        if (application?.ApplicationProfile == null)
+            return Task.CompletedTask;
+        if (!CaseSavedLocation.TryAdd(_objectSpace, application.ApplicationProfile, field, text, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        ComponentModel.Suggestions = LoadSuggestions();
+        return Task.CompletedTask;
+    }
+
+    private Task OnRenameSavedAsync((string Previous, string Next) pair)
+    {
+        if (_objectSpace == null || _settings == null)
+            return Task.CompletedTask;
+        var field = IsWorkPermit(_settings)
+            ? ApplicationProfileSavedLocationField.WorkPermitLocation
+            : ApplicationProfileSavedLocationField.BorderZone;
+        var application = ResolveApplication(CurrentObject);
+        if (application?.ApplicationProfile == null)
+            return Task.CompletedTask;
+        if (!CaseSavedLocation.TryRename(
+                _objectSpace, application.ApplicationProfile, field, pair.Previous, pair.Next, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        ComponentModel.Suggestions = LoadSuggestions();
+        return Task.CompletedTask;
     }
 
     private System.Collections.Generic.IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadSuggestions()
@@ -117,10 +182,9 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         var field = IsWorkPermit(_settings)
             ? ApplicationProfileSavedLocationField.WorkPermitLocation
             : ApplicationProfileSavedLocationField.BorderZone;
-        var app = CurrentObject as ApplicationProfileInstance;
         try
         {
-            return CaseSavedLocation.List(_objectSpace, field, app);
+            return CaseSavedLocation.List(_objectSpace, field);
         }
         catch
         {
@@ -141,4 +205,18 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
     private static bool IsWorkPermit(CommaSeparatedMultiSelectAttribute settings) =>
         settings.CatalogEntityType == typeof(WorkPermittedLocationName)
         || string.IsNullOrEmpty(settings.NoneValue);
+
+    private static ApplicationProfileInstance? ResolveApplication(object? current) => current switch
+    {
+        ApplicationProfileInstance application => application,
+        Visa visa => visa.IssuingApplicationProfileInstance
+            ?? visa.ApplicationProfileInstances?.FirstOrDefault(),
+        Invitation invitation => invitation.ApplicationProfileInstance,
+        WorkPermitItem item => item.ApplicationProfileInstance
+            ?? item.ApplicationProfileInstances?.FirstOrDefault(),
+        BorderZoneItem item => item.BorderZone?.ApplicationProfileInstance,
+        WorkPermitLocationGrantItem item => item.Grant?.ApplicationProfileInstance,
+        ApplicationRosterMergeLine line => line.ApplicationProfileInstance,
+        _ => null,
+    };
 }

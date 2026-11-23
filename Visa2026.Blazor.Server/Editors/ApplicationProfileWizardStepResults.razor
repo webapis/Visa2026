@@ -67,10 +67,14 @@
                         <LocationMultiSelectField Value="@Profile.DefaultBorderZoneLocation"
                                                   Enabled="@(!Disabled && Profile.RequireBorderZone && HasBorderZoneDefault)"
                                                   ReadOnly="@(Disabled || !Profile.RequireBorderZone || !HasBorderZoneDefault)"
+                                                  FieldName="border zone location"
                                                   Suggestions="@LoadWizardSavedLocations(ApplicationProfileSavedLocationField.BorderZone)"
                                                   NoneValue="@CommaSeparatedSelectionHelper.NoneValue"
-                                                  EmptyHint="Search or type a border zone location."
-                                                  ValueChanged="@OnBorderZoneDefaultChanged" />
+                                                  Placeholder="Start typing a location"
+                                                  EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                  ValueChanged="@OnBorderZoneDefaultChanged"
+                                                  AddSaved="text => OnWizardLocationAddAsync(ApplicationProfileSavedLocationField.BorderZone, text)"
+                                                  RenameSaved="pair => OnWizardLocationRenameAsync(ApplicationProfileSavedLocationField.BorderZone, pair)" />
                     </td>
                 </tr>
                 <tr>
@@ -249,10 +253,14 @@
                         <LocationMultiSelectField Value="@Profile.DefaultWorkPermitLocation"
                                                   Enabled="@(!Disabled && Profile.RequireWorkPermitLocation && HasWorkPermitLocationDefault)"
                                                   ReadOnly="@(Disabled || !Profile.RequireWorkPermitLocation || !HasWorkPermitLocationDefault)"
+                                                  FieldName="work permit location"
                                                   Suggestions="@LoadWizardSavedLocations(ApplicationProfileSavedLocationField.WorkPermitLocation)"
                                                   NoneValue="@string.Empty"
-                                                  EmptyHint="Search or type a work permit location."
-                                                  ValueChanged="@OnWorkPermitLocationDefaultChanged" />
+                                                  Placeholder="Start typing a location"
+                                                  EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                  ValueChanged="@OnWorkPermitLocationDefaultChanged"
+                                                  AddSaved="text => OnWizardLocationAddAsync(ApplicationProfileSavedLocationField.WorkPermitLocation, text)"
+                                                  RenameSaved="pair => OnWizardLocationRenameAsync(ApplicationProfileSavedLocationField.WorkPermitLocation, pair)" />
                     </td>
                 </tr>
                 <tr>
@@ -288,6 +296,28 @@
     [Parameter] public ApplicationProfileWizardLookupData Lookups { get; set; } = new();
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
     private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _wizardLocCache = new(StringComparer.Ordinal);
+
+    private async Task OnWizardLocationAddAsync(ApplicationProfileSavedLocationField field, string text)
+    {
+        if (ObjectSpace == null)
+            return;
+        if (!CaseSavedLocation.TryAdd(ObjectSpace, Profile, field, text, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        _wizardLocCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
+
+    private async Task OnWizardLocationRenameAsync(
+        ApplicationProfileSavedLocationField field,
+        (string Previous, string Next) pair)
+    {
+        if (ObjectSpace == null)
+            return;
+        if (!CaseSavedLocation.TryRename(ObjectSpace, Profile, field, pair.Previous, pair.Next, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        _wizardLocCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
 
     private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadWizardSavedLocations(ApplicationProfileSavedLocationField field)
     {
@@ -414,7 +444,10 @@
 
     private Task OnBorderZoneDefaultChanged(string? value)
     {
+        var previous = Profile.DefaultBorderZoneLocation;
         Profile.DefaultBorderZoneLocation = value;
+        if (ObjectSpace != null)
+            CaseSavedLocation.ReplaceEdited(ObjectSpace, Profile, ApplicationProfileSavedLocationField.BorderZone, previous, value, CommaSeparatedSelectionHelper.NoneValue);
         return Task.CompletedTask;
     }
 
@@ -571,7 +604,10 @@
 
     private Task OnWorkPermitLocationDefaultChanged(string? value)
     {
+        var previous = Profile.DefaultWorkPermitLocation;
         Profile.DefaultWorkPermitLocation = value;
+        if (ObjectSpace != null)
+            CaseSavedLocation.ReplaceEdited(ObjectSpace, Profile, ApplicationProfileSavedLocationField.WorkPermitLocation, previous, value, string.Empty);
         return Task.CompletedTask;
     }
 

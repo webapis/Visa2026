@@ -1,0 +1,127 @@
+@using Visa2026.Module.Services
+
+@if (IsOpen)
+{
+    <div class="cw-svd-backdrop" @onclick="CancelAsync"></div>
+    <div class="cw-svd" role="dialog" aria-modal="true" aria-labelledby="@_titleId" @onclick:stopPropagation="true">
+        <form @onsubmit="SubmitAsync" @onsubmit:preventDefault="true">
+            <header class="cw-svd__head">
+                <h2 id="@_titleId" class="cw-svd__title">@Title</h2>
+                <button type="button" class="cw-svd__x" aria-label="Close" @onclick="CancelAsync">×</button>
+            </header>
+            <div class="cw-svd__body">
+                <label class="cw-svd__label" for="@_inputId">@InputLabel</label>
+                <textarea id="@_inputId"
+                          class="cw-svd__input"
+                          rows="@InputRows"
+                          maxlength="@MaxLength"
+                          value="@_draft"
+                          aria-invalid="@(!string.IsNullOrEmpty(_error))"
+                          aria-describedby="@($"{_hintId} {_errId}")"
+                          @oninput="OnInput"
+                          @onkeydown="OnKeyDown"></textarea>
+                <p id="@_hintId" class="cw-svd__hint">@Hint</p>
+                <p id="@_errId" class="cw-svd__err" role="alert">@(_error ?? string.Empty)</p>
+            </div>
+            <footer class="cw-svd__foot">
+                <button type="button" class="cw-svd__btn" @onclick="CancelAsync">Cancel</button>
+                <button type="submit" class="cw-svd__btn cw-svd__btn--primary">@PrimaryLabel</button>
+            </footer>
+        </form>
+    </div>
+}
+
+@code {
+    /// <summary>address | location</summary>
+    [Parameter] public string Kind { get; set; } = "address";
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public string Mode { get; set; } = "add"; // add | edit
+    [Parameter] public string FieldName { get; set; } = "Address";
+    [Parameter] public string? InitialText { get; set; }
+    [Parameter] public string? ExcludeText { get; set; }
+    [Parameter] public int UseCount { get; set; }
+    [Parameter] public IReadOnlyList<CaseAddressAutocomplete.SavedEntry> Suggestions { get; set; } =
+        Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+    [Parameter] public string? ExternalError { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<string> OnSave { get; set; }
+
+    private readonly string _titleId = "cw-svd-title-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _inputId = "cw-svd-input-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _hintId = "cw-svd-hint-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _errId = "cw-svd-err-" + Guid.NewGuid().ToString("N")[..8];
+
+    private string _draft = string.Empty;
+    private string? _error;
+    private bool _wasOpen;
+
+    private bool IsLocation => string.Equals(Kind, "location", StringComparison.OrdinalIgnoreCase);
+    private bool IsEdit => string.Equals(Mode, "edit", StringComparison.OrdinalIgnoreCase);
+    private int MaxLength => IsLocation ? CaseLocationAutocomplete.MaxLength : CaseAddressAutocomplete.MaxLength;
+    private int InputRows => IsLocation ? 2 : 4;
+    private string InputLabel => IsLocation ? "Location name" : "Address";
+    private string Title => IsEdit ? $"Edit {FieldName}" : $"Add {FieldName}";
+    private string PrimaryLabel => IsEdit
+        ? "Save changes"
+        : (IsLocation ? "Add location" : "Add address");
+    private string Hint => IsEdit
+        ? $"Used {(UseCount <= 0 ? 0 : UseCount)}×. Renaming changes this {(IsLocation ? "location" : "address")} wherever it is selected."
+            + (IsLocation ? string.Empty : " Line breaks become spaces.")
+        : (IsLocation
+            ? "It is saved to the list right away and added to this field."
+            : "It is saved to the list right away and selected in this field. Line breaks become spaces.");
+
+    protected override void OnParametersSet()
+    {
+        if (IsOpen && !_wasOpen)
+        {
+            _draft = InitialText ?? string.Empty;
+            _error = ExternalError;
+        }
+        else if (IsOpen && !string.IsNullOrEmpty(ExternalError))
+            _error = ExternalError;
+        _wasOpen = IsOpen;
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        _draft = e.Value?.ToString() ?? string.Empty;
+        _error = null;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CancelAsync();
+            return;
+        }
+
+        if (e.Key == "Enter" && !e.ShiftKey)
+            await SubmitAsync();
+    }
+
+    private async Task CancelAsync()
+    {
+        _error = null;
+        if (OnCancel.HasDelegate)
+            await OnCancel.InvokeAsync();
+    }
+
+    private async Task SubmitAsync()
+    {
+        var store = Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+        var exclude = IsEdit ? ExcludeText : null;
+        _error = IsLocation
+            ? CaseLocationAutocomplete.ValidateDialogText(_draft, store, exclude)
+            : CaseAddressAutocomplete.ValidateDialogText(_draft, store, exclude);
+        if (!string.IsNullOrEmpty(_error))
+            return;
+
+        var normalized = IsLocation
+            ? CaseLocationAutocomplete.NormalizeDisplay(_draft)
+            : CaseAddressAutocomplete.NormalizeDisplay(_draft);
+        if (OnSave.HasDelegate)
+            await OnSave.InvokeAsync(normalized);
+    }
+}

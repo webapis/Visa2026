@@ -49,4 +49,32 @@ public class CaseAddressAutocompleteTests
         Assert.Equal("foo bar baz", normalized);
         Assert.Equal(CaseAddressAutocomplete.MaxLength, CaseAddressAutocomplete.NormalizeDisplay(longText).Length);
     }
+
+    [Fact]
+    public void ValidateDialogText_RejectsEmptyAndDuplicate()
+    {
+        var store = new[]
+        {
+            new CaseAddressAutocomplete.SavedEntry("Aşgabat ýoly", 1, DateTime.UtcNow),
+        };
+        Assert.Equal("Enter an address.", CaseAddressAutocomplete.ValidateDialogText("  ", store));
+        Assert.Equal(
+            "\u201casgabat yoly\u201d already exists in this list. Close this dialog and search for it.",
+            CaseAddressAutocomplete.ValidateDialogText("asgabat yoly", store));
+        Assert.Null(CaseAddressAutocomplete.ValidateDialogText("asgabat yoly", store, excludeText: "Aşgabat ýoly"));
+        Assert.Null(CaseAddressAutocomplete.ValidateDialogText("Mary welaýaty", store));
+    }
+
+    [Fact]
+    public void Search_ExcludesSelectedText()
+    {
+        var store = new List<CaseAddressAutocomplete.SavedEntry>
+        {
+            new("Aşgabat köçesi 5", 9, DateTime.UtcNow),
+            new("Aşgabat ýoly 1", 2, DateTime.UtcNow),
+        };
+        var result = CaseAddressAutocomplete.Search("asgabat", store, excludeText: "Aşgabat köçesi 5");
+        Assert.Equal(1, result.Total);
+        Assert.Equal("Aşgabat ýoly 1", result.Items[0].Text);
+    }
 }

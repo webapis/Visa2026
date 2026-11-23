@@ -53,6 +53,37 @@ public static class CaseLocationAutocomplete
     public static bool IsExactSaved(string? text, IEnumerable<CaseAddressAutocomplete.SavedEntry> store) =>
         CaseAddressAutocomplete.IsExactSaved(NormalizeDisplay(text), store);
 
+    /// <summary>Dialog validation (empty / length / duplicate). Returns null when valid.</summary>
+    public static string? ValidateDialogText(
+        string? text,
+        IEnumerable<CaseAddressAutocomplete.SavedEntry> store,
+        string? excludeText = null)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "Enter a location name.";
+        var collapsed = string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        if (collapsed.Length > MaxLength)
+            return "Use at most 100 characters.";
+        if (text.Any(ch => char.IsControl(ch) && !char.IsWhiteSpace(ch)))
+            return "Enter a location name.";
+        var display = NormalizeDisplay(text);
+        if (string.IsNullOrEmpty(display) || CommaSeparatedSelectionHelper.IsNoneValue(display))
+            return "Enter a location name.";
+
+        var key = FoldKey(display);
+        var excludeKey = string.IsNullOrWhiteSpace(excludeText) ? null : FoldKey(excludeText);
+        foreach (var item in store)
+        {
+            var itemKey = FoldKey(item.Text);
+            if (excludeKey != null && string.Equals(itemKey, excludeKey, StringComparison.Ordinal))
+                continue;
+            if (string.Equals(itemKey, key, StringComparison.Ordinal))
+                return $"\u201c{display}\u201d already exists in this list. Close this dialog and search for it.";
+        }
+
+        return null;
+    }
+
     public static IReadOnlyList<(int Start, int End)> HighlightRanges(string text, string? query) =>
         CaseAddressAutocomplete.HighlightRanges(text, NormalizeDisplay(query));
 

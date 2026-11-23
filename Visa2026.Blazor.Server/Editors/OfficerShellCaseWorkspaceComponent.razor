@@ -780,10 +780,8 @@
             return;
 
         var needsCatalogs = view.HeaderFields.Any(field =>
-            field.Kind is ApplicationWorkspaceCaseHeaderFieldKind.Lookup
-                    or ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect
-                && field.Options.Count == 0
-                && field.MultiSelectOptions.Count == 0);
+            field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup
+                && field.Options.Count == 0);
         if (!needsCatalogs)
             return;
 
@@ -876,8 +874,11 @@
         if (field == null || field.ReadOnly)
             return;
 
-        // Chip editors commit through ValueChanged. The focused node is only the search box.
+        // Chip editors and AddressAutocomplete commit through ValueChanged.
+        // Focused DOM may be the search box or edit button (empty .value) — do not overwrite.
         if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect)
+            return;
+        if (ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(field.Key))
             return;
 
         var value = NormalizeFocusedSummaryValue(field, focused.Value);
@@ -1165,7 +1166,7 @@
         var locationField = string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.BorderZone, StringComparison.Ordinal)
             || string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal);
         if (locationField)
-            _caseSummarySavedLocationCache.Clear();
+            RememberCaseLocation(key, value);
         // Location chips must update the case value even in view mode, so Linked Records can prefill them.
         ApplyHeaderDraft(key, value, null, allowWhenReadOnly: locationField);
         return Task.CompletedTask;
@@ -1839,9 +1840,9 @@
     {
         var readOnly = forceReadOnly || field.ReadOnly;
         var fillClass = plain ? null : $"cw-summary-field--fill-{FillCss(field.FillState)}";
-        <label class="cw-summary-field @(plain ? "cw-summary-field--plain" : null) @fillClass @(readOnly ? "is-readonly" : null)"
-               data-summary-key="@field.Key"
-               data-summary-kind="@field.Kind">
+        <div class="cw-summary-field @(plain ? "cw-summary-field--plain" : null) @fillClass @(readOnly ? "is-readonly" : null)"
+             data-summary-key="@field.Key"
+             data-summary-kind="@field.Kind">
             <span class="cw-summary-field__label">@field.Label</span>
             @if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Date)
             {
@@ -1858,15 +1859,18 @@
                     ? ApplicationProfileSavedLocationField.WorkPermitLocation
                     : ApplicationProfileSavedLocationField.BorderZone;
                 var locSuggestions = LoadCaseSummarySavedLocations(locField);
+                EnsureCaseLocationHydrated(locField, field.Value);
                 <LocationMultiSelectField @key="@($"cw-loc-{field.Key}")" Value="@field.Value"
                                           Enabled="@(!readOnly)"
                                           ReadOnly="@readOnly"
+                                          FieldName="@(isWp ? "work permit location" : "border zone location")"
                                           Suggestions="@locSuggestions"
                                           NoneValue="@(isWp ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
-                                          EmptyHint="@(isWp
-                                              ? "Search or type a work permit location."
-                                              : "Search or type a border zone location.")"
-                                          ValueChanged="value => OnHeaderFieldChanged(field.Key, value)" />
+                                          Placeholder="Start typing a location"
+                                          EmptyHint="Search saved locations. Use the + button to add a new one."
+                                          ValueChanged="value => OnHeaderFieldChanged(field.Key, value)"
+                                          AddSaved="text => OnCaseLocationAddAsync(locField, text)"
+                                          RenameSaved="pair => OnCaseLocationRenameAsync(locField, pair)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Lookup
                      && string.Equals(field.Key, ApplicationWorkspaceCaseHeaderFieldsHelper.TargetApplicationProfileInstance, StringComparison.Ordinal))
@@ -1952,18 +1956,27 @@
                      && ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(field.Key))
             {
                 var isAddress1 = ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddress1DefaultTextField(field.Key);
-                var suggestions = LoadCaseSummarySavedAddresses(isAddress1
+                var savedField = isAddress1
                     ? ApplicationProfileSavedAddressField.Address1
-                    : ApplicationProfileSavedAddressField.Address2);
+                    : ApplicationProfileSavedAddressField.Address2;
+                EnsureCaseAddressHydrated(savedField, field.Value);
+                var suggestions = LoadCaseSummarySavedAddresses(savedField);
+                var fieldName = isAddress1 ? "Address 1" : "Address 2";
                 <AddressAutocompleteField Value="@field.Value"
+                                          FieldName="@fieldName"
                                           Required="@(field.FillState == ApplicationWorkspaceCaseSummaryFillState.Empty)"
                                           Enabled="@(!readOnly)"
                                           ReadOnly="@readOnly"
                                           Suggestions="@suggestions"
+                                          Placeholder="@(isAddress1
+                                              ? "Start typing a street, district or city"
+                                              : "Apartment, building, floor or landmark")"
                                           EmptyHint="@(isAddress1
-                                              ? "Start typing to search saved addresses."
-                                              : "Optional. Start typing to search saved entries.")"
-                                          ValueChanged="text => OnHeaderFieldChanged(field.Key, text)" />
+                                              ? "Start typing to search saved addresses. Use the + button to add a new one."
+                                              : "Optional. Start typing to search saved entries. Use the + button to add a new one.")"
+                                          ValueChanged="text => OnHeaderFieldChanged(field.Key, text)"
+                                          AddSaved="text => OnCaseAddressAddAsync(savedField, text)"
+                                          RenameSaved="pair => OnCaseAddressRenameAsync(savedField, pair)" />
             }
             else if (field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.Text)
             {
@@ -1981,7 +1994,7 @@
                        disabled="@readOnly"
                        @onchange="e => OnHeaderFieldChanged(field.Key, e.Value?.ToString())" />
             }
-        </label>
+        </div>
     };
 
     private RenderFragment RenderCaseLevel1Tabs(ApplicationWorkspaceCaseView _) => __builder =>
@@ -2983,15 +2996,24 @@
                                         var addressField = isAddress1Line
                                             ? ApplicationProfileSavedAddressField.Address1
                                             : ApplicationProfileSavedAddressField.Address2;
+                                        EnsureCaseAddressHydrated(addressField, line.TextValue);
+                                        var lrSuggestions = LoadCaseSummarySavedAddresses(addressField);
+                                        var lrName = isAddress1Line ? "Address 1" : "Address 2";
                                         <div class="os-link-review__address2 os-link-review__address-ac">
                                             <AddressAutocompleteField Value="@line.TextValue"
+                                                                      FieldName="@lrName"
                                                                       Required="false"
                                                                       Enabled="true"
-                                                                      Suggestions="@LoadCaseSummarySavedAddresses(addressField)"
+                                                                      Suggestions="@lrSuggestions"
+                                                                      Placeholder="@(isAddress1Line
+                                                                          ? "Start typing a street, district or city"
+                                                                          : "Apartment, building, floor or landmark")"
                                                                       EmptyHint="@(isAddress1Line
-                                                                          ? "Start typing to search saved addresses."
-                                                                          : "Optional. Start typing to search saved entries.")"
-                                                                      ValueChanged="text => SetAddressText(line, text)" />
+                                                                          ? "Start typing to search saved addresses. Use the + button to add a new one."
+                                                                          : "Optional. Start typing to search saved entries. Use the + button to add a new one.")"
+                                                                      ValueChanged="text => SetAddressText(line, text)"
+                                                                      AddSaved="text => OnCaseAddressAddAsync(addressField, text)"
+                                                                      RenameSaved="pair => OnCaseAddressRenameAsync(addressField, pair)" />
                                         </div>
                                     }
                                     else if (IsRequestedLocationReviewLine(line))
@@ -3002,16 +3024,19 @@
                                                 var lrField = isWpLoc
                                                     ? ApplicationProfileSavedLocationField.WorkPermitLocation
                                                     : ApplicationProfileSavedLocationField.BorderZone;
+                                                EnsureCaseLocationHydrated(lrField, RequestedLocationFieldValue(line));
                                             }
                                             <LocationMultiSelectField @key="@($"{PersonLinkReviewPersonId:N}:{line.ResolveTabKey()}:loc")"
                                                                       Value="@RequestedLocationFieldValue(line)"
                                                                       Enabled="true"
+                                                                      FieldName="@(isWpLoc ? "work permit location" : "border zone location")"
                                                                       Suggestions="@LoadCaseSummarySavedLocations(lrField)"
                                                                       NoneValue="@(isWpLoc ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
-                                                                      EmptyHint="@(isWpLoc
-                                                                          ? "Search or type a work permit location."
-                                                                          : "Search or type a border zone location.")"
-                                                                      ValueChanged="value => SetRequestedLocations(line, value)" />
+                                                                      Placeholder="Start typing a location"
+                                                                      EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                                      ValueChanged="value => SetRequestedLocations(line, value)"
+                                                                      AddSaved="text => OnCaseLocationAddAsync(lrField, text)"
+                                                                      RenameSaved="pair => OnCaseLocationRenameAsync(lrField, pair)" />
                                         </div>
                                     }
                                     else if (_reviewGearOn && line.Choices.Count > 0)
@@ -4353,6 +4378,110 @@
 
     private readonly Dictionary<string, IReadOnlyList<CaseAddressAutocomplete.SavedEntry>> _caseSummarySavedLocationCache = new(StringComparer.Ordinal);
 
+    private void EnsureCaseLocationHydrated(ApplicationProfileSavedLocationField field, string? stored)
+    {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+            if (application?.ApplicationProfile == null)
+                return;
+            var none = field == ApplicationProfileSavedLocationField.WorkPermitLocation
+                ? string.Empty
+                : CommaSeparatedSelectionHelper.NoneValue;
+            var changed = false;
+            foreach (var label in CaseLocationAutocomplete.ParseChips(stored, none))
+            {
+                if (CaseSavedLocation.EnsureExists(objectSpace, application.ApplicationProfile, field, label))
+                    changed = true;
+            }
+            if (changed)
+            {
+                objectSpace.CommitChanges();
+                _caseSummarySavedLocationCache.Remove(field.ToString());
+            }
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task OnCaseLocationAddAsync(ApplicationProfileSavedLocationField field, string text)
+    {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+        if (application?.ApplicationProfile == null)
+            return;
+        if (!CaseSavedLocation.TryAdd(objectSpace, application.ApplicationProfile, field, text, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        objectSpace.CommitChanges();
+        _caseSummarySavedLocationCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
+
+    private async Task OnCaseLocationRenameAsync(
+        ApplicationProfileSavedLocationField field,
+        (string Previous, string Next) pair)
+    {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+        if (application?.ApplicationProfile == null)
+            return;
+        if (!CaseSavedLocation.TryRename(
+                objectSpace, application.ApplicationProfile, field, pair.Previous, pair.Next, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedLocation.DuplicateError);
+        objectSpace.CommitChanges();
+        _caseSummarySavedLocationCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
+
+    private void RememberCaseLocation(string key, string? nextValue)
+    {
+        var workPermit = string.Equals(key, ApplicationWorkspaceCaseHeaderFieldsHelper.WorkPermitLocation, StringComparison.Ordinal);
+        var field = workPermit
+            ? ApplicationProfileSavedLocationField.WorkPermitLocation
+            : ApplicationProfileSavedLocationField.BorderZone;
+        var none = workPermit ? string.Empty : CommaSeparatedSelectionHelper.NoneValue;
+        var previous = Snapshot?.CaseView.HeaderFields.FirstOrDefault(item =>
+            string.Equals(item.Key, key, StringComparison.Ordinal))?.Value;
+        _caseSummarySavedLocationCache.Remove(field.ToString());
+        if (string.Equals(previous ?? string.Empty, nextValue ?? string.Empty, StringComparison.Ordinal))
+            return;
+
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+            if (application?.ApplicationProfile == null)
+                return;
+            CaseSavedLocation.ReplaceEdited(
+                objectSpace,
+                application.ApplicationProfile,
+                field,
+                previous,
+                nextValue,
+                none);
+            objectSpace.CommitChanges();
+        }
+        catch
+        {
+            /* The case draft still holds the edited chips. */
+        }
+    }
+
     private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> LoadCaseSummarySavedLocations(ApplicationProfileSavedLocationField field)
     {
         var caseId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
@@ -4366,10 +4495,7 @@
         try
         {
             using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-            ApplicationProfileInstance? app = null;
-            if (caseId != Guid.Empty)
-                app = objectSpace.GetObjectByKey<ApplicationProfileInstance>(caseId);
-            cached = CaseSavedLocation.List(objectSpace, field, app);
+            cached = CaseSavedLocation.List(objectSpace, field);
         }
         catch
         {
@@ -4381,11 +4507,79 @@
     }
     private void SetAddressText(PersonLinkReviewLine line, string? value)
     {
+
         line.TextValue = value;
         line.Summary = string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+        var field = line.SlotIndex <= 1
+            ? ApplicationProfileSavedAddressField.Address1
+            : ApplicationProfileSavedAddressField.Address2;
+        _caseSummarySavedAddressCache.Remove(field.ToString());
         StateHasChanged();
     }
 
+    private void EnsureCaseAddressHydrated(ApplicationProfileSavedAddressField field, string? value)
+    {
+        var text = CaseAddressAutocomplete.NormalizeDisplay(value);
+        if (string.IsNullOrEmpty(text))
+            return;
+        if (CaseAddressAutocomplete.IsExactSaved(text, LoadCaseSummarySavedAddresses(field)))
+            return;
+
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+            if (application?.ApplicationProfile == null)
+                return;
+            if (CaseSavedAddress.EnsureExists(objectSpace, application.ApplicationProfile, field, text))
+            {
+                objectSpace.CommitChanges();
+                _caseSummarySavedAddressCache.Remove(field.ToString());
+            }
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task OnCaseAddressAddAsync(ApplicationProfileSavedAddressField field, string text)
+    {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+        if (application?.ApplicationProfile == null)
+            return;
+        if (!CaseSavedAddress.TryAdd(objectSpace, application.ApplicationProfile, field, text, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedAddress.DuplicateError);
+        objectSpace.CommitChanges();
+        _caseSummarySavedAddressCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
+
+    private async Task OnCaseAddressRenameAsync(
+        ApplicationProfileSavedAddressField field,
+        (string Previous, string Next) pair)
+    {
+        var instanceId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
+        if (instanceId == Guid.Empty)
+            return;
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+        var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(instanceId);
+        if (application?.ApplicationProfile == null)
+            return;
+        if (!CaseSavedAddress.TryRename(
+                objectSpace, application.ApplicationProfile, field, pair.Previous, pair.Next, out var error))
+            throw new InvalidOperationException(error ?? CaseSavedAddress.DuplicateError);
+        objectSpace.CommitChanges();
+        _caseSummarySavedAddressCache.Remove(field.ToString());
+        await Task.CompletedTask;
+    }
 
     /// <summary>
     /// Case Requested WP/BZ → empty Linked Records rows (same purpose as Address 1/2 defaults).

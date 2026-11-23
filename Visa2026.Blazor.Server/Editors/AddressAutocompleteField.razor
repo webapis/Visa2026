@@ -1,134 +1,214 @@
+@using Microsoft.JSInterop
 @using Visa2026.Module.Services
+@inject IJSRuntime Js
 
-<div class="cw-addr-ac" @onfocusin="OnFocusIn" @onfocusout="OnFocusOut">
-    <div class="cw-addr-ac__field">
-        <textarea id="@_inputId"
-                  class="@TextAreaCss"
-                  rows="4"
-                  maxlength="@CaseAddressAutocomplete.MaxLength"
-                  disabled="@(!Enabled || ReadOnly)"
-                  readonly="@ReadOnly"
-                  placeholder="@Placeholder"
-                  role="combobox"
-                  aria-expanded="@(_listOpen ? "true" : "false")"
-                  aria-controls="@_listId"
-                  aria-autocomplete="list"
-                  aria-activedescendant="@(_activeIndex >= 0 && _activeIndex < _hits.Count ? OptionId(_activeIndex) : null)"
-                  value="@_draft"
-                  @oninput="OnInput"
-                  @onkeydown="OnKeyDown"
-                  @onchange="OnChangeCommit"></textarea>
-        @if (Enabled && !ReadOnly && !string.IsNullOrWhiteSpace(_draft))
+<div class="cw-addr-ac">
+    <div class="cw-addr-ac__row">
+        <div class="cw-addr-ac__field" @onfocusin="OnFocusIn" @onfocusout="OnFocusOut">
+            @if (HasSelection)
+            {
+                <div class="@SelectedBoxCss">
+                    <button type="button"
+                            id="@_editBtnId"
+                            class="cw-addr-ac__edit"
+                            disabled="@(!Enabled || ReadOnly)"
+                            aria-label="@($"Edit {FieldName}: {SelectedText}")"
+                            @onclick="OpenEditDialogAsync">
+                        <span class="cw-addr-ac__edit-text">@SelectedText</span>
+                        <svg class="cw-addr-ac__pen" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                    @if (Enabled && !ReadOnly)
+                    {
+                        <button type="button"
+                                class="cw-addr-ac__clear"
+                                title="@($"Clear {FieldName}")"
+                                aria-label="@($"Clear {FieldName}")"
+                                @onclick="ClearAsync"
+                                @onclick:preventDefault="true">×</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <textarea id="@_inputId"
+                          class="@SearchCss"
+                          rows="3"
+                          maxlength="@CaseAddressAutocomplete.MaxLength"
+                          disabled="@(!Enabled || ReadOnly)"
+                          readonly="@ReadOnly"
+                          placeholder="@Placeholder"
+                          role="combobox"
+                          aria-expanded="@(_listOpen ? "true" : "false")"
+                          aria-controls="@_listId"
+                          aria-autocomplete="list"
+                          aria-required="@(Required ? "true" : "false")"
+                          aria-activedescendant="@(_activeIndex >= 0 && _activeIndex < _hits.Count ? OptionId(_activeIndex) : null)"
+                          aria-describedby="@_statusId"
+                          value="@_search"
+                          @oninput="OnSearchInput"
+                          @onkeydown="OnSearchKeyDown"
+                          @onkeydown:preventDefault="@_preventEnter"></textarea>
+                @if (_listOpen && _hits.Count > 0)
+                {
+                    <ul id="@_listId" class="cw-addr-ac__list" role="listbox">
+                        @for (var i = 0; i < _hits.Count; i++)
+                        {
+                            var index = i;
+                            var item = _hits[index];
+                            <li id="@OptionId(index)"
+                                class="@(_activeIndex == index ? "cw-addr-ac__option is-active" : "cw-addr-ac__option")"
+                                role="option"
+                                aria-selected="@(_activeIndex == index)"
+                                @onmousedown:preventDefault="true"
+                                @onmousedown="() => SelectAsync(item.Text)">
+                                <span class="cw-addr-ac__option-main">@Highlight(item.Text)</span>
+                                <span class="cw-addr-ac__option-meta">@(item.UseCount <= 0 ? "New" : $"Used {item.UseCount}×")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        </div>
+        @if (Enabled && !ReadOnly && !_suggestionsFailed)
         {
             <button type="button"
-                    class="cw-addr-ac__clear"
-                    title="Clear"
-                    tabindex="-1"
-                    @onclick="ClearAsync"
-                    @onclick:preventDefault="true">×</button>
-        }
-        @if (_listOpen && _hits.Count > 0)
-        {
-            <ul id="@_listId" class="cw-addr-ac__list" role="listbox">
-                @for (var i = 0; i < _hits.Count; i++)
-                {
-                    var index = i;
-                    var item = _hits[index];
-                    <li id="@OptionId(index)"
-                        class="@(_activeIndex == index ? "cw-addr-ac__option is-active" : "cw-addr-ac__option")"
-                        role="option"
-                        aria-selected="@(_activeIndex == index)"
-                        @onmousedown:preventDefault="true"
-                        @onmousedown="() => PickAsync(item.Text)">
-                        <span class="cw-addr-ac__option-main">@Highlight(item.Text)</span>
-                        <span class="cw-addr-ac__option-meta">Used @item.UseCount×</span>
-                    </li>
-                }
-            </ul>
+                    class="cw-addr-ac__add"
+                    title="Add new"
+                    aria-label="@($"Add new {FieldName}")"
+                    @onclick="OpenAddDialogAsync">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </button>
         }
     </div>
-    <div class="cw-addr-ac__status" data-state="@_statusState" role="status" aria-live="polite">@_statusText</div>
+    <div id="@_statusId" class="cw-addr-ac__status" data-state="@_statusState" role="status" aria-live="polite">@_statusText</div>
+    <span class="cw-addr-ac__sr" role="status" aria-live="polite">@_announce</span>
 </div>
+
+<SavedValueDialog IsOpen="@_dialogOpen"
+                  Mode="@_dialogMode"
+                  FieldName="@FieldName"
+                  InitialText="@_dialogInitial"
+                  ExcludeText="@(_dialogMode == "edit" ? SelectedText : null)"
+                  UseCount="@SelectedUseCount"
+                  Suggestions="@Suggestions"
+                  ExternalError="@_dialogSaveError"
+                  OnCancel="CloseDialogAsync"
+                  OnSave="OnDialogSaveAsync" />
 
 @code {
     [Parameter] public string? Value { get; set; }
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public EventCallback<string> AddSaved { get; set; }
+    [Parameter] public EventCallback<(string Previous, string Next)> RenameSaved { get; set; }
     [Parameter] public IReadOnlyList<CaseAddressAutocomplete.SavedEntry> Suggestions { get; set; } =
         Array.Empty<CaseAddressAutocomplete.SavedEntry>();
     [Parameter] public bool Required { get; set; }
     [Parameter] public bool Enabled { get; set; } = true;
     [Parameter] public bool ReadOnly { get; set; }
-    [Parameter] public string Placeholder { get; set; } = string.Empty;
-    [Parameter] public string EmptyHint { get; set; } = "Start typing to search saved addresses.";
+    [Parameter] public string FieldName { get; set; } = "Address";
+    [Parameter] public string Placeholder { get; set; } = "Start typing a street, district or city";
+    [Parameter] public string EmptyHint { get; set; } =
+        "Start typing to search saved addresses. Use the + button to add a new one.";
 
     private readonly string _inputId = "cw-addr-ac-" + Guid.NewGuid().ToString("N")[..8];
     private readonly string _listId = "cw-addr-ac-list-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _statusId = "cw-addr-ac-status-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _editBtnId = "cw-addr-ac-edit-" + Guid.NewGuid().ToString("N")[..8];
 
-    private string _draft = string.Empty;
+    private string _search = string.Empty;
     private string? _lastExternal;
     private bool _listOpen;
-    private bool _pickInFlight;
     private bool _focused;
+    private bool _pickInFlight;
+    private bool _preventEnter;
+    private bool _suggestionsFailed;
+    private bool _focusEditAfterSelect;
     private int _activeIndex = -1;
     private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> _hits =
         Array.Empty<CaseAddressAutocomplete.SavedEntry>();
     private int _hitTotal;
     private string _statusText = string.Empty;
     private string _statusState = string.Empty;
+    private string _announce = string.Empty;
 
-    private string TextAreaCss =>
-        "cw-summary-field__input cw-summary-field__textarea cw-addr-ac__ta"
-        + (_statusState == "ok" ? " is-saved" : string.Empty);
+    private bool _dialogOpen;
+    private string _dialogMode = "add";
+    private string _dialogInitial = string.Empty;
+    private string? _dialogSaveError;
+
+    private string SelectedText => CaseAddressAutocomplete.NormalizeDisplay(Value);
+    private bool HasSelection => !string.IsNullOrEmpty(SelectedText);
+
+    private int SelectedUseCount
+    {
+        get
+        {
+            var key = CaseAddressAutocomplete.FoldKey(SelectedText);
+            var hit = Suggestions?.FirstOrDefault(item =>
+                string.Equals(CaseAddressAutocomplete.FoldKey(item.Text), key, StringComparison.Ordinal));
+            return hit?.UseCount ?? 0;
+        }
+    }
+
+    private string SearchCss => "cw-summary-field__input cw-summary-field__textarea cw-addr-ac__ta";
+    private string SelectedBoxCss =>
+        "cw-summary-field__input cw-summary-field__textarea cw-addr-ac__ta cw-addr-ac__selected is-saved";
 
     protected override void OnParametersSet()
     {
         var incoming = Value ?? string.Empty;
         if (string.Equals(incoming, _lastExternal, StringComparison.Ordinal))
+        {
+            RefreshStatus(keepList: false);
             return;
-
-        // After Pick/Commit we set `_lastExternal` to the draft immediately; the parent
-        // Value can lag one render. Do not stomp `_draft` with that stale Value.
-        if (_focused
-            && string.Equals(_lastExternal, _draft, StringComparison.Ordinal)
-            && !string.Equals(incoming, _draft, StringComparison.Ordinal))
-            return;
+        }
 
         _lastExternal = incoming;
-        _draft = incoming;
+        if (HasSelection)
+            _search = string.Empty;
         RefreshStatus(keepList: false);
     }
 
-    private void OnFocusIn()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _focused = true;
-        RefreshStatus(keepList: true);
+        if (!_focusEditAfterSelect)
+            return;
+        _focusEditAfterSelect = false;
+        try
+        {
+            await Js.InvokeVoidAsync("eval", $"document.getElementById('{_editBtnId}')?.focus()");
+        }
+        catch { /* best effort */ }
     }
+
+    private void OnFocusIn() => _focused = true;
 
     private async Task OnFocusOut()
     {
-        if (_pickInFlight)
+        if (_pickInFlight || _dialogOpen)
             return;
-
         _focused = false;
         _listOpen = false;
         _activeIndex = -1;
-        await CommitDraftAsync();
+        // Spec: unpicked search text is discarded on blur.
+        _search = string.Empty;
+        RefreshStatus(keepList: false);
+        await Task.CompletedTask;
     }
 
-    private void OnInput(ChangeEventArgs e)
+    private void OnSearchInput(ChangeEventArgs e)
     {
-        _draft = e.Value?.ToString() ?? string.Empty;
+        _search = e.Value?.ToString() ?? string.Empty;
         RefreshStatus(keepList: true);
     }
 
-    private async Task OnChangeCommit(ChangeEventArgs e)
+    private async Task OnSearchKeyDown(KeyboardEventArgs e)
     {
-        _draft = e.Value?.ToString() ?? string.Empty;
-        await CommitDraftAsync();
-    }
-
-    private async Task OnKeyDown(KeyboardEventArgs e)
-    {
+        _preventEnter = false;
         if (!Enabled || ReadOnly)
             return;
 
@@ -141,8 +221,7 @@
 
         if (e.Key == "ArrowDown")
         {
-            if (!_listOpen)
-                RefreshStatus(keepList: true);
+            RefreshStatus(keepList: true);
             if (_hits.Count == 0)
                 return;
             _listOpen = true;
@@ -161,33 +240,38 @@
 
         if (e.Key == "Enter")
         {
+            _preventEnter = true;
             if (_listOpen && _activeIndex >= 0 && _activeIndex < _hits.Count)
             {
-                await PickAsync(_hits[_activeIndex].Text);
+                await SelectAsync(_hits[_activeIndex].Text);
+                return;
             }
-            // Otherwise allow newline (default textarea).
+
+            var q = CaseAddressAutocomplete.NormalizeDisplay(_search);
+            if (!string.IsNullOrEmpty(q)
+                && CaseAddressAutocomplete.IsExactSaved(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
+            {
+                await SelectAsync(q);
+            }
+            // Otherwise do nothing — no newline, no create.
         }
     }
 
-    private async Task ClearAsync()
-    {
-        _draft = string.Empty;
-        _listOpen = false;
-        _activeIndex = -1;
-        RefreshStatus(keepList: false);
-        await CommitDraftAsync();
-    }
-
-    private async Task PickAsync(string text)
+    private async Task SelectAsync(string text)
     {
         _pickInFlight = true;
         try
         {
-            _draft = CaseAddressAutocomplete.NormalizeDisplay(text) ?? string.Empty;
+            var normalized = CaseAddressAutocomplete.NormalizeDisplay(text);
+            _search = string.Empty;
             _listOpen = false;
             _activeIndex = -1;
+            _lastExternal = normalized;
+            _announce = "Selected " + normalized + ".";
+            _focusEditAfterSelect = true;
             RefreshStatus(keepList: false);
-            await CommitDraftAsync();
+            if (ValueChanged.HasDelegate)
+                await ValueChanged.InvokeAsync(string.IsNullOrEmpty(normalized) ? null : normalized);
         }
         finally
         {
@@ -195,19 +279,125 @@
         }
     }
 
-    private async Task CommitDraftAsync()
+    private async Task ClearAsync()
     {
-        var normalized = CaseAddressAutocomplete.NormalizeDisplay(_draft);
-        _draft = normalized;
-        _lastExternal = normalized;
+        _search = string.Empty;
+        _listOpen = false;
+        _activeIndex = -1;
+        _lastExternal = string.Empty;
+        _announce = FieldName + " cleared.";
         RefreshStatus(keepList: false);
         if (ValueChanged.HasDelegate)
-            await ValueChanged.InvokeAsync(string.IsNullOrEmpty(normalized) ? null : normalized);
+            await ValueChanged.InvokeAsync(null);
+        try
+        {
+            await Js.InvokeVoidAsync("eval", $"document.getElementById('{_inputId}')?.focus()");
+        }
+        catch { /* best effort */ }
+    }
+
+    private async Task OpenAddDialogAsync()
+    {
+        var typed = CaseAddressAutocomplete.NormalizeDisplay(_search);
+        // Already saved: select it instead of opening Add (no duplicate).
+        if (!string.IsNullOrEmpty(typed)
+            && CaseAddressAutocomplete.IsExactSaved(
+                typed,
+                Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
+        {
+            await SelectAsync(typed);
+            return;
+        }
+
+        _dialogMode = "add";
+        _dialogInitial = _search;
+        _dialogSaveError = null;
+        _dialogOpen = true;
+        _listOpen = false;
+    }
+
+    private Task OpenEditDialogAsync()
+    {
+        if (!HasSelection || !Enabled || ReadOnly)
+            return Task.CompletedTask;
+        _dialogMode = "edit";
+        _dialogInitial = SelectedText;
+        _dialogSaveError = null;
+        _dialogOpen = true;
+        return Task.CompletedTask;
+    }
+
+    private Task CloseDialogAsync()
+    {
+        _dialogOpen = false;
+        _dialogSaveError = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnDialogSaveAsync(string text)
+    {
+        _dialogSaveError = null;
+        try
+        {
+            if (string.Equals(_dialogMode, "edit", StringComparison.OrdinalIgnoreCase))
+            {
+                var previous = SelectedText;
+                if (RenameSaved.HasDelegate)
+                    await RenameSaved.InvokeAsync((previous, text));
+                _dialogOpen = false;
+                _announce = "Address updated.";
+                await SelectAsync(text);
+                return;
+            }
+
+            // Exact existing saved address: select only (do not TryAdd a duplicate).
+            if (CaseAddressAutocomplete.IsExactSaved(
+                    text,
+                    Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
+            {
+                _dialogOpen = false;
+                _search = string.Empty;
+                _announce = "Address selected.";
+                await SelectAsync(text);
+                return;
+            }
+
+            if (AddSaved.HasDelegate)
+                await AddSaved.InvokeAsync(text);
+            _dialogOpen = false;
+            _search = string.Empty;
+            _announce = "New address added and selected.";
+            await SelectAsync(text);
+        }
+        catch (Exception ex)
+        {
+            _dialogSaveError = ex.InnerException?.Message ?? ex.Message;
+            _dialogOpen = true;
+        }
     }
 
     private void RefreshStatus(bool keepList)
     {
-        var q = CaseAddressAutocomplete.NormalizeDisplay(_draft);
+        if (_suggestionsFailed)
+        {
+            _statusState = "new";
+            _statusText = "Addresses unavailable";
+            _listOpen = false;
+            return;
+        }
+
+        if (HasSelection)
+        {
+            _hits = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
+            _hitTotal = 0;
+            _listOpen = false;
+            _activeIndex = -1;
+            _statusState = "ok";
+            _statusText = "Saved address. Click it to edit, or × to choose another.";
+            return;
+        }
+
+        var q = CaseAddressAutocomplete.NormalizeDisplay(_search);
         if (string.IsNullOrEmpty(q))
         {
             _hits = Array.Empty<CaseAddressAutocomplete.SavedEntry>();
@@ -219,14 +409,17 @@
             return;
         }
 
-        var result = CaseAddressAutocomplete.Search(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>());
+        var result = CaseAddressAutocomplete.Search(
+            q,
+            Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>(),
+            excludeText: null);
         _hits = result.Items;
         _hitTotal = result.Total;
 
         if (CaseAddressAutocomplete.IsExactSaved(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
         {
             _statusState = "ok";
-            _statusText = "Saved address";
+            _statusText = "Saved address. Press Enter to select it.";
             _listOpen = false;
             _activeIndex = -1;
             return;
@@ -235,7 +428,7 @@
         if (_hits.Count > 0)
         {
             _statusState = string.Empty;
-            _statusText = $"{_hitTotal} saved address{(_hitTotal == 1 ? "" : "es")} match. Pick one, or keep typing a new address.";
+            _statusText = $"{_hitTotal} saved address{(_hitTotal == 1 ? "" : "es")} match. Pick one from the list.";
             _listOpen = keepList && _focused;
             if (!_listOpen)
                 _activeIndex = -1;
@@ -243,9 +436,7 @@
         }
 
         _statusState = "new";
-        _statusText = Required
-            ? "New address. It will be saved for next time when you create the application."
-            : "New address. It will be saved for next time when you save.";
+        _statusText = $"No saved address matches “{q}”. Use the + button to add it as a new address.";
         _listOpen = false;
         _activeIndex = -1;
     }
@@ -254,7 +445,7 @@
 
     private RenderFragment Highlight(string text) => builder =>
     {
-        var ranges = CaseAddressAutocomplete.HighlightRanges(text, _draft);
+        var ranges = CaseAddressAutocomplete.HighlightRanges(text, _search);
         if (ranges.Count == 0)
         {
             builder.AddContent(0, text);

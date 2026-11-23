@@ -16,12 +16,15 @@ public enum ApplicationProfileSavedLocationField
 
 public enum ApplicationProfileSavedLocationSource
 {
+    /// <summary>Unused — location autocomplete is officer-added only (no catalog).</summary>
+    [Obsolete("Location autocomplete does not use catalog lookup. Use User.")]
     Lookup = 0,
+    /// <summary>Officer-added via + dialog / Remember on save.</summary>
     User = 1,
 }
 
 /// <summary>
-/// Tenant saved Requested border zone / work permit location suggestions (shared across applications).
+/// Officer-added Requested border zone / work permit location suggestions (no catalog). Shared across applications.
 /// </summary>
 [Table("ApplicationProfileSavedLocations")]
 [DefaultClassOptions]
