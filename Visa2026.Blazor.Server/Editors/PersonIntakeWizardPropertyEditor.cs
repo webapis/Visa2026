@@ -18,44 +18,55 @@ namespace Visa2026.Blazor.Server.Editors;
 public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase, IComplexViewItem
 {
     private IObjectSpace? _objectSpace;
+    private XafApplication? _application;
+    private Guid? _boundPersonId;
 
     public PersonIntakeWizardPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model) { }
 
     public override PersonIntakeWizardModel ComponentModel => (PersonIntakeWizardModel)base.ComponentModel;
 
-    void IComplexViewItem.Setup(IObjectSpace objectSpace, XafApplication application) =>
-        _objectSpace = objectSpace;
-
-    protected override IComponentModel CreateComponentModel() => new PersonIntakeWizardModel
+    void IComplexViewItem.Setup(IObjectSpace objectSpace, XafApplication application)
     {
-        State = new PersonIntakeWizardState(),
-        SaveRequested = EventCallback.Factory.Create(this, SaveAsync)
-    };
+        _objectSpace = objectSpace;
+        _application = application;
+    }
+
+    protected override IComponentModel CreateComponentModel()
+    {
+        var model = new PersonIntakeWizardModel
+        {
+            State = new PersonIntakeWizardState(),
+            SaveRequested = EventCallback.Factory.Create(this, SaveAsync)
+        };
+        model.Application = _application;
+        return model;
+    }
 
     protected override void OnCurrentObjectChanged()
     {
         base.OnCurrentObjectChanged();
-        BindPerson();
+        _boundPersonId = null;
+        BindPerson(forceReloadChildren: true);
     }
 
     protected override void ReadValueCore()
     {
         base.ReadValueCore();
-        BindPerson();
+        BindPerson(forceReloadChildren: false);
     }
 
     protected override void RefreshReadOnly()
     {
         base.RefreshReadOnly();
-        BindPerson();
+        BindPerson(forceReloadChildren: false);
     }
 
     protected override object GetControlValueCore() => string.Empty;
 
     protected override void WriteValueCore() { }
 
-    private void BindPerson()
+    private void BindPerson(bool forceReloadChildren)
     {
         var model = ComponentModel;
         if (model == null)
@@ -63,10 +74,12 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
 
         Person? person;
         IObjectSpace? personSpace;
+        var openedFromIncompleteList = false;
         if (CurrentObject is PersonIntakeWizardHost host)
         {
             person = host.Person;
             personSpace = host.PersonObjectSpace;
+            openedFromIncompleteList = host.OpenedFromIncompleteList;
         }
         else
         {
@@ -75,9 +88,19 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
         }
 
         model.Person = person;
+        model.OwnerViewId = View?.Id;
         model.ObjectSpace = personSpace;
-        if (person != null)
-            model.State.LoadFromPerson(person);
+        model.Application = _application;
+        model.ShowIncompleteOverview = openedFromIncompleteList && person?.IsDataIncomplete == true;
+        if (person == null)
+            return;
+
+        var personId = person.ID;
+        var reloadChildren = forceReloadChildren || _boundPersonId != personId;
+        if (reloadChildren || model.Access == PersonIntakeWizardAccess.Unrestricted)
+            model.Access = PersonIntakeWizardAccess.ForCurrentUser(personSpace, person);
+        model.State.LoadFromPerson(person, reloadChildren: reloadChildren);
+        _boundPersonId = personId;
     }
 
     private Task SaveAsync()
@@ -100,12 +123,17 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
             objectSpace,
             person,
             model.State,
-            SecuritySystem.CurrentUserName ?? string.Empty);
+            SecuritySystem.CurrentUserName ?? string.Empty,
+            model.Access);
 
         model.StatusMessage = result.Message;
         model.IsStatusError = !result.Succeeded;
         if (result.Succeeded)
-            model.State.LoadFromPerson(person);
+        {
+            // A created person now has object-level rules (criteria) to evaluate.
+            model.Access = PersonIntakeWizardAccess.ForCurrentUser(objectSpace, person);
+            model.State.LoadFromPerson(person, reloadChildren: true, reloadPending: true);
+        }
 
         ReadValueCore();
         return Task.CompletedTask;

@@ -102,6 +102,15 @@ public static class VisaPreviewSlotOccupantKeys
         if (request?.OpenPreviewOnly != true)
             return key;
 
+        if (request.InlineFiles is { Count: > 0 })
+        {
+            var bytes = request.InlineFiles.Sum(file => (long)(file?.Content?.Length ?? 0));
+            var focusKey = string.IsNullOrWhiteSpace(request.FocusRecordKey)
+                ? "inline"
+                : request.FocusRecordKey.Trim();
+            return $"{key}|preview:inline:{focusKey}:{request.InlineFiles.Count}:{bytes}";
+        }
+
         var focus = !string.IsNullOrWhiteSpace(request.FocusSectionId)
             ? "section:" + request.FocusSectionId.Trim()
             : string.IsNullOrWhiteSpace(request.FocusRecordKey)

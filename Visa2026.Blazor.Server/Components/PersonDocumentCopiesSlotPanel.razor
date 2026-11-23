@@ -170,8 +170,11 @@
             .Where(id => id != Guid.Empty)
             .Distinct()
             .ToList() ?? new List<Guid>();
+        var inlineFiles = Request?.InlineFiles?
+            .Where(file => file?.Content is { Length: > 0 })
+            .ToList() ?? new List<ProgressLetterInlineFile>();
 
-        if (personIds.Count == 0)
+        if (personIds.Count == 0 && inlineFiles.Count == 0)
         {
             _personId = Guid.Empty;
             _snapshot = new PersonLinkedDocumentsSnapshot();
@@ -200,8 +203,11 @@
 
         _personId = Request?.UploadPersonId is Guid up && up != Guid.Empty
             ? up
-            : personIds[0];
-        ReloadSnapshot();
+            : personIds.Count > 0 ? personIds[0] : Guid.Empty;
+        if (personIds.Count > 0)
+            ReloadSnapshot();
+        else
+            _snapshot = new PersonLinkedDocumentsSnapshot();
         CaptureUploadContextFromRequest();
 
         if (_uploadMode)
@@ -209,6 +215,21 @@
 
         if (_previewOnlyMode && _pendingPreviewRequest == null && !_previewActive)
         {
+            if (inlineFiles.Count > 0)
+            {
+                _previewActive = true;
+                _previewOnlyEmpty = false;
+                _pendingPreviewRequest = new PersonDocumentCopiesInlinePreviewRequest
+                {
+                    RecordKey = Request?.FocusRecordKey?.Trim() ?? string.Empty,
+                    DisplayName = string.IsNullOrWhiteSpace(Request?.FocusDisplayName)
+                        ? inlineFiles[0].FileName
+                        : Request!.FocusDisplayName!,
+                    InlineFiles = inlineFiles,
+                };
+            }
+            else
+            {
             var sectionId = Request?.FocusSectionId?.Trim();
             if (!string.IsNullOrWhiteSpace(sectionId))
             {
@@ -257,6 +278,7 @@
                         : Request!.FocusDisplayName!;
                     CaptureUploadContextFromRequest();
                 }
+            }
             }
         }
     }

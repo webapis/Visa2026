@@ -5557,6 +5557,8 @@ button.lv-progress-step__files {
     gap: 1rem;
     padding: 0.25rem 0.5rem 1rem;
     color: var(--bs-body-color, #f4f5f7);
+    /* Native <select> popup follows OS/browser color-scheme. */
+    color-scheme: dark;
 }
 
 .person-intake-wizard__header {
@@ -5566,10 +5568,115 @@ button.lv-progress-step__files {
     gap: 1rem;
 }
 
+.person-intake-wizard__who {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.person-intake-wizard__avatar {
+    flex: 0 0 auto;
+    width: 3.6rem;
+    height: 4.6rem;
+    border-radius: 0.35rem;
+    border: 2px solid #f5c451;
+    background: rgba(245, 196, 81, 0.14);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.person-intake-wizard__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.person-intake-wizard__avatar-initials {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #fff8e1;
+}
+
+.person-intake-wizard__who-text {
+    min-width: 0;
+}
+
+.person-intake-wizard__who-initials {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f5c451;
+}
+
+.person-intake-wizard__who-name {
+    margin: 0.05rem 0 0.15rem;
+    font-size: 1.55rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #fff8e1;
+}
+
 .person-intake-wizard__title {
     margin: 0;
-    font-size: 1.35rem;
+    font-size: 0.95rem;
     font-weight: 600;
+    opacity: 0.85;
+}
+
+.person-intake-overview {
+    margin: 0 0 1rem;
+    padding: 1rem 1.15rem 1.15rem;
+    border-radius: 0.6rem;
+    border: 2px solid #f5c451;
+    background: linear-gradient(180deg, rgba(245, 196, 81, 0.22), rgba(245, 196, 81, 0.06));
+    box-shadow: 0 0 0 1px rgba(245, 196, 81, 0.35), 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.person-intake-overview__kicker {
+    margin: 0 0 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f5c451;
+}
+
+.person-intake-overview__names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2.5rem;
+}
+
+.person-intake-overview__name {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 10rem;
+}
+
+.person-intake-overview__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 236, 179, 0.8);
+}
+
+.person-intake-overview__value {
+    font-size: 2.15rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #fff8e1;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
 }
 
 .person-intake-wizard__sub {
@@ -5600,6 +5707,23 @@ button.lv-progress-step__files {
 .person-intake-wizard__status.is-ok {
     background: rgba(25, 135, 84, 0.15);
     border: 1px solid rgba(25, 135, 84, 0.35);
+}
+
+.person-intake-wizard__status.is-info {
+    background: rgba(31, 99, 198, 0.14);
+    border: 1px solid rgba(31, 99, 198, 0.4);
+}
+
+/* Card the role cannot edit (XAF Write / Create denied): inert blocks focus and clicks. */
+.person-intake-wizard__record-form[inert] {
+    opacity: 0.72;
+}
+
+.person-intake-wizard__record-form[inert] .pi-ac__clear,
+.person-intake-wizard__record-form[inert] .pi-ac__add,
+.person-intake-wizard__record-form[inert] .pi-ac__chev,
+.person-intake-wizard__record-form[inert] input[type="file"] {
+    display: none;
 }
 
 .person-intake-wizard__layout {
@@ -5659,6 +5783,13 @@ button.lv-progress-step__files {
     opacity: 0.72;
 }
 
+.person-intake-wizard__nav-item.is-optional .person-intake-wizard__nav-label,
+.person-intake-wizard__nav-item.is-optional .person-intake-wizard__nav-status {
+    color: #f5c451;
+    opacity: 1;
+    font-weight: 700;
+}
+
 .person-intake-wizard__panel {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 0.5rem;
@@ -5669,6 +5800,48 @@ button.lv-progress-step__files {
 .person-intake-wizard__panel-title {
     margin: 0 0 0.35rem;
     font-size: 1.1rem;
+}
+
+.person-intake-wizard__panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.person-intake-wizard__gear {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.person-intake-wizard__gear:hover,
+.person-intake-wizard__gear:focus-visible {
+    opacity: 1;
+    border-color: rgba(127, 127, 127, 0.4);
+}
+
+.person-intake-wizard__gear.is-on {
+    opacity: 1;
+    color: #6cb4ff;
+    border-color: rgba(108, 180, 255, 0.55);
+    background: rgba(108, 180, 255, 0.12);
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__gear.is-on {
+    color: #1f63c6;
+    border-color: rgba(31, 99, 198, 0.45);
+    background: rgba(31, 99, 198, 0.08);
 }
 
 .person-intake-wizard__panel-hint {
@@ -5692,13 +5865,104 @@ button.lv-progress-step__files {
 }
 
 .person-intake-wizard__input,
+.person-intake-wizard select,
 .person-intake-wizard__field-row select {
     width: 100%;
     padding: 0.4rem 0.55rem;
     border-radius: 0.35rem;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(0, 0, 0, 0.2);
-    color: inherit;
+    background-color: #1a1f2a;
+    color: #f3f4f6;
+    color-scheme: dark;
+}
+
+.person-intake-wizard .officer-date-edit-host,
+.person-intake-wizard .officer-date-edit,
+.person-intake-wizard .dxbl-date-edit {
+    width: 100%;
+}
+
+/* One field height across all wizard steps: text inputs, selects, lookups, date pickers. */
+.person-intake-wizard {
+    --pi-field-h: 2rem;
+}
+
+.person-intake-wizard input.person-intake-wizard__input,
+.person-intake-wizard select {
+    box-sizing: border-box;
+    height: var(--pi-field-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: normal;
+}
+
+.person-intake-wizard .pi-ac__box {
+    box-sizing: border-box;
+    height: var(--pi-field-h);
+    min-height: var(--pi-field-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.person-intake-wizard .pi-ac__chev,
+.person-intake-wizard .pi-ac__clear {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.person-intake-wizard .pi-ac__edit {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.person-intake-wizard .pi-ac__text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.person-intake-wizard .pi-ac__pen {
+    flex: 0 0 auto;
+}
+
+.person-intake-wizard .dxbl-date-edit.person-intake-wizard__input,
+.person-intake-wizard .officer-date-edit-host .dxbl-text-edit {
+    box-sizing: border-box;
+    height: var(--pi-field-h);
+    min-height: var(--pi-field-h);
+    padding: 0;
+}
+
+.person-intake-wizard .officer-date-edit-host .dxbl-text-edit input {
+    height: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.person-intake-wizard .officer-date-edit-host .dxbl-text-edit .dxbl-btn,
+.person-intake-wizard .officer-date-edit-host .dxbl-text-edit .dxbl-edit-btn {
+    height: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.person-intake-wizard__input option,
+.person-intake-wizard select option,
+.person-intake-wizard__field-row select option {
+    background-color: #1a1f2a;
+    color: #f3f4f6;
+}
+
+.person-intake-wizard__input option:checked,
+.person-intake-wizard select option:checked,
+.person-intake-wizard__field-row select option:checked {
+    background-color: #0d6efd;
+    color: #fff;
 }
 
 .person-intake-wizard__input.is-pending {
@@ -5722,6 +5986,23 @@ button.lv-progress-step__files {
     margin-bottom: 0.75rem;
 }
 
+.person-intake-wizard__other-card {
+    padding: 0.75rem;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 0.4rem;
+    margin-bottom: 0.85rem;
+}
+
+.person-intake-wizard__other-card .person-intake-wizard__other-row {
+    margin-bottom: 0;
+    padding: 0;
+    border: none;
+}
+
+.person-intake-wizard__other-card .person-intake-wizard__record-form {
+    margin-top: 0.75rem;
+}
+
 .person-intake-wizard__other-row {
     display: flex;
     justify-content: space-between;
@@ -5735,10 +6016,167 @@ button.lv-progress-step__files {
     opacity: 0.75;
 }
 
-.person-intake-wizard__passport-form {
+.person-intake-wizard__passport-form,
+.person-intake-wizard__record-form {
     display: grid;
     gap: 0.5rem;
     margin-top: 0.75rem;
+}
+
+.person-intake-wizard__field-row--top {
+    align-items: start;
+}
+
+.person-intake-wizard__dob-age {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: end;
+    width: 100%;
+}
+
+.person-intake-wizard__dob-age-date {
+    min-width: 0;
+}
+
+.person-intake-wizard__dob-age-calc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 4.5rem;
+    max-width: 5.5rem;
+}
+
+.person-intake-wizard__dob-age-label {
+    font-size: 0.72rem;
+    opacity: 0.7;
+    letter-spacing: 0.01em;
+}
+
+.person-intake-wizard__age-readonly {
+    text-align: center;
+    opacity: 0.85;
+    cursor: default;
+}
+
+@media (max-width: 700px) {
+    .person-intake-wizard__dob-age {
+        grid-template-columns: 1fr;
+    }
+
+    .person-intake-wizard__dob-age-calc {
+        max-width: none;
+    }
+}
+
+.person-intake-wizard__photo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    max-width: 9rem;
+}
+
+.person-intake-wizard__photo.is-pending {
+    opacity: 0.55;
+}
+
+.person-intake-wizard__photo-frame {
+    width: 7.1rem;
+    height: 9.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.25rem;
+    background: rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.person-intake-wizard__photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.person-intake-wizard__photo-empty {
+    font-size: 0.78rem;
+    opacity: 0.65;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.person-intake-wizard__photo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: center;
+}
+
+.person-intake-wizard__photo-upload {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.3rem;
+    background: rgba(13, 110, 253, 0.18);
+    cursor: pointer;
+    font-size: 0.82rem;
+    overflow: hidden;
+}
+
+.person-intake-wizard__photo-file {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__photo-frame {
+    background: #f3f5f8;
+    border-color: rgba(20, 32, 51, 0.18);
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__photo-upload {
+    background: #e8f1ff;
+    border-color: rgba(13, 110, 253, 0.28);
+    color: #142033;
+}
+
+.person-intake-wizard__copies {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.person-intake-wizard__copy-list {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.person-intake-wizard__copy-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.person-intake-wizard__btn--link {
+    background: transparent;
+    border: none;
+    color: #6ea8fe;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.person-intake-wizard__record-hint.is-error {
+    color: #f1aeb5;
+    opacity: 1;
 }
 
 .person-intake-wizard__record-hint {
@@ -5803,16 +6241,45 @@ button.lv-progress-step__files {
     color: #fff;
 }
 
+.dxbl-theme-fluent-mode-light .person-intake-wizard__who-name,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__avatar-initials {
+    color: #1a2332;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__avatar {
+    background: rgba(245, 196, 81, 0.35);
+}
+
 .dxbl-theme-fluent-mode-light .person-intake-wizard__panel {
     background: #f8f9fb;
     border-color: rgba(20, 32, 51, 0.12);
 }
 
+.dxbl-theme-fluent-mode-light .person-intake-wizard {
+    color-scheme: light;
+}
+
 .dxbl-theme-fluent-mode-light .person-intake-wizard__input,
+.dxbl-theme-fluent-mode-light .person-intake-wizard select,
 .dxbl-theme-fluent-mode-light .person-intake-wizard__field-row select {
-    background: #fff;
+    background-color: #fff;
     border-color: rgba(20, 32, 51, 0.16);
     color: #142033;
+    color-scheme: light;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__input option,
+.dxbl-theme-fluent-mode-light .person-intake-wizard select option,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__field-row select option {
+    background-color: #fff;
+    color: #142033;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__input option:checked,
+.dxbl-theme-fluent-mode-light .person-intake-wizard select option:checked,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__field-row select option:checked {
+    background-color: #0d6efd;
+    color: #fff;
 }
 
 .dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item {
@@ -6260,4 +6727,618 @@ button.state-preview-doc {
         font-weight: inherit;
         text-decoration: none;
     }
+}
+
+/* Person intake — stacked child-record cards */
+.person-intake-wizard__record-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+.person-intake-wizard__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.person-intake-wizard__card {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.5rem;
+    background: rgba(0, 0, 0, 0.18);
+    /* Visible so lookup suggestion lists can extend past the last field of a card. */
+    overflow: visible;
+}
+.person-intake-wizard__card.is-expanded {
+    border-color: rgba(59, 130, 246, 0.55);
+}
+.person-intake-wizard__card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.85rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+.person-intake-wizard__card-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+.person-intake-wizard__card-pill {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(61, 214, 140, 0.18);
+    color: #3dd68c;
+}
+.person-intake-wizard__card-pill.is-warn {
+    background: rgba(240, 113, 120, 0.18);
+    color: #f0a0a0;
+}
+.person-intake-wizard__card-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.75rem;
+}
+.person-intake-wizard__card-summary {
+    margin: 0;
+    padding: 0 0.85rem 0.75rem;
+    font-size: 0.82rem;
+    opacity: 0.75;
+}
+/* Identity / Work & address: same narrow controls as Passport cards */
+.person-intake-wizard__form-fields {
+    max-width: 40rem;
+}
+.person-intake-wizard__form-fields .person-intake-wizard__field-row {
+    grid-template-columns: minmax(8rem, 11rem) minmax(0, 22rem) auto;
+}
+.person-intake-wizard__form-fields .person-intake-wizard__input,
+.person-intake-wizard__form-fields select,
+.person-intake-wizard__form-fields .officer-date-edit-host,
+.person-intake-wizard__form-fields .officer-date-edit,
+.person-intake-wizard__form-fields .dxbl-date-edit,
+.person-intake-wizard__form-fields .person-intake-wizard__lookup-host,
+.person-intake-wizard__form-fields .person-intake-wizard__lookup,
+.person-intake-wizard__form-fields .person-intake-wizard__dob-age,
+.person-intake-wizard__form-fields .visa-family-lines-inline {
+    width: 100%;
+    max-width: 22rem;
+}
+.person-intake-wizard__form-fields .person-intake-wizard__photo {
+    max-width: 22rem;
+}
+@media (max-width: 700px) {
+    .person-intake-wizard__form-fields .person-intake-wizard__field-row {
+        grid-template-columns: 1fr;
+    }
+}
+.person-intake-wizard__record-form--grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.85rem 0.85rem 0.25rem;
+    margin-top: 0;
+    max-width: 40rem;
+}
+.person-intake-wizard__record-form--grid .person-intake-wizard__field-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+    gap: 0.6rem 1rem;
+    align-items: center;
+    margin: 0 0 0.75rem;
+    max-width: none;
+}
+.person-intake-wizard__record-form--grid .person-intake-wizard__field-row--top {
+    align-items: start;
+}
+.person-intake-wizard__record-form--grid .person-intake-wizard__field-row--full {
+    grid-column: auto;
+    max-width: none;
+}
+.person-intake-wizard__record-form--grid .person-intake-wizard__input,
+.person-intake-wizard__record-form--grid select,
+.person-intake-wizard__record-form--grid .officer-date-edit-host,
+.person-intake-wizard__record-form--grid .officer-date-edit,
+.person-intake-wizard__record-form--grid .dxbl-date-edit,
+.person-intake-wizard__record-form--grid .person-intake-wizard__lookup-host,
+.person-intake-wizard__record-form--grid .person-intake-wizard__lookup {
+    width: 100%;
+    max-width: 22rem;
+}
+.person-intake-wizard__record-form--grid .person-intake-wizard__copies {
+    max-width: 22rem;
+}
+.person-intake-wizard__btn--link.is-danger {
+    color: #f07178;
+}
+@media (max-width: 700px) {
+    .person-intake-wizard__record-form--grid .person-intake-wizard__field-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.person-intake-wizard__lookup,
+.person-intake-wizard__lookup.dxbl-combo-box,
+.person-intake-wizard .person-intake-wizard__lookup {
+    width: 100%;
+    max-width: 22rem;
+}
+/* Wizard lookup fields: search-and-select (same behavior as AddressAutocompleteField, one line high). */
+.person-intake-wizard .pi-ac {
+    position: relative;
+    width: 100%;
+    max-width: 22rem;
+    min-width: 0;
+}
+.pi-ac__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.35rem;
+    width: 100%;
+}
+.pi-ac__field {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.pi-ac__box {
+    display: block;
+    width: 100%;
+    min-height: 2rem;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.3rem 1.9rem 0.3rem 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0.35rem;
+    background: #1a1f2a;
+    color: #f3f4f6;
+    font: inherit;
+    line-height: 1.35;
+    position: relative;
+}
+.pi-ac__input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.28);
+}
+.pi-ac__input::placeholder {
+    color: rgba(243, 244, 246, 0.42);
+    opacity: 1;
+}
+.pi-ac__input:disabled {
+    cursor: not-allowed;
+}
+.pi-ac__box.is-saved {
+    border-color: #2fa36b;
+}
+.person-intake-wizard .person-intake-wizard__input.is-filled,
+.person-intake-wizard .dxbl-text-edit.is-filled {
+    --dxbl-text-edit-border-color: #2fa36b;
+    border-color: #2fa36b;
+}
+.pi-ac__chev {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.6rem;
+    font-size: 0.7rem;
+    color: rgba(243, 244, 246, 0.55);
+    pointer-events: none;
+}
+.pi-ac__edit {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.pi-ac__edit:hover .pi-ac__text,
+.pi-ac__edit:focus-visible .pi-ac__text {
+    text-decoration: underline;
+}
+.pi-ac__edit:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+.pi-ac__text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.pi-ac__pen {
+    margin-left: 0.35rem;
+    vertical-align: -1px;
+    color: #9cc2ff;
+}
+.pi-ac__clear {
+    position: absolute;
+    top: 0.32rem;
+    right: 0.35rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(243, 244, 246, 0.7);
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+.pi-ac__clear:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.pi-ac__add {
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0.35rem;
+    background: #2c3342;
+    color: #e8eaef;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+.pi-ac__add:not(:disabled):hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+.pi-ac__add:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+.pi-ac__list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 40;
+    max-height: 15.75rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.4rem;
+    background: #2a2e38;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+}
+.pi-ac__option {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.38rem 0.65rem;
+    cursor: pointer;
+}
+.pi-ac__option:hover,
+.pi-ac__option.is-active {
+    background: rgba(59, 130, 246, 0.28);
+}
+.pi-ac__option-main {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.pi-ac__option mark {
+    background: rgba(245, 196, 81, 0.35);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.pi-ac__meta {
+    flex: none;
+    font-size: 0.75rem;
+    color: rgba(243, 244, 246, 0.6);
+    white-space: nowrap;
+}
+.pi-ac__meta.is-new {
+    color: #f5c451;
+}
+.pi-ac__foot {
+    margin-top: 0.2rem;
+    padding: 0.35rem 0.65rem 0.2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.72rem;
+    color: rgba(243, 244, 246, 0.6);
+}
+.pi-ac {
+    position: relative;
+}
+/* Floats under the box so focusing a lookup never pushes the rows below it. */
+.pi-ac__status {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 35;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.3rem;
+    background: #1b212c;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    font-size: 0.74rem;
+    line-height: 1.3;
+    color: rgba(243, 244, 246, 0.72);
+    pointer-events: none;
+}
+.dxbl-theme-fluent-mode-light .pi-ac__status {
+    background: #fff;
+    border-color: rgba(20, 32, 51, 0.15);
+    box-shadow: 0 6px 16px rgba(20, 32, 51, 0.15);
+}
+.pi-ac__status[data-state="ok"] {
+    color: #7fd6a9;
+}
+.pi-ac__status[data-state="info"] {
+    color: #6cb4ff;
+}
+.pi-ac.is-pending .pi-ac__box {
+    opacity: 0.55;
+    border-color: rgba(245, 196, 81, 0.55);
+}
+.pi-ac__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+.dxbl-theme-fluent-mode-light .pi-ac__box,
+.dxbl-theme-fluent-mode-light .pi-ac__add {
+    background: #fff;
+    color: #1a2332;
+    border-color: rgba(20, 32, 51, 0.22);
+}
+.dxbl-theme-fluent-mode-light .pi-ac__box.is-saved {
+    border-color: #17804f;
+}
+.dxbl-theme-fluent-mode-light .person-intake-wizard .person-intake-wizard__input.is-filled,
+.dxbl-theme-fluent-mode-light .person-intake-wizard .dxbl-text-edit.is-filled {
+    --dxbl-text-edit-border-color: #17804f;
+    border-color: #17804f;
+}
+.dxbl-theme-fluent-mode-light .pi-ac__input::placeholder {
+    color: rgba(26, 35, 50, 0.45);
+}
+.dxbl-theme-fluent-mode-light .pi-ac__list {
+    background: #fff;
+    border-color: rgba(20, 32, 51, 0.18);
+    box-shadow: 0 10px 26px rgba(20, 32, 51, 0.18);
+}
+.dxbl-theme-fluent-mode-light .pi-ac__meta,
+.dxbl-theme-fluent-mode-light .pi-ac__foot,
+.dxbl-theme-fluent-mode-light .pi-ac__status,
+.dxbl-theme-fluent-mode-light .pi-ac__chev,
+.dxbl-theme-fluent-mode-light .pi-ac__clear {
+    color: rgba(26, 35, 50, 0.65);
+}
+.dxbl-theme-fluent-mode-light .pi-ac__status[data-state="ok"] {
+    color: #17804f;
+}
+.dxbl-theme-fluent-mode-light .pi-ac__status[data-state="info"] {
+    color: #1f63c6;
+}
+.dxbl-theme-fluent-mode-light .pi-ac__pen {
+    color: #1f63c6;
+}
+
+/* Person intake lookup add / edit dialog (replaces the XAF DetailView popup). */
+/* Record steps (Passports, Education, Salaries, Position history): native-style nested list + detail popup. */
+.pi-lv {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.pi-lv__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2rem;
+}
+.pi-lv__icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    -webkit-mask: var(--pi-lv-icon) center / contain no-repeat;
+    mask: var(--pi-lv-icon) center / contain no-repeat;
+}
+.pi-lv__icon--new {
+    --pi-lv-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z'/%3E%3C/svg%3E");
+}
+.pi-lv__icon--delete {
+    --pi-lv-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z'/%3E%3C/svg%3E");
+}
+.pi-lv__confirm {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(240, 113, 120, 0.45);
+    border-radius: 0.35rem;
+    background: rgba(240, 113, 120, 0.08);
+    font-size: 0.85rem;
+}
+.pi-lv__grid .dxbl-grid-table > tbody > tr {
+    cursor: pointer;
+}
+.pi-dlg.pi-dlg--record {
+    top: 8vh;
+    left: 0;
+    right: 0;
+    transform: none;
+    margin: 0 auto;
+    width: min(44rem, calc(100vw - 2rem));
+    max-height: none;
+    overflow: visible;
+}
+/* Keep the record popup in the main column so the preview slot stays usable. */
+#visa-app-shell.visa-app-shell--preview-open .pi-dlg-backdrop {
+    right: var(--visa-preview-slot-width, var(--visa-preview-slot-default));
+}
+#visa-app-shell.visa-app-shell--preview-open .pi-dlg.pi-dlg--record {
+    right: var(--visa-preview-slot-width, var(--visa-preview-slot-default));
+    width: min(44rem, calc(100vw - var(--visa-preview-slot-width, var(--visa-preview-slot-default)) - 2rem));
+}
+.pi-dlg--record .pi-dlg__body {
+    padding-top: 0.6rem;
+}
+
+.pi-dlg-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1990;
+    background: rgba(8, 12, 20, 0.55);
+}
+.pi-dlg {
+    position: fixed;
+    top: 18vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    width: min(28rem, calc(100vw - 2rem));
+    max-height: 76vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.6rem;
+    background: #232a37;
+    color: #e8eaef;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+}
+.pi-dlg__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem 0.4rem;
+}
+.pi-dlg__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.pi-dlg__x {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: inherit;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.pi-dlg__x:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+.pi-dlg__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.3rem 1rem 0.6rem;
+}
+.pi-dlg__label {
+    margin-top: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.pi-dlg__input {
+    width: 100%;
+    min-height: 2rem;
+    padding: 0.35rem 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.35rem;
+    background: #1b212c;
+    color: inherit;
+    font: inherit;
+}
+.pi-dlg__input:focus {
+    outline: 2px solid #6cb4ff;
+    outline-offset: 1px;
+}
+.pi-dlg__input[aria-invalid="true"] {
+    border-color: #f07b7b;
+}
+.pi-dlg__textarea {
+    resize: vertical;
+}
+.pi-dlg__check {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+}
+.pi-dlg__hint {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    color: rgba(243, 244, 246, 0.62);
+}
+.pi-dlg__err {
+    min-height: 1.1em;
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: #f07b7b;
+}
+.pi-dlg__foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem 0.9rem;
+}
+.pi-dlg__btn {
+    min-height: 2rem;
+    padding: 0.3rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.35rem;
+    background: #2c3342;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.pi-dlg__btn--primary {
+    border-color: #1f63c6;
+    background: #1f63c6;
+    color: #fff;
+}
+.pi-dlg__btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+.dxbl-theme-fluent-mode-light .pi-dlg-backdrop {
+    background: rgba(20, 32, 51, 0.35);
+}
+.dxbl-theme-fluent-mode-light .pi-dlg {
+    background: #fff;
+    color: #1a2332;
+    border-color: rgba(20, 32, 51, 0.18);
+    box-shadow: 0 18px 48px rgba(20, 32, 51, 0.25);
+}
+.dxbl-theme-fluent-mode-light .pi-dlg__input,
+.dxbl-theme-fluent-mode-light .pi-dlg__btn {
+    background: #fff;
+    border-color: rgba(20, 32, 51, 0.25);
+}
+.dxbl-theme-fluent-mode-light .pi-dlg__btn--primary {
+    background: #1f63c6;
+    border-color: #1f63c6;
+    color: #fff;
+}
+.dxbl-theme-fluent-mode-light .pi-dlg__x:hover {
+    background: rgba(20, 32, 51, 0.08);
+}
+.dxbl-theme-fluent-mode-light .pi-dlg__hint {
+    color: rgba(26, 35, 50, 0.65);
+}
+.dxbl-theme-fluent-mode-light .pi-dlg__err {
+    color: #b42318;
 }

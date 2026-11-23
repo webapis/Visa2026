@@ -108,6 +108,7 @@
     private string _activeRecordKey = string.Empty;
     private string _activeSectionId = string.Empty;
     private IReadOnlyList<Guid> _activePersonIds = Array.Empty<Guid>();
+    private IReadOnlyList<ProgressLetterInlineFile> _inlineFiles = Array.Empty<ProgressLetterInlineFile>();
     private string _previewHeaderLabel = string.Empty;
     private DocumentCopyPrintLayout _printLayout;
     private string _previewLoadingLabel = string.Empty;
@@ -151,7 +152,10 @@
             .Distinct()
             .ToList() ?? [];
         var isSectionPreview = !string.IsNullOrWhiteSpace(sectionId) && personIds.Count > 0;
-        if (!isSectionPreview && string.IsNullOrWhiteSpace(request.RecordKey))
+        _inlineFiles = request.InlineFiles?
+            .Where(file => file?.Content is { Length: > 0 })
+            .ToList() ?? new List<ProgressLetterInlineFile>();
+        if (!isSectionPreview && _inlineFiles.Count == 0 && string.IsNullOrWhiteSpace(request.RecordKey))
             return;
 
         if (isSectionPreview)
@@ -213,6 +217,22 @@
             _previewHeaderLabel,
             () =>
             {
+                if (_inlineFiles.Count > 0)
+                {
+                    if (!FileAccess.TryGetMergedInlinePdf(
+                            _inlineFiles,
+                            _activeRecordKey,
+                            _previewHeaderLabel,
+                            out var inlineResult,
+                            _printLayout)
+                        || inlineResult == null)
+                    {
+                        return (null, null, PreviewError);
+                    }
+
+                    return (inlineResult.Content, inlineResult.FileName, null);
+                }
+
                 if (!string.IsNullOrWhiteSpace(_activeSectionId) && _activePersonIds.Count > 0)
                 {
                     if (!FileAccess.TryGetMergedSectionPdf(
@@ -339,6 +359,7 @@
         _error = string.Empty;
         _loading = false;
         _activeRecordKey = string.Empty;
+        _inlineFiles = Array.Empty<ProgressLetterInlineFile>();
         _previewHeaderLabel = string.Empty;
         _printLayout = default;
         _previewLoadingLabel = string.Empty;

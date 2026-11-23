@@ -777,7 +777,7 @@
             <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="3">
               <LayoutItem Id="MedicalRecords" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="4">
+            <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="4" Removed="True">
               <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
             </LayoutGroup>
             <LayoutGroup Id="Documents" ShowCaption="True" Caption="CV &amp; personal files" Index="5" RelativeSize="100" IsNewNode="True">
@@ -886,7 +886,7 @@
               <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="1" IsNewNode="True">
                 <LayoutItem Id="MedicalRecords" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="2" IsNewNode="True">
+              <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="2" IsNewNode="True" Removed="True">
                 <LayoutItem Id="AddressesOfResidence" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
               <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="3" IsNewNode="True">

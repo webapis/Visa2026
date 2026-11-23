@@ -22,23 +22,31 @@ namespace Visa2026.Module.DatabaseUpdate
             if (navigationItems["People"] is IModelNavigationItem legacyPeopleGroup)
                 legacyPeopleGroup.Remove();
 
-            EnsureTopLevelPersonNavigation(
+            EnsurePersonRosterGroupNavigation(
                 navigationItems,
                 modelViews,
-                navItemId: "Employees",
-                listViewId: "Person_ListView_Employees",
-                criteria: PersonRoleHelper.EmployeeCriteria,
-                caption: "Employees",
+                groupNavId: PersonRosterListViewIds.NavEmployees,
+                allListViewId: PersonRosterListViewIds.Employees,
+                incompleteListViewId: PersonRosterListViewIds.EmployeesIncomplete,
+                roleCriteria: PersonRoleHelper.EmployeeCriteria,
+                incompleteCriteria: PersonRosterListViewIds.EmployeesIncompleteCriteria,
+                groupCaption: "Employees",
+                allCaption: "All",
+                incompleteCaption: "Incomplete",
                 imageName: "BO_Employee",
                 index: 0);
 
-            EnsureTopLevelPersonNavigation(
+            EnsurePersonRosterGroupNavigation(
                 navigationItems,
                 modelViews,
-                navItemId: "FamilyMembers",
-                listViewId: "Person_ListView_FamilyMembers",
-                criteria: PersonRoleHelper.FamilyMemberCriteria,
-                caption: "Family Members",
+                groupNavId: PersonRosterListViewIds.NavFamilyMembers,
+                allListViewId: PersonRosterListViewIds.FamilyMembers,
+                incompleteListViewId: PersonRosterListViewIds.FamilyMembersIncomplete,
+                roleCriteria: PersonRoleHelper.FamilyMemberCriteria,
+                incompleteCriteria: PersonRosterListViewIds.FamilyMembersIncompleteCriteria,
+                groupCaption: "Family Members",
+                allCaption: "All",
+                incompleteCaption: "Incomplete",
                 imageName: "BO_Contact",
                 index: 1);
 
@@ -145,6 +153,53 @@ namespace Visa2026.Module.DatabaseUpdate
                 item.Visible = false;
         }
 
+        private static void EnsurePersonRosterGroupNavigation(
+            IModelNavigationItems navigationItems,
+            IModelViews modelViews,
+            string groupNavId,
+            string allListViewId,
+            string incompleteListViewId,
+            string roleCriteria,
+            string incompleteCriteria,
+            string groupCaption,
+            string allCaption,
+            string incompleteCaption,
+            string imageName,
+            int index)
+        {
+            var allView = EnsureListView(modelViews, allListViewId, "Person_ListView", roleCriteria);
+            // Incomplete ListViews: PersonIncompleteRosterListViewSync (ModelMember-safe columns).
+            var incompleteView = modelViews[incompleteListViewId] as IModelListView;
+            if (allView == null || incompleteView == null)
+                return;
+
+            allView.Caption = groupCaption;
+            incompleteView.Caption = incompleteCaption;
+            incompleteView.Criteria = incompleteCriteria;
+            if (allView.DetailView != null)
+                incompleteView.DetailView = allView.DetailView;
+
+            var group = navigationItems[groupNavId] ?? navigationItems.AddNode<IModelNavigationItem>(groupNavId);
+            group.Caption = groupCaption;
+            group.ImageName = imageName;
+            group.Index = index;
+            // Folder only — All / Incomplete are the clickable leaves.
+            group.View = null;
+
+            var allNav = group.Items[PersonRosterListViewIds.NavAll]
+                ?? group.Items.AddNode<IModelNavigationItem>(PersonRosterListViewIds.NavAll);
+            allNav.View = allView;
+            allNav.Caption = allCaption;
+            allNav.ImageName = imageName;
+            allNav.Index = 0;
+
+            var incompleteNav = group.Items[PersonRosterListViewIds.NavIncomplete]
+                ?? group.Items.AddNode<IModelNavigationItem>(PersonRosterListViewIds.NavIncomplete);
+            incompleteNav.View = incompleteView;
+            incompleteNav.Caption = incompleteCaption;
+            incompleteNav.ImageName = "Action_Validation_Warning";
+            incompleteNav.Index = 1;
+        }
         private static void EnsureTopLevelPersonNavigation(
             IModelNavigationItems navigationItems,
             IModelViews modelViews,
@@ -480,8 +535,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     existingVisitorListView.DetailView = visitorDetailViewForList;
             }
 
+            PersonIncompleteRosterListViewSync.EnsureAll(modelViews);
+
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_Employees");
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_FamilyMembers");
+            HideCurrentRejectionItemColumn(modelViews, PersonRosterListViewIds.EmployeesIncomplete);
+            HideCurrentRejectionItemColumn(modelViews, PersonRosterListViewIds.FamilyMembersIncomplete);
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_TemporaryVisitors");
 
             if (node is ModelNode viewsNode && viewsNode.Root is IModelApplication modelApplication)
@@ -569,6 +628,9 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             foreach (var sourceColumn in source.Columns)
             {
+                if (string.IsNullOrWhiteSpace(sourceColumn.PropertyName))
+                    continue;
+
                 var targetColumn = target.Columns[sourceColumn.Id] ?? target.Columns.AddNode<IModelColumn>(sourceColumn.Id);
                 targetColumn.PropertyName = sourceColumn.PropertyName;
                 targetColumn.Index = sourceColumn.Index;

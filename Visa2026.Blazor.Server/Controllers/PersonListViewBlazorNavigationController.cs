@@ -1,16 +1,16 @@
 using System.ComponentModel;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.SystemModule;
-using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.PersonIntake;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Blazor list row open: Employees / Family members / Temporary visitors use the native typed Person DetailView.
-/// New still opens the intake wizard via <c>PersonListViewController</c>.
+/// Blazor list row open: Employees / Family members open the intake wizard (create and edit).
+/// Temporary visitors keep the native typed Person DetailView.
 /// </summary>
 public sealed class PersonListViewBlazorNavigationController : ViewController<ListView>
 {
@@ -18,7 +18,7 @@ public sealed class PersonListViewBlazorNavigationController : ViewController<Li
 
     public PersonListViewBlazorNavigationController()
     {
-        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers;Person_ListView_TemporaryVisitors";
+        TargetViewId = PersonRosterListViewIds.Employees + ";" + PersonRosterListViewIds.EmployeesIncomplete + ";" + PersonRosterListViewIds.FamilyMembers + ";" + PersonRosterListViewIds.FamilyMembersIncomplete + ";" + PersonRosterListViewIds.TemporaryVisitors;
     }
 
     protected override void OnActivated()
@@ -48,16 +48,38 @@ public sealed class PersonListViewBlazorNavigationController : ViewController<Li
         if (View.ObjectSpace.IsNewObject(person))
             return;
 
+        if (PersonRosterListViewIds.IsIntakeWizardList(View.Id))
+        {
+            var wizard = PersonIntakeWizardAccess.IsWizardEnabled(View.ObjectSpace)
+                ? PersonIntakeWizardOpenHelper.OpenExisting(
+                    Application,
+                    person,
+                    openedFromIncompleteList: PersonRosterListViewIds.IsIncompleteRoster(View.Id))
+                : PersonIntakeWizardOpenHelper.OpenNativeExisting(Application, person);
+            if (wizard == null)
+                return;
+
+            e.Handled = true;
+            Application.ShowViewStrategy.ShowView(
+                new ShowViewParameters(wizard)
+                {
+                    TargetWindow = TargetWindow.Current
+                },
+                new ShowViewSource(Frame, null));
+            return;
+        }
+
+        // Temporary visitors: native typed DetailView (unchanged).
         PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
 
         string detailViewId = PersonDetailViewModelHelper.ResolveDetailViewId(Application, View.Id, person);
         if (detailViewId == PersonDetailViewIds.Default)
             return;
 
-        if (Application is not BlazorApplication blazorApplication)
+        if (Application is not DevExpress.ExpressApp.Blazor.BlazorApplication blazorApplication)
             return;
 
-        NavigationManager? navigationManager = blazorApplication.ServiceProvider?.GetService<NavigationManager>();
+        var navigationManager = blazorApplication.ServiceProvider?.GetService<Microsoft.AspNetCore.Components.NavigationManager>();
         if (navigationManager == null)
             return;
 

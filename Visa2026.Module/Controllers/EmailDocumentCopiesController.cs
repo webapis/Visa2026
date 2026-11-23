@@ -11,6 +11,8 @@ using Visa2026.Module.BusinessObjects.Email;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.EmailDocumentCopies;
 
+using Visa2026.Module;
+
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
@@ -20,13 +22,15 @@ namespace Visa2026.Module.Controllers;
 /// </summary>
 public sealed class EmailDocumentCopiesController : ViewController
 {
-    public const string EmployeesListViewId = "Person_ListView_Employees";
-    public const string FamilyMembersListViewId = "Person_ListView_FamilyMembers";
+    public const string EmployeesListViewId = PersonRosterListViewIds.Employees;
+    public const string FamilyMembersListViewId = PersonRosterListViewIds.FamilyMembers;
 
     private static readonly string PersonTargetViewIds = string.Join(';', new[]
     {
-        EmployeesListViewId,
-        FamilyMembersListViewId,
+        PersonRosterListViewIds.Employees,
+        PersonRosterListViewIds.EmployeesIncomplete,
+        PersonRosterListViewIds.FamilyMembers,
+        PersonRosterListViewIds.FamilyMembersIncomplete,
         PersonDetailViewIds.Employee,
         PersonDetailViewIds.FamilyMember,
         PersonDetailViewIds.Default,

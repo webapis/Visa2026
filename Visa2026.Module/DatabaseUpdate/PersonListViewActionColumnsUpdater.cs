@@ -1,21 +1,24 @@
+using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Person typed ListViews: dossier + document-copies icon columns before Full Name.
+/// Incomplete roster lists are rebuilt from All after columns are finalized.
 /// </summary>
 public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
     private static readonly string[] TargetViewIds =
     [
-        "Person_ListView_Employees",
-        "Person_ListView_FamilyMembers",
-        "Person_ListView_TemporaryVisitors",
+        PersonRosterListViewIds.Employees,
+        PersonRosterListViewIds.FamilyMembers,
+        PersonRosterListViewIds.TemporaryVisitors,
     ];
 
     public override void UpdateNode(ModelNode node)
@@ -29,7 +32,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             // Roster grids page in the database. Client mode loaded every person before the first row painted.
             listView.DataAccessMode = CollectionSourceDataAccessMode.Server;
 
-            var employees = viewId == "Person_ListView_Employees";
+            var employees = viewId == PersonRosterListViewIds.Employees;
             EnsureActionColumns(listView, includeDocumentCopies: !employees);
 
             HideColumn(listView, nameof(Person.Gender));
@@ -47,12 +50,12 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             }
             else
             {
-                var temporary = viewId == "Person_ListView_TemporaryVisitors";
+                var temporary = viewId == PersonRosterListViewIds.TemporaryVisitors;
                 EnsureEducationColumns(listView, temporary ? 10 : 12);
                 EnsureActiveDocumentColumns(listView);
             }
 
-            if (viewId == "Person_ListView_FamilyMembers")
+            if (viewId == PersonRosterListViewIds.FamilyMembers)
             {
                 EnsureColumn(listView, nameof(Person.PersonalNumber), 3, 120, "Personal Number");
                 EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 11, 166, null);
@@ -62,7 +65,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
                 if (archived != null)
                     archived.Index = 19;
             }
-            else if (viewId == "Person_ListView_TemporaryVisitors")
+            else if (viewId == PersonRosterListViewIds.TemporaryVisitors)
             {
                 EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 15, 166, null);
                 EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 16, 220, null);
@@ -71,6 +74,8 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
                     archived.Index = 17;
             }
         }
+
+        PersonIncompleteRosterListViewSync.EnsureAll(views);
     }
 
     /// <summary>
@@ -93,7 +98,7 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
     /// <summary>Family members and temporary visitors: the same three document stacks, before Archived.</summary>
     private static void EnsureActiveDocumentColumns(IModelListView listView)
     {
-        var temporary = string.Equals(listView.Id, "Person_ListView_TemporaryVisitors", StringComparison.Ordinal);
+        var temporary = string.Equals(listView.Id, PersonRosterListViewIds.TemporaryVisitors, StringComparison.Ordinal);
         var start = temporary ? 12 : 14;
         EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), start, 193, null);
         EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), start + 1, 164, null);

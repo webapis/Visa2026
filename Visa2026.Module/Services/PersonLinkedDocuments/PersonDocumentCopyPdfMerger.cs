@@ -475,6 +475,53 @@ public sealed class PersonDocumentCopyPdfMerger
         return true;
     }
 
+    /// <summary>
+    /// Merges scans the caller already has in memory (person intake wizard, including files not saved yet).
+    /// </summary>
+    public bool TryBuildMergedPdfFromBytes(
+        IReadOnlyList<(string FileName, byte[] Content)> files,
+        string recordKey,
+        string recordLabel,
+        out byte[]? content,
+        out string? fileName,
+        DocumentCopyPrintLayout? printLayout = null)
+    {
+        content = null;
+        fileName = null;
+        if (files == null || files.Count == 0)
+            return false;
+
+        var layout = printLayout ?? DocumentCopyPrintLayout.DefaultFor(recordKey ?? string.Empty);
+        var pdfStreams = new List<MemoryStream>();
+        try
+        {
+            foreach (var (name, bytes) in files)
+            {
+                if (bytes == null || bytes.Length == 0)
+                    continue;
+                if (!TryCreateMergeSlicePdfStream(bytes, name, recordKey ?? string.Empty, layout, out var pdfStream))
+                    continue;
+                pdfStreams.Add(pdfStream);
+            }
+
+            if (pdfStreams.Count == 0)
+                return false;
+
+            using var merged = new MemoryStream();
+            SupportingDocumentsPdfSharpHelper.MergePdfStreams(pdfStreams, merged);
+            content = merged.ToArray();
+            fileName = pdfStreams.Count == 1
+                ? SanitizeFileName(Path.GetFileNameWithoutExtension(files[0].FileName)) + ".pdf"
+                : SanitizeFileName(string.IsNullOrWhiteSpace(recordLabel) ? "person-document-copies" : recordLabel) + ".pdf";
+            return content.Length > 0;
+        }
+        finally
+        {
+            foreach (var stream in pdfStreams)
+                stream.Dispose();
+        }
+    }
+
     private bool TryCreateMergeSlicePdfStream(
         byte[] content,
         string sourceFileName,

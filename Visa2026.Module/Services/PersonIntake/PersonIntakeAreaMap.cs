@@ -14,6 +14,7 @@ internal static class PersonIntakeAreaMap
         [PersonPendingTargets.CountryOfBirth] = PersonIncompleteDataLabels.PersonalData,
         [PersonPendingTargets.Nationality] = PersonIncompleteDataLabels.PersonalData,
         [PersonPendingTargets.MaritalStatus] = PersonIncompleteDataLabels.PersonalData,
+        [PersonPendingTargets.VisaApplicationFamilyMembersText] = PersonIncompleteDataLabels.PersonalData,
         [PersonPendingTargets.ForeignAddress] = PersonIncompleteDataLabels.PersonalData,
         [PersonPendingTargets.ForeignAddressCountry] = PersonIncompleteDataLabels.PersonalData,
         [PersonPendingTargets.ProjectContract] = PersonIncompleteDataLabels.PersonalData,

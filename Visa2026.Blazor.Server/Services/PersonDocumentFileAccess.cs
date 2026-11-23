@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.PersonLinkedDocuments;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Services;
 
@@ -42,6 +43,38 @@ public sealed class PersonDocumentFileAccess
             return false;
 
         if (!pdfMerger.TryBuildMergedPdf(personId, recordKey, record.RecordLabel, out var content, out var fileName, printLayout)
+            || content == null
+            || content.Length == 0
+            || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        result = new ApplicationItemDocumentFileResult
+        {
+            Content = content,
+            FileName = fileName,
+            ContentType = "application/pdf"
+        };
+        return true;
+    }
+
+    public bool TryGetMergedInlinePdf(
+        IReadOnlyList<ProgressLetterInlineFile> files,
+        string recordKey,
+        string recordLabel,
+        out ApplicationItemDocumentFileResult? result,
+        DocumentCopyPrintLayout? printLayout = null)
+    {
+        result = null;
+        var payloads = files?
+            .Where(file => file?.Content is { Length: > 0 })
+            .Select(file => (file.FileName, file.Content))
+            .ToList();
+        if (payloads == null || payloads.Count == 0)
+            return false;
+
+        if (!pdfMerger.TryBuildMergedPdfFromBytes(payloads, recordKey, recordLabel, out var content, out var fileName, printLayout)
             || content == null
             || content.Length == 0
             || string.IsNullOrWhiteSpace(fileName))

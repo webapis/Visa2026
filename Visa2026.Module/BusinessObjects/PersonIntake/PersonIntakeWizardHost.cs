@@ -33,6 +33,10 @@ public class PersonIntakeWizardHost : NonPersistentBaseObject
     [Browsable(false)]
     public IObjectSpace? PersonObjectSpace { get; set; }
 
+    /// <summary>True when this wizard was opened from Employees or Family Members → Incomplete.</summary>
+    [Browsable(false)]
+    public bool OpenedFromIncompleteList { get; set; }
+
     [VisibleInListView(false)]
     [VisibleInLookupListView(false)]
     [ModelDefault("AllowEdit", "True")]

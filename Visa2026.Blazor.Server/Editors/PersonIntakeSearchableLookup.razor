@@ -1,0 +1,623 @@
+@using DevExpress.ExpressApp
+@using DevExpress.ExpressApp.Security
+@using DevExpress.Persistent.BaseImpl.EF
+@using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.PersonIntake
+
+<div class="pi-ac @(Interactive ? null : "is-disabled") @(PendingCss)" @onfocusin="OnFocusIn" @onfocusout="OnFocusOut">
+    <div class="pi-ac__row">
+        <div class="pi-ac__field">
+            @if (HasSelection)
+            {
+                <div class="pi-ac__box is-saved">
+                    @if (CanEditCurrent)
+                    {
+                        <button type="button"
+                                @ref="_editRef"
+                                class="pi-ac__edit"
+                                title="@PersonIntakeText.Format("Lookup.EditTitle", FieldName)"
+                                aria-label="@PersonIntakeText.Format("Lookup.EditAria", FieldName, SelectedText)"
+                                @onclick="EditAsync">
+                            <span class="pi-ac__text" title="@SelectedText">@SelectedText</span>
+                            <svg class="pi-ac__pen" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="pi-ac__text pi-ac__text--plain" title="@SelectedText">@SelectedText</span>
+                    }
+                    @if (Interactive)
+                    {
+                        <button type="button"
+                                class="pi-ac__clear"
+                                title="@PersonIntakeText.Format("Lookup.Clear", FieldName)"
+                                aria-label="@PersonIntakeText.Format("Lookup.Clear", FieldName)"
+                                @onclick="ClearAsync">×</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <input @ref="_inputRef"
+                       id="@_inputId"
+                       class="pi-ac__box pi-ac__input"
+                       type="text"
+                       autocomplete="off"
+                       maxlength="200"
+                       disabled="@(!Interactive)"
+                       placeholder="@EffectivePlaceholder"
+                       role="combobox"
+                       aria-expanded="@(_listOpen ? "true" : "false")"
+                       aria-controls="@_listId"
+                       aria-autocomplete="list"
+                       aria-label="@FieldName"
+                       aria-activedescendant="@(_activeIndex >= 0 && _activeIndex < _hits.Count ? OptionId(_activeIndex) : null)"
+                       aria-describedby="@_statusId"
+                       value="@_search"
+                       @oninput="OnSearchInput"
+                       @onkeydown="OnSearchKeyDown"
+                       @onfocus="OnInputFocus"
+                       @onclick="OnInputClick" />
+                @if (IsShortList && Interactive)
+                {
+                    <span class="pi-ac__chev" aria-hidden="true">▾</span>
+                }
+                @if (_listOpen && _hits.Count > 0)
+                {
+                    <ul id="@_listId" class="pi-ac__list" role="listbox">
+                        @for (var i = 0; i < _hits.Count; i++)
+                        {
+                            var index = i;
+                            var item = _hits[index];
+                            <li id="@OptionId(index)"
+                                class="pi-ac__option @(_activeIndex == index ? "is-active" : null)"
+                                role="option"
+                                aria-selected="@(_activeIndex == index ? "true" : "false")"
+                                @onmousedown:preventDefault="true"
+                                @onmousedown="() => SelectAsync(item)">
+                                <span class="pi-ac__option-main">@Highlight(item.Text)</span>
+                                @if (ShowUsage)
+                                {
+                                    <span class="pi-ac__meta @(item.UseCount <= 0 ? "is-new" : null)">@UsageLabel(item.UseCount)</span>
+                                }
+                            </li>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(_search) && _hitTotal > _hits.Count)
+                        {
+                            <li class="pi-ac__foot" role="presentation">@_hitTotal matches. Keep typing to narrow the list.</li>
+                        }
+                    </ul>
+                }
+            }
+        </div>
+        @if (CanAdd)
+        {
+            <button type="button"
+                    class="pi-ac__add"
+                    title="@PersonIntakeText.Format("Lookup.AddNew", FieldName)"
+                    aria-label="@PersonIntakeText.Format("Lookup.AddNew", FieldName)"
+                    @onmousedown:preventDefault="true"
+                    @onclick="NewAsync">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </button>
+        }
+    </div>
+    @if (!string.IsNullOrEmpty(_statusText) && !_listOpen)
+    {
+        <div id="@_statusId" class="pi-ac__status" data-state="@_statusState" role="status" aria-live="polite">@_statusText</div>
+    }
+    <span class="pi-ac__sr" role="status" aria-live="polite">@_announce</span>
+</div>
+
+<PersonIntakeLookupDialog IsOpen="@_dialogOpen"
+                          IsEdit="@_dialogEdit"
+                          FieldName="@FieldName"
+                          LookupType="@LookupType"
+                          InitialValues="@_dialogInitial"
+                          UseCount="@SelectedUseCount"
+                          Error="@_dialogError"
+                          Busy="@_dialogBusy"
+                          OnCancel="CloseDialog"
+                          OnErrorCleared="() => _dialogError = null"
+                          OnSave="SaveDialogAsync" />
+
+@code {
+    [Parameter] public IEnumerable<PersonIntakeLookupOption> Options { get; set; } = Array.Empty<PersonIntakeLookupOption>();
+    [Parameter] public Guid? Value { get; set; }
+    [Parameter] public EventCallback<Guid?> ValueChanged { get; set; }
+    [Parameter] public EventCallback LookupChanged { get; set; }
+    [Parameter] public string CssClass { get; set; } = string.Empty;
+    [Parameter] public bool Enabled { get; set; } = true;
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool AllowEditLookup { get; set; } = true;
+    /// <summary>Wizard gear toggle: + and the pen are hidden until the officer turns it on.</summary>
+    [Parameter] public bool ShowTools { get; set; } = true;
+    [Parameter] public Type? LookupType { get; set; }
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public XafApplication? Application { get; set; }
+    [Parameter] public string FieldName { get; set; } = "value";
+    [Parameter] public string? Placeholder { get; set; }
+    /// <summary><see cref="PersonIntakeLookupUsage"/> key; null hides "Used N×".</summary>
+    [Parameter] public string? UsageKey { get; set; }
+
+    private readonly string _inputId = "pi-ac-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _listId = "pi-ac-list-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _statusId = "pi-ac-status-" + Guid.NewGuid().ToString("N")[..8];
+
+    private ElementReference _inputRef;
+    private ElementReference _editRef;
+    private IEnumerable<PersonIntakeLookupOption>? _lastOptionsRef;
+    private List<PersonIntakeLookupSearch.Entry> _entries = new();
+    private IReadOnlyDictionary<Guid, int> _usage = new Dictionary<Guid, int>();
+    private string? _usageLoadedKey;
+    private IObjectSpace? _usageLoadedSpace;
+
+    private IReadOnlyList<PersonIntakeLookupSearch.Entry> _hits = Array.Empty<PersonIntakeLookupSearch.Entry>();
+    private int _hitTotal;
+    private string _search = string.Empty;
+    private bool _listOpen;
+    private bool _focused;
+    private bool _pickInFlight;
+    private int _activeIndex = -1;
+    private string _statusText = string.Empty;
+    private string _statusState = string.Empty;
+    private string _announce = string.Empty;
+    private bool _focusEditAfterRender;
+    private bool _focusInputAfterRender;
+
+    private bool Interactive => Enabled && !ReadOnly;
+    private bool ShowUsage => !string.IsNullOrWhiteSpace(UsageKey);
+    private bool IsShortList => PersonIntakeLookupSearch.IsShortList(_entries.Count);
+    private bool _dialogOpen;
+    private bool _dialogEdit;
+    private bool _dialogBusy;
+    private string? _dialogError;
+    private PersonIntakeLookupEditor.Values? _dialogInitial;
+    private Type? _permissionType;
+    private bool _createGranted;
+    private bool _writeGranted;
+
+    private bool CanOpenLookup => Application != null && LookupType != null;
+    private bool UsesDialog => PersonIntakeLookupEditor.IsSupported(LookupType);
+    private bool CouldAdd => Interactive && AllowEditLookup && CanOpenLookup && _createGranted;
+    private bool CanAdd => CouldAdd && ShowTools;
+
+    private string AddHint =>
+        CanAdd ? " " + PersonIntakeText.Format("Lookup.Hint.UsePlus", FieldName)
+        : CouldAdd ? " " + PersonIntakeText.Get("Lookup.Hint.TurnOnGear")
+        : string.Empty;
+    private bool CanEditCurrent =>
+        Interactive && AllowEditLookup && ShowTools && CanOpenLookup && HasSelection
+        && !PersonIntakeLookupEditor.IsSharedCatalog(LookupType) && _writeGranted;
+
+    private int SelectedUseCount =>
+        HasSelection && _usage.TryGetValue(Value!.Value, out var count) ? count : 0;
+    private bool HasSelection => Value.HasValue && Value.Value != Guid.Empty;
+    private string? PendingCss => CssClass.Contains("is-pending", StringComparison.Ordinal) ? "is-pending" : null;
+
+    private string EffectivePlaceholder =>
+        !Interactive ? "—"
+        : !string.IsNullOrWhiteSpace(Placeholder) ? Placeholder!
+        : IsShortList ? PersonIntakeText.Get("Lookup.Placeholder.Short")
+        : PersonIntakeText.Format("Lookup.Placeholder.Search", FieldName);
+
+    private string SelectedText
+    {
+        get
+        {
+            if (!HasSelection)
+                return string.Empty;
+            var hit = _entries.FirstOrDefault(e => e.Id == Value!.Value);
+            if (hit != null)
+                return hit.Text;
+            if (ObjectSpace != null && LookupType != null)
+            {
+                try
+                {
+                    return PersonIntakeLookupHelper.Caption(ObjectSpace.GetObjectByKey(LookupType, Value!.Value) as BaseObject);
+                }
+                catch
+                {
+                    // fall through to placeholder text
+                }
+            }
+            return "(unavailable)";
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!ReferenceEquals(ObjectSpace, _usageLoadedSpace) || !string.Equals(UsageKey, _usageLoadedKey, StringComparison.Ordinal))
+            LoadUsage();
+
+        if (LookupType != _permissionType)
+        {
+            _permissionType = LookupType;
+            _createGranted = PersonIntakeLookupEditor.IsGranted(ObjectSpace, LookupType, SecurityOperations.Create);
+            _writeGranted = PersonIntakeLookupEditor.IsGranted(ObjectSpace, LookupType, SecurityOperations.Write);
+        }
+
+        if (!ReferenceEquals(Options, _lastOptionsRef))
+        {
+            _lastOptionsRef = Options;
+            RebuildEntries(Options);
+        }
+
+        if (!_focused)
+            RefreshList(keepOpen: false);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusEditAfterRender)
+        {
+            _focusEditAfterRender = false;
+            try { await _editRef.FocusAsync(); } catch { /* element may be gone */ }
+        }
+        else if (_focusInputAfterRender)
+        {
+            _focusInputAfterRender = false;
+            try { await _inputRef.FocusAsync(); } catch { /* element may be gone */ }
+        }
+    }
+
+    private void LoadUsage()
+    {
+        _usageLoadedSpace = ObjectSpace;
+        _usageLoadedKey = UsageKey;
+        _usage = ShowUsage
+            ? PersonIntakeLookupUsage.Load(ObjectSpace, UsageKey)
+            : new Dictionary<Guid, int>();
+        RebuildEntries(_lastOptionsRef ?? Options);
+    }
+
+    private void RebuildEntries(IEnumerable<PersonIntakeLookupOption>? options)
+    {
+        _entries = (options ?? Array.Empty<PersonIntakeLookupOption>())
+            .Where(o => o != null && o.Oid != Guid.Empty)
+            .Select(o => new PersonIntakeLookupSearch.Entry(
+                o.Oid,
+                o.Text,
+                _usage.TryGetValue(o.Oid, out var count) ? count : 0))
+            .ToList();
+    }
+
+    private void OnFocusIn()
+    {
+        _focused = true;
+        if (HasSelection)
+            RefreshList(keepOpen: false);
+    }
+
+    private void OnInputFocus()
+    {
+        _focused = true;
+        if (Interactive && !HasSelection)
+            RefreshList(keepOpen: IsShortList && string.IsNullOrWhiteSpace(_search));
+    }
+
+    private void OnFocusOut()
+    {
+        if (_pickInFlight)
+            return;
+        _focused = false;
+        _listOpen = false;
+        _activeIndex = -1;
+        _search = string.Empty;
+        _statusText = string.Empty;
+        _statusState = string.Empty;
+    }
+
+    private void OnInputClick()
+    {
+        if (!Interactive || !IsShortList || !string.IsNullOrWhiteSpace(_search) || _listOpen)
+            return;
+        _focused = true;
+        RefreshList(keepOpen: true);
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        _search = e.Value?.ToString() ?? string.Empty;
+        _activeIndex = -1;
+        RefreshList(keepOpen: true);
+    }
+
+    private async Task OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (!Interactive)
+            return;
+
+        switch (e.Key)
+        {
+            case "Escape":
+                _listOpen = false;
+                _activeIndex = -1;
+                return;
+            case "ArrowDown":
+                if (!_listOpen)
+                    RefreshList(keepOpen: true);
+                if (_hits.Count == 0)
+                    return;
+                _listOpen = true;
+                _activeIndex = _activeIndex < 0 ? 0 : Math.Min(_hits.Count - 1, _activeIndex + 1);
+                return;
+            case "ArrowUp":
+                if (_hits.Count == 0 || !_listOpen)
+                    return;
+                _activeIndex = _activeIndex <= 0 ? _hits.Count - 1 : _activeIndex - 1;
+                return;
+            case "Enter":
+                if (_listOpen && _activeIndex >= 0 && _activeIndex < _hits.Count)
+                {
+                    await SelectAsync(_hits[_activeIndex]);
+                    return;
+                }
+                var exact = PersonIntakeLookupSearch.ExactMatch(_search, _entries);
+                if (exact != null)
+                    await SelectAsync(exact);
+                return;
+        }
+    }
+
+    private void RefreshList(bool keepOpen)
+    {
+        if (HasSelection)
+        {
+            _hits = Array.Empty<PersonIntakeLookupSearch.Entry>();
+            _hitTotal = 0;
+            _listOpen = false;
+            _activeIndex = -1;
+            if (_focused && Interactive)
+            {
+                _statusState = "ok";
+                _statusText = CanEditCurrent
+                    ? PersonIntakeText.Get("Lookup.Status.SelectedEditable")
+                    : PersonIntakeText.Get("Lookup.Status.Selected");
+            }
+            else
+            {
+                _statusState = string.Empty;
+                _statusText = string.Empty;
+            }
+            return;
+        }
+
+        var q = CaseAddressAutocomplete.NormalizeDisplay(_search);
+        if (string.IsNullOrEmpty(q))
+        {
+            if (IsShortList)
+            {
+                _hits = PersonIntakeLookupSearch.Browse(_entries);
+                _hitTotal = _hits.Count;
+                _listOpen = keepOpen && _focused && _hits.Count > 0;
+            }
+            else
+            {
+                _hits = Array.Empty<PersonIntakeLookupSearch.Entry>();
+                _hitTotal = 0;
+                _listOpen = false;
+            }
+            _activeIndex = -1;
+            _statusState = string.Empty;
+            _statusText = _focused && Interactive
+                ? IsShortList
+                    ? PersonIntakeText.Get("Lookup.Status.PickOrFilter")
+                    : PersonIntakeText.Get("Lookup.Status.StartTyping") + AddHint
+                : string.Empty;
+            return;
+        }
+
+        var result = PersonIntakeLookupSearch.Search(q, _entries);
+        _hits = result.Items;
+        _hitTotal = result.Total;
+
+        if (_hits.Count > 0)
+        {
+            _listOpen = keepOpen && _focused;
+            if (_activeIndex >= _hits.Count)
+                _activeIndex = -1;
+            var exact = PersonIntakeLookupSearch.ExactMatch(q, _entries);
+            _statusState = exact != null ? "ok" : string.Empty;
+            _statusText = exact != null
+                ? PersonIntakeText.Get("Lookup.Status.ExactMatch")
+                : PersonIntakeText.Format("Lookup.Status.Matches", _hitTotal);
+            return;
+        }
+
+        _listOpen = false;
+        _activeIndex = -1;
+        _statusState = "info";
+        _statusText = PersonIntakeText.Format("Lookup.Status.NoMatch", FieldName, q) + AddHint;
+    }
+
+    private async Task SelectAsync(PersonIntakeLookupSearch.Entry entry)
+    {
+        _pickInFlight = true;
+        try
+        {
+            _search = string.Empty;
+            _listOpen = false;
+            _activeIndex = -1;
+            _announce = PersonIntakeText.Format("Lookup.Announce.Selected", entry.Text);
+            _focusEditAfterRender = CanEditCurrent;
+            if (ValueChanged.HasDelegate)
+                await ValueChanged.InvokeAsync(entry.Id);
+            RefreshList(keepOpen: false);
+        }
+        finally
+        {
+            _pickInFlight = false;
+        }
+    }
+
+    private async Task ClearAsync()
+    {
+        _search = string.Empty;
+        _listOpen = false;
+        _activeIndex = -1;
+        _announce = PersonIntakeText.Format("Lookup.Announce.Cleared", FieldName);
+        _focusInputAfterRender = true;
+        if (ValueChanged.HasDelegate)
+            await ValueChanged.InvokeAsync(null);
+    }
+
+    private Task NewAsync()
+    {
+        if (!CanAdd)
+            return Task.CompletedTask;
+
+        var typed = CaseAddressAutocomplete.NormalizeDisplay(_search);
+        var exact = PersonIntakeLookupSearch.ExactMatch(typed, _entries);
+        if (exact != null)
+            return SelectAsync(exact);
+
+        if (!UsesDialog)
+        {
+            PersonIntakeLookupHelper.ShowNew(Application, LookupType, id =>
+                _ = InvokeAsync(async () =>
+                {
+                    ReloadOptions();
+                    _search = string.Empty;
+                    _announce = PersonIntakeText.Format("Lookup.Announce.Added", FieldName);
+                    if (ValueChanged.HasDelegate)
+                        await ValueChanged.InvokeAsync(id);
+                    if (LookupChanged.HasDelegate)
+                        await LookupChanged.InvokeAsync();
+                    StateHasChanged();
+                }), typed);
+            return Task.CompletedTask;
+        }
+
+        _dialogEdit = false;
+        _dialogInitial = new PersonIntakeLookupEditor.Values { Name = typed };
+        _dialogError = null;
+        _dialogOpen = true;
+        _listOpen = false;
+        return Task.CompletedTask;
+    }
+
+    private Task EditAsync()
+    {
+        if (!CanEditCurrent || ObjectSpace == null || LookupType == null)
+            return Task.CompletedTask;
+
+        if (!UsesDialog)
+        {
+            PersonIntakeLookupHelper.ShowEdit(Application, LookupType, Value!.Value, () =>
+                _ = InvokeAsync(async () =>
+                {
+                    var local = ObjectSpace.GetObjectByKey(LookupType, Value!.Value);
+                    if (local != null)
+                        ObjectSpace.ReloadObject(local);
+                    ReloadOptions();
+                    _announce = PersonIntakeText.Format("Lookup.Announce.Updated", FieldName);
+                    if (LookupChanged.HasDelegate)
+                        await LookupChanged.InvokeAsync();
+                    StateHasChanged();
+                }));
+            return Task.CompletedTask;
+        }
+
+        _dialogEdit = true;
+        _dialogInitial = PersonIntakeLookupEditor.Load(ObjectSpace, LookupType, Value!.Value);
+        _dialogError = null;
+        _dialogOpen = true;
+        return Task.CompletedTask;
+    }
+
+    private void CloseDialog()
+    {
+        _dialogOpen = false;
+        _dialogError = null;
+        _dialogBusy = false;
+    }
+
+    private async Task SaveDialogAsync(PersonIntakeLookupEditor.Values values)
+    {
+        if (Application == null || LookupType == null || ObjectSpace == null)
+            return;
+
+        var editId = _dialogEdit ? Value : null;
+        _dialogBusy = true;
+        try
+        {
+            Guid savedId;
+            using (var editSpace = Application.CreateObjectSpace(LookupType))
+                savedId = PersonIntakeLookupEditor.Save(editSpace, LookupType, editId, values);
+
+            // Reload only the touched record; refreshing the whole wizard space would drop unsaved person edits.
+            var local = ObjectSpace.GetObjectByKey(LookupType, savedId);
+            if (local != null)
+                ObjectSpace.ReloadObject(local);
+
+            ReloadOptions();
+            _dialogOpen = false;
+            _dialogError = null;
+            _search = string.Empty;
+            _announce = _dialogEdit
+                ? PersonIntakeText.Format("Lookup.Announce.Updated", FieldName)
+                : PersonIntakeText.Format("Lookup.Announce.Added", FieldName);
+            if (!_dialogEdit && ValueChanged.HasDelegate)
+                await ValueChanged.InvokeAsync(savedId);
+            if (LookupChanged.HasDelegate)
+                await LookupChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            _dialogError = ex.InnerException?.Message ?? ex.Message;
+        }
+        finally
+        {
+            _dialogBusy = false;
+        }
+    }
+
+    private void ReloadOptions()
+    {
+        if (ObjectSpace == null || LookupType == null)
+            return;
+        var reloaded = PersonIntakeLookupHelper.LoadOptions(ObjectSpace, LookupType).ToList();
+        _lastOptionsRef = reloaded;
+        _usage = ShowUsage
+            ? PersonIntakeLookupUsage.Load(ObjectSpace, UsageKey)
+            : new Dictionary<Guid, int>();
+        RebuildEntries(reloaded);
+    }
+
+    private static string UsageLabel(int count) =>
+        count <= 0 ? PersonIntakeText.Get("Lookup.Usage.New") : PersonIntakeText.Format("Lookup.Usage.Used", count.ToString("N0"));
+
+    private string OptionId(int index) => $"{_listId}-opt-{index}";
+
+    private RenderFragment Highlight(string text) => builder =>
+    {
+        var ranges = CaseAddressAutocomplete.HighlightRanges(text, _search);
+        if (ranges.Count == 0)
+        {
+            builder.AddContent(0, text);
+            return;
+        }
+
+        var seq = 1;
+        var cursor = 0;
+        foreach (var (start, end) in ranges)
+        {
+            var s = Math.Max(0, Math.Min(start, text.Length));
+            var e = Math.Max(s, Math.Min(end, text.Length));
+            if (s > cursor)
+                builder.AddContent(seq++, text[cursor..s]);
+            builder.OpenElement(seq++, "mark");
+            builder.AddContent(seq++, text[s..e]);
+            builder.CloseElement();
+            cursor = e;
+        }
+        if (cursor < text.Length)
+            builder.AddContent(seq, text[cursor..]);
+    };
+}

@@ -222,6 +222,14 @@ public sealed class PersonDocumentCopiesSlotRequest
     public string? FocusDisplayName { get; init; }
 
     /// <summary>
+    /// Files to preview instead of the saved catalog. Used by the person intake wizard, where a copy
+    /// may be chosen on screen and not saved yet. When this has items and <see cref="OpenPreviewOnly"/>
+    /// is true, the slot shows these bytes and does not read the database.
+    /// </summary>
+    public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; init; }
+        = Array.Empty<ProgressLetterInlineFile>();
+
+    /// <summary>
     /// When true, the slot shows only the document preview viewer (no catalog).
     /// Used when the officer clicks Preview on a dossier row.
     /// </summary>
@@ -388,6 +396,10 @@ public sealed class PersonDocumentCopiesInlinePreviewRequest
     public string? SectionId { get; init; }
 
     public IReadOnlyList<Guid> PersonIds { get; init; } = Array.Empty<Guid>();
+
+    /// <summary>When set, merge these bytes instead of loading <see cref="RecordKey"/> from the database.</summary>
+    public IReadOnlyList<ProgressLetterInlineFile> InlineFiles { get; init; }
+        = Array.Empty<ProgressLetterInlineFile>();
 }
 
 public sealed class HeaderDocumentCopiesInlinePreviewRequest

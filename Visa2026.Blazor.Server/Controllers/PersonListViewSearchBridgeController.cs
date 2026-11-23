@@ -1,3 +1,4 @@
+using Visa2026.Module;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.SystemModule;
@@ -20,7 +21,7 @@ public sealed class PersonListViewSearchBridgeController : ObjectViewController<
         if (wired)
             return;
 
-        if (View.IsRoot && View.Id is "Person_ListView_Employees" or "Person_ListView_FamilyMembers")
+        if (View.IsRoot && PersonRosterListViewIds.IsIntakeWizardList(View.Id))
             return;
 
         if (View.Editor is not DxGridListEditor gridListEditor)

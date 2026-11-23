@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.PersonList;
 
@@ -18,9 +19,11 @@ public static class PersonRosterListViews
 {
     public static readonly string[] Ids =
     [
-        "Person_ListView_Employees",
-        "Person_ListView_FamilyMembers",
-        "Person_ListView_TemporaryVisitors",
+        PersonRosterListViewIds.Employees,
+        PersonRosterListViewIds.EmployeesIncomplete,
+        PersonRosterListViewIds.FamilyMembers,
+        PersonRosterListViewIds.FamilyMembersIncomplete,
+        PersonRosterListViewIds.TemporaryVisitors,
     ];
 
     public static bool IsRoster(string? viewId) =>
@@ -147,7 +150,7 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         base.OnActivated();
         ApplyRosterPaging();
         var changed = HideColumn(nameof(Person.Gender));
-        if (string.Equals(View.Id, "Person_ListView_Employees", StringComparison.Ordinal))
+        if (PersonRosterListViewIds.IsEmployeeRoster(View.Id))
         {
             changed |= HideColumn(nameof(Person.PersonalNumber));
             changed |= HideColumn(nameof(Person.ProjectContract));

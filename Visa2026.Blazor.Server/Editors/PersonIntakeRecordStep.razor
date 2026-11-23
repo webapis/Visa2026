@@ -1,0 +1,1165 @@
+@using System.IO
+@using System.Linq
+@using DevExpress.Blazor
+@using DevExpress.ExpressApp
+@using DevExpress.ExpressApp.Model
+@using DevExpress.ExpressApp.Utils
+@using DevExpress.Persistent.BaseImpl.EF
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.AspNetCore.Components.Rendering
+@using Visa2026.Blazor.Server.Components
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PersonIntake
+@using Visa2026.Module.Services.PreviewSlot
+
+@{
+    var deferRecord = State.PendingKeys.Contains(RecordKey);
+    var hasRows = HasCards;
+    EnsureDefaults();
+}
+
+<div class="person-intake-wizard__record-toolbar">
+    @if (RecordKey != PersonPendingTargets.EmployeeSalary)
+    {
+        <label class="person-intake-wizard__toggle">
+            <input type="checkbox" checked="@deferRecord" disabled="@(hasRows || !Access.CanTogglePendingStep(RecordKey))"
+                   @onchange="e => OnTogglePending(e.Value is true)" />
+            <span>@T("NotReceivedYet")</span>
+        </label>
+    }
+    @if (!UsesGrid && !deferRecord && CanCreate)
+    {
+        <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary"
+                disabled="@(!CanAddCard)"
+                @onclick="AddCard">@T("Record.AddButton")</button>
+    }
+</div>
+@if (!deferRecord && CanCreate && UsesOneAtATime && !CanAddCard)
+{
+    <p class="person-intake-wizard__record-hint">@T("Record.OneAtATime")</p>
+}
+
+@if (deferRecord)
+{
+}
+else if (UsesGrid)
+{
+    @if (!hasRows && RecordKey == PersonPendingTargets.EmployeeSalary)
+    {
+        <p class="person-intake-wizard__record-hint">@T("Record.SalaryOptional")</p>
+    }
+    <div class="pi-lv">
+        <div class="pi-lv__toolbar">
+            @if (CanCreate)
+            {
+                <DxButton Text="@T("Grid.New")"
+                          IconCssClass="pi-lv__icon pi-lv__icon--new"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Text"
+                          Enabled="CanAddCard"
+                          Click="NewRecordAsync" />
+            }
+            @if (CanDeleteAny)
+            {
+                <DxButton Text="@T("Grid.Delete")"
+                          IconCssClass="pi-lv__icon pi-lv__icon--delete"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          RenderStyleMode="ButtonRenderStyleMode.Text"
+                          Enabled="CanDeleteSelection"
+                          Click="() => _confirmDelete = true" />
+            }
+        </div>
+        @if (_confirmDelete && CanDeleteSelection)
+        {
+            <div class="pi-lv__confirm" role="alertdialog" aria-label="@T("Grid.Delete")">
+                <span>@T("Grid.DeleteConfirm")</span>
+                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary" @onclick="DeleteSelectedAsync">@T("Yes")</button>
+                <button type="button" class="person-intake-wizard__btn" @onclick="() => _confirmDelete = false">@T("No")</button>
+            </div>
+        }
+        <DxGrid Data="GridItems"
+                KeyFieldName="CardId"
+                CssClass="pi-lv__grid"
+                ShowAllRows="true"
+                SelectionMode="GridSelectionMode.Multiple"
+                SelectedDataItems="_selected"
+                SelectedDataItemsChanged="OnSelectionChanged"
+                UnboundColumnData="OnUnboundColumnData"
+                RowClick="OnRowClick">
+            <Columns>
+                <DxGridSelectionColumn Width="2.75rem" />
+                @foreach (var column in GridColumns)
+                {
+                    <DxGridDataColumn FieldName="@column.Key"
+                                      Caption="@column.Caption"
+                                      UnboundType="@column.UnboundType"
+                                      DisplayFormat="@column.DisplayFormat" />
+                }
+                @if (ShowsCopyPreview)
+                {
+                    <DxGridDataColumn FieldName="pi_preview"
+                                      Caption="@PreviewCaption"
+                                      UnboundType="GridUnboundColumnType.String"
+                                      Width="6.5rem"
+                                      AllowSort="false">
+                        <CellDisplayTemplate>
+                            @if (context.DataItem != null && HasPreviewCopies(context.DataItem))
+                            {
+                                <button type="button"
+                                        class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                        @onclick="() => PreviewDraftAsync(context.DataItem)"
+                                        @onclick:stopPropagation="true">@PreviewCaption</button>
+                            }
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                }
+            </Columns>
+        </DxGrid>
+    </div>
+}
+else if (!hasRows)
+{
+    <p class="person-intake-wizard__record-hint">
+        @(RecordKey == PersonPendingTargets.EmployeeSalary
+            ? T("Record.SalaryOptional")
+            : T("Record.Empty"))
+    </p>
+}
+else
+{
+    <div class="person-intake-wizard__cards">
+        @if (RecordKey == PersonPendingTargets.MedicalRecord)
+        {
+            @foreach (var draft in State.MedicalDrafts)
+            {
+                var card = draft;
+                <article class="person-intake-wizard__card @(card.Expanded ? "is-expanded" : null)">
+                    <div class="person-intake-wizard__card-head">
+                        <span class="person-intake-wizard__card-title">@card.SummaryTitle</span>
+                        <div class="person-intake-wizard__card-actions">
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                    @onclick="() => ToggleExpand(card)">@(card.Expanded ? T("Card.Collapse") : T("Card.Expand"))</button>
+                            @if (CanRemoveCard(card.ExistingId))
+                            {
+                                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link is-danger"
+                                        @onclick="() => RemoveMedical(card.CardId)">Remove</button>
+                            }
+                        </div>
+                    </div>
+                    @if (card.Expanded)
+                    {
+                        <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!CanEditCard(card.ExistingId))">
+                            <div class="person-intake-wizard__field-row"><label>Document number</label>
+                                <input class="@FilledCss(card.DocumentNumber)" @bind="card.DocumentNumber" /></div>
+                            <div class="person-intake-wizard__field-row"><label>Issue date</label>
+                                <OfficerDateEdit @bind-Date="card.IssueDate" CssClass="person-intake-wizard__input" /></div>
+                            <div class="person-intake-wizard__field-row"><label>Validity duration</label>
+                                @(RenderDraftLookup<ValidityDuration>(card.ValidityDurationId, id => card.ValidityDurationId = id))</div>
+                            <div class="person-intake-wizard__field-row"><label>Expiration date</label>
+                                <input class="@FilledCss(card.ExpirationDate)" disabled value="@(card.ExpirationDate?.ToString("dd.MM.yyyy") ?? string.Empty)" /></div>
+                            <div class="person-intake-wizard__field-row person-intake-wizard__field-row--top person-intake-wizard__field-row--full">
+                                <label>Medical copies</label>
+                                <div class="person-intake-wizard__copies">
+                                    <InputFile OnChange="e => OnCopiesSelected(e, card.Copies)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple />
+                                    @if (card.Copies.Count > 0)
+                                    {
+                                        <ul class="person-intake-wizard__copy-list">
+                                            @foreach (var copy in card.Copies)
+                                            {
+                                                var copyId = copy.Id;
+                                                <li>
+                                                    <span>@copy.FileName @(copy.IsExisting ? T("Files.OnFile") : null)</span>
+                                                    <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                            @onclick="() => card.Copies.RemoveAll(c => c.Id == copyId)">Remove</button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="person-intake-wizard__card-summary">@(card.IssueDate?.ToString("dd.MM.yyyy") ?? T("Card.NoIssueDate")) · @PersonIntakeText.Format("Card.Scans", card.Copies.Count)</p>
+                    }
+                </article>
+            }
+        }
+        else if (RecordKey == PersonPendingTargets.AddressOfResidence)
+        {
+            @foreach (var draft in State.ResidenceDrafts)
+            {
+                var card = draft;
+                <article class="person-intake-wizard__card @(card.Expanded ? "is-expanded" : null)">
+                    <div class="person-intake-wizard__card-head">
+                        <span class="person-intake-wizard__card-title">@card.SummaryTitle</span>
+                        <div class="person-intake-wizard__card-actions">
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                    @onclick="() => ToggleExpand(card)">@(card.Expanded ? T("Card.Collapse") : T("Card.Expand"))</button>
+                            @if (CanRemoveCard(card.ExistingId))
+                            {
+                                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link is-danger"
+                                        @onclick="() => RemoveResidence(card.CardId)">Remove</button>
+                            }
+                        </div>
+                    </div>
+                    @if (card.Expanded)
+                    {
+                        <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!CanEditCard(card.ExistingId))">
+                            <div class="person-intake-wizard__field-row"><label>Type</label>
+                                <select class="@FilledCss(card.Type)" value="@(card.Type?.ToString() ?? string.Empty)"
+                                        @onchange="e => SetResidenceType(card, e.Value?.ToString())">
+                                    @foreach (ResidenceType type in Enum.GetValues<ResidenceType>())
+                                    {
+                                        <option value="@type">@type</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="person-intake-wizard__field-row"><label>Region</label>
+                                @(RenderDraftLookup<Region>(card.RegionId, id => card.RegionId = id))</div>
+                            <div class="person-intake-wizard__field-row"><label>City</label>
+                                @(RenderDraftLookup<City>(card.CityId, id => card.CityId = id))</div>
+                            @if (card.Type == ResidenceType.PrivateHouse || card.Type == null)
+                            {
+                                <div class="person-intake-wizard__field-row person-intake-wizard__field-row--full"><label>Full address</label>
+                                    <input class="@FilledCss(card.FullAddress)" @bind="card.FullAddress" /></div>
+                                <div class="person-intake-wizard__field-row"><label>Expiration date</label>
+                                    <OfficerDateEdit @bind-Date="card.ExpirationDate" CssClass="person-intake-wizard__input" /></div>
+                            }
+                            else if (card.Type == ResidenceType.Lodging)
+                            {
+                                <div class="person-intake-wizard__field-row"><label>Lodging</label>
+                                    @(RenderDraftLookup<Lodging>(card.LodgingId, id => card.LodgingId = id))</div>
+                            }
+                            else if (card.Type == ResidenceType.Hotel)
+                            {
+                                <div class="person-intake-wizard__field-row"><label>Hotel</label>
+                                    @(RenderDraftLookup<Hotel>(card.HotelId, id => card.HotelId = id))</div>
+                            }
+                            else if (card.Type == ResidenceType.Hospital)
+                            {
+                                <div class="person-intake-wizard__field-row"><label>Hospital</label>
+                                    @(RenderDraftLookup<Hospital>(card.HospitalId, id => card.HospitalId = id))</div>
+                            }
+                            else if (card.Type == ResidenceType.Other)
+                            {
+                                <div class="person-intake-wizard__field-row"><label>Other site</label>
+                                    @(RenderDraftLookup<OtherSite>(card.OtherSiteId, id => card.OtherSiteId = id))</div>
+                            }
+                            <div class="person-intake-wizard__field-row person-intake-wizard__field-row--top person-intake-wizard__field-row--full">
+                                <label>Address copies</label>
+                                <div class="person-intake-wizard__copies">
+                                    <InputFile OnChange="e => OnCopiesSelected(e, card.Copies)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple />
+                                    @if (card.Copies.Count > 0)
+                                    {
+                                        <ul class="person-intake-wizard__copy-list">
+                                            @foreach (var copy in card.Copies)
+                                            {
+                                                var copyId = copy.Id;
+                                                <li>
+                                                    <span>@copy.FileName @(copy.IsExisting ? T("Files.OnFile") : null)</span>
+                                                    <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                            @onclick="() => card.Copies.RemoveAll(c => c.Id == copyId)">Remove</button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="person-intake-wizard__card-summary">@(card.Type?.ToString() ?? "?") · @PersonIntakeText.Format("Card.Scans", card.Copies.Count)</p>
+                    }
+                </article>
+            }
+        }
+        else if (RecordKey == PersonPendingTargets.PersonDocument)
+        {
+            @foreach (var draft in State.DocumentDrafts)
+            {
+                var card = draft;
+                <article class="person-intake-wizard__card @(card.Expanded ? "is-expanded" : null)">
+                    <div class="person-intake-wizard__card-head">
+                        <span class="person-intake-wizard__card-title">@card.SummaryTitle</span>
+                        <div class="person-intake-wizard__card-actions">
+                            @if (PersonIntakeCopyPreview.HasPreview(card))
+                            {
+                                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                        @onclick="() => PreviewPersonFileAsync(card)">@PreviewCaption</button>
+                            }
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                    @onclick="() => ToggleExpand(card)">@(card.Expanded ? T("Card.Collapse") : T("Card.Expand"))</button>
+                            @if (CanRemoveCard(card.ExistingId))
+                            {
+                                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link is-danger"
+                                        @onclick="() => RemoveDocument(card.CardId)">@T("Remove")</button>
+                            }
+                        </div>
+                    </div>
+                    @if (card.Expanded)
+                    {
+                        <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!CanEditCard(card.ExistingId))">
+                            <div class="person-intake-wizard__field-row person-intake-wizard__field-row--top person-intake-wizard__field-row--full">
+                                <label>@T("Files.File")</label>
+                                <div class="person-intake-wizard__copies">
+                                    @if (PersonIntakeCopyPreview.HasPreview(card))
+                                    {
+                                        <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                @onclick="() => PreviewPersonFileAsync(card)">@card.FileName @(card.IsExisting ? T("Files.OnFile") : null)</button>
+                                    }
+                                    else if (card.IsExisting || !string.IsNullOrWhiteSpace(card.FileName))
+                                    {
+                                        <span>@card.FileName @(card.IsExisting ? T("Files.OnFile") : null)</span>
+                                    }
+                                    @if (!card.IsExisting)
+                                    {
+                                        <InputFile OnChange="e => OnDocumentFileSelected(e, card)"
+                                                   accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp,.doc,.docx" />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="person-intake-wizard__card-summary">@card.SummaryTitle</p>
+                    }
+                </article>
+            }
+        }
+        else if (RecordKey == PersonPendingTargets.TravelHistory)
+        {
+            @foreach (var draft in State.TravelDrafts)
+            {
+                var card = draft;
+                <article class="person-intake-wizard__card @(card.Expanded ? "is-expanded" : null)">
+                    <div class="person-intake-wizard__card-head">
+                        <span class="person-intake-wizard__card-title">@card.SummaryTitle</span>
+                        <div class="person-intake-wizard__card-actions">
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                    @onclick="() => ToggleExpand(card)">@(card.Expanded ? T("Card.Collapse") : T("Card.Expand"))</button>
+                            @if (CanRemoveCard(card.ExistingId))
+                            {
+                                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link is-danger"
+                                        @onclick="() => RemoveTravel(card.CardId)">Remove</button>
+                            }
+                        </div>
+                    </div>
+                    @if (card.Expanded)
+                    {
+                        <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!CanEditCard(card.ExistingId))">
+                            <div class="person-intake-wizard__field-row"><label>Travel type</label>
+                                <select class="@FilledCss(card.TravelType)" value="@(card.TravelType?.ToString() ?? string.Empty)"
+                                        @onchange="e => SetTravelType(card, e.Value?.ToString())">
+                                    <option value="">—</option>
+                                    <option value="@TravelType.External">External</option>
+                                    <option value="@TravelType.Internal">Internal</option>
+                                </select>
+                            </div>
+                            <div class="person-intake-wizard__field-row"><label>Movement</label>
+                                <select class="@FilledCss(card.MovementType)" value="@(card.MovementType?.ToString() ?? string.Empty)"
+                                        @onchange="e => SetMovementType(card, e.Value?.ToString())">
+                                    <option value="">—</option>
+                                    <option value="@MovementType.Entry">Entry</option>
+                                    <option value="@MovementType.Exit">Exit</option>
+                                </select>
+                            </div>
+                            <div class="person-intake-wizard__field-row"><label>Travel date</label>
+                                <OfficerDateEdit @bind-Date="card.TravelDate" CssClass="person-intake-wizard__input" /></div>
+                            @if (card.TravelType == TravelType.External)
+                            {
+                                <div class="person-intake-wizard__field-row"><label>Check point</label>
+                                    @(RenderDraftLookup<CheckPoint>(card.CheckPointId, id => card.CheckPointId = id))</div>
+                                <div class="person-intake-wizard__field-row"><label>Country</label>
+                                    @(RenderDraftLookup<Country>(card.CountryId, id => card.CountryId = id))</div>
+                            }
+                            else if (card.TravelType == TravelType.Internal)
+                            {
+                                <div class="person-intake-wizard__field-row"><label>Region</label>
+                                    @(RenderDraftLookup<Region>(card.RegionId, id => { card.RegionId = id; card.CityId = null; }))</div>
+                                <div class="person-intake-wizard__field-row"><label>City</label>
+                                    @(RenderDraftLookup<City>(card.CityId, id => card.CityId = id))</div>
+                            }
+                            <div class="person-intake-wizard__field-row"><label>Travel notes</label>
+                                <input class="@FilledCss(card.Notes)" @bind="card.Notes" /></div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="person-intake-wizard__card-summary">@(card.TravelDate?.ToString("dd.MM.yyyy") ?? T("Card.NoDate")) · @card.SummaryTitle</p>
+                    }
+                </article>
+            }
+        }
+    </div>
+}
+
+@if (_editing != null)
+{
+    var editable = CanEditCard(ExistingIdOf(_editing));
+    <div class="pi-dlg-backdrop"></div>
+    <div class="pi-dlg pi-dlg--record" role="dialog" aria-modal="true" aria-label="@DialogTitle">
+        <header class="pi-dlg__head">
+            <h2 class="pi-dlg__title">@DialogTitle</h2>
+            <button type="button" class="pi-dlg__x" aria-label="@T("Close")" @onclick="CancelEditAsync">×</button>
+        </header>
+        <div class="pi-dlg__body">
+            @if (_editing is PersonIntakePassportDraft passport)
+            {
+                var card = passport;
+                <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!editable)">
+                    <div class="person-intake-wizard__field-row"><label>@L("PassportNumber", "Passport number")</label>
+                        <input class="@FilledCss(card.PassportNumber)" @bind="card.PassportNumber" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("PassportType", "Passport type")</label>
+                        @(RenderDraftLookup<PassportType>(card.PassportTypeId, id => card.PassportTypeId = id, L("PassportType", "Passport type"), PersonIntakeLookupUsage.PassportType))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("IssuedCountry", "Issued country")</label>
+                        @(RenderDraftLookup<Country>(card.IssuedCountryId, id => card.IssuedCountryId = id, L("IssuedCountry", "Issued country"), PersonIntakeLookupUsage.PassportIssuedCountry))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("Authority", "Authority")</label>
+                        <input class="@FilledCss(card.Authority)" @bind="card.Authority" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("IssueDate", "Issue date")</label>
+                        <OfficerDateEdit @bind-Date="card.IssueDate" CssClass="person-intake-wizard__input" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("ExpirationDate", "Expiration date")</label>
+                        <OfficerDateEdit @bind-Date="card.ExpirationDate" CssClass="person-intake-wizard__input" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("DaysRemaining", "Days remaining")</label>
+                        <input class="@FilledCss(card.DaysRemaining)" disabled value="@(card.DaysRemaining?.ToString() ?? string.Empty)" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("IsCancelled", "Cancelled")</label>
+                        <label class="person-intake-wizard__toggle"><input type="checkbox" @bind="card.IsCancelled" /><span>@L("IsCancelled", "Cancelled")</span></label></div>
+                </div>
+                @RenderCopies(L("Documents", "Passport copies"), card.Copies, () => PreviewCopiesAsync(card.ExistingId, card.CardId, "Passport", card.PassportNumber, typeof(PassportDocument), card.Copies))
+            }
+            else if (_editing is PersonIntakeEducationDraft education)
+            {
+                var card = education;
+                <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!editable)">
+                    <div class="person-intake-wizard__field-row"><label>@L("EducationLevel", "Education level")</label>
+                        @(RenderDraftLookup<EducationLevel>(card.EducationLevelId, id => card.EducationLevelId = id, L("EducationLevel", "Education level"), PersonIntakeLookupUsage.EducationLevel))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("EducationInstitution", "Education institution")</label>
+                        @(RenderDraftLookup<EducationInstitution>(card.EducationInstitutionId, id => card.EducationInstitutionId = id, L("EducationInstitution", "Education institution"), PersonIntakeLookupUsage.EducationInstitution))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("EducationCountry", "Education country")</label>
+                        @(RenderDraftLookup<Country>(card.EducationCountryId, id => card.EducationCountryId = id, L("EducationCountry", "Education country"), PersonIntakeLookupUsage.EducationCountry))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("Specialty", "Specialty")</label>
+                        @(RenderDraftLookup<Specialty>(card.SpecialtyId, id => card.SpecialtyId = id, L("Specialty", "Specialty"), PersonIntakeLookupUsage.EducationSpecialty))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("GraduationYear", "Graduation year")</label>
+                        <input class="@FilledCss(card.GraduationYear)" maxlength="8" @bind="card.GraduationYear" /></div>
+                </div>
+                @RenderCopies(L("Documents", "Diploma copies"), card.Copies, () => PreviewCopiesAsync(card.ExistingId, card.CardId, "Education", card.SummaryTitle, typeof(EducationDocument), card.Copies))
+            }
+            else if (_editing is PersonIntakeSalaryDraft salary)
+            {
+                var card = salary;
+                <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!editable)">
+                    <div class="person-intake-wizard__field-row"><label>@L("Amount", "Amount")</label>
+                        <input class="@FilledCss(card.Amount)" @bind="card.Amount" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("StartDate", "Start date")</label>
+                        <OfficerDateEdit @bind-Date="card.StartDate" CssClass="person-intake-wizard__input" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("EndDate", "End date")</label>
+                        <OfficerDateEdit @bind-Date="card.EndDate" CssClass="person-intake-wizard__input" /></div>
+                </div>
+            }
+            else if (_editing is PersonIntakePositionDraft position)
+            {
+                var card = position;
+                <div class="person-intake-wizard__record-form person-intake-wizard__record-form--grid" inert="@(!editable)">
+                    <div class="person-intake-wizard__field-row"><label>@L("Position", "Position (visa reports)")</label>
+                        @(RenderDraftLookup<Position>(card.PositionId, id => card.PositionId = id, L("Position", "Position (visa reports)"), PersonIntakeLookupUsage.PositionVisaReports))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("ActualPosition", "Position (actual / company)")</label>
+                        @(RenderDraftLookup<ActualPosition>(card.ActualPositionId, id => card.ActualPositionId = id, L("ActualPosition", "Position (actual / company)"), PersonIntakeLookupUsage.PositionActual))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("Department", "Department")</label>
+                        @(RenderDraftLookup<Department>(card.DepartmentId, id => card.DepartmentId = id, L("Department", "Department"), PersonIntakeLookupUsage.PositionDepartment))</div>
+                    <div class="person-intake-wizard__field-row"><label>@L("StartDate", "Start date")</label>
+                        <OfficerDateEdit @bind-Date="card.StartDate" CssClass="person-intake-wizard__input" /></div>
+                    <div class="person-intake-wizard__field-row"><label>@L("EndDate", "End date")</label>
+                        <OfficerDateEdit @bind-Date="card.EndDate" CssClass="person-intake-wizard__input" /></div>
+                </div>
+                @RenderCopies(L("Documents", "Order for assignment"), card.OrderDocuments, () => PreviewCopiesAsync(card.ExistingId, card.CardId, "EmployeePositionHistory", card.SummaryTitle, typeof(EmployeePositionHistoryDocument), card.OrderDocuments))
+            }
+        </div>
+        <footer class="pi-dlg__foot">
+            @if (editable)
+            {
+                <button type="button" class="pi-dlg__btn pi-dlg__btn--primary" @onclick="AcceptEditAsync">@T("Ok")</button>
+                <button type="button" class="pi-dlg__btn" @onclick="CancelEditAsync">@T("Cancel")</button>
+            }
+            else
+            {
+                <button type="button" class="pi-dlg__btn" @onclick="CancelEditAsync">@T("Close")</button>
+            }
+        </footer>
+    </div>
+}
+
+@code {
+    private static string FilledCss(object? value) =>
+        value switch
+        {
+            null => "person-intake-wizard__input",
+            string s when string.IsNullOrWhiteSpace(s) => "person-intake-wizard__input",
+            _ => "person-intake-wizard__input is-filled"
+        };
+
+    [Parameter] public string RecordKey { get; set; } = string.Empty;
+    [Parameter] public Person? Person { get; set; }
+    [Parameter] public string? OwnerViewId { get; set; }
+    [Parameter] public PersonIntakeWizardState State { get; set; } = new();
+    [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public XafApplication? Application { get; set; }
+    [Parameter] public EventCallback StateChanged { get; set; }
+    [Parameter] public PersonIntakeWizardAccess Access { get; set; } = PersonIntakeWizardAccess.Unrestricted;
+    [Parameter] public bool ShowLookupTools { get; set; }
+
+    private sealed record GridColumn(
+        string Key,
+        string Caption,
+        string PropertyName,
+        Type? MemberType,
+        GridUnboundColumnType UnboundType,
+        string? DisplayFormat);
+
+    private object? _editing;
+    private bool _editingIsNew;
+    private PersonIntakeDraftSnapshot? _snapshot;
+    private IReadOnlyList<object> _selected = Array.Empty<object>();
+    private bool _confirmDelete;
+    private string? _columnsKey;
+    private IReadOnlyList<GridColumn> _columns = Array.Empty<GridColumn>();
+
+    private bool UsesGrid =>
+        RecordKey is PersonPendingTargets.Passport
+            or PersonPendingTargets.Education
+            or PersonPendingTargets.EmployeeSalary
+            or PersonPendingTargets.EmployeePositionHistory;
+
+    private Type? RecordBoType => RecordKey switch
+    {
+        PersonPendingTargets.Passport => typeof(Passport),
+        PersonPendingTargets.Education => typeof(Education),
+        PersonPendingTargets.EmployeeSalary => typeof(EmployeeSalary),
+        PersonPendingTargets.EmployeePositionHistory => typeof(EmployeePositionHistory),
+        _ => null
+    };
+
+    private string? RecordCollection => RecordKey switch
+    {
+        PersonPendingTargets.Passport => nameof(Person.Passports),
+        PersonPendingTargets.Education => nameof(Person.Educations),
+        PersonPendingTargets.EmployeeSalary => nameof(Person.Salaries),
+        PersonPendingTargets.EmployeePositionHistory => nameof(Person.PositionHistory),
+        _ => null
+    };
+
+    private IReadOnlyList<object> GridItems => RecordKey switch
+    {
+        PersonPendingTargets.Passport => State.PassportDrafts.Cast<object>().ToList(),
+        PersonPendingTargets.Education => State.EducationDrafts.Cast<object>().ToList(),
+        PersonPendingTargets.EmployeeSalary => State.SalaryDrafts.Cast<object>().ToList(),
+        PersonPendingTargets.EmployeePositionHistory => State.PositionDrafts.Cast<object>().ToList(),
+        _ => Array.Empty<object>()
+    };
+
+    private static Guid? ExistingIdOf(object? draft) => draft switch
+    {
+        PersonIntakePassportDraft d => d.ExistingId,
+        PersonIntakeEducationDraft d => d.ExistingId,
+        PersonIntakeSalaryDraft d => d.ExistingId,
+        PersonIntakePositionDraft d => d.ExistingId,
+        _ => null
+    };
+
+    private string DialogTitle
+    {
+        get
+        {
+            var type = RecordBoType;
+            var caption = type == null ? null : Application?.Model?.BOModel?.GetClass(type)?.Caption;
+            return string.IsNullOrWhiteSpace(caption) ? CaptionFromType(type ?? typeof(object)) : caption;
+        }
+    }
+
+    private bool CanDeleteAny => GridItems.Any(item => CanRemoveCard(ExistingIdOf(item)));
+
+    private bool CanDeleteSelection =>
+        _selected.Count > 0 && _selected.All(item => CanRemoveCard(ExistingIdOf(item)));
+
+    /// <summary>Visible columns of the native nested ListView (Person_Passports_ListView, ...).</summary>
+    private IReadOnlyList<GridColumn> GridColumns
+    {
+        get
+        {
+            if (_columnsKey != RecordKey)
+            {
+                _columns = BuildColumns();
+                _columnsKey = RecordKey;
+            }
+            return _columns;
+        }
+    }
+
+    private IReadOnlyList<GridColumn> BuildColumns()
+    {
+        var type = RecordBoType;
+        var views = Application?.Model?.Views;
+        if (type == null || views == null)
+            return Array.Empty<GridColumn>();
+
+        var listView = views[$"{nameof(Person)}_{RecordCollection}_ListView"] as IModelListView
+            ?? views[$"{type.Name}_ListView"] as IModelListView;
+        if (listView?.Columns == null)
+            return Array.Empty<GridColumn>();
+
+        return listView.Columns
+            .Where(c => c != null && (c.Index ?? 0) >= 0 && !string.IsNullOrEmpty(c.PropertyName))
+            .Where(c => c.ModelMember?.Type != typeof(Person))
+            .OrderBy(c => c.Index ?? int.MaxValue)
+            .Select((c, i) =>
+            {
+                var memberType = c.ModelMember?.Type;
+                var core = memberType == null ? null : Nullable.GetUnderlyingType(memberType) ?? memberType;
+                var kind = core == typeof(DateTime)
+                    ? GridUnboundColumnType.DateTime
+                    : core == typeof(bool) ? GridUnboundColumnType.Boolean : GridUnboundColumnType.String;
+                return new GridColumn(
+                    $"pi_col_{i}",
+                    string.IsNullOrWhiteSpace(c.Caption) ? c.PropertyName : c.Caption,
+                    c.PropertyName,
+                    memberType,
+                    kind,
+                    kind == GridUnboundColumnType.DateTime ? "dd.MM.yyyy" : null);
+            })
+            .ToList();
+    }
+
+    private void OnUnboundColumnData(GridUnboundColumnDataEventArgs e)
+    {
+        if (e.FieldName == "pi_preview")
+        {
+            e.Value = string.Empty;
+            return;
+        }
+
+        var column = _columns.FirstOrDefault(c => c.Key == e.FieldName);
+        if (column == null || e.DataItem == null)
+            return;
+        e.Value = CellValue(e.DataItem, column);
+    }
+
+    private object? CellValue(object draft, GridColumn column)
+    {
+        var raw = ReadDraftValue(draft, column, out var found);
+        if (!found)
+            raw = ReadSavedValue(draft, column);
+        return ToCell(raw, column);
+    }
+
+    private object? ReadDraftValue(object draft, GridColumn column, out bool found)
+    {
+        found = false;
+        var name = column.PropertyName.Split('.')[0];
+        var type = draft.GetType();
+        var property = type.GetProperty(name);
+        if (property != null && !typeof(System.Collections.IList).IsAssignableFrom(property.PropertyType))
+        {
+            found = true;
+            return property.GetValue(draft);
+        }
+
+        var idProperty = type.GetProperty(name + "Id");
+        if (idProperty?.PropertyType != typeof(Guid?))
+            return null;
+
+        found = true;
+        var id = (Guid?)idProperty.GetValue(draft);
+        return id.HasValue && ObjectSpace != null && column.MemberType != null
+            ? ObjectSpace.GetObjectByKey(column.MemberType, id.Value)
+            : null;
+    }
+
+    private object? ReadSavedValue(object draft, GridColumn column)
+    {
+        var id = ExistingIdOf(draft);
+        var type = RecordBoType;
+        if (!id.HasValue || type == null || ObjectSpace == null)
+            return null;
+        var saved = ObjectSpace.GetObjectByKey(type, id.Value);
+        var member = ObjectSpace.TypesInfo.FindTypeInfo(type)?.FindMember(column.PropertyName);
+        return saved == null || member == null ? null : member.GetValue(saved);
+    }
+
+    private static object? ToCell(object? raw, GridColumn column)
+    {
+        switch (column.UnboundType)
+        {
+            case GridUnboundColumnType.DateTime:
+                return raw is DateTime date && date != default ? date : null;
+            case GridUnboundColumnType.Boolean:
+                return raw as bool?;
+        }
+
+        return raw switch
+        {
+            null => null,
+            string text => text,
+            BaseObject item => PersonIntakeLookupHelper.Caption(item),
+            Enum value => new EnumDescriptor(value.GetType()).GetCaption(value),
+            DateTime date => date.ToString("dd.MM.yyyy"),
+            IFormattable formattable => formattable.ToString(null, System.Globalization.CultureInfo.CurrentCulture),
+            _ => raw.ToString()
+        };
+    }
+
+    private void OnSelectionChanged(IReadOnlyList<object> items)
+    {
+        _selected = items ?? Array.Empty<object>();
+        _confirmDelete = false;
+    }
+
+    private void OnRowClick(GridRowClickEventArgs e)
+    {
+        if (e.Column is DxGridSelectionColumn)
+            return;
+        if (e.Column is DxGridDataColumn dataColumn && dataColumn.FieldName == "pi_preview")
+            return;
+        var item = e.Grid.GetDataItem(e.VisibleIndex);
+        if (item == null)
+            return;
+        _editing = item;
+        _editingIsNew = false;
+        _snapshot = PersonIntakeDraftSnapshot.Take(item);
+        _confirmDelete = false;
+    }
+
+    private async Task NewRecordAsync()
+    {
+        if (!CanAddCard)
+            return;
+        await AddCard();
+        _editing = GridItems.LastOrDefault();
+        _editingIsNew = _editing != null;
+        _snapshot = null;
+        _confirmDelete = false;
+    }
+
+    private async Task AcceptEditAsync()
+    {
+        _editing = null;
+        _snapshot = null;
+        await NotifyAsync();
+    }
+
+    private async Task CancelEditAsync()
+    {
+        if (_editing != null)
+        {
+            if (_editingIsNew)
+                RemoveDraft(_editing);
+            else if (_snapshot?.IsFor(_editing) == true)
+                _snapshot.Restore();
+        }
+        _editing = null;
+        _snapshot = null;
+        await NotifyAsync();
+    }
+
+    private async Task DeleteSelectedAsync()
+    {
+        foreach (var item in _selected.Where(item => CanRemoveCard(ExistingIdOf(item))).ToList())
+            RemoveDraft(item);
+        _selected = Array.Empty<object>();
+        _confirmDelete = false;
+        await NotifyAsync();
+    }
+
+    private void RemoveDraft(object item)
+    {
+        switch (item)
+        {
+            case PersonIntakePassportDraft d: State.PassportDrafts.Remove(d); break;
+            case PersonIntakeEducationDraft d: State.EducationDrafts.Remove(d); break;
+            case PersonIntakeSalaryDraft d: State.SalaryDrafts.Remove(d); break;
+            case PersonIntakePositionDraft d: State.PositionDrafts.Remove(d); break;
+        }
+    }
+
+    private RenderFragment RenderCopies(string label, List<PersonIntakeDocumentCopyDraft> copies, Func<Task> preview) =>
+        @<div class="person-intake-wizard__field-row person-intake-wizard__field-row--top person-intake-wizard__field-row--full">
+            <label>@label</label>
+            <div class="person-intake-wizard__copies">
+                <InputFile OnChange="e => OnCopiesSelected(e, copies)" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" multiple />
+                @if (PersonIntakeCopyPreview.HasPreview(copies))
+                {
+                    <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                            @onclick="preview">@PreviewCaption</button>
+                }
+                @if (copies.Count > 0)
+                {
+                    <ul class="person-intake-wizard__copy-list">
+                        @foreach (var copy in copies)
+                        {
+                            var copyId = copy.Id;
+                            <li>
+                                @if (PersonIntakeCopyPreview.HasPreview(new[] { copy }))
+                                {
+                                    <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                            @onclick="preview">@copy.FileName @(copy.IsExisting ? T("Files.OnFile") : null)</button>
+                                }
+                                else
+                                {
+                                    <span>@copy.FileName @(copy.IsExisting ? T("Files.OnFile") : null)</span>
+                                }
+                                <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                        @onclick="() => copies.RemoveAll(c => c.Id == copyId)">@T("Remove")</button>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>;
+
+    private static string T(string key) => PersonIntakeText.Get(key);
+
+    private string PreviewCaption => VisaUiMessages.Get("PersonDocumentCopies.Action.Preview");
+
+    private bool ShowsCopyPreview =>
+        RecordKey is PersonPendingTargets.Passport
+            or PersonPendingTargets.Education
+            or PersonPendingTargets.EmployeePositionHistory;
+
+    private static bool HasPreviewCopies(object item) => item switch
+    {
+        PersonIntakePassportDraft draft => PersonIntakeCopyPreview.HasPreview(draft.Copies),
+        PersonIntakeEducationDraft draft => PersonIntakeCopyPreview.HasPreview(draft.Copies),
+        PersonIntakePositionDraft draft => PersonIntakeCopyPreview.HasPreview(draft.OrderDocuments),
+        _ => false
+    };
+
+    private Task PreviewDraftAsync(object item) => item switch
+    {
+        PersonIntakePassportDraft draft => PreviewCopiesAsync(draft.ExistingId, draft.CardId, "Passport", draft.PassportNumber, typeof(PassportDocument), draft.Copies),
+        PersonIntakeEducationDraft draft => PreviewCopiesAsync(draft.ExistingId, draft.CardId, "Education", draft.SummaryTitle, typeof(EducationDocument), draft.Copies),
+        PersonIntakePositionDraft draft => PreviewCopiesAsync(draft.ExistingId, draft.CardId, "EmployeePositionHistory", draft.SummaryTitle, typeof(EmployeePositionHistoryDocument), draft.OrderDocuments),
+        _ => Task.CompletedTask
+    };
+
+    private Task PreviewCopiesAsync(
+        Guid? savedId,
+        Guid cardId,
+        string prefix,
+        string? displayName,
+        Type documentType,
+        List<PersonIntakeDocumentCopyDraft> copies)
+    {
+        var files = PersonIntakeCopyPreview.Collect(ObjectSpace, documentType, copies);
+        var label = string.IsNullOrWhiteSpace(displayName) ? T("Files.File") : displayName.Trim();
+        return OpenPreviewAsync(PersonIntakeCopyPreview.LayoutKey(prefix, savedId, cardId), label, files);
+    }
+
+    private Task PreviewPersonFileAsync(PersonIntakePersonDocumentDraft card)
+    {
+        var files = PersonIntakeCopyPreview.CollectPersonFile(ObjectSpace, card);
+        var label = string.IsNullOrWhiteSpace(card.FileName) ? card.SummaryTitle : card.FileName.Trim();
+        return OpenPreviewAsync(PersonIntakeCopyPreview.LayoutKey("PersonDocument", card.ExistingId, card.CardId), label, files);
+    }
+
+    private async Task OpenPreviewAsync(
+        string layoutKey,
+        string displayName,
+        IReadOnlyList<(string FileName, byte[] Content)> files)
+    {
+        if (files.Count == 0)
+            return;
+
+        var slot = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slot == null)
+            return;
+
+        var personId = Person?.ID ?? Guid.Empty;
+        await slot.OpenPersonDocumentCopiesAsync(new PersonDocumentCopiesSlotRequest
+        {
+            PersonIds = personId == Guid.Empty ? Array.Empty<Guid>() : new[] { personId },
+            OpenPreviewOnly = true,
+            FocusRecordKey = layoutKey,
+            FocusDisplayName = displayName,
+            AllowEditFiles = false,
+            InlineFiles = files
+                .Select(file => new ProgressLetterInlineFile { FileName = file.FileName, Content = file.Content })
+                .ToList()
+        }, OwnerViewId);
+    }
+
+    private string L(string member, string fallback) =>
+        RecordBoType == null ? fallback : PersonIntakeFieldLabels.MemberLabel(RecordBoType, member, fallback);
+
+    private bool CanCreate => Access.CanAddRecord(RecordKey);
+    private bool CanEditCard(Guid? existingId) => Access.CanEditRecord(RecordKey, existingId);
+    private bool CanRemoveCard(Guid? existingId) => Access.CanRemoveRecord(RecordKey, existingId);
+
+    private bool HasCards => RecordKey switch
+    {
+        PersonPendingTargets.Passport => State.PassportDrafts.Count > 0,
+        PersonPendingTargets.Education => State.EducationDrafts.Count > 0,
+        PersonPendingTargets.MedicalRecord => State.MedicalDrafts.Count > 0,
+        PersonPendingTargets.AddressOfResidence => State.ResidenceDrafts.Count > 0,
+        PersonPendingTargets.PersonDocument => State.DocumentDrafts.Count > 0,
+        PersonPendingTargets.TravelHistory => State.TravelDrafts.Count > 0,
+        PersonPendingTargets.EmployeeSalary => State.SalaryDrafts.Count > 0,
+        PersonPendingTargets.EmployeePositionHistory => State.PositionDrafts.Count > 0,
+        _ => false
+    };
+
+    private string AddLabel => RecordKey switch
+    {
+        PersonPendingTargets.Passport => "passport",
+        PersonPendingTargets.Education => "education",
+        PersonPendingTargets.MedicalRecord => "medical record",
+        PersonPendingTargets.AddressOfResidence => "address",
+        PersonPendingTargets.PersonDocument => "file",
+        PersonPendingTargets.TravelHistory => "travel",
+        PersonPendingTargets.EmployeeSalary => "salary",
+        PersonPendingTargets.EmployeePositionHistory => "position",
+        _ => "record"
+    };
+
+    private bool UsesOneAtATime =>
+        RecordKey is PersonPendingTargets.Passport
+            or PersonPendingTargets.Education
+            or PersonPendingTargets.PersonDocument
+            or PersonPendingTargets.EmployeeSalary
+            or PersonPendingTargets.EmployeePositionHistory;
+
+    private bool CanAddCard => RecordKey switch
+    {
+        PersonPendingTargets.Passport => State.PassportDrafts.All(draft => draft.IsComplete && draft.IsSaved),
+        PersonPendingTargets.Education => State.EducationDrafts.All(draft => draft.IsComplete && draft.IsSaved),
+        PersonPendingTargets.PersonDocument => State.DocumentDrafts.All(draft => draft.IsComplete && draft.IsSaved),
+        PersonPendingTargets.EmployeeSalary => State.SalaryDrafts.All(draft => draft.IsComplete && draft.IsSaved),
+        PersonPendingTargets.EmployeePositionHistory => State.PositionDrafts.All(draft => draft.IsComplete && draft.IsSaved),
+        _ => true
+    };
+
+    private Task NotifyAsync() => StateChanged.HasDelegate ? StateChanged.InvokeAsync() : InvokeAsync(StateHasChanged);
+
+    private async Task OnTogglePending(bool on)
+    {
+        if (on)
+            State.PendingKeys.Add(RecordKey);
+        else
+            State.PendingKeys.Remove(RecordKey);
+        await NotifyAsync();
+    }
+
+    private async Task AddCard()
+    {
+        if (!CanAddCard)
+            return;
+
+        State.PendingKeys.Remove(RecordKey);
+        switch (RecordKey)
+        {
+            case PersonPendingTargets.Passport:
+                var passport = State.AddPassportDraft();
+                EnsurePassportDefaults(passport);
+                break;
+            case PersonPendingTargets.Education:
+                var education = State.AddEducationDraft();
+                EnsureEducationDefaults(education);
+                break;
+            case PersonPendingTargets.MedicalRecord:
+                var medical = State.AddMedicalDraft();
+                EnsureMedicalDefaults(medical);
+                break;
+            case PersonPendingTargets.AddressOfResidence:
+                State.AddResidenceDraft();
+                break;
+            case PersonPendingTargets.PersonDocument:
+                State.AddDocumentDraft();
+                break;
+            case PersonPendingTargets.TravelHistory:
+                State.AddTravelDraft();
+                break;
+            case PersonPendingTargets.EmployeeSalary:
+                State.AddSalaryDraft();
+                break;
+            case PersonPendingTargets.EmployeePositionHistory:
+                State.AddPositionDraft();
+                break;
+        }
+        await NotifyAsync();
+    }
+
+    private void ToggleExpand(PersonIntakeMedicalDraft card) => card.Expanded = !card.Expanded;
+    private void ToggleExpand(PersonIntakeResidenceDraft card) => card.Expanded = !card.Expanded;
+    private void ToggleExpand(PersonIntakePersonDocumentDraft card) => card.Expanded = !card.Expanded;
+    private void ToggleExpand(PersonIntakeTravelDraft card) => card.Expanded = !card.Expanded;
+
+    private async Task RemoveDocument(Guid id)
+    {
+        State.DocumentDrafts.RemoveAll(d => d.CardId == id);
+        await NotifyAsync();
+    }
+
+    private async Task RemoveTravel(Guid id)
+    {
+        State.TravelDrafts.RemoveAll(d => d.CardId == id);
+        await NotifyAsync();
+    }
+
+    private void SetTravelType(PersonIntakeTravelDraft card, string? value)
+    {
+        card.TravelType = Enum.TryParse<TravelType>(value, out var type) ? type : null;
+        card.CheckPointId = null;
+        card.CountryId = null;
+        card.RegionId = null;
+        card.CityId = null;
+    }
+
+    private void SetMovementType(PersonIntakeTravelDraft card, string? value) =>
+        card.MovementType = Enum.TryParse<MovementType>(value, out var type) ? type : null;
+
+    private async Task OnDocumentFileSelected(InputFileChangeEventArgs e, PersonIntakePersonDocumentDraft card)
+    {
+        var file = e?.File;
+        if (file == null || card == null)
+            return;
+        await using var stream = file.OpenReadStream(10 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        card.FileName = file.Name;
+        card.Content = ms.ToArray();
+        card.IsExisting = false;
+        await NotifyAsync();
+    }
+
+    private async Task RemoveMedical(Guid id)
+    {
+        State.MedicalDrafts.RemoveAll(d => d.CardId == id);
+        await NotifyAsync();
+    }
+
+    private async Task RemoveResidence(Guid id)
+    {
+        State.ResidenceDrafts.RemoveAll(d => d.CardId == id);
+        await NotifyAsync();
+    }
+
+    private void SetResidenceType(PersonIntakeResidenceDraft card, string? value)
+    {
+        if (Enum.TryParse<ResidenceType>(value, out var type))
+            card.Type = type;
+    }
+
+    private void EnsureDefaults()
+    {
+        if (RecordKey == PersonPendingTargets.Passport)
+        {
+            foreach (var draft in State.PassportDrafts.Where(d => CanEditCard(d.ExistingId)))
+                EnsurePassportDefaults(draft);
+        }
+        else if (RecordKey == PersonPendingTargets.Education)
+        {
+            foreach (var draft in State.EducationDrafts.Where(d => CanEditCard(d.ExistingId)))
+                EnsureEducationDefaults(draft);
+        }
+        else if (RecordKey == PersonPendingTargets.MedicalRecord)
+        {
+            foreach (var draft in State.MedicalDrafts.Where(d => CanEditCard(d.ExistingId)))
+                EnsureMedicalDefaults(draft);
+        }
+    }
+
+    private void EnsurePassportDefaults(PersonIntakePassportDraft draft)
+    {
+        if (ObjectSpace == null || draft == null || draft.DefaultsApplied)
+            return;
+        draft.DefaultsApplied = true;
+        if (!draft.PassportTypeId.HasValue)
+        {
+            var type = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(t => t.IsDefault)
+                ?? ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(t =>
+                    string.Equals(t.PdfForm_Code, Passport.DefaultPassportTypeCode, StringComparison.OrdinalIgnoreCase));
+            draft.PassportTypeId = type?.ID;
+        }
+        if (!draft.IssuedCountryId.HasValue)
+            draft.IssuedCountryId = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault)?.ID;
+    }
+
+    private void EnsureEducationDefaults(PersonIntakeEducationDraft draft)
+    {
+        if (ObjectSpace == null || draft == null || draft.DefaultsApplied)
+            return;
+        draft.DefaultsApplied = true;
+        if (!draft.EducationCountryId.HasValue)
+            draft.EducationCountryId = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault)?.ID;
+    }
+
+    private void EnsureMedicalDefaults(PersonIntakeMedicalDraft draft)
+    {
+        if (ObjectSpace == null || draft == null || draft.DefaultsApplied)
+            return;
+        draft.DefaultsApplied = true;
+        if (!draft.IssueDate.HasValue)
+            draft.IssueDate = DateTime.Today;
+        if (!draft.ValidityDurationId.HasValue)
+            draft.ValidityDurationId = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault)?.ID;
+    }
+
+    private async Task OnCopiesSelected(InputFileChangeEventArgs e, List<PersonIntakeDocumentCopyDraft> target)
+    {
+        if (e?.FileCount <= 0 || target == null)
+            return;
+
+        foreach (var file in e.GetMultipleFiles(8))
+        {
+            await using var stream = file.OpenReadStream(10 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            target.Add(new PersonIntakeDocumentCopyDraft
+            {
+                FileName = file.Name,
+                Content = ms.ToArray(),
+                IsExisting = false
+            });
+        }
+
+        await NotifyAsync();
+    }
+
+    private RenderFragment RenderDraftLookup<T>(
+        Guid? currentId,
+        Action<Guid?> assign,
+        string? fieldName = null,
+        string? usageKey = null) where T : BaseObject => builder =>
+    {
+        if (ObjectSpace == null)
+            return;
+
+        var options = PersonIntakeLookupHelper.LoadOptions<T>(ObjectSpace);
+        builder.OpenComponent<PersonIntakeSearchableLookup>(0);
+        builder.AddAttribute(1, nameof(PersonIntakeSearchableLookup.Options), options);
+        builder.AddAttribute(2, nameof(PersonIntakeSearchableLookup.Value), currentId);
+        builder.AddAttribute(3, nameof(PersonIntakeSearchableLookup.ValueChanged),
+            EventCallback.Factory.Create<Guid?>(this, id =>
+            {
+                assign(id == Guid.Empty ? null : id);
+                _ = NotifyAsync();
+            }));
+        builder.AddAttribute(4, nameof(PersonIntakeSearchableLookup.CssClass),
+            "person-intake-wizard__input person-intake-wizard__lookup");
+        builder.AddAttribute(5, nameof(PersonIntakeSearchableLookup.LookupType), typeof(T));
+        builder.AddAttribute(6, nameof(PersonIntakeSearchableLookup.ObjectSpace), ObjectSpace);
+        builder.AddAttribute(7, nameof(PersonIntakeSearchableLookup.Application), Application);
+        builder.AddAttribute(8, nameof(PersonIntakeSearchableLookup.LookupChanged),
+            EventCallback.Factory.Create(this, NotifyAsync));
+        builder.AddAttribute(9, nameof(PersonIntakeSearchableLookup.FieldName),
+            fieldName ?? CaptionFromType(typeof(T)));
+        builder.AddAttribute(10, nameof(PersonIntakeSearchableLookup.UsageKey), usageKey);
+        builder.AddAttribute(11, nameof(PersonIntakeSearchableLookup.ShowTools), ShowLookupTools);
+        builder.CloseComponent();
+    };
+
+    private static string CaptionFromType(Type type) =>
+        System.Text.RegularExpressions.Regex.Replace(type.Name, "(?<=[a-z])([A-Z])", " $1");
+}

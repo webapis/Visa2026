@@ -18,9 +18,20 @@ public sealed class PersonIntakeWizardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public string? OwnerViewId
+    {
+        get => GetPropertyValue<string>();
+        set => SetPropertyValue(value);
+    }
+
     public IObjectSpace? ObjectSpace
     {
         get => GetPropertyValue<IObjectSpace>();
+        set => SetPropertyValue(value);
+    }
+    public XafApplication? Application
+    {
+        get => GetPropertyValue<XafApplication>();
         set => SetPropertyValue(value);
     }
 
@@ -37,6 +48,18 @@ public sealed class PersonIntakeWizardModel : ComponentModelBase
     }
 
     public bool IsStatusError
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public PersonIntakeWizardAccess Access
+    {
+        get => GetPropertyValue<PersonIntakeWizardAccess>() ?? PersonIntakeWizardAccess.Unrestricted;
+        set => SetPropertyValue(value);
+    }
+
+    public bool ShowIncompleteOverview
     {
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);

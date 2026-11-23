@@ -37,9 +37,10 @@
         _editor is null ? Task.CompletedTask : _editor.FocusAsync().AsTask();
 
     private string ResolvedCssClass =>
-        string.IsNullOrWhiteSpace(CssClass)
+        (string.IsNullOrWhiteSpace(CssClass)
             ? "issue-issued-header-slot__input officer-date-edit"
-            : $"{CssClass} officer-date-edit";
+            : $"{CssClass} officer-date-edit")
+        + (Date.HasValue ? " is-filled" : string.Empty);
 
     private Task NotifyDateChangedAsync() =>
         DateChanged.HasDelegate ? DateChanged.InvokeAsync(Date) : Task.CompletedTask;

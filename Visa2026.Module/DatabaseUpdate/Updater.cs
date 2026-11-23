@@ -586,6 +586,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureFullAccessRecursivePermission<EmployeePositionHistory>(userRole);
     EnsureFullAccessRecursivePermission<EmployeePositionHistoryDocument>(userRole);
     EnsureFullAccessRecursivePermission<EmployeeSalary>(userRole);
+    // Person intake wizard: CV & files step and family relation documents (Other records).
+    EnsureFullAccessRecursivePermission<PersonDocument>(userRole);
+    EnsureFullAccessRecursivePermission<PersonFamilyRelationDocument>(userRole);
     EnsureFullAccessRecursivePermission<WorkDuty>(userRole);
     EnsureFullAccessRecursivePermission<TravelHistory>(userRole);
     EnsureReadOnlyPermission<City>(userRole);
@@ -852,6 +855,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<AuthorizedRepresentative>(role);
             EnsureTypePermission<BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            // Person intake wizard opens view-only for readers (no Write on Person); child steps need Read.
+            EnsureTypePermission<BusinessObjects.PersonIntake.PersonIntakeWizardHost>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureReadOnlyPermission<PersonPendingItem>(role);
+            EnsureReadOnlyPermission<PersonDocument>(role);
+            EnsureReadOnlyPermission<PersonFamilyRelationDocument>(role);
             EnsureReadOnlyPermission<ExpirationAlertRule>(role);
             EnsureReadOnlyPermission<VisaIssueWindowSettings>(role);
             EnsureReadOnlyPermission<PdfFormMapping>(role);

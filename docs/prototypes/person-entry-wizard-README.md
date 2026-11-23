@@ -17,6 +17,7 @@ Issued visas, invitations, work permits, and applications stay out of this dialo
 | [person-entry-wizard-07-education-entered.jpg](./person-entry-wizard-07-education-entered.jpg) | Education step. Switch is off and one school row is entered. **Add education** is available. |
 | [person-entry-wizard-06-family-link.jpg](./person-entry-wizard-06-family-link.jpg) | New family member, first step. Sponsoring employee and relationship are filled and cannot be left waiting. |
 | [person-entry-wizard-05-review-update.jpg](./person-entry-wizard-05-review-update.jpg) | Later update of the same employee. Review lists what is still waiting. **Move to Complete** stays off. |
+| [person-intake-wizard-child-records-edit.png](./person-intake-wizard-child-records-edit.png) ([HTML](./person-intake-wizard-child-records-edit.html)) | **Edit mode:** same wizard for Person + 1:N children. Passport step shows stacked record cards (expand/edit inline, Add, Remove) — no native Person DetailView. |
 
 The **Complete** tab uses the same grid. The **Waiting for** column is hidden there, because those people have nothing left waiting.
 

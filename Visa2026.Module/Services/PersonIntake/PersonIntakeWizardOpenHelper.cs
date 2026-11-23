@@ -1,5 +1,6 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using Visa2026.Module.BusinessObjects.PersonIntake;
@@ -22,7 +23,7 @@ public static class PersonIntakeWizardOpenHelper
         return CreateHostView(application, personSpace, person, role);
     }
 
-    public static DetailView? OpenExisting(XafApplication application, Person person)
+    public static DetailView? OpenExisting(XafApplication application, Person person, bool openedFromIncompleteList = false)
     {
         if (application == null || person == null)
             return null;
@@ -32,14 +33,49 @@ public static class PersonIntakeWizardOpenHelper
         if (loaded == null)
             return null;
 
-        return CreateHostView(application, personSpace, loaded, loaded.PersonRole);
+        return CreateHostView(application, personSpace, loaded, loaded.PersonRole, openedFromIncompleteList);
+    }
+
+    /// <summary>Classic Person form for roles without Read on <see cref="PersonIntakeWizardHost"/>.</summary>
+    public static DetailView? OpenNativeNew(XafApplication application, PersonRecordRole role)
+    {
+        if (application == null)
+            return null;
+
+        var personSpace = application.CreateObjectSpace(typeof(Person));
+        var person = personSpace.CreateObject<Person>();
+        PersonRoleHelper.ApplyRole(person, role);
+        if (role == PersonRecordRole.Employee)
+            VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
+
+        return application.CreateDetailView(personSpace, NativeDetailViewId(application, role), true, person);
+    }
+
+    public static DetailView? OpenNativeExisting(XafApplication application, Person person)
+    {
+        if (application == null || person == null)
+            return null;
+
+        var personSpace = application.CreateObjectSpace(typeof(Person));
+        var loaded = personSpace.GetObject(person);
+        if (loaded == null)
+            return null;
+
+        return application.CreateDetailView(personSpace, NativeDetailViewId(application, loaded.PersonRole), true, loaded);
+    }
+
+    private static string NativeDetailViewId(XafApplication application, PersonRecordRole role)
+    {
+        var id = role == PersonRecordRole.Employee ? PersonDetailViewIds.Employee : PersonDetailViewIds.FamilyMember;
+        return PersonDetailViewModelHelper.CanUseDetailView(application, id) ? id : PersonDetailViewIds.Default;
     }
 
     private static DetailView CreateHostView(
         XafApplication application,
         IObjectSpace personSpace,
         Person person,
-        PersonRecordRole role)
+        PersonRecordRole role,
+        bool openedFromIncompleteList = false)
     {
         var hostSpace = application.CreateObjectSpace(typeof(PersonIntakeWizardHost));
         var host = hostSpace.CreateObject<PersonIntakeWizardHost>();
@@ -47,6 +83,7 @@ public static class PersonIntakeWizardOpenHelper
         host.PersonObjectSpace = personSpace;
         host.Role = role;
         host.PersonId = person.ID;
+        host.OpenedFromIncompleteList = openedFromIncompleteList && person.IsDataIncomplete;
 
         var detailView = application.CreateDetailView(hostSpace, host);
         detailView.ViewEditMode = ViewEditMode.Edit;

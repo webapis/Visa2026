@@ -27,8 +27,8 @@
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Employees" Caption="Employees" Index="0" />
-      <Item Id="FamilyMembers" Caption="Family Members" Index="1" />
+      <Item Id="Employees" Caption="Employees" Index="0"><Items><Item Id="All" Caption="All" Index="0" /><Item Id="Incomplete" Caption="Incomplete" Index="1" /></Items></Item>
+      <Item Id="FamilyMembers" Caption="Family Members" Index="1"><Items><Item Id="All" Caption="All" Index="0" /><Item Id="Incomplete" Caption="Incomplete" Index="1" /></Items></Item>
       <Item Id="TemporaryVisitors" Caption="Temporary visitor" Index="2" Visible="False" />
       <Item Id="Invitation" Visible="False" />
       <Item Id="Rejection" Visible="False" />

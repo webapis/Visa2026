@@ -31,7 +31,7 @@ public sealed class PersonListViewActionLinksController : ViewController<ListVie
     public PersonListViewActionLinksController()
     {
         TargetObjectType = typeof(Person);
-        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers;Person_ListView_TemporaryVisitors";
+        TargetViewId = string.Join(';', PersonRosterListViews.Ids);
 
         // Unspecified = not on View toolbar; must stay Active so DoExecute works
         // (Active["Hidden"]=false deactivates the action and throws error 1007).

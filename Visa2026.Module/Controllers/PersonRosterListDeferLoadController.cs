@@ -6,10 +6,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Employees and Family Members open with no rows. The roster is queried only after
-/// the officer submits a search, and returns to empty when that search is cleared.
-/// Criteria changes around FullTextSearch are batched so clearing the box does not
-/// load the full table before the empty filter is applied.
+/// Previously kept Employees and Family Members empty until a custom search.
+/// Those lists now load as a native XAF ListView, so this controller stays inactive.
 /// </summary>
 public sealed class PersonRosterListDeferLoadController : ObjectViewController<ListView, Person>
 {
@@ -20,6 +18,7 @@ public sealed class PersonRosterListDeferLoadController : ObjectViewController<L
 
     public PersonRosterListDeferLoadController()
     {
+        Active["NativeRosterList"] = false;
         TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers";
         TargetViewNesting = Nesting.Root;
     }

@@ -1,39 +1,56 @@
 @using System.IO
 @using System.Linq
+@using DevExpress.Blazor
 @using DevExpress.ExpressApp
 @using DevExpress.Persistent.BaseImpl.EF
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Rendering
 @using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Blazor.Server.Components
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.PersonIntake
+@using Visa2026.Module.Services.PersonLinkedDocuments
 
 @if (Person == null)
 {
-    <div class="person-intake-wizard__empty">No person loaded.</div>
+    <div class="person-intake-wizard__empty">@T("NoPerson")</div>
 }
 else
 {
-    var steps = PersonIntakeStepCatalog.Steps(Person);
-    var active = steps[Math.Clamp(_stepIndex, 0, steps.Count - 1)];
-    var findings = PersonIntakeCompleteness.Evaluate(Person, State.PendingKeys);
+    var steps = VisibleSteps();
+    var currentIndex = Math.Clamp(_stepIndex, 0, Math.Max(0, steps.Count - 1));
+    var active = steps[currentIndex];
+    var findings = PersonIntakeCompleteness.Evaluate(Person, State.PendingKeys, State.DraftSatisfiedKeys());
     var unresolved = findings.Where(f => f.State == PersonIntakeItemState.Unresolved).ToList();
     var pending = findings.Where(f => f.State == PersonIntakeItemState.Pending).ToList();
 
     <div class="person-intake-wizard">
         <header class="person-intake-wizard__header">
-            <div>
-                <h1 class="person-intake-wizard__title">
-                    @(ObjectSpace?.IsNewObject(Person) == true ? "New" : "Edit")
-                    @(Person.PersonRole == PersonRecordRole.Employee ? "employee" : "family member")
-                </h1>
-                <p class="person-intake-wizard__sub">Step @(_stepIndex + 1) of @steps.Count · @active.Title</p>
+            <div class="person-intake-wizard__who">
+                <div class="person-intake-wizard__avatar" title="@PersonHeading">
+                    @if (HasPhoto)
+                    {
+                        <img class="person-intake-wizard__avatar-img" alt="" src="@PhotoDataUrl(Person.Photo)" />
+                    }
+                    else
+                    {
+                        <span class="person-intake-wizard__avatar-initials">@PersonInitials</span>
+                    }
+                </div>
+                <div class="person-intake-wizard__who-text">
+                    <p class="person-intake-wizard__who-initials">@PersonInitials</p>
+                    <p class="person-intake-wizard__who-name">@PersonHeading</p>
+                    <h1 class="person-intake-wizard__title">
+                        @WizardTitle
+                    </h1>
+                    <p class="person-intake-wizard__sub">@PersonIntakeText.Format("StepOf", currentIndex + 1, steps.Count, active.Title)</p>
+                </div>
             </div>
             @if (pending.Count > 0)
             {
-                <span class="person-intake-wizard__pending-pill">@pending.Count pending</span>
+                <span class="person-intake-wizard__pending-pill">@PersonIntakeText.Format("Status.PendingCount", pending.Count)</span>
             }
         </header>
 
@@ -41,17 +58,22 @@ else
         {
             <div class="person-intake-wizard__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
         }
+        @if (Access.IsViewOnly)
+        {
+            <div class="person-intake-wizard__status is-info" role="note">@PersonIntakeWizardAccess.ViewOnlyMessage</div>
+        }
 
         <div class="person-intake-wizard__layout">
-            <nav class="person-intake-wizard__nav" aria-label="Wizard steps">
+            <nav class="person-intake-wizard__nav" aria-label="@T("Nav.AriaLabel")">
                 @for (var i = 0; i < steps.Count; i++)
                 {
-                    var step = steps[i];
+                    var stepIndex = i;
+                    var step = steps[stepIndex];
                     var stepFindings = findingsForStep(step, findings);
-                    var status = StepStatus(step, stepFindings);
+                    var status = StatusFor(step, stepFindings);
                     <button type="button"
-                            class="person-intake-wizard__nav-item @(i == _stepIndex ? "is-active" : null) @status.Css"
-                            @onclick="() => GoToStep(i)">
+                            class="person-intake-wizard__nav-item @(stepIndex == currentIndex ? "is-active" : null) @status.Css"
+                            @onclick="() => GoToStep(stepIndex)">
                         <span class="person-intake-wizard__nav-badge">@status.Badge</span>
                         <span>
                             <span class="person-intake-wizard__nav-label">@step.Title</span>
@@ -62,82 +84,159 @@ else
             </nav>
 
             <div class="person-intake-wizard__panel">
-                <h2 class="person-intake-wizard__panel-title">@active.Title</h2>
+                <div class="person-intake-wizard__panel-head">
+                    <h2 class="person-intake-wizard__panel-title">@active.Title</h2>
+                    @if (StepHasLookupTools(active))
+                    {
+                        <button type="button"
+                                class="person-intake-wizard__gear @(_showLookupTools ? "is-on" : null)"
+                                aria-pressed="@(_showLookupTools ? "true" : "false")"
+                                title="@(_showLookupTools ? T("Gear.Hide") : T("Gear.Show"))"
+                                aria-label="@T("Gear.AriaLabel")"
+                                @onclick="() => _showLookupTools = !_showLookupTools">
+                            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.49.42l-.36 2.54a7.03 7.03 0 0 0-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.48a.5.5 0 0 0 .12.64l2.03 1.58a7.07 7.07 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.5.38 1.05.7 1.63.94l.36 2.54a.5.5 0 0 0 .49.42h3.8a.5.5 0 0 0 .49-.42l.36-2.54a7.03 7.03 0 0 0 1.63-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/>
+                            </svg>
+                        </button>
+                    }
+                </div>
                 <p class="person-intake-wizard__panel-hint">@active.Hint</p>
 
-                @if (active.Kind == PersonIntakeStepKind.Form)
+                @if (active.Kind == PersonIntakeStepKind.Overview)
                 {
+                    <div class="person-intake-overview">
+                        <p class="person-intake-overview__kicker">@T("Overview.Kicker")</p>
+                        <div class="person-intake-overview__names">
+                            <div class="person-intake-overview__name">
+                                <span class="person-intake-overview__label">@PersonIntakeFieldLabels.Label(PersonPendingTargets.FirstName)</span>
+                                <span class="person-intake-overview__value">@DisplayName(Person.FirstName)</span>
+                            </div>
+                            <div class="person-intake-overview__name">
+                                <span class="person-intake-overview__label">@PersonIntakeFieldLabels.Label(PersonPendingTargets.LastName)</span>
+                                <span class="person-intake-overview__value">@DisplayName(Person.LastName)</span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (pending.Count > 0)
+                    {
+                        <div class="person-intake-wizard__review-block is-pending">
+                            <strong>@PersonIntakeText.Format("Review.Pending", pending.Count)</strong>
+                            <ul>
+                                @foreach (var p in pending)
+                                {
+                                    <li>@PersonIntakeFieldLabels.Label(p.TargetKey)</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                }
+                else if (active.Kind == PersonIntakeStepKind.Form)
+                {
+                    <div class="person-intake-wizard__form-fields">
                     @foreach (var key in active.FieldKeys)
                     {
+                        if (key == PersonPendingTargets.Age)
+                            continue;
+
                         var defer = State.PendingKeys.Contains(key);
                         var canDefer = PersonIntakeFieldLabels.CanDefer(key);
-                        <div class="person-intake-wizard__field-row">
+                        var canToggle = Access.CanTogglePendingField(key);
+                        if (key == PersonPendingTargets.DateOfBirth)
+                        {
+                            var showAge = !defer && Person.DateOfBirth != default;
+                            <div class="person-intake-wizard__field-row">
+                                <label>@PersonIntakeFieldLabels.Label(key)</label>
+                                <div class="person-intake-wizard__dob-age">
+                                    <div class="person-intake-wizard__dob-age-date">
+                                        @RenderField(key, defer)
+                                    </div>
+                                    @if (showAge)
+                                    {
+                                        <div class="person-intake-wizard__dob-age-calc" title="@T("Identity.AgeCalculated")">
+                                            <span class="person-intake-wizard__dob-age-label">@PersonIntakeFieldLabels.Label(PersonPendingTargets.Age)</span>
+                                            <input class="@FilledCss("person-intake-wizard__input person-intake-wizard__age-readonly", Person.DateOfBirth != default)"
+                                                   disabled
+                                                   value="@Person.Age.ToString()" />
+                                        </div>
+                                    }
+                                </div>
+                                @if (canDefer && (canToggle || defer))
+                                {
+                                    <label class="person-intake-wizard__toggle">
+                                        <input type="checkbox" checked="@defer" disabled="@(!canToggle)" @onchange="e => TogglePending(key, e.Value is true)" />
+                                        <span>@T("NotReceived")</span>
+                                    </label>
+                                }
+                            </div>
+                            continue;
+                        }
+
+                        <div class="person-intake-wizard__field-row @(key == PersonPendingTargets.Photo ? "person-intake-wizard__field-row--top" : null)">
                             <label>@PersonIntakeFieldLabels.Label(key)</label>
                             @RenderField(key, defer)
-                            @if (canDefer)
+                            @if (canDefer && (canToggle || defer))
                             {
                                 <label class="person-intake-wizard__toggle">
-                                    <input type="checkbox" checked="@defer" @onchange="e => TogglePending(key, e.Value is true)" />
-                                    <span>Not received</span>
+                                    <input type="checkbox" checked="@defer" disabled="@(!canToggle)" @onchange="e => TogglePending(key, e.Value is true)" />
+                                    <span>@T("NotReceived")</span>
                                 </label>
                             }
                         </div>
                     }
+                    </div>
                 }
                 else if (active.Kind == PersonIntakeStepKind.Record)
                 {
-                    var recordKey = active.RecordTargetKey;
-                    var deferRecord = State.PendingKeys.Contains(recordKey);
-                    var hasRows = RecordHasRows(recordKey);
-                    <div class="person-intake-wizard__record-card">
-                        <label class="person-intake-wizard__toggle">
-                            <input type="checkbox" checked="@deferRecord" disabled="@hasRows"
-                                   @onchange="e => TogglePending(recordKey, e.Value is true)" />
-                            <span>Not received yet</span>
-                        </label>
-                        @if (deferRecord)
-                        {
-                            <p class="person-intake-wizard__record-hint">This person stays on the Incomplete list until this record is added.</p>
-                            <input class="person-intake-wizard__input"
-                                   placeholder="Waiting on (optional)"
-                                   value="@GetRecordNote(recordKey)"
-                                   @oninput="e => SetRecordNote(recordKey, e.Value?.ToString())" />
-                        }
-                        else if (recordKey == PersonPendingTargets.Passport && !hasRows)
-                        {
-                            <div class="person-intake-wizard__passport-form">
-                                <input class="person-intake-wizard__input" placeholder="Passport number"
-                                       @bind="State.PassportDraft.PassportNumber" />
-                                <input class="person-intake-wizard__input" type="date"
-                                       @bind="State.PassportDraft.IssueDate" />
-                                <input class="person-intake-wizard__input" type="date"
-                                       @bind="State.PassportDraft.ExpirationDate" />
-                            </div>
-                        }
-                        else if (hasRows)
-                        {
-                            <p class="person-intake-wizard__record-hint">Record already on file.</p>
-                        }
-                        else
-                        {
-                            <p class="person-intake-wizard__record-hint">Add this record from the classic tabs after save, or mark Not received.</p>
-                        }
-                    </div>
+                    <PersonIntakeRecordStep RecordKey="@active.RecordTargetKey"
+                                            Person="Person"
+                                            OwnerViewId="@OwnerViewId"
+                                            State="State"
+                                            Access="Access"
+                                            ShowLookupTools="_showLookupTools"
+                                            ObjectSpace="ObjectSpace"
+                                            Application="Application"
+                                            StateChanged="OnRecordStateChanged" />
                 }
                 else if (active.Kind == PersonIntakeStepKind.Others)
                 {
                     @foreach (var option in active.OtherOptions)
                     {
-                        var on = State.PendingKeys.Contains(option.TargetKey);
-                        <div class="person-intake-wizard__other-row">
-                            <div>
-                                <strong>@option.Label</strong>
-                                <p>@option.Help</p>
+                        var targetKey = option.TargetKey;
+                        var on = State.PendingKeys.Contains(targetKey);
+                        var canToggleOther = Access.CanTogglePendingStep(targetKey);
+                        <div class="person-intake-wizard__other-card">
+                            <div class="person-intake-wizard__other-row">
+                                <div>
+                                    <strong>@option.Label</strong>
+                                    <p>@option.Help</p>
+                                </div>
+                                <label class="person-intake-wizard__toggle">
+                                    <input type="checkbox" checked="@on" disabled="@(!canToggleOther)" @onchange="e => TogglePending(targetKey, e.Value is true)" />
+                                    <span>@T("NotReceived")</span>
+                                </label>
                             </div>
-                            <label class="person-intake-wizard__toggle">
-                                <input type="checkbox" checked="@on" @onchange="e => TogglePending(option.TargetKey, e.Value is true)" />
-                                <span>Not received</span>
-                            </label>
+                            @if (on)
+                            {
+                                <p class="person-intake-wizard__record-hint">Marked as waiting — no row is created until this is cleared.</p>
+                            }
+                            else if (targetKey == PersonPendingTargets.PersonFamilyRelationDocument)
+                            {
+                                @RenderDocumentCopiesEditor(
+                                    State.OtherDrafts.FamilyRelationDocuments,
+                                    T("Other.FamilyRelationFile"),
+                                    EventCallback.Factory.Create<InputFileChangeEventArgs>(this, OnFamilyRelationDocumentsSelected),
+                                    RemoveFamilyRelationDocument,
+                                    Access.CanAddRecord(targetKey))
+                            }
+                            else if (targetKey == PersonPendingTargets.WorkDuty)
+                            {
+                                <div class="person-intake-wizard__record-form">
+                                    <div class="person-intake-wizard__field-row person-intake-wizard__field-row--top">
+                                        <label>@PersonIntakeFieldLabels.Label(PersonPendingTargets.WorkDuty)</label>
+                                        <textarea class="@FilledCss("person-intake-wizard__input", State.OtherDrafts.WorkDuty.Description)" rows="4" disabled="@(!Access.CanAddRecord(targetKey))" @bind="State.OtherDrafts.WorkDuty.Description"></textarea>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                 }
@@ -146,7 +245,7 @@ else
                     @if (unresolved.Count > 0)
                     {
                         <div class="person-intake-wizard__review-block is-error">
-                            <strong>Needs a value or Not received (@unresolved.Count)</strong>
+                            <strong>@PersonIntakeText.Format("Review.Unresolved", unresolved.Count)</strong>
                             <ul>
                                 @foreach (var u in unresolved)
                                 {
@@ -158,7 +257,7 @@ else
                     @if (pending.Count > 0)
                     {
                         <div class="person-intake-wizard__review-block is-pending">
-                            <strong>Marked as not received (@pending.Count)</strong>
+                            <strong>@PersonIntakeText.Format("Review.Pending", pending.Count)</strong>
                             <ul>
                                 @foreach (var p in pending)
                                 {
@@ -167,25 +266,24 @@ else
                             </ul>
                         </div>
                     }
-                    <div class="person-intake-wizard__field-row">
-                        <label>Note for the visa officer</label>
-                        <input class="person-intake-wizard__input" @bind="State.FollowNote" />
-                    </div>
+                    <p class="person-intake-wizard__record-hint">
+                        @T("Review.LaterNote")
+                    </p>
                 }
 
                 <footer class="person-intake-wizard__footer">
-                    <button type="button" class="person-intake-wizard__btn" disabled="@(_stepIndex == 0)" @onclick="PreviousStep">Back</button>
+                    <button type="button" class="person-intake-wizard__btn" disabled="@(currentIndex == 0)" @onclick="PreviousStep">@T("Back")</button>
                     <div class="person-intake-wizard__footer-right">
-                        @if (_stepIndex < steps.Count - 1)
+                        @if (currentIndex < steps.Count - 1)
                         {
-                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary" @onclick="NextStep">Next</button>
+                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary" @onclick="NextStep">@T("Next")</button>
                         }
-                        else
+                        else if (!Access.IsViewOnly)
                         {
                             <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary"
                                     disabled="@(unresolved.Count > 0)"
                                     @onclick="SaveAsync">
-                                @(pending.Count > 0 ? "Create as incomplete" : SaveCompleteLabel())
+                                @(pending.Count > 0 ? SaveIncompleteLabel() : SaveCompleteLabel())
                             </button>
                         }
                     </div>
@@ -197,13 +295,50 @@ else
 
 @code {
     [Parameter] public Person? Person { get; set; }
+    [Parameter] public string? OwnerViewId { get; set; }
     [Parameter] public IObjectSpace? ObjectSpace { get; set; }
+    [Parameter] public XafApplication? Application { get; set; }
     [Parameter] public PersonIntakeWizardState State { get; set; } = new();
     [Parameter] public string? StatusMessage { get; set; }
     [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public bool ShowIncompleteOverview { get; set; }
+    [Parameter] public PersonIntakeWizardAccess Access { get; set; } = PersonIntakeWizardAccess.Unrestricted;
     [Parameter] public EventCallback SaveRequested { get; set; }
 
     private int _stepIndex;
+    private bool _showLookupTools;
+
+    private static readonly HashSet<string> LookupFieldKeys = new(StringComparer.Ordinal)
+    {
+        PersonPendingTargets.Gender,
+        PersonPendingTargets.CountryOfBirth,
+        PersonPendingTargets.Nationality,
+        PersonPendingTargets.ForeignAddressCountry,
+        PersonPendingTargets.MaritalStatus,
+        PersonPendingTargets.ProjectContract,
+        PersonPendingTargets.Subcontractor,
+        PersonPendingTargets.Relationship
+    };
+
+    private static readonly HashSet<string> LookupRecordKeys = new(StringComparer.Ordinal)
+    {
+        PersonPendingTargets.Passport,
+        PersonPendingTargets.Education,
+        PersonPendingTargets.MedicalRecord,
+        PersonPendingTargets.AddressOfResidence,
+        PersonPendingTargets.TravelHistory,
+        PersonPendingTargets.EmployeePositionHistory
+    };
+
+    /// <summary>Gear only on steps that render add / edit-capable list fields, and only for editors.</summary>
+    private bool StepHasLookupTools(PersonIntakeStep step) =>
+        !Access.IsViewOnly && step.Kind switch
+        {
+            PersonIntakeStepKind.Form => step.FieldKeys.Any(k => LookupFieldKeys.Contains(k) && Access.CanWriteField(k)),
+            PersonIntakeStepKind.Record => LookupRecordKeys.Contains(step.RecordTargetKey),
+            _ => false
+        };
+    private Guid? _overviewPersonId;
     private Guid? _familyPersonId;
     private string? _familySourceText;
     private IReadOnlyList<VisaFamilyMemberLineDto> _familyLines = Array.Empty<VisaFamilyMemberLineDto>();
@@ -214,13 +349,122 @@ else
     private string _familyStatus = string.Empty;
     private bool _familyStatusError;
     private VisaFamilyMembersTextLocalization.UiTexts? _familyUi;
+    private string _passportCopyStatus = string.Empty;
+    private bool _passportCopyStatusError;
+    private string _educationCopyStatus = string.Empty;
+    private bool _educationCopyStatusError;
+    private string _familyDocStatus = string.Empty;
+    private bool _familyDocStatusError;
 
     private Task SaveAsync() => SaveRequested.HasDelegate ? SaveRequested.InvokeAsync() : Task.CompletedTask;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (!ShowIncompleteOverview || Person == null)
+            return;
+
+        if (_overviewPersonId == Person.ID)
+            return;
+
+        _overviewPersonId = Person.ID;
+        _stepIndex = 0;
+    }
+
+    private IReadOnlyList<PersonIntakeStep> VisibleSteps()
+    {
+        var steps = PersonIntakeStepCatalog.Steps(Person)
+            .Select(ApplyReadAccess)
+            .Where(step => step != null)
+            .ToList();
+        if (!ShowIncompleteOverview)
+            return steps;
+
+        steps.Insert(0, new PersonIntakeStep
+        {
+            Id = "overview",
+            Title = T("Step.Overview"),
+            Hint = T("Step.Overview.Hint"),
+            Kind = PersonIntakeStepKind.Overview
+        });
+        return steps;
+    }
+
+    /// <summary>Drops fields, record steps, and other-record options the role cannot read.</summary>
+    private PersonIntakeStep? ApplyReadAccess(PersonIntakeStep step)
+    {
+        switch (step.Kind)
+        {
+            case PersonIntakeStepKind.Form:
+                var fields = step.FieldKeys.Where(Access.CanReadField).ToList();
+                return fields.Count == 0 ? null : new PersonIntakeStep
+                {
+                    Id = step.Id,
+                    Title = step.Title,
+                    Hint = step.Hint,
+                    Kind = step.Kind,
+                    FieldKeys = fields
+                };
+            case PersonIntakeStepKind.Record:
+                return Access.CanReadStep(step.RecordTargetKey) ? step : null;
+            case PersonIntakeStepKind.Others:
+                var options = step.OtherOptions.Where(o => Access.CanReadStep(o.TargetKey)).ToList();
+                return options.Count == 0 ? null : new PersonIntakeStep
+                {
+                    Id = step.Id,
+                    Title = step.Title,
+                    Hint = step.Hint,
+                    Kind = step.Kind,
+                    OtherOptions = options
+                };
+            default:
+                return step;
+        }
+    }
+
+    private static string DisplayName(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value.Trim();
+
+    private bool HasPhoto => Person?.Photo is { Length: > 0 };
+
+    private string PersonHeading
+    {
+        get
+        {
+            var first = Person?.FirstName?.Trim();
+            var last = Person?.LastName?.Trim();
+            if (string.IsNullOrEmpty(first) && string.IsNullOrEmpty(last))
+                return T("NameNotEntered");
+            return string.Join(" ", new[] { first, last }.Where(s => !string.IsNullOrEmpty(s)));
+        }
+    }
+
+    private string PersonInitials
+    {
+        get
+        {
+            var first = NameInitial(Person?.FirstName);
+            var last = NameInitial(Person?.LastName);
+            if (first == null && last == null)
+                return "—";
+            if (first != null && last != null)
+                return first + "." + last + ".";
+            return (first ?? last) + ".";
+        }
+    }
+
+    private static string? NameInitial(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+        var text = value.Trim();
+        return char.ToUpperInvariant(text[0]).ToString();
+    }
     private Task NextStep()
     {
         if (Person != null)
         {
-            var steps = PersonIntakeStepCatalog.Steps(Person);
+            var steps = VisibleSteps();
             _stepIndex = Math.Min(_stepIndex + 1, steps.Count - 1);
         }
         return Task.CompletedTask;
@@ -234,7 +478,11 @@ else
 
     private Task GoToStep(int index)
     {
-        _stepIndex = index;
+        if (Person == null)
+            return Task.CompletedTask;
+
+        var stepCount = VisibleSteps().Count;
+        _stepIndex = Math.Clamp(index, 0, Math.Max(0, stepCount - 1));
         return Task.CompletedTask;
     }
 
@@ -247,8 +495,29 @@ else
         InvokeAsync(StateHasChanged);
     }
 
-    private string SaveCompleteLabel() =>
-        Person?.PersonRole == PersonRecordRole.Employee ? "Create employee" : "Create family member";
+    private string SaveCompleteLabel()
+    {
+        if (ObjectSpace?.IsNewObject(Person) != true)
+            return T("Save.SaveChanges");
+        return Person?.PersonRole == PersonRecordRole.Employee ? T("Save.CreateEmployee") : T("Save.CreateFamilyMember");
+    }
+
+    private string SaveIncompleteLabel() =>
+        ObjectSpace?.IsNewObject(Person) == true ? T("Save.CreateIncomplete") : T("Save.SaveIncomplete");
+
+    private string WizardTitle
+    {
+        get
+        {
+            var mode = Access.IsViewOnly ? "View" : ObjectSpace?.IsNewObject(Person) == true ? "New" : "Edit";
+            var role = Person?.PersonRole == PersonRecordRole.Employee ? "Employee" : "FamilyMember";
+            return T($"Title.{mode}{role}");
+        }
+    }
+
+    private static string T(string key) => PersonIntakeText.Get(key);
+
+    private Task OnRecordStateChanged() => InvokeAsync(StateHasChanged);
 
     private string GetRecordNote(string key) =>
         State.RecordNotes.TryGetValue(key, out var note) ? note : string.Empty;
@@ -277,45 +546,45 @@ else
 
         var seq = 0;
         var css = "person-intake-wizard__input" + (deferred ? " is-pending" : string.Empty);
+        var locked = deferred || !Access.CanWriteField(key);
         switch (key)
         {
             case PersonPendingTargets.FirstName:
                 builder.OpenElement(seq++, "input");
-                builder.AddAttribute(seq++, "class", css);
-                builder.AddAttribute(seq++, "disabled", deferred);
+                builder.AddAttribute(seq++, "class", FilledCss(css, Person.FirstName));
+                builder.AddAttribute(seq++, "disabled", locked);
                 builder.AddAttribute(seq++, "value", Person.FirstName ?? string.Empty);
                 builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => Person.FirstName = e.Value?.ToString()));
                 builder.CloseElement();
                 break;
             case PersonPendingTargets.LastName:
                 builder.OpenElement(seq++, "input");
-                builder.AddAttribute(seq++, "class", css);
-                builder.AddAttribute(seq++, "disabled", deferred);
+                builder.AddAttribute(seq++, "class", FilledCss(css, Person.LastName));
+                builder.AddAttribute(seq++, "disabled", locked);
                 builder.AddAttribute(seq++, "value", Person.LastName ?? string.Empty);
                 builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => Person.LastName = e.Value?.ToString()));
                 builder.CloseElement();
                 break;
             case PersonPendingTargets.DateOfBirth:
-                builder.OpenElement(seq++, "input");
-                builder.AddAttribute(seq++, "type", "date");
-                builder.AddAttribute(seq++, "class", css);
-                builder.AddAttribute(seq++, "disabled", deferred);
-                builder.AddAttribute(seq++, "value", Person.DateOfBirth == default ? string.Empty : Person.DateOfBirth.ToString("yyyy-MM-dd"));
-                builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e =>
+                builder.OpenComponent<OfficerDateEdit>(seq++);
+                builder.AddAttribute(seq++, nameof(OfficerDateEdit.Date), Person.DateOfBirth == default ? null : Person.DateOfBirth);
+                builder.AddAttribute(seq++, nameof(OfficerDateEdit.DateChanged), EventCallback.Factory.Create<DateTime?>(this, value =>
                 {
-                    if (DateTime.TryParse(e.Value?.ToString(), out var dt))
-                        Person.DateOfBirth = dt;
+                    Person.DateOfBirth = value ?? default;
                 }));
-                builder.CloseElement();
+                builder.AddAttribute(seq++, nameof(OfficerDateEdit.CssClass), "person-intake-wizard__input");
+                builder.AddAttribute(seq++, nameof(OfficerDateEdit.Enabled), !locked);
+                builder.AddAttribute(seq++, nameof(OfficerDateEdit.ReadOnly), locked);
+                builder.CloseComponent();
                 break;
             case PersonPendingTargets.PersonalNumber:
             case PersonPendingTargets.BirthPlace:
             case PersonPendingTargets.ForeignAddress:
-                AddTextInput(builder, ref seq, css, deferred, GetScalar(key), v => SetScalar(key, v));
+                AddTextInput(builder, ref seq, css, locked, GetScalar(key), v => SetScalar(key, v));
                 break;
             case PersonPendingTargets.Age:
                 builder.OpenElement(seq++, "input");
-                builder.AddAttribute(seq++, "class", css);
+                builder.AddAttribute(seq++, "class", FilledCss(css, Person.DateOfBirth != default));
                 builder.AddAttribute(seq++, "disabled", true);
                 builder.AddAttribute(seq++, "value", Person.DateOfBirth == default ? string.Empty : Person.Age.ToString());
                 builder.CloseElement();
@@ -333,7 +602,7 @@ else
                 builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.DraftLinesChanged), EventCallback.Factory.Create<IReadOnlyList<VisaFamilyMemberLineDto>>(this, OnVisaFamilyDraftChanged));
                 builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupVisible), _familyPopupVisible);
                 builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupVisibleChanged), EventCallback.Factory.Create<bool>(this, OnVisaFamilyPopupVisibleChanged));
-                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.ReadOnly), deferred);
+                builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.ReadOnly), locked);
                 builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.StatusMessage), _familyStatus);
                 builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.StatusIsError), _familyStatusError);
                 builder.AddAttribute(seq++, nameof(VisaFamilyMembersTextComponent.PopupTitle), familyUi.PopupTitle);
@@ -357,46 +626,34 @@ else
                 builder.CloseComponent();
                 break;
             case PersonPendingTargets.Photo:
-                builder.OpenComponent<InputFile>(seq++);
-                builder.AddAttribute(seq++, "class", css);
-                builder.AddAttribute(seq++, "accept", "image/*");
-                builder.AddAttribute(seq++, "disabled", deferred);
-                builder.AddAttribute(seq++, "OnChange", EventCallback.Factory.Create<InputFileChangeEventArgs>(this, OnPhotoSelected));
-                builder.CloseComponent();
-                if (Person.Photo is { Length: > 0 })
-                {
-                    builder.OpenElement(seq++, "span");
-                    builder.AddAttribute(seq++, "class", "person-intake-wizard__nav-status");
-                    builder.AddContent(seq++, "Photo attached");
-                    builder.CloseElement();
-                }
+                builder.AddContent(seq++, RenderPhotoEditor(deferred, locked));
                 break;
             case PersonPendingTargets.Gender:
-                RenderLookup(builder, ref seq, css, deferred, Person.Gender, value => Person.Gender = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.Gender, value => Person.Gender = value);
                 break;
             case PersonPendingTargets.CountryOfBirth:
-                RenderLookup(builder, ref seq, css, deferred, Person.CountryOfBirth, value => Person.CountryOfBirth = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.CountryOfBirth, value => Person.CountryOfBirth = value);
                 break;
             case PersonPendingTargets.Nationality:
-                RenderLookup(builder, ref seq, css, deferred, Person.Nationality, value => Person.Nationality = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.Nationality, value => Person.Nationality = value);
                 break;
             case PersonPendingTargets.ForeignAddressCountry:
-                RenderLookup(builder, ref seq, css, deferred, Person.ForeignAddressCountry, value => Person.ForeignAddressCountry = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.ForeignAddressCountry, value => Person.ForeignAddressCountry = value);
                 break;
             case PersonPendingTargets.MaritalStatus:
-                RenderLookup(builder, ref seq, css, deferred, Person.MaritalStatus, value => Person.MaritalStatus = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.MaritalStatus, value => Person.MaritalStatus = value);
                 break;
             case PersonPendingTargets.ProjectContract:
-                RenderLookup(builder, ref seq, css, deferred, Person.ProjectContract, value => Person.ProjectContract = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.ProjectContract, value => Person.ProjectContract = value);
                 break;
             case PersonPendingTargets.Subcontractor:
-                RenderLookup(builder, ref seq, css, deferred, Person.Subcontractor, value => Person.Subcontractor = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.Subcontractor, value => Person.Subcontractor = value);
                 break;
             case PersonPendingTargets.Relationship:
-                RenderLookup(builder, ref seq, css, deferred, Person.Relationship, value => Person.Relationship = value);
+                RenderLookup(builder, ref seq, key, css, locked, Person.Relationship, value => Person.Relationship = value);
                 break;
             case PersonPendingTargets.SponsoringEmployee:
-                RenderSponsoringEmployee(builder, ref seq, css, deferred);
+                RenderSponsoringEmployee(builder, ref seq, css, locked);
                 break;
             default:
                 AddTextInput(builder, ref seq, css, true, string.Empty, _ => { });
@@ -404,9 +661,24 @@ else
         }
     };
 
+    private static string? PersonLookupUsageKey(string key) => key switch
+    {
+        PersonPendingTargets.Gender => PersonIntakeLookupUsage.PersonGender,
+        PersonPendingTargets.CountryOfBirth => PersonIntakeLookupUsage.PersonCountryOfBirth,
+        PersonPendingTargets.Nationality => PersonIntakeLookupUsage.PersonNationality,
+        PersonPendingTargets.ForeignAddressCountry => PersonIntakeLookupUsage.PersonForeignAddressCountry,
+        PersonPendingTargets.MaritalStatus => PersonIntakeLookupUsage.PersonMaritalStatus,
+        PersonPendingTargets.ProjectContract => PersonIntakeLookupUsage.PersonProjectContract,
+        PersonPendingTargets.Subcontractor => PersonIntakeLookupUsage.PersonSubcontractor,
+        PersonPendingTargets.Relationship => PersonIntakeLookupUsage.PersonRelationship,
+        PersonPendingTargets.SponsoringEmployee => PersonIntakeLookupUsage.PersonSponsoringEmployee,
+        _ => null
+    };
+
     private void RenderLookup<T>(
         RenderTreeBuilder builder,
         ref int seq,
+        string key,
         string css,
         bool deferred,
         T? current,
@@ -415,32 +687,359 @@ else
         if (ObjectSpace == null)
             return;
 
-        var items = ObjectSpace.GetObjectsQuery<T>().ToList()
-            .OrderBy(LookupCaption, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
-        builder.OpenElement(seq++, "select");
-        builder.AddAttribute(seq++, "class", css);
-        builder.AddAttribute(seq++, "disabled", deferred);
-        builder.AddAttribute(seq++, "value", current?.ID.ToString() ?? string.Empty);
-        builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e =>
+        var options = PersonIntakeLookupHelper.LoadOptions<T>(ObjectSpace);
+        builder.OpenComponent<PersonIntakeSearchableLookup>(seq++);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Options), options);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Value), current?.ID);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ValueChanged),
+            EventCallback.Factory.Create<Guid?>(this, id =>
+            {
+                if (id is Guid guid && guid != Guid.Empty)
+                    assign(ObjectSpace.GetObjectByKey<T>(guid));
+                else
+                    assign(null);
+            }));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.CssClass),
+            css + " person-intake-wizard__lookup");
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Enabled), !deferred);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ReadOnly), deferred);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ShowTools), _showLookupTools);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.LookupType), typeof(T));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ObjectSpace), ObjectSpace);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Application), Application);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.FieldName), PersonIntakeFieldLabels.Label(key));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.UsageKey), PersonLookupUsageKey(key));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.LookupChanged),
+            EventCallback.Factory.Create(this, () => InvokeAsync(StateHasChanged)));
+        builder.CloseComponent();
+    }
+
+    private RenderFragment RenderDraftLookup<T>(Guid? currentId, Action<Guid?> assign) where T : BaseObject => builder =>
+    {
+        if (ObjectSpace == null)
+            return;
+
+        var options = PersonIntakeLookupHelper.LoadOptions<T>(ObjectSpace);
+        builder.OpenComponent<PersonIntakeSearchableLookup>(0);
+        builder.AddAttribute(1, nameof(PersonIntakeSearchableLookup.Options), options);
+        builder.AddAttribute(2, nameof(PersonIntakeSearchableLookup.Value), currentId);
+        builder.AddAttribute(3, nameof(PersonIntakeSearchableLookup.ValueChanged),
+            EventCallback.Factory.Create<Guid?>(this, id => assign(id == Guid.Empty ? null : id)));
+        builder.AddAttribute(4, nameof(PersonIntakeSearchableLookup.CssClass),
+            "person-intake-wizard__input person-intake-wizard__lookup");
+        builder.AddAttribute(5, nameof(PersonIntakeSearchableLookup.LookupType), typeof(T));
+        builder.AddAttribute(6, nameof(PersonIntakeSearchableLookup.ObjectSpace), ObjectSpace);
+        builder.AddAttribute(7, nameof(PersonIntakeSearchableLookup.Application), Application);
+        builder.AddAttribute(8, nameof(PersonIntakeSearchableLookup.LookupChanged),
+            EventCallback.Factory.Create(this, () => InvokeAsync(StateHasChanged)));
+        builder.CloseComponent();
+    };
+
+    private void EnsureRecordDraftDefaults(string recordKey)
+    {
+        if (ObjectSpace == null)
+            return;
+
+        if (recordKey == PersonPendingTargets.Passport)
         {
-            if (Guid.TryParse(e.Value?.ToString(), out var id))
-                assign(ObjectSpace.GetObjectByKey<T>(id));
-            else
-                assign(null);
-        }));
-        builder.OpenElement(seq++, "option");
-        builder.AddAttribute(seq++, "value", string.Empty);
-        builder.AddContent(seq++, "—");
-        builder.CloseElement();
-        foreach (var item in items)
-        {
-            builder.OpenElement(seq++, "option");
-            builder.AddAttribute(seq++, "value", item.ID.ToString());
-            builder.AddContent(seq++, LookupCaption(item));
-            builder.CloseElement();
+            if (!State.PassportDraft.PassportTypeId.HasValue)
+            {
+                var type = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(t => t.IsDefault)
+                    ?? ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(t =>
+                        string.Equals(t.PdfForm_Code, Passport.DefaultPassportTypeCode, StringComparison.OrdinalIgnoreCase));
+                State.PassportDraft.PassportTypeId = type?.ID;
+            }
+
+            if (!State.PassportDraft.IssuedCountryId.HasValue)
+                State.PassportDraft.IssuedCountryId = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault)?.ID;
         }
-        builder.CloseElement();
+        else if (recordKey == PersonPendingTargets.Education)
+        {
+            if (!State.EducationDraft.EducationLevelId.HasValue)
+                State.EducationDraft.EducationLevelId = ObjectSpace.GetObjectsQuery<EducationLevel>().FirstOrDefault(e => e.IsDefault)?.ID;
+            if (!State.EducationDraft.EducationCountryId.HasValue)
+                State.EducationDraft.EducationCountryId = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault)?.ID;
+            if (!State.EducationDraft.SpecialtyId.HasValue)
+                State.EducationDraft.SpecialtyId = ObjectSpace.GetObjectsQuery<Specialty>().FirstOrDefault(s => s.IsDefault)?.ID;
+        }
+    }
+
+    private string EducationDraftDescription()
+    {
+        if (ObjectSpace == null)
+            return string.Empty;
+
+        var parts = new List<string>();
+        void Add(Guid? id, Func<Guid, LookupBase?> resolve)
+        {
+            if (!id.HasValue)
+                return;
+            var entity = resolve(id.Value);
+            var caption = entity == null ? null : LookupCaption(entity);
+            if (!string.IsNullOrWhiteSpace(caption))
+                parts.Add(caption);
+        }
+
+        Add(State.EducationDraft.EducationLevelId, id => ObjectSpace.GetObjectByKey<EducationLevel>(id));
+        Add(State.EducationDraft.EducationInstitutionId, id => ObjectSpace.GetObjectByKey<EducationInstitution>(id));
+        Add(State.EducationDraft.EducationCountryId, id => ObjectSpace.GetObjectByKey<Country>(id));
+        Add(State.EducationDraft.SpecialtyId, id => ObjectSpace.GetObjectByKey<Specialty>(id));
+        if (!string.IsNullOrWhiteSpace(State.EducationDraft.GraduationYear))
+            parts.Add(State.EducationDraft.GraduationYear.Trim());
+
+        return string.Join(", ", parts);
+    }
+
+    private async Task OnPassportCopiesSelected(InputFileChangeEventArgs args)
+    {
+        _passportCopyStatus = string.Empty;
+        _passportCopyStatusError = false;
+        if (args.FileCount == 0)
+            return;
+
+        var maxMb = ObjectSpace != null
+            ? (SystemSettings.TryGetInstance(ObjectSpace)?.MaxDocumentSizeInMB ?? SystemSettings.DefaultMaxDocumentSizeInMB)
+            : SystemSettings.DefaultMaxDocumentSizeInMB;
+        var maxBytes = maxMb * 1024L * 1024L;
+
+        foreach (var file in args.GetMultipleFiles(10))
+        {
+            if (file.Size > maxBytes)
+            {
+                _passportCopyStatus = PersonIntakeText.Format("Files.TooLarge", file.Name, maxMb);
+                _passportCopyStatusError = true;
+                continue;
+            }
+
+            await using var stream = file.OpenReadStream(maxBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var content = buffer.ToArray();
+
+            if (ObjectSpace != null)
+            {
+                var validationError = PersonLinkedDocumentUploadService.ValidateBytes(ObjectSpace, file.Name, content);
+                if (!string.IsNullOrEmpty(validationError))
+                {
+                    _passportCopyStatus = $"\"{file.Name}\": {validationError}";
+                    _passportCopyStatusError = true;
+                    continue;
+                }
+            }
+
+            State.PassportDraft.Copies.Add(new PersonIntakeDocumentCopyDraft
+            {
+                FileName = file.Name,
+                Content = content
+            });
+        }
+
+        if (!_passportCopyStatusError && State.PassportDraft.Copies.Count > 0)
+            _passportCopyStatus = PersonIntakeText.Format("Files.Ready", State.PassportDraft.Copies.Count);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task RemovePassportCopy(Guid copyId)
+    {
+        State.PassportDraft.Copies.RemoveAll(c => c.Id == copyId);
+        _passportCopyStatus = State.PassportDraft.Copies.Count == 0
+            ? string.Empty
+            : PersonIntakeText.Format("Files.Ready", State.PassportDraft.Copies.Count);
+        _passportCopyStatusError = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnEducationCopiesSelected(InputFileChangeEventArgs args)
+    {
+        _educationCopyStatus = string.Empty;
+        _educationCopyStatusError = false;
+        if (args.FileCount == 0)
+            return;
+
+        var maxMb = ObjectSpace != null
+            ? (SystemSettings.TryGetInstance(ObjectSpace)?.MaxDocumentSizeInMB ?? SystemSettings.DefaultMaxDocumentSizeInMB)
+            : SystemSettings.DefaultMaxDocumentSizeInMB;
+        var maxBytes = maxMb * 1024L * 1024L;
+
+        foreach (var file in args.GetMultipleFiles(10))
+        {
+            if (file.Size > maxBytes)
+            {
+                _educationCopyStatus = PersonIntakeText.Format("Files.TooLarge", file.Name, maxMb);
+                _educationCopyStatusError = true;
+                continue;
+            }
+
+            await using var stream = file.OpenReadStream(maxBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var content = buffer.ToArray();
+
+            if (ObjectSpace != null)
+            {
+                var validationError = PersonLinkedDocumentUploadService.ValidateBytes(ObjectSpace, file.Name, content);
+                if (!string.IsNullOrEmpty(validationError))
+                {
+                    _educationCopyStatus = $"\"{file.Name}\": {validationError}";
+                    _educationCopyStatusError = true;
+                    continue;
+                }
+            }
+
+            State.EducationDraft.Copies.Add(new PersonIntakeDocumentCopyDraft
+            {
+                FileName = file.Name,
+                Content = content
+            });
+        }
+
+        if (!_educationCopyStatusError && State.EducationDraft.Copies.Count > 0)
+            _educationCopyStatus = PersonIntakeText.Format("Files.Ready", State.EducationDraft.Copies.Count);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task RemoveEducationCopy(Guid copyId)
+    {
+        State.EducationDraft.Copies.RemoveAll(c => c.Id == copyId);
+        _educationCopyStatus = State.EducationDraft.Copies.Count == 0
+            ? string.Empty
+            : PersonIntakeText.Format("Files.Ready", State.EducationDraft.Copies.Count);
+        _educationCopyStatusError = false;
+        return Task.CompletedTask;
+    }
+
+    private RenderFragment RenderDocumentCopiesEditor(
+        List<PersonIntakeDocumentCopyDraft> copies,
+        string noun,
+        EventCallback<InputFileChangeEventArgs> onChange,
+        Func<Guid, Task> onRemove,
+        bool editable = true) => __builder =>
+    {
+        var seq = 0;
+        var status = copies == State.OtherDrafts.FamilyRelationDocuments ? _familyDocStatus : string.Empty;
+        var statusError = copies == State.OtherDrafts.FamilyRelationDocuments && _familyDocStatusError;
+
+        __builder.OpenElement(seq++, "div");
+        __builder.AddAttribute(seq++, "class", "person-intake-wizard__copies");
+        if (editable)
+        {
+            __builder.OpenComponent<InputFile>(seq++);
+            __builder.AddAttribute(seq++, "accept", ".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp");
+            __builder.AddAttribute(seq++, "multiple", true);
+            __builder.AddAttribute(seq++, "OnChange", onChange);
+            __builder.CloseComponent();
+        }
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            __builder.OpenElement(seq++, "p");
+            __builder.AddAttribute(seq++, "class", "person-intake-wizard__record-hint" + (statusError ? " is-error" : string.Empty));
+            __builder.AddContent(seq++, status);
+            __builder.CloseElement();
+        }
+
+        if (copies.Count > 0)
+        {
+            __builder.OpenElement(seq++, "ul");
+            __builder.AddAttribute(seq++, "class", "person-intake-wizard__copy-list");
+            foreach (var copy in copies)
+            {
+                var copyId = copy.Id;
+                __builder.OpenElement(seq++, "li");
+                __builder.OpenElement(seq++, "span");
+                __builder.AddContent(seq++, copy.FileName);
+                __builder.CloseElement();
+                if (editable)
+                {
+                    __builder.OpenElement(seq++, "button");
+                    __builder.AddAttribute(seq++, "type", "button");
+                    __builder.AddAttribute(seq++, "class", "person-intake-wizard__btn person-intake-wizard__btn--link");
+                    __builder.AddAttribute(seq++, "onclick", EventCallback.Factory.Create(this, () => onRemove(copyId)));
+                    __builder.AddContent(seq++, T("Remove"));
+                    __builder.CloseElement();
+                }
+                __builder.CloseElement();
+            }
+            __builder.CloseElement();
+        }
+        else
+        {
+            __builder.OpenElement(seq++, "p");
+            __builder.AddAttribute(seq++, "class", "person-intake-wizard__record-hint");
+            __builder.AddContent(seq++, editable ? T("Files.OptionalUpload") : T("Files.None"));
+            __builder.CloseElement();
+        }
+
+        __builder.CloseElement();
+    };
+
+    private Task OnFamilyRelationDocumentsSelected(InputFileChangeEventArgs args) =>
+        AddDocumentCopiesAsync(args, State.OtherDrafts.FamilyRelationDocuments, "family relation file",
+            (msg, err) => { _familyDocStatus = msg; _familyDocStatusError = err; });
+
+    private Task RemoveFamilyRelationDocument(Guid id)
+    {
+        State.OtherDrafts.FamilyRelationDocuments.RemoveAll(c => c.Id == id);
+        _familyDocStatus = State.OtherDrafts.FamilyRelationDocuments.Count == 0
+            ? string.Empty
+            : PersonIntakeText.Format("Files.Ready", State.OtherDrafts.FamilyRelationDocuments.Count);
+        _familyDocStatusError = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task AddDocumentCopiesAsync(
+        InputFileChangeEventArgs args,
+        List<PersonIntakeDocumentCopyDraft> target,
+        string noun,
+        Action<string, bool> setStatus)
+    {
+        setStatus(string.Empty, false);
+        if (args.FileCount == 0)
+            return;
+
+        var maxMb = ObjectSpace != null
+            ? (SystemSettings.TryGetInstance(ObjectSpace)?.MaxDocumentSizeInMB ?? SystemSettings.DefaultMaxDocumentSizeInMB)
+            : SystemSettings.DefaultMaxDocumentSizeInMB;
+        var maxBytes = maxMb * 1024L * 1024L;
+        var hadError = false;
+
+        foreach (var file in args.GetMultipleFiles(10))
+        {
+            if (file.Size > maxBytes)
+            {
+                setStatus(PersonIntakeText.Format("Files.TooLarge", file.Name, maxMb), true);
+                hadError = true;
+                continue;
+            }
+
+            await using var stream = file.OpenReadStream(maxBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            var content = buffer.ToArray();
+
+            if (ObjectSpace != null)
+            {
+                var validationError = PersonLinkedDocumentUploadService.ValidateBytes(ObjectSpace, file.Name, content);
+                if (!string.IsNullOrEmpty(validationError))
+                {
+                    setStatus($"\"{file.Name}\": {validationError}", true);
+                    hadError = true;
+                    continue;
+                }
+            }
+
+            target.Add(new PersonIntakeDocumentCopyDraft
+            {
+                FileName = file.Name,
+                Content = content
+            });
+        }
+
+        if (!hadError && target.Count > 0)
+            setStatus(PersonIntakeText.Format("Files.Ready", target.Count), false);
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private void RenderSponsoringEmployee(RenderTreeBuilder builder, ref int seq, string css, bool deferred)
@@ -451,32 +1050,90 @@ else
         var employees = ObjectSpace.GetObjectsQuery<Person>()
             .Where(p => p.PersonRole == PersonRecordRole.Employee)
             .ToList()
-            .OrderBy(p => p.FullName, StringComparer.CurrentCultureIgnoreCase)
+            .Select(p => new PersonIntakeLookupOption
+            {
+                Oid = p.ID,
+                Text = string.IsNullOrWhiteSpace(p.FullName) ? p.ToString() ?? string.Empty : p.FullName
+            })
+            .OrderBy(o => o.Text, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
-        builder.OpenElement(seq++, "select");
-        builder.AddAttribute(seq++, "class", css);
-        builder.AddAttribute(seq++, "disabled", deferred);
-        builder.AddAttribute(seq++, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, e =>
+
+        builder.OpenComponent<PersonIntakeSearchableLookup>(seq++);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Options), employees);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Value), Person.SponsoringEmployee?.ID);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ValueChanged),
+            EventCallback.Factory.Create<Guid?>(this, id =>
+            {
+                Person.SponsoringEmployee = id is Guid guid && guid != Guid.Empty
+                    ? ObjectSpace.GetObjectByKey<Person>(guid)
+                    : null;
+            }));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.CssClass), css);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Enabled), !deferred);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ReadOnly), deferred);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.AllowEditLookup), false);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.LookupType), typeof(Person));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ObjectSpace), ObjectSpace);
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.FieldName),
+            PersonIntakeFieldLabels.Label(PersonPendingTargets.SponsoringEmployee));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Placeholder), T("Lookup.Placeholder.Employee"));
+        builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.UsageKey), PersonIntakeLookupUsage.PersonSponsoringEmployee);
+        builder.CloseComponent();
+    }
+
+    private RenderFragment RenderPhotoEditor(bool deferred, bool locked) => builder =>
+    {
+        var seq = 0;
+        var hasPhoto = Person?.Photo is { Length: > 0 };
+        builder.OpenElement(seq++, "div");
+        builder.AddAttribute(seq++, "class", "person-intake-wizard__photo" + (deferred ? " is-pending" : string.Empty));
+
+        builder.OpenElement(seq++, "div");
+        builder.AddAttribute(seq++, "class", "person-intake-wizard__photo-frame");
+        if (hasPhoto)
         {
-            if (Guid.TryParse(e.Value?.ToString(), out var id))
-                Person.SponsoringEmployee = ObjectSpace.GetObjectByKey<Person>(id);
-            else
-                Person.SponsoringEmployee = null;
-        }));
-        builder.OpenElement(seq++, "option");
-        builder.AddAttribute(seq++, "value", string.Empty);
-        builder.AddContent(seq++, "—");
-        builder.CloseElement();
-        foreach (var employee in employees)
+            builder.OpenElement(seq++, "img");
+            builder.AddAttribute(seq++, "class", "person-intake-wizard__photo-img");
+            builder.AddAttribute(seq++, "alt", T("Photo.Alt"));
+            builder.AddAttribute(seq++, "src", PhotoDataUrl(Person!.Photo!));
+            builder.CloseElement();
+        }
+        else
         {
-            builder.OpenElement(seq++, "option");
-            builder.AddAttribute(seq++, "value", employee.ID.ToString());
-            builder.AddAttribute(seq++, "selected", Person.SponsoringEmployee?.ID == employee.ID);
-            builder.AddContent(seq++, employee.FullName ?? employee.ToString());
+            builder.OpenElement(seq++, "div");
+            builder.AddAttribute(seq++, "class", "person-intake-wizard__photo-empty");
+            builder.AddContent(seq++, T("Photo.None"));
             builder.CloseElement();
         }
         builder.CloseElement();
-    }
+
+        builder.OpenElement(seq++, "div");
+        builder.AddAttribute(seq++, "class", "person-intake-wizard__photo-actions");
+        if (!locked)
+        {
+            builder.OpenElement(seq++, "label");
+            builder.AddAttribute(seq++, "class", "person-intake-wizard__photo-upload");
+            builder.AddContent(seq++, hasPhoto ? T("Photo.Change") : T("Photo.Upload"));
+            builder.OpenComponent<InputFile>(seq++);
+            builder.AddAttribute(seq++, "class", "person-intake-wizard__photo-file");
+            builder.AddAttribute(seq++, "accept", "image/*");
+            builder.AddAttribute(seq++, "OnChange", EventCallback.Factory.Create<InputFileChangeEventArgs>(this, OnPhotoSelected));
+            builder.CloseComponent();
+            builder.CloseElement();
+
+            if (hasPhoto)
+            {
+                builder.OpenElement(seq++, "button");
+                builder.AddAttribute(seq++, "type", "button");
+                builder.AddAttribute(seq++, "class", "person-intake-wizard__btn person-intake-wizard__btn--link");
+                builder.AddAttribute(seq++, "onclick", EventCallback.Factory.Create(this, ClearPhoto));
+                builder.AddContent(seq++, T("Photo.Clear"));
+                builder.CloseElement();
+            }
+        }
+        builder.CloseElement();
+        builder.CloseElement();
+    };
 
     private async Task OnPhotoSelected(InputFileChangeEventArgs args)
     {
@@ -488,6 +1145,34 @@ else
         await stream.CopyToAsync(buffer);
         Person.Photo = buffer.ToArray();
         await InvokeAsync(StateHasChanged);
+    }
+
+    private Task ClearPhoto()
+    {
+        if (Person != null)
+            Person.Photo = null;
+        return Task.CompletedTask;
+    }
+
+    private static string PhotoDataUrl(byte[] bytes)
+    {
+        var mime = DetectImageMime(bytes);
+        return $"data:{mime};base64,{Convert.ToBase64String(bytes)}";
+    }
+
+    private static string DetectImageMime(byte[] bytes)
+    {
+        if (bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF)
+            return "image/jpeg";
+        if (bytes.Length >= 8
+            && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47)
+            return "image/png";
+        if (bytes.Length >= 6
+            && bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46)
+            return "image/gif";
+        if (bytes.Length >= 2 && bytes[0] == 0x42 && bytes[1] == 0x4D)
+            return "image/bmp";
+        return "image/jpeg";
     }
 
     private static string LookupCaption(BaseObject item)
@@ -515,6 +1200,12 @@ else
         return all.ToList();
     }
 
+    private static string FilledCss(string css, string? value) =>
+        FilledCss(css, !string.IsNullOrWhiteSpace(value));
+
+    private static string FilledCss(string css, bool filled) =>
+        filled ? css + " is-filled" : css;
+
     private void AddTextInput(
         RenderTreeBuilder builder,
         ref int seq,
@@ -524,7 +1215,7 @@ else
         Action<string> assign)
     {
         builder.OpenElement(seq++, "input");
-        builder.AddAttribute(seq++, "class", css);
+        builder.AddAttribute(seq++, "class", FilledCss(css, value));
         builder.AddAttribute(seq++, "disabled", deferred);
         builder.AddAttribute(seq++, "value", value);
         builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => assign(e.Value?.ToString() ?? string.Empty)));
@@ -697,24 +1388,41 @@ else
                 IsLegacyIncomplete = line.IsLegacyIncomplete,
             }).ToList();
 
+    private (string Css, string Badge, string Text) StatusFor(PersonIntakeStep step, List<PersonIntakeFinding> stepFindings)
+    {
+        if (step.RecordTargetKey == PersonPendingTargets.EmployeeSalary)
+        {
+            var hasSalary = State.SalaryDrafts.Count > 0
+                || Person?.Salaries?.Any(salary => salary != null) == true;
+            return hasSalary
+                ? ("is-done", "✓", T("Status.Added"))
+                : ("is-optional", "·", T("Status.Optional"));
+        }
+
+        return StepStatus(step, stepFindings);
+    }
+
     private static (string Css, string Badge, string Text) StepStatus(PersonIntakeStep step, List<PersonIntakeFinding> stepFindings)
     {
+        if (step.Kind == PersonIntakeStepKind.Overview)
+            return ("is-pending", "!", T("Status.StartHere"));
+
         if (step.Kind == PersonIntakeStepKind.Review)
-            return ("is-review", "✓", "Summary");
+            return ("is-review", "✓", T("Status.Summary"));
 
         if (stepFindings.Count == 0)
-            return ("is-todo", "·", "Not started");
+            return ("is-todo", "·", T("Status.NotStarted"));
 
         if (stepFindings.Any(f => f.State == PersonIntakeItemState.Unresolved))
-            return ("is-progress", "…", "In progress");
+            return ("is-progress", "…", T("Status.InProgress"));
 
         var pendingCount = stepFindings.Count(f => f.State == PersonIntakeItemState.Pending);
         if (pendingCount > 0 && stepFindings.All(f => f.State != PersonIntakeItemState.Unresolved))
-            return ("is-pending", "!", $"{pendingCount} pending");
+            return ("is-pending", "!", PersonIntakeText.Format("Status.PendingCount", pendingCount));
 
         if (stepFindings.All(f => f.State == PersonIntakeItemState.Filled))
-            return ("is-done", "✓", "Complete");
+            return ("is-done", "✓", T("Status.Complete"));
 
-        return ("is-todo", "·", "Not started");
+        return ("is-todo", "·", T("Status.NotStarted"));
     }
 }

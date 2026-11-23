@@ -1,3 +1,4 @@
+using Visa2026.Module;
 using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -11,9 +12,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Employees and Family Members open on a search card instead of an empty grid.
-/// A search keeps that text in a bar above the rows. The list search box stays hidden.
-/// Clearing the bar brings the card back.
+/// Previously replaced Employees and Family Members with a custom search bar.
+/// Those navigation items now open the native XAF ListView, so this controller stays inactive.
 /// </summary>
 public sealed class PersonRosterSearchGateController : ObjectViewController<ListView, Person>
 {
@@ -29,7 +29,8 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
 
     public PersonRosterSearchGateController()
     {
-        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers";
+        Active["NativeRosterList"] = false;
+        TargetViewId = PersonRosterListViewIds.Employees + ";" + PersonRosterListViewIds.EmployeesIncomplete + ";" + PersonRosterListViewIds.FamilyMembers + ";" + PersonRosterListViewIds.FamilyMembersIncomplete;
         TargetViewNesting = Nesting.Root;
     }
 

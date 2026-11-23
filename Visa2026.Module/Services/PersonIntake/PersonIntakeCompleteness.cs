@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.PersonIntake;
 
@@ -45,6 +46,7 @@ public static class PersonIntakeCompleteness
         new(PersonPendingTargets.CountryOfBirth, PersonIncompleteDataLabels.PersonalData, Who.Both, true, true),
         new(PersonPendingTargets.Nationality, PersonIncompleteDataLabels.PersonalData, Who.Both, true, true),
         new(PersonPendingTargets.MaritalStatus, PersonIncompleteDataLabels.PersonalData, Who.Employee, true, true),
+        new(PersonPendingTargets.VisaApplicationFamilyMembersText, PersonIncompleteDataLabels.PersonalData, Who.Employee, true, true),
         new(PersonPendingTargets.ForeignAddress, PersonIncompleteDataLabels.PersonalData, Who.Employee, true, true),
         new(PersonPendingTargets.ForeignAddressCountry, PersonIncompleteDataLabels.PersonalData, Who.Employee, true, true),
         new(PersonPendingTargets.ProjectContract, PersonIncompleteDataLabels.PersonalData, Who.Both, true, true),
@@ -54,11 +56,10 @@ public static class PersonIntakeCompleteness
         new(PersonPendingTargets.Photo, PersonIncompleteDataLabels.Photo, Who.Both, false, true),
         new(PersonPendingTargets.Passport, PersonIncompleteDataLabels.Passport, Who.Both, true, true),
         new(PersonPendingTargets.Education, PersonIncompleteDataLabels.Education, Who.Both, true, true),
-        new(PersonPendingTargets.MedicalRecord, PersonIncompleteDataLabels.Medical, Who.Both, true, true),
-        new(PersonPendingTargets.AddressOfResidence, PersonIncompleteDataLabels.Address, Who.Both, true, true),
+        // Medical and travel are collected outside this wizard.
+        // Address completeness is case-owned (RequireAddress1); not a Person inventory target.
         new(PersonPendingTargets.PersonDocument, PersonIncompleteDataLabels.Cv, Who.Employee, false, true),
         new(PersonPendingTargets.EmployeePositionHistory, PersonIncompleteDataLabels.Other, Who.Employee, false, true),
-        new(PersonPendingTargets.TravelHistory, PersonIncompleteDataLabels.Other, Who.Both, false, true),
         new(PersonPendingTargets.WorkDuty, PersonIncompleteDataLabels.Other, Who.Employee, false, true),
         new(PersonPendingTargets.EmployeeSalary, PersonIncompleteDataLabels.Other, Who.Employee, false, true),
         new(PersonPendingTargets.PersonFamilyRelationDocument, PersonIncompleteDataLabels.FamilyDocs, Who.Family, false, true),
@@ -70,11 +71,17 @@ public static class PersonIntakeCompleteness
             item != null && string.Equals(item.TargetKey, targetKey, StringComparison.Ordinal));
 
     public static IReadOnlyList<PersonIntakeFinding> Evaluate(Person person) =>
-        Evaluate(person, draftPendingKeys: null);
+        Evaluate(person, draftPendingKeys: null, draftFilledKeys: null);
 
     public static IReadOnlyList<PersonIntakeFinding> Evaluate(
         Person person,
-        IEnumerable<string> draftPendingKeys)
+        IEnumerable<string> draftPendingKeys) =>
+        Evaluate(person, draftPendingKeys, draftFilledKeys: null);
+
+    public static IReadOnlyList<PersonIntakeFinding> Evaluate(
+        Person person,
+        IEnumerable<string> draftPendingKeys,
+        IEnumerable<string> draftFilledKeys)
     {
         HashSet<string> draft = null;
         if (draftPendingKeys != null)
@@ -87,10 +94,24 @@ public static class PersonIntakeCompleteness
             }
         }
 
-        return Evaluate(person, draft);
+        HashSet<string> filled = null;
+        if (draftFilledKeys != null)
+        {
+            filled = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var key in draftFilledKeys)
+            {
+                if (!string.IsNullOrWhiteSpace(key))
+                    filled.Add(key);
+            }
+        }
+
+        return Evaluate(person, draft, filled);
     }
 
-    private static IReadOnlyList<PersonIntakeFinding> Evaluate(Person person, HashSet<string> draftPendingKeys)
+    private static IReadOnlyList<PersonIntakeFinding> Evaluate(
+        Person person,
+        HashSet<string> draftPendingKeys,
+        HashSet<string> draftFilledKeys)
     {
         if (person == null)
             return Array.Empty<PersonIntakeFinding>();
@@ -105,7 +126,8 @@ public static class PersonIntakeCompleteness
             PersonIntakeItemState state;
             if (IsPending(person, requirement.TargetKey, draftPendingKeys))
                 state = PersonIntakeItemState.Pending;
-            else if (IsFilled(person, requirement.TargetKey))
+            else if (IsFilled(person, requirement.TargetKey)
+                     || (draftFilledKeys != null && draftFilledKeys.Contains(requirement.TargetKey)))
                 state = PersonIntakeItemState.Filled;
             else if (requirement.BlocksWhenEmpty)
                 state = PersonIntakeItemState.Unresolved;
@@ -201,6 +223,8 @@ public static class PersonIntakeCompleteness
             person.Nationality = null;
         if (HasPending(person, PersonPendingTargets.MaritalStatus))
             person.MaritalStatus = null;
+        if (HasPending(person, PersonPendingTargets.VisaApplicationFamilyMembersText))
+            person.VisaApplicationFamilyMembersText = null;
         if (HasPending(person, PersonPendingTargets.ForeignAddress))
             person.ForeignAddress = null;
         if (HasPending(person, PersonPendingTargets.ForeignAddressCountry))
@@ -231,6 +255,10 @@ public static class PersonIntakeCompleteness
         PersonPendingTargets.CountryOfBirth => person.CountryOfBirth != null,
         PersonPendingTargets.Nationality => person.Nationality != null,
         PersonPendingTargets.MaritalStatus => person.MaritalStatus != null,
+        PersonPendingTargets.VisaApplicationFamilyMembersText =>
+            VisaFamilyMemberLinesHelper.IsNoneValue(person.VisaApplicationFamilyMembersText)
+            || (!string.IsNullOrWhiteSpace(person.VisaApplicationFamilyMembersText)
+                && !VisaFamilyMemberLinesHelper.IsManualVisaFamilyEmpty(person.VisaApplicationFamilyMembersText)),
         PersonPendingTargets.ForeignAddress => HasText(person.ForeignAddress),
         PersonPendingTargets.ForeignAddressCountry => person.ForeignAddressCountry != null,
         PersonPendingTargets.ProjectContract => person.ProjectContract != null

@@ -6,6 +6,7 @@ namespace Visa2026.Module.Services.PersonIntake;
 
 public enum PersonIntakeStepKind
 {
+    Overview,
     Form,
     Record,
     Others,
@@ -35,58 +36,76 @@ public static class PersonIntakeStepCatalog
     public static IReadOnlyList<PersonIntakeStep> Steps(Person person)
     {
         var employee = person?.PersonRole == PersonRecordRole.Employee;
-        var personFields = new List<string>();
-        if (!employee)
-            personFields.Add(PersonPendingTargets.SponsoringEmployee);
-
-        personFields.Add(PersonPendingTargets.FirstName);
-        personFields.Add(PersonPendingTargets.LastName);
-        personFields.Add(PersonPendingTargets.DateOfBirth);
-        personFields.Add(PersonPendingTargets.Age);
-        personFields.Add(PersonPendingTargets.BirthPlace);
-        personFields.Add(PersonPendingTargets.CountryOfBirth);
-        personFields.Add(PersonPendingTargets.Gender);
-        if (employee)
+        // Identity: who the person is.
+        var identityFields = new List<string>
         {
-            personFields.Add(PersonPendingTargets.MaritalStatus);
-            personFields.Add(PersonPendingTargets.VisaApplicationFamilyMembersText);
+            PersonPendingTargets.FirstName,
+            PersonPendingTargets.LastName,
+            PersonPendingTargets.DateOfBirth,
+            PersonPendingTargets.Age,
+            PersonPendingTargets.BirthPlace,
+            PersonPendingTargets.CountryOfBirth,
+            PersonPendingTargets.Gender
+        };
+        if (employee)
+            identityFields.Add(PersonPendingTargets.MaritalStatus);
+        identityFields.Add(PersonPendingTargets.Nationality);
+        identityFields.Add(PersonPendingTargets.PersonalNumber);
+        identityFields.Add(PersonPendingTargets.Photo);
+
+        // Work & address: assignment / contact context (shorter companion step).
+        var workFields = new List<string>();
+        if (!employee)
+        {
+            workFields.Add(PersonPendingTargets.SponsoringEmployee);
+            workFields.Add(PersonPendingTargets.Relationship);
+        }
+        else
+        {
+            workFields.Add(PersonPendingTargets.VisaApplicationFamilyMembersText);
+            workFields.Add(PersonPendingTargets.ForeignAddress);
+            workFields.Add(PersonPendingTargets.ForeignAddressCountry);
         }
 
-        personFields.Add(PersonPendingTargets.Nationality);
-        personFields.Add(PersonPendingTargets.PersonalNumber);
-        if (employee)
-        {
-            personFields.Add(PersonPendingTargets.ForeignAddress);
-            personFields.Add(PersonPendingTargets.ForeignAddressCountry);
-        }
-
-        personFields.Add(PersonPendingTargets.ProjectContract);
-        personFields.Add(PersonPendingTargets.Subcontractor);
-        if (!employee)
-            personFields.Add(PersonPendingTargets.Relationship);
-        personFields.Add(PersonPendingTargets.Photo);
+        workFields.Add(PersonPendingTargets.ProjectContract);
+        workFields.Add(PersonPendingTargets.Subcontractor);
 
         var steps = new List<PersonIntakeStep>
         {
-            FormStep("person", "Person", "Person", "Same fields as the person detail form.", personFields.ToArray())
+            FormStep("identity", PersonIntakeText.Get("Step.Identity"), PersonIntakeText.Get("Step.Identity.Hint"), identityFields.ToArray()),
+            FormStep("work", PersonIntakeText.Get("Step.Work"), employee
+                ? PersonIntakeText.Get("Step.Work.HintEmployee")
+                : PersonIntakeText.Get("Step.Work.HintFamilyMember"), workFields.ToArray())
         };
 
-        steps.Add(RecordStep("passports", "Passports", PersonPendingTargets.Passport));
-        steps.Add(RecordStep("education", "Education", PersonPendingTargets.Education));
-        steps.Add(RecordStep("medical", "Medical", PersonPendingTargets.MedicalRecord));
-        steps.Add(RecordStep("residence", "Residence", PersonPendingTargets.AddressOfResidence));
-        steps.Add(OthersStep(person));
+        steps.Add(RecordStep("passports", PersonIntakeText.Get("Step.Passports"), PersonPendingTargets.Passport));
+        steps.Add(RecordStep("education", PersonIntakeText.Get("Step.Education"), PersonPendingTargets.Education));
+        // Medical records and travel history are entered later from their own navigation, not this wizard.
+        // Residence addresses are case-owned (ApplicationProfileInstance Address1/2); not Person intake.
+        if (employee)
+            steps.Add(RecordStep("documents", PersonIntakeText.Get("Step.Documents"), PersonPendingTargets.PersonDocument));
+        if (employee)
+            steps.Add(RecordStep(
+                "salaries",
+                PersonIntakeText.Get("Step.Salaries"),
+                PersonPendingTargets.EmployeeSalary,
+                PersonIntakeText.Get("Step.Salaries.Hint")));
+        if (employee)
+            steps.Add(RecordStep("positions", PersonIntakeText.Get("Step.Positions"), PersonPendingTargets.EmployeePositionHistory));
+        var others = OthersStep(person);
+        if (others.OtherOptions.Count > 0)
+            steps.Add(others);
         steps.Add(new PersonIntakeStep
         {
             Id = "review",
-            Title = "Review",
-            Hint = "Check what is complete and what is still outstanding.",
+            Title = PersonIntakeText.Get("Step.Review"),
+            Hint = PersonIntakeText.Get("Step.Review.Hint"),
             Kind = PersonIntakeStepKind.Review
         });
         return steps;
     }
 
-    private static PersonIntakeStep FormStep(string id, string title, string subtitle, string hint, string[] keys) =>
+    private static PersonIntakeStep FormStep(string id, string title, string hint, string[] keys) =>
         new()
         {
             Id = id,
@@ -96,12 +115,12 @@ public static class PersonIntakeStepCatalog
             FieldKeys = keys
         };
 
-    private static PersonIntakeStep RecordStep(string id, string title, string recordKey) =>
+    private static PersonIntakeStep RecordStep(string id, string title, string recordKey, string hint = null) =>
         new()
         {
             Id = id,
             Title = title,
-            Hint = "Add a record now or mark the whole record as not received.",
+            Hint = hint ?? PersonIntakeText.Get("Step.Record.Hint"),
             Kind = PersonIntakeStepKind.Record,
             RecordTargetKey = recordKey
         };
@@ -109,26 +128,18 @@ public static class PersonIntakeStepCatalog
     private static PersonIntakeStep OthersStep(Person person)
     {
         var employee = person.PersonRole == PersonRecordRole.Employee;
+        // Purpose of arrival / employee Other records deferred — not required for now.
         var options = employee
-            ? new[]
-            {
-                Other(PersonPendingTargets.PersonDocument, "CV & personal files", "CV and certificate scans."),
-                Other(PersonPendingTargets.EmployeePositionHistory, "Position history", "Current and previous positions."),
-                Other(PersonPendingTargets.TravelHistory, "Travel history", "Border crossings and trips."),
-                Other(PersonPendingTargets.WorkDuty, "Purpose of arrival", "Business trip purpose and dates."),
-                Other(PersonPendingTargets.EmployeeSalary, "Salaries", "Salary periods and amounts.")
-            }
+            ? Array.Empty<PersonIntakeOtherRecordOption>()
             : new[]
             {
-                Other(PersonPendingTargets.PersonFamilyRelationDocument, "Family relation documents", "Marriage or birth certificate scans."),
-                Other(PersonPendingTargets.TravelHistory, "Travel history", "Border crossings and trips.")
+                Other(PersonPendingTargets.PersonFamilyRelationDocument, PersonIntakeText.Get("Other.FamilyRelation"), PersonIntakeText.Get("Other.FamilyRelation.Help"))
             };
-
         return new PersonIntakeStep
         {
             Id = "others",
-            Title = "Other records",
-            Hint = "Optional records. Mark only what you are still waiting for.",
+            Title = PersonIntakeText.Get("Step.Others"),
+            Hint = PersonIntakeText.Get("Step.Others.Hint"),
             Kind = PersonIntakeStepKind.Others,
             OtherOptions = options
         };

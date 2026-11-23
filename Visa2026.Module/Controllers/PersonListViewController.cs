@@ -8,8 +8,8 @@ using Visa2026.Module.Services.PersonIntake;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Employees / Family members: <b>New</b> opens the intake wizard; row open uses typed native DetailViews.
-/// Blazor row navigation is <c>PersonListViewBlazorNavigationController</c> (URL to native detail).
+/// Employees / Family members: <b>New</b> opens the intake wizard.
+/// Blazor row open is <c>PersonListViewBlazorNavigationController</c> (wizard for Employees/Family; native detail for Temporary visitors).
 /// Temporary visitors: classic create + typed detail only.
 /// </summary>
 public sealed class PersonListViewController : ViewController<ListView>
@@ -19,7 +19,7 @@ public sealed class PersonListViewController : ViewController<ListView>
 
     public PersonListViewController()
     {
-        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers;Person_ListView_TemporaryVisitors";
+        TargetViewId = PersonRosterListViewIds.Employees + ";" + PersonRosterListViewIds.EmployeesIncomplete + ";" + PersonRosterListViewIds.FamilyMembers + ";" + PersonRosterListViewIds.FamilyMembersIncomplete + ";" + PersonRosterListViewIds.TemporaryVisitors;
     }
 
     protected override void OnActivated()
@@ -53,7 +53,9 @@ public sealed class PersonListViewController : ViewController<ListView>
         if (!TryGetIntakeRole(View.Id, out var role))
             return;
 
-        var wizard = PersonIntakeWizardOpenHelper.OpenNew(Application, role);
+        var wizard = PersonIntakeWizardAccess.IsWizardEnabled(View.ObjectSpace)
+            ? PersonIntakeWizardOpenHelper.OpenNew(Application, role)
+            : PersonIntakeWizardOpenHelper.OpenNativeNew(Application, role);
         if (wizard == null)
             return;
 
@@ -65,13 +67,13 @@ public sealed class PersonListViewController : ViewController<ListView>
 
     private static bool TryGetIntakeRole(string? listViewId, out PersonRecordRole role)
     {
-        if (listViewId == "Person_ListView_Employees")
+        if (PersonRosterListViewIds.IsEmployeeRoster(listViewId))
         {
             role = PersonRecordRole.Employee;
             return true;
         }
 
-        if (listViewId == "Person_ListView_FamilyMembers")
+        if (PersonRosterListViewIds.IsFamilyRoster(listViewId))
         {
             role = PersonRecordRole.FamilyMember;
             return true;
@@ -161,16 +163,16 @@ public sealed class PersonListViewController : ViewController<ListView>
 
         PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
 
-        if (View.Id == "Person_ListView_Employees")
+        if (PersonRosterListViewIds.IsEmployeeRoster(View.Id))
         {
             PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee);
             VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
         }
-        else if (View.Id == "Person_ListView_FamilyMembers")
+        else if (PersonRosterListViewIds.IsFamilyRoster(View.Id))
         {
             PersonRoleHelper.ApplyRole(person, PersonRecordRole.FamilyMember);
         }
-        else if (View.Id == "Person_ListView_TemporaryVisitors")
+        else if (View.Id == PersonRosterListViewIds.TemporaryVisitors)
         {
             PersonRoleHelper.ApplyRole(person, PersonRecordRole.TemporaryVisitor);
         }

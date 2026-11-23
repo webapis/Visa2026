@@ -7,13 +7,13 @@ public static class PersonDetailViewResolver
 {
     public static string Resolve(string? listViewId, Person person)
     {
-        if (listViewId == "Person_ListView_Employees")
+        if (PersonRosterListViewIds.IsEmployeeRoster(listViewId))
             return PersonDetailViewIds.Employee;
 
-        if (listViewId == "Person_ListView_FamilyMembers")
+        if (PersonRosterListViewIds.IsFamilyRoster(listViewId))
             return PersonDetailViewIds.FamilyMember;
 
-        if (listViewId == "Person_ListView_TemporaryVisitors")
+        if (listViewId == PersonRosterListViewIds.TemporaryVisitors)
             return PersonDetailViewIds.TemporaryVisitor;
 
         return person.PersonRole switch

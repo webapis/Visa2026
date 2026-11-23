@@ -27,6 +27,7 @@ Related:
 | Update while incomplete | Same popup (**Update incomplete**) reloads current checkboxes/notes |
 | DetailView fields | Read-only on **Incomplete data** tab under `PersonRecordTabs` (hidden when not incomplete) |
 | ListViews | Incomplete / Missing-* columns hidden (`VisibleInListView(false)`) |
+| Navigation | **Employees → Incomplete** and **Family Members → Incomplete** show only `IsDataIncomplete = True` for that role (`Person_ListView_*_Incomplete`) |
 | Notes on complete | **Cleared** (no history episode BO in v1) |
 | Free text for “Other” | Notes only (no separate Other-detail field) |
 
@@ -100,7 +101,20 @@ View heal for incomplete persons is **separate** from via-ministry standalone re
 
 ---
 
-## 5. Report Dashboard — Incomplete persons
+## 5. Navigation — Incomplete lists
+
+Under **Employees** and **Family Members** in the left menu:
+
+| Nav | ListView | Criteria |
+|-----|----------|----------|
+| Employees → All | `Person_ListView_Employees` | Employee role |
+| Employees → Incomplete | `Person_ListView_Employees_Incomplete` | Employee + `IsDataIncomplete` |
+| Family Members → All | `Person_ListView_FamilyMembers` | Family member role |
+| Family Members → Incomplete | `Person_ListView_FamilyMembers_Incomplete` | Family member + `IsDataIncomplete` |
+
+Incomplete lists load immediately (no search gate empty hold). Row open still uses the intake wizard. Wired in `CustomNavigationUpdater` / `CustomViewClonerUpdater` via `PersonRosterListViewIds`.
+
+## 6. Report Dashboard — Incomplete persons
 
 | Item | Value |
 |------|--------|

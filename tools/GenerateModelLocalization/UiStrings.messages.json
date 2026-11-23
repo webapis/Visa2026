@@ -491,12 +491,6 @@
     "tk-TM": "Iş rugsat ýerleri",
     "ru-RU": "Места разрешения на работу"
   },
-  "PersonDossier.Section.rejections": {
-    "en": "Rejections",
-    "tr-TR": "Retler",
-    "tk-TM": "Seretmezlikler",
-    "ru-RU": "Отказы"
-  },
   "PersonDossier.Section.registration": {
     "en": "Registration",
     "tr-TR": "Kayıt",

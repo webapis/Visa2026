@@ -21,6 +21,7 @@
 | `tools/GenerateModelLocalization/UiStrings.application-profile.json` | Application Profile + Application Profile Instance class/view/enum captions |
 | `tools/GenerateModelLocalization/UiStrings.application-profile-messages.json` | Officer catalog / wizard / picker / case workspace runtime strings |
 | `tools/GenerateModelLocalization/UiStrings.template-scan.json` | Create template from yellow marks wizard and catalog entry |
+| `tools/GenerateModelLocalization/UiStrings.person-intake.json` | Person intake wizard (`PersonIntake.*`; field labels come from model member captions) |
 | `tools/GenerateModelLocalization/UiStrings.navigation-paths.json` | Nested `Lookup/…` navigation group captions |
 | `tools/GenerateModelLocalization/UiStrings.messages.json` | Controller messages, confirmations (generates `VisaUiMessageCatalog.g.cs`) |
 | `tools/GenerateModelLocalization/UiStrings.validation.json` | Validation rule `CustomMessageTemplate` overrides in localization xafml |

@@ -1,8 +1,8 @@
 # Person intake wizard — implementation plan
 
-**Status:** in progress (create wizard + dual open path).
+**Status:** in progress (create + edit wizard; Temporary visitors native-only).
 
-Until the wizard is finished: **New** on Employees / Family members opens the intake wizard; **open / double-click** an existing row opens the **native** Person DetailView (`Person_DetailView_Employee` / `Person_DetailView_FamilyMember`). Temporary visitors stay native-only. When the wizard is complete, open-existing can switch to the wizard as well.
+**New** and **open / double-click** on Employees / Family members open the intake wizard (`PersonIntakeWizardHost`). Child 1:N records (passport, education, medical, residence) use stacked cards inside the wizard — officers do not use the native Person DetailView for those roles. Temporary visitors stay native-only.
 
 Officer create for **Employee** and **Family member** moves into one wizard. The person can be saved while required information is still missing, and the Employees and Family members lists split into **Complete** and **Incomplete**.
 
@@ -21,8 +21,8 @@ Related docs: [PERSON_INCOMPLETE_DATA.md](PERSON_INCOMPLETE_DATA.md), [OPTIONAL_
 
 ### Where it lives
 
-- **New** on `Person_ListView_Employees` and `Person_ListView_FamilyMembers` opens the wizard (`PersonIntakeWizardHost`).
-- **Open / double-click** (transition period) opens the native typed DetailView. **Provide info** will open the wizard once that slice ships.
+- **New** and **Open / double-click** on `Person_ListView_Employees` and `Person_ListView_FamilyMembers` open the wizard (`PersonIntakeWizardHost`).
+- **Provide info** (list Incomplete tab) opens the same wizard on the first pending step once that slice ships.
 - The XAF shell, left navigation, and those two list views stay.
 - Role comes from the list that created the person (`PersonListViewController.OnObjectCreated` already sets `PersonRole`). There is no Employee / Family member switch inside the wizard.
 - **Issued documents** (applications, work permits, invitations, rejections, emailed documents) stay out of the steps. A saved person can still open the existing `IssuedDocumentsTabs` from the wizard. New persons keep that section hidden (`PersonDetailViewIssuedDocumentsLayoutController`).
@@ -31,28 +31,58 @@ Related docs: [PERSON_INCOMPLETE_DATA.md](PERSON_INCOMPLETE_DATA.md), [OPTIONAL_
 
 | Step | Employee | Family member |
 |------|----------|----------------|
-| Identity | First name, last name, middle name, date of birth, age (computed), gender, personal number, photo | Same |
-| Origin and address | Birth place, country of birth, nationality, foreign address, foreign address country | Birth place, country of birth, nationality. Foreign address is not required |
-| Employment / relation | Project contract, company (subcontractor), family members for visa (manual) | Sponsoring employee, relationship, project contract, company (subcontractor) |
-| Passports | One passport record, then **Add another** | Same |
-| Education | Education rows | Same. Adult family member with no pending education mark still gets the Orta / Orta mekdep / Orta bilim row from `FamilyMemberDefaultEducation` |
-| Medical | Medical record | Same |
-| Residence | Address of residence | Same |
-| Other records | CV and files, position history, travel history, purpose of arrival, salaries | Family relation documents, travel history |
+| Identity | First name, last name, date of birth, age, birth place, country of birth, gender, marital status, nationality, personal number, photo | Same without marital status |
+| Work & address | Family members for visa (manual), foreign address, foreign address country, project contract, company (subcontractor) | Sponsoring employee, relationship, project contract, company (subcontractor) |
+| Passports | Native-style list (columns from `Person_Passports_ListView`) with **New** / **Delete**; a row opens the detail popup (**OK** / **Cancel**) | Same |
+| Education | Native-style list (`Person_Educations_ListView`) + detail popup | Same. Adult family member with no pending education mark still gets the Orta / Orta mekdep / Orta bilim row from `FamilyMemberDefaultEducation` |
+| Medical | Not in the wizard. Added later from Medical navigation. | Same |
+| Residence | Stacked address-of-residence cards; defaults to **Not received** on create until a card is added | Same |
+| CV & files | Stacked personal-file cards (employee) | — |
+| Travel | Not in the wizard. Added later from Travel navigation. | Same |
+| Salaries | Native-style list (`Person_Salaries_ListView`) + detail popup (employee). Optional: the tab is labeled **Salaries (optional)**. There is no Not received switch. An empty salary does not keep the person incomplete. | — |
+| Position history | Native-style list (`Person_PositionHistory_ListView`) + detail popup (employee) | — |
+| Other records | — (deferred; Purpose of arrival not required for now) | Family relation documents (optional) |
 | Review | Unresolved list, pending list, officer note | Same |
 
-Photo is the image editor, not a text field. Family members for visa (manual) is the existing `VisaFamilyMembersText` editor. New employees still receive the default `Ýok` from `VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty`, and that value counts as filled.
+Opening a person from **Employees → Incomplete** or **Family Members → Incomplete** starts on **Overview**. First name and last name are shown in a highlighted banner so the officer can see who the record is before the other steps.
+
+Every wizard step keeps the same person in the header: photo when one is stored, initials when it is not, and the initials plus first and last name beside the picture.
+
+### Lookup fields
+
+Every lookup in the wizard (Country of birth, Gender, Marital status, Nationality, Foreign address country, Project contract, Company (subcontractor), Relationship, Sponsoring employee, Passport type, Issued country, Education level / institution / country, Specialty, Position (visa reports), Position (actual / company), Department) uses one search-and-select control, `PersonIntakeSearchableLookup`. It follows the address autocomplete ([address-autocomplete/address-autocomplete-spec.md](address-autocomplete/address-autocomplete-spec.md)) at one line high. Prototype: [prototypes/person-intake-lookup-autocomplete.png](prototypes/person-intake-lookup-autocomplete.png).
+
+- Lists of 15 entries or fewer open in full on click or focus. Longer lists open only while typing.
+- Search ignores case and Turkmen/Turkish diacritics, and words match in any order. At most 6 suggestions show, ranked by "starts with", then by usage, then by name (`PersonIntakeLookupSearch`).
+- "Used N×" counts rows that use the value in the same property (Nationality counts `Person.Nationality`), from `PersonIntakeLookupUsage`. "New" means no row uses it yet.
+- + and the pen are rarely needed, so they are hidden by default. A gear button at the top right of each step that has list fields turns them on for the whole wizard (it stays on when moving between steps, until the wizard is closed). While the gear is off, a search with no match says to turn on the gear to add a value. View-only users get no gear.
+- A selected value has a green border, and × clears it. The + button outside the box opens a small wizard dialog (`PersonIntakeLookupDialog`) with the typed text as the name. Clicking the selected name opens the same dialog to rename that record. Saving writes through `PersonIntakeLookupEditor` (Module) in its own object space, checks for an existing entry with the same folded name, and selects the new record. The dialog asks for the name (`NameTm`, or `Name` on `ActualPosition`). Relationship also asks for the reverse name. Project contract also asks for a description and Active; its approval legs and files stay on the Project contract screen.
+- Shared catalogs (`GlobalLookupCatalogBase`: Country, Gender, Marital status, Passport type, Education level, Relationship, and the rest) can be added from the wizard but not renamed, so their name is not clickable. + and rename are shown only when the user's role grants Create / Write on that type.
+- City (needs a Region) and Hotel, Hospital, Lodging, Other site (need address data) keep the XAF New / edit popup. City is a shared catalog, so it gets + only.
+- Text that matches nothing creates nothing and is discarded when the field loses focus.
+- Sponsoring employee has no + or edit: it only selects an existing employee.
+- **Not received** makes the field read-only and amber.
+
+List steps (Passports, Education, Salaries, Position history) look like the native XAF nested ListView: the grid shows the visible columns of the Person nested ListView model node (so model column changes carry over), a selection column, and **New** / **Delete** (with the XAF delete confirmation). Clicking a row, or **New**, opens the record detail popup. **OK** keeps the edits in the wizard draft; **Cancel** restores the row (or drops a new one). Nothing is written until the person is saved. CV & files keeps stacked cards.
+
+Passports, Education, Position history, and CV & files open their scans in the right-hand document-copies preview. The list has a **Preview** column (CV uses **Preview** on the card). The detail popup previews from the copies list, including a file chosen in this session and not saved yet. The preview is the merged copies of that one record.
+
+**New** (list steps) / **Add** (CV & files) on Passports, Education, CV & files, Salaries, and Position history stays disabled until every card on that step is complete and matches the last save. Only one new card can be added at a time. The officer fills the required fields, saves the person from Review, then **Add** enables for the next card.
+
+Medical records and travel history are not wizard steps. Officers add them later from their own navigation. Empty CV & files do not block save and do not appear in unresolved warnings unless the officer marks **Not received**.
+
+Photo is the image editor, not a text field. Family members for visa (manual) is the existing `VisaFamilyMembersText` editor. New employees still receive the default `Ýok` from `VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty`, and that value counts as filled. Officers may also mark that field **Not received** when the household list is still missing.
 
 ### Two waiting controls
 
 | Control | Applies to | On |
 |---------|------------|----|
 | **Not received** on a field | A required person field that is allowed to wait | The input is disabled and amber. The property stays empty. A `PersonPendingItem` is stored. |
-| **Not received** on a record | Passport, Education, Medical, Residence, and each Other-records entry | No child row is required. Optional waiting-on note. A `PersonPendingItem` is stored. |
+| **Not received** on a record | Passport, Education, CV & files, Salaries, Position history, and each Other-records entry | No child row is required. Optional waiting-on note. A `PersonPendingItem` is stored. |
 
-A child row is saved only when its own required fields are filled. The wizard does not save a half-filled passport (or education, medical, residence). To leave that step, the officer finishes the row or switches the whole record to **Not received**. An in-progress row that is then marked **Not received** is discarded, and the waiting-on note is kept. Existing saved rows are left as they are: the record switch is for “no row yet”, and it is hidden once a row of that kind exists.
+A child row is saved only when its own required fields are filled. The wizard does not save a half-filled passport (or education). To leave that step, the officer finishes the row or switches the whole record to **Not received**. An in-progress row that is then marked **Not received** is discarded, and the waiting-on note is kept. Existing saved rows are left as they are: the record switch is for “no row yet”, and it is hidden once a row of that kind exists.
 
-Other records are optional. Switch off and no row means the person can still be Complete. Switch on means the officer is waiting, so the person stays Incomplete.
+CV & files, Salaries, Position history, and Other records (family relation docs) are optional collections (`BlocksWhenEmpty=false`). Medical and travel are outside the wizard. They are omitted from unresolved warnings when empty. Purpose of arrival and employee Other records are deferred from the wizard for now. Switch off and no row means the person can still be Complete. Switch on means the officer is waiting, so the person stays Incomplete.
 
 These cannot be marked **Not received**:
 
@@ -112,16 +142,16 @@ People already in the database are not reclassified. A person moves to Incomplet
 | `Person.Photo` | Both, only when the officer switches it on | Photo |
 | `Passport` | Both | Passport |
 | `Education` | Both | Education |
-| `MedicalRecord` | Both | Medical |
+| `MedicalRecord` | Not a wizard step. Added later from Medical navigation. | Medical |
 | `AddressOfResidence` | Both | Address |
-| `PersonDocument` (CV and files) | Employee, only when switched on | CV |
-| `EmployeePositionHistory` | Employee, only when switched on | Other |
-| `TravelHistory` | Both, only when switched on | Other |
-| `PurposeOfArrival` | Employee, only when switched on | Other |
-| `EmployeeSalary` | Employee, only when switched on | Other |
+| `PersonDocument` (CV and files) | Employee (Record step; optional unless Not received) | CV |
+| `EmployeePositionHistory` | Employee (Record step; optional unless Not received) | Other |
+| `TravelHistory` | Not a wizard step. Added later from Travel navigation. | Other |
+| `PurposeOfArrival` | Employee — deferred (not shown in wizard for now) | Other |
+| `EmployeeSalary` | Employee (Record step; optional unless Not received) | Other |
 | `PersonFamilyRelationDocument` | Family member, only when switched on | Family docs |
 
-Photo and the Other-records keys do not block save when they are empty and the switch is off. Passport, Education, Medical, and Residence do: an empty collection is unresolved until a valid row exists or the record switch is on.
+Photo, CV & files, Salaries, Position history, and Other-records keys do not block save when they are empty and the switch is off. Medical and travel are not collected here. Passport and Education do: an empty collection is unresolved until a valid row exists or the record switch is on.
 
 `FamilyMemberDefaultEducation.ShouldEnsure` returns false while an Education pending item exists, including the `DateOfBirth` setter path. When the officer later clears that pending item and saves an adult family member with no education row, `Ensure` runs as it does today.
 
@@ -170,6 +200,23 @@ Add an idempotent `CREATE TABLE` heal beside `PersonIncompleteDataSchemaSql`, in
 
 Extend `PersonIncompleteDataOfficerPermissions.Ensure` so the Users role can create, write, and delete `PersonPendingItem`. The nine person members stay writable as they are today.
 
+**XAF native access (implemented).** The wizard asks XAF security through `PersonIntakeWizardAccess` (Module). An administrator regulates it in the Roles screen; no wizard-specific settings exist.
+
+| Roles screen setting | Wizard behaviour |
+|---|---|
+| Read on **Person intake** (`PersonIntakeWizardHost`) | Turns the wizard on for the role. Without it, Employees / Family members **New** and row open use the classic `Person_DetailView_Employee` / `Person_DetailView_FamilyMember` form. |
+| No Write on `Person` (object or type; Create for a new person) | View-only wizard: every step visible, inputs locked, no Save, blue "view only" banner. `UsersReadOnly` gets this. |
+| Member Read denied on a `Person` property | That field is hidden; a form step with no readable field is hidden. Age follows `DateOfBirth`. |
+| Member Write denied on a `Person` property | That field is read-only, and its **Not received** box is locked. |
+| Read denied on a child type (`Passport`, `Education`, `PersonDocument`, `EmployeeSalary`, `EmployeePositionHistory`, `PersonFamilyRelationDocument`) | That step / Other-records option is hidden. |
+| Create denied on a child type | **+ Add** is hidden and the step's **Not received** box is locked. |
+| Write denied on a child type (or object criteria on a row) | That card's fields are locked (`inert`); defaults are not filled in. |
+| Delete denied on a child type | **Remove** is hidden on saved cards, and **Delete** skips saved rows in list steps. Unsaved rows can still be discarded. |
+| Create, Write, and Delete on `PersonPendingItem` | Needed to toggle **Not received**. Without them, the boxes show the current marks but are locked. |
+| Write on `Person.IncompleteNotes` | Needed for the Review note. |
+
+`PersonIntakeWizardPersistHelper.TrySave` repeats the checks before writing (`FindSaveViolation`): it refuses a view-only save, adding or removing a record the role cannot create or delete, and changing Not received marks without the `PersonPendingItem` rights. `SyncPendingItems` keeps unchanged rows, so saving without pending-item rights works when the marks did not change. Any other denied member write is still rejected by the secured object space at commit.
+
 ---
 
 ## 4. UI
@@ -201,6 +248,11 @@ A controller on the two person list views (same id list as `PersonListViewContro
 - Incomplete tab shows `IncompleteMissingAreasDisplay` and `IncompleteNotes`
 - Missing-item filter adds one area flag to the criteria
 - **Provide info** is a row action, same column style as `PersonListViewActionColumnsUpdater`, and opens the typed detail view
+
+### Localization
+
+- Field labels (Person members, record popup fields, step titles that name a collection) use the XAF model member caption through `PersonIntakeFieldLabels` (`CaptionHelper`), so they follow `Model.DesignedDiffs.Localization.*.xafml`. The English text in code is only a fallback.
+- All other wizard text uses `PersonIntakeText.Get` / `Format` with `PersonIntake.*` keys in `tools/GenerateModelLocalization/UiStrings.person-intake.json` (en, tr-TR, tk-TM, ru-RU). After editing it, run the generator and commit `VisaUiMessageCatalog.g.cs`.
 
 ---
 

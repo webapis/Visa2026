@@ -1,0 +1,144 @@
+@using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.Services.PersonIntake
+
+@if (IsOpen)
+{
+    <div class="pi-dlg-backdrop" @onclick="CancelAsync"></div>
+    <div class="pi-dlg" role="dialog" aria-modal="true" aria-labelledby="@_titleId" @onkeydown="OnKeyDown">
+        <form @onsubmit="SubmitAsync" @onsubmit:preventDefault="true">
+            <header class="pi-dlg__head">
+                <h2 id="@_titleId" class="pi-dlg__title">@Title</h2>
+                <button type="button" class="pi-dlg__x" aria-label="@PersonIntakeText.Get("Close")" @onclick="CancelAsync">×</button>
+            </header>
+            <div class="pi-dlg__body">
+                <label class="pi-dlg__label" for="@_nameId">@NameLabel</label>
+                <input @ref="_nameRef"
+                       id="@_nameId"
+                       class="pi-dlg__input"
+                       type="text"
+                       autocomplete="off"
+                       maxlength="@PersonIntakeLookupEditor.NameMaxLength"
+                       value="@_values.Name"
+                       aria-invalid="@(!string.IsNullOrEmpty(Error) ? "true" : "false")"
+                       aria-describedby="@($"{_hintId} {_errId}")"
+                       @oninput="e => { _values.Name = e.Value?.ToString() ?? string.Empty; ClearError(); }" />
+
+                @if (ShowReverseName)
+                {
+                    <label class="pi-dlg__label" for="@_reverseId">@PersonIntakeText.Get("LookupDialog.ReverseName")</label>
+                    <input id="@_reverseId"
+                           class="pi-dlg__input"
+                           type="text"
+                           autocomplete="off"
+                           maxlength="@PersonIntakeLookupEditor.NameMaxLength"
+                           value="@_values.ReverseName"
+                           @oninput="e => _values.ReverseName = e.Value?.ToString() ?? string.Empty" />
+                    <p class="pi-dlg__hint">@PersonIntakeText.Get("LookupDialog.ReverseName.Hint")</p>
+                }
+
+                @if (ShowContractFields)
+                {
+                    <label class="pi-dlg__label" for="@_descId">@PersonIntakeText.Get("LookupDialog.Description")</label>
+                    <textarea id="@_descId"
+                              class="pi-dlg__input pi-dlg__textarea"
+                              rows="3"
+                              maxlength="@PersonIntakeLookupEditor.DescriptionMaxLength"
+                              value="@_values.Description"
+                              @oninput="e => _values.Description = e.Value?.ToString() ?? string.Empty"></textarea>
+                    <label class="pi-dlg__check">
+                        <input type="checkbox" checked="@_values.IsActive"
+                               @onchange="e => _values.IsActive = e.Value is true" />
+                        <span>@PersonIntakeText.Get("LookupDialog.Active")</span>
+                    </label>
+                    <p class="pi-dlg__hint">@PersonIntakeText.Get("LookupDialog.Contract.Hint")</p>
+                }
+
+                <p id="@_hintId" class="pi-dlg__hint">@Hint</p>
+                <p id="@_errId" class="pi-dlg__err" role="alert">@(Error ?? string.Empty)</p>
+            </div>
+            <footer class="pi-dlg__foot">
+                <button type="button" class="pi-dlg__btn" @onclick="CancelAsync">@PersonIntakeText.Get("Cancel")</button>
+                <button type="submit" class="pi-dlg__btn pi-dlg__btn--primary" disabled="@Busy">@PrimaryLabel</button>
+            </footer>
+        </form>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public string FieldName { get; set; } = "value";
+    [Parameter] public Type? LookupType { get; set; }
+    [Parameter] public PersonIntakeLookupEditor.Values? InitialValues { get; set; }
+    [Parameter] public int UseCount { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<PersonIntakeLookupEditor.Values> OnSave { get; set; }
+    [Parameter] public EventCallback OnErrorCleared { get; set; }
+
+    private readonly string _titleId = "pi-dlg-title-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _nameId = "pi-dlg-name-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _reverseId = "pi-dlg-rev-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _descId = "pi-dlg-desc-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _hintId = "pi-dlg-hint-" + Guid.NewGuid().ToString("N")[..8];
+    private readonly string _errId = "pi-dlg-err-" + Guid.NewGuid().ToString("N")[..8];
+
+    private ElementReference _nameRef;
+    private PersonIntakeLookupEditor.Values _values = new();
+    private bool _wasOpen;
+    private bool _focusPending;
+
+    private bool ShowReverseName => PersonIntakeLookupEditor.HasReverseName(LookupType);
+    private bool ShowContractFields => PersonIntakeLookupEditor.HasContractFields(LookupType);
+    private string Title => PersonIntakeText.Format(IsEdit ? "LookupDialog.TitleEdit" : "LookupDialog.TitleAdd", FieldName);
+    private string PrimaryLabel => PersonIntakeText.Get(IsEdit ? "Save.SaveChanges" : "LookupDialog.Add");
+    private string NameLabel => LookupType == typeof(Visa2026.Module.BusinessObjects.ActualPosition) ? PersonIntakeText.Get("LookupDialog.Title") : PersonIntakeText.Get("LookupDialog.Name");
+
+    private string Hint => IsEdit
+        ? UseCount > 0
+            ? PersonIntakeText.Format("LookupDialog.Hint.RenameUsed", UseCount.ToString("N0"))
+            : PersonIntakeText.Get("LookupDialog.Hint.Rename")
+        : PersonIntakeText.Get("LookupDialog.Hint.Add");
+
+    protected override void OnParametersSet()
+    {
+        if (IsOpen && !_wasOpen)
+        {
+            var initial = InitialValues ?? new PersonIntakeLookupEditor.Values();
+            _values = new PersonIntakeLookupEditor.Values
+            {
+                Name = initial.Name,
+                ReverseName = initial.ReverseName,
+                Description = initial.Description,
+                IsActive = initial.IsActive
+            };
+            _focusPending = true;
+        }
+        _wasOpen = IsOpen;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusPending || !IsOpen)
+            return;
+        _focusPending = false;
+        try { await _nameRef.FocusAsync(); } catch { /* dialog may have closed */ }
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            await CancelAsync();
+    }
+
+    private Task CancelAsync() => OnCancel.HasDelegate ? OnCancel.InvokeAsync() : Task.CompletedTask;
+
+    private Task SubmitAsync() => OnSave.HasDelegate && !Busy ? OnSave.InvokeAsync(_values) : Task.CompletedTask;
+
+    private void ClearError()
+    {
+        if (!string.IsNullOrEmpty(Error) && OnErrorCleared.HasDelegate)
+            _ = OnErrorCleared.InvokeAsync();
+    }
+}

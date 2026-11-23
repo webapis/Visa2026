@@ -202,6 +202,12 @@ Shared helper `EnsureApplicationProcessTrackingReadPermissions` — required for
 | Current status | `ApplicationProgress`, `ApplicationState`, `ApplicationLocation`, `MigrationService` |
 | Project/Contract | `ProjectContract` (read-only; Users role may edit) |
 
+### Person intake wizard
+
+Read on `PersonIntakeWizardHost` plus read-only `PersonPendingItem`, `PersonDocument`, `PersonFamilyRelationDocument`. Readers open Employees / Family members in a **view-only** wizard (no Write on `Person`). Users role has full access on `PersonDocument` and `PersonFamilyRelationDocument` (CV & files step, family relation documents).
+
+The wizard honours type, member, and object permissions set in the Roles screen. Removing Read on **Person intake** from a role makes it fall back to the classic Person form. Full matrix: [PERSON_INTAKE_WIZARD.md § Security](PERSON_INTAKE_WIZARD.md#security).
+
 ---
 
 ## How to Add a New Permission
