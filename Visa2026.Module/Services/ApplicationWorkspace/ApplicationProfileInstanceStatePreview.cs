@@ -14,7 +14,7 @@ namespace Visa2026.Module.Services.ApplicationWorkspace;
 /// Read-only A4 state sheet for one Application Profile instance.
 /// The list keeps identity columns, people names, color tabs, and row color.
 /// </summary>
-public static class ApplicationProfileInstanceStatePreview
+public static partial class ApplicationProfileInstanceStatePreview
 {
     public enum Layout
     {
@@ -33,6 +33,10 @@ public static class ApplicationProfileInstanceStatePreview
         Visa,
         BorderZone,
         Location,
+        RenewedInvitations,
+        ChangedInvitation,
+        CancelledInvitation,
+        CancelledWorkPermit,
     }
 
     public readonly record struct ProduceFlags(
@@ -179,7 +183,10 @@ public static class ApplicationProfileInstanceStatePreview
             IReadOnlyList<string>? notIssued = null;
             if (plan.Id is SectionId.Invitation or SectionId.WorkPermit)
             {
-                var grouped = GroupHeaders(rows, periodOnHeader: plan.Id == SectionId.Invitation);
+                var grouped = GroupHeaders(
+                    rows,
+                    periodOnHeader: plan.Id == SectionId.Invitation,
+                    keepDocumentInForceWhenMixed: plan.Id == SectionId.WorkPermit);
                 groups = grouped.Groups;
                 notIssued = grouped.NotIssuedNames;
             }
@@ -192,6 +199,8 @@ public static class ApplicationProfileInstanceStatePreview
 
             sections.Add(new Section(plan.Id, plan.NestBorderZone, plan.NestLocations, rows, groups, notIssued));
         }
+
+        AppendRelatedSections(objectSpace, application, sections);
 
         // Same clock as the list and Application result. Null until every work permit is in.
         var visaWindow = VisaIssuePassportWait.TryLoad(objectSpace, application);
@@ -237,7 +246,7 @@ public static class ApplicationProfileInstanceStatePreview
         IReadOnlyList<HeaderGroup>? Groups = null,
         IReadOnlyList<string>? NotIssuedNames = null)
     {
-        public bool GroupsByHeader => Id is SectionId.Invitation or SectionId.WorkPermit;
+        public bool GroupsByHeader => IsGroupedSection(Id);
     }
 
     /// <summary>One issued invitation or work permit, with its people listed once underneath.</summary>
@@ -249,7 +258,9 @@ public static class ApplicationProfileInstanceStatePreview
         HeaderDocumentCopiesFamily? PreviewFamily,
         Guid PreviewPersonId,
         string? InvitationLifeKey,
-        IReadOnlyList<GroupPerson> People)
+        IReadOnlyList<GroupPerson> People,
+        string? RelatedApplicationNumber = null,
+        Guid RelatedApplicationId = default)
     {
         public bool CanPreview => PreviewParentId != Guid.Empty && PreviewFamily.HasValue;
     }
@@ -263,7 +274,11 @@ public static class ApplicationProfileInstanceStatePreview
         string? SuccessorNumber = null,
         Guid SuccessorDocumentId = default,
         string? SuccessorLifeKey = null,
-        Guid SuccessorPersonId = default);
+        Guid SuccessorPersonId = default,
+        string? SuccessorInvitationNumber = null,
+        Guid SuccessorApplicationId = default,
+        string? RelatedLineTitleKey = null,
+        bool StrikeName = false);
 
     public readonly record struct HeaderGrouping(
         IReadOnlyList<HeaderGroup> Groups,
@@ -273,7 +288,10 @@ public static class ApplicationProfileInstanceStatePreview
     /// Invitation and work-permit rows share a header. The number is kept once.
     /// People who were not issued are returned separately, in list order.
     /// </summary>
-    public static HeaderGrouping GroupHeaders(IReadOnlyList<Row> rows, bool periodOnHeader)
+    public static HeaderGrouping GroupHeaders(
+        IReadOnlyList<Row> rows,
+        bool periodOnHeader,
+        bool keepDocumentInForceWhenMixed = false)
     {
         var groups = new Dictionary<Guid, GroupBuilder>();
         var order = new List<GroupBuilder>();
@@ -317,6 +335,12 @@ public static class ApplicationProfileInstanceStatePreview
         {
             group.People.Sort((a, b) => string.Compare(a.PersonName, b.PersonName, StringComparison.CurrentCultureIgnoreCase));
             var life = SharedLife(group.People);
+            if (keepDocumentInForceWhenMixed
+                && string.IsNullOrEmpty(life)
+                && group.People.Any(person =>
+                    string.IsNullOrEmpty(person.InvitationLifeKey)
+                    || string.Equals(person.InvitationLifeKey, InvitationLaterLife.InForce, StringComparison.Ordinal)))
+                life = InvitationLaterLife.InForce;
             var personId = group.People.Count == 1 ? group.People[0].PersonId : Guid.Empty;
             built.Add(new HeaderGroup(
                 group.Number,
@@ -435,6 +459,10 @@ public static class ApplicationProfileInstanceStatePreview
             SuccessorNumber = row.SuccessorNumber;
             SuccessorDocumentId = row.SuccessorDocumentId;
             SuccessorLifeKey = row.SuccessorLifeKey;
+            SuccessorInvitationNumber = row.SuccessorInvitationNumber;
+            SuccessorApplicationId = row.SuccessorApplicationId;
+            RelatedLineTitleKey = row.RelatedLineTitleKey;
+            StrikeName = row.StrikeName;
         }
 
         public string PersonName { get; }
@@ -446,10 +474,27 @@ public static class ApplicationProfileInstanceStatePreview
         public string? SuccessorNumber { get; }
         public Guid SuccessorDocumentId { get; }
         public string? SuccessorLifeKey { get; }
+        public string? SuccessorInvitationNumber { get; }
+        public Guid SuccessorApplicationId { get; }
+        public string? RelatedLineTitleKey { get; }
+        public bool StrikeName { get; }
         public List<Row> Nested { get; } = new();
 
         public GroupPerson ToPerson() =>
-            new(PersonName, Period, StateKey, Tone, Nested, SuccessorNumber, SuccessorDocumentId, SuccessorLifeKey, PersonId);
+            new(
+                PersonName,
+                Period,
+                StateKey,
+                Tone,
+                Nested,
+                SuccessorNumber,
+                SuccessorDocumentId,
+                SuccessorLifeKey,
+                PersonId,
+                SuccessorInvitationNumber,
+                SuccessorApplicationId,
+                RelatedLineTitleKey,
+                StrikeName);
     }
 
     public sealed record Row(
@@ -465,7 +510,11 @@ public static class ApplicationProfileInstanceStatePreview
         string? InvitationLifeKey = null,
         string? SuccessorNumber = null,
         Guid SuccessorDocumentId = default,
-        string? SuccessorLifeKey = null)
+        string? SuccessorLifeKey = null,
+        string? SuccessorInvitationNumber = null,
+        Guid SuccessorApplicationId = default,
+        string? RelatedLineTitleKey = null,
+        bool StrikeName = false)
     {
         /// <summary>An issued header opens its copies. A row that was not issued stays plain text.</summary>
         public bool CanPreview => PreviewParentId != Guid.Empty && PreviewFamily.HasValue;
@@ -509,7 +558,11 @@ public static class ApplicationProfileInstanceStatePreview
         string? InvitationLifeKey = null,
         string? SuccessorNumber = null,
         Guid SuccessorDocumentId = default,
-        string? SuccessorLifeKey = null);
+        string? SuccessorLifeKey = null,
+        string? SuccessorInvitationNumber = null,
+        Guid SuccessorApplicationId = default,
+        string? RelatedLineTitleKey = null,
+        bool StrikeName = false);
 
     private static List<(Guid Id, string Name)> PeopleOf(ApplicationProfileInstance application)
     {
@@ -658,6 +711,7 @@ public static class ApplicationProfileInstanceStatePreview
         var cancelled = CompletedInvitationItems(objectSpace, itemIds, ApplicationProfileActionFamily.Cancellation);
         var changed = CompletedInvitationItems(objectSpace, itemIds, ApplicationProfileActionFamily.Change);
         var successors = Successors(application);
+        var cancellations = LoadCancellationLinks(objectSpace, application.ID, itemIds);
 
         var rows = new List<Doc>(items.Count);
         foreach (var item in items)
@@ -678,6 +732,9 @@ public static class ApplicationProfileInstanceStatePreview
             string? successorNumber = null;
             var successorDocumentId = Guid.Empty;
             string? successorLife = null;
+            string? successorInvitationNumber = null;
+            var successorApplicationId = Guid.Empty;
+            string? relatedLineTitleKey = null;
             if (string.Equals(life, InvitationLaterLife.Changed, StringComparison.Ordinal)
                 && successors.TryGetValue(person.ID, out var successor)
                 && successor.DocumentId != Guid.Empty)
@@ -689,6 +746,21 @@ public static class ApplicationProfileInstanceStatePreview
                 successorLife = string.IsNullOrEmpty(successor.State)
                     ? InvitationLaterLife.InForce
                     : successor.State;
+                successorInvitationNumber = string.IsNullOrWhiteSpace(successor.InvitationNumber)
+                    ? null
+                    : successor.InvitationNumber.Trim();
+                successorApplicationId = successor.ApplicationId;
+                relatedLineTitleKey = RelatedSuccessorTitleKey;
+            }
+            else if (string.Equals(life, InvitationLaterLife.Cancelled, StringComparison.Ordinal)
+                && cancellations.TryGetValue(person.ID, out var cancel)
+                && cancel.ApplicationId != Guid.Empty)
+            {
+                successorNumber = string.IsNullOrWhiteSpace(cancel.ApplicationNumber)
+                    ? null
+                    : cancel.ApplicationNumber.Trim();
+                successorApplicationId = cancel.ApplicationId;
+                relatedLineTitleKey = RelatedCancelledInvitationTitleKey;
             }
 
             rows.Add(new Doc(
@@ -703,7 +775,11 @@ public static class ApplicationProfileInstanceStatePreview
                 parentId == Guid.Empty ? null : life ?? InvitationLaterLife.InForce,
                 successorNumber,
                 successorDocumentId,
-                successorLife));
+                successorLife,
+                successorInvitationNumber,
+                successorApplicationId,
+                relatedLineTitleKey,
+                StrikeNameForLife(life)));
         }
 
         return rows;
@@ -764,8 +840,8 @@ public static class ApplicationProfileInstanceStatePreview
         }
 
         var itemIds = items.Select(item => item.ID).Where(id => id != Guid.Empty).ToList();
-        var cancelled = CompletedWorkPermitItems(objectSpace, itemIds, ApplicationProfileActionFamily.Cancellation);
-        var changed = CompletedWorkPermitItems(objectSpace, itemIds, ApplicationProfileActionFamily.Change);
+        var cancellations = LoadWorkPermitCancellations(objectSpace, itemIds);
+        var cancelled = cancellations.ItemIds;
 
         var rows = new List<Doc>(items.Count);
         foreach (var item in items)
@@ -775,13 +851,28 @@ public static class ApplicationProfileInstanceStatePreview
                 continue;
 
             var header = item.WorkPermit;
+            // Work permits are not changeable — only cancelled (and expiry) later life.
             var life = InvitationLaterLife.Resolve(
                 cancelled.Contains(item.ID) || IssuedDocumentLifecycle.IsCancelled(item),
-                changed.Contains(item.ID) || IssuedDocumentLifecycle.IsChanged(item),
+                changed: false,
                 used: false,
                 expired: InvitationLaterLife.IsExpired(item.ExpirationDate));
             var (key, tone) = Life(life);
             var parentId = header?.ID ?? Guid.Empty;
+            string? successorNumber = null;
+            var successorApplicationId = Guid.Empty;
+            string? relatedLineTitleKey = null;
+            var isCancelled = string.Equals(life, InvitationLaterLife.Cancelled, StringComparison.Ordinal);
+            if (isCancelled
+                && cancellations.ByPerson.TryGetValue(person.ID, out var cancel)
+                && cancel.ApplicationId != Guid.Empty)
+            {
+                successorNumber = string.IsNullOrWhiteSpace(cancel.ApplicationNumber)
+                    ? null
+                    : cancel.ApplicationNumber.Trim();
+                successorApplicationId = cancel.ApplicationId;
+                relatedLineTitleKey = RelatedCancelledWorkPermitTitleKey;
+            }
             rows.Add(new Doc(
                 person.ID,
                 NameOf(person),
@@ -791,29 +882,17 @@ public static class ApplicationProfileInstanceStatePreview
                 tone,
                 parentId,
                 parentId == Guid.Empty ? null : HeaderDocumentCopiesFamily.WorkPermit,
-                parentId == Guid.Empty ? null : life ?? InvitationLaterLife.InForce));
+                parentId == Guid.Empty ? null : life ?? InvitationLaterLife.InForce,
+                successorNumber,
+                SuccessorDocumentId: default,
+                SuccessorLifeKey: null,
+                SuccessorInvitationNumber: null,
+                successorApplicationId,
+                relatedLineTitleKey,
+                StrikeName: isCancelled));
         }
 
         return rows;
-    }
-
-    private static HashSet<Guid> CompletedWorkPermitItems(
-        IObjectSpace objectSpace,
-        IReadOnlyCollection<Guid> itemIds,
-        ApplicationProfileActionFamily family)
-    {
-        if (itemIds.Count == 0)
-            return [];
-
-        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
-        return objectSpace.GetObjectsQuery<WorkPermitItem>()
-            .Where(item => itemIds.Contains(item.ID)
-                && item.ApplicationProfileInstances.Any(instance =>
-                    instance.ApplicationProfile != null
-                    && instance.ApplicationProfile.ActionFamily == family
-                    && instance.LatestPrimaryStateCode == issued))
-            .Select(item => item.ID)
-            .ToHashSet();
     }
 
     private static List<Doc> VisaRows(ApplicationProfileInstance application)
@@ -990,7 +1069,11 @@ public static class ApplicationProfileInstanceStatePreview
             doc.InvitationLifeKey,
             doc.SuccessorNumber,
             doc.SuccessorDocumentId,
-            doc.SuccessorLifeKey);
+            doc.SuccessorLifeKey,
+            doc.SuccessorInvitationNumber,
+            doc.SuccessorApplicationId,
+            doc.RelatedLineTitleKey,
+            doc.StrikeName);
 
     /// <summary>Pill for a shared invitation or work-permit state. In force when the life is empty.</summary>
     public static (string Key, string Tone) DocumentLife(string? life) => Life(life);

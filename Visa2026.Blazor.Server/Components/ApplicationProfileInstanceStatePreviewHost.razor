@@ -9,6 +9,7 @@
 @inject IApplicationProfileInstanceStatePreviewService Dialog
 @inject IVisaPreviewSlotService Preview
 @inject INonSecuredObjectSpaceFactory ObjectSpaceFactory
+@inject Visa2026.Blazor.Server.Services.XafApplicationHolder AppHolder
 @inject IJSRuntime JS
 
 @if (Dialog.CurrentId != null)
@@ -142,6 +143,19 @@
                                                     {
                                                         <b>@group.Number</b>
                                                     }
+                                                    @if (!string.IsNullOrWhiteSpace(group.RelatedApplicationNumber))
+                                                    {
+                                                        <span class="state-preview-group__app">
+                                                            @if (group.RelatedApplicationId != Guid.Empty)
+                                                            {
+                                                                <button type="button" class="state-preview-doc" @onclick="() => OpenApplication(group.RelatedApplicationId)">@group.RelatedApplicationNumber</button>
+                                                            }
+                                                            else
+                                                            {
+                                                                @group.RelatedApplicationNumber
+                                                            }
+                                                        </span>
+                                                    }
                                                     @if (GroupLife(group) is { } life)
                                                     {
                                                         <span class="state-preview-pill state-preview-pill--@life.Tone">@Msg(life.Key)</span>
@@ -168,23 +182,46 @@
                                                     {
                                                         <tr>
                                                             <td class="state-preview-who">
-                                                                @person.PersonName
-                                                                @if (group.PeriodOnHeader && !string.IsNullOrWhiteSpace(person.SuccessorNumber))
+                                                                <span class="@(person.StrikeName ? "state-preview-name--struck" : null)">@person.PersonName</span>
+                                                                @if (!string.IsNullOrWhiteSpace(person.RelatedLineTitleKey)
+                                                                    || !string.IsNullOrWhiteSpace(person.SuccessorNumber)
+                                                                    || !string.IsNullOrWhiteSpace(person.SuccessorInvitationNumber))
                                                                 {
                                                                     <div class="state-preview-successor">
-                                                                        @Msg("ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle")
+                                                                        @Msg(string.IsNullOrWhiteSpace(person.RelatedLineTitleKey)
+                                                                            ? "ApplicationProfileInstance.List.Mark.InvitationSuccessorTitle"
+                                                                            : person.RelatedLineTitleKey)
                                                                         @if (!string.IsNullOrWhiteSpace(person.SuccessorLifeKey))
                                                                         {
                                                                             <span> · @Msg(InvitationLaterLife.BannerMessageKey(person.SuccessorLifeKey))</span>
                                                                         }
-                                                                        <span> · </span>
-                                                                        @if (person.SuccessorDocumentId != Guid.Empty)
+                                                                        @if (!string.IsNullOrWhiteSpace(person.SuccessorInvitationNumber))
                                                                         {
-                                                                            <button type="button" class="state-preview-doc" @onclick="() => OpenSuccessor(person)">@person.SuccessorNumber</button>
+                                                                            <span> · </span>
+                                                                            @if (person.SuccessorDocumentId != Guid.Empty)
+                                                                            {
+                                                                                <button type="button" class="state-preview-doc" @onclick="() => OpenSuccessorDocument(person)">@person.SuccessorInvitationNumber</button>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @person.SuccessorInvitationNumber
+                                                                            }
                                                                         }
-                                                                        else
+                                                                        @if (!string.IsNullOrWhiteSpace(person.SuccessorNumber))
                                                                         {
-                                                                            @person.SuccessorNumber
+                                                                            <span> · </span>
+                                                                            @if (person.SuccessorApplicationId != Guid.Empty)
+                                                                            {
+                                                                                <button type="button" class="state-preview-doc" @onclick="() => OpenApplication(person.SuccessorApplicationId)">@person.SuccessorNumber</button>
+                                                                            }
+                                                                            else if (person.SuccessorDocumentId != Guid.Empty && string.IsNullOrWhiteSpace(person.SuccessorInvitationNumber))
+                                                                            {
+                                                                                <button type="button" class="state-preview-doc" @onclick="() => OpenSuccessorDocument(person)">@person.SuccessorNumber</button>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @person.SuccessorNumber
+                                                                            }
                                                                         }
                                                                     </div>
                                                                 }
@@ -372,7 +409,7 @@
 
     private void Close() => Dialog.Close();
 
-    private Task OpenSuccessor(ApplicationProfileInstanceStatePreview.GroupPerson person)
+    private Task OpenSuccessorDocument(ApplicationProfileInstanceStatePreview.GroupPerson person)
     {
         if (person.SuccessorDocumentId == Guid.Empty)
             return Task.CompletedTask;
@@ -388,6 +425,20 @@
                 PersonId = person.SuccessorPersonId == Guid.Empty ? null : person.SuccessorPersonId,
             },
             Dialog.OwnerViewId);
+    }
+
+    private void OpenApplication(Guid applicationId)
+    {
+        if (applicationId == Guid.Empty || AppHolder.Application == null)
+            return;
+
+        var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(AppHolder.Application, applicationId);
+        if (workspaceView == null)
+            return;
+
+        AppHolder.Application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(null, null));
     }
 
     private Task OpenApprovalCopies(ApplicationWorkspaceListProgressSteps.Step step)
@@ -506,6 +557,10 @@
         ApplicationProfileInstanceStatePreview.SectionId.Visa => "ApplicationProfileInstance.StatePreview.Section.Visas",
         ApplicationProfileInstanceStatePreview.SectionId.BorderZone => "ApplicationProfileInstance.StatePreview.Section.BorderZones",
         ApplicationProfileInstanceStatePreview.SectionId.Location => "ApplicationProfileInstance.StatePreview.Section.Locations",
+        ApplicationProfileInstanceStatePreview.SectionId.RenewedInvitations => "ApplicationProfileInstance.StatePreview.Section.RenewedInvitations",
+        ApplicationProfileInstanceStatePreview.SectionId.ChangedInvitation => "ApplicationProfileInstance.StatePreview.Section.ChangedInvitation",
+        ApplicationProfileInstanceStatePreview.SectionId.CancelledInvitation => "ApplicationProfileInstance.StatePreview.Section.CancelledInvitation",
+        ApplicationProfileInstanceStatePreview.SectionId.CancelledWorkPermit => "ApplicationProfileInstance.StatePreview.Section.CancelledWorkPermit",
         _ => "ApplicationProfileInstance.StatePreview.Title",
     };
 

@@ -3267,12 +3267,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu retdäki adamlar",
             ["ru-RU"] = "Люди в этом отказе",
         },
+        ["ApplicationProfileInstance.Issued.OpenItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open",
+            ["tr-TR"] = "Aç",
+            ["tk-TM"] = "Aç",
+            ["ru-RU"] = "Открыть",
+        },
         ["ApplicationProfileInstance.Issued.PeopleWorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "People on this work permit",
             ["tr-TR"] = "Bu çalışma iznindeki kişiler",
             ["tk-TM"] = "Bu iş rugsadynyň adamlary",
             ["ru-RU"] = "Люди в этом разрешении на работу",
+        },
+        ["ApplicationProfileInstance.Issued.SaveThenOpenItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save the work permit, then open a person to edit that item.",
+            ["tr-TR"] = "Çalışma iznini kaydedin, sonra kişiyi açıp öğeyi düzenleyin.",
+            ["tk-TM"] = "Iş rugsadyny ýazdyryň, soň adamy açyp elementi üýtgediň.",
+            ["ru-RU"] = "Сохраните разрешение на работу, затем откройте человека, чтобы изменить строку.",
         },
         ["ApplicationProfileInstance.Issued.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -5171,12 +5185,40 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Berlen serhet ýaka",
             ["ru-RU"] = "Выданные приграничные зоны",
         },
+        ["ApplicationProfileInstance.StatePreview.Section.CancelledInvitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled invitation",
+            ["tr-TR"] = "İptal edilen davetiye",
+            ["tk-TM"] = "Ýatyrylan çakylyk",
+            ["ru-RU"] = "Отменённое приглашение",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.CancelledWorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled work permit",
+            ["tr-TR"] = "İptal edilen çalışma izni",
+            ["tk-TM"] = "Ýatyrylan iş rugsady",
+            ["ru-RU"] = "Отменённое разрешение на работу",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.ChangedInvitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changed invitation",
+            ["tr-TR"] = "Değiştirilen davetiye",
+            ["tk-TM"] = "Üýtgedilen çakylyk",
+            ["ru-RU"] = "Изменённое приглашение",
+        },
         ["ApplicationProfileInstance.StatePreview.Section.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Issued invitations",
             ["tr-TR"] = "Verilen davetiyeler",
             ["tk-TM"] = "Berlen çakylyklar",
             ["ru-RU"] = "Выданные приглашения",
+        },
+        ["ApplicationProfileInstance.StatePreview.Section.RenewedInvitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Renewed invitations",
+            ["tr-TR"] = "Yenilenen davetiyeler",
+            ["tk-TM"] = "Täze çakylyklar",
+            ["ru-RU"] = "Новые приглашения",
         },
         ["ApplicationProfileInstance.StatePreview.Section.Locations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

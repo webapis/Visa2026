@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
@@ -14,6 +15,13 @@ public static class CaseSavedLocation
     public const int Cap = 200;
     public const string DuplicateError =
         "This location already exists in the list. Close this dialog and search for it.";
+
+    /// <summary>
+    /// Unsaved Field+TextKey rows for this ObjectSpace. EF GetObjectsQuery often misses Added entities,
+    /// so Remember on many work-permit people with the same chips would insert duplicates.
+    /// </summary>
+    private static readonly ConditionalWeakTable<IObjectSpace, Dictionary<(ApplicationProfileSavedLocationField Field, string TextKey), ApplicationProfileSavedLocation>> PendingBySpace =
+        new();
 
     /// <summary>Create a saved location with use count 0. Fails on duplicate folded text.</summary>
     public static bool TryAdd(
@@ -50,26 +58,17 @@ public static class CaseSavedLocation
             return false;
         }
 
-        // No duplicates for officer-added: any existing Field+TextKey blocks Add.
-        if (objectSpace.GetObjectsQuery<ApplicationProfileSavedLocation>()
-            .Any(row => row.Field == field && row.TextKey == key))
+        // No duplicates for officer-added: any existing Field+TextKey blocks Add
+        // (including rows created earlier in this same save batch).
+        if (FindExisting(objectSpace, field, key) != null)
         {
             error = FormatDuplicateError(display);
             return false;
         }
 
-        var profileId = profile.ID;
-        var created = objectSpace.CreateObject<ApplicationProfileSavedLocation>();
-        created.ApplicationProfile = objectSpace.GetObjectByKey<ApplicationProfile>(profileId) ?? profile;
-        created.ApplicationProfileId = profileId;
-        created.Field = field;
-        created.TextKey = key;
-        created.Text = display;
-        created.UseCount = 0;
-        created.UsedAtUtc = DateTime.UtcNow;
-        created.Source = ApplicationProfileSavedLocationSource.User;
+        var created = CreateRow(objectSpace, profile, field, key, display, useCount: 0);
         Prune(objectSpace, field);
-        return true;
+        return created != null;
     }
 
     /// <summary>Rename without bumping use count. Same folded text (self) is allowed.</summary>
@@ -113,22 +112,14 @@ public static class CaseSavedLocation
         if (string.IsNullOrEmpty(fromKey))
             return TryAdd(objectSpace, profile, field, to, out error);
 
-        var source = objectSpace.GetObjectsQuery<ApplicationProfileSavedLocation>()
-            .Where(row => row.Field == field && row.TextKey == fromKey)
-            .OrderByDescending(row => row.UseCount)
-            .ThenByDescending(row => row.UsedAtUtc)
-            .FirstOrDefault();
+        var source = FindExisting(objectSpace, field, fromKey);
 
         if (source == null)
             return TryAdd(objectSpace, profile, field, to, out error);
 
         if (!string.Equals(fromKey, toKey, StringComparison.Ordinal))
         {
-            var target = objectSpace.GetObjectsQuery<ApplicationProfileSavedLocation>()
-                .Where(row => row.Field == field && row.TextKey == toKey)
-                .OrderByDescending(row => row.UseCount)
-                .ThenByDescending(row => row.UsedAtUtc)
-                .FirstOrDefault();
+            var target = FindExisting(objectSpace, field, toKey);
             if (target != null && !ReferenceEquals(target, source))
             {
                 error = FormatDuplicateError(to);
@@ -161,11 +152,7 @@ public static class CaseSavedLocation
         if (string.IsNullOrEmpty(key))
             return false;
 
-        var existing = objectSpace.GetObjectsQuery<ApplicationProfileSavedLocation>()
-            .Where(row => row.Field == field && row.TextKey == key)
-            .OrderByDescending(row => row.UseCount)
-            .ThenByDescending(row => row.UsedAtUtc)
-            .FirstOrDefault();
+        var existing = FindExisting(objectSpace, field, key);
         if (existing != null)
         {
             // One row per TextKey — never insert a duplicate. Promote legacy Lookup to User so List shows it.
@@ -209,11 +196,7 @@ public static class CaseSavedLocation
         if (string.IsNullOrEmpty(key))
             return false;
 
-        var existing = objectSpace.GetObjectsQuery<ApplicationProfileSavedLocation>()
-            .Where(row => row.Field == field && row.TextKey == key)
-            .OrderByDescending(row => row.UseCount)
-            .ThenByDescending(row => row.UsedAtUtc)
-            .FirstOrDefault();
+        var existing = FindExisting(objectSpace, field, key);
 
         if (existing != null)
         {
@@ -221,8 +204,35 @@ public static class CaseSavedLocation
             existing.UseCount = Math.Max(1, existing.UseCount) + 1;
             existing.UsedAtUtc = DateTime.UtcNow;
             existing.Source = ApplicationProfileSavedLocationSource.User;
+            TrackPending(objectSpace, existing);
             Prune(objectSpace, field);
             return true;
+        }
+
+        var created = CreateRow(objectSpace, profile, field, key, display, useCount: 1);
+        Prune(objectSpace, field);
+        return created != null;
+    }
+
+    private static ApplicationProfileSavedLocation? CreateRow(
+        IObjectSpace objectSpace,
+        ApplicationProfile profile,
+        ApplicationProfileSavedLocationField field,
+        string key,
+        string display,
+        int useCount)
+    {
+        // Re-check after any concurrent Remember in the same batch (GetObjectsQuery misses Added).
+        var existing = FindExisting(objectSpace, field, key);
+        if (existing != null)
+        {
+            existing.Text = display;
+            if (useCount > 0)
+                existing.UseCount = Math.Max(1, existing.UseCount) + 1;
+            existing.UsedAtUtc = DateTime.UtcNow;
+            existing.Source = ApplicationProfileSavedLocationSource.User;
+            TrackPending(objectSpace, existing);
+            return existing;
         }
 
         var profileId = profile.ID;
@@ -232,11 +242,102 @@ public static class CaseSavedLocation
         created.Field = field;
         created.TextKey = key;
         created.Text = display;
-        created.UseCount = 1;
+        created.UseCount = useCount;
         created.UsedAtUtc = DateTime.UtcNow;
         created.Source = ApplicationProfileSavedLocationSource.User;
-        Prune(objectSpace, field);
-        return true;
+        TrackPending(objectSpace, created);
+        return created;
+    }
+
+    /// <summary>
+    /// DB row, ModifiedObjects / GetObjects, or a row we already CreateObject'd in this ObjectSpace.
+    /// </summary>
+    private static ApplicationProfileSavedLocation? FindExisting(
+        IObjectSpace objectSpace,
+        ApplicationProfileSavedLocationField field,
+        string key)
+    {
+        if (PendingBySpace.TryGetValue(objectSpace, out var pending)
+            && pending.TryGetValue((field, key), out var tracked)
+            && tracked != null
+            && !objectSpace.IsDeletedObject(tracked))
+        {
+            return tracked;
+        }
+
+        ApplicationProfileSavedLocation? best = null;
+        foreach (var obj in objectSpace.ModifiedObjects)
+        {
+            if (obj is not ApplicationProfileSavedLocation row)
+                continue;
+            if (row.Field != field
+                || !string.Equals(row.TextKey, key, StringComparison.Ordinal)
+                || objectSpace.IsDeletedObject(row))
+            {
+                continue;
+            }
+
+            if (best == null
+                || row.UseCount > best.UseCount
+                || (row.UseCount == best.UseCount && row.UsedAtUtc > best.UsedAtUtc))
+            {
+                best = row;
+            }
+        }
+
+        if (best != null)
+        {
+            TrackPending(objectSpace, best);
+            return best;
+        }
+
+        try
+        {
+            foreach (var row in objectSpace.GetObjects<ApplicationProfileSavedLocation>())
+            {
+                if (row.Field != field
+                    || !string.Equals(row.TextKey, key, StringComparison.Ordinal)
+                    || objectSpace.IsDeletedObject(row))
+                {
+                    continue;
+                }
+
+                if (best == null
+                    || row.UseCount > best.UseCount
+                    || (row.UseCount == best.UseCount && row.UsedAtUtc > best.UsedAtUtc))
+                {
+                    best = row;
+                }
+            }
+        }
+        catch
+        {
+            // Some ObjectSpaces reject unbound GetObjects; fall through to query.
+        }
+
+        if (best != null)
+        {
+            TrackPending(objectSpace, best);
+            return best;
+        }
+
+        var fromStore = objectSpace.GetObjectsQuery<ApplicationProfileSavedLocation>()
+            .Where(row => row.Field == field && row.TextKey == key)
+            .OrderByDescending(row => row.UseCount)
+            .ThenByDescending(row => row.UsedAtUtc)
+            .FirstOrDefault();
+        if (fromStore != null)
+            TrackPending(objectSpace, fromStore);
+        return fromStore;
+    }
+
+    private static void TrackPending(IObjectSpace objectSpace, ApplicationProfileSavedLocation row)
+    {
+        if (objectSpace == null || row == null || string.IsNullOrEmpty(row.TextKey))
+            return;
+
+        var map = PendingBySpace.GetValue(objectSpace, static _ => new Dictionary<(ApplicationProfileSavedLocationField, string), ApplicationProfileSavedLocation>());
+        map[(row.Field, row.TextKey)] = row;
     }
 
     public static void RememberAll(
@@ -247,8 +348,14 @@ public static class CaseSavedLocation
     {
         if (labels == null)
             return;
+        var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var label in labels)
+        {
+            var key = CaseLocationAutocomplete.FoldKey(label);
+            if (string.IsNullOrEmpty(key) || !seen.Add(key))
+                continue;
             Remember(objectSpace, application, field, label, ApplicationProfileSavedLocationSource.User);
+        }
     }
 
     /// <summary>Remember each chip in a stored comma-separated location. Skips Ýok and blank.</summary>
@@ -273,8 +380,14 @@ public static class CaseSavedLocation
     {
         if (objectSpace == null || profile == null)
             return;
+        var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var label in CaseLocationAutocomplete.ParseChips(stored, noneValue))
+        {
+            var key = CaseLocationAutocomplete.FoldKey(label);
+            if (string.IsNullOrEmpty(key) || !seen.Add(key))
+                continue;
             Remember(objectSpace, profile, field, label, ApplicationProfileSavedLocationSource.User);
+        }
     }
 
     /// <summary>

@@ -685,12 +685,6 @@ public static partial class IssueIssuedHeaderComposeService
             : null;
         Guid? defaultDurationId = null;
 
-        var borderZoneNames = kind == IssueIssuedHeaderKind.Invitation
-            ? CommaSeparatedCatalogHelper.LoadCatalogNames(
-                objectSpace,
-                typeof(BorderZoneName),
-                CommaSeparatedSelectionHelper.NoneValue)
-            : Array.Empty<string>();
         var defaultBorderZone = kind == IssueIssuedHeaderKind.Invitation
             ? CasePersonRequestedLocation.ResolveBorderZoneForInvitationHeader(
                 objectSpace,
@@ -738,7 +732,6 @@ public static partial class IssueIssuedHeaderComposeService
             ValidityDurationId = defaultDurationId,
             VisaCategories = visaCategories,
             VisaPeriods = visaPeriods,
-            BorderZoneNames = borderZoneNames,
             ValidityDurations = validityDurations,
             People = people,
         };
@@ -1203,6 +1196,12 @@ public static partial class IssueIssuedHeaderComposeService
                 BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance))
             : draft.BorderZoneLocation.Trim();
         BorderZoneSelectionHelper.ApplyDefaultIfEmpty(invitation);
+        CaseSavedLocation.RememberStored(
+            objectSpace,
+            instance,
+            ApplicationProfileSavedLocationField.BorderZone,
+            invitation.BorderZoneLocation,
+            CommaSeparatedSelectionHelper.NoneValue);
 
         invitation.IsVisaStartAndEndDateDefined = draft.IsVisaStartAndEndDateDefined;
         invitation.VisaStartDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaStartDate?.Date : null;
@@ -1270,6 +1269,7 @@ public static partial class IssueIssuedHeaderComposeService
 
         var defaultLocations = instance.MovementPermitLocation?.Trim() ?? string.Empty;
         if (workPermit.WorkPermitItems == null) workPermit.WorkPermitItems = new System.Collections.ObjectModel.ObservableCollection<WorkPermitItem>();
+        RememberWorkPermitLocationsOnce(objectSpace, instance, selected, defaultLocations);
         foreach (var row in selected)
         {
             var person = objectSpace.GetObjectByKey<Person>(row.PersonId);
@@ -1279,7 +1279,7 @@ public static partial class IssueIssuedHeaderComposeService
             var item = objectSpace.CreateObject<WorkPermitItem>();
             item.WorkPermit = workPermit;
             item.Person = person;
-            ApplyWorkPermitItemFields(objectSpace, instance, item, row, defaultLocations);
+            ApplyWorkPermitItemFields(objectSpace, instance, item, row, defaultLocations, rememberLocations: false);
             workPermit.WorkPermitItems.Add(item);
         }
 
@@ -1394,6 +1394,12 @@ public static partial class IssueIssuedHeaderComposeService
                 ? objectSpace.GetObjectByKey<Passport>(pid)
                 : ApplicationProfileInstancePersonValidItems.ResolvePassport(person);
             item.BorderZoneLocation = ResolveBorderZoneItemLocations(objectSpace, instance, row);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                instance,
+                ApplicationProfileSavedLocationField.BorderZone,
+                item.BorderZoneLocation,
+                CommaSeparatedSelectionHelper.NoneValue);
             borderZone.BorderZoneItems.Add(item);
         }
 
@@ -1521,14 +1527,27 @@ public static partial class IssueIssuedHeaderComposeService
                 draft.HeaderNumber = workPermit.WorkPermitNumber?.Trim() ?? string.Empty;
                 draft.PrimaryDate = workPermit.IssuedDate == default ? DateTime.Today : workPermit.IssuedDate.Date;
 
-                var items = workPermit.WorkPermitItems?.Where(i => i != null).ToList()
-                    ?? new List<WorkPermitItem>();
+                // Query items by person id. The WorkPermitItems navigation can miss Person and then a real line has no Open.
+                var itemIdsByPerson = objectSpace.GetObjectsQuery<WorkPermitItem>()
+                    .Where(i => i.WorkPermit != null && i.WorkPermit.ID == headerId && i.Person != null)
+                    .Select(i => new { i.ID, PersonId = i.Person.ID })
+                    .ToList()
+                    .GroupBy(i => i.PersonId)
+                    .ToDictionary(g => g.Key, g => g.First().ID);
                 foreach (var person in draft.People)
                 {
-                    var item = items.FirstOrDefault(i => i.Person != null && i.Person.ID == person.PersonId);
+                    if (!itemIdsByPerson.TryGetValue(person.PersonId, out var itemId))
+                    {
+                        person.Include = false;
+                        person.ExistingLineId = null;
+                        continue;
+                    }
+
+                    var item = objectSpace.GetObjectByKey<WorkPermitItem>(itemId);
                     if (item == null)
                     {
                         person.Include = false;
+                        person.ExistingLineId = null;
                         continue;
                     }
 
@@ -1778,6 +1797,12 @@ public static partial class IssueIssuedHeaderComposeService
             ? BorderZoneSelectionHelper.NoneValue
             : draft.BorderZoneLocation.Trim();
         BorderZoneSelectionHelper.ApplyDefaultIfEmpty(invitation);
+        CaseSavedLocation.RememberStored(
+            objectSpace,
+            invitation.ApplicationProfileInstance,
+            ApplicationProfileSavedLocationField.BorderZone,
+            invitation.BorderZoneLocation,
+            CommaSeparatedSelectionHelper.NoneValue);
         invitation.IsVisaStartAndEndDateDefined = draft.IsVisaStartAndEndDateDefined;
         invitation.VisaStartDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaStartDate?.Date : null;
         invitation.VisaEndDate = draft.IsVisaStartAndEndDateDefined ? draft.VisaEndDate?.Date : null;
@@ -1883,6 +1908,8 @@ public static partial class IssueIssuedHeaderComposeService
 
         var instance = workPermit.ApplicationProfileInstance;
         var defaultLocations = instance?.MovementPermitLocation?.Trim() ?? string.Empty;
+        if (instance != null)
+            RememberWorkPermitLocationsOnce(objectSpace, instance, selected, defaultLocations);
         foreach (var row in selected)
         {
             var person = objectSpace.GetObjectByKey<Person>(row.PersonId);
@@ -1900,7 +1927,7 @@ public static partial class IssueIssuedHeaderComposeService
 
             if (instance == null)
                 continue;
-            ApplyWorkPermitItemFields(objectSpace, instance, item, row, defaultLocations);
+            ApplyWorkPermitItemFields(objectSpace, instance, item, row, defaultLocations, rememberLocations: false);
         }
 
         objectSpace.CommitChanges();
@@ -2004,6 +2031,12 @@ public static partial class IssueIssuedHeaderComposeService
                     existing.BorderZoneLocation = row.WorkPermittedLocations.Trim();
                 else if (instance != null)
                     existing.BorderZoneLocation = ResolveBorderZoneItemLocations(objectSpace, instance, row);
+                CaseSavedLocation.RememberStored(
+                    objectSpace,
+                    instance,
+                    ApplicationProfileSavedLocationField.BorderZone,
+                    existing.BorderZoneLocation,
+                    CommaSeparatedSelectionHelper.NoneValue);
                 continue;
             }
 
@@ -2020,6 +2053,12 @@ public static partial class IssueIssuedHeaderComposeService
             item.BorderZoneLocation = instance == null
                 ? (row.WorkPermittedLocations?.Trim() ?? string.Empty)
                 : ResolveBorderZoneItemLocations(objectSpace, instance, row);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                instance,
+                ApplicationProfileSavedLocationField.BorderZone,
+                item.BorderZoneLocation,
+                CommaSeparatedSelectionHelper.NoneValue);
             borderZone.BorderZoneItems.Add(item);
         }
 
@@ -2435,12 +2474,40 @@ public static partial class IssueIssuedHeaderComposeService
             .ToList();
     }
 
+    private static void RememberWorkPermitLocationsOnce(
+        IObjectSpace objectSpace,
+        ApplicationProfileInstance instance,
+        IReadOnlyList<IssueIssuedHeaderPersonLineDraft> selected,
+        string defaultLocations)
+    {
+        var labels = new List<string>();
+        foreach (var row in selected)
+        {
+            var stored = string.IsNullOrWhiteSpace(row.WorkPermittedLocations)
+                ? CasePersonRequestedLocation.ResolveForPrefill(
+                    objectSpace,
+                    instance.ID,
+                    row.PersonId,
+                    ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
+                    defaultLocations)
+                : row.WorkPermittedLocations.Trim();
+            labels.AddRange(CaseLocationAutocomplete.ParseChips(stored, string.Empty));
+        }
+
+        CaseSavedLocation.RememberAll(
+            objectSpace,
+            instance,
+            ApplicationProfileSavedLocationField.WorkPermitLocation,
+            labels);
+    }
+
     private static void ApplyWorkPermitItemFields(
         IObjectSpace objectSpace,
         ApplicationProfileInstance instance,
         WorkPermitItem item,
         IssueIssuedHeaderPersonLineDraft row,
-        string defaultLocations)
+        string defaultLocations,
+        bool rememberLocations = true)
     {
         item.WorkPermitNumber = row.ItemNumber.Trim();
         item.ASNumber = row.ASNumber.Trim();
@@ -2460,6 +2527,15 @@ public static partial class IssueIssuedHeaderComposeService
                 ApplicationProfileInstancePersonRequestedLocationKind.WorkPermit,
                 defaultLocations)
             : row.WorkPermittedLocations.Trim();
+        if (rememberLocations)
+        {
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                instance,
+                ApplicationProfileSavedLocationField.WorkPermitLocation,
+                item.WorkPermittedLocations,
+                string.Empty);
+        }
     }
 
     private static Guid? FirstAssignedId(params Guid?[] ids)

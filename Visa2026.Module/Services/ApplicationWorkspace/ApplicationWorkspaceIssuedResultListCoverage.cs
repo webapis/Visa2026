@@ -273,6 +273,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 ChangeId = i.Invitation.ApplicationProfileInstance.ID,
                 PersonId = i.Person.ID,
                 DocumentId = i.Invitation.ID,
+                InvitationNumber = i.Invitation.InvitationNumber,
                 ItemId = i.ID,
                 Expiration = i.Invitation.ExpirationDate,
             })
@@ -296,11 +297,11 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
                 lifeByItem[copy.ItemId] = life;
         }
 
-        var copyByChangePerson = new Dictionary<(Guid ChangeId, Guid PersonId), (Guid DocumentId, Guid ItemId)>();
+        var copyByChangePerson = new Dictionary<(Guid ChangeId, Guid PersonId), (Guid DocumentId, Guid ItemId, string? InvitationNumber)>();
         foreach (var copy in copies)
-            copyByChangePerson.TryAdd((copy.ChangeId, copy.PersonId), (copy.DocumentId, copy.ItemId));
+            copyByChangePerson.TryAdd((copy.ChangeId, copy.PersonId), (copy.DocumentId, copy.ItemId, copy.InvitationNumber));
 
-        var grouped = new Dictionary<(Guid OldInstanceId, Guid PersonId), List<(DateTime Date, Guid DocumentId, Guid ApplicationId, string? Number, string? Life)>>();
+        var grouped = new Dictionary<(Guid OldInstanceId, Guid PersonId), List<(DateTime Date, Guid DocumentId, Guid ApplicationId, string? Number, string? Life, string? InvitationNumber)>>();
         foreach (var link in links)
         {
             if (!copyByChangePerson.TryGetValue((link.ChangeId, link.PersonId), out var copy))
@@ -314,7 +315,7 @@ public static class ApplicationWorkspaceIssuedResultListCoverage
             }
 
             lifeByItem.TryGetValue(copy.ItemId, out var life);
-            options.Add((link.Date, copy.DocumentId, link.ChangeId, link.Number, life));
+            options.Add((link.Date, copy.DocumentId, link.ChangeId, link.Number, life, copy.InvitationNumber));
         }
 
         foreach (var (key, options) in grouped)

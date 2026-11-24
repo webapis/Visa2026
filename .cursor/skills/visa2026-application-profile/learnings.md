@@ -1,3 +1,56 @@
+## 2026-11-24 — Duplicate work-permit row hid Mustafa's cancellation
+
+- **Symptom**: Ýagdaý syny still showed Mustafa Yetkin Aydınlı In force on permit 1445 after counting in-progress cancellations.
+- **Cause**: Cancel case 10/-2034 links a second WorkPermitItem 1445/4 whose header is not the permit on the case. The sheet only matched the exact item id.
+- **Fix**: A cancellation of the same person and the same permit number marks the row on the case. Header 1445 stays In force when other people are still valid.
+- **Officer**: Rebuild and hard-refresh. Mustafa's row should be Ýatyryldy with 10/-2034 under the name.
+- **Prevent**: Do not require the cancellation skip-nav to point at the case's own WorkPermitItem id when another row shares the permit number.
+- **Verify**: ApplicationProfileInstanceStatePreviewTests 43 passed. Officer confirmed Mustafa is Cancelled with 10/-2034 under the name, and permit 1445 stays In force.
+## 2026-11-24 — In-progress cancellation marks the work permit on Ýagdaý syny
+
+- **Need**: Mustafa Yetkin Aydınlı is on cancellation application 18/-2035 (still Visa awaiting) but work permit 1445 on the original sheet still showed In force.
+- **Cause**: Cancelled work-permit life required the cancellation case to be process-issued.
+- **Fix**: A cancellation case that links the work-permit item counts immediately. The person row is Ýatyryldy, name struck, under-name opens the cancellation case. If anyone on the permit is still in force, header 1445 stays In force.
+- **Officer**: Rebuild, hard-refresh, open the original case Ýagdaý syny. Mustafa's row under 1445 should be cancelled; the 1445 pill stays In force.
+- **Prevent**: Do not wait for ProcessIssued before painting a linked work-permit cancellation. Invitations still wait for issued.
+- **Verify**: ApplicationProfileInstanceStatePreviewTests 42 passed. Not opened in the browser.
+## 2026-11-24 — Work permit people as a compact list
+
+- **Need**: Opening every work-permit person at once cluttered the preview slot.
+- **Fix**: Work permit compose shows a table (include, name, number, dates, locations, Open). Open shows one native WorkPermitItem DetailView. Save no longer waits for the hidden card fields. Location grants still use stacked cards.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a saved work permit and use Open on one person.
+- **Prevent**: Do not expand every WorkPermitItem in the slot. Invitation and border zone stay as they are for this pass.
+- **Verify**: Isolated Blazor build, 0 errors. Not opened in the browser.
+## 2026-11-24 — Saved location duplicate still on WP save (batch + pending map)
+
+- **Symptom**: Same `23505 IX_ApplicationProfileSavedLocations_Field_Text` after first Remember fix when saving a work permit with shared location chips across people.
+- **Cause**: EF `GetObjectsQuery` / `GetObjects` often do not see Added entities in the same ObjectSpace batch.
+- **Fix**: `ConditionalWeakTable` pending map per ObjectSpace; scan `ModifiedObjects`; work-permit create/update remembers all chips once before applying items.
+- **Officer**: Stop F5, rebuild host, hard-refresh, save work permit 1445 again.
+- **Prevent**: Do not rely on GetObjectsQuery alone for Field+TextKey uniqueness before CreateObject.
+- **Verify**: Isolated Module build. Not browser-verified.
+## 2026-11-24 — Duplicate saved location on work-permit save
+
+- **Symptom**: Saving Edit Work permit with many people sharing the same work-permitted location chips failed with 23505 IX_ApplicationProfileSavedLocations_Field_Text.
+- **Cause**: CaseSavedLocation.Remember only queried the database. The first person created an unsaved row; the next people with the same chip inserted another row in the same batch.
+- **Fix**: FindExisting also checks ObjectSpace in-memory rows before Create. RememberAll skips duplicate fold keys in one call.
+- **Officer**: Rebuild, hard-refresh, save the work permit again with shared location chips.
+- **Prevent**: Never insert ApplicationProfileSavedLocation for Field+TextKey without checking unsaved ObjectSpace objects in the same save.
+- **Verify**: Isolated Module build. Not browser-verified.
+## 2026-11-24 — Cancelled work permit on WP-producing Ýagdaý syny
+
+- **Need**: Same cancelled display as invitation on Berlen iş rugsatnamalary for every WP-producing profile (e.g. extend_visa_wp).
+- **Fix**: WP life ignores Change; cancelled only gets name strike + Ýatyrylan iş rugsady under-name + cancel-app link; look-back also on cancel_workpermit. Sheet-only (not People column).
+- **Officer**: Rebuild, hard-refresh, open Ýagdaý syny on a WP case with a cancelled permit.
+- **Prevent**: Do not treat work permits as changeable; do not add a renewed-WP section on the original.
+- **Verify**: StatePreview tests passed. Not browser-verified.
+## 2026-11-24 — Ýagdaý syny renewed / cancelled invitation sections
+
+- **Need**: On the initial invitation case show changed people with name strike-through, keep the under-name line with both renewed invitation № (PDF) and change-application № (case), and add a **Täze çakylyklar** section. On change cases show **Üýtgedilen çakylyk** look-back. Cancel invitation (+ WP) uses the same two-sided pattern with **Ýatyrylan çakylyk** / **Ýatyrylan iş rugsady** and no second document section on the original.
+- **Fix**: Extended state-preview related sections + cancel links; Host opens invitation PDF vs application workspace separately; CSS name strike-through only.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open Ýagdaý syny on obtain / change / cancel samples.
+- **Prevent**: Do not reuse the under-name click for both PDF and case — invitation № opens PDF, application № opens the case.
+- **Verify**: Isolated Module + Blazor build; StatePreview + LinkedPeople tests 57 passed. Not browser-verified.
 ### 2026-11-21 — Address 1 and Address 2 edit like a location chip
 
 - **Need**: A filled Address 1 or Address 2 can be corrected in place, and the next suggestion uses that spelling.

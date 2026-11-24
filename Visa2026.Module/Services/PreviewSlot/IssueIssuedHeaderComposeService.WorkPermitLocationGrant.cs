@@ -43,6 +43,12 @@ public static partial class IssueIssuedHeaderComposeService
             item.GrantedLocations = row.WorkPermittedLocations?.Trim() ?? string.Empty;
             item.SourceWorkPermitItem = sourceItem;
             grant.Items.Add(item);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                grant.ApplicationProfileInstance,
+                ApplicationProfileSavedLocationField.WorkPermitLocation,
+                item.GrantedLocations,
+                string.Empty);
         }
 
         grant.SourceWorkPermit = sourceHeader;
@@ -85,6 +91,12 @@ public static partial class IssueIssuedHeaderComposeService
             {
                 if (!string.IsNullOrWhiteSpace(row.WorkPermittedLocations))
                     existing.GrantedLocations = row.WorkPermittedLocations.Trim();
+                CaseSavedLocation.RememberStored(
+                    objectSpace,
+                    grant.ApplicationProfileInstance,
+                    ApplicationProfileSavedLocationField.WorkPermitLocation,
+                    existing.GrantedLocations,
+                    string.Empty);
                 continue;
             }
 
@@ -102,6 +114,12 @@ public static partial class IssueIssuedHeaderComposeService
             item.GrantedLocations = row.WorkPermittedLocations?.Trim() ?? string.Empty;
             item.SourceWorkPermitItem = sourceItem;
             grant.Items.Add(item);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                grant.ApplicationProfileInstance,
+                ApplicationProfileSavedLocationField.WorkPermitLocation,
+                item.GrantedLocations,
+                string.Empty);
             if (grant.SourceWorkPermit == null && sourceItem?.WorkPermit != null)
                 grant.SourceWorkPermit = sourceItem.WorkPermit;
         }

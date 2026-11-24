@@ -296,6 +296,7 @@ public class ApplicationProfileInstanceStatePreviewTests
         var header = Guid.NewGuid();
         var successor = Guid.NewGuid();
         var personId = Guid.NewGuid();
+        var changeApp = Guid.NewGuid();
         var row = new ApplicationProfileInstanceStatePreview.Row(
             "A",
             "1574",
@@ -309,7 +310,11 @@ public class ApplicationProfileInstanceStatePreviewTests
             InvitationLifeKey: "invitationChanged",
             SuccessorNumber: "9/-100",
             SuccessorDocumentId: successor,
-            SuccessorLifeKey: "invitationInForce");
+            SuccessorLifeKey: "invitationInForce",
+            SuccessorInvitationNumber: "ASGH338897",
+            SuccessorApplicationId: changeApp,
+            RelatedLineTitleKey: ApplicationProfileInstanceStatePreview.RelatedSuccessorTitleKey,
+            StrikeName: true);
 
         var grouped = ApplicationProfileInstanceStatePreview.GroupHeaders(new[] { row }, periodOnHeader: true);
         var person = grouped.Groups[0].People[0];
@@ -318,7 +323,97 @@ public class ApplicationProfileInstanceStatePreviewTests
         Assert.Equal(successor, person.SuccessorDocumentId);
         Assert.Equal("invitationInForce", person.SuccessorLifeKey);
         Assert.Equal(personId, person.SuccessorPersonId);
+        Assert.Equal("ASGH338897", person.SuccessorInvitationNumber);
+        Assert.Equal(changeApp, person.SuccessorApplicationId);
+        Assert.True(person.StrikeName);
+        Assert.Equal(ApplicationProfileInstanceStatePreview.RelatedSuccessorTitleKey, person.RelatedLineTitleKey);
     }
+
+    [Fact]
+    public void Strike_name_only_for_changed_or_cancelled_life()
+    {
+        Assert.True(ApplicationProfileInstanceStatePreview.StrikeNameForLife(InvitationLaterLife.Changed));
+        Assert.True(ApplicationProfileInstanceStatePreview.StrikeNameForLife(InvitationLaterLife.Cancelled));
+        Assert.False(ApplicationProfileInstanceStatePreview.StrikeNameForLife(InvitationLaterLife.InForce));
+        Assert.False(ApplicationProfileInstanceStatePreview.StrikeNameForLife(InvitationLaterLife.Used));
+    }
+
+    [Fact]
+    public void Work_permit_cancelled_row_keeps_cancel_application_under_the_struck_name()
+    {
+        var header = Guid.NewGuid();
+        var personId = Guid.NewGuid();
+        var cancelApp = Guid.NewGuid();
+        var row = new ApplicationProfileInstanceStatePreview.Row(
+            "Mukrip",
+            "578/8",
+            "01.01.2023 – 01.01.2024",
+            "ApplicationProfileInstance.List.Mark.InvitationCancelledTitle",
+            "cancelled",
+            Nested: false,
+            PreviewParentId: header,
+            PreviewFamily: HeaderDocumentCopiesFamily.WorkPermit,
+            PreviewPersonId: personId,
+            InvitationLifeKey: InvitationLaterLife.Cancelled,
+            SuccessorNumber: "7/-1278",
+            SuccessorApplicationId: cancelApp,
+            RelatedLineTitleKey: ApplicationProfileInstanceStatePreview.RelatedCancelledWorkPermitTitleKey,
+            StrikeName: true);
+
+        var grouped = ApplicationProfileInstanceStatePreview.GroupHeaders(new[] { row }, periodOnHeader: false);
+        var person = grouped.Groups[0].People[0];
+
+        Assert.True(person.StrikeName);
+        Assert.Equal("7/-1278", person.SuccessorNumber);
+        Assert.Equal(cancelApp, person.SuccessorApplicationId);
+        Assert.Equal(
+            ApplicationProfileInstanceStatePreview.RelatedCancelledWorkPermitTitleKey,
+            person.RelatedLineTitleKey);
+        Assert.Equal("578/8", grouped.Groups[0].Number);
+    }
+
+    [Fact]
+    public void Mixed_work_permit_keeps_the_permit_in_force()
+    {
+        var header = Guid.NewGuid();
+        var rows = new[]
+        {
+            Person("Caner", "1445", "01.01.2027 – 30.06.2027", header, InvitationLaterLife.InForce, HeaderDocumentCopiesFamily.WorkPermit),
+            Person("Mustafa", "1445", "29.12.2026 – 28.06.2027", header, InvitationLaterLife.Cancelled, HeaderDocumentCopiesFamily.WorkPermit),
+        };
+
+        var grouped = ApplicationProfileInstanceStatePreview.GroupHeaders(
+            rows,
+            periodOnHeader: false,
+            keepDocumentInForceWhenMixed: true);
+
+        Assert.Equal(InvitationLaterLife.InForce, grouped.Groups[0].InvitationLifeKey);
+        Assert.Equal(2, grouped.Groups[0].People.Count);
+    }
+
+    [Fact]
+    public void Duplicate_work_permit_row_with_the_same_number_counts_as_cancelled()
+    {
+        var person = Guid.NewGuid();
+        var onSheet = Guid.NewGuid();
+        var linkedDuplicate = Guid.NewGuid();
+
+        Assert.True(ApplicationProfileInstanceStatePreview.WorkPermitItemIsCancelledByLink(
+            onSheet, person, "1445", linkedDuplicate, person, "1445"));
+        Assert.False(ApplicationProfileInstanceStatePreview.WorkPermitItemIsCancelledByLink(
+            onSheet, person, "1445", linkedDuplicate, person, "451"));
+        Assert.False(ApplicationProfileInstanceStatePreview.WorkPermitItemIsCancelledByLink(
+            onSheet, person, "1445", linkedDuplicate, Guid.NewGuid(), "1445"));
+    }
+
+    [Theory]
+    [InlineData(ApplicationProfileInstanceStatePreview.SectionId.RenewedInvitations, true)]
+    [InlineData(ApplicationProfileInstanceStatePreview.SectionId.ChangedInvitation, true)]
+    [InlineData(ApplicationProfileInstanceStatePreview.SectionId.CancelledInvitation, true)]
+    [InlineData(ApplicationProfileInstanceStatePreview.SectionId.CancelledWorkPermit, true)]
+    [InlineData(ApplicationProfileInstanceStatePreview.SectionId.Visa, false)]
+    public void Related_sections_group_by_header(ApplicationProfileInstanceStatePreview.SectionId id, bool grouped) =>
+        Assert.Equal(grouped, ApplicationProfileInstanceStatePreview.IsGroupedSection(id));
 
     private static ApplicationProfileInstanceStatePreview.Row Person(
         string name,

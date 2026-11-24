@@ -40,7 +40,11 @@ public static class ApplicationListLinkedPeople
         Guid ApplicationId,
         string ApplicationNumber,
         string Tone,
-        string? State);
+        string? State,
+        string InvitationNumber = "");
+
+    /// <summary>Completed cancel (or change) application that acted on this person's issued document.</summary>
+    public sealed record RelatedApplicationLink(Guid ApplicationId, string ApplicationNumber);
 
     /// <param name="ExcludedLetterNumber">First Seretmezlik letter / case number when excluded on the target.</param>
     /// <param name="ExcludedLetterDate">First letter / application date.</param>
@@ -283,7 +287,7 @@ public static class ApplicationListLinkedPeople
     /// Latest issued replacement wins. A change that has no new invitation is ignored.
     /// </summary>
     public static InvitationReplacement? ChooseSuccessor(
-        IEnumerable<(DateTime Date, Guid DocumentId, Guid ApplicationId, string? Number, string? Life)> options)
+        IEnumerable<(DateTime Date, Guid DocumentId, Guid ApplicationId, string? Number, string? Life, string? InvitationNumber)> options)
     {
         InvitationReplacement? best = null;
         var bestDate = DateTime.MinValue;
@@ -309,7 +313,36 @@ public static class ApplicationListLinkedPeople
                 option.ApplicationId,
                 number,
                 life == null ? ToneDone : InvitationLaterLife.Tone(life),
-                life);
+                life,
+                option.InvitationNumber?.Trim() ?? "");
+        }
+
+        return best;
+    }
+
+    /// <summary>Latest completed related application wins (cancel or change look-up by date).</summary>
+    public static RelatedApplicationLink? ChooseRelatedApplication(
+        IEnumerable<(DateTime Date, Guid ApplicationId, string? Number)> options)
+    {
+        RelatedApplicationLink? best = null;
+        var bestDate = DateTime.MinValue;
+        var bestNumber = "";
+        foreach (var option in options)
+        {
+            if (option.ApplicationId == Guid.Empty)
+                continue;
+
+            var number = option.Number?.Trim() ?? "";
+            if (best != null
+                && (option.Date < bestDate
+                    || (option.Date == bestDate && string.Compare(number, bestNumber, StringComparison.Ordinal) <= 0)))
+            {
+                continue;
+            }
+
+            bestDate = option.Date;
+            bestNumber = number;
+            best = new RelatedApplicationLink(option.ApplicationId, number);
         }
 
         return best;

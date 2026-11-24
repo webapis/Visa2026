@@ -441,14 +441,15 @@ public class ApplicationListLinkedPeopleTests
         var newerDocument = Guid.NewGuid();
         var chosen = ApplicationListLinkedPeople.ChooseSuccessor(
         [
-            (new DateTime(2026, 1, 1), Guid.NewGuid(), older, "10/-1000", null),
-            (new DateTime(2026, 10, 1), newerDocument, newer, "10/-2125", InvitationLaterLife.Used),
+            (new DateTime(2026, 1, 1), Guid.NewGuid(), older, "10/-1000", null, "OLD-INV"),
+            (new DateTime(2026, 10, 1), newerDocument, newer, "10/-2125", InvitationLaterLife.Used, "ASGH338897"),
         ]);
 
         Assert.NotNull(chosen);
         Assert.Equal(newerDocument, chosen!.DocumentId);
         Assert.Equal(newer, chosen.ApplicationId);
         Assert.Equal("10/-2125", chosen.ApplicationNumber);
+        Assert.Equal("ASGH338897", chosen.InvitationNumber);
         Assert.Equal(InvitationLaterLife.ToneUsed, chosen.Tone);
         Assert.Equal(InvitationLaterLife.Used, chosen.State);
     }

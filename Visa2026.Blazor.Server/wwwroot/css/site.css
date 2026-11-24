@@ -6653,6 +6653,16 @@ button.state-preview-doc {
     font-weight: 650;
 }
 
+.state-preview-name--struck {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+}
+
+.state-preview-group__app {
+    margin-left: 8px;
+    font-weight: 650;
+}
+
 .state-preview-successor {
     display: block;
     margin-top: 2px;
