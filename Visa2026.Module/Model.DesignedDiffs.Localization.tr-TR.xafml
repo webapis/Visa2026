@@ -91,6 +91,11 @@
           <Item Id="FamilyMember" Caption="Davetiyeler (Aile üyesi)" />
         </Items>
       </Item>
+      <Item Id="WorkPermits" Caption="İş İzinleri">
+        <Items>
+          <Item Id="Employee" Caption="İş İzinleri (Çalışan)" />
+        </Items>
+      </Item>
       <Item Id="Geography" Caption="Coğrafya" />
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="ImportReimportHistory" Caption="Yeniden içe aktarma geçmişi" />
@@ -2558,6 +2563,7 @@
     </ListView>
     <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Davetiyeler" />
     <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Davetiyeler (Çalışan)" />
+    <ListView Id="WorkPermitItem_Registry_Employees_ListView" Caption="İş İzinleri (Çalışan)" />
     <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Davetiyeler (Aile üyesi)" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Doğrudan migrasyon başvuruları">
       <Columns>

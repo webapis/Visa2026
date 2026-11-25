@@ -91,6 +91,11 @@
           <Item Id="FamilyMember" Caption="Çakylyklar (Maşgala)" />
         </Items>
       </Item>
+      <Item Id="WorkPermits" Caption="Iş rugsatlary">
+        <Items>
+          <Item Id="Employee" Caption="Iş rugsatlary (Işgär)" />
+        </Items>
+      </Item>
       <Item Id="Geography" Caption="Geografiýa" />
       <Item Id="Housing" Caption="Ýaşaýyş" />
       <Item Id="ImportReimportHistory" Caption="Gaýtadan import taryhy" />
@@ -2558,6 +2563,7 @@
     </ListView>
     <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Çakylyklar" />
     <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Çakylyklar (Işgär)" />
+    <ListView Id="WorkPermitItem_Registry_Employees_ListView" Caption="Iş rugsatlary (Işgär)" />
     <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Çakylyklar (Maşgala)" />
 <ListView Id="Application_ListView_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
       <Columns>

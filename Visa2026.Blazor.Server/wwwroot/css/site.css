@@ -616,6 +616,26 @@ dxd-license,
 .visa-invitation-row.visa-invitation-row--cancelled { --visa-row-hue: #f8d7da; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-invitation-row.visa-invitation-row--changed { --visa-row-hue: #e9d5ff; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-invitation-row.visa-invitation-row--expired { --visa-row-hue: #fecdd3; --dxbl-grid-row-bg: var(--visa-row-hue); }
+/* Work Permits (Employee) registry — row tint matches color-tab swatches. */
+.visa-workpermit-row.visa-workpermit-row--inforce { --visa-row-hue: #86efac; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-workpermit-row.visa-workpermit-row--cancelled { --visa-row-hue: #f8d7da; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-workpermit-row.visa-workpermit-row--changed { --visa-row-hue: #e9d5ff; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-workpermit-row.visa-workpermit-row--expired { --visa-row-hue: #fecdd3; --dxbl-grid-row-bg: var(--visa-row-hue); }
+
+.visa-workpermit-row[class*="visa-workpermit-row--"] {
+    --visa-row-surface: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+    --visa-row-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #142033));
+    --dxbl-grid-row-bg: color-mix(in srgb, var(--visa-row-hue) 55%, var(--visa-row-surface));
+}
+.dxbl-theme-fluent-mode-light .visa-workpermit-row[class*="visa-workpermit-row--"] {
+    --dxbl-grid-row-bg: var(--visa-row-hue);
+}
+.dxbl-grid tr.visa-workpermit-row[class*="visa-workpermit-row--"] > td {
+    background-color: var(--dxbl-grid-row-bg) !important;
+    background-image: none !important;
+    --dxbl-grid-data-cell-bg: var(--dxbl-grid-row-bg);
+    color: var(--visa-row-ink) !important;
+}
 
 /* Same DxGrid cell paint as .visa-progress-row: set td background or the tint never shows. */
 .visa-invitation-row[class*="visa-invitation-row--"] {

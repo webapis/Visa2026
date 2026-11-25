@@ -219,3 +219,17 @@ button.doc-copies-brand:disabled {
   color: #93c5fd !important;
   text-decoration: underline !important;
 }
+
+.app-cakylyklar-application-detail-link {
+  --dcb-text: #60a5fa;
+  color: var(--dcb-text) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  text-align: left !important;
+}
+
+.app-cakylyklar-application-detail-link:hover {
+  color: #93c5fd !important;
+  text-decoration: underline !important;
+}

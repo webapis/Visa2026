@@ -14,6 +14,7 @@ public partial class InvitationItem
     private string? listViewLifeKey;
     private string? listViewLinkedDetail;
     private string? listViewProcessNumber;
+    private string? listViewApplicationNumber;
     private string? listViewInvitationNumber;
     private string? listViewPersonName;
     private string? listViewPassportNumber;
@@ -33,6 +34,9 @@ public partial class InvitationItem
     public void SetListViewLinkedDetail(string? detail) => listViewLinkedDetail = detail;
 
     public void SetListViewProcessNumber(string? processNumber) => listViewProcessNumber = processNumber;
+
+    public void SetListViewApplicationNumber(string? applicationNumber) =>
+        listViewApplicationNumber = applicationNumber;
 
     public void SetListViewInvitationNumber(string? invitationNumber) =>
         listViewInvitationNumber = invitationNumber;
@@ -240,6 +244,28 @@ public partial class InvitationItem
     [XafDisplayName("Linked detail")]
     public string CakylyklarLinkedDetailDisplay =>
         listViewLinkedDetail ?? string.Empty;
+
+    /// <summary>Full application number · date for the issuing Application Profile Instance.</summary>
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Application")]
+    public string CakylyklarApplicationDisplay =>
+        listViewApplicationNumber
+        ?? FormatProcessFallback(
+            PreferApplicationNumber(Invitation?.ApplicationProfileInstance),
+            Invitation?.ApplicationProfileInstance?.ApplicationDate);
+
+    private static string? PreferApplicationNumber(ApplicationProfileInstance? app)
+    {
+        if (app == null)
+            return null;
+        if (!string.IsNullOrWhiteSpace(app.FullApplicationNumber))
+            return app.FullApplicationNumber.Trim();
+        return string.IsNullOrWhiteSpace(app.ApplicationNumber) ? null : app.ApplicationNumber.Trim();
+    }
 
     internal static string FormatProcessWithDate(string? processNumber, DateTime? applicationDate)
     {

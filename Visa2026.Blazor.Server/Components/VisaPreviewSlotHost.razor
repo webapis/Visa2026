@@ -9,6 +9,8 @@
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Services.ApplicationWorkspace
 @using DevExpress.ExpressApp
+@using DevExpress.ExpressApp.Editors
+@using Visa2026.Module.BusinessObjects
 @implements IAsyncDisposable
 
 <div class="visa-preview-slot__host">
@@ -500,6 +502,33 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
 
             application.ShowViewStrategy.ShowView(
                 new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
+                new ShowViewSource(application.MainWindow, null));
+        });
+    }
+    [JSInvokable]
+    public Task OpenListApplicationDetailFromJsAsync(string applicationIdText)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return InvokeAsync(() =>
+        {
+            var application = AppHolder.Application;
+            if (application == null)
+                return;
+
+            var objectSpace = application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var target = objectSpace.GetObjectByKey<ApplicationProfileInstance>(applicationId);
+            if (target == null)
+            {
+                objectSpace.Dispose();
+                return;
+            }
+
+            var detailView = application.CreateDetailView(objectSpace, target, isRoot: true);
+            detailView.ViewEditMode = ViewEditMode.View;
+            application.ShowViewStrategy.ShowView(
+                new ShowViewParameters(detailView) { TargetWindow = TargetWindow.NewWindow },
                 new ShowViewSource(application.MainWindow, null));
         });
     }

@@ -36,7 +36,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
         Visibility = ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
-    public class WorkPermitItem : BaseObject, IExpirationLogic, IOptionalDetailFields
+    public partial class WorkPermitItem : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
         [RuleRequiredField]
         [ImmediatePostData]

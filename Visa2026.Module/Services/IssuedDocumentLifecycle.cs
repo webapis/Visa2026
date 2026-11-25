@@ -187,6 +187,51 @@ public static class IssuedDocumentLifecycle
         return query.Select(v => v.ID).ToHashSet();
     }
 
+    
+    /// <summary>
+    /// Work-permit item IDs linked to a completed Cancellation instance (<c>PROCESS_ISSUED</c>).
+    /// </summary>
+    public static HashSet<Guid> LoadCancelledWorkPermitItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? workPermitItemIds) =>
+        LoadWorkPermitItemIdsForFamily(
+            objectSpace,
+            workPermitItemIds,
+            ApplicationProfileActionFamily.Cancellation);
+
+    /// <summary>
+    /// Work-permit item IDs linked to a completed Change instance (<c>PROCESS_ISSUED</c>).
+    /// </summary>
+    public static HashSet<Guid> LoadChangedWorkPermitItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? workPermitItemIds) =>
+        LoadWorkPermitItemIdsForFamily(
+            objectSpace,
+            workPermitItemIds,
+            ApplicationProfileActionFamily.Change);
+
+    private static HashSet<Guid> LoadWorkPermitItemIdsForFamily(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? workPermitItemIds,
+        ApplicationProfileActionFamily family)
+    {
+        if (objectSpace == null)
+            return [];
+        if (workPermitItemIds != null && workPermitItemIds.Count == 0)
+            return [];
+
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var query = objectSpace.GetObjectsQuery<WorkPermitItem>()
+            .Where(w => w.ApplicationProfileInstances.Any(a =>
+                a.ApplicationProfile != null
+                && a.ApplicationProfile.ActionFamily == family
+                && a.LatestPrimaryStateCode == issued));
+        if (workPermitItemIds != null)
+            query = query.Where(w => workPermitItemIds.Contains(w.ID));
+
+        return query.Select(w => w.ID).ToHashSet();
+    }
+
     /// <summary>
     /// Work-permit item IDs linked to a completed Cancellation or Change instance.
     /// </summary>

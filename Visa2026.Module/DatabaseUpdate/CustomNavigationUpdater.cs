@@ -50,6 +50,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 index: 1);
 
             EnsureInvitationsGroupNavigation(navigationItems, modelViews);
+            EnsureWorkPermitsGroupNavigation(navigationItems, modelViews);
 
             EnsureTopLevelPersonNavigation(
                 navigationItems,
@@ -59,7 +60,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: PersonRoleHelper.TemporaryVisitorCriteria,
                 caption: "Temporary visitor",
                 imageName: "BO_Person",
-                index: 3);
+                index: 4);
 
             ConfigureApplicationProfileInstanceProgressRouteNavigation(navigationItems, modelViews);
             RemoveLegacyLookupOperationalNavigation(navigationItems);
@@ -396,6 +397,63 @@ namespace Visa2026.Module.DatabaseUpdate
             familyNav.Index = 1;
         }
 
+        /// <summary>
+        /// Top-level Work Permits group: Employee registry only.
+        /// </summary>
+        private static void EnsureWorkPermitsGroupNavigation(
+            IModelNavigationItems navigationItems,
+            IModelViews modelViews)
+        {
+            var employeesView = EnsureWorkPermitItemRegistryListView(
+                modelViews,
+                WorkPermitItemRegistryNavigation.ListViewEmployeesId,
+                WorkPermitItemRegistryNavigation.CriteriaEmployees,
+                WorkPermitItemRegistryNavigation.CaptionEmployee);
+            if (employeesView == null)
+                return;
+
+            var group = navigationItems[WorkPermitItemRegistryNavigation.GroupNavId]
+                ?? navigationItems.AddNode<IModelNavigationItem>(WorkPermitItemRegistryNavigation.GroupNavId);
+            group.Caption = WorkPermitItemRegistryNavigation.CaptionGroup;
+            group.ImageName = WorkPermitItemRegistryNavigation.ImageName;
+            group.Index = WorkPermitItemRegistryNavigation.GroupNavIndex;
+            group.View = null;
+
+            var employeeNav = group.Items[WorkPermitItemRegistryNavigation.NavItemEmployee]
+                ?? group.Items.AddNode<IModelNavigationItem>(WorkPermitItemRegistryNavigation.NavItemEmployee);
+            employeeNav.View = employeesView;
+            employeeNav.Caption = WorkPermitItemRegistryNavigation.CaptionEmployee;
+            employeeNav.ImageName = "BO_Employee";
+            employeeNav.Index = 0;
+        }
+
+        private static IModelListView? EnsureWorkPermitItemRegistryListView(
+            IModelViews views,
+            string listViewId,
+            string criteria,
+            string caption)
+        {
+            var sourceView = views[WorkPermitItemRegistryNavigation.SourceListViewId] as IModelListView;
+            var view = views[listViewId] as IModelListView;
+            if (view == null && sourceView != null)
+            {
+                view = views.AddNode<IModelListView>(listViewId);
+                view.ModelClass = sourceView.ModelClass;
+            }
+
+            if (view == null)
+                return null;
+
+            if (view.ModelClass == null && sourceView != null)
+                view.ModelClass = sourceView.ModelClass;
+
+            view.Criteria = criteria;
+            view.Caption = caption;
+            view.DataAccessMode = CollectionSourceDataAccessMode.Client;
+            ModelListViewColumnVisibility.ConfigureWorkPermitRegistryColumns(view);
+            return view;
+        }
+
         private static IModelListView? EnsureInvitationItemCakylyklarListView(
             IModelViews views,
             string listViewId,
@@ -657,6 +715,44 @@ namespace Visa2026.Module.DatabaseUpdate
             }
 
             CloneInvitationItemCakylyklarListViewIfMissing(modelViews);
+            CloneWorkPermitItemRegistryListViewIfMissing(modelViews);
+        }
+
+
+        private static void CloneWorkPermitItemRegistryListViewIfMissing(IModelViews modelViews)
+        {
+            CloneOneWorkPermitRegistryListViewIfMissing(
+                modelViews,
+                WorkPermitItemRegistryNavigation.ListViewEmployeesId,
+                WorkPermitItemRegistryNavigation.CriteriaEmployees,
+                WorkPermitItemRegistryNavigation.CaptionEmployee);
+        }
+
+        private static void CloneOneWorkPermitRegistryListViewIfMissing(
+            IModelViews modelViews,
+            string listViewId,
+            string criteria,
+            string caption)
+        {
+            var sourceView = modelViews[WorkPermitItemRegistryNavigation.SourceListViewId] as IModelListView;
+            if (modelViews[listViewId] is not IModelListView targetView)
+            {
+                if (sourceView == null)
+                    return;
+
+                targetView = modelViews.AddNode<IModelListView>(listViewId);
+                targetView.Id = listViewId;
+                targetView.ModelClass = sourceView.ModelClass;
+                CopyColumns(sourceView, targetView);
+            }
+
+            if (targetView.ModelClass == null && sourceView != null)
+                targetView.ModelClass = sourceView.ModelClass;
+
+            targetView.Criteria = criteria;
+            targetView.Caption = caption;
+            targetView.DataAccessMode = CollectionSourceDataAccessMode.Client;
+            ModelListViewColumnVisibility.ConfigureWorkPermitRegistryColumns(targetView);
         }
 
         private static void CloneInvitationItemCakylyklarListViewIfMissing(IModelViews modelViews)
@@ -789,6 +885,43 @@ namespace Visa2026.Module.DatabaseUpdate
         /// <summary>
         /// Çakylyklar columns: State last; Invitation № before State (preview link).
         /// </summary>
+        /// <summary>
+        /// Work Permits (Employee) registry columns: State last.
+        /// </summary>
+        public static void ConfigureWorkPermitRegistryColumns(IModelListView view)
+        {
+            Set(view, "WorkPermitItemName", false);
+            Set(view, "Person", false);
+            Set(view, "Passport", false);
+            Set(view, "WorkPermit", false);
+            Set(view, "CurrentPositionHistory", false);
+            Set(view, "ASNumber", false);
+            Set(view, "WorkPermittedLocations", false);
+            Set(view, "DocumentCopiesListLink", false);
+            Set(view, "ShowOptionalFields", false);
+
+            Set(view, nameof(WorkPermitItem.RegistryPersonDisplay), true);
+            Set(view, nameof(WorkPermitItem.RegistryPassportDisplay), true);
+            Set(view, nameof(WorkPermitItem.RegistryDepartmentDisplay), true);
+            Set(view, nameof(WorkPermitItem.RegistryWorkPermitNumberDisplay), true);
+            Set(view, nameof(WorkPermitItem.StartDate), true);
+            Set(view, nameof(WorkPermitItem.ExpirationDate), true);
+            Set(view, nameof(WorkPermitItem.RegistryDaysRemaining), true);
+            Set(view, nameof(WorkPermitItem.RegistryProcessNumberDisplay), true);
+            Set(view, nameof(WorkPermitItem.RegistryLinkedDetailDisplay), true);
+            Set(view, nameof(WorkPermitItem.RegistryStateDisplay), true);
+
+            SetIndex(view, nameof(WorkPermitItem.RegistryPersonDisplay), 0);
+            SetIndex(view, nameof(WorkPermitItem.RegistryPassportDisplay), 1);
+            SetIndex(view, nameof(WorkPermitItem.RegistryDepartmentDisplay), 2);
+            SetIndex(view, nameof(WorkPermitItem.RegistryWorkPermitNumberDisplay), 3);
+            SetIndex(view, nameof(WorkPermitItem.StartDate), 4);
+            SetIndex(view, nameof(WorkPermitItem.ExpirationDate), 5);
+            SetIndex(view, nameof(WorkPermitItem.RegistryDaysRemaining), 6);
+            SetIndex(view, nameof(WorkPermitItem.RegistryProcessNumberDisplay), 7);
+            SetIndex(view, nameof(WorkPermitItem.RegistryLinkedDetailDisplay), 8);
+            SetIndex(view, nameof(WorkPermitItem.RegistryStateDisplay), 9);
+        }
         public static void ConfigureCakylyklarColumns(IModelListView view)
         {
             Set(view, "InvitationItemName", false);
@@ -812,6 +945,7 @@ namespace Visa2026.Module.DatabaseUpdate
             Set(view, nameof(InvitationItem.ExpirationDate), true);
             Set(view, nameof(InvitationItem.CakylyklarDaysRemaining), true);
             Set(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarApplicationDisplay), true);
 
             // Person → … → Linked → Expiration → Days remaining → Invitation № → State
             SetIndex(view, nameof(InvitationItem.CakylyklarPersonDisplay), 0);
@@ -827,6 +961,7 @@ namespace Visa2026.Module.DatabaseUpdate
             SetIndex(view, nameof(InvitationItem.CakylyklarDaysRemaining), 10);
             SetIndex(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), 11);
             SetIndex(view, nameof(InvitationItem.CakylyklarStateDisplay), 12);
+            SetIndex(view, nameof(InvitationItem.CakylyklarApplicationDisplay), 13);
         }
     }
 }

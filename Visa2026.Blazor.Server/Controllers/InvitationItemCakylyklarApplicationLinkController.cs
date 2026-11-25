@@ -9,7 +9,7 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Çakylyklar CO cell: process number · date opens the invitation's Application Profile Instance workspace.
+/// Çakylyklar CO → workspace; Application column → Application Profile Instance DetailView.
 /// </summary>
 public sealed class InvitationItemCakylyklarApplicationLinkController : ViewController<ListView>
 {
@@ -85,12 +85,20 @@ public sealed class InvitationItemCakylyklarApplicationLinkController : ViewCont
         customizeElementHandler = e =>
         {
             previousCustomizeElement?.Invoke(e);
-            ApplyApplicationLinkStyle(e);
+            ApplyProcessNumberLinkStyle(e);
+            ApplyApplicationDetailLinkStyle(e);
         };
         gridModel.CustomizeElement = customizeElementHandler;
     }
 
-    private static void ApplyApplicationLinkStyle(GridCustomizeElementEventArgs e)
+    private static Guid? ResolveApplicationId(InvitationItem item) =>
+        item.ListViewApplicationProfileInstanceId
+        ?? (item.Invitation?.ApplicationProfileInstance != null
+            && item.Invitation.ApplicationProfileInstance.ID != Guid.Empty
+                ? item.Invitation.ApplicationProfileInstance.ID
+                : null);
+
+    private static void ApplyProcessNumberLinkStyle(GridCustomizeElementEventArgs e)
     {
         if (e.ElementType != GridElementType.DataCell || e.VisibleIndex < 0)
             return;
@@ -107,11 +115,7 @@ public sealed class InvitationItemCakylyklarApplicationLinkController : ViewCont
         if (e.Grid.GetDataItem(e.VisibleIndex) is not InvitationItem item)
             return;
 
-        var applicationId = item.ListViewApplicationProfileInstanceId
-            ?? (item.Invitation?.ApplicationProfileInstance != null
-                && item.Invitation.ApplicationProfileInstance.ID != Guid.Empty
-                    ? item.Invitation.ApplicationProfileInstance.ID
-                    : null);
+        var applicationId = ResolveApplicationId(item);
         if (applicationId is not Guid id || id == Guid.Empty)
             return;
 
@@ -124,6 +128,39 @@ public sealed class InvitationItemCakylyklarApplicationLinkController : ViewCont
         e.Attributes["tabindex"] = "0";
         e.Attributes["title"] = item.CakylyklarProcessNumberDisplay;
         e.Attributes["aria-label"] = item.CakylyklarProcessNumberDisplay;
+        e.Attributes["data-application-id"] = id.ToString("D");
+    }
+
+    private static void ApplyApplicationDetailLinkStyle(GridCustomizeElementEventArgs e)
+    {
+        if (e.ElementType != GridElementType.DataCell || e.VisibleIndex < 0)
+            return;
+
+        var fieldName = e.Column is DxGridDataColumn dataColumn
+            ? dataColumn.FieldName
+            : e.Column?.Name;
+        if (!string.Equals(
+                fieldName,
+                nameof(InvitationItem.CakylyklarApplicationDisplay),
+                StringComparison.Ordinal))
+            return;
+
+        if (e.Grid.GetDataItem(e.VisibleIndex) is not InvitationItem item)
+            return;
+
+        var applicationId = ResolveApplicationId(item);
+        if (applicationId is not Guid id || id == Guid.Empty)
+            return;
+
+        if (string.IsNullOrWhiteSpace(item.CakylyklarApplicationDisplay))
+            return;
+
+        const string linkClass = "app-cakylyklar-application-detail-link";
+        e.CssClass = string.IsNullOrEmpty(e.CssClass) ? linkClass : $"{e.CssClass} {linkClass}";
+        e.Attributes["role"] = "button";
+        e.Attributes["tabindex"] = "0";
+        e.Attributes["title"] = item.CakylyklarApplicationDisplay;
+        e.Attributes["aria-label"] = item.CakylyklarApplicationDisplay;
         e.Attributes["data-application-id"] = id.ToString("D");
     }
 

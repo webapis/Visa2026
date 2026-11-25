@@ -20,7 +20,7 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         TargetViewId =
             "WorkPermit_ListView;WorkPermitItem_ListView;"
             + "Invitation_ListView;InvitationItem_ListView;"
-            + InvitationItemCakylyklarNavigation.TargetViewIds + ";"
+            + InvitationItemCakylyklarNavigation.TargetViewIds + ";" + WorkPermitItemRegistryNavigation.TargetViewIds + ";"
             + "Rejection_ListView;RejectionItem_ListView;"
             + "BorderZone_ListView;BorderZoneItem_ListView";
     }
@@ -145,7 +145,7 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
             e.Attributes["data-header-doc-context-item-id"] = contextId.ToString("D");
 
         // Çakylyklar: open the scan in the slot immediately (no catalog → Preview click).
-        if (InvitationItemCakylyklarNavigation.IsCakylyklarListView(View?.Id))
+        if ((InvitationItemCakylyklarNavigation.IsCakylyklarListView(View?.Id) || WorkPermitItemRegistryNavigation.IsRegistryListView(View?.Id)))
         {
             e.Attributes["data-header-doc-preview-only"] = "1";
         }
@@ -164,7 +164,7 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         if (string.Equals(fieldName, "DocumentCopiesListLink", StringComparison.Ordinal))
             return true;
 
-        if (!InvitationItemCakylyklarNavigation.IsCakylyklarListView(View?.Id))
+        if (!(InvitationItemCakylyklarNavigation.IsCakylyklarListView(View?.Id) || WorkPermitItemRegistryNavigation.IsRegistryListView(View?.Id)))
             return false;
 
         // Çakylyklar: Invitation № → invitation letter preview.
@@ -196,7 +196,16 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
             linkKind = CakylyklarLinkKind.WorkPermitNumber;
             return true;
         }
-
+        // Work Permits registry: Work permit № → work-permit copies preview.
+        if (WorkPermitItemRegistryNavigation.IsRegistryListView(View?.Id)
+            && string.Equals(
+                fieldName,
+                nameof(WorkPermitItem.RegistryWorkPermitNumberDisplay),
+                StringComparison.Ordinal))
+        {
+            linkKind = CakylyklarLinkKind.WorkPermitNumber;
+            return true;
+        }
         return false;
     }
 
@@ -232,22 +241,42 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
 
         if (linkKind == CakylyklarLinkKind.WorkPermitNumber)
         {
-            if (row is not InvitationItem item)
-                return false;
+            if (row is InvitationItem invItem)
+            {
+                if (string.IsNullOrWhiteSpace(invItem.CakylyklarWorkPermitDisplay))
+                    return false;
 
-            if (string.IsNullOrWhiteSpace(item.CakylyklarWorkPermitDisplay))
-                return false;
+                var workPermitId = invItem.ListViewWorkPermitId;
+                if (workPermitId is not Guid wpId || wpId == Guid.Empty)
+                    return false;
 
-            var workPermitId = item.ListViewWorkPermitId;
-            if (workPermitId is not Guid wpId || wpId == Guid.Empty)
-                return false;
+                family = HeaderDocumentCopiesFamily.WorkPermit;
+                parentId = wpId;
+                contextItemId = invItem.ListViewWorkPermitItemId is Guid itemId && itemId != Guid.Empty
+                    ? itemId
+                    : null;
+                return true;
+            }
 
-            family = HeaderDocumentCopiesFamily.WorkPermit;
-            parentId = wpId;
-            contextItemId = item.ListViewWorkPermitItemId is Guid itemId && itemId != Guid.Empty
-                ? itemId
-                : null;
-            return true;
+            if (row is WorkPermitItem wpItem)
+            {
+                if (string.IsNullOrWhiteSpace(wpItem.RegistryWorkPermitNumberDisplay))
+                    return false;
+
+                var workPermitId = wpItem.ListViewWorkPermitId
+                    ?? (wpItem.WorkPermit != null && wpItem.WorkPermit.ID != Guid.Empty
+                        ? wpItem.WorkPermit.ID
+                        : null);
+                if (workPermitId is not Guid wpId || wpId == Guid.Empty)
+                    return false;
+
+                family = HeaderDocumentCopiesFamily.WorkPermit;
+                parentId = wpId;
+                contextItemId = wpItem.ID != Guid.Empty ? wpItem.ID : null;
+                return true;
+            }
+
+            return false;
         }
 
         return HeaderDocumentCopiesListLinkResolution.TryResolve(row, out family, out parentId, out contextItemId);

@@ -1,0 +1,59 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.BusinessObjects
+@implements IDisposable
+
+<div class="visa-progress-color-tabs" role="tablist" aria-label="Work permit state filter">
+    @foreach (var tab in Model.Tabs)
+    {
+        var isSelected = string.Equals(tab.Key, Model.SelectedKey, StringComparison.OrdinalIgnoreCase);
+        var isSearch = WorkPermitItemColorTab.IsSearchTab(tab.Key);
+        var isLoading = !string.IsNullOrEmpty(Model.LoadingKey)
+            && string.Equals(tab.Key, Model.LoadingKey, StringComparison.OrdinalIgnoreCase);
+        <button type="button"
+                role="tab"
+                class="visa-progress-color-tab @(isSelected ? "is-selected" : null) @(isSearch ? "is-search" : null) @(isLoading ? "is-loading" : null)"
+                aria-selected="@isSelected"
+                aria-busy="@isLoading"
+                @onclick="() => Model.OnSelect.InvokeAsync(tab.Key)">
+            @if (!string.IsNullOrWhiteSpace(tab.BackgroundHex))
+            {
+                <span class="visa-progress-color-tab__swatch" style="background:@tab.BackgroundHex" aria-hidden="true"></span>
+            }
+            <span class="visa-progress-color-tab__label">@tab.Label</span>
+            <span class="visa-progress-color-tab__count">@tab.Count</span>
+            <span class="visa-progress-color-tab__spinner @(isLoading ? "is-on" : null)"
+                  aria-hidden="true"></span>
+        </button>
+    }
+</div>
+
+@code {
+    private WorkPermitItemColorTabsModel? _subscribed;
+
+    [Parameter, EditorRequired]
+    public WorkPermitItemColorTabsModel Model { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(_subscribed, Model))
+            return;
+
+        if (_subscribed != null)
+            _subscribed.Changed -= OnModelChanged;
+
+        _subscribed = Model;
+        if (_subscribed != null)
+            _subscribed.Changed += OnModelChanged;
+    }
+
+    public void Dispose()
+    {
+        if (_subscribed != null)
+        {
+            _subscribed.Changed -= OnModelChanged;
+            _subscribed = null;
+        }
+    }
+
+    private void OnModelChanged() => _ = InvokeAsync(StateHasChanged);
+}

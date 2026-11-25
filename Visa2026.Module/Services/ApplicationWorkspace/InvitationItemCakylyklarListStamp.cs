@@ -156,6 +156,14 @@ public static class InvitationItemCakylyklarListStamp
             item.SetListViewProcessNumber(
                 InvitationItem.FormatProcessWithDate(owningApp?.ProcessNumber, owningApp?.ApplicationDate));
 
+            var appNumber = !string.IsNullOrWhiteSpace(owningApp?.FullApplicationNumber)
+                ? owningApp!.FullApplicationNumber!.Trim()
+                : (owningApp?.ApplicationNumber?.Trim() ?? string.Empty);
+            item.SetListViewApplicationNumber(
+                InvitationItem.FormatProcessWithDate(
+                    string.IsNullOrEmpty(appNumber) ? null : appNumber,
+                    owningApp?.ApplicationDate));
+
             var invitation = item.Invitation;
             item.SetListViewVisaLookups(
                 LookupLocalization.GetDisplayName(

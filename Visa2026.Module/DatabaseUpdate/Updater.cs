@@ -14,6 +14,7 @@ using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.BusinessObjects.MedicalRecordWorkspace;
 using Visa2026.Module.BusinessObjects.Feedback;
 using Visa2026.Module.BusinessObjects.Operations;
 using Visa2026.Module.BusinessObjects.StateNotifications;
@@ -433,6 +434,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitations", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitations/Items/Employee", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitations/Items/FamilyMember", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/WorkPermits", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/WorkPermits/Items/Employee", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(
             @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries/Items/ApplicationItem_ViaMinistries",
             SecurityPermissionState.Allow);
@@ -700,6 +703,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitations", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitations/Items/Employee", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitations/Items/FamilyMember", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermits", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermits/Items/Employee", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
                 role,
                 @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries/Items/ApplicationItem_ViaMinistries",
@@ -743,6 +748,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/ForeignWorkerMaglumat", SecurityPermissionState.Allow);
 
             // Top-level person lists (legacy-style; not under People). Temporary visitors stay off the left menu.
+            EnsureMedicalRecordWorkspaceHostPermission(role);
+            EnsureNavigationPermission(role, MedicalRecordWorkspaceViewIds.PermissionPath, SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
@@ -1019,6 +1026,29 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             {
                 role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Deny);
             }
+        }
+
+        private static void EnsureMedicalRecordWorkspaceHostPermission(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            var targetType = typeof(MedicalRecordWorkspaceHost);
+            var existing = role.TypePermissions.FirstOrDefault(permission => permission.TargetType == targetType);
+            if (existing != null)
+            {
+                existing.ReadState = SecurityPermissionState.Allow;
+                existing.WriteState = SecurityPermissionState.Allow;
+                existing.CreateState = SecurityPermissionState.Allow;
+                existing.NavigateState = SecurityPermissionState.Allow;
+                return;
+            }
+
+            const string readWriteCreate = $"{SecurityOperations.Read};{SecurityOperations.Write};{SecurityOperations.Create}";
+            role.AddTypePermission<MedicalRecordWorkspaceHost>(readWriteCreate, SecurityPermissionState.Allow);
+            var created = role.TypePermissions.FirstOrDefault(permission => permission.TargetType == targetType);
+            if (created != null)
+                created.NavigateState = SecurityPermissionState.Allow;
         }
 
         private static void EnsureNavigationPermission(PermissionPolicyRole role, string itemPath, SecurityPermissionState state)
