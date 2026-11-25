@@ -39,6 +39,15 @@ public sealed class PersonListViewFullTextSearchCriteriaBuilderTests
         Assert.Contains("LastName", text, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("serdar", false)]
+    [InlineData("ab123", true)]
+    [InlineData("U 86993401", true)]
+    public void IncludePassportLookup_RequiresADigit(string searchText, bool include)
+    {
+        Assert.Equal(include, PersonListViewFullTextSearchCriteriaBuilder.IncludePassportLookup(searchText));
+    }
+
     [Fact]
     public void BuildPassportNumberCriteria_UsesRelatedPassportsCollection()
     {

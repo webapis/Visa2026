@@ -6,7 +6,7 @@
 {
     <div class="visa-roster-search-gate"></div>
 }
-else
+else if (ShowNoMatches)
 {
     <div class="visa-roster-search-warning-host">
         <div class="visa-roster-search-warning" role="alert">
@@ -15,6 +15,10 @@ else
         </div>
     </div>
 }
+else
+{
+    <div class="visa-roster-search-hold" aria-hidden="true"></div>
+}
 
 @code {
     private PersonRosterSearchState? subscribed;
@@ -22,6 +26,10 @@ else
     [Parameter] public PersonRosterSearchState? State { get; set; }
 
     private bool IsAwaiting => State?.Awaiting ?? true;
+
+    private bool ShowNoMatches =>
+        State is { Busy: false, ResultCount: 0 }
+        && !string.IsNullOrWhiteSpace(State.Query);
 
     protected override void OnParametersSet() => Subscribe();
 

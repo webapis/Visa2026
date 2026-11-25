@@ -3,7 +3,7 @@
 @implements IDisposable
 
 <div class="visa-roster-search-bar-block">
-<form class="visa-roster-search-bar" @onsubmit="Submit" @onsubmit:preventDefault="true" aria-busy="@searching">
+<form class="visa-roster-search-bar" @onsubmit="Submit" @onsubmit:preventDefault="true" aria-busy="@showProgress">
     <label class="visa-roster-search-gate__field">
         <span class="visa-roster-search-gate__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
@@ -18,45 +18,43 @@
                placeholder="@Msg("PersonRosterSearch.Placeholder")"
                aria-label="@Msg("PersonRosterSearch.Placeholder")"
                autocomplete="off"
-               spellcheck="false"
-               disabled="@searching" />
-        @if (HasQuery)
+               spellcheck="false" />
+        @if (!string.IsNullOrEmpty(text))
         {
             <button type="button"
                     class="visa-roster-search-bar__clear"
                     data-testid="visa-roster-search-clear"
                     aria-label="@Msg("PersonRosterSearch.Clear")"
-                    disabled="@searching"
                     @onclick="Clear">
                 <span aria-hidden="true">&times;</span>
             </button>
         }
+        <span class="visa-roster-search-bar__spinner @(showProgress ? null : "is-idle")"
+              role="status"
+              data-testid="visa-roster-search-progress"
+              aria-hidden="@(!showProgress)"
+              aria-label="@(showProgress ? Msg("PersonRosterSearch.Searching") : null)"></span>
     </label>
-    <button type="submit"
-            class="visa-roster-search-gate__submit @(searching ? "is-loading" : null)"
-            data-testid="visa-roster-search-submit"
-            disabled="@(searching || string.IsNullOrWhiteSpace(text))"
-            aria-busy="@searching">
-        @if (searching)
-        {
-            <span class="visa-roster-search-gate__spinner" aria-hidden="true"></span>
-            <span>@Msg("PersonRosterSearch.Searching")</span>
-        }
-        else
-        {
-            @Msg("PersonRosterSearch.Search")
-        }
-    </button>
 </form>
-@if (HasQuery && State?.ResultCount is int found)
+@if (HasQuery)
 {
-    <p class="visa-roster-search-count" role="status">@CountText(found)</p>
+    <p class="visa-roster-search-count" role="status">@(State?.ResultCount is int found ? CountText(found) : "\u00a0")</p>
 }
 </div>
 
 @code {
+    /// <summary>Short pause after typing stops, then the list query runs.</summary>
+    private const int SearchInputDelayMs = 300;
+
+    /// <summary>Shorter text matches too widely, so the list stays empty until four characters.</summary>
+    private const int MinimumSearchLength = 4;
+
     private string text = string.Empty;
+    private string committed = string.Empty;
     private bool searching;
+    private bool showProgress;
+    private int searchSerial;
+    private CancellationTokenSource? searchDelayCts;
     private ElementReference input;
     private PersonRosterSearchState? subscribed;
 
@@ -71,8 +69,10 @@
     protected override void OnParametersSet()
     {
         Subscribe();
-        if (!searching)
-            text = State?.Query ?? string.Empty;
+        var incoming = State?.Query ?? string.Empty;
+        if (!searching && text == committed)
+            text = incoming;
+        committed = incoming;
     }
 
     public void Dispose()
@@ -80,6 +80,7 @@
         if (subscribed != null)
             subscribed.Changed -= OnStateChanged;
         subscribed = null;
+        CancelPendingSearch();
     }
 
     private void Subscribe()
@@ -97,9 +98,10 @@
 
     private void OnStateChanged()
     {
-        if (!searching)
-            text = State?.Query ?? string.Empty;
-
+        var incoming = State?.Query ?? string.Empty;
+        if (!searching && text == committed)
+            text = incoming;
+        committed = incoming;
         _ = InvokeAsync(StateHasChanged);
     }
 
@@ -118,34 +120,136 @@
         }
     }
 
-    private void OnInput(ChangeEventArgs e) => text = e.Value?.ToString() ?? string.Empty;
-
-    private Task Submit()
+    private void OnInput(ChangeEventArgs e)
     {
-        if (searching)
-            return Task.CompletedTask;
+        text = e.Value?.ToString() ?? string.Empty;
+        if (text.Trim().Length < MinimumSearchLength)
+        {
+            showProgress = false;
+            _ = ReleaseShortQuery();
+            return;
+        }
 
+        showProgress = true;
+        // Do not return the delay task. An incomplete input handler redraws the box and can drop typed characters.
+        _ = ScheduleSearchAsync();
+    }
+
+    private async Task ScheduleSearchAsync()
+    {
+        var serial = ArmSearchDelay();
         var query = text.Trim();
-        if (query.Length == 0)
+        var cts = searchDelayCts;
+        if (cts == null)
+            return;
+
+        try
+        {
+            await Task.Delay(SearchInputDelayMs, cts.Token);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
+        {
+            return;
+        }
+
+        if (serial != searchSerial)
+            return;
+
+        await RunQueryAsync(query);
+    }
+
+    private Task SearchNowAsync()
+    {
+        CancelPendingSearch();
+        return RunQueryAsync(text.Trim());
+    }
+
+    private Task Submit() => SearchNowAsync();
+
+    private Task RunQueryAsync(string query)
+    {
+        if (query.Length < MinimumSearchLength)
+        {
+            showProgress = false;
+            return ReleaseShortQuery();
+        }
+
+        showProgress = true;
+        var serial = searchSerial;
+        return RunAsync(serial, () => OnSearch.InvokeAsync(query));
+    }
+
+    private Task ReleaseShortQuery()
+    {
+        CancelPendingSearch();
+        if (string.IsNullOrWhiteSpace(text))
             return Clear();
 
-        return RunAsync(() => OnSearch.InvokeAsync(query));
+        if (string.IsNullOrWhiteSpace(committed) && !HasQuery)
+            return Task.CompletedTask;
+
+        return RunClearKeepTextAsync();
+    }
+
+    private async Task RunClearKeepTextAsync()
+    {
+        var kept = text;
+        searching = true;
+        try
+        {
+            await OnClear.InvokeAsync();
+        }
+        finally
+        {
+            searching = false;
+            showProgress = false;
+            text = kept;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private Task Clear()
     {
-        if (searching)
-            return Task.CompletedTask;
-
+        CancelPendingSearch();
         text = string.Empty;
-        return RunAsync(() => OnClear.InvokeAsync());
+        showProgress = false;
+        return RunClearAsync();
     }
 
-    private async Task RunAsync(Func<Task> action)
+    private int ArmSearchDelay()
+    {
+        CancelTimer();
+        searchDelayCts = new CancellationTokenSource();
+        return ++searchSerial;
+    }
+
+    private void CancelPendingSearch()
+    {
+        searchSerial++;
+        CancelTimer();
+    }
+
+    private void CancelTimer()
+    {
+        var pending = searchDelayCts;
+        searchDelayCts = null;
+        if (pending == null)
+            return;
+
+        try
+        {
+            pending.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
+        pending.Dispose();
+    }
+
+    private async Task RunAsync(int serial, Func<Task> action)
     {
         searching = true;
-        StateHasChanged();
-        await Task.Delay(1);
         try
         {
             await action();
@@ -153,6 +257,24 @@
         finally
         {
             searching = false;
+            if (serial == searchSerial)
+                showProgress = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task RunClearAsync()
+    {
+        searching = true;
+        try
+        {
+            await OnClear.InvokeAsync();
+        }
+        finally
+        {
+            searching = false;
+            showProgress = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

@@ -25,6 +25,7 @@ public sealed class PersonIntakeWizardState
     public List<PersonIntakeTravelDraft> TravelDrafts { get; } = new();
     public List<PersonIntakeSalaryDraft> SalaryDrafts { get; } = new();
     public List<PersonIntakePositionDraft> PositionDrafts { get; } = new();
+    public List<PersonIntakeWorkDutyDraft> WorkDutyDrafts { get; } = new();
     public PersonIntakeOtherDrafts OtherDrafts { get; set; } = new();
 
     /// <summary>Backward-compatible single passport draft used by older call sites.</summary>
@@ -78,6 +79,7 @@ public sealed class PersonIntakeWizardState
         TravelDrafts.Clear();
         SalaryDrafts.Clear();
         PositionDrafts.Clear();
+        WorkDutyDrafts.Clear();
 
         if (person == null)
             return;
@@ -128,6 +130,12 @@ public sealed class PersonIntakeWizardState
         {
             foreach (var row in person.PositionHistory.Where(p => p != null))
                 PositionDrafts.Add(PersonIntakePositionDraft.FromEntity(row, expand: PositionDrafts.Count == 0));
+        }
+
+        if (person.WorkDuties != null)
+        {
+            foreach (var duty in person.WorkDuties.Where(d => d != null))
+                WorkDutyDrafts.Add(PersonIntakeWorkDutyDraft.FromEntity(duty, expand: WorkDutyDrafts.Count == 0));
         }
     }
 
@@ -234,6 +242,19 @@ public sealed class PersonIntakeWizardState
         return card;
     }
 
+    public PersonIntakeWorkDutyDraft AddWorkDutyDraft(bool expand = true)
+    {
+        if (expand)
+        {
+            foreach (var draft in WorkDutyDrafts)
+                draft.Expanded = false;
+        }
+
+        var card = new PersonIntakeWorkDutyDraft { Expanded = expand };
+        WorkDutyDrafts.Add(card);
+        return card;
+    }
+
     public IReadOnlyCollection<string> DraftSatisfiedKeys()
     {
         var keys = new HashSet<string>(StringComparer.Ordinal);
@@ -253,6 +274,8 @@ public sealed class PersonIntakeWizardState
             keys.Add(PersonPendingTargets.EmployeeSalary);
         if (PositionDrafts.Any(d => d.HasContent || d.ExistingId.HasValue))
             keys.Add(PersonPendingTargets.EmployeePositionHistory);
+        if (WorkDutyDrafts.Any(d => d.HasContent || d.ExistingId.HasValue))
+            keys.Add(PersonPendingTargets.WorkDuty);
         return keys;
     }
 }
@@ -582,7 +605,6 @@ public sealed class PersonIntakeResidenceDraft
 public sealed class PersonIntakeOtherDrafts
 {
     public List<PersonIntakeDocumentCopyDraft> FamilyRelationDocuments { get; } = new();
-    public PersonIntakeWorkDutyDraft WorkDuty { get; set; } = new();
 }
 
 public sealed class PersonIntakePositionDraft
@@ -754,8 +776,33 @@ public sealed class PersonIntakeTravelDraft
 
 public sealed class PersonIntakeWorkDutyDraft
 {
+    public Guid CardId { get; set; } = Guid.NewGuid();
+    public Guid? ExistingId { get; set; }
+    public bool Expanded { get; set; } = true;
     public string Description { get; set; } = string.Empty;
+    public string SavedDescription { get; set; } = string.Empty;
+
+    public bool IsComplete => !string.IsNullOrWhiteSpace(Description);
+
+    public bool IsSaved =>
+        ExistingId.HasValue
+        && string.Equals(Description?.Trim() ?? string.Empty, SavedDescription?.Trim() ?? string.Empty, StringComparison.Ordinal);
+
     public bool HasContent => !string.IsNullOrWhiteSpace(Description);
+
+    public string SummaryTitle =>
+        string.IsNullOrWhiteSpace(Description)
+            ? PersonIntakeText.Get("Card.WorkDuty")
+            : Description.Trim();
+
+    public static PersonIntakeWorkDutyDraft FromEntity(WorkDuty duty, bool expand) =>
+        new()
+        {
+            ExistingId = duty.ID,
+            Expanded = expand,
+            Description = duty.Description ?? string.Empty,
+            SavedDescription = duty.Description ?? string.Empty
+        };
 }
 
 public sealed class PersonIntakeSalaryDraft

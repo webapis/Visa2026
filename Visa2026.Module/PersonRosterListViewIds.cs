@@ -9,6 +9,9 @@ public static class PersonRosterListViewIds
     public const string FamilyMembersIncomplete = "Person_ListView_FamilyMembers_Incomplete";
     public const string TemporaryVisitors = "Person_ListView_TemporaryVisitors";
 
+    /// <summary>Employees and Family Members show only this column beside Dossier, wide enough for a full name on one line.</summary>
+    public const int FullNameColumnWidth = 560;
+
     public const string NavEmployees = "Employees";
     public const string NavFamilyMembers = "FamilyMembers";
     public const string NavAll = "All";

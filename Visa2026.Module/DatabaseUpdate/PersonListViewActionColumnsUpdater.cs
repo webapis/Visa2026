@@ -9,8 +9,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Person typed ListViews: dossier + document-copies icon columns before Full Name.
-/// Incomplete roster lists are rebuilt from All after columns are finalized.
+/// Employees and Family Members keep dossier and full name only.
+/// Temporary visitors keep the document columns. Incomplete lists are cloned from All.
 /// </summary>
 public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
@@ -32,40 +32,18 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
             // Roster grids page in the database. Client mode loaded every person before the first row painted.
             listView.DataAccessMode = CollectionSourceDataAccessMode.Server;
 
-            var employees = viewId == PersonRosterListViewIds.Employees;
-            EnsureActionColumns(listView, includeDocumentCopies: !employees);
+            if (viewId is PersonRosterListViewIds.Employees or PersonRosterListViewIds.FamilyMembers)
+            {
+                KeepFullNameAndDossier(listView);
+                continue;
+            }
 
+            EnsureActionColumns(listView, includeDocumentCopies: true);
             HideColumn(listView, nameof(Person.Gender));
+            EnsureEducationColumns(listView, 10);
+            EnsureActiveDocumentColumns(listView);
 
-            if (employees)
-            {
-                EnsureEmployeeSummaryColumns(listView);
-                EnsureColumn(listView, nameof(Person.EmployeeListCvCopies), 20, 160, null);
-                HideColumn(listView, nameof(Person.DateOfBirth));
-                HideColumn(listView, nameof(Person.Age));
-                HideColumn(listView, nameof(Person.MaritalStatus));
-                HideColumn(listView, nameof(Person.DocumentCopiesListLink));
-                HideColumn(listView, nameof(Person.PersonalNumber));
-                HideColumn(listView, nameof(Person.ProjectContract));
-            }
-            else
-            {
-                var temporary = viewId == PersonRosterListViewIds.TemporaryVisitors;
-                EnsureEducationColumns(listView, temporary ? 10 : 12);
-                EnsureActiveDocumentColumns(listView);
-            }
-
-            if (viewId == PersonRosterListViewIds.FamilyMembers)
-            {
-                EnsureColumn(listView, nameof(Person.PersonalNumber), 3, 120, "Personal Number");
-                EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 11, 166, null);
-                EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 17, 220, null);
-                EnsureColumn(listView, nameof(Person.EmployeeListFamilyProofCopies), 18, 160, null);
-                var archived = listView.Columns[nameof(Person.IsArchived)];
-                if (archived != null)
-                    archived.Index = 19;
-            }
-            else if (viewId == PersonRosterListViewIds.TemporaryVisitors)
+            if (viewId == PersonRosterListViewIds.TemporaryVisitors)
             {
                 EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 15, 166, null);
                 EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 16, 220, null);
@@ -79,23 +57,73 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
     }
 
     /// <summary>
-    /// Read-only summary columns after Subcontractor (index 10) and before Archived.
-    /// Captions come from the member display name so localization applies.
+    /// Employees and Family Members show only the dossier link and full name.
+    /// The other roster columns are calculated per row and keep the search grid slow.
     /// </summary>
-    private static void EnsureEmployeeSummaryColumns(IModelListView listView)
+    public static bool KeepFullNameAndDossier(IModelListView listView)
     {
-        EnsureColumn(listView, nameof(Person.EmployeeListActivePassport), 3, 166, null);
-        EnsureEducationColumns(listView, 11);
-        EnsureColumn(listView, nameof(Person.EmployeeListPositionName), 13, 160, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActualPositionName), 14, 180, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListDepartmentName), 15, 120, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveVisaNumbers), 16, 193, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveWorkPermitNumbers), 17, 164, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListActiveInvitationNumbers), 18, 204, null);
-        EnsureColumn(listView, nameof(Person.EmployeeListResidenceAddress), 19, 220, null);
+        EnsureActionColumns(listView, includeDocumentCopies: false);
+        var changed = false;
+        var fullName = listView.Columns[nameof(Person.FullName)];
+        if (fullName != null && fullName.Width < PersonRosterListViewIds.FullNameColumnWidth)
+        {
+            fullName.Width = PersonRosterListViewIds.FullNameColumnWidth;
+            changed = true;
+        }
+        foreach (IModelColumn column in listView.Columns)
+        {
+            var name = string.IsNullOrEmpty(column.PropertyName) ? column.Id : column.PropertyName;
+            if (name is nameof(Person.DossierListLink) or nameof(Person.FullName)
+                or nameof(Person.IncompleteMissingAreasDisplay) or nameof(Person.IncompleteNotes))
+                continue;
+            if (column.Index < 0)
+                continue;
+
+            column.Index = -1;
+            changed = true;
+        }
+
+        return changed;
     }
 
-    /// <summary>Family members and temporary visitors: the same three document stacks, before Archived.</summary>
+    /// <summary>
+    /// Missing areas and notes stay on the list model so the Incomplete tab can show them.
+    /// The tab controller hides them on All and Search.
+    /// </summary>
+    public static bool EnsureIncompleteInfoColumns(IModelListView listView)
+    {
+        var changed = false;
+        (string Name, int Index, int Width)[] specs =
+        [
+            (nameof(Person.IncompleteMissingAreasDisplay), 3, 280),
+            (nameof(Person.IncompleteNotes), 4, 220),
+        ];
+        foreach (var spec in specs)
+        {
+            var column = listView.Columns[spec.Name] ?? listView.Columns.AddNode<IModelColumn>(spec.Name);
+            if (!string.Equals(column.PropertyName, spec.Name, StringComparison.Ordinal))
+            {
+                column.PropertyName = spec.Name;
+                changed = true;
+            }
+
+            if (column.Index != spec.Index)
+            {
+                column.Index = spec.Index;
+                changed = true;
+            }
+
+            if (column.Width < spec.Width)
+            {
+                column.Width = spec.Width;
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    /// <summary>Temporary visitors: the three document stacks, before Archived.</summary>
     private static void EnsureActiveDocumentColumns(IModelListView listView)
     {
         var temporary = string.Equals(listView.Id, PersonRosterListViewIds.TemporaryVisitors, StringComparison.Ordinal);

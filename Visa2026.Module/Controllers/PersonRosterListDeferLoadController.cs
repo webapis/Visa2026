@@ -6,8 +6,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Previously kept Employees and Family Members empty until a custom search.
-/// Those lists now load as a native XAF ListView, so this controller stays inactive.
+/// Employees and Family Members batch the search criteria with the color-tab filter.
+/// The tab controller decides which rows are visible. This controller no longer hides the list.
 /// </summary>
 public sealed class PersonRosterListDeferLoadController : ObjectViewController<ListView, Person>
 {
@@ -18,7 +18,6 @@ public sealed class PersonRosterListDeferLoadController : ObjectViewController<L
 
     public PersonRosterListDeferLoadController()
     {
-        Active["NativeRosterList"] = false;
         TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers";
         TargetViewNesting = Nesting.Root;
     }
@@ -35,8 +34,7 @@ public sealed class PersonRosterListDeferLoadController : ObjectViewController<L
             filterController.FullTextFilterAction.HandleException += OnSearchHandleException;
         }
 
-        if (string.IsNullOrWhiteSpace(CurrentSearchText()))
-            HoldEmpty();
+        ReleaseEmpty();
     }
 
     protected override void OnDeactivated()
@@ -57,25 +55,12 @@ public sealed class PersonRosterListDeferLoadController : ObjectViewController<L
     private void OnSearchExecuting(object sender, System.ComponentModel.CancelEventArgs e)
     {
         BeginCriteriaUpdate();
-        if (string.IsNullOrWhiteSpace(CurrentSearchText()))
-            HoldEmpty();
-        else
-            ReleaseEmpty();
+        ReleaseEmpty();
     }
 
     private void OnSearchFinished(object sender, ActionBaseEventArgs e) => EndCriteriaUpdate();
 
     private void OnSearchHandleException(object sender, HandleExceptionEventArgs e) => EndCriteriaUpdate();
-
-    private string? CurrentSearchText() => filterController?.FullTextFilterAction?.Value as string;
-
-    private void HoldEmpty()
-    {
-        if (View?.CollectionSource == null)
-            return;
-
-        View.CollectionSource.Criteria[CriteriaKey] = CollectionSourceBase.EmptyCollectionCriteria;
-    }
 
     private void ReleaseEmpty()
     {

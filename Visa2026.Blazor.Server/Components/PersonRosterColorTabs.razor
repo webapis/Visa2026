@@ -1,0 +1,54 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Services
+@implements IDisposable
+
+<div class="visa-progress-color-tabs" role="tablist" aria-label="Person list filter">
+    @foreach (var tab in Model.Tabs)
+    {
+        var isSelected = string.Equals(tab.Key, Model.SelectedKey, StringComparison.OrdinalIgnoreCase);
+        var isSearch = PersonRosterColorTab.IsSearch(tab.Key);
+        <button type="button"
+                role="tab"
+                class="visa-progress-color-tab @(isSelected ? "is-selected" : null) @(isSearch ? "is-search" : null)"
+                aria-selected="@isSelected"
+                @onclick="() => Model.OnSelect.InvokeAsync(tab.Key)">
+            @if (!string.IsNullOrWhiteSpace(tab.BackgroundHex))
+            {
+                <span class="visa-progress-color-tab__swatch" style="background:@tab.BackgroundHex" aria-hidden="true"></span>
+            }
+            <span class="visa-progress-color-tab__label">@tab.Label</span>
+            <span class="visa-progress-color-tab__count">@tab.Count</span>
+        </button>
+    }
+</div>
+
+@code {
+    private PersonRosterColorTabsModel? subscribed;
+
+    [Parameter, EditorRequired]
+    public PersonRosterColorTabsModel Model { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(subscribed, Model))
+            return;
+
+        if (subscribed != null)
+            subscribed.Changed -= OnModelChanged;
+
+        subscribed = Model;
+        if (subscribed != null)
+            subscribed.Changed += OnModelChanged;
+    }
+
+    public void Dispose()
+    {
+        if (subscribed != null)
+        {
+            subscribed.Changed -= OnModelChanged;
+            subscribed = null;
+        }
+    }
+
+    private void OnModelChanged() => _ = InvokeAsync(StateHasChanged);
+}

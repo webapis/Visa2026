@@ -8,6 +8,9 @@ public sealed class PersonRosterSearchState
 {
     public bool Awaiting { get; private set; } = true;
 
+    /// <summary>True while a new query is replacing the current rows. The grid keeps its last result until then.</summary>
+    public bool Busy { get; private set; }
+
     public string Query { get; private set; } = string.Empty;
 
     /// <summary>Null until the filtered total is known. Zero is a finished search with no rows.</summary>
@@ -15,13 +18,23 @@ public sealed class PersonRosterSearchState
 
     public event Action? Changed;
 
+    public void SetBusy(bool busy)
+    {
+        if (Busy == busy)
+            return;
+
+        Busy = busy;
+        Changed?.Invoke();
+    }
+
     public void Publish(bool awaiting, string? query)
     {
         var next = query?.Trim() ?? string.Empty;
-        if (awaiting || !string.Equals(Query, next, StringComparison.Ordinal))
+        if (awaiting)
             ResultCount = null;
 
         Awaiting = awaiting;
+        Busy = false;
         Query = next;
         Changed?.Invoke();
     }

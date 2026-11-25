@@ -4,14 +4,19 @@
 @using DevExpress.ExpressApp
 @using DevExpress.Persistent.BaseImpl.EF
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.DependencyInjection
 @using Microsoft.AspNetCore.Components.Rendering
 @using Microsoft.AspNetCore.Components.Web
 @using Visa2026.Blazor.Server.Components
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.HeaderLinkedDocuments
 @using Visa2026.Module.Services.PersonIntake
 @using Visa2026.Module.Services.PersonLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.StateEvaluation
 
 @if (Person == null)
 {
@@ -72,7 +77,7 @@ else
                     var stepFindings = findingsForStep(step, findings);
                     var status = StatusFor(step, stepFindings);
                     <button type="button"
-                            class="person-intake-wizard__nav-item @(stepIndex == currentIndex ? "is-active" : null) @status.Css"
+                            class="person-intake-wizard__nav-item @NavTone(step) @(stepIndex == currentIndex ? "is-active" : null) @status.Css"
                             @onclick="() => GoToStep(stepIndex)">
                         <span class="person-intake-wizard__nav-badge">@status.Badge</span>
                         <span>
@@ -132,10 +137,12 @@ else
                 }
                 else if (active.Kind == PersonIntakeStepKind.Form)
                 {
-                    <div class="person-intake-wizard__form-fields">
+                    var showPhoto = active.FieldKeys.Contains(PersonPendingTargets.Photo);
+                    <div class="person-intake-wizard__form-fields @(showPhoto ? "has-photo" : null)">
+                    <div class="person-intake-wizard__form-fields-main">
                     @foreach (var key in active.FieldKeys)
                     {
-                        if (key == PersonPendingTargets.Age)
+                        if (key == PersonPendingTargets.Age || key == PersonPendingTargets.Photo)
                             continue;
 
                         var defer = State.PendingKeys.Contains(key);
@@ -171,7 +178,7 @@ else
                             continue;
                         }
 
-                        <div class="person-intake-wizard__field-row @(key == PersonPendingTargets.Photo ? "person-intake-wizard__field-row--top" : null)">
+                        <div class="person-intake-wizard__field-row">
                             <label>@PersonIntakeFieldLabels.Label(key)</label>
                             @RenderField(key, defer)
                             @if (canDefer && (canToggle || defer))
@@ -183,6 +190,265 @@ else
                             }
                         </div>
                     }
+                    </div>
+                    @if (showPhoto)
+                    {
+                        var photoKey = PersonPendingTargets.Photo;
+                        var photoDefer = State.PendingKeys.Contains(photoKey);
+                        var photoCanToggle = Access.CanTogglePendingField(photoKey);
+                        <aside class="person-intake-wizard__photo-aside">
+                            <span class="person-intake-wizard__photo-aside-label">@PersonIntakeFieldLabels.Label(photoKey)</span>
+                            @RenderField(photoKey, photoDefer)
+                            @if (PersonIntakeFieldLabels.CanDefer(photoKey) && (photoCanToggle || photoDefer))
+                            {
+                                <label class="person-intake-wizard__toggle">
+                                    <input type="checkbox" checked="@photoDefer" disabled="@(!photoCanToggle)" @onchange="e => TogglePending(photoKey, e.Value is true)" />
+                                    <span>@T("NotReceived")</span>
+                                </label>
+                            }
+                        </aside>
+                    }
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.FamilyMembers)
+                {
+                    @if (!string.IsNullOrWhiteSpace(_familyOpenBlocked))
+                    {
+                        <div class="person-intake-wizard__status is-error" role="alert">@_familyOpenBlocked</div>
+                    }
+                    <div class="pi-lv">
+                        <DxGrid Data="FamilyMemberRows"
+                                KeyFieldName="Id"
+                                CssClass="pi-lv__grid"
+                                ShowAllRows="true"
+                                RowClick="OnFamilyMemberRowClick">
+                            <Columns>
+                                <DxGridDataColumn FieldName="@nameof(FamilyMemberRow.FullName)" Caption="@FamilyNameCaption" />
+                                <DxGridDataColumn FieldName="@nameof(FamilyMemberRow.Relationship)" Caption="@FamilyRelationshipCaption" />
+                                <DxGridDataColumn FieldName="@nameof(FamilyMemberRow.DateOfBirth)" Caption="@FamilyBirthCaption" />
+                                <DxGridDataColumn FieldName="@nameof(FamilyMemberRow.Nationality)" Caption="@FamilyNationalityCaption" />
+                            </Columns>
+                        </DxGrid>
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.Visas)
+                {
+                    <div class="pi-lv">
+                        <DxGrid Data="VisaRows"
+                                KeyFieldName="Id"
+                                CssClass="pi-lv__grid"
+                                ShowAllRows="true">
+                            <Columns>
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Preview)" Caption="@VisaPreviewCaption" Width="6.5rem" AllowSort="false">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var previewRow = context.DataItem as VisaRow;
+                                        }
+                                        @if (previewRow?.CanPreview == true)
+                                        {
+                                            <button type="button"
+                                                    class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                    @onclick="() => PreviewVisaAsync(previewRow)">@VisaPreviewCaption</button>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.StateLabel)" Caption="@VisaStateCaption">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var stateRow = context.DataItem as VisaRow;
+                                        }
+                                        @if (stateRow != null)
+                                        {
+                                            <span class="pi-wp-state @stateRow.StateCss">@stateRow.StateLabel</span>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Number)" Caption="@VisaNumberCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Type)" Caption="@VisaTypeCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Category)" Caption="@VisaCategoryCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.IssuedPlace)" Caption="@VisaIssuedPlaceCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.IssueDate)" Caption="@VisaIssueDateCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Start)" Caption="@VisaStartCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Expiration)" Caption="@VisaExpirationCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Days)" Caption="@VisaDaysCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.Passport)" Caption="@VisaPassportCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.ProcessNumber)" Caption="@VisaProcessNumberCaption" />
+                                <DxGridDataColumn FieldName="@nameof(VisaRow.IssuingApplication)" Caption="@VisaIssuingApplicationCaption" />
+                            </Columns>
+                        </DxGrid>
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.Invitations)
+                {
+                    <div class="pi-lv">
+                        <DxGrid Data="InvitationRows"
+                                KeyFieldName="Id"
+                                CssClass="pi-lv__grid"
+                                ShowAllRows="true">
+                            <Columns>
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.Preview)" Caption="@InvitationPreviewCaption" Width="6.5rem" AllowSort="false">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var previewRow = context.DataItem as InvitationRow;
+                                        }
+                                        @if (previewRow?.CanPreview == true)
+                                        {
+                                            <button type="button"
+                                                    class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                    @onclick="() => PreviewInvitationAsync(previewRow)">@InvitationPreviewCaption</button>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.StateLabel)" Caption="@InvitationStateCaption">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var stateRow = context.DataItem as InvitationRow;
+                                        }
+                                        @if (stateRow != null)
+                                        {
+                                            <span class="pi-wp-state @stateRow.StateCss">@stateRow.StateLabel</span>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.Number)" Caption="@InvitationNumberCaption" />
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.Issued)" Caption="@InvitationIssuedCaption" />
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.Expiration)" Caption="@InvitationExpirationCaption" />
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.Passport)" Caption="@InvitationPassportCaption" />
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.Profile)" Caption="@InvitationProfileCaption" />
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.IssuedVisa)" Caption="@InvitationIssuedVisaCaption" />
+                                <DxGridDataColumn FieldName="@nameof(InvitationRow.ProcessNumber)" Caption="@InvitationProcessNumberCaption" />
+                            </Columns>
+                        </DxGrid>
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.MedicalRecords)
+                {
+                    <div class="pi-lv">
+                        <DxGrid Data="MedicalRows"
+                                KeyFieldName="Id"
+                                CssClass="pi-lv__grid"
+                                ShowAllRows="true">
+                            <Columns>
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.Preview)" Caption="@MedicalPreviewCaption" Width="6.5rem" AllowSort="false">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var previewRow = context.DataItem as MedicalRow;
+                                        }
+                                        @if (previewRow?.CanPreview == true)
+                                        {
+                                            <button type="button"
+                                                    class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                    @onclick="() => PreviewMedicalAsync(previewRow)">@MedicalPreviewCaption</button>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.StateLabel)" Caption="@MedicalStateCaption">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var stateRow = context.DataItem as MedicalRow;
+                                        }
+                                        @if (stateRow != null)
+                                        {
+                                            <span class="pi-wp-state @stateRow.StateCss">@stateRow.StateLabel</span>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.Number)" Caption="@MedicalNumberCaption" />
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.IssueDate)" Caption="@MedicalIssueCaption" />
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.Validity)" Caption="@MedicalValidityCaption" />
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.Expiration)" Caption="@MedicalExpirationCaption" />
+                                <DxGridDataColumn FieldName="@nameof(MedicalRow.Days)" Caption="@MedicalDaysCaption" />
+                            </Columns>
+                        </DxGrid>
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.WorkPermits)
+                {
+                    <div class="pi-lv">
+                        <DxGrid Data="WorkPermitRows"
+                                KeyFieldName="Id"
+                                CssClass="pi-lv__grid"
+                                ShowAllRows="true">
+                            <Columns>
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Preview)" Caption="@WorkPermitPreviewCaption" Width="6.5rem" AllowSort="false">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var previewRow = context.DataItem as WorkPermitRow;
+                                        }
+                                        @if (previewRow?.CanPreview == true)
+                                        {
+                                            <button type="button"
+                                                    class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                    @onclick="() => PreviewWorkPermitAsync(previewRow)">@WorkPermitPreviewCaption</button>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.StateLabel)" Caption="@WorkPermitStateCaption">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var stateRow = context.DataItem as WorkPermitRow;
+                                        }
+                                        @if (stateRow != null)
+                                        {
+                                            <span class="pi-wp-state @stateRow.StateCss">@stateRow.StateLabel</span>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Number)" Caption="@WorkPermitNumberCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Start)" Caption="@WorkPermitStartCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Expiration)" Caption="@WorkPermitExpirationCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Days)" Caption="@WorkPermitDaysCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Locations)" Caption="@WorkPermitLocationsCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.AsNumber)" Caption="@WorkPermitAsNumberCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Position)" Caption="@WorkPermitPositionCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Passport)" Caption="@WorkPermitPassportCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Header)" Caption="@WorkPermitHeaderCaption" />
+                                <DxGridDataColumn FieldName="@nameof(WorkPermitRow.Profile)" Caption="@WorkPermitProfileCaption" />
+                            </Columns>
+                        </DxGrid>
+                    </div>
+                }
+                else if (active.Kind == PersonIntakeStepKind.ApplicationProfileInstances)
+                {
+                    <div class="pi-lv">
+                        <DxGrid Data="ApplicationProfileInstanceRows"
+                                KeyFieldName="Id"
+                                CssClass="pi-lv__grid"
+                                ShowAllRows="true">
+                            <Columns>
+                                <DxGridDataColumn FieldName="@nameof(ApplicationProfileInstanceRow.StateLabel)" Caption="@ApplicationStateCaption">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var stateRow = context.DataItem as ApplicationProfileInstanceRow;
+                                        }
+                                        @if (stateRow != null)
+                                        {
+                                            <span class="pi-wp-state @stateRow.StateCss">@stateRow.StateLabel</span>
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(ApplicationProfileInstanceRow.Number)" Caption="@ApplicationNumberCaption">
+                                    <CellDisplayTemplate>
+                                        @{
+                                            var numberRow = context.DataItem as ApplicationProfileInstanceRow;
+                                        }
+                                        @if (numberRow != null && numberRow.Id != Guid.Empty && !string.IsNullOrWhiteSpace(numberRow.Number))
+                                        {
+                                            <button type="button"
+                                                    class="person-intake-wizard__btn person-intake-wizard__btn--link"
+                                                    @onclick="() => OpenApplicationProfileInstance(numberRow)">@numberRow.Number</button>
+                                        }
+                                        else
+                                        {
+                                            @(numberRow?.Number)
+                                        }
+                                    </CellDisplayTemplate>
+                                </DxGridDataColumn>
+                                <DxGridDataColumn FieldName="@nameof(ApplicationProfileInstanceRow.Profile)" Caption="@ApplicationProfileCaption" />
+                                <DxGridDataColumn FieldName="@nameof(ApplicationProfileInstanceRow.Date)" Caption="@ApplicationDateCaption" />
+                                <DxGridDataColumn FieldName="@nameof(ApplicationProfileInstanceRow.ProcessNumber)" Caption="@ApplicationProcessCaption" />
+                            </Columns>
+                        </DxGrid>
                     </div>
                 }
                 else if (active.Kind == PersonIntakeStepKind.Record)
@@ -228,15 +494,6 @@ else
                                     RemoveFamilyRelationDocument,
                                     Access.CanAddRecord(targetKey))
                             }
-                            else if (targetKey == PersonPendingTargets.WorkDuty)
-                            {
-                                <div class="person-intake-wizard__record-form">
-                                    <div class="person-intake-wizard__field-row person-intake-wizard__field-row--top">
-                                        <label>@PersonIntakeFieldLabels.Label(PersonPendingTargets.WorkDuty)</label>
-                                        <textarea class="@FilledCss("person-intake-wizard__input", State.OtherDrafts.WorkDuty.Description)" rows="4" disabled="@(!Access.CanAddRecord(targetKey))" @bind="State.OtherDrafts.WorkDuty.Description"></textarea>
-                                    </div>
-                                </div>
-                            }
                         </div>
                     }
                 }
@@ -270,26 +527,32 @@ else
                         @T("Review.LaterNote")
                     </p>
                 }
-
-                <footer class="person-intake-wizard__footer">
-                    <button type="button" class="person-intake-wizard__btn" disabled="@(currentIndex == 0)" @onclick="PreviousStep">@T("Back")</button>
-                    <div class="person-intake-wizard__footer-right">
-                        @if (currentIndex < steps.Count - 1)
-                        {
-                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary" @onclick="NextStep">@T("Next")</button>
-                        }
-                        else if (!Access.IsViewOnly)
-                        {
-                            <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary"
-                                    disabled="@(unresolved.Count > 0)"
-                                    @onclick="SaveAsync">
-                                @(pending.Count > 0 ? SaveIncompleteLabel() : SaveCompleteLabel())
-                            </button>
-                        }
-                    </div>
-                </footer>
             </div>
         </div>
+
+        <footer class="person-intake-wizard__footer">
+            <button type="button" class="person-intake-wizard__btn" disabled="@(currentIndex == 0)" @onclick="PreviousStep">@T("Back")</button>
+            <div class="person-intake-wizard__footer-right">
+                @if (!Access.IsViewOnly)
+                {
+                    <button type="button" class="person-intake-wizard__btn"
+                            disabled="@(unresolved.Count > 0)"
+                            @onclick="SaveAsync">
+                        @NativeActionCaption("Save", "Save")
+                    </button>
+                    <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary"
+                            @onclick="SaveAndCloseAsync">
+                        @NativeActionCaption("SaveAndClose", "Save and Close")
+                    </button>
+                }
+                <button type="button"
+                        class="person-intake-wizard__btn person-intake-wizard__btn--primary @(currentIndex >= steps.Count - 1 ? "is-reserved" : null)"
+                        disabled="@(currentIndex >= steps.Count - 1)"
+                        aria-hidden="@(currentIndex >= steps.Count - 1)"
+                        tabindex="@(currentIndex >= steps.Count - 1 ? -1 : 0)"
+                        @onclick="NextStep">@T("Next")</button>
+            </div>
+        </footer>
     </div>
 }
 
@@ -304,6 +567,7 @@ else
     [Parameter] public bool ShowIncompleteOverview { get; set; }
     [Parameter] public PersonIntakeWizardAccess Access { get; set; } = PersonIntakeWizardAccess.Unrestricted;
     [Parameter] public EventCallback SaveRequested { get; set; }
+    [Parameter] public EventCallback SaveAndCloseRequested { get; set; }
 
     private int _stepIndex;
     private bool _showLookupTools;
@@ -355,8 +619,533 @@ else
     private bool _educationCopyStatusError;
     private string _familyDocStatus = string.Empty;
     private bool _familyDocStatusError;
+    private string _familyOpenBlocked = string.Empty;
+
+    private string FamilyNameCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.FullName), "Full name");
+    private string FamilyRelationshipCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.Relationship), "Relationship");
+    private string FamilyBirthCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.DateOfBirth), "Date of birth");
+    private string FamilyNationalityCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.Nationality), "Nationality");
+
+    private IReadOnlyList<FamilyMemberRow> FamilyMemberRows =>
+        Person?.FamilyMembers?
+            .Where(member => member != null)
+            .OrderBy(member => member.FullName, StringComparer.CurrentCultureIgnoreCase)
+            .Select(member => new FamilyMemberRow(
+                member.ID,
+                member.FullName,
+                PersonIntakeLookupHelper.Caption(member.Relationship),
+                member.DateOfBirth == default ? string.Empty : member.DateOfBirth.ToString("dd.MM.yyyy"),
+                PersonIntakeLookupHelper.Caption(member.Nationality)))
+            .ToList()
+        ?? (IReadOnlyList<FamilyMemberRow>)Array.Empty<FamilyMemberRow>();
+
+    private void OnFamilyMemberRowClick(GridRowClickEventArgs e)
+    {
+        _familyOpenBlocked = string.Empty;
+        if (Application == null || ObjectSpace == null || Person?.FamilyMembers == null)
+            return;
+
+        var row = e.Grid.GetDataItem(e.VisibleIndex) as FamilyMemberRow;
+        var member = row == null ? null : Person.FamilyMembers.FirstOrDefault(item => item != null && item.ID == row.Id);
+        if (member == null)
+            return;
+
+        if (ObjectSpace?.IsModified == true || ObjectSpace?.IsNewObject(Person) == true || ObjectSpace?.IsNewObject(member) == true)
+        {
+            _familyOpenBlocked = T("FamilyMembers.SaveFirst");
+            return;
+        }
+
+        var wizard = PersonIntakeWizardAccess.IsWizardEnabled(ObjectSpace)
+            ? PersonIntakeWizardOpenHelper.OpenExisting(Application, member)
+            : PersonIntakeWizardOpenHelper.OpenNativeExisting(Application, member);
+        if (wizard == null)
+            return;
+
+        Application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(wizard) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(Application.MainWindow, null));
+    }
+
+    private sealed record FamilyMemberRow(Guid Id, string FullName, string Relationship, string DateOfBirth, string Nationality);
+
+    private string WorkPermitPreviewCaption => VisaUiMessages.Get("PersonDocumentCopies.Action.Preview");
+    private string WorkPermitStateCaption => T("WorkPermits.State");
+    private string WorkPermitNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.WorkPermitNumber), "Number");
+    private string WorkPermitStartCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.StartDate), "Start");
+    private string WorkPermitExpirationCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.ExpirationDate), "Expiration");
+    private string WorkPermitDaysCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.DaysRemaining), "Days");
+    private string WorkPermitLocationsCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.WorkPermittedLocations), "Work permitted locations");
+    private string WorkPermitAsNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.ASNumber), "AS number");
+    private string WorkPermitPositionCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.CurrentPositionHistory), "Position");
+    private string WorkPermitPassportCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.Passport), "Passport");
+    private string WorkPermitHeaderCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.WorkPermit), "Work permit");
+    private string WorkPermitProfileCaption => PersonIntakeFieldLabels.MemberLabel(typeof(WorkPermitItem), nameof(WorkPermitItem.ApplicationProfileInstance), "Application profile instance");
+
+    private IReadOnlyList<WorkPermitRow> WorkPermitRows =>
+        Person?.WorkPermitItems?
+            .Where(item => item != null)
+            .OrderByDescending(item => item.StartDate)
+            .ThenByDescending(item => item.WorkPermitNumber, StringComparer.CurrentCultureIgnoreCase)
+            .Select(ToWorkPermitRow)
+            .ToList()
+        ?? (IReadOnlyList<WorkPermitRow>)Array.Empty<WorkPermitRow>();
+
+    private WorkPermitRow ToWorkPermitRow(WorkPermitItem item)
+    {
+        var code = PersonIntakeWorkPermitState.Code(item, StateEvaluationSettings.FromObjectSpace(ObjectSpace));
+        var start = item.StartDate == default ? string.Empty : item.StartDate.ToString("dd.MM.yyyy");
+        var expiration = item.ExpirationDate == default ? string.Empty : item.ExpirationDate.ToString("dd.MM.yyyy");
+        return new WorkPermitRow(
+            item.ID,
+            item.WorkPermit != null && item.WorkPermit.ID != Guid.Empty,
+            WorkPermitStateLabel(code),
+            WorkPermitStateCss(code),
+            item.WorkPermitNumber ?? string.Empty,
+            start,
+            expiration,
+            PersonIntakeWorkPermitState.ShowsDays(code) ? item.DaysRemaining.ToString() : "—",
+            item.WorkPermittedLocations ?? string.Empty,
+            item.ASNumber ?? string.Empty,
+            item.CurrentPositionHistory?.Title ?? string.Empty,
+            item.Passport?.PassportNumber ?? string.Empty,
+            item.WorkPermit?.WorkPermitNumber ?? string.Empty,
+            item.ApplicationProfileInstance?.DisplayCaption ?? string.Empty);
+    }
+
+    private string WorkPermitStateLabel(string code) => code switch
+    {
+        PersonIntakeWorkPermitState.Active => T("WorkPermits.Valid"),
+        PersonIntakeWorkPermitState.ExpiringSoon => T("WorkPermits.ExpiringSoon"),
+        PersonIntakeWorkPermitState.ExtensionRequired => T("WorkPermits.ExtensionRequired"),
+        PersonIntakeWorkPermitState.Expired => T("WorkPermits.Expired"),
+        PersonIntakeWorkPermitState.Cancelled => T("WorkPermits.Cancelled"),
+        PersonIntakeWorkPermitState.Previous => T("WorkPermits.Previous"),
+        _ => code
+    };
+
+    private static string WorkPermitStateCss(string code) => code switch
+    {
+        PersonIntakeWorkPermitState.Active => "is-valid",
+        PersonIntakeWorkPermitState.ExpiringSoon => "is-soon",
+        PersonIntakeWorkPermitState.ExtensionRequired => "is-ext",
+        PersonIntakeWorkPermitState.Expired => "is-expired",
+        PersonIntakeWorkPermitState.Cancelled => "is-cancelled",
+        PersonIntakeWorkPermitState.Previous => "is-previous",
+        _ => string.Empty
+    };
+
+    private async Task PreviewWorkPermitAsync(WorkPermitRow row)
+    {
+        var item = Person?.WorkPermitItems?.FirstOrDefault(candidate => candidate != null && candidate.ID == row.Id);
+        if (item?.WorkPermit == null || item.WorkPermit.ID == Guid.Empty)
+            return;
+
+        var slot = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slot == null)
+            return;
+
+        await slot.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = HeaderDocumentCopiesFamily.WorkPermit,
+            ParentId = item.WorkPermit.ID,
+            ContextItemId = item.ID,
+            FocusDisplayName = string.IsNullOrWhiteSpace(item.WorkPermitNumber) ? item.WorkPermit.WorkPermitNumber : item.WorkPermitNumber,
+            OpenPreviewOnly = true,
+            PreviewAllCopies = true
+        }, OwnerViewId);
+    }
+
+    private string VisaPreviewCaption => VisaUiMessages.Get("PersonDocumentCopies.Action.Preview");
+    private string VisaStateCaption => T("WorkPermits.State");
+    private string VisaNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.VisaNumber), "Number");
+    private string VisaTypeCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.VisaType), "Type");
+    private string VisaCategoryCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.VisaCategory), "Category");
+    private string VisaIssuedPlaceCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.VisaIssuedPlace), "Issued place");
+    private string VisaIssueDateCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.IssueDate), "Issue date");
+    private string VisaStartCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.StartDate), "Start");
+    private string VisaExpirationCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.ExpirationDate), "Expiration");
+    private string VisaDaysCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.DaysRemaining), "Days");
+    private string VisaPassportCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.Passport), "Passport");
+    private string VisaProcessNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.ProcessNumber), "Process number");
+    private string VisaIssuingApplicationCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Visa), nameof(Visa.IssuingApplicationProfileInstance), "Issuing application");
+
+    private IReadOnlyList<VisaRow> VisaRows =>
+        Person?.Passports?
+            .Where(passport => passport != null)
+            .SelectMany(passport => passport.Visas ?? Array.Empty<Visa>())
+            .Where(visa => visa != null)
+            .OrderByDescending(visa => visa.StartDate)
+            .ThenByDescending(visa => visa.VisaNumber, StringComparer.CurrentCultureIgnoreCase)
+            .Select(ToVisaRow)
+            .ToList()
+        ?? (IReadOnlyList<VisaRow>)Array.Empty<VisaRow>();
+
+    private VisaRow ToVisaRow(Visa visa)
+    {
+        var code = PersonIntakeVisaState.Code(visa, StateEvaluationSettings.FromObjectSpace(ObjectSpace));
+        var issue = visa.IssueDate == default ? string.Empty : visa.IssueDate.ToString("dd.MM.yyyy");
+        var start = visa.StartDate == default ? string.Empty : visa.StartDate.ToString("dd.MM.yyyy");
+        var expiration = visa.ExpirationDate is DateTime end && end != default ? end.ToString("dd.MM.yyyy") : string.Empty;
+        return new VisaRow(
+            visa.ID,
+            visa.ID != Guid.Empty,
+            VisaStateLabel(code),
+            VisaStateCss(code),
+            visa.VisaNumber ?? string.Empty,
+            PersonIntakeLookupHelper.Caption(visa.VisaType),
+            PersonIntakeLookupHelper.Caption(visa.VisaCategory),
+            PersonIntakeLookupHelper.Caption(visa.VisaIssuedPlace),
+            issue,
+            start,
+            expiration,
+            PersonIntakeVisaState.ShowsDays(code) ? visa.DaysRemaining.ToString() : "—",
+            visa.Passport?.PassportNumber ?? string.Empty,
+            visa.ProcessNumber ?? string.Empty,
+            visa.IssuingApplicationProfileInstance?.DisplayCaption ?? string.Empty);
+    }
+
+    private string VisaStateLabel(string code) => code switch
+    {
+        PersonIntakeVisaState.Active => T("WorkPermits.Valid"),
+        PersonIntakeVisaState.ExpiringSoon => T("WorkPermits.ExpiringSoon"),
+        PersonIntakeVisaState.ExpiringSoonNotRequired => T("Visas.ExpiringSoonNotRequired"),
+        PersonIntakeVisaState.ExtensionRequired => T("WorkPermits.ExtensionRequired"),
+        PersonIntakeVisaState.Extended => T("Visas.Extended"),
+        PersonIntakeVisaState.Changed => T("Visas.Changed"),
+        PersonIntakeVisaState.Expired => T("WorkPermits.Expired"),
+        PersonIntakeVisaState.Cancelled => T("WorkPermits.Cancelled"),
+        PersonIntakeVisaState.Previous => T("WorkPermits.Previous"),
+        _ => code
+    };
+
+    private static string VisaStateCss(string code) => code switch
+    {
+        PersonIntakeVisaState.Active => "is-valid",
+        PersonIntakeVisaState.ExpiringSoon => "is-soon",
+        PersonIntakeVisaState.ExpiringSoonNotRequired => "is-info",
+        PersonIntakeVisaState.ExtensionRequired => "is-ext",
+        PersonIntakeVisaState.Extended => "is-info",
+        PersonIntakeVisaState.Changed => "is-info",
+        PersonIntakeVisaState.Expired => "is-expired",
+        PersonIntakeVisaState.Cancelled => "is-cancelled",
+        PersonIntakeVisaState.Previous => "is-previous",
+        _ => string.Empty
+    };
+
+    private async Task PreviewVisaAsync(VisaRow row)
+    {
+        if (row.Id == Guid.Empty)
+            return;
+
+        var slot = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slot == null)
+            return;
+
+        await slot.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = HeaderDocumentCopiesFamily.Visa,
+            ParentId = row.Id,
+            FocusDisplayName = row.Number,
+            OpenPreviewOnly = true,
+            PreviewAllCopies = true
+        }, OwnerViewId);
+    }
+
+    private sealed record VisaRow(
+        Guid Id,
+        bool CanPreview,
+        string StateLabel,
+        string StateCss,
+        string Number,
+        string Type,
+        string Category,
+        string IssuedPlace,
+        string IssueDate,
+        string Start,
+        string Expiration,
+        string Days,
+        string Passport,
+        string ProcessNumber,
+        string IssuingApplication)
+    {
+        public string Preview => string.Empty;
+    }
+
+    private string InvitationPreviewCaption => VisaUiMessages.Get("PersonDocumentCopies.Action.Preview");
+    private string InvitationStateCaption => T("WorkPermits.State");
+    private string InvitationNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Invitation), nameof(Invitation.InvitationNumber), "Invitation number");
+    private string InvitationIssuedCaption => PersonIntakeFieldLabels.MemberLabel(typeof(Invitation), nameof(Invitation.IssuedDate), "Issued date");
+    private string InvitationExpirationCaption => PersonIntakeFieldLabels.MemberLabel(typeof(InvitationItem), nameof(InvitationItem.ExpirationDate), "Expiration");
+    private string InvitationPassportCaption => PersonIntakeFieldLabels.MemberLabel(typeof(InvitationItem), nameof(InvitationItem.Passport), "Passport");
+    private string InvitationProfileCaption => PersonIntakeFieldLabels.MemberLabel(typeof(InvitationItem), nameof(InvitationItem.ApplicationProfileInstance), "Application profile instance");
+    private string InvitationIssuedVisaCaption => PersonIntakeFieldLabels.MemberLabel(typeof(InvitationItem), nameof(InvitationItem.IssuedVisa), "Issued visa");
+    private string InvitationProcessNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(ApplicationProfileInstance), nameof(ApplicationProfileInstance.ProcessNumber), "Process number");
+
+    private IReadOnlyList<InvitationRow> InvitationRows =>
+        Person?.InvitationItems?
+            .Where(item => item != null)
+            .OrderByDescending(item => item.Invitation?.IssuedDate ?? default)
+            .ThenByDescending(item => item.Invitation?.InvitationNumber, StringComparer.CurrentCultureIgnoreCase)
+            .Select(ToInvitationRow)
+            .ToList()
+        ?? (IReadOnlyList<InvitationRow>)Array.Empty<InvitationRow>();
+
+    private InvitationRow ToInvitationRow(InvitationItem item)
+    {
+        var code = PersonIntakeInvitationState.Code(item);
+        var invitation = item.Invitation;
+        var issued = invitation?.IssuedDate is DateTime issuedOn && issuedOn != default
+            ? issuedOn.ToString("dd.MM.yyyy")
+            : string.Empty;
+        var expiration = item.ExpirationDate is DateTime end && end != default
+            ? end.ToString("dd.MM.yyyy")
+            : string.Empty;
+        return new InvitationRow(
+            item.ID,
+            invitation != null && invitation.ID != Guid.Empty,
+            invitation?.ID ?? Guid.Empty,
+            InvitationStateLabel(code),
+            InvitationStateCss(code),
+            invitation?.InvitationNumber ?? string.Empty,
+            issued,
+            expiration,
+            item.Passport?.PassportNumber ?? string.Empty,
+            invitation?.ApplicationProfileInstance?.DisplayCaption ?? string.Empty,
+            item.IssuedVisa?.VisaNumber ?? string.Empty,
+            invitation?.ApplicationProfileInstance?.ProcessNumber ?? string.Empty);
+    }
+
+    private string InvitationStateLabel(string code) => code switch
+    {
+        PersonIntakeInvitationState.Ready => T("Invitations.Ready"),
+        PersonIntakeInvitationState.Used => T("Invitations.Used"),
+        PersonIntakeInvitationState.Cancelled => T("Invitations.Cancelled"),
+        PersonIntakeInvitationState.Changed => T("Invitations.Changed"),
+        PersonIntakeInvitationState.Expired => T("Invitations.Expired"),
+        _ => code
+    };
+
+    private static string InvitationStateCss(string code) => code switch
+    {
+        PersonIntakeInvitationState.Ready => "is-valid",
+        PersonIntakeInvitationState.Used => "is-info",
+        PersonIntakeInvitationState.Cancelled => "is-cancelled",
+        PersonIntakeInvitationState.Changed => "is-changed",
+        PersonIntakeInvitationState.Expired => "is-expired",
+        _ => string.Empty
+    };
+
+    private async Task PreviewInvitationAsync(InvitationRow row)
+    {
+        if (!row.CanPreview)
+            return;
+
+        var slot = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slot == null)
+            return;
+
+        await slot.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = HeaderDocumentCopiesFamily.Invitation,
+            ParentId = row.InvitationId,
+            ContextItemId = row.Id,
+            FocusDisplayName = row.Number,
+            OpenPreviewOnly = true,
+            PreviewAllCopies = true
+        }, OwnerViewId);
+    }
+
+    private sealed record InvitationRow(
+        Guid Id,
+        bool CanPreview,
+        Guid InvitationId,
+        string StateLabel,
+        string StateCss,
+        string Number,
+        string Issued,
+        string Expiration,
+        string Passport,
+        string Profile,
+        string IssuedVisa,
+        string ProcessNumber)
+    {
+        public string Preview => string.Empty;
+    }
+
+    private string MedicalPreviewCaption => VisaUiMessages.Get("PersonDocumentCopies.Action.Preview");
+    private string MedicalStateCaption => T("WorkPermits.State");
+    private string MedicalNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(MedicalRecord), nameof(MedicalRecord.DocumentNumber), "Document number");
+    private string MedicalIssueCaption => PersonIntakeFieldLabels.MemberLabel(typeof(MedicalRecord), nameof(MedicalRecord.IssueDate), "Issue date");
+    private string MedicalValidityCaption => PersonIntakeFieldLabels.MemberLabel(typeof(MedicalRecord), nameof(MedicalRecord.ValidityDuration), "Validity");
+    private string MedicalExpirationCaption => PersonIntakeFieldLabels.MemberLabel(typeof(MedicalRecord), nameof(MedicalRecord.ExpirationDate), "Expiration");
+    private string MedicalDaysCaption => PersonIntakeFieldLabels.MemberLabel(typeof(MedicalRecord), nameof(MedicalRecord.DaysRemaining), "Days");
+
+    private IReadOnlyList<MedicalRow> MedicalRows =>
+        Person?.MedicalRecords?
+            .Where(record => record != null)
+            .OrderByDescending(record => record.IssueDate)
+            .ThenByDescending(record => record.DocumentNumber, StringComparer.CurrentCultureIgnoreCase)
+            .Select(ToMedicalRow)
+            .ToList()
+        ?? (IReadOnlyList<MedicalRow>)Array.Empty<MedicalRow>();
+
+    private MedicalRow ToMedicalRow(MedicalRecord record)
+    {
+        var code = PersonIntakeMedicalState.Code(record, StateEvaluationSettings.FromObjectSpace(ObjectSpace));
+        var issue = record.IssueDate == default ? string.Empty : record.IssueDate.ToString("dd.MM.yyyy");
+        var expiration = record.ExpirationDate is DateTime end && end != default
+            ? end.ToString("dd.MM.yyyy")
+            : string.Empty;
+        return new MedicalRow(
+            record.ID,
+            record.ID != Guid.Empty && record.Documents?.Any(document => document != null) == true,
+            MedicalStateLabel(code),
+            MedicalStateCss(code),
+            record.DocumentNumber ?? string.Empty,
+            issue,
+            PersonIntakeLookupHelper.Caption(record.ValidityDuration),
+            expiration,
+            PersonIntakeMedicalState.ShowsDays(code) ? record.DaysRemaining.ToString() : "—");
+    }
+
+    private string MedicalStateLabel(string code) => code switch
+    {
+        PersonIntakeMedicalState.Active => T("WorkPermits.Valid"),
+        PersonIntakeMedicalState.ExpiringSoon => T("WorkPermits.ExpiringSoon"),
+        PersonIntakeMedicalState.Expired => T("WorkPermits.Expired"),
+        PersonIntakeMedicalState.Previous => T("WorkPermits.Previous"),
+        _ => code
+    };
+
+    private static string MedicalStateCss(string code) => code switch
+    {
+        PersonIntakeMedicalState.Active => "is-valid",
+        PersonIntakeMedicalState.ExpiringSoon => "is-soon",
+        PersonIntakeMedicalState.Expired => "is-expired",
+        PersonIntakeMedicalState.Previous => "is-previous",
+        _ => string.Empty
+    };
+
+    private async Task PreviewMedicalAsync(MedicalRow row)
+    {
+        if (row.Id == Guid.Empty || Person == null)
+            return;
+
+        var slot = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        if (slot == null)
+            return;
+
+        await slot.OpenPersonDocumentCopiesAsync(new PersonDocumentCopiesSlotRequest
+        {
+            PersonIds = new[] { Person.ID },
+            OpenPreviewOnly = true,
+            FocusRecordKey = $"MedicalRecord:{row.Id:N}",
+            FocusDisplayName = row.Number,
+            AllowEditFiles = false
+        }, OwnerViewId);
+    }
+
+    private sealed record MedicalRow(
+        Guid Id,
+        bool CanPreview,
+        string StateLabel,
+        string StateCss,
+        string Number,
+        string IssueDate,
+        string Validity,
+        string Expiration,
+        string Days)
+    {
+        public string Preview => string.Empty;
+    }
+
+    private string ApplicationStateCaption => PersonIntakeFieldLabels.MemberLabel(typeof(ApplicationProfileInstance), nameof(ApplicationProfileInstance.CurrentState), "State");
+    private string ApplicationNumberCaption => PersonIntakeFieldLabels.MemberLabel(typeof(ApplicationProfileInstance), nameof(ApplicationProfileInstance.FullApplicationNumber), "Number");
+    private string ApplicationProfileCaption => PersonIntakeFieldLabels.MemberLabel(typeof(ApplicationProfileInstance), nameof(ApplicationProfileInstance.ApplicationProfile), "Profile");
+    private string ApplicationDateCaption => PersonIntakeFieldLabels.MemberLabel(typeof(ApplicationProfileInstance), nameof(ApplicationProfileInstance.ApplicationDate), "Date");
+    private string ApplicationProcessCaption => PersonIntakeFieldLabels.MemberLabel(typeof(ApplicationProfileInstance), nameof(ApplicationProfileInstance.ProcessNumber), "Process number");
+
+    private IReadOnlyList<ApplicationProfileInstanceRow> ApplicationProfileInstanceRows =>
+        Person?.ApplicationProfileInstances?
+            .Where(instance => instance != null)
+            .OrderByDescending(instance => instance.ApplicationDate)
+            .ThenByDescending(instance => instance.FullApplicationNumber, StringComparer.CurrentCultureIgnoreCase)
+            .Select(ToApplicationProfileInstanceRow)
+            .ToList()
+        ?? (IReadOnlyList<ApplicationProfileInstanceRow>)Array.Empty<ApplicationProfileInstanceRow>();
+
+    private void OpenApplicationProfileInstance(ApplicationProfileInstanceRow row)
+    {
+        if (Application == null || row.Id == Guid.Empty)
+            return;
+
+        var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(Application, row.Id);
+        if (workspaceView == null)
+            return;
+
+        Application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(Application.MainWindow, null));
+    }
+
+    private static ApplicationProfileInstanceRow ToApplicationProfileInstanceRow(ApplicationProfileInstance instance)
+    {
+        var number = !string.IsNullOrWhiteSpace(instance.FullApplicationNumber)
+            ? instance.FullApplicationNumber
+            : instance.ApplicationNumber ?? string.Empty;
+        var date = instance.ApplicationDate == default ? string.Empty : instance.ApplicationDate.ToString("dd.MM.yyyy");
+        return new ApplicationProfileInstanceRow(
+            instance.ID,
+            PersonIntakeApplicationProfileInstanceState.Label(instance),
+            PersonIntakeApplicationProfileInstanceState.Css(instance),
+            number,
+            instance.ApplicationProfile?.DisplayName ?? string.Empty,
+            date,
+            instance.ProcessNumber ?? string.Empty);
+    }
+
+    private sealed record ApplicationProfileInstanceRow(
+        Guid Id,
+        string StateLabel,
+        string StateCss,
+        string Number,
+        string Profile,
+        string Date,
+        string ProcessNumber);
+
+    private sealed record WorkPermitRow(
+        Guid Id,
+        bool CanPreview,
+        string StateLabel,
+        string StateCss,
+        string Number,
+        string Start,
+        string Expiration,
+        string Days,
+        string Locations,
+        string AsNumber,
+        string Position,
+        string Passport,
+        string Header,
+        string Profile)
+    {
+        public string Preview => string.Empty;
+    }
 
     private Task SaveAsync() => SaveRequested.HasDelegate ? SaveRequested.InvokeAsync() : Task.CompletedTask;
+
+    private Task SaveAndCloseAsync() =>
+        SaveAndCloseRequested.HasDelegate ? SaveAndCloseRequested.InvokeAsync() : Task.CompletedTask;
+
+    private string NativeActionCaption(string actionId, string fallback)
+    {
+        var caption = Application?.Model?.ActionDesign?.Actions[actionId]?.Caption;
+        if (!string.IsNullOrWhiteSpace(caption))
+            return caption;
+
+        return fallback;
+    }
 
     protected override void OnParametersSet()
     {
@@ -494,16 +1283,6 @@ else
             State.PendingKeys.Remove(key);
         InvokeAsync(StateHasChanged);
     }
-
-    private string SaveCompleteLabel()
-    {
-        if (ObjectSpace?.IsNewObject(Person) != true)
-            return T("Save.SaveChanges");
-        return Person?.PersonRole == PersonRecordRole.Employee ? T("Save.CreateEmployee") : T("Save.CreateFamilyMember");
-    }
-
-    private string SaveIncompleteLabel() =>
-        ObjectSpace?.IsNewObject(Person) == true ? T("Save.CreateIncomplete") : T("Save.SaveIncomplete");
 
     private string WizardTitle
     {
@@ -1388,13 +2167,24 @@ else
                 IsLegacyIncomplete = line.IsLegacyIncomplete,
             }).ToList();
 
+    private static string NavTone(PersonIntakeStep step) =>
+        step.Kind is PersonIntakeStepKind.FamilyMembers or PersonIntakeStepKind.WorkPermits or PersonIntakeStepKind.Visas or PersonIntakeStepKind.Invitations or PersonIntakeStepKind.MedicalRecords or PersonIntakeStepKind.ApplicationProfileInstances
+            ? "is-readonly"
+            : step.Kind == PersonIntakeStepKind.Review
+                ? string.Empty
+                : "is-editable";
+
     private (string Css, string Badge, string Text) StatusFor(PersonIntakeStep step, List<PersonIntakeFinding> stepFindings)
     {
-        if (step.RecordTargetKey == PersonPendingTargets.EmployeeSalary)
+        if (step.Kind is PersonIntakeStepKind.FamilyMembers or PersonIntakeStepKind.WorkPermits or PersonIntakeStepKind.Visas or PersonIntakeStepKind.Invitations or PersonIntakeStepKind.MedicalRecords or PersonIntakeStepKind.ApplicationProfileInstances)
+            return ("is-readonly", "•", T("Status.ReadOnly"));
+
+        if (step.RecordTargetKey is PersonPendingTargets.EmployeeSalary or PersonPendingTargets.WorkDuty)
         {
-            var hasSalary = State.SalaryDrafts.Count > 0
-                || Person?.Salaries?.Any(salary => salary != null) == true;
-            return hasSalary
+            var hasRows = step.RecordTargetKey == PersonPendingTargets.EmployeeSalary
+                ? State.SalaryDrafts.Count > 0 || Person?.Salaries?.Any(salary => salary != null) == true
+                : State.WorkDutyDrafts.Count > 0 || Person?.WorkDuties?.Any(duty => duty != null) == true;
+            return hasRows
                 ? ("is-done", "✓", T("Status.Added"))
                 : ("is-optional", "·", T("Status.Optional"));
         }

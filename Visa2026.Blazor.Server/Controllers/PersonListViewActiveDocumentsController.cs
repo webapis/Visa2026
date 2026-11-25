@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.DatabaseUpdate;
 using Visa2026.Module.Services.PersonList;
 
 namespace Visa2026.Blazor.Server.Controllers;
@@ -102,7 +103,7 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     {
         [nameof(Person.DossierListLink)] = 8,
         [nameof(Person.DocumentCopiesListLink)] = 8,
-        [nameof(Person.FullName)] = 170,
+        [nameof(Person.FullName)] = PersonRosterListViewIds.FullNameColumnWidth,
         [nameof(Person.EmployeeListActivePassport)] = 120,
         [nameof(Person.PersonalNumber)] = 100,
         [nameof(Person.DateOfBirth)] = 92,
@@ -149,11 +150,18 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
     {
         base.OnActivated();
         ApplyRosterPaging();
-        var changed = HideColumn(nameof(Person.Gender));
-        if (PersonRosterListViewIds.IsEmployeeRoster(View.Id))
+        var changed = false;
+        if (PersonRosterListViewIds.IsIntakeWizardList(View.Id))
         {
-            changed |= HideColumn(nameof(Person.PersonalNumber));
-            changed |= HideColumn(nameof(Person.ProjectContract));
+            if (View.Model != null)
+            {
+                changed = PersonListViewActionColumnsUpdater.KeepFullNameAndDossier(View.Model);
+                changed |= PersonListViewActionColumnsUpdater.EnsureIncompleteInfoColumns(View.Model);
+            }
+        }
+        else
+        {
+            changed = HideColumn(nameof(Person.Gender));
         }
 
         if (changed)
@@ -386,6 +394,9 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
                 pixels = View.Model?.Columns[field]?.Width ?? 0;
             if (pixels <= 0)
                 pixels = FallbackPreferred.GetValueOrDefault(field, 120);
+            if (PersonRosterListViewIds.IsIntakeWizardList(View?.Id)
+                && string.Equals(field, nameof(Person.FullName), StringComparison.Ordinal))
+                pixels = Math.Max(pixels, PersonRosterListViewIds.FullNameColumnWidth);
             widths.Add(new PersonListColumnShare.Width(field, pixels));
         }
 
@@ -423,6 +434,8 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
                     if (LockedColumnWidths.ContainsKey(column.FieldName ?? string.Empty)
                         && column.MinWidth != match.Pixels)
                         column.MinWidth = match.Pixels;
+                    if (IsRosterFullName(column.FieldName) && column.MinWidth < match.Pixels)
+                        column.MinWidth = match.Pixels;
                 }
             }
             finally
@@ -446,6 +459,8 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
 
                         column.Width = match.Pixels.ToString(CultureInfo.InvariantCulture) + "px";
                         if (LockedColumnWidths.ContainsKey(column.FieldName ?? string.Empty))
+                            column.MinWidth = match.Pixels;
+                        if (IsRosterFullName(column.FieldName) && column.MinWidth < match.Pixels)
                             column.MinWidth = match.Pixels;
                     }
                 }
@@ -671,6 +686,10 @@ public sealed class PersonListViewActiveDocumentsController : ViewController<Lis
         pixels = (int)Math.Round(value);
         return pixels > 0;
     }
+
+    private bool IsRosterFullName(string? field) =>
+        PersonRosterListViewIds.IsIntakeWizardList(View?.Id)
+        && string.Equals(field, nameof(Person.FullName), StringComparison.Ordinal);
 
     private static IReadOnlyList<PersonListColumnShare.Width> ScaleTo(
         IReadOnlyList<PersonListColumnShare.Width> weights,

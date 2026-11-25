@@ -32,7 +32,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 roleCriteria: PersonRoleHelper.EmployeeCriteria,
                 incompleteCriteria: PersonRosterListViewIds.EmployeesIncompleteCriteria,
                 groupCaption: "Employees",
-                allCaption: "All",
                 incompleteCaption: "Incomplete",
                 imageName: "BO_Employee",
                 index: 0);
@@ -46,7 +45,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 roleCriteria: PersonRoleHelper.FamilyMemberCriteria,
                 incompleteCriteria: PersonRosterListViewIds.FamilyMembersIncompleteCriteria,
                 groupCaption: "Family Members",
-                allCaption: "All",
                 incompleteCaption: "Incomplete",
                 imageName: "BO_Contact",
                 index: 1);
@@ -165,7 +163,6 @@ namespace Visa2026.Module.DatabaseUpdate
             string roleCriteria,
             string incompleteCriteria,
             string groupCaption,
-            string allCaption,
             string incompleteCaption,
             string imageName,
             int index)
@@ -186,22 +183,11 @@ namespace Visa2026.Module.DatabaseUpdate
             group.Caption = groupCaption;
             group.ImageName = imageName;
             group.Index = index;
-            // Folder only — All / Incomplete are the clickable leaves.
-            group.View = null;
-
-            var allNav = group.Items[PersonRosterListViewIds.NavAll]
-                ?? group.Items.AddNode<IModelNavigationItem>(PersonRosterListViewIds.NavAll);
-            allNav.View = allView;
-            allNav.Caption = allCaption;
-            allNav.ImageName = imageName;
-            allNav.Index = 0;
-
-            var incompleteNav = group.Items[PersonRosterListViewIds.NavIncomplete]
-                ?? group.Items.AddNode<IModelNavigationItem>(PersonRosterListViewIds.NavIncomplete);
-            incompleteNav.View = incompleteView;
-            incompleteNav.Caption = incompleteCaption;
-            incompleteNav.ImageName = "Action_Validation_Warning";
-            incompleteNav.Index = 1;
+            group.View = allView;
+            if (group.Items[PersonRosterListViewIds.NavAll] is IModelNavigationItem allNav)
+                allNav.Remove();
+            if (group.Items[PersonRosterListViewIds.NavIncomplete] is IModelNavigationItem incompleteNav)
+                incompleteNav.Remove();
         }
         private static void EnsureTopLevelPersonNavigation(
             IModelNavigationItems navigationItems,

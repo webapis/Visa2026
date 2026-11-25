@@ -41,17 +41,25 @@ public sealed class PersonListViewPassportFullTextSearchController : ObjectViewC
         if (filterController == null || string.IsNullOrWhiteSpace(e.SearchText))
             return;
 
-        var defaultProperties = filterController.GetFullTextSearchProperties();
-        var defaultCriteria = new SearchCriteriaBuilder(
-            View.ObjectTypeInfo,
-            defaultProperties,
-            e.SearchText,
-            GroupOperatorType.Or,
-            includeNonPersistentMembers: false,
-            filterController.FullTextSearchMode).BuildCriteria();
+        // Employees and Family Members already match name, personal number, and passport.
+        // The default scan of every other string column is the slow part of that query.
+        CriteriaOperator? defaultCriteria = null;
+        if (!PersonRosterListViewIds.IsIntakeWizardList(View?.Id))
+        {
+            var defaultProperties = filterController.GetFullTextSearchProperties();
+            defaultCriteria = new SearchCriteriaBuilder(
+                View.ObjectTypeInfo,
+                defaultProperties,
+                e.SearchText,
+                GroupOperatorType.Or,
+                includeNonPersistentMembers: false,
+                filterController.FullTextSearchMode).BuildCriteria();
+        }
 
         var identityCriteria = PersonListViewFullTextSearchCriteriaBuilder.BuildPersonIdentityCriteria(e.SearchText);
-        var passportCriteria = PersonListViewFullTextSearchCriteriaBuilder.BuildPassportNumberCriteria(e.SearchText);
+        var passportCriteria = PersonListViewFullTextSearchCriteriaBuilder.IncludePassportLookup(e.SearchText)
+            ? PersonListViewFullTextSearchCriteriaBuilder.BuildPassportNumberCriteria(e.SearchText)
+            : null;
         var combinedCriteria = PersonListViewFullTextSearchCriteriaBuilder.CombineOr(
             defaultCriteria,
             identityCriteria,

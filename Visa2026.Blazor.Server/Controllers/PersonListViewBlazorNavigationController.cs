@@ -50,11 +50,13 @@ public sealed class PersonListViewBlazorNavigationController : ViewController<Li
 
         if (PersonRosterListViewIds.IsIntakeWizardList(View.Id))
         {
+            var fromIncomplete = PersonRosterListViewIds.IsIncompleteRoster(View.Id)
+                || Frame.GetController<PersonRosterColorTabsController>()?.IsIncompleteTabSelected == true;
             var wizard = PersonIntakeWizardAccess.IsWizardEnabled(View.ObjectSpace)
                 ? PersonIntakeWizardOpenHelper.OpenExisting(
                     Application,
                     person,
-                    openedFromIncompleteList: PersonRosterListViewIds.IsIncompleteRoster(View.Id))
+                    openedFromIncompleteList: fromIncomplete)
                 : PersonIntakeWizardOpenHelper.OpenNativeExisting(Application, person);
             if (wizard == null)
                 return;

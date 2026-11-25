@@ -12724,6 +12724,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hökman däl",
             ["ru-RU"] = "Необязательно",
         },
+        ["PersonIntake.Status.ReadOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only",
+            ["tr-TR"] = "Salt okunur",
+            ["tk-TM"] = "Diňe okamak",
+            ["ru-RU"] = "Только просмотр",
+        },
         ["PersonIntake.Status.PendingCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0} pending",
@@ -12745,12 +12752,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Jemleýji",
             ["ru-RU"] = "Итог",
         },
+        ["PersonIntake.FamilyMembers.SaveFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save this employee before opening a family member.",
+            ["tr-TR"] = "Bir aile üyesini açmadan önce bu çalışanı kaydedin.",
+            ["tk-TM"] = "Maşgala agzasyny açmazdan öň bu işgäri ýazdyryň.",
+            ["ru-RU"] = "Сохраните этого сотрудника, прежде чем открывать члена семьи.",
+        },
         ["PersonIntake.Step.Documents"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "CV & files",
             ["tr-TR"] = "CV ve dosyalar",
             ["tk-TM"] = "CV we faýllar",
             ["ru-RU"] = "Резюме и файлы",
+        },
+        ["PersonIntake.Step.FamilyMembers.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select a row to open that family member.",
+            ["tr-TR"] = "O aile üyesini açmak için bir satır seçin.",
+            ["tk-TM"] = "Şol maşgala agzasyny açmak üçin setiri saýlaň.",
+            ["ru-RU"] = "Выберите строку, чтобы открыть этого члена семьи.",
         },
         ["PersonIntake.Step.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -12815,6 +12836,167 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wezipe taryhy",
             ["ru-RU"] = "История должностей",
         },
+        ["PersonIntake.Step.WorkPermits.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only. Preview opens the scanned work permit.",
+            ["tr-TR"] = "Salt okunur. Önizleme, taranmış çalışma iznini açar.",
+            ["tk-TM"] = "Diňe okamak. Deslapky görnüş skanirlenen iş rugsatyny açýar.",
+            ["ru-RU"] = "Только просмотр. Предпросмотр открывает скан разрешения на работу.",
+        },
+        ["PersonIntake.WorkPermits.Cancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyrylan",
+            ["ru-RU"] = "Аннулировано",
+        },
+        ["PersonIntake.WorkPermits.Expired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired",
+            ["tr-TR"] = "Süresi doldu",
+            ["tk-TM"] = "Möhleti gutardy",
+            ["ru-RU"] = "Истёк",
+        },
+        ["PersonIntake.WorkPermits.ExpiringSoon"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon",
+            ["tr-TR"] = "Süresi dolmak üzere",
+            ["tk-TM"] = "Möhleti ýakynlaşýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["PersonIntake.WorkPermits.ExtensionRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension required",
+            ["tr-TR"] = "Uzatma gerekli",
+            ["tk-TM"] = "Uzatmak gerek",
+            ["ru-RU"] = "Нужно продление",
+        },
+        ["PersonIntake.WorkPermits.Previous"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Previous",
+            ["tr-TR"] = "Önceki",
+            ["tk-TM"] = "Öňki",
+            ["ru-RU"] = "Предыдущее",
+        },
+        ["PersonIntake.Step.Visas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visas",
+            ["tr-TR"] = "Vizeler",
+            ["tk-TM"] = "Wizalar",
+            ["ru-RU"] = "Визы",
+        },
+        ["PersonIntake.Step.Visas.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only. Preview opens the scanned visa.",
+            ["tr-TR"] = "Salt okunur. Önizleme, taranmış vizeyi açar.",
+            ["tk-TM"] = "Diňe okamak. Deslapky görnüş skanirlenen wizany açýar.",
+            ["ru-RU"] = "Только просмотр. Предпросмотр открывает скан визы.",
+        },
+        ["PersonIntake.Visas.Changed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changed",
+            ["tr-TR"] = "Değiştirildi",
+            ["tk-TM"] = "Üýtgedilen",
+            ["ru-RU"] = "Изменена",
+        },
+        ["PersonIntake.Visas.ExpiringSoonNotRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon — extension not required",
+            ["tr-TR"] = "Süresi dolmak üzere — uzatma gerekmez",
+            ["tk-TM"] = "Möhleti ýakynlaşýar — uzatmak gerek däl",
+            ["ru-RU"] = "Скоро истекает — продление не требуется",
+        },
+        ["PersonIntake.Visas.Extended"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extended",
+            ["tr-TR"] = "Uzatılmış",
+            ["tk-TM"] = "Uzatylan",
+            ["ru-RU"] = "Продлена",
+        },
+        ["PersonIntake.Step.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitations",
+            ["tr-TR"] = "Davetiyeler",
+            ["tk-TM"] = "Çakylyklar",
+            ["ru-RU"] = "Приглашения",
+        },
+        ["PersonIntake.Step.Invitations.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only. Preview opens the scanned invitation.",
+            ["tr-TR"] = "Salt okunur. Önizleme, taranmış davetiyeyi açar.",
+            ["tk-TM"] = "Diňe okamak. Deslapky görnüş skanirlenen çakylygy açýar.",
+            ["ru-RU"] = "Только просмотр. Предпросмотр открывает скан приглашения.",
+        },
+        ["PersonIntake.Step.Medical.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only. Preview opens the scanned medical record.",
+            ["tr-TR"] = "Salt okunur. Önizleme, taranmış sağlık kaydını açar.",
+            ["tk-TM"] = "Diňe okamak. Deslapky görnüş skanirlenen saglyk ýazgysyny açýar.",
+            ["ru-RU"] = "Только просмотр. Предпросмотр открывает скан медицинской записи.",
+        },
+        ["PersonIntake.Step.Applications"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application profile instances",
+            ["tr-TR"] = "Başvuru profili örnekleri",
+            ["tk-TM"] = "Ýüztutmalar",
+            ["ru-RU"] = "Экземпляры профиля заявки",
+        },
+        ["PersonIntake.Step.Applications.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only. Application profile instances this person is already on.",
+            ["tr-TR"] = "Salt okunur. Bu kişinin bağlı olduğu başvuru profili örnekleri.",
+            ["tk-TM"] = "Diňe okamak. Bu adamyň baglanan ýüztutmalary.",
+            ["ru-RU"] = "Только просмотр. Экземпляры профиля заявки, к которым уже привязан этот человек.",
+        },
+        ["PersonIntake.Invitations.Ready"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ready",
+            ["tr-TR"] = "Hazır",
+            ["tk-TM"] = "Taýýar",
+            ["ru-RU"] = "Готово",
+        },
+        ["PersonIntake.Invitations.Used"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Used",
+            ["tr-TR"] = "Kullanıldı",
+            ["tk-TM"] = "Ulanyldy",
+            ["ru-RU"] = "Использовано",
+        },
+        ["PersonIntake.Invitations.Cancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled",
+            ["tr-TR"] = "İptal edildi",
+            ["tk-TM"] = "Ýatyryldy",
+            ["ru-RU"] = "Отменено",
+        },
+        ["PersonIntake.Invitations.Changed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Changed",
+            ["tr-TR"] = "Değiştirildi",
+            ["tk-TM"] = "Üýtgedildi",
+            ["ru-RU"] = "Изменено",
+        },
+        ["PersonIntake.Invitations.Expired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired",
+            ["tr-TR"] = "Süresi doldu",
+            ["tk-TM"] = "Möhleti gutaran",
+            ["ru-RU"] = "Истёк",
+        },
+        ["PersonIntake.WorkPermits.State"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaýy",
+            ["ru-RU"] = "Состояние",
+        },
+        ["PersonIntake.WorkPermits.Valid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid",
+            ["tr-TR"] = "Geçerli",
+            ["tk-TM"] = "Hereket edýän",
+            ["ru-RU"] = "Действует",
+        },
         ["PersonIntake.Step.Record.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Add records, or mark the whole step Not received.",
@@ -12849,6 +13031,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "İsteğe bağlı. Maaş bilgisi olduğunda ekleyin. Bu adımı boş bırakabilirsiniz.",
             ["tk-TM"] = "Hökman däl. Aýlyk maglumaty bolanda goşuň. Bu ädimi boş goýup bilersiňiz.",
             ["ru-RU"] = "Необязательно. Добавьте зарплату, когда она будет известна. Этот шаг можно оставить пустым.",
+        },
+        ["PersonIntake.Step.WorkDuties"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Purpose of arrival (optional)",
+            ["tr-TR"] = "Gelmeginiň Maksady (isteğe bağlı)",
+            ["tk-TM"] = "Gelmeginiň maksady (hökman däl)",
+            ["ru-RU"] = "Цель визита (необязательно)",
+        },
+        ["PersonIntake.Step.WorkDuties.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Optional. Add a purpose of arrival when you have one. You can leave this step empty.",
+            ["tr-TR"] = "İsteğe bağlı. Geliş amacı olduğunda ekleyin. Bu adımı boş bırakabilirsiniz.",
+            ["tk-TM"] = "Hökman däl. Gelmeginiň maksady bolanda goşuň. Bu ädimi boş goýup bilersiňiz.",
+            ["ru-RU"] = "Необязательно. Добавьте цель визита, когда она будет известна. Этот шаг можно оставить пустым.",
+        },
+        ["PersonIntake.Record.WorkDutyOptional"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Optional. Add a purpose when you have one.",
+            ["tr-TR"] = "İsteğe bağlı. Amaç olduğunda ekleyin.",
+            ["tk-TM"] = "Hökman däl. Maksat bolanda goşuň.",
+            ["ru-RU"] = "Необязательно. Добавьте цель, когда она будет известна.",
+        },
+        ["PersonIntake.Card.WorkDuty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Purpose of arrival",
+            ["tr-TR"] = "Gelmeginiň Maksady",
+            ["tk-TM"] = "Gelmeginiň maksady",
+            ["ru-RU"] = "Цель визита",
         },
         ["PersonIntake.Step.Work"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

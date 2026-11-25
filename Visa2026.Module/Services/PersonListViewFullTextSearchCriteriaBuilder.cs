@@ -84,6 +84,21 @@ public static class PersonListViewFullTextSearchCriteriaBuilder
     }
 
     /// <summary>
+    /// A name has no digits. Skip the passport scan for that query; a number still searches passports.
+    /// </summary>
+    public static bool IncludePassportLookup(string? searchText)
+    {
+        var key = CompactPassportSearchKey(searchText);
+        foreach (var ch in key)
+        {
+            if (char.IsDigit(ch))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Match a compacted passport key against any related passport number.
     /// </summary>
     public static CriteriaOperator? BuildPassportNumberCriteria(string searchText)

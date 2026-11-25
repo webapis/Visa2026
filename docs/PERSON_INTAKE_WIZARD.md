@@ -25,9 +25,11 @@ Related docs: [PERSON_INCOMPLETE_DATA.md](PERSON_INCOMPLETE_DATA.md), [OPTIONAL_
 - **Provide info** (list Incomplete tab) opens the same wizard on the first pending step once that slice ships.
 - The XAF shell, left navigation, and those two list views stay.
 - Role comes from the list that created the person (`PersonListViewController.OnObjectCreated` already sets `PersonRole`). There is no Employee / Family member switch inside the wizard.
-- **Issued documents** (applications, work permits, invitations, rejections, emailed documents) stay out of the steps. A saved person can still open the existing `IssuedDocumentsTabs` from the wizard. New persons keep that section hidden (`PersonDetailViewIssuedDocumentsLayoutController`).
+- **Issued documents** other than work permits, invitations, visas, and application profile instances (rejections, emailed documents) stay out of the steps. Work permits are a read-only employee step when the person already has at least one. Application profile instances are a read-only step on both wizards when the person is already on one. A saved person can still open the existing `IssuedDocumentsTabs` from the wizard. New persons keep that section hidden (`PersonDetailViewIssuedDocumentsLayoutController`).
 
 ### Steps
+
+Editable steps use a green nav item. Read-only steps (Family members, Visas, Invitations, Medical records, Work permits, Application profile instances) use a blue nav item and sit after every editable step. Review stays last.
 
 | Step | Employee | Family member |
 |------|----------|----------------|
@@ -35,13 +37,19 @@ Related docs: [PERSON_INCOMPLETE_DATA.md](PERSON_INCOMPLETE_DATA.md), [OPTIONAL_
 | Work & address | Family members for visa (manual), foreign address, foreign address country, project contract, company (subcontractor) | Sponsoring employee, relationship, project contract, company (subcontractor) |
 | Passports | Native-style list (columns from `Person_Passports_ListView`) with **New** / **Delete**; a row opens the detail popup (**OK** / **Cancel**) | Same |
 | Education | Native-style list (`Person_Educations_ListView`) + detail popup | Same. Adult family member with no pending education mark still gets the Orta / Orta mekdep / Orta bilim row from `FamilyMemberDefaultEducation` |
-| Medical | Not in the wizard. Added later from Medical navigation. | Same |
+| Medical records | Read-only. Shown on both wizards when this person has a medical record, after Invitations when that step is present and before Work permits. Grid: preview, state, document number, issue date, validity, expiration, days. Preview opens that record's scans. Hidden when the list is empty. Does not make a medical record required to save. Nav item is blue. | Same |
 | Residence | Stacked address-of-residence cards; defaults to **Not received** on create until a card is added | Same |
 | CV & files | Stacked personal-file cards (employee) | — |
 | Travel | Not in the wizard. Added later from Travel navigation. | Same |
 | Salaries | Native-style list (`Person_Salaries_ListView`) + detail popup (employee). Optional: the tab is labeled **Salaries (optional)**. There is no Not received switch. An empty salary does not keep the person incomplete. | — |
 | Position history | Native-style list (`Person_PositionHistory_ListView`) + detail popup (employee) | — |
-| Other records | — (deferred; Purpose of arrival not required for now) | Family relation documents (optional) |
+| Purpose of arrival | Native-style list of `WorkDuty` (employee), after Position history. Optional: the tab is labeled **Purpose of arrival (optional)** / **Gelmeginiň maksady (hökman däl)**. The grid column is the description. New / Delete and a detail popup. There is no Not received switch. An empty list does not keep the person incomplete. Nav item is green. | — |
+| Family members | Read-only. Shown only when this employee has family members, and only after the editable steps. Grid: full name, relationship, date of birth, nationality. A row opens that family member's wizard. Hidden when the list is empty. Nav item is blue. | — |
+| Visas | Read-only. Shown on both wizards when any passport has a visa, after Family members when that step is present and before Invitations. Grid: preview, state, number, type, category, issued place, issue date, start, expiration, days, passport, process number, issuing application. Preview opens that visa's scans. Hidden when there is no visa. Nav item is blue. | Same |
+| Invitations | Read-only. Shown on both wizards when this person has an invitation line, after Visas when that step is present and before Work permits. Grid: preview, state (Ready, Used, Cancelled, Changed, Expired), invitation number, issued date, expiration, passport, application profile instance, issued visa, process number. Preview opens that line's invitation scans. Hidden when the list is empty. Nav item is blue. | Same |
+| Work permits | Read-only. Shown only when this employee has work permit lines, after Invitations when that step is present. Grid: preview, state, number, start, expiration, days, locations, AS number, position, passport, parent work permit, application profile instance. Preview opens that line's work-permit scans. Hidden when the list is empty. Nav item is blue. | — |
+| Application profile instances | Read-only. Shown on both wizards when this person is already on an instance, after Work permits when that step is present and before Review. Grid: state, number, profile, date, process number. Clicking the number opens that instance's case workspace in a new tab. Hidden when the list is empty. Does not make an instance required to save. Nav item is blue. | Same |
+| Other records | — | Family relation documents (optional) |
 | Review | Unresolved list, pending list, officer note | Same |
 
 Opening a person from **Employees → Incomplete** or **Family Members → Incomplete** starts on **Overview**. First name and last name are shown in a highlighted banner so the officer can see who the record is before the other steps.
@@ -69,7 +77,7 @@ Passports, Education, Position history, and CV & files open their scans in the r
 
 **New** (list steps) / **Add** (CV & files) on Passports, Education, CV & files, Salaries, and Position history stays disabled until every card on that step is complete and matches the last save. Only one new card can be added at a time. The officer fills the required fields, saves the person from Review, then **Add** enables for the next card.
 
-Medical records and travel history are not wizard steps. Officers add them later from their own navigation. Empty CV & files do not block save and do not appear in unresolved warnings unless the officer marks **Not received**.
+Travel history is not a wizard step. Officers add it later from its own navigation. Medical records appear as a read-only step when the person already has one; the wizard does not create them. Empty CV & files do not block save and do not appear in unresolved warnings unless the officer marks **Not received**.
 
 Photo is the image editor, not a text field. Family members for visa (manual) is the existing `VisaFamilyMembersText` editor. New employees still receive the default `Ýok` from `VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty`, and that value counts as filled. Officers may also mark that field **Not received** when the household list is still missing.
 
@@ -82,7 +90,7 @@ Photo is the image editor, not a text field. Family members for visa (manual) is
 
 A child row is saved only when its own required fields are filled. The wizard does not save a half-filled passport (or education). To leave that step, the officer finishes the row or switches the whole record to **Not received**. An in-progress row that is then marked **Not received** is discarded, and the waiting-on note is kept. Existing saved rows are left as they are: the record switch is for “no row yet”, and it is hidden once a row of that kind exists.
 
-CV & files, Salaries, Position history, and Other records (family relation docs) are optional collections (`BlocksWhenEmpty=false`). Medical and travel are outside the wizard. They are omitted from unresolved warnings when empty. Purpose of arrival and employee Other records are deferred from the wizard for now. Switch off and no row means the person can still be Complete. Switch on means the officer is waiting, so the person stays Incomplete.
+CV & files, Salaries, Position history, Purpose of arrival, and Other records (family relation docs) are optional collections (`BlocksWhenEmpty=false`). Medical records are a read-only step when they already exist, and travel stays outside the wizard. Both are omitted from unresolved warnings when empty. Switch off and no row means the person can still be Complete. Switch on means the officer is waiting, so the person stays Incomplete.
 
 These cannot be marked **Not received**:
 
@@ -142,7 +150,7 @@ People already in the database are not reclassified. A person moves to Incomplet
 | `Person.Photo` | Both, only when the officer switches it on | Photo |
 | `Passport` | Both | Passport |
 | `Education` | Both | Education |
-| `MedicalRecord` | Not a wizard step. Added later from Medical navigation. | Medical |
+| `MedicalRecord` | Shown read-only when records already exist. The wizard does not create them and an empty list does not block save. | Medical |
 | `AddressOfResidence` | Both | Address |
 | `PersonDocument` (CV and files) | Employee (Record step; optional unless Not received) | CV |
 | `EmployeePositionHistory` | Employee (Record step; optional unless Not received) | Other |
@@ -151,7 +159,7 @@ People already in the database are not reclassified. A person moves to Incomplet
 | `EmployeeSalary` | Employee (Record step; optional unless Not received) | Other |
 | `PersonFamilyRelationDocument` | Family member, only when switched on | Family docs |
 
-Photo, CV & files, Salaries, Position history, and Other-records keys do not block save when they are empty and the switch is off. Medical and travel are not collected here. Passport and Education do: an empty collection is unresolved until a valid row exists or the record switch is on.
+Photo, CV & files, Salaries, Position history, and Other-records keys do not block save when they are empty and the switch is off. Medical records are displayed when they already exist and are not collected here. Travel is not collected here. Passport and Education do: an empty collection is unresolved until a valid row exists or the record switch is on.
 
 `FamilyMemberDefaultEducation.ShouldEnsure` returns false while an Education pending item exists, including the `DateOfBirth` setter path. When the officer later clears that pending item and saves an adult family member with no education row, `Ensure` runs as it does today.
 

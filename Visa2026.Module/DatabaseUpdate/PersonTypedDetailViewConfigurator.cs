@@ -1,5 +1,6 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module;
 
 namespace Visa2026.Module.DatabaseUpdate;
@@ -26,8 +27,13 @@ public static class PersonTypedDetailViewConfigurator
         PersonTypedDetailViewFactory.SyncTypedDetailViews(modelViews);
         PersonIntakeWizardModelPatch.Apply(modelApplication);
 
-        // After user diffs merge: Incomplete is a clone of the native All ListView.
+        // After user diffs merge: drop calculated roster columns, then clone Incomplete from All.
+        if (modelViews[PersonRosterListViewIds.Employees] is IModelListView employees)
+            PersonListViewActionColumnsUpdater.KeepFullNameAndDossier(employees);
+        if (modelViews[PersonRosterListViewIds.FamilyMembers] is IModelListView familyMembers)
+            PersonListViewActionColumnsUpdater.KeepFullNameAndDossier(familyMembers);
         PersonIncompleteRosterListViewSync.EnsureAll(modelViews);
+        FlattenRosterNavigation(modelApplication);
 
         if (modelViews[PersonDetailViewIds.Employee] is not IModelDetailView employeeDetailView
             || modelViews[PersonDetailViewIds.FamilyMember] is not IModelDetailView familyMemberDetailView
@@ -41,6 +47,29 @@ public static class PersonTypedDetailViewConfigurator
         WireListViewDetailView(modelViews, PersonRosterListViewIds.FamilyMembers, familyMemberDetailView);
         WireListViewDetailView(modelViews, PersonRosterListViewIds.FamilyMembersIncomplete, familyMemberDetailView);
         WireListViewDetailView(modelViews, PersonRosterListViewIds.TemporaryVisitors, temporaryVisitorDetailView);
+    }
+
+    private static void FlattenRosterNavigation(IModelApplication modelApplication)
+    {
+        if (modelApplication is not IModelApplicationNavigationItems navigation)
+            return;
+
+        FlattenRosterItem(navigation.NavigationItems?.Items, PersonRosterListViewIds.NavEmployees, PersonRosterListViewIds.Employees, modelApplication.Views);
+        FlattenRosterItem(navigation.NavigationItems?.Items, PersonRosterListViewIds.NavFamilyMembers, PersonRosterListViewIds.FamilyMembers, modelApplication.Views);
+    }
+
+    private static void FlattenRosterItem(IModelNavigationItems? items, string navId, string listViewId, IModelViews views)
+    {
+        if (items?[navId] is not IModelNavigationItem item)
+            return;
+
+        if (views[listViewId] is IModelListView listView)
+            item.View = listView;
+
+        if (item.Items[PersonRosterListViewIds.NavAll] is IModelNavigationItem all)
+            all.Remove();
+        if (item.Items[PersonRosterListViewIds.NavIncomplete] is IModelNavigationItem incomplete)
+            incomplete.Remove();
     }
 
     private static void WireListViewDetailView(IModelViews modelViews, string listViewId, IModelDetailView detailView)

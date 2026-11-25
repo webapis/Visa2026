@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.PersonIntake;
@@ -10,7 +11,19 @@ public enum PersonIntakeStepKind
     Form,
     Record,
     Others,
-    Review
+    Review,
+    /// <summary>Read-only list of this employee's family members. A row opens that person's wizard.</summary>
+    FamilyMembers,
+    /// <summary>Read-only list of this employee's work permit lines. Preview opens the scanned copy.</summary>
+    WorkPermits,
+    /// <summary>Read-only list of visas on this person's passports. Preview opens the scanned copy.</summary>
+    Visas,
+    /// <summary>Read-only list of this person's invitation lines. Preview opens the invitation scans.</summary>
+    Invitations,
+    /// <summary>Read-only list of this person's medical records. Preview opens the scanned copy.</summary>
+    MedicalRecords,
+    /// <summary>Read-only list of application profile instances this person is already on.</summary>
+    ApplicationProfileInstances
 }
 
 public sealed class PersonIntakeStep
@@ -80,7 +93,7 @@ public static class PersonIntakeStepCatalog
 
         steps.Add(RecordStep("passports", PersonIntakeText.Get("Step.Passports"), PersonPendingTargets.Passport));
         steps.Add(RecordStep("education", PersonIntakeText.Get("Step.Education"), PersonPendingTargets.Education));
-        // Medical records and travel history are entered later from their own navigation, not this wizard.
+        // Travel history is entered later from its own navigation, not this wizard.
         // Residence addresses are case-owned (ApplicationProfileInstance Address1/2); not Person intake.
         if (employee)
             steps.Add(RecordStep("documents", PersonIntakeText.Get("Step.Documents"), PersonPendingTargets.PersonDocument));
@@ -92,9 +105,28 @@ public static class PersonIntakeStepCatalog
                 PersonIntakeText.Get("Step.Salaries.Hint")));
         if (employee)
             steps.Add(RecordStep("positions", PersonIntakeText.Get("Step.Positions"), PersonPendingTargets.EmployeePositionHistory));
+        if (employee)
+            steps.Add(RecordStep(
+                "work-duties",
+                PersonIntakeText.Get("Step.WorkDuties"),
+                PersonPendingTargets.WorkDuty,
+                PersonIntakeText.Get("Step.WorkDuties.Hint")));
         var others = OthersStep(person);
         if (others.OtherOptions.Count > 0)
             steps.Add(others);
+        // Read-only lists come after every step the officer can edit.
+        if (employee && HasFamilyMembers(person))
+            steps.Add(FamilyMembersStep());
+        if (HasVisas(person))
+            steps.Add(VisasStep());
+        if (HasInvitations(person))
+            steps.Add(InvitationsStep());
+        if (HasMedicalRecords(person))
+            steps.Add(MedicalRecordsStep());
+        if (employee && HasWorkPermits(person))
+            steps.Add(WorkPermitsStep());
+        if (HasApplicationProfileInstances(person))
+            steps.Add(ApplicationProfileInstancesStep());
         steps.Add(new PersonIntakeStep
         {
             Id = "review",
@@ -104,6 +136,85 @@ public static class PersonIntakeStepCatalog
         });
         return steps;
     }
+
+    public const string FamilyMembersStepId = "family-members";
+    public const string WorkPermitsStepId = "work-permits";
+    public const string VisasStepId = "visas";
+    public const string InvitationsStepId = "invitations";
+    public const string MedicalRecordsStepId = "medical-records";
+    public const string ApplicationProfileInstancesStepId = "application-profile-instances";
+
+    private static bool HasFamilyMembers(Person person) =>
+        person.FamilyMembers?.Any(member => member != null) == true;
+
+    private static bool HasWorkPermits(Person person) =>
+        person.WorkPermitItems?.Any(item => item != null) == true;
+
+    private static bool HasVisas(Person person) =>
+        person.Passports?.Any(passport => passport?.Visas?.Any(visa => visa != null) == true) == true;
+
+    private static bool HasInvitations(Person person) =>
+        person.InvitationItems?.Any(item => item != null) == true;
+
+    private static bool HasMedicalRecords(Person person) =>
+        person.MedicalRecords?.Any(record => record != null) == true;
+
+    private static bool HasApplicationProfileInstances(Person person) =>
+        person.ApplicationProfileInstances?.Any(instance => instance != null) == true;
+
+    private static PersonIntakeStep ApplicationProfileInstancesStep() =>
+        new()
+        {
+            Id = ApplicationProfileInstancesStepId,
+            Title = PersonIntakeText.Get("Step.Applications"),
+            Hint = PersonIntakeText.Get("Step.Applications.Hint"),
+            Kind = PersonIntakeStepKind.ApplicationProfileInstances
+        };
+
+    private static PersonIntakeStep MedicalRecordsStep() =>
+        new()
+        {
+            Id = MedicalRecordsStepId,
+            Title = PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.MedicalRecords), "Medical records"),
+            Hint = PersonIntakeText.Get("Step.Medical.Hint"),
+            Kind = PersonIntakeStepKind.MedicalRecords
+        };
+
+    private static PersonIntakeStep InvitationsStep() =>
+        new()
+        {
+            Id = InvitationsStepId,
+            Title = PersonIntakeText.Get("Step.Invitations"),
+            Hint = PersonIntakeText.Get("Step.Invitations.Hint"),
+            Kind = PersonIntakeStepKind.Invitations
+        };
+
+    private static PersonIntakeStep VisasStep() =>
+        new()
+        {
+            Id = VisasStepId,
+            Title = PersonIntakeText.Get("Step.Visas"),
+            Hint = PersonIntakeText.Get("Step.Visas.Hint"),
+            Kind = PersonIntakeStepKind.Visas
+        };
+
+    private static PersonIntakeStep WorkPermitsStep() =>
+        new()
+        {
+            Id = WorkPermitsStepId,
+            Title = PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.WorkPermitItems), "Work permits"),
+            Hint = PersonIntakeText.Get("Step.WorkPermits.Hint"),
+            Kind = PersonIntakeStepKind.WorkPermits
+        };
+
+    private static PersonIntakeStep FamilyMembersStep() =>
+        new()
+        {
+            Id = FamilyMembersStepId,
+            Title = PersonIntakeFieldLabels.MemberLabel(typeof(Person), nameof(Person.FamilyMembers), "Family members"),
+            Hint = PersonIntakeText.Get("Step.FamilyMembers.Hint"),
+            Kind = PersonIntakeStepKind.FamilyMembers
+        };
 
     private static PersonIntakeStep FormStep(string id, string title, string hint, string[] keys) =>
         new()
@@ -128,7 +239,7 @@ public static class PersonIntakeStepCatalog
     private static PersonIntakeStep OthersStep(Person person)
     {
         var employee = person.PersonRole == PersonRecordRole.Employee;
-        // Purpose of arrival / employee Other records deferred — not required for now.
+        // Purpose of arrival is the Work duty record step. Employee Other records stay off.
         var options = employee
             ? Array.Empty<PersonIntakeOtherRecordOption>()
             : new[]

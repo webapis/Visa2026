@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
@@ -61,6 +63,9 @@ public static class PersonIntakeWizardPersistHelper
         if (!state.PendingKeys.Contains(PersonPendingTargets.EmployeePositionHistory))
             SyncPositions(objectSpace, person, state.PositionDrafts);
 
+        if (!state.PendingKeys.Contains(PersonPendingTargets.WorkDuty))
+            SyncWorkDuties(objectSpace, person, state.WorkDutyDrafts);
+
         ApplyOtherDrafts(objectSpace, person, state);
 
         PersonIntakeCompleteness.ClearPendingScalars(person);
@@ -92,6 +97,9 @@ public static class PersonIntakeWizardPersistHelper
         PersonPendingRollup.Apply(person, replaceLegacy: true, markedBy ?? string.Empty);
 
         objectSpace.CommitChanges();
+        // Commit can leave the aggregated collection empty even though the rows were written.
+        // Put the committed rows back so the wizard still treats those fields as Not received.
+        AttachCommittedPendingItems(objectSpace, person);
         return new PersonIntakeSaveResult { Succeeded = true, Message = pending.Count > 0 ? PersonIntakeText.Get("Save.SavedIncomplete") : PersonIntakeText.Get("Save.SavedComplete") };
     }
 
@@ -453,6 +461,35 @@ public static class PersonIntakeWizardPersistHelper
         foreach (var existing in person.Salaries.Where(s => s != null && !keep.Contains(s.ID)).ToList())
             objectSpace.Delete(existing);
     }
+
+    private static void SyncWorkDuties(IObjectSpace objectSpace, Person person, List<PersonIntakeWorkDutyDraft> drafts)
+    {
+        person.WorkDuties ??= new System.Collections.ObjectModel.ObservableCollection<WorkDuty>();
+        var keep = new HashSet<Guid>();
+        foreach (var draft in drafts.Where(d => d != null && (d.HasContent || d.ExistingId.HasValue)))
+        {
+            WorkDuty duty;
+            if (draft.ExistingId is Guid existingId)
+            {
+                duty = person.WorkDuties.FirstOrDefault(item => item != null && item.ID == existingId)
+                    ?? objectSpace.GetObjectByKey<WorkDuty>(existingId);
+                if (duty == null)
+                    continue;
+            }
+            else
+            {
+                duty = objectSpace.CreateObject<WorkDuty>();
+                duty.Person = person;
+            }
+
+            duty.Description = draft.Description?.Trim() ?? string.Empty;
+            keep.Add(duty.ID);
+        }
+
+        foreach (var existing in person.WorkDuties.Where(item => item != null && !keep.Contains(item.ID)).ToList())
+            objectSpace.Delete(existing);
+    }
+
     private static void ApplyOtherDrafts(IObjectSpace objectSpace, Person person, PersonIntakeWizardState state)
     {
         var other = state.OtherDrafts;
@@ -467,15 +504,6 @@ public static class PersonIntakeWizardPersistHelper
                 AttachFamilyRelationDocument(objectSpace, person, copy);
         }
 
-
-        if (!state.PendingKeys.Contains(PersonPendingTargets.WorkDuty)
-            && other.WorkDuty.HasContent
-            && person.WorkDuties?.Any(w => w != null) != true)
-        {
-            var duty = objectSpace.CreateObject<WorkDuty>();
-            duty.Person = person;
-            duty.Description = other.WorkDuty.Description.Trim();
-        }
 
     }
 
@@ -590,6 +618,32 @@ public static class PersonIntakeWizardPersistHelper
             row.TargetKey = key;
             row.AreaKey = area;
             row.Note = PendingNote(state, key);
+            if (!person.PendingItems.Contains(row))
+                person.PendingItems.Add(row);
+        }
+    }
+
+    private static void AttachCommittedPendingItems(IObjectSpace objectSpace, Person person)
+    {
+        if (objectSpace == null || person == null || person.ID == Guid.Empty)
+            return;
+
+        person.PendingItems ??= new ObservableCollection<PersonPendingItem>();
+        var rows = objectSpace
+            .GetObjects<PersonPendingItem>(CriteriaOperator.Parse("[Person.ID] = ?", person.ID))
+            .Cast<PersonPendingItem>()
+            .Where(row => row != null)
+            .ToList();
+        if (rows.Count == 0)
+            return;
+
+        var ids = new HashSet<Guid>(rows.Select(row => row.ID));
+        foreach (var stale in person.PendingItems.Where(item => item == null || !ids.Contains(item.ID)).ToList())
+            person.PendingItems.Remove(stale);
+        foreach (var row in rows)
+        {
+            if (!person.PendingItems.Any(item => item != null && item.ID == row.ID))
+                person.PendingItems.Add(row);
         }
     }
 

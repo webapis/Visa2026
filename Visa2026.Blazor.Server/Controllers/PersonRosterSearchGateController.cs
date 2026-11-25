@@ -12,8 +12,8 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Previously replaced Employees and Family Members with a custom search bar.
-/// Those navigation items now open the native XAF ListView, so this controller stays inactive.
+/// Employees and Family Members use the roster search bar. The grid stays hidden until a search,
+/// then the same bar filters the list. The built-in grid search box stays off.
 /// </summary>
 public sealed class PersonRosterSearchGateController : ObjectViewController<ListView, Person>
 {
@@ -29,7 +29,6 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
 
     public PersonRosterSearchGateController()
     {
-        Active["NativeRosterList"] = false;
         TargetViewId = PersonRosterListViewIds.Employees + ";" + PersonRosterListViewIds.EmployeesIncomplete + ";" + PersonRosterListViewIds.FamilyMembers + ";" + PersonRosterListViewIds.FamilyMembersIncomplete;
         TargetViewNesting = Nesting.Root;
     }
@@ -92,9 +91,13 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
 
     private void OnClearRequested() => ExecuteSearch(string.Empty);
 
+    /// <summary>All or Incomplete was chosen while a search was showing. Drop the query.</summary>
+    public void ClearSearch() => ExecuteSearch(string.Empty);
+
     private void ExecuteSearch(string? text)
     {
         submittedQuery = text?.Trim() ?? string.Empty;
+        presentation.SetBusy(!string.IsNullOrWhiteSpace(submittedQuery));
         if (filterController?.FullTextFilterAction == null)
         {
             ApplyPresentation();
@@ -102,8 +105,19 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
         }
 
         // The list search box stays inactive. DoExecute refuses an inactive action.
-        filterController.FullTextFilterAction.Active[ActiveKey] = true;
-        filterController.FullTextFilterAction.DoExecute(submittedQuery);
+        // Batch with the tab-criteria change so the grid reloads once.
+        if (View?.CollectionSource != null)
+            View.CollectionSource.BeginUpdateCriteria();
+        try
+        {
+            filterController.FullTextFilterAction.Active[ActiveKey] = true;
+            filterController.FullTextFilterAction.DoExecute(submittedQuery);
+        }
+        finally
+        {
+            if (View?.CollectionSource != null)
+                View.CollectionSource.EndUpdateCriteria();
+        }
     }
 
     private void OnSearchFinished(object sender, ActionBaseEventArgs e) => ApplyPresentation();
@@ -122,7 +136,7 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
         // The grid reloads after a search and the action value is empty again.
         // The text the officer submitted is what decides card vs no-match warning.
         var query = string.IsNullOrWhiteSpace(submittedQuery) ? CurrentSearchText() : submittedQuery;
-        presentation.Publish(string.IsNullOrWhiteSpace(query), query);
+        presentation.Publish(false, query);
         ScheduleResultCount();
 
         if (templateCaptured)
@@ -134,6 +148,7 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
 
         var search = EventCallback.Factory.Create<string>(this, OnSearchRequested);
         var clear = EventCallback.Factory.Create(this, OnClearRequested);
+        var tabs = Frame.GetController<PersonRosterColorTabsController>()?.Strip;
         gridModel.EmptyDataAreaTemplate = _ => builder =>
         {
             builder.OpenComponent<PersonRosterSearchGate>(0);
@@ -143,11 +158,21 @@ public sealed class PersonRosterSearchGateController : ObjectViewController<List
 
         gridModel.ToolbarTemplate = _ => builder =>
         {
-            builder.OpenComponent<PersonRosterSearchBar>(0);
-            builder.AddAttribute(1, "State", presentation);
-            builder.AddAttribute(2, "OnSearch", search);
-            builder.AddAttribute(3, "OnClear", clear);
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "visa-roster-list-head");
+            if (tabs != null)
+            {
+                builder.OpenComponent<PersonRosterColorTabs>(2);
+                builder.AddAttribute(3, "Model", tabs);
+                builder.CloseComponent();
+            }
+
+            builder.OpenComponent<PersonRosterSearchBar>(4);
+            builder.AddAttribute(5, "State", presentation);
+            builder.AddAttribute(6, "OnSearch", search);
+            builder.AddAttribute(7, "OnClear", clear);
             builder.CloseComponent();
+            builder.CloseElement();
         };
     }
 

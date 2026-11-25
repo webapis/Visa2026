@@ -260,6 +260,9 @@ public sealed class PersonIntakeWizardAccess
             yield return (PersonPendingTargets.EmployeePositionHistory,
                 state.PositionDrafts.Select(d => new DraftRef(d.ExistingId, d.HasContent)).ToList(),
                 Ids(person.PositionHistory, p => p.ID));
+            yield return (PersonPendingTargets.WorkDuty,
+                state.WorkDutyDrafts.Select(d => new DraftRef(d.ExistingId, d.HasContent)).ToList(),
+                Ids(person.WorkDuties, d => d.ID));
         }
     }
 
