@@ -610,6 +610,28 @@ dxd-license,
     box-shadow: inset 0 -2px 0 #7c3aed;
     background: rgba(124, 58, 237, 0.08);
 }
+/* Çakylyklar InvitationItem ListView — row tint matches color-tab swatches (GetBackgroundHex). */
+.visa-invitation-row.visa-invitation-row--ready { --visa-row-hue: #86efac; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-invitation-row.visa-invitation-row--used { --visa-row-hue: #bbf7d0; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-invitation-row.visa-invitation-row--cancelled { --visa-row-hue: #f8d7da; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-invitation-row.visa-invitation-row--changed { --visa-row-hue: #e9d5ff; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-invitation-row.visa-invitation-row--expired { --visa-row-hue: #fecdd3; --dxbl-grid-row-bg: var(--visa-row-hue); }
+
+/* Same DxGrid cell paint as .visa-progress-row: set td background or the tint never shows. */
+.visa-invitation-row[class*="visa-invitation-row--"] {
+    --visa-row-surface: var(--DS-color-surface-neutral-default-rest, var(--bs-body-bg, #ffffff));
+    --visa-row-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #142033));
+    --dxbl-grid-row-bg: color-mix(in srgb, var(--visa-row-hue) 55%, var(--visa-row-surface));
+}
+.dxbl-theme-fluent-mode-light .visa-invitation-row[class*="visa-invitation-row--"] {
+    --dxbl-grid-row-bg: var(--visa-row-hue);
+}
+.dxbl-grid tr.visa-invitation-row[class*="visa-invitation-row--"] > td {
+    background-color: var(--dxbl-grid-row-bg) !important;
+    background-image: none !important;
+    --dxbl-grid-data-cell-bg: var(--dxbl-grid-row-bg);
+    color: var(--visa-row-ink) !important;
+}
 /* ApplicationProfileInstance ListView — row tint from latest progress (BoStateAppearanceColors).
    Light mode keeps the pastel. Fluent Dark mixes that hue into the theme surface and uses theme text. */
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --visa-row-hue: #FEDEAF; --dxbl-grid-row-bg: var(--visa-row-hue); }

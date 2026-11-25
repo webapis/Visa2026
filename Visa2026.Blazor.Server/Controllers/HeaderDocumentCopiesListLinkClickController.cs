@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.SystemModule;
 using System.ComponentModel;
 using Visa2026.Blazor.Server.Services;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 
 namespace Visa2026.Blazor.Server.Controllers;
@@ -19,6 +20,7 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         TargetViewId =
             "WorkPermit_ListView;WorkPermitItem_ListView;"
             + "Invitation_ListView;InvitationItem_ListView;"
+            + InvitationItemCakylyklarNavigation.TargetViewIds + ";"
             + "Rejection_ListView;RejectionItem_ListView;"
             + "BorderZone_ListView;BorderZoneItem_ListView";
     }
@@ -119,15 +121,17 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         if (e.ElementType != GridElementType.DataCell || e.VisibleIndex < 0)
             return;
 
-        if (!IsDocumentCopiesLinkColumn(e.Column))
+        if (!TryResolveLinkColumn(e.Column, out var linkKind))
             return;
 
         var row = e.Grid.GetDataItem(e.VisibleIndex);
-        if (!HeaderDocumentCopiesListLinkResolution.TryResolve(row, out var family, out var parentId, out var contextItemId))
+        if (!TryResolveLinkTarget(row, linkKind, out var family, out var parentId, out var contextItemId))
             return;
 
         const string linkClass = "app-header-document-copies-link";
         e.CssClass = string.IsNullOrEmpty(e.CssClass) ? linkClass : $"{e.CssClass} {linkClass}";
+        if (linkKind is CakylyklarLinkKind.InvitationNumber or CakylyklarLinkKind.UsedVisaNumber)
+            e.CssClass += " app-header-document-copies-link--text";
         e.Attributes["role"] = "button";
         e.Attributes["tabindex"] = "0";
         var label = HeaderDocumentCopiesLocalization.Title(family);
@@ -137,22 +141,91 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         e.Attributes["data-header-doc-parent-id"] = parentId.ToString("D");
         if (contextItemId is Guid contextId && contextId != Guid.Empty)
             e.Attributes["data-header-doc-context-item-id"] = contextId.ToString("D");
+
+        // Çakylyklar: open the scan in the slot immediately (no catalog → Preview click).
+        if (InvitationItemCakylyklarNavigation.IsCakylyklarListView(View?.Id))
+        {
+            e.Attributes["data-header-doc-preview-only"] = "1";
+        }
     }
 
-    private static bool IsDocumentCopiesLinkColumn(IGridColumn? column)
+    private bool TryResolveLinkColumn(IGridColumn? column, out CakylyklarLinkKind linkKind)
     {
+        linkKind = CakylyklarLinkKind.DocumentCopies;
         if (column == null)
             return false;
 
-        if (column is DxGridDataColumn dataColumn)
+        var fieldName = column is DxGridDataColumn dataColumn
+            ? dataColumn.FieldName
+            : column.Name;
+
+        if (string.Equals(fieldName, "DocumentCopiesListLink", StringComparison.Ordinal))
+            return true;
+
+        if (!InvitationItemCakylyklarNavigation.IsCakylyklarListView(View?.Id))
+            return false;
+
+        // Çakylyklar: Invitation № → invitation letter preview.
+        if (string.Equals(
+                fieldName,
+                nameof(InvitationItem.CakylyklarInvitationNumberDisplay),
+                StringComparison.Ordinal))
         {
-            return string.Equals(
-                dataColumn.FieldName,
-                "DocumentCopiesListLink",
-                StringComparison.Ordinal);
+            linkKind = CakylyklarLinkKind.InvitationNumber;
+            return true;
         }
 
-        return string.Equals(column.Name, "DocumentCopiesListLink", StringComparison.Ordinal);
+        // Çakylyklar Used: Linked detail (visa number) → visa beside passport.
+        if (string.Equals(
+                fieldName,
+                nameof(InvitationItem.CakylyklarLinkedDetailDisplay),
+                StringComparison.Ordinal))
+        {
+            linkKind = CakylyklarLinkKind.UsedVisaNumber;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryResolveLinkTarget(
+        object? row,
+        CakylyklarLinkKind linkKind,
+        out HeaderDocumentCopiesFamily family,
+        out Guid parentId,
+        out Guid? contextItemId)
+    {
+        family = default;
+        parentId = Guid.Empty;
+        contextItemId = null;
+
+        if (linkKind == CakylyklarLinkKind.UsedVisaNumber)
+        {
+            if (row is not InvitationItem item)
+                return false;
+
+            // Only Used rows with a stamped visa id become links.
+            if (!string.Equals(item.ListViewLifeKey, InvitationLaterLife.Used, StringComparison.Ordinal))
+                return false;
+
+            var visaId = item.ListViewVisaId
+                ?? (item.IssuedVisa != null && item.IssuedVisa.ID != Guid.Empty ? item.IssuedVisa.ID : null);
+            if (visaId is not Guid id || id == Guid.Empty)
+                return false;
+
+            family = HeaderDocumentCopiesFamily.Visa;
+            parentId = id;
+            return true;
+        }
+
+        return HeaderDocumentCopiesListLinkResolution.TryResolve(row, out family, out parentId, out contextItemId);
+    }
+
+    private enum CakylyklarLinkKind
+    {
+        DocumentCopies,
+        InvitationNumber,
+        UsedVisaNumber,
     }
 
     protected override void OnDeactivated()

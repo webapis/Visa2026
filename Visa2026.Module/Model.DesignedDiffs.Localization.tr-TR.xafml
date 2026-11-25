@@ -58,6 +58,7 @@
     <Items>
       <Item Id="Application" Caption="Başvuru profili örnekleri">
         <Items>
+          <Item Id="InvitationItem_Cakylyklar" Caption="Davetiyeler" />
           <Item Id="Application_DirectMigration" Caption="Anlaşma gerektirmeyen başvurular">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Başvuru kalemleri (migrasyon)" />
@@ -84,6 +85,12 @@
       <Item Id="Employee" Caption="Çalışan" />
       <Item Id="Employees" Caption="Çalışanlar" />
       <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
+      <Item Id="Invitations" Caption="Davetiyeler">
+        <Items>
+          <Item Id="Employee" Caption="Davetiyeler (Çalışan)" />
+          <Item Id="FamilyMember" Caption="Davetiyeler (Aile üyesi)" />
+        </Items>
+      </Item>
       <Item Id="Geography" Caption="Coğrafya" />
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="ImportReimportHistory" Caption="Yeniden içe aktarma geçmişi" />
@@ -2549,6 +2556,9 @@
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
+    <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Davetiyeler" />
+    <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Davetiyeler (Çalışan)" />
+    <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Davetiyeler (Aile üyesi)" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Doğrudan migrasyon başvuruları">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />

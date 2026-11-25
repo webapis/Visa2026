@@ -115,6 +115,51 @@ public static class IssuedDocumentLifecycle
     }
 
     /// <summary>
+    /// Invitation item IDs linked to a completed Cancellation instance (<c>PROCESS_ISSUED</c>).
+    /// </summary>
+    public static HashSet<Guid> LoadCancelledInvitationItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? invitationItemIds) =>
+        LoadInvitationItemIdsForFamily(
+            objectSpace,
+            invitationItemIds,
+            ApplicationProfileActionFamily.Cancellation);
+
+    /// <summary>
+    /// Invitation item IDs linked to a completed Change instance (<c>PROCESS_ISSUED</c>).
+    /// Does not exclude cancelled — callers should prefer cancelled when both apply.
+    /// </summary>
+    public static HashSet<Guid> LoadChangedInvitationItemIds(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? invitationItemIds) =>
+        LoadInvitationItemIdsForFamily(
+            objectSpace,
+            invitationItemIds,
+            ApplicationProfileActionFamily.Change);
+
+    private static HashSet<Guid> LoadInvitationItemIdsForFamily(
+        IObjectSpace? objectSpace,
+        IReadOnlyCollection<Guid>? invitationItemIds,
+        ApplicationProfileActionFamily family)
+    {
+        if (objectSpace == null)
+            return [];
+        if (invitationItemIds != null && invitationItemIds.Count == 0)
+            return [];
+
+        var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
+        var query = objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.ApplicationProfileInstances.Any(a =>
+                a.ApplicationProfile != null
+                && a.ApplicationProfile.ActionFamily == family
+                && a.LatestPrimaryStateCode == issued));
+        if (invitationItemIds != null)
+            query = query.Where(i => invitationItemIds.Contains(i.ID));
+
+        return query.Select(i => i.ID).ToHashSet();
+    }
+
+    /// <summary>
     /// Visa IDs linked to a completed Cancellation or Change instance.
     /// Same purpose as <see cref="LoadClosedInvitationItemIds"/> for Person ListView active visas.
     /// </summary>

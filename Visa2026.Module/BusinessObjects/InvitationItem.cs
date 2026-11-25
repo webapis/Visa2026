@@ -26,7 +26,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "ApplicationProfileInstance is not null", Context = "DetailView",
         Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
     [SupportsOptionalDetailFields]
-    public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, IOptionalDetailFields
+    public partial class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, IOptionalDetailFields
     {
         [RuleRequiredField]
         public virtual Invitation Invitation { get; set; }

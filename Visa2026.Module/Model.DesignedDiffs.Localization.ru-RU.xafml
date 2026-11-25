@@ -58,6 +58,7 @@
     <Items>
       <Item Id="Application" Caption="Экземпляры профиля заявки">
         <Items>
+          <Item Id="InvitationItem_Cakylyklar" Caption="Приглашения" />
           <Item Id="Application_DirectMigration" Caption="Заявки без необходимости согласования">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Позиции (напрямую в миграцию)" />
@@ -84,6 +85,12 @@
       <Item Id="Employee" Caption="Сотрудник" />
       <Item Id="Employees" Caption="Сотрудники" />
       <Item Id="FamilyMembers" Caption="Родственники" />
+      <Item Id="Invitations" Caption="Приглашения">
+        <Items>
+          <Item Id="Employee" Caption="Приглашения (Сотрудник)" />
+          <Item Id="FamilyMember" Caption="Приглашения (Член семьи)" />
+        </Items>
+      </Item>
       <Item Id="Geography" Caption="География" />
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="ImportReimportHistory" Caption="История повторного импорта" />
@@ -2549,6 +2556,9 @@
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
+    <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Приглашения" />
+    <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Приглашения (Сотрудник)" />
+    <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Приглашения (Член семьи)" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />

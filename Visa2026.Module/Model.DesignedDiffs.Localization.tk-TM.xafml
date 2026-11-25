@@ -58,6 +58,7 @@
     <Items>
       <Item Id="Application" Caption="Ýüztutmalar">
         <Items>
+          <Item Id="InvitationItem_Cakylyklar" Caption="Çakylyklar" />
           <Item Id="Application_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Ýüztutmadaky raýatlar" />
@@ -84,6 +85,12 @@
       <Item Id="Employee" Caption="Işgär" />
       <Item Id="Employees" Caption="Işgärler" />
       <Item Id="FamilyMembers" Caption="Maşgalalar" />
+      <Item Id="Invitations" Caption="Çakylyklar">
+        <Items>
+          <Item Id="Employee" Caption="Çakylyklar (Işgär)" />
+          <Item Id="FamilyMember" Caption="Çakylyklar (Maşgala)" />
+        </Items>
+      </Item>
       <Item Id="Geography" Caption="Geografiýa" />
       <Item Id="Housing" Caption="Ýaşaýyş" />
       <Item Id="ImportReimportHistory" Caption="Gaýtadan import taryhy" />
@@ -2549,7 +2556,10 @@
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
+    <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Çakylyklar" />
+    <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Çakylyklar (Işgär)" />
+    <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Çakylyklar (Maşgala)" />
+<ListView Id="Application_ListView_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
         <ColumnInfo Id="ApplicationProfile" Caption="Ýüztutma profili" />

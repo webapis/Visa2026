@@ -112,6 +112,35 @@ button.doc-copies-brand:disabled {
   text-decoration: none !important;
 }
 
+/* Çakylyklar: Invitation № is the preview control — show number as a text link, not the icon pill. */
+.app-header-document-copies-link.app-header-document-copies-link--text {
+  --dcb-text: #60a5fa;
+  color: var(--dcb-text) !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  text-align: left !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+  padding: inherit !important;
+}
+
+.app-header-document-copies-link.app-header-document-copies-link--text::before {
+  content: none !important;
+  display: none !important;
+}
+
+.app-header-document-copies-link.app-header-document-copies-link--text > * {
+  display: revert !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
+
+.app-header-document-copies-link.app-header-document-copies-link--text:hover {
+  filter: none;
+  color: #93c5fd !important;
+  text-decoration: underline !important;
+}
+
 /* Slot panel title with brand icon */
 .visa-preview-drawer__title.doc-copies-brand-title,
 .doc-copies-brand-title {
@@ -174,4 +203,19 @@ button.doc-copies-brand:disabled {
 .app-person-dossier-link:hover {
   filter: brightness(0.97);
   text-decoration: none !important;
+}
+
+/* Çakylyklar CO: process number · date opens Application Profile Instance. */
+.app-cakylyklar-application-link {
+  --dcb-text: #60a5fa;
+  color: var(--dcb-text) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  text-align: left !important;
+}
+
+.app-cakylyklar-application-link:hover {
+  color: #93c5fd !important;
+  text-decoration: underline !important;
 }

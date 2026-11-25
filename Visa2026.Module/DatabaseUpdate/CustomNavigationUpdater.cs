@@ -1,3 +1,4 @@
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
@@ -50,6 +51,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 imageName: "BO_Contact",
                 index: 1);
 
+            EnsureInvitationsGroupNavigation(navigationItems, modelViews);
+
             EnsureTopLevelPersonNavigation(
                 navigationItems,
                 modelViews,
@@ -58,7 +61,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: PersonRoleHelper.TemporaryVisitorCriteria,
                 caption: "Temporary visitor",
                 imageName: "BO_Person",
-                index: 2);
+                index: 3);
 
             ConfigureApplicationProfileInstanceProgressRouteNavigation(navigationItems, modelViews);
             RemoveLegacyLookupOperationalNavigation(navigationItems);
@@ -329,6 +332,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 "BO_Localization",
                 index: 4);
 
+            HideApplicationListNavItem(applicationGroup, InvitationItemCakylyklarNavigation.LegacyNavItemId);
+
             RemoveApplicationItemRouteNavItems(applicationGroup);
             // Remove the node if another generator re-added it (Administrators ignore nav Deny).
             if (applicationGroup.Items["Application"] is IModelNavigationItem legacyApplicationItem)
@@ -355,6 +360,76 @@ namespace Visa2026.Module.DatabaseUpdate
             navItem.Caption = caption;
             navItem.ImageName = imageName;
             navItem.Index = index;
+        }
+
+        /// <summary>
+        /// Top-level Invitations group (near Employees / Family Members): Employee and Family member registries.
+        /// TemporaryVisitor invitation lines are excluded from both lists.
+        /// </summary>
+        private static void EnsureInvitationsGroupNavigation(
+            IModelNavigationItems navigationItems,
+            IModelViews modelViews)
+        {
+            var employeesView = EnsureInvitationItemCakylyklarListView(
+                modelViews,
+                InvitationItemCakylyklarNavigation.ListViewEmployeesId,
+                InvitationItemCakylyklarNavigation.CriteriaEmployees,
+                InvitationItemCakylyklarNavigation.CaptionEmployee);
+            var familyView = EnsureInvitationItemCakylyklarListView(
+                modelViews,
+                InvitationItemCakylyklarNavigation.ListViewFamilyMembersId,
+                InvitationItemCakylyklarNavigation.CriteriaFamilyMembers,
+                InvitationItemCakylyklarNavigation.CaptionFamilyMember);
+            if (employeesView == null || familyView == null)
+                return;
+
+            var group = navigationItems[InvitationItemCakylyklarNavigation.GroupNavId]
+                ?? navigationItems.AddNode<IModelNavigationItem>(InvitationItemCakylyklarNavigation.GroupNavId);
+            group.Caption = InvitationItemCakylyklarNavigation.CaptionGroup;
+            group.ImageName = InvitationItemCakylyklarNavigation.ImageName;
+            group.Index = InvitationItemCakylyklarNavigation.GroupNavIndex;
+            group.View = null;
+
+            var employeeNav = group.Items[InvitationItemCakylyklarNavigation.NavItemEmployee]
+                ?? group.Items.AddNode<IModelNavigationItem>(InvitationItemCakylyklarNavigation.NavItemEmployee);
+            employeeNav.View = employeesView;
+            employeeNav.Caption = InvitationItemCakylyklarNavigation.CaptionEmployee;
+            employeeNav.ImageName = "BO_Employee";
+            employeeNav.Index = 0;
+
+            var familyNav = group.Items[InvitationItemCakylyklarNavigation.NavItemFamilyMember]
+                ?? group.Items.AddNode<IModelNavigationItem>(InvitationItemCakylyklarNavigation.NavItemFamilyMember);
+            familyNav.View = familyView;
+            familyNav.Caption = InvitationItemCakylyklarNavigation.CaptionFamilyMember;
+            familyNav.ImageName = "BO_Contact";
+            familyNav.Index = 1;
+        }
+
+        private static IModelListView? EnsureInvitationItemCakylyklarListView(
+            IModelViews views,
+            string listViewId,
+            string criteria,
+            string caption)
+        {
+            var sourceView = views[InvitationItemCakylyklarNavigation.SourceListViewId] as IModelListView;
+            var view = views[listViewId] as IModelListView;
+            if (view == null && sourceView != null)
+            {
+                view = views.AddNode<IModelListView>(listViewId);
+                view.ModelClass = sourceView.ModelClass;
+            }
+
+            if (view == null)
+                return null;
+
+            if (view.ModelClass == null && sourceView != null)
+                view.ModelClass = sourceView.ModelClass;
+
+            view.Criteria = criteria;
+            view.Caption = caption;
+            view.DataAccessMode = CollectionSourceDataAccessMode.Client;
+            ModelListViewColumnVisibility.ConfigureCakylyklarColumns(view);
+            return view;
         }
 
         private static void HideApplicationListNavItem(IModelNavigationItem applicationGroup, string navItemId)
@@ -589,6 +664,49 @@ namespace Visa2026.Module.DatabaseUpdate
                 SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationSlaStatement), false);
                 SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.ApplicationProfileInstance.MigrationService), true);
             }
+
+            CloneInvitationItemCakylyklarListViewIfMissing(modelViews);
+        }
+
+        private static void CloneInvitationItemCakylyklarListViewIfMissing(IModelViews modelViews)
+        {
+            CloneOneCakylyklarListViewIfMissing(
+                modelViews,
+                InvitationItemCakylyklarNavigation.ListViewEmployeesId,
+                InvitationItemCakylyklarNavigation.CriteriaEmployees,
+                InvitationItemCakylyklarNavigation.CaptionEmployee);
+            CloneOneCakylyklarListViewIfMissing(
+                modelViews,
+                InvitationItemCakylyklarNavigation.ListViewFamilyMembersId,
+                InvitationItemCakylyklarNavigation.CriteriaFamilyMembers,
+                InvitationItemCakylyklarNavigation.CaptionFamilyMember);
+        }
+
+        private static void CloneOneCakylyklarListViewIfMissing(
+            IModelViews modelViews,
+            string listViewId,
+            string criteria,
+            string caption)
+        {
+            var sourceView = modelViews[InvitationItemCakylyklarNavigation.SourceListViewId] as IModelListView;
+            if (modelViews[listViewId] is not IModelListView targetView)
+            {
+                if (sourceView == null)
+                    return;
+
+                targetView = modelViews.AddNode<IModelListView>(listViewId);
+                targetView.Id = listViewId;
+                targetView.ModelClass = sourceView.ModelClass;
+                CopyColumns(sourceView, targetView);
+            }
+
+            if (targetView.ModelClass == null && sourceView != null)
+                targetView.ModelClass = sourceView.ModelClass;
+
+            targetView.Criteria = criteria;
+            targetView.Caption = caption;
+            targetView.DataAccessMode = CollectionSourceDataAccessMode.Client;
+            ModelListViewColumnVisibility.ConfigureCakylyklarColumns(targetView);
         }
 
         private static void CloneApplicationListViewIfMissing(
@@ -663,6 +781,48 @@ namespace Visa2026.Module.DatabaseUpdate
             {
                 column.Index = visible ? (column.Index == -1 ? 100 : column.Index) : -1;
             }
+        }
+
+        public static void SetIndex(IModelListView view, string propertyName, int index)
+        {
+            var column = view.Columns.FirstOrDefault(c => c.PropertyName == propertyName);
+            if (column == null)
+            {
+                column = view.Columns.AddNode<IModelColumn>(propertyName);
+                column.PropertyName = propertyName;
+            }
+
+            column.Index = index;
+        }
+
+        /// <summary>
+        /// Çakylyklar columns: State last; Invitation № before State (preview link).
+        /// </summary>
+        public static void ConfigureCakylyklarColumns(IModelListView view)
+        {
+            Set(view, "InvitationItemName", false);
+            Set(view, "Person", false);
+            Set(view, "Passport", false);
+            Set(view, "Invitation", false);
+            Set(view, "ApplicationProfileInstance", false);
+            Set(view, "IssuedVisa", false);
+            Set(view, nameof(InvitationItem.DocumentCopiesListLink), false);
+
+            Set(view, nameof(InvitationItem.CakylyklarPersonDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarPassportDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarStateDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarProcessNumberDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarLinkedDetailDisplay), true);
+            Set(view, nameof(InvitationItem.ExpirationDate), true);
+            Set(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), true);
+
+            SetIndex(view, nameof(InvitationItem.CakylyklarPersonDisplay), 0);
+            SetIndex(view, nameof(InvitationItem.CakylyklarPassportDisplay), 1);
+            SetIndex(view, nameof(InvitationItem.CakylyklarProcessNumberDisplay), 2);
+            SetIndex(view, nameof(InvitationItem.CakylyklarLinkedDetailDisplay), 3);
+            SetIndex(view, nameof(InvitationItem.ExpirationDate), 4);
+            SetIndex(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), 5);
+            SetIndex(view, nameof(InvitationItem.CakylyklarStateDisplay), 6);
         }
     }
 }

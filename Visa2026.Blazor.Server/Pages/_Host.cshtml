@@ -1022,8 +1022,9 @@
                         return;
                     }
                     var contextItemId = cell.getAttribute("data-header-doc-context-item-id") || "";
+                    var openPreviewOnly = cell.getAttribute("data-header-doc-preview-only") === "1";
                     if (window.visaPreviewDrawer.openHeaderDocumentCopies) {
-                        window.visaPreviewDrawer.openHeaderDocumentCopies(family, parentId, contextItemId, event);
+                        window.visaPreviewDrawer.openHeaderDocumentCopies(family, parentId, contextItemId, event, openPreviewOnly);
                     }
                 }
 
@@ -1042,7 +1043,63 @@
                 }, true);
             })();
 
-            window.visaPreviewDrawer.openHeaderDocumentCopies = function (family, parentId, contextItemId, event) {
+            (function installCakylyklarApplicationLinkCapture() {
+                if (window.visaPreviewDrawer._cakylyklarApplicationLinkCaptureInstalled) {
+                    return;
+                }
+                window.visaPreviewDrawer._cakylyklarApplicationLinkCaptureInstalled = true;
+
+                function findApplicationLinkCell(target) {
+                    return target && target.closest
+                        ? target.closest(".app-cakylyklar-application-link")
+                        : null;
+                }
+
+                function blockGridRowActivation(event) {
+                    var cell = findApplicationLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    if (window.visaPreviewDrawer._hostRef) {
+                        window.visaPreviewDrawer._hostRef.invokeMethodAsync("MarkHeaderDocumentCopiesLinkClickPending");
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+
+                function openApplicationFromCell(event) {
+                    var cell = findApplicationLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var applicationId = cell.getAttribute("data-application-id") || "";
+                    if (!applicationId || !window.visaPreviewDrawer._hostRef) {
+                        return;
+                    }
+                    window.visaPreviewDrawer._hostRef.invokeMethodAsync(
+                        "OpenListApplicationFromJsAsync",
+                        applicationId);
+                }
+
+                document.addEventListener("pointerdown", blockGridRowActivation, true);
+                document.addEventListener("mousedown", blockGridRowActivation, true);
+                document.addEventListener("click", openApplicationFromCell, true);
+                document.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter" && event.key !== " ") {
+                        return;
+                    }
+                    var cell = findApplicationLinkCell(event.target);
+                    if (!cell || document.activeElement !== cell) {
+                        return;
+                    }
+                    openApplicationFromCell(event);
+                }, true);
+            })();
+            window.visaPreviewDrawer.openHeaderDocumentCopies = function (family, parentId, contextItemId, event, openPreviewOnly) {
                 if (event) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1052,7 +1109,8 @@
                         "OpenHeaderDocumentCopiesFromJsAsync",
                         family || "",
                         parentId || "",
-                        contextItemId || "");
+                        contextItemId || "",
+                        !!openPreviewOnly);
                 }
             };
 
