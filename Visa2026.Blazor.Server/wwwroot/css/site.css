@@ -612,7 +612,7 @@ dxd-license,
 }
 /* Çakylyklar InvitationItem ListView — row tint matches color-tab swatches (GetBackgroundHex). */
 .visa-invitation-row.visa-invitation-row--ready { --visa-row-hue: #86efac; --dxbl-grid-row-bg: var(--visa-row-hue); }
-.visa-invitation-row.visa-invitation-row--used { --visa-row-hue: #bbf7d0; --dxbl-grid-row-bg: var(--visa-row-hue); }
+.visa-invitation-row.visa-invitation-row--used { --visa-row-hue: #4ade80; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-invitation-row.visa-invitation-row--cancelled { --visa-row-hue: #f8d7da; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-invitation-row.visa-invitation-row--changed { --visa-row-hue: #e9d5ff; --dxbl-grid-row-bg: var(--visa-row-hue); }
 .visa-invitation-row.visa-invitation-row--expired { --visa-row-hue: #fecdd3; --dxbl-grid-row-bg: var(--visa-row-hue); }
@@ -4789,7 +4789,7 @@ button.lv-person-mark--hit.lv-person-mark--rej {
 }
 
 button.lv-person-mark--hit.lv-person-mark--used {
-    background: #bbf7d0;
+    background: #4ade80;
     color: #14532d;
 }
 
@@ -4878,7 +4878,7 @@ button.lv-person-mark-follow__app {
 }
 
 .invitation-life-banner--used {
-    background: #bbf7d0;
+    background: #4ade80;
     color: #14532d;
 }
 
@@ -4930,7 +4930,7 @@ button.lv-person-mark-follow__app {
 }
 
 .invitation-life-chip--used {
-    background: #bbf7d0;
+    background: #4ade80;
     color: #14532d;
 }
 
@@ -4963,7 +4963,7 @@ button.lv-person-mark-follow__app {
 }
 
 .lv-person-mark--used {
-    background: #bbf7d0;
+    background: #4ade80;
     color: #14532d;
 }
 

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Module.BusinessObjects;
@@ -16,8 +17,15 @@ public partial class InvitationItem
     private string? listViewInvitationNumber;
     private string? listViewPersonName;
     private string? listViewPassportNumber;
+    private string? listViewDepartmentName;
+    private string? listViewWorkPermitNumber;
+    private string? listViewVisaTypeName;
+    private string? listViewVisaCategoryName;
+    private string? listViewVisaPeriodName;
     private Guid? listViewVisaId;
     private Guid? listViewApplicationProfileInstanceId;
+    private Guid? listViewWorkPermitId;
+    private Guid? listViewWorkPermitItemId;
 
     /// <summary>Stamped <see cref="InvitationLaterLife"/> key for Çakylyklar tabs/rows.</summary>
     public void SetListViewLifeKey(string? lifeKey) => listViewLifeKey = lifeKey;
@@ -33,6 +41,29 @@ public partial class InvitationItem
 
     public void SetListViewPassportNumber(string? passportNumber) =>
         listViewPassportNumber = passportNumber;
+
+    public void SetListViewDepartmentName(string? departmentName) =>
+        listViewDepartmentName = departmentName;
+
+    public void SetListViewWorkPermit(
+        string? workPermitNumber,
+        Guid? workPermitId,
+        Guid? workPermitItemId)
+    {
+        listViewWorkPermitNumber = workPermitNumber;
+        listViewWorkPermitId = workPermitId;
+        listViewWorkPermitItemId = workPermitItemId;
+    }
+
+    public void SetListViewVisaLookups(
+        string? visaTypeName,
+        string? visaCategoryName,
+        string? visaPeriodName)
+    {
+        listViewVisaTypeName = visaTypeName;
+        listViewVisaCategoryName = visaCategoryName;
+        listViewVisaPeriodName = visaPeriodName;
+    }
 
     public void SetListViewVisaId(Guid? visaId) => listViewVisaId = visaId;
 
@@ -52,6 +83,16 @@ public partial class InvitationItem
     [Browsable(false)]
     [NotMapped]
     public Guid? ListViewApplicationProfileInstanceId => listViewApplicationProfileInstanceId;
+
+    /// <summary>Parent WorkPermit id for Çakylyklar work-permit copy preview.</summary>
+    [Browsable(false)]
+    [NotMapped]
+    public Guid? ListViewWorkPermitId => listViewWorkPermitId;
+
+    /// <summary>WorkPermitItem id used as header-copies context on Çakylyklar.</summary>
+    [Browsable(false)]
+    [NotMapped]
+    public Guid? ListViewWorkPermitItemId => listViewWorkPermitItemId;
 
     /// <summary>Color-tab filter key for Çakylyklar ListView.</summary>
     [Browsable(false)]
@@ -84,6 +125,78 @@ public partial class InvitationItem
         listViewPassportNumber
         ?? Passport?.PassportNumber
         ?? string.Empty;
+
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Department")]
+    public string CakylyklarDepartmentDisplay =>
+        listViewDepartmentName
+        ?? (Person != null ? PersonCurrentItems.FormatEmployeeListDepartmentName(Person) : string.Empty);
+
+    /// <summary>
+    /// WorkPermitItem number from the same issuing Application Profile Instance (and person).
+    /// </summary>
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Work permit")]
+    public string CakylyklarWorkPermitDisplay =>
+        listViewWorkPermitNumber ?? string.Empty;
+
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Visa type")]
+    public string CakylyklarVisaTypeDisplay =>
+        listViewVisaTypeName
+        ?? LookupLocalization.GetDisplayName(
+            Invitation?.ApplicationProfileInstance?.VisaType
+            ?? IssuedVisa?.VisaType);
+
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Visa category")]
+    public string CakylyklarVisaCategoryDisplay =>
+        listViewVisaCategoryName
+        ?? LookupLocalization.GetDisplayName(
+            Invitation?.VisaCategory
+            ?? Invitation?.ApplicationProfileInstance?.VisaCategory
+            ?? IssuedVisa?.VisaCategory);
+
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Visa period")]
+    public string CakylyklarVisaPeriodDisplay =>
+        listViewVisaPeriodName
+        ?? LookupLocalization.GetDisplayName(
+            Invitation?.VisaPeriod
+            ?? Invitation?.ApplicationProfileInstance?.VisaPeriod);
+
+    /// <summary>
+    /// Calendar days until invitation letter expiry (0 when expired or missing).
+    /// Especially relevant for Taýýar (Ready) rows.
+    /// </summary>
+    [NotMapped]
+    [ModelDefault("AllowEdit", "False")]
+    [VisibleInDetailView(false)]
+    [VisibleInLookupListView(false)]
+    [VisibleInListView(true)]
+    [XafDisplayName("Days remaining")]
+    public int CakylyklarDaysRemaining =>
+        ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate);
 
     /// <summary>Localized lifecycle label (same text as the color tab for this row's state).</summary>
     [NotMapped]

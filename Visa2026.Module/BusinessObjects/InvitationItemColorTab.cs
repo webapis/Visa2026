@@ -93,7 +93,7 @@ public static class InvitationItemColorTab
     public static string GetBackgroundHex(string bucketKey) => bucketKey switch
     {
         Ready => "#86efac",
-        Used => "#bbf7d0",
+        Used => "#4ade80",
         Cancelled => "#f8d7da",
         Changed => "#e9d5ff",
         Expired => "#fecdd3",

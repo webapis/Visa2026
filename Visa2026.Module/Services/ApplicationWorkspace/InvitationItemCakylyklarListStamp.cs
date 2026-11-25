@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -31,6 +32,49 @@ public static class InvitationItemCakylyklarListStamp
             .ToList()
             .GroupBy(x => x.ItemId)
             .ToDictionary(g => g.Key, g => g.First());
+
+        var appIds = items
+            .Select(i => i.Invitation?.ApplicationProfileInstance?.ID ?? Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+        var personIds = items
+            .Select(i => i.Person?.ID ?? Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        // One WorkPermitItem per person per issuing case (match person + ApplicationProfileInstance).
+        var workPermitsByAppPerson = new Dictionary<(Guid AppId, Guid PersonId), (Guid ItemId, Guid WorkPermitId, string Number)>();
+        if (appIds.Count > 0 && personIds.Count > 0)
+        {
+            var wpRows = objectSpace.GetObjectsQuery<WorkPermitItem>()
+                .Where(w => w.WorkPermit != null
+                    && w.WorkPermit.ApplicationProfileInstance != null
+                    && appIds.Contains(w.WorkPermit.ApplicationProfileInstance.ID)
+                    && w.Person != null
+                    && personIds.Contains(w.Person.ID))
+                .Select(w => new
+                {
+                    AppId = w.WorkPermit!.ApplicationProfileInstance!.ID,
+                    PersonId = w.Person!.ID,
+                    ItemId = w.ID,
+                    WorkPermitId = w.WorkPermit.ID,
+                    Number = w.WorkPermitNumber,
+                })
+                .ToList();
+
+            foreach (var row in wpRows)
+            {
+                var key = (row.AppId, row.PersonId);
+                if (workPermitsByAppPerson.ContainsKey(key))
+                    continue;
+                workPermitsByAppPerson[key] = (
+                    row.ItemId,
+                    row.WorkPermitId,
+                    row.Number?.Trim() ?? string.Empty);
+            }
+        }
 
         var issued = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
         var familyRows = objectSpace.GetObjectsQuery<InvitationItem>()
@@ -100,6 +144,10 @@ public static class InvitationItemCakylyklarListStamp
 
             item.SetListViewPersonName(item.Person?.FullName);
             item.SetListViewPassportNumber(item.Passport?.PassportNumber);
+            item.SetListViewDepartmentName(
+                item.Person != null
+                    ? PersonCurrentItems.FormatEmployeeListDepartmentName(item.Person)
+                    : null);
             item.SetListViewInvitationNumber(item.Invitation?.InvitationNumber);
 
             var owningApp = item.Invitation?.ApplicationProfileInstance;
@@ -107,6 +155,35 @@ public static class InvitationItemCakylyklarListStamp
             item.SetListViewApplicationProfileInstanceId(applicationId);
             item.SetListViewProcessNumber(
                 InvitationItem.FormatProcessWithDate(owningApp?.ProcessNumber, owningApp?.ApplicationDate));
+
+            var invitation = item.Invitation;
+            item.SetListViewVisaLookups(
+                LookupLocalization.GetDisplayName(
+                    owningApp?.VisaType
+                    ?? item.IssuedVisa?.VisaType),
+                LookupLocalization.GetDisplayName(
+                    invitation?.VisaCategory
+                    ?? owningApp?.VisaCategory
+                    ?? item.IssuedVisa?.VisaCategory),
+                LookupLocalization.GetDisplayName(
+                    invitation?.VisaPeriod
+                    ?? owningApp?.VisaPeriod));
+
+            var personId = item.Person?.ID ?? Guid.Empty;
+            if (applicationId is Guid appId
+                && appId != Guid.Empty
+                && personId != Guid.Empty
+                && workPermitsByAppPerson.TryGetValue((appId, personId), out var wp))
+            {
+                item.SetListViewWorkPermit(
+                    string.IsNullOrWhiteSpace(wp.Number) ? null : wp.Number,
+                    wp.WorkPermitId != Guid.Empty ? wp.WorkPermitId : null,
+                    wp.ItemId != Guid.Empty ? wp.ItemId : null);
+            }
+            else
+            {
+                item.SetListViewWorkPermit(null, null, null);
+            }
 
             string detail;
             Guid? visaId = null;
@@ -143,7 +220,17 @@ public static class InvitationItemCakylyklarListStamp
             }
             else
             {
-                detail = item.ExpirationDate?.ToString("dd.MM.yyyy") ?? string.Empty;
+                // Taýýar (in force): expiry date + days remaining
+                var exp = item.ExpirationDate;
+                if (exp is { } d)
+                {
+                    var days = ExpirationLogicHelper.CalculateDaysRemaining(d);
+                    detail = d.ToString("dd.MM.yyyy") + " · " + days + "d";
+                }
+                else
+                {
+                    detail = string.Empty;
+                }
             }
 
             item.SetListViewLinkedDetail(detail);

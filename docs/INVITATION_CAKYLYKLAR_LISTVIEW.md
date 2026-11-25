@@ -28,7 +28,7 @@ Removed from Application Profile Instances (Via / Direct). Legacy `InvitationIte
 
 ## 2. Tabs / columns / affordances
 
-Same as before for both lists: Ähli / Taýýar / Ulanyldy / … / Gözleg; Person, Passport, CO, Linked detail, Expiration, Invitation №, State (last). Search spans states within that role list.
+Same UI for both lists: Ähli / Taýýar / Ulanyldy / … / Gözleg; Person, Passport, Department, Work permit, Visa type / category / period, CO, Linked detail, **Expiration Date**, **Days remaining**, Invitation №, State (last). Taýýar Linked detail also shows expiry · remaining days. Family rows usually have no work permit. Search spans states within that role list.
 
 ## 3. Code map
 
@@ -45,3 +45,7 @@ Same as before for both lists: Ähli / Taýýar / Ulanyldy / … / Gözleg; Pers
 |------|------|
 | 2026-11-25 | Initial Çakylyklar under Application Profile Instances |
 | 2026-11-25 | Split to top-level Invitations (Employee / Family); TemporaryVisitor hidden; TR Davetiyeler |
+| 2026-11-25 | Department column (current position history) |
+| 2026-11-25 | Work permit column (WorkPermitItem number; preview copies) |
+| 2026-11-25 | Expiration Date + Days remaining for Taýýar / Ready |
+| 2026-11-25 | Ulanyldy/Used row tint #bbf7d0 → #4ade80 (less pale on dark) |

@@ -108,9 +108,9 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         /// <summary>
-        /// Invitation, work permit headers/items, visa tracking, work-permit tracking, temporary visitors,
-        /// rejection, and border zone stay off the left menu. Records remain reachable from a person or application.
-        /// The Work permit group stays for the other items in that folder.
+        /// Invitation, work permit headers/items, the WorkPermit folder, visa tracking, the Visa Extension folder,
+        /// work-permit tracking, temporary visitors, rejection, and border zone stay off the left menu.
+        /// Records remain reachable from a person or an application.
         /// </summary>
         private static void HideRetiredLeftNavigation(IModelNavigationItems navigationItems)
         {
@@ -120,11 +120,16 @@ namespace Visa2026.Module.DatabaseUpdate
             HideTopLevelIfPresent(navigationItems, "BorderZone");
             HideTopLevelIfPresent(navigationItems, "Visa Tracking");
             HideTopLevelIfPresent(navigationItems, "Work Permit Tracking");
+            HideTopLevelIfPresent(navigationItems, "VisaExt");
+            HideTopLevelIfPresent(navigationItems, "WorkPermit");
 
             if (navigationItems["WorkPermit"] is IModelNavigationItem workPermitGroup)
             {
                 HideNavItemIfPresent(workPermitGroup, "WorkPermit");
                 HideNavItemIfPresent(workPermitGroup, "WorkPermitItem");
+                HideNavItemIfPresent(workPermitGroup, "ForeignWorkerMaglumat");
+                HideNavItemIfPresent(workPermitGroup, "WorkPermitLocationGrant");
+                HideNavItemIfPresent(workPermitGroup, "WorkPermitLocationGrantItem");
             }
 
             if (navigationItems["People"] is IModelNavigationItem peopleGroup)
@@ -796,19 +801,32 @@ namespace Visa2026.Module.DatabaseUpdate
 
             Set(view, nameof(InvitationItem.CakylyklarPersonDisplay), true);
             Set(view, nameof(InvitationItem.CakylyklarPassportDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarDepartmentDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarWorkPermitDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarVisaTypeDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarVisaCategoryDisplay), true);
+            Set(view, nameof(InvitationItem.CakylyklarVisaPeriodDisplay), true);
             Set(view, nameof(InvitationItem.CakylyklarStateDisplay), true);
             Set(view, nameof(InvitationItem.CakylyklarProcessNumberDisplay), true);
             Set(view, nameof(InvitationItem.CakylyklarLinkedDetailDisplay), true);
             Set(view, nameof(InvitationItem.ExpirationDate), true);
+            Set(view, nameof(InvitationItem.CakylyklarDaysRemaining), true);
             Set(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), true);
 
+            // Person → … → Linked → Expiration → Days remaining → Invitation № → State
             SetIndex(view, nameof(InvitationItem.CakylyklarPersonDisplay), 0);
             SetIndex(view, nameof(InvitationItem.CakylyklarPassportDisplay), 1);
-            SetIndex(view, nameof(InvitationItem.CakylyklarProcessNumberDisplay), 2);
-            SetIndex(view, nameof(InvitationItem.CakylyklarLinkedDetailDisplay), 3);
-            SetIndex(view, nameof(InvitationItem.ExpirationDate), 4);
-            SetIndex(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), 5);
-            SetIndex(view, nameof(InvitationItem.CakylyklarStateDisplay), 6);
+            SetIndex(view, nameof(InvitationItem.CakylyklarDepartmentDisplay), 2);
+            SetIndex(view, nameof(InvitationItem.CakylyklarWorkPermitDisplay), 3);
+            SetIndex(view, nameof(InvitationItem.CakylyklarVisaTypeDisplay), 4);
+            SetIndex(view, nameof(InvitationItem.CakylyklarVisaCategoryDisplay), 5);
+            SetIndex(view, nameof(InvitationItem.CakylyklarVisaPeriodDisplay), 6);
+            SetIndex(view, nameof(InvitationItem.CakylyklarProcessNumberDisplay), 7);
+            SetIndex(view, nameof(InvitationItem.CakylyklarLinkedDetailDisplay), 8);
+            SetIndex(view, nameof(InvitationItem.ExpirationDate), 9);
+            SetIndex(view, nameof(InvitationItem.CakylyklarDaysRemaining), 10);
+            SetIndex(view, nameof(InvitationItem.CakylyklarInvitationNumberDisplay), 11);
+            SetIndex(view, nameof(InvitationItem.CakylyklarStateDisplay), 12);
         }
     }
 }

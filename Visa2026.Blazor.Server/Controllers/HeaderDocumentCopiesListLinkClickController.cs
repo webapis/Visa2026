@@ -130,7 +130,9 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
 
         const string linkClass = "app-header-document-copies-link";
         e.CssClass = string.IsNullOrEmpty(e.CssClass) ? linkClass : $"{e.CssClass} {linkClass}";
-        if (linkKind is CakylyklarLinkKind.InvitationNumber or CakylyklarLinkKind.UsedVisaNumber)
+        if (linkKind is CakylyklarLinkKind.InvitationNumber
+            or CakylyklarLinkKind.UsedVisaNumber
+            or CakylyklarLinkKind.WorkPermitNumber)
             e.CssClass += " app-header-document-copies-link--text";
         e.Attributes["role"] = "button";
         e.Attributes["tabindex"] = "0";
@@ -185,6 +187,16 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
             return true;
         }
 
+        // Çakylyklar: Work permit № → work-permit copies preview.
+        if (string.Equals(
+                fieldName,
+                nameof(InvitationItem.CakylyklarWorkPermitDisplay),
+                StringComparison.Ordinal))
+        {
+            linkKind = CakylyklarLinkKind.WorkPermitNumber;
+            return true;
+        }
+
         return false;
     }
 
@@ -218,6 +230,26 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
             return true;
         }
 
+        if (linkKind == CakylyklarLinkKind.WorkPermitNumber)
+        {
+            if (row is not InvitationItem item)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(item.CakylyklarWorkPermitDisplay))
+                return false;
+
+            var workPermitId = item.ListViewWorkPermitId;
+            if (workPermitId is not Guid wpId || wpId == Guid.Empty)
+                return false;
+
+            family = HeaderDocumentCopiesFamily.WorkPermit;
+            parentId = wpId;
+            contextItemId = item.ListViewWorkPermitItemId is Guid itemId && itemId != Guid.Empty
+                ? itemId
+                : null;
+            return true;
+        }
+
         return HeaderDocumentCopiesListLinkResolution.TryResolve(row, out family, out parentId, out contextItemId);
     }
 
@@ -226,6 +258,7 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         DocumentCopies,
         InvitationNumber,
         UsedVisaNumber,
+        WorkPermitNumber,
     }
 
     protected override void OnDeactivated()
