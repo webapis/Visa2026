@@ -317,9 +317,11 @@ static void PrintHelp()
     Console.WriteLine("                [--supplement-permit-positions]  EmployeePositionHistory: import soft-deleted WH referenced by WorkPermit");
     Console.WriteLine("                [--supplement-permit-persons]  Person: import soft-deleted Person referenced by active WorkPermit (IsArchived)");
     Console.WriteLine("                [--supplement-permit-passports]  Passport: import Passport rows referenced by active WorkPermit");
+    Console.WriteLine("                [--skip-children-of-existing-persons]  Catch-up: skip passport, education, position, address, salary, photo, and scans for a person already on the target");
     Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs → headless ObjectSpace (requires --inprocess + scalar id-map).");
     Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|MedicalRecord --property Photo|PassportDocument|...");
     Console.WriteLine("                --inprocess --target-connection conn [--legacy-source calik-energi] [--id-map path.json]");
+    Console.WriteLine("                [--skip-children-of-existing-persons]  Skip photo and scans for a person already on the target");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N]");
     Console.WriteLine("  --cleanup-visa2014-education-documents  DELETE duplicate EducationDocument rows + rename FileData to diploma-*.");
     Console.WriteLine("  --purge-visa2014-education-documents    DELETE ALL EducationDocument rows + clear id-map.");

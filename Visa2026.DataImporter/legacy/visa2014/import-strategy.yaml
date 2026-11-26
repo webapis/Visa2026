@@ -424,7 +424,10 @@ onPremDeployment:
       additionalWorkPermitLocationInstances.importerStatus are implemented; a
       full application-type slice is still forbidden. Photo and person/passport/
       education/family-proof scan bytes are a separate fill-missing pass
-      (fileCatchUp), not part of the scalar catch-up.
+      (fileCatchUp) for people imported in that same run. People already on
+      the target are listed in Person.skip-children.json
+      (--skip-children-of-existing-persons): their passport, education,
+      position, address, salary, photo, and scans are not imported.
     insertOnly: true
     insertOnlyLockedAt: 2026-10-09
     duplicatePolicy:
@@ -435,10 +438,15 @@ onPremDeployment:
       never: [insert_second_row, update_existing_row]
       beforeCatchUp: rebuild production id-maps from visa2026_prod so every row already there is mapped
       notes: >
-        Same rule for the later archive database. Person, Passport, Education,
-        EmployeePositionHistory, EmployeeSalary, and AddressOfResidence link an
-        existing natural key into the id-map and skip. The existing row is not
-        updated. Catch-up does not import Visa, WorkPermit, or Invitation
+        Same rule for the later archive database. Production catch-up passes
+        --skip-children-of-existing-persons. A person already on visa2026_prod
+        (personal number, or first name + last name + birth date when the
+        number is blank, 0, or only dashes and dots) is not updated, and that
+        person's Passport, Education, EmployeePositionHistory,
+        AddressOfResidence, EmployeeSalary, photo, and scans are not imported.
+        A person posted in the same run still receives those records. Natural
+        key link-and-skip still applies to child rows of a newly posted person.
+        Catch-up does not import Visa, WorkPermit, or Invitation
         (officers enter those). Rebuild may still map issued-document rows
         already on visa2026_prod for later check-in / additional-WP filters.
     fileCatchUp:
@@ -458,7 +466,9 @@ onPremDeployment:
           property: FamilyProofDocument
       excluded: [VisaDocument, WorkPermitDocument, InvitationDocument, MedicalRecord, Rejection, BorderZone]
       notes: >
-        Fill a photo only when the person row has no photo bytes. Fill a
+        With --skip-children-of-existing-persons, skip photo and scans for a
+        person already on visa2026_prod. For a person imported in the same run,
+        fill a photo only when the person row has no photo bytes, and fill a
         document only when the parent does not already store the same bytes.
         Do not import VisaDocument, WorkPermitDocument, or InvitationDocument
         (officers enter issued documents). The July document id-maps are not

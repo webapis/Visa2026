@@ -15,6 +15,7 @@ internal sealed class Visa2014EducationDocumentImportResult
     public int SkippedNoBlob { get; init; }
     public int SkippedOversize { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int SkippedDuplicateBlob { get; init; }
     public int Failed { get; init; }
     public string? DocumentIdMapPath { get; init; }
@@ -34,7 +35,8 @@ internal static class Visa2014EducationDocumentImporter
             CAST(pc.Education AS varchar(36)) AS LegacyEducationOid,
             LTRIM(RTRIM(
                 COALESCE(per.FirstName, N'') + N' ' + COALESCE(per.LastName, N'')
-            )) AS PersonFullName
+            )) AS PersonFullName,
+            CAST(per.Oid AS varchar(36)) AS LegacyPersonOid
         FROM dbo.PassportCopy pc
         INNER JOIN dbo.Education e ON pc.Education = e.Oid AND e.GCRecord IS NULL
         INNER JOIN dbo.Person per ON e.Person = per.Oid AND per.GCRecord IS NULL
@@ -51,7 +53,8 @@ internal static class Visa2014EducationDocumentImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        string? targetConnection = null)
+        string? targetConnection = null,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         var educationIdMap = Visa2014IdMapHelper.Load(educationIdMapPath);
         var docMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
@@ -75,11 +78,18 @@ internal static class Visa2014EducationDocumentImporter
         int skippedNoBlob = 0;
         int skippedOversize = 0;
         int skippedAlreadyImported = 0;
+        int skippedExistingPerson = 0;
         int skippedDuplicateBlob = 0;
         int postedSinceLastSave = 0;
 
-        foreach (var (legacyCopyOid, legacyEducationOid, personFullName) in copyRows)
+        foreach (var (legacyCopyOid, legacyEducationOid, personFullName, legacyPersonOid) in copyRows)
         {
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, legacyPersonOid))
+            {
+                skippedExistingPerson++;
+                continue;
+            }
+
             if (!educationIdMap.TryGetValue(legacyEducationOid, out var targetEducationId))
             {
                 skippedNoEducationMap++;
@@ -191,6 +201,7 @@ internal static class Visa2014EducationDocumentImporter
             SkippedNoBlob = skippedNoBlob,
             SkippedOversize = skippedOversize,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedExistingPerson = skippedExistingPerson,
             SkippedDuplicateBlob = skippedDuplicateBlob,
             Failed = failed,
             DocumentIdMapPath = documentIdMapPath,
@@ -198,7 +209,7 @@ internal static class Visa2014EducationDocumentImporter
         };
     }
 
-    private static async Task<List<(Guid LegacyCopyOid, Guid LegacyEducationOid, string? PersonFullName)>> ListLegacyCopyRowsAsync(
+    private static async Task<List<(Guid LegacyCopyOid, Guid LegacyEducationOid, string? PersonFullName, Guid LegacyPersonOid)>> ListLegacyCopyRowsAsync(
         SqlConnection connection,
         int? maxRows)
     {
@@ -206,7 +217,7 @@ internal static class Visa2014EducationDocumentImporter
             ? ListEducationCopiesSql.Replace("SELECT", $"SELECT TOP ({maxRows.Value})", StringComparison.Ordinal)
             : ListEducationCopiesSql;
 
-        var rows = new List<(Guid, Guid, string?)>();
+        var rows = new List<(Guid, Guid, string?, Guid)>();
         await using var command = new SqlCommand(sql, connection);
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -216,7 +227,10 @@ internal static class Visa2014EducationDocumentImporter
             if (!Guid.TryParse(reader.GetString(1), out var educationOid))
                 continue;
             var personFullName = reader.IsDBNull(2) ? null : reader.GetString(2);
-            rows.Add((copyOid, educationOid, personFullName));
+            var legacyPersonOid = !reader.IsDBNull(3) && Guid.TryParse(reader.GetString(3), out var personOid)
+                ? personOid
+                : Guid.Empty;
+            rows.Add((copyOid, educationOid, personFullName, legacyPersonOid));
         }
 
         return rows;

@@ -345,6 +345,17 @@ internal static class Visa2014ImportCommand
                     verbose);
                 if (expandCode != 0)
                     return expandCode;
+
+                if (Visa2014ExistingPersonSkipSet.Requested(args))
+                {
+                    var map = Visa2014IdMapHelper.Load(result.IdMapPath);
+                    var skip = Visa2014ExistingPersonSkipSet.SelectExisting(map, result.PostedTargetIds);
+                    var skipPath = Visa2014ExistingPersonSkipSet.PathBesidePersonIdMap(result.IdMapPath);
+                    await Visa2014ExistingPersonSkipSet.SaveAsync(skipPath, skip);
+                    Console.WriteLine(
+                        $"INF Skip-by-person: {skip.Count} legacy people already on target. " +
+                        $"Their passport, education, position, address, salary, photo, and scans are not imported. ({skipPath})");
+                }
             }
         }
         else if (supplementPermitPersons && result.SkippedAlreadyImported > 0)
@@ -374,6 +385,9 @@ internal static class Visa2014ImportCommand
         if (supplementPermitPassports)
             Console.WriteLine("INF Mode: --supplement-permit-passports (Passport rows referenced by active WorkPermit).");
 
+        if (!TryLoadExistingPersonSkipSet(args, personIdMapPath, out var existingPeople))
+            return 1;
+
         var passportIdMapForRun = supplementPermitPassports || !dryRun ? passportIdMapPath : null;
 
         var result = await Visa2014PassportODataImporter.RunAsync(
@@ -386,14 +400,15 @@ internal static class Visa2014ImportCommand
             maxRows,
             dryRun,
             verbose,
-            supplementPermitPassports);
+            supplementPermitPassports,
+            existingPeople);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (person already on target): {result.SkippedExistingPerson}");
             if (result.IdMapPath != null)
             {
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
@@ -500,6 +515,9 @@ internal static class Visa2014ImportCommand
 
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
 
+        if (!TryLoadExistingPersonSkipSet(args, personIdMapPath, out var existingPeople))
+            return 1;
+
         var result = await Visa2014EducationODataImporter.RunAsync(
             target,
             resolver,
@@ -509,14 +527,15 @@ internal static class Visa2014ImportCommand
             dryRun ? null : educationIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            existingPeople);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (person already on target): {result.SkippedExistingPerson}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -734,6 +753,9 @@ internal static class Visa2014ImportCommand
 
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
 
+        if (!TryLoadExistingPersonSkipSet(args, personIdMapPath, out var existingPeople))
+            return 1;
+
         var result = await Visa2014AddressOfResidenceODataImporter.RunAsync(
             target,
             resolver,
@@ -744,14 +766,15 @@ internal static class Visa2014ImportCommand
             maxRows,
             dryRun,
             verbose,
-            GetTargetConnection(args));
+            GetTargetConnection(args),
+            existingPeople);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (person already on target): {result.SkippedExistingPerson}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -974,6 +997,9 @@ internal static class Visa2014ImportCommand
         if (supplementPermitPositions)
             Console.WriteLine("INF Mode: --supplement-permit-positions (soft-deleted WH referenced by active WorkPermit).");
 
+        if (!TryLoadExistingPersonSkipSet(args, personIdMapPath, out var existingPeople))
+            return 1;
+
         var result = await Visa2014EmployeePositionHistoryODataImporter.RunAsync(
             target,
             resolver,
@@ -984,14 +1010,15 @@ internal static class Visa2014ImportCommand
             maxRows,
             dryRun,
             verbose,
-            supplementPermitPositions);
+            supplementPermitPositions,
+            existingPeople);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  ActualPositions created: {result.ActualPositionsCreated}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (person already on target): {result.SkippedExistingPerson}  ActualPositions created: {result.ActualPositionsCreated}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -1026,6 +1053,9 @@ internal static class Visa2014ImportCommand
 
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
 
+        if (!TryLoadExistingPersonSkipSet(args, personIdMapPath, out var existingPeople))
+            return 1;
+
         var result = await Visa2014EmployeeSalaryODataImporter.RunAsync(
             target,
             source.ConnectionString,
@@ -1034,14 +1064,15 @@ internal static class Visa2014ImportCommand
             dryRun ? null : salaryIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            existingPeople);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  Skipped (person already on target): {result.SkippedExistingPerson}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }
@@ -1565,6 +1596,23 @@ internal static class Visa2014ImportCommand
         if (int.TryParse(GetOptionValue(args, "--batch-size"), out var size) && size > 0)
             return size;
         return 50;
+    }
+
+    private static bool TryLoadExistingPersonSkipSet(
+        IReadOnlyList<string> args,
+        string personIdMapPath,
+        out IReadOnlySet<Guid>? existingPeople)
+    {
+        var load = Visa2014ExistingPersonSkipSet.LoadForChildRun(args, personIdMapPath);
+        if (load.Error != null)
+        {
+            Console.Error.WriteLine(load.Error);
+            existingPeople = null;
+            return false;
+        }
+
+        existingPeople = load.Set;
+        return true;
     }
 
     private static bool HasArg(IReadOnlyList<string> args, string flag) =>

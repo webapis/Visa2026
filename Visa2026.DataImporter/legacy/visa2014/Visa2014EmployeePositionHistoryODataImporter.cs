@@ -11,6 +11,7 @@ internal sealed class Visa2014EmployeePositionHistoryImportResult
     public int DedupeMergedCount { get; init; }
     public int SkippedNoPersonMap { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public int ActualPositionsCreated { get; init; }
@@ -30,7 +31,8 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        bool supplementPermitReferencedOnly = false)
+        bool supplementPermitReferencedOnly = false,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         if (verbose)
@@ -79,6 +81,7 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
+        int skippedExistingPerson = 0;
         int relinked = 0;
         int actualPositionsCreated = 0;
         int positionsCreated = 0;
@@ -107,6 +110,14 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                 skippedNoPerson++;
                 if (verbose)
                     Console.WriteLine($"  SKIP {legacyOid}: Person {legacyPersonOid} not in id-map");
+                continue;
+            }
+
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, legacyPersonOid))
+            {
+                skippedExistingPerson++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: person {legacyPersonOid} already on target");
                 continue;
             }
 
@@ -223,6 +234,7 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedNoPersonMap = skippedNoPerson,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedExistingPerson = skippedExistingPerson,
             PostedCount = posted,
             FailedCount = failed,
             ActualPositionsCreated = actualPositionsCreated,

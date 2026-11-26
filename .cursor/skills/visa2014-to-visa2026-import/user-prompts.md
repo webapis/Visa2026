@@ -93,7 +93,7 @@ Copy this to start the next catch-up of `visa2026_prod`. First run completed 202
 
 Before importing, rebuild id-maps/calik-energi-onprem-prod from live visa2026_prod (--rebuild-visa2014-id-maps) so officer-created rows are linked. Keep the document id-maps from the last file pass. Do not restore July application or document maps. Do not pass an application id-map. Do not touch visa2026_staging. Do not back up unless I ask.
 
-Insert only. A legacy id already in the id-map is skipped and the Visa2026 row is not updated. If the natural key is already on production and the legacy id is missing from the map, link the id and skip. Never insert a second row. Never update an existing row.
+Insert only. A legacy id already in the id-map is skipped and the Visa2026 row is not updated. Pass --skip-children-of-existing-persons on Person and on every later scalar and file step. Person import writes Person.skip-children.json beside the person id-map. A legacy person already on production is skipped, and so are that person's Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary, Photo, PassportDocument, EducationDocument, and FamilyProofDocument. Match a real personal number. When the legacy number is blank, 0, or only dashes and dots, match first name, last name, and birth date. A person who is not already on production is imported with those records. Never update an existing row.
 
 From 2026-10-23 onward: do not import Visa, VisaDocument, WorkPermit, WorkPermitItem, WorkPermitDocument, Invitation, InvitationItem, or InvitationDocument. Officers enter those on production by hand. Do not run --visa-remainder, --work-permit-remainder, or --invitation-remainder. Id-map rebuild may still map rows already on prod; do not POST or file-import those entities.
 
@@ -102,7 +102,7 @@ Do not import ApplicationProfileInstance, roster, or progress on this run. Two a
 Scalar order, stop on the first non-zero exit:
 Person, Passport, Education, EmployeePositionHistory, AddressOfResidence, EmployeeSalary.
 
-Then fill missing files only, in this order. Do not replace photo or scan bytes already stored:
+Then files, with the same --skip-children-of-existing-persons flag. Skip photo and scans for a person already on production. For a person imported in this run, fill missing files only and do not replace bytes already stored:
 Person Photo, Passport PassportDocument, Education EducationDocument, Person FamilyProofDocument.
 
 If Education fails because an institution or specialty NameTm is missing, insert that exact legacy title into visa2026_prod and the Calik catalog JSON, then re-run Education only. Do not invent labels. If an address fails on a missing lodging, hotel, or hospital, add that site from the legacy row and its city, then re-run AddressOfResidence only.

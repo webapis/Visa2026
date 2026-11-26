@@ -15,6 +15,7 @@ internal sealed class Visa2014PersonImportResult
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
+    public IReadOnlySet<Guid> PostedTargetIds { get; init; } = new HashSet<Guid>();
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
@@ -86,6 +87,7 @@ internal static class Visa2014PersonODataImporter
                 r => r.GetValueOrDefault("Subcontractor") as string);
 
         var idMap = new Dictionary<Guid, Guid>(existingIdMap);
+        var postedTargetIds = new HashSet<Guid>();
         var errors = new List<string>();
         int posted = 0;
         int failed = 0;
@@ -172,6 +174,7 @@ internal static class Visa2014PersonODataImporter
                 }
 
                 idMap[legacyOid] = createdId.Value;
+                postedTargetIds.Add(createdId.Value);
                 duplicateGuard?.RegisterFromImportRow(row, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
@@ -211,6 +214,7 @@ internal static class Visa2014PersonODataImporter
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
+            PostedTargetIds = postedTargetIds,
             Errors = errors,
         };
     }

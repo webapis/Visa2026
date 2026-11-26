@@ -9,6 +9,7 @@ internal sealed class Visa2014PersonPhotoImportResult
     public int Processed { get; init; }
     public int Patched { get; init; }
     public int SkippedAlreadyHasPhoto { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int SkippedNoBlob { get; init; }
     public int Failed { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
@@ -25,7 +26,8 @@ internal static class Visa2014PersonPhotoImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        string? targetConnection = null)
+        string? targetConnection = null,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         if (!File.Exists(idMapPath))
             throw new FileNotFoundException("Person id-map not found. Run scalar --import-visa2014 first.", idMapPath);
@@ -46,9 +48,16 @@ internal static class Visa2014PersonPhotoImporter
         int failed = 0;
         int skippedNoBlob = 0;
         int skippedAlreadyHasPhoto = 0;
+        int skippedExistingPerson = 0;
 
         foreach (var (legacyOid, targetId) in entries)
         {
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, legacyOid))
+            {
+                skippedExistingPerson++;
+                continue;
+            }
+
             if (alreadyHasPhoto.Contains(targetId))
             {
                 skippedAlreadyHasPhoto++;
@@ -115,6 +124,7 @@ internal static class Visa2014PersonPhotoImporter
             Processed = entries.Count,
             Patched = patched,
             SkippedAlreadyHasPhoto = skippedAlreadyHasPhoto,
+            SkippedExistingPerson = skippedExistingPerson,
             SkippedNoBlob = skippedNoBlob,
             Failed = failed,
             Errors = errors,

@@ -16,6 +16,7 @@ internal sealed class Visa2014PassportCopyImportResult
     public int SkippedNoBlob { get; init; }
     public int SkippedOversize { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int SkippedDuplicateBlob { get; init; }
     public int Failed { get; init; }
     public string? CopyIdMapPath { get; init; }
@@ -30,7 +31,8 @@ internal static class Visa2014PassportCopyImporter
         SELECT
             CAST(pc.Oid AS varchar(36)) AS LegacyCopyOid,
             CAST(pc.Passport AS varchar(36)) AS LegacyPassportOid,
-            p.PassportNumber
+            p.PassportNumber,
+            CAST(p.Person AS varchar(36)) AS LegacyPersonOid
         FROM dbo.PassportCopy pc
         INNER JOIN dbo.Passport p ON pc.Passport = p.Oid AND p.GCRecord IS NULL
         WHERE pc.GCRecord IS NULL
@@ -46,7 +48,8 @@ internal static class Visa2014PassportCopyImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        string? targetConnection = null)
+        string? targetConnection = null,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
         var existingCopyMap = LoadOptionalCopyIdMap(copyIdMapOutputPath);
@@ -64,6 +67,7 @@ internal static class Visa2014PassportCopyImporter
         int skippedNoBlob = 0;
         int skippedOversize = 0;
         int skippedAlreadyImported = 0;
+        int skippedExistingPerson = 0;
         int skippedDuplicateBlob = 0;
         var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
         var copyIndexByPassport = new Dictionary<Guid, int>();
@@ -72,8 +76,14 @@ internal static class Visa2014PassportCopyImporter
         if (existingOnTarget > 0)
             Console.WriteLine($"INF Passport scans already on target: {existingOnTarget} (same bytes are not inserted again)");
 
-        foreach (var (legacyCopyOid, legacyPassportOid, passportNumber) in copyRows)
+        foreach (var (legacyCopyOid, legacyPassportOid, passportNumber, legacyPersonOid) in copyRows)
         {
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, legacyPersonOid))
+            {
+                skippedExistingPerson++;
+                continue;
+            }
+
             if (!passportIdMap.TryGetValue(legacyPassportOid, out var targetPassportId))
             {
                 skippedNoPassportMap++;
@@ -185,6 +195,7 @@ internal static class Visa2014PassportCopyImporter
             SkippedNoBlob = skippedNoBlob,
             SkippedOversize = skippedOversize,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedExistingPerson = skippedExistingPerson,
             SkippedDuplicateBlob = skippedDuplicateBlob,
             Failed = failed,
             CopyIdMapPath = copyIdMapPath,
@@ -192,7 +203,7 @@ internal static class Visa2014PassportCopyImporter
         };
     }
 
-    private static async Task<List<(Guid LegacyCopyOid, Guid LegacyPassportOid, string? PassportNumber)>> ListLegacyCopyRowsAsync(
+    private static async Task<List<(Guid LegacyCopyOid, Guid LegacyPassportOid, string? PassportNumber, Guid LegacyPersonOid)>> ListLegacyCopyRowsAsync(
         SqlConnection connection,
         int? maxRows)
     {
@@ -203,7 +214,7 @@ internal static class Visa2014PassportCopyImporter
                 StringComparison.Ordinal)
             : ListCopiesSql;
 
-        var rows = new List<(Guid, Guid, string?)>();
+        var rows = new List<(Guid, Guid, string?, Guid)>();
         await using var command = new SqlCommand(sql, connection);
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -213,7 +224,10 @@ internal static class Visa2014PassportCopyImporter
             if (!Guid.TryParse(reader.GetString(1), out var passportOid))
                 continue;
             var passportNumber = reader.IsDBNull(2) ? null : reader.GetString(2);
-            rows.Add((copyOid, passportOid, passportNumber));
+            var legacyPersonOid = !reader.IsDBNull(3) && Guid.TryParse(reader.GetString(3), out var personOid)
+                ? personOid
+                : Guid.Empty;
+            rows.Add((copyOid, passportOid, passportNumber, legacyPersonOid));
         }
 
         return rows;

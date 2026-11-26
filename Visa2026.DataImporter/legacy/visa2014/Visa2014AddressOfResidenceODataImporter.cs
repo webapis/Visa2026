@@ -12,6 +12,7 @@ internal sealed class Visa2014AddressOfResidenceImportResult
     public int DedupeMergedCount { get; init; }
     public int SkippedNoPersonMap { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -30,7 +31,8 @@ internal static class Visa2014AddressOfResidenceODataImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        string? targetConnectionString = null)
+        string? targetConnectionString = null,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         if (verbose)
@@ -71,6 +73,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
+        int skippedExistingPerson = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -102,6 +105,14 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 skippedNoPerson++;
                 if (verbose)
                     Console.WriteLine($"  SKIP {legacyOid}: Person {legacyPersonOid} not in id-map");
+                continue;
+            }
+
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, legacyPersonOid))
+            {
+                skippedExistingPerson++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: person {legacyPersonOid} already on target");
                 continue;
             }
 
@@ -158,7 +169,8 @@ internal static class Visa2014AddressOfResidenceODataImporter
         int inferredSkipped = 0;
         if (!dryRun)
         {
-            (inferredPosted, inferredFailed, inferredSkipped) = await ImportInferredFromPiaAsync(
+            int inferredExistingPerson;
+            (inferredPosted, inferredFailed, inferredSkipped, inferredExistingPerson) = await ImportInferredFromPiaAsync(
                 target,
                 resolver,
                 legacyConnectionString,
@@ -167,7 +179,9 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 addressIdMap,
                 targetConnectionString,
                 siteGuard,
-                verbose);
+                verbose,
+                existingPersonLegacyOids);
+            skippedExistingPerson += inferredExistingPerson;
             if (inferredPosted > 0 || inferredSkipped > 0)
                 Console.WriteLine(
                     $"INF PIA-inferred AddressOfResidence: posted {inferredPosted}, skipped {inferredSkipped}, failed {inferredFailed}");
@@ -194,6 +208,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedNoPersonMap = skippedNoPerson,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedExistingPerson = skippedExistingPerson,
             PostedCount = posted + inferredPosted,
             FailedCount = failed + inferredFailed,
             IdMapPath = idMapPath,
@@ -277,7 +292,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         return gaps.Count > 0 ? string.Join("; ", gaps) : "lookup or required field";
     }
 
-    private static async Task<(int Posted, int Failed, int Skipped)> ImportInferredFromPiaAsync(
+    private static async Task<(int Posted, int Failed, int Skipped, int ExistingPerson)> ImportInferredFromPiaAsync(
         IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
@@ -286,7 +301,8 @@ internal static class Visa2014AddressOfResidenceODataImporter
         Dictionary<Guid, Guid> addressIdMap,
         string? targetConnectionString,
         Visa2014AddressOfResidenceSiteDuplicateGuard siteGuard,
-        bool verbose)
+        bool verbose,
+        IReadOnlySet<Guid>? existingPersonLegacyOids)
     {
         RegisterSponsorCanonicalFromExistingLegacyAor(
             legacyConnectionString, personIdMap, addressIdMap, verbose);
@@ -297,6 +313,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         int posted = 0;
         int failed = 0;
         int skipped = 0;
+        int existingPerson = 0;
 
         foreach (var plan in batch.Plans)
         {
@@ -311,6 +328,15 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 skipped++;
                 if (verbose)
                     Console.WriteLine($"  SKIP inferred {plan.SyntheticLegacyOid}: Person {plan.LegacyPersonOid} not in id-map");
+                continue;
+            }
+
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, plan.LegacyPersonOid))
+            {
+                existingPerson++;
+                skipped++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP inferred {plan.SyntheticLegacyOid}: person {plan.LegacyPersonOid} already on target");
                 continue;
             }
 
@@ -356,7 +382,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         }
 
         await target.FlushAsync();
-        return (posted, failed, skipped);
+        return (posted, failed, skipped, existingPerson);
     }
 
     private static void RegisterSponsorCanonicalFromExistingLegacyAor(

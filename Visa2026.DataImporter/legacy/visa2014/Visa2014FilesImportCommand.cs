@@ -185,6 +185,13 @@ internal static class Visa2014FilesImportCommand
             Console.WriteLine($"INF Person id-map: {personIdMapPath}");
             Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
 
+            var familySkip = Visa2014ExistingPersonSkipSet.LoadForChildRun(args, personIdMapPath);
+            if (familySkip.Error != null)
+            {
+                Console.Error.WriteLine(familySkip.Error);
+                return 1;
+            }
+
             var familyProofResult = await Visa2014FamilyProofDocumentImporter.RunAsync(
                 target,
                 source.ConnectionString,
@@ -193,7 +200,8 @@ internal static class Visa2014FilesImportCommand
                 maxRows,
                 dryRun,
                 verbose,
-                GetTargetConnection(args));
+                GetTargetConnection(args),
+                familySkip.Set);
 
             Console.WriteLine($"INF Person id-map entries: {familyProofResult.PersonIdMapEntries}");
             Console.WriteLine($"INF Legacy family-proof rows: {familyProofResult.LegacyRows}");
@@ -202,6 +210,7 @@ internal static class Visa2014FilesImportCommand
                 $"PersonFamilyRelationDocument: {familyProofResult.PostedFamilyRelationDocument}  Failed: {familyProofResult.Failed}  " +
                 $"No person map: {familyProofResult.SkippedNoPersonMap}  No blob: {familyProofResult.SkippedNoBlob}  " +
                 $"Oversize (>5MB): {familyProofResult.SkippedOversize}  Already imported: {familyProofResult.SkippedAlreadyImported}  " +
+                $"Person already on target: {familyProofResult.SkippedExistingPerson}  " +
                 $"Duplicate blob: {familyProofResult.SkippedDuplicateBlob}");
             if (familyProofResult.DocumentIdMapPath != null)
                 Console.WriteLine($"INF Document id-map: {familyProofResult.DocumentIdMapPath}");
@@ -246,6 +255,13 @@ internal static class Visa2014FilesImportCommand
 
         if (isPhoto)
         {
+            var photoSkip = Visa2014ExistingPersonSkipSet.LoadForChildRun(args, idMapPath);
+            if (photoSkip.Error != null)
+            {
+                Console.Error.WriteLine(photoSkip.Error);
+                return 1;
+            }
+
             var result = await Visa2014PersonPhotoImporter.RunAsync(
                 target,
                 source.ConnectionString,
@@ -253,12 +269,14 @@ internal static class Visa2014FilesImportCommand
                 maxRows,
                 dryRun,
                 verbose,
-                GetTargetConnection(args));
+                GetTargetConnection(args),
+                photoSkip.Set);
 
             Console.WriteLine($"INF Id-map entries: {result.IdMapEntries}");
             Console.WriteLine(
                 $"INF Processed: {result.Processed}  Patched: {result.Patched}  " +
-                $"Already has photo: {result.SkippedAlreadyHasPhoto}  No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
+                $"Already has photo: {result.SkippedAlreadyHasPhoto}  Person already on target: {result.SkippedExistingPerson}  " +
+                $"No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
 
             foreach (var error in result.Errors.Take(20))
                 Console.Error.WriteLine($"ERR {error}");
@@ -317,6 +335,15 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
         Console.WriteLine($"INF Copy id-map: {copyIdMapPath}");
 
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+        var passportSkip = Visa2014ExistingPersonSkipSet.LoadForChildRun(args, personIdMapPath);
+        if (passportSkip.Error != null)
+        {
+            Console.Error.WriteLine(passportSkip.Error);
+            return 1;
+        }
+
         var result = await Visa2014PassportCopyImporter.RunAsync(
             target,
             source.ConnectionString,
@@ -325,7 +352,8 @@ internal static class Visa2014FilesImportCommand
             maxRows,
             dryRun,
             verbose,
-            GetTargetConnection(args));
+            GetTargetConnection(args),
+            passportSkip.Set);
 
         Console.WriteLine($"INF Passport id-map entries: {result.PassportIdMapEntries}");
         Console.WriteLine($"INF Legacy copy rows: {result.LegacyCopyRows}");
@@ -333,6 +361,7 @@ internal static class Visa2014FilesImportCommand
             $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
             $"No passport map: {result.SkippedNoPassportMap}  No blob: {result.SkippedNoBlob}  " +
             $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}  " +
+            $"Person already on target: {result.SkippedExistingPerson}  " +
             $"Duplicate blob: {result.SkippedDuplicateBlob}");
         if (result.CopyIdMapPath != null)
             Console.WriteLine($"INF Copy id-map: {result.CopyIdMapPath}");
@@ -427,6 +456,15 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Education id-map: {educationIdMapPath}");
         Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
 
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+        var educationSkip = Visa2014ExistingPersonSkipSet.LoadForChildRun(args, personIdMapPath);
+        if (educationSkip.Error != null)
+        {
+            Console.Error.WriteLine(educationSkip.Error);
+            return 1;
+        }
+
         var result = await Visa2014EducationDocumentImporter.RunAsync(
             target,
             source.ConnectionString,
@@ -435,7 +473,8 @@ internal static class Visa2014FilesImportCommand
             maxRows,
             dryRun,
             verbose,
-            GetTargetConnection(args));
+            GetTargetConnection(args),
+            educationSkip.Set);
 
         Console.WriteLine($"INF Education id-map entries: {result.EducationIdMapEntries}");
         Console.WriteLine($"INF Legacy diploma copy rows: {result.LegacyCopyRows}");
@@ -443,6 +482,7 @@ internal static class Visa2014FilesImportCommand
             $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
             $"No education map: {result.SkippedNoEducationMap}  No blob: {result.SkippedNoBlob}  " +
             $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}  " +
+            $"Person already on target: {result.SkippedExistingPerson}  " +
             $"Duplicate blob: {result.SkippedDuplicateBlob}");
         if (result.DocumentIdMapPath != null)
             Console.WriteLine($"INF Document id-map: {result.DocumentIdMapPath}");

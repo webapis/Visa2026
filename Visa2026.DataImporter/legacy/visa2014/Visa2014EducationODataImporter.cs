@@ -11,6 +11,7 @@ internal sealed class Visa2014EducationImportResult
     public int DedupeMergedCount { get; init; }
     public int SkippedNoPersonMap { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -28,7 +29,8 @@ internal static class Visa2014EducationODataImporter
         string? educationIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         if (verbose)
@@ -65,6 +67,7 @@ internal static class Visa2014EducationODataImporter
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
+        int skippedExistingPerson = 0;
         int relinked = 0;
 
         foreach (var row in batch.ImportRows)
@@ -90,6 +93,14 @@ internal static class Visa2014EducationODataImporter
                 skippedNoPerson++;
                 if (verbose)
                     Console.WriteLine($"  SKIP {legacyOid}: Person {legacyPersonOid} not in id-map");
+                continue;
+            }
+
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, legacyPersonOid))
+            {
+                skippedExistingPerson++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: person {legacyPersonOid} already on target");
                 continue;
             }
 
@@ -166,6 +177,7 @@ internal static class Visa2014EducationODataImporter
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedNoPersonMap = skippedNoPerson,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedExistingPerson = skippedExistingPerson,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,

@@ -13,6 +13,7 @@ internal sealed class Visa2014FamilyProofDocumentImportResult
     public int SkippedNoBlob { get; init; }
     public int SkippedOversize { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int SkippedExistingPerson { get; init; }
     public int SkippedDuplicateBlob { get; init; }
     public int Failed { get; init; }
     public string? DocumentIdMapPath { get; init; }
@@ -31,7 +32,8 @@ internal static class Visa2014FamilyProofDocumentImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        string? targetConnection = null)
+        string? targetConnection = null,
+        IReadOnlySet<Guid>? existingPersonLegacyOids = null)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         var docMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
@@ -63,6 +65,7 @@ internal static class Visa2014FamilyProofDocumentImporter
         int skippedNoBlob = 0;
         int skippedOversize = 0;
         int skippedAlreadyImported = 0;
+        int skippedExistingPerson = 0;
         int skippedDuplicateBlob = 0;
         int postedSinceLastSave = 0;
 
@@ -71,6 +74,12 @@ internal static class Visa2014FamilyProofDocumentImporter
             if (!personIdMap.TryGetValue(row.LegacyPersonOid, out var targetPersonId))
             {
                 skippedNoPersonMap++;
+                continue;
+            }
+
+            if (Visa2014ExistingPersonSkipSet.ShouldSkip(existingPersonLegacyOids, row.LegacyPersonOid))
+            {
+                skippedExistingPerson++;
                 continue;
             }
 
@@ -179,6 +188,7 @@ internal static class Visa2014FamilyProofDocumentImporter
             SkippedNoBlob = skippedNoBlob,
             SkippedOversize = skippedOversize,
             SkippedAlreadyImported = skippedAlreadyImported,
+            SkippedExistingPerson = skippedExistingPerson,
             SkippedDuplicateBlob = skippedDuplicateBlob,
             Failed = failed,
             DocumentIdMapPath = documentIdMapPath,
