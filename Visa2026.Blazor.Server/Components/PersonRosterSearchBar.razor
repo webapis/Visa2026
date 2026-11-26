@@ -46,8 +46,8 @@
     /// <summary>Short pause after typing stops, then the list query runs.</summary>
     private const int SearchInputDelayMs = 300;
 
-    /// <summary>Shorter text matches too widely, so the list stays empty until four characters.</summary>
-    private const int MinimumSearchLength = 4;
+    /// <summary>A single letter starts the search. Blank text clears it.</summary>
+    private const int MinimumSearchLength = 1;
 
     private string text = string.Empty;
     private string committed = string.Empty;
