@@ -32,7 +32,9 @@ internal readonly struct ApplicationListViewDisplayState
             ? slaAppearanceCode
             : CompletedRouteAppearance(application, primaryStateCode);
         // Green > AS/CO yellow > Submitted yellow > Ministrlikden çykan (last approval) > approval-leg teal > At Office peach > SLA.
-        if (ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(application, primaryStateCode))
+        // Hand-in green (Seretmezlik) must win over the submitted yellow below.
+        if (ApplicationWorkspaceViaMinistryIssuanceGreenGate.IsGreen(application, primaryStateCode)
+            || IsCompleteAtHandIn(application, primaryStateCode))
             listRowAppearance = ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
         else if (string.Equals(
             primaryStateCode,
@@ -87,13 +89,21 @@ internal readonly struct ApplicationListViewDisplayState
     }
 
     /// <summary>
+    /// Seretmezlik (and any profile whose last visible step is hand-in) is complete at
+    /// Migrasiýa gullugyna tabşyryldy. The list uses Issued green. The stored step stays
+    /// <c>SUBMITTED_MIGRATION</c>.
+    /// </summary>
+    private static bool IsCompleteAtHandIn(ApplicationProfileInstance application, string stateCode) =>
+        ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(stateCode, application)
+        && ApplicationMigrationSubmission.IsState(stateCode);
+
+    /// <summary>
     /// A finished route uses the same green as Issued, including a short route such as
     /// Seretmezlik that ends at hand-in instead of an AS number or Issued step.
     /// </summary>
     private static string CompletedRouteAppearance(ApplicationProfileInstance application, string stateCode)
     {
-        if (ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(stateCode, application)
-            && ApplicationMigrationSubmission.IsState(stateCode))
+        if (IsCompleteAtHandIn(application, stateCode))
             return ApplicationProfileInstanceProgressStateCodes.ProcessIssued;
 
         return stateCode;

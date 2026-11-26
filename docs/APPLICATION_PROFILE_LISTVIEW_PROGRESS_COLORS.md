@@ -36,12 +36,13 @@ Turkmen labels below are the officer-facing names used in seed / localization (`
 Resolved in `ApplicationListViewDisplayState.Resolve`. Milestone colors **override** SLA tint for forced steps:
 
 1. **Via Ministries issuance green** — latest is `PROCESS_STARTED` **and** required Result chips are complete → paint as `PROCESS_ISSUED` (`ApplicationWorkspaceViaMinistryIssuanceGreenGate`). Invitation profiles ignore the Visa chip. **Wiza we Iş Rugsatnamasyny Uzaltmak** (`extend_visa_wp`) is also green when every work permit is in and the visa-issue counter is **0 gün** while visas are still missing. The counter and the Wiza pill stay amber. The stored step stays **CO belgisi alyndy**. Report Dashboard is unchanged.
-2. **CO belgisi alyndy** — `PROCESS_STARTED` → `#FED700`
-3. **Migrasiýa gullugyna tabşyryldy** — `SUBMITTED_MIGRATION` → `#FFF59D`
-4. **Ministrlikden çykan** — last ministry leg `N_REVIEW_APPROVED` → `LAST_APPROVAL_COMPLETE` → `#4169E2`
-5. **Approval-leg teal** — other `N_REVIEW_STARTED` / intermediate `N_REVIEW_APPROVED` / `AT_THE_MINISTERY_N` → `#3FE0D0`
-6. **Ofisde peach** — `IS_BEING_PREPARED` / `AT_OFFICE` → `#FEDEAF`
-7. Else SLA / completed-route appearance (warning / overdue / other registry codes)
+2. **Hand-in is the last visible step** — Seretmezlik (Issued hidden; hand-in is terminal) at `SUBMITTED_MIGRATION` → paint as `PROCESS_ISSUED` (`#86efac`). The stored step stays **Migrasiýa gullugyna tabşyryldy**. Profiles that still show a later step stay on the submitted yellow.
+3. **CO belgisi alyndy** — `PROCESS_STARTED` → `#FED700`
+4. **Migrasiýa gullugyna tabşyryldy** — `SUBMITTED_MIGRATION` → `#FFF59D`
+5. **Ministrlikden çykan** — last ministry leg `N_REVIEW_APPROVED` → `LAST_APPROVAL_COMPLETE` → `#4169E2`
+6. **Approval-leg teal** — other `N_REVIEW_STARTED` / intermediate `N_REVIEW_APPROVED` / `AT_THE_MINISTERY_N` → `#3FE0D0`
+7. **Ofisde peach** — `IS_BEING_PREPARED` / `AT_OFFICE` → `#FEDEAF`
+8. Else SLA / completed-route appearance (warning / overdue / other registry codes)
 
 All reject outcomes share one red (`#fca5a5`). Cancelled stays the lighter coral (`#fecaca`).
 
@@ -67,6 +68,7 @@ All reject outcomes share one red (`#fca5a5`). Cancelled stays the lighter coral
 | 2026-11-12 | Strategy captured: palette, Turkmen labels, precedence, yellow pair contrast (`#FFF59D` vs `#FED700`), Ministrlikden çykan blue, Ministrlige iberlen rename |
 | 2026-11-12 | Applied: palette/precedence wired; last-approval ListView label Ministrlikden çykan; unit tests lock hex + Resolve |
 | 2026-11-16 | `extend_visa_wp`: list row turns green at visa-window day 0 with visas still missing. Controls stay amber. Stored step stays CO belgisi alyndy |
+| 2026-11-26 | Seretmezlik list row turns green when the latest step is Migrasiýa gullugyna tabşyryldy (hand-in is the last visible step). Stored step unchanged |
 
 ## 6. Color filter tabs (ListView)
 

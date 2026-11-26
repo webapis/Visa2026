@@ -133,4 +133,76 @@ public class ApplicationProfileListViewProgressColorsTests
             state.ListRowAppearanceStateCode);
         Assert.DoesNotContain("LAST_APPROVAL_COMPLETE", state.ListRowCssClass, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void Resolve_seretmezlik_hand_in_is_green()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                Code = "seretmezlik",
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+                ActionFamily = ApplicationProfileActionFamily.Cancellation,
+                RequireSubmitToOrganization = true,
+                RequireTargetApplicationProfileInstance = true,
+                ProgressStepVisibility =
+                    "[{\"Key\":\"office\",\"Visible\":false},{\"Key\":\"ministry\",\"Visible\":false},{\"Key\":\"migration-submitted\",\"Visible\":true},{\"Key\":\"migration\",\"Visible\":false},{\"Key\":\"process-issued\",\"Visible\":false},{\"Key\":\"process-rejected\",\"Visible\":false},{\"Key\":\"process-cancelled\",\"Visible\":false}]",
+            },
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>
+            {
+                new()
+                {
+                    Date = new DateTime(2026, 11, 17),
+                    State = new ApplicationState
+                    {
+                        Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+                    },
+                },
+            },
+        };
+
+        var state = ApplicationListViewDisplayState.Resolve(app);
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            state.PrimaryStateCode);
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.ProcessIssued,
+            state.ListRowAppearanceStateCode);
+        Assert.Contains("PROCESS_ISSUED", state.ListRowCssClass, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Resolve_submitted_stays_yellow_when_a_later_step_is_still_visible()
+    {
+        var app = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile
+            {
+                Code = "cancel_visa",
+                ProgressRoute = ApplicationProfileInstanceProgressRouteKind.DirectToMigrationService,
+                ActionFamily = ApplicationProfileActionFamily.Cancellation,
+                ProgressStepVisibility =
+                    "[{\"Key\":\"office\",\"Visible\":true},{\"Key\":\"ministry\",\"Visible\":false},{\"Key\":\"migration-submitted\",\"Visible\":true},{\"Key\":\"migration\",\"Visible\":false},{\"Key\":\"process-issued\",\"Visible\":true},{\"Key\":\"process-rejected\",\"Visible\":false},{\"Key\":\"process-cancelled\",\"Visible\":false}]",
+            },
+            ProgressHistory = new ObservableCollection<ApplicationProfileInstanceProgress>
+            {
+                new()
+                {
+                    Date = new DateTime(2026, 11, 17),
+                    State = new ApplicationState
+                    {
+                        Code = ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+                    },
+                },
+            },
+        };
+
+        var state = ApplicationListViewDisplayState.Resolve(app);
+
+        Assert.Equal(
+            ApplicationProfileInstanceProgressStateCodes.SubmittedToMigration,
+            state.ListRowAppearanceStateCode);
+    }
 }

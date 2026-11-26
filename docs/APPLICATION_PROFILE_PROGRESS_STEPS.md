@@ -3,7 +3,7 @@
 **Purpose:** Reference for which progress-timeline steps each Calik Energi Application Profile shows.
 **Source of truth (seed):** `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/application-profile.calik-energi.json` → each row's `ProgressSteps` array (`Key` + `Visible`).
 **Runtime:** `ApplicationProfileProgressStepVisibility` and the case workspace timeline (`ApplicationWorkspaceProgressTimeline`).
-**Related:** [`APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md) · skill visa2026-application-profile · progress transitions visa2026-application-progress.
+**Related:** [`APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md) · skill visa2026-application-process-steps (visibility, completion, this doc) · profile config visa2026-application-profile · progress transitions visa2026-application-progress.
 
 **Snapshot:** 35 profiles in the Calik Energi tenant catalog (synced from Excel). Re-check the JSON if profiles are added or `ProgressSteps` change.
 **Excel export:** [`APPLICATION_PROFILE_PROGRESS_STEPS.xlsx`](APPLICATION_PROFILE_PROGRESS_STEPS.xlsx) — sheets: Column legend, Visibility patterns, Full matrix, Notes (`Y`/`N` for visible).

@@ -64,6 +64,7 @@ disable-model-invocation: false
 | Topic | Skill |
 |-------|--------|
 | Progress transitions, ministry legs on **Application** (not profile embed yet) | [visa2026-application-progress](../visa2026-application-progress/SKILL.md) |
+| Which `ProgressSteps` are visible, completion, list/workspace green | [visa2026-application-process-steps](../visa2026-application-process-steps/SKILL.md) |
 | `ApplicationType` JSON seed, lookup catalogs | [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) |
 | Field visibility / `[Appearance]` on Application today | grep `ApplicationType.Show*` — migrate to profile in slice 2 |
 | Resminamalar / nested Word–Excel on profile | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |

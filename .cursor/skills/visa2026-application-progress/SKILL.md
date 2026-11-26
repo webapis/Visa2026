@@ -38,6 +38,7 @@ disable-model-invocation: false
 | Topic | Skill |
 |-------|--------|
 | ListView row colors, `BoStateAppearanceColors`, `PrimaryStateCode` tint | [visa2026-bo-state-colors](../visa2026-bo-state-colors/SKILL.md) |
+| Which steps a profile shows, when the case is complete, matrix doc | [visa2026-application-process-steps](../visa2026-application-process-steps/SKILL.md) |
 | Tenant `ProjectContract` / `ApprovingMinistry` JSON seed | [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) |
 | `Invalid column name`, Docker deploy, `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 | Officer E2E on Applications list | [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) |

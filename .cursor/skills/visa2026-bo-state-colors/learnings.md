@@ -36,6 +36,15 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **`SKILL.md`** or 
 
 ## Entries
 
+### 2026-11-26 — [+] Seretmezlik hand-in uses Issued green
+
+- **Outcome**: positive
+- **Context**: Application Profile Instance Direct list. Stored step stays `SUBMITTED_MIGRATION`.
+- **What we tried**: Leave every hand-in row on `#FFF59D`.
+- **What worked / failed**: That yellow is only for profiles that still have a later step. Seretmezlik's last visible step is hand-in, so the row uses `PROCESS_ISSUED` (`#86efac`). Hex registry unchanged.
+- **Reuse next time**: Completion green is `visa2026-application-process-steps`. Do not map all `SUBMITTED_MIGRATION` rows to green.
+- **Promote**: done → visa2026-application-process-steps
+
 ### 2026-10-24 — [+] Whole instance ListView row uses progress tint
 
 - **Outcome**: positive

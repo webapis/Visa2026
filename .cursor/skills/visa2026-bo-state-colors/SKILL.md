@@ -27,6 +27,8 @@ disable-model-invocation: false
 
 **Workflow / transitions / ministry legs:** [visa2026-application-progress](../visa2026-application-progress/SKILL.md) — not this skill.
 
+**Which steps are visible, and when a case is complete (green on the list and in the workspace):** [visa2026-application-process-steps](../visa2026-application-process-steps/SKILL.md). Hex and palette stay here.
+
 **Not this skill:** state notification inbox UI ([`docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](../../../docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)), E2E list appearance ([`visa2026-easytest-e2e`](../visa2026-easytest-e2e/SKILL.md) for officer-journey tests).
 
 **Experience log:** [learnings.md](./learnings.md) — append-only (read before, append after verified ListView / appearance work).
