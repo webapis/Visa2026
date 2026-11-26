@@ -3,12 +3,14 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects.EmployeeSearch;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
 public sealed class EmployeeSearchNavigationController : WindowController
 {
     private ShowNavigationItemController _navigationController;
+    private bool _localizing;
 
     public EmployeeSearchNavigationController()
     {
@@ -19,16 +21,75 @@ public sealed class EmployeeSearchNavigationController : WindowController
     {
         base.OnActivated();
         _navigationController = Frame.GetController<ShowNavigationItemController>();
-        if (_navigationController != null)
-            _navigationController.CustomShowNavigationItem += OnCustomShowNavigationItem;
+        if (_navigationController == null)
+            return;
+
+        _navigationController.CustomShowNavigationItem += OnCustomShowNavigationItem;
+        _navigationController.ItemsInitialized += OnItemsInitialized;
+        if (_navigationController.ShowNavigationItemAction != null)
+            _navigationController.ShowNavigationItemAction.ItemsChanged += OnItemsChanged;
+
+        Localize(_navigationController.ShowNavigationItemAction?.Items);
     }
 
     protected override void OnDeactivated()
     {
         if (_navigationController != null)
+        {
             _navigationController.CustomShowNavigationItem -= OnCustomShowNavigationItem;
+            _navigationController.ItemsInitialized -= OnItemsInitialized;
+            if (_navigationController.ShowNavigationItemAction != null)
+                _navigationController.ShowNavigationItemAction.ItemsChanged -= OnItemsChanged;
+        }
+
         _navigationController = null;
         base.OnDeactivated();
+    }
+
+    private void OnItemsInitialized(object sender, EventArgs e) =>
+        Localize((sender as ShowNavigationItemController)?.ShowNavigationItemAction?.Items);
+
+    private void OnItemsChanged(object sender, EventArgs e)
+    {
+        if (_localizing)
+            return;
+
+        Localize((sender as ChoiceActionBase)?.Items);
+    }
+
+    private void Localize(ChoiceActionItemCollection items)
+    {
+        var item = Find(items);
+        if (item == null || _localizing)
+            return;
+
+        _localizing = true;
+        try
+        {
+            item.Caption = EmployeeSearchText.Get("Title");
+        }
+        finally
+        {
+            _localizing = false;
+        }
+    }
+
+    private static ChoiceActionItem Find(ChoiceActionItemCollection items)
+    {
+        if (items == null)
+            return null;
+
+        foreach (ChoiceActionItem item in items)
+        {
+            if (IsFindEmployeesItem(item))
+                return item;
+
+            var nested = Find(item.Items);
+            if (nested != null)
+                return nested;
+        }
+
+        return null;
     }
 
     private void OnCustomShowNavigationItem(object sender, CustomShowNavigationItemEventArgs e)
@@ -84,6 +145,7 @@ public sealed class EmployeeSearchChromeController : ViewController
         if (View is not DetailView detailView || detailView.Id != EmployeeSearchViewIds.DetailView)
             return;
 
+        detailView.Caption = EmployeeSearchText.Get("Title");
         detailView.AllowDelete.SetItemValue(Reason, false);
         detailView.AllowNew.SetItemValue(Reason, false);
         detailView.AllowEdit.SetItemValue(Reason, false);
