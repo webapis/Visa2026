@@ -160,10 +160,6 @@ public static class IssueIssuedVisaComposeService
         var visaIssuedPlaces = LoadLookups<VisaIssuedPlace>(objectSpace);
         var defaultPlaceId = DefaultIssuedPlaceId(objectSpace, instance)
             ?? visaIssuedPlaces.FirstOrDefault()?.Id;
-        var borderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
-            objectSpace,
-            typeof(BorderZoneName),
-            CommaSeparatedSelectionHelper.NoneValue);
 
         var defaultTypeId = instance.VisaType?.ID
             ?? instance.ApplicationProfile?.DefaultVisaType?.ID
@@ -301,7 +297,6 @@ public static class IssueIssuedVisaComposeService
             VisaCategories = visaCategories,
             VisaPeriods = visaPeriods,
             VisaIssuedPlaces = visaIssuedPlaces,
-            BorderZoneNames = borderZoneNames,
             Groups = groups,
         };
     }
@@ -317,10 +312,6 @@ public static class IssueIssuedVisaComposeService
         var visaIssuedPlaces = LoadLookups<VisaIssuedPlace>(objectSpace);
         var defaultPlaceId = DefaultIssuedPlaceId(objectSpace, instance)
             ?? visaIssuedPlaces.FirstOrDefault()?.Id;
-        var borderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
-            objectSpace,
-            typeof(BorderZoneName),
-            CommaSeparatedSelectionHelper.NoneValue);
 
         var defaultTypeId = instance.VisaType?.ID
             ?? instance.ApplicationProfile?.DefaultVisaType?.ID
@@ -468,7 +459,6 @@ public static class IssueIssuedVisaComposeService
             VisaCategories = visaCategories,
             VisaPeriods = visaPeriods,
             VisaIssuedPlaces = visaIssuedPlaces,
-            BorderZoneNames = borderZoneNames,
             Groups = groups,
         };
     }
@@ -517,7 +507,6 @@ public static class IssueIssuedVisaComposeService
             VisaCategories = full.VisaCategories,
             VisaPeriods = full.VisaPeriods,
             VisaIssuedPlaces = full.VisaIssuedPlaces,
-            BorderZoneNames = full.BorderZoneNames,
             Groups = [group],
         };
     }
@@ -679,6 +668,12 @@ public static class IssueIssuedVisaComposeService
                         BorderZoneSelectionHelper.ResolveForIssuedVisa(item.Invitation, instance))
                     : row.BorderZoneLocation.Trim();
                 BorderZoneSelectionHelper.ApplyDefaultIfEmpty(visa);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                instance,
+                ApplicationProfileSavedLocationField.BorderZone,
+                visa.BorderZoneLocation,
+                CommaSeparatedSelectionHelper.NoneValue);
 
                 var copyError = AttachPendingCopy(objectSpace, visa, row);
                 if (copyError != null)
@@ -825,6 +820,12 @@ public static class IssueIssuedVisaComposeService
                     BorderZoneSelectionHelper.ResolveForIssuedVisa(null, instance))
                 : row.BorderZoneLocation.Trim();
             BorderZoneSelectionHelper.ApplyDefaultIfEmpty(visa);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                instance,
+                ApplicationProfileSavedLocationField.BorderZone,
+                visa.BorderZoneLocation,
+                CommaSeparatedSelectionHelper.NoneValue);
 
             var copyError = AttachPendingCopy(objectSpace, visa, row);
             if (copyError != null)
@@ -929,6 +930,12 @@ public static class IssueIssuedVisaComposeService
                     BorderZoneSelectionHelper.ResolveForIssuedVisa(visa.IssuingInvitationItem?.Invitation, instance))
                 : row.BorderZoneLocation.Trim();
             BorderZoneSelectionHelper.ApplyDefaultIfEmpty(visa);
+            CaseSavedLocation.RememberStored(
+                objectSpace,
+                instance,
+                ApplicationProfileSavedLocationField.BorderZone,
+                visa.BorderZoneLocation,
+                CommaSeparatedSelectionHelper.NoneValue);
 
             objectSpace.CommitChanges();
             return new IssueIssuedVisaCreateResult

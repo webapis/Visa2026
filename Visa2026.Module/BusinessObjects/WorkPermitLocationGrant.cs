@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// Does not mutate <see cref="WorkPermitItem.WorkPermittedLocations"/> on the source permit.
 /// </summary>
 [DefaultClassOptions]
-[NavigationItem("WorkPermit")]
+[NavigationItem(false)]
 [DefaultProperty(nameof(GrantNumber))]
 [XafDisplayName("Work permit location grant")]
 public class WorkPermitLocationGrant : BaseObject, IPersonLinkParent

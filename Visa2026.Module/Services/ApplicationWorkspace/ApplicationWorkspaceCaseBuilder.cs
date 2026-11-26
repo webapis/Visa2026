@@ -364,6 +364,35 @@ internal static class ApplicationWorkspaceCaseBuilder
                 }
             }
 
+            if (CaseWorkPermitLocationCopy.ShowInLinkReview(application)
+                && !tiles.Any(t => string.Equals(t.TabKey, "wp-location", StringComparison.OrdinalIgnoreCase)))
+            {
+                var locExpected = people.Sum(p =>
+                {
+                    var record = p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, "wp-location", StringComparison.OrdinalIgnoreCase));
+                    return record?.ExpectedCount ?? 0;
+                });
+                var locCount = people.Sum(p =>
+                {
+                    var record = p.Records.FirstOrDefault(r =>
+                        string.Equals(r.Key, "wp-location", StringComparison.OrdinalIgnoreCase));
+                    return record?.Count ?? 0;
+                });
+                if (locExpected == 0 && people.Count == 0)
+                    locExpected = 1;
+                tiles.Add(new ApplicationWorkspaceCaseLinkedTile
+                {
+                    TabKey = "wp-location",
+                    Label = "Work permit location",
+                    Count = locCount,
+                    ExpectedCount = locExpected,
+                    Tone = LinkedTones[toneIndex % LinkedTones.Length],
+                    Glyph = "📍",
+                });
+                toneIndex++;
+            }
+
             if (CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application)
                 && !tiles.Any(t => string.Equals(t.TabKey, "visa-bz-location", StringComparison.OrdinalIgnoreCase)))
             {
@@ -1343,6 +1372,26 @@ internal static class ApplicationWorkspaceCaseBuilder
                 toneIndex++;
             }
 
+        }
+
+        // Requested WP location follows Case Results even when the profile has no Work permit item tile.
+        if (CaseWorkPermitLocationCopy.ShowInLinkReview(application)
+            && !records.Any(r => string.Equals(r.Key, "wp-location", StringComparison.OrdinalIgnoreCase)))
+        {
+            var locationText = FirstCellForPerson(tabs, "wp-location", personName, 1);
+            var hasLocation = !string.IsNullOrWhiteSpace(locationText)
+                && !string.Equals(locationText, "—", StringComparison.Ordinal);
+            records.Add(new ApplicationWorkspaceCasePersonRecord
+            {
+                Key = "wp-location",
+                Label = "Work permit location",
+                Count = hasLocation ? 1 : 0,
+                ExpectedCount = 1,
+                State = hasLocation ? "valid" : "empty",
+                Glyph = "📍",
+                Tone = LinkedTones[toneIndex % LinkedTones.Length],
+            });
+            toneIndex++;
         }
 
         if (CaseVisaBorderZoneLocationCopy.ShowInLinkReview(application)

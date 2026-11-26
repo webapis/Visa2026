@@ -1,0 +1,479 @@
+@using System.IO
+@using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Services.MedicalRecordWorkspace
+
+<div class="mrw">
+    @if (IsLoading && Mode == MedicalRecordWorkspaceMode.List)
+    {
+        <div class="mrw__loading" role="status">Loading medical records…</div>
+    }
+    else if (Mode == MedicalRecordWorkspaceMode.List)
+    {
+        <header class="mrw__head">
+            <div>
+                <h1 class="mrw__title">Medical records</h1>
+                <p class="mrw__sub">Open a record to edit it without opening the person.</p>
+            </div>
+            <button type="button" class="mrw__btn mrw__btn--primary" disabled="@IsBusy" @onclick="NewAsync">New</button>
+        </header>
+
+        @Status
+
+        <form class="mrw__search" @onsubmit="SearchListAsync" @onsubmit:preventDefault>
+            <input class="mrw__input" @bind="_listSearch" @bind:event="oninput" placeholder="Person, personal number, or document number" />
+            <button type="submit" class="mrw__btn" disabled="@IsBusy">Search</button>
+        </form>
+
+        @if (ListTruncated)
+        {
+            <p class="mrw__hint">Showing the first @MedicalRecordWorkspaceService.ListLimit records. Search to narrow the list.</p>
+        }
+
+        @if (Rows.Count == 0)
+        {
+            <p class="mrw__empty">No medical records.</p>
+        }
+        else
+        {
+            <div class="mrw__table-wrap">
+                <table class="mrw__table">
+                    <thead>
+                        <tr>
+                            <th>Person</th>
+                            <th>Role</th>
+                            <th>Document number</th>
+                            <th>Issue date</th>
+                            <th>Validity</th>
+                            <th>Expiration</th>
+                            <th>Days</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Rows)
+                        {
+                            <tr @onclick="() => OpenAsync(row.Id)">
+                                <td>@row.PersonName</td>
+                                <td>@row.PersonRole</td>
+                                <td>@row.DocumentNumber</td>
+                                <td>@row.IssueDate.ToString("dd.MM.yyyy")</td>
+                                <td>@row.Validity</td>
+                                <td>@(row.ExpirationDate?.ToString("dd.MM.yyyy"))</td>
+                                <td>@(row.DaysRemaining?.ToString())</td>
+                                <td>
+                                    @if (row.HasCopies)
+                                    {
+                                        <button type="button" class="mrw__btn mrw__btn--link" @onclick="() => PreviewRowAsync(row)" @onclick:stopPropagation="true">Preview</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+    else
+    {
+        <header class="mrw__head">
+            <div>
+                <h1 class="mrw__title">@(_id.HasValue ? "Medical record" : "New medical record")</h1>
+                <p class="mrw__sub">@(_personId == Guid.Empty ? "Choose the person, then the medical record." : _personName)</p>
+            </div>
+            <div class="mrw__actions">
+                <button type="button" class="mrw__btn" disabled="@IsBusy" @onclick="CancelAsync">Back</button>
+                <button type="button" class="mrw__btn" disabled="@(!CanSave)" @onclick="() => SaveAsync(false)">Save</button>
+                <button type="button" class="mrw__btn mrw__btn--primary" disabled="@(!CanSave)" @onclick="() => SaveAsync(true)">Save and Close</button>
+            </div>
+        </header>
+
+        @Status
+
+        <section class="mrw__panel">
+            <h2>Person</h2>
+            <div class="mrw__person">
+                @if (HasPerson && !_personListOpen)
+                {
+                    <div class="mrw__person-selected">
+                        <span class="mrw__person-name">@_personName</span>
+                        @if (!string.IsNullOrWhiteSpace(PersonMeta))
+                        {
+                            <span class="mrw__muted">@PersonMeta</span>
+                        }
+                        <button type="button" class="mrw__person-clear" title="Choose another person" aria-label="Choose another person" @onclick="ClearPerson">×</button>
+                    </div>
+                }
+                else
+                {
+                    <form class="mrw__search" @onsubmit="SearchPeopleAsync" @onsubmit:preventDefault>
+                        <div class="mrw__person-field">
+                            <input class="mrw__input" @bind="_personSearch" @bind:event="oninput" placeholder="Name or personal number" aria-expanded="@(_personListOpen ? "true" : "false")" @onkeydown="OnPersonSearchKey" />
+                            @if (_personListOpen && PersonHits.Count > 0)
+                            {
+                                <ul class="mrw__hits" role="listbox">
+                                    @foreach (var hit in PersonHits)
+                                    {
+                                        var person = hit;
+                                        <li>
+                                            <button type="button" class="mrw__hit" @onclick="() => ChoosePerson(person)">
+                                                <span>@person.Name</span>
+                                                <span class="mrw__muted">@person.Role @(string.IsNullOrWhiteSpace(person.PersonalNumber) ? null : "· " + person.PersonalNumber)</span>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                        <button type="submit" class="mrw__btn" disabled="@IsBusy">Search</button>
+                    </form>
+                }
+            </div>
+        </section>
+
+        <section class="mrw__panel">
+            <h2>Medical record</h2>
+            <div class="mrw__form">
+                <label>
+                    <span>Document number</span>
+                    <input class="mrw__input" @bind="_documentNumber" maxlength="50" />
+                </label>
+                <label>
+                    <span>Issue date</span>
+                    <OfficerDateEdit @bind-Date="_issueDate" CssClass="mrw__date" />
+                </label>
+                <label>
+                    <span>Validity</span>
+                    <select class="mrw__input" @bind="_validityId">
+                        <option value="@Guid.Empty">Choose</option>
+                        @foreach (var option in ValidityOptions)
+                        {
+                            <option value="@option.Id">@option.Caption</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Expiration</span>
+                    <input class="mrw__input" readonly value="@ExpirationText" />
+                </label>
+            </div>
+        </section>
+
+        <section class="mrw__panel">
+            <h2>Scans</h2>
+            <ul class="mrw__scans">
+                @foreach (var scan in _scans.Where(item => !item.Removed))
+                {
+                    var row = scan;
+                    <li>
+                        <span>@(row.ReplacementName ?? row.FileName)</span>
+                        <span class="mrw__scan-actions">
+                            @if (row.HasContent || row.Replacement != null)
+                            {
+                                <button type="button" class="mrw__btn mrw__btn--link" @onclick="() => PreviewScanAsync(row)">Preview</button>
+                            }
+                            <label class="mrw__btn">
+                                Replace
+                                <InputFile OnChange="e => ReplaceScanAsync(e, row)" accept="@Accept" class="mrw__file" />
+                            </label>
+                            <button type="button" class="mrw__btn mrw__btn--danger" @onclick="() => RemoveScan(row)">Remove</button>
+                        </span>
+                    </li>
+                }
+                @foreach (var pending in _adds)
+                {
+                    var added = pending;
+                    <li>
+                        <span>@added.FileName</span>
+                        <span class="mrw__scan-actions">
+                            <button type="button" class="mrw__btn mrw__btn--link" @onclick="() => PreviewPendingAsync(added)">Preview</button>
+                            <button type="button" class="mrw__btn mrw__btn--danger" @onclick="() => RemovePending(added)">Remove</button>
+                        </span>
+                    </li>
+                }
+            </ul>
+            <label class="mrw__btn">
+                Upload
+                <InputFile OnChange="AddScansAsync" accept="@Accept" multiple class="mrw__file" />
+            </label>
+        </section>
+    }
+</div>
+
+@code {
+    private const string Accept = ".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp";
+
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public MedicalRecordWorkspaceMode Mode { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public bool ListTruncated { get; set; }
+    [Parameter] public IReadOnlyList<MedicalRecordListRow> Rows { get; set; } = Array.Empty<MedicalRecordListRow>();
+    [Parameter] public IReadOnlyList<MedicalRecordValidityOption> ValidityOptions { get; set; } = Array.Empty<MedicalRecordValidityOption>();
+    [Parameter] public IReadOnlyList<MedicalRecordPersonHit> PersonHits { get; set; } = Array.Empty<MedicalRecordPersonHit>();
+    [Parameter] public MedicalRecordDetailDto? Detail { get; set; }
+    [Parameter] public int DetailRevision { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback<string> SearchRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenRequested { get; set; }
+    [Parameter] public EventCallback NewRequested { get; set; }
+    [Parameter] public EventCallback<string> PersonSearchRequested { get; set; }
+    [Parameter] public EventCallback<MedicalRecordSaveRequest> SaveRequested { get; set; }
+    [Parameter] public EventCallback<MedicalRecordPreviewRequest> PreviewRequested { get; set; }
+    [Parameter] public EventCallback CancelRequested { get; set; }
+
+    private string _listSearch = string.Empty;
+    private string _personSearch = string.Empty;
+    private bool _personListOpen;
+    private int _seenRevision = -1;
+    private Guid? _id;
+    private Guid _personId;
+    private string _personName = string.Empty;
+    private string _personRole = string.Empty;
+    private string _personNumber = string.Empty;
+    private string _documentNumber = string.Empty;
+    private DateTime? _issueDate = DateTime.Today;
+    private Guid _validityId;
+    private readonly List<ScanEdit> _scans = new();
+    private readonly List<PendingScan> _adds = new();
+
+    private bool HasPerson => _personId != Guid.Empty;
+
+    private string PersonMeta
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_personRole))
+                return _personNumber;
+            if (string.IsNullOrWhiteSpace(_personNumber))
+                return _personRole;
+            return _personRole + " · " + _personNumber;
+        }
+    }
+
+    private bool CanSave => !IsBusy && HasPerson && !string.IsNullOrWhiteSpace(_documentNumber) && _issueDate.HasValue && _validityId != Guid.Empty;
+
+    private string ExpirationText
+    {
+        get
+        {
+            if (_issueDate == null || _validityId == Guid.Empty)
+                return string.Empty;
+            var option = ValidityOptions.FirstOrDefault(item => item.Id == _validityId);
+            if (option == null || option.NumberOfDays <= 0)
+                return string.Empty;
+            return _issueDate.Value.Date.AddDays(option.NumberOfDays).ToString("dd.MM.yyyy");
+        }
+    }
+
+    private RenderFragment Status => builder =>
+    {
+        if (string.IsNullOrWhiteSpace(StatusMessage))
+            return;
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", IsStatusError ? "mrw__status is-error" : "mrw__status is-ok");
+        builder.AddAttribute(2, "role", "status");
+        builder.AddContent(3, StatusMessage);
+        builder.CloseElement();
+    };
+
+    protected override void OnInitialized()
+    {
+        _ = InitialLoadRequested.InvokeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Mode != MedicalRecordWorkspaceMode.Detail || DetailRevision == _seenRevision)
+            return;
+
+        _seenRevision = DetailRevision;
+        var detail = Detail;
+        _id = detail?.Id;
+        _personListOpen = false;
+        _personSearch = string.Empty;
+        _personId = detail?.PersonId ?? Guid.Empty;
+        _personName = detail?.PersonName ?? string.Empty;
+        _personRole = string.Empty;
+        _personNumber = string.Empty;
+        _documentNumber = detail?.DocumentNumber ?? string.Empty;
+        _issueDate = detail == null || detail.IssueDate == default ? DateTime.Today : detail.IssueDate;
+        _validityId = detail?.ValidityDurationId ?? Guid.Empty;
+        _scans.Clear();
+        _adds.Clear();
+        if (detail?.Scans == null)
+            return;
+        foreach (var scan in detail.Scans)
+        {
+            _scans.Add(new ScanEdit
+            {
+                Id = scan.Id,
+                FileId = scan.FileId,
+                HasContent = scan.HasContent,
+                FileName = scan.FileName
+            });
+        }
+    }
+
+    private Task SearchListAsync() => SearchRequested.InvokeAsync(_listSearch);
+    private Task OpenAsync(Guid id) => OpenRequested.InvokeAsync(id);
+    private Task NewAsync() => NewRequested.InvokeAsync();
+    private Task CancelAsync() => CancelRequested.InvokeAsync();
+    private Task SearchPeopleAsync()
+    {
+        _personListOpen = true;
+        return PersonSearchRequested.InvokeAsync(_personSearch);
+    }
+
+    private void OnPersonSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            _personListOpen = false;
+    }
+
+    private void RemoveScan(ScanEdit scan) => scan.Removed = true;
+
+    private void RemovePending(PendingScan scan) => _adds.Remove(scan);
+
+    private void ChoosePerson(MedicalRecordPersonHit person)
+    {
+        _personId = person.Id;
+        _personName = person.Name;
+        _personRole = person.Role;
+        _personNumber = person.PersonalNumber;
+        _personSearch = string.Empty;
+        _personListOpen = false;
+    }
+
+    private void ClearPerson()
+    {
+        _personId = Guid.Empty;
+        _personName = string.Empty;
+        _personRole = string.Empty;
+        _personNumber = string.Empty;
+        _personSearch = string.Empty;
+        _personListOpen = false;
+    }
+
+    private async Task AddScansAsync(InputFileChangeEventArgs args)
+    {
+        foreach (var file in args.GetMultipleFiles(8))
+        {
+            var content = await ReadFileAsync(file);
+            if (content == null)
+                continue;
+            _adds.Add(new PendingScan { FileName = file.Name, Content = content });
+        }
+    }
+
+    private async Task ReplaceScanAsync(InputFileChangeEventArgs args, ScanEdit scan)
+    {
+        var file = args.File;
+        var content = await ReadFileAsync(file);
+        if (content == null)
+            return;
+        scan.ReplacementName = file.Name;
+        scan.Replacement = content;
+    }
+
+    private static async Task<byte[]?> ReadFileAsync(IBrowserFile file)
+    {
+        try
+        {
+            await using var stream = file.OpenReadStream(20 * 1024 * 1024);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            return buffer.ToArray();
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+    }
+
+    private Task PreviewRowAsync(MedicalRecordListRow row) =>
+        PreviewRequested.InvokeAsync(new MedicalRecordPreviewRequest
+        {
+            PersonId = row.PersonId,
+            RecordId = row.Id,
+            DisplayName = row.DocumentNumber
+        });
+
+    private Task PreviewScanAsync(ScanEdit scan)
+    {
+        if (scan.Replacement is { Length: > 0 })
+        {
+            return PreviewRequested.InvokeAsync(new MedicalRecordPreviewRequest
+            {
+                PersonId = _personId,
+                RecordId = _id,
+                DisplayName = scan.ReplacementName ?? scan.FileName,
+                InlineContent = scan.Replacement
+            });
+        }
+
+        return PreviewRequested.InvokeAsync(new MedicalRecordPreviewRequest
+        {
+            PersonId = _personId,
+            RecordId = _id,
+            FileId = scan.FileId,
+            DisplayName = scan.FileName
+        });
+    }
+
+    private Task PreviewPendingAsync(PendingScan scan) =>
+        PreviewRequested.InvokeAsync(new MedicalRecordPreviewRequest
+        {
+            PersonId = _personId,
+            RecordId = _id,
+            DisplayName = scan.FileName,
+            InlineContent = scan.Content
+        });
+
+    private Task SaveAsync(bool closeAfterSave)
+    {
+        var request = new MedicalRecordSaveRequest
+        {
+            Id = _id,
+            PersonId = _personId,
+            DocumentNumber = _documentNumber,
+            IssueDate = _issueDate ?? default,
+            ValidityDurationId = _validityId,
+            CloseAfterSave = closeAfterSave,
+            RemoveScanIds = _scans.Where(scan => scan.Removed).Select(scan => scan.Id).ToList(),
+            ReplaceScans = _scans
+                .Where(scan => !scan.Removed && scan.Replacement != null)
+                .Select(scan => new MedicalRecordFileChange
+                {
+                    ScanId = scan.Id,
+                    FileName = scan.ReplacementName ?? scan.FileName,
+                    Content = scan.Replacement!
+                })
+                .ToList(),
+            AddScans = _adds.Select(scan => new MedicalRecordFileChange
+            {
+                FileName = scan.FileName,
+                Content = scan.Content
+            }).ToList()
+        };
+        return SaveRequested.InvokeAsync(request);
+    }
+
+    private sealed class ScanEdit
+    {
+        public Guid Id { get; set; }
+        public Guid FileId { get; set; }
+        public bool HasContent { get; set; }
+        public string FileName { get; set; } = string.Empty;
+        public bool Removed { get; set; }
+        public string? ReplacementName { get; set; }
+        public byte[]? Replacement { get; set; }
+    }
+
+    private sealed class PendingScan
+    {
+        public string FileName { get; set; } = string.Empty;
+        public byte[] Content { get; set; } = Array.Empty<byte>();
+    }
+}

@@ -7,7 +7,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Migrates <see cref="WorkPermitItem"/> permitted locations from legacy city link rows to comma-separated
-/// <c>WorkPermittedLocations</c> nvarchar and <see cref="WorkPermittedLocationName"/> catalog.
+/// <c>WorkPermittedLocations</c> nvarchar. Location names are not seeded.
 /// </summary>
 public sealed class WorkPermitItemPermittedLocationsStringUpdater : ModuleUpdater
 {
@@ -26,7 +26,6 @@ public sealed class WorkPermitItemPermittedLocationsStringUpdater : ModuleUpdate
     public override void UpdateDatabaseAfterUpdateSchema()
     {
         base.UpdateDatabaseAfterUpdateSchema();
-        SeedWorkPermittedLocationNamesFromItems();
         DropWorkPermitItemPermittedCityTable();
     }
 
@@ -78,46 +77,6 @@ EXEC sp_executesql @sql;
 UPDATE dbo.WorkPermitItems
 SET WorkPermittedLocations = N''
 WHERE WorkPermittedLocations IS NULL;", false);
-    }
-
-    private void SeedWorkPermittedLocationNamesFromItems()
-    {
-        if (ObjectSpace == null)
-        {
-            return;
-        }
-
-        var names = ObjectSpace.GetObjectsQuery<WorkPermitItem>()
-            .Select(wpi => wpi.WorkPermittedLocations)
-            .ToList()
-            .SelectMany(s => (s ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var nameTm in names)
-        {
-            EnsureWorkPermittedLocationName(nameTm);
-        }
-    }
-
-    private void EnsureWorkPermittedLocationName(string nameTm)
-    {
-        if (string.IsNullOrWhiteSpace(nameTm))
-        {
-            return;
-        }
-
-        var trimmed = nameTm.Trim();
-        var existing = ObjectSpace.FirstOrDefault<WorkPermittedLocationName>(z => z.NameTm == trimmed);
-        if (existing != null)
-        {
-            return;
-        }
-
-        var entry = ObjectSpace.CreateObject<WorkPermittedLocationName>();
-        entry.NameTm = trimmed;
-        entry.Name = trimmed;
-        ObjectSpace.CommitChanges();
     }
 
     private void DropWorkPermitItemPermittedCityTable()

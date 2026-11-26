@@ -1385,7 +1385,7 @@ public static partial class PersonLinkReview
             ApplicationProfileInstancePersonLinkKind.Education => CreateEducation(objectSpace, person, form, out error),
             ApplicationProfileInstancePersonLinkKind.Position => CreatePosition(objectSpace, person, form, out error),
             ApplicationProfileInstancePersonLinkKind.AddressOfResidence => CreateAddress(objectSpace, person, form, application, out error),
-            ApplicationProfileInstancePersonLinkKind.Visa => CreateVisa(objectSpace, person, form, passportId, out error),
+            ApplicationProfileInstancePersonLinkKind.Visa => CreateVisa(objectSpace, person, form, passportId, application, out error),
             _ => null,
         };
         if (created == null && error == null)
@@ -1449,7 +1449,7 @@ public static partial class PersonLinkReview
                 Set(form, "issue", DateText(visa.IssueDate));
                 Set(form, "start", DateText(visa.StartDate));
                 Set(form, "expiration", DateText(visa.ExpirationDate));
-                Set(form, "border", BorderId(objectSpace, visa.BorderZoneLocation));
+                Set(form, "border", visa.BorderZoneLocation);
                 return true;
             default:
                 return false;
@@ -1495,17 +1495,6 @@ public static partial class PersonLinkReview
 
     private static string IdText(BaseObject? row) =>
         row == null || row.ID == Guid.Empty ? string.Empty : row.ID.ToString();
-
-    private static string BorderId(IObjectSpace objectSpace, string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return string.Empty;
-
-        var match = objectSpace.GetObjectsQuery<BorderZoneName>()
-            .AsEnumerable()
-            .FirstOrDefault(row => string.Equals(row.NameTm?.Trim(), name.Trim(), StringComparison.Ordinal));
-        return match == null ? string.Empty : match.ID.ToString();
-    }
 
     private static bool IsShown(PersonLinkReviewCreateForm form, PersonLinkReviewCreateField field)
     {
@@ -1594,7 +1583,7 @@ public static partial class PersonLinkReview
         TextField("issue", T("IssueDate"), true, date: true),
         TextField("start", U("ApplicationProfile.Field.StartDate"), true, date: true),
         TextField("expiration", U("ApplicationProfileInstance.Workspace.AddressExpiration"), true, date: true),
-        LookupField("border", U("ApplicationProfile.Doc.BorderZone"), true, CatalogOptions<BorderZoneName>(objectSpace)),
+        TextField("border", U("ApplicationProfile.Doc.BorderZone"), true),
     };
 
     private static List<PersonLinkReviewCreateField> AddressCreateFields(IObjectSpace objectSpace)
@@ -1762,7 +1751,7 @@ public static partial class PersonLinkReview
         return address;
     }
 
-    private static Visa? CreateVisa(IObjectSpace objectSpace, Person person, PersonLinkReviewCreateForm form, Guid passportId, out string? error)
+    private static Visa? CreateVisa(IObjectSpace objectSpace, Person person, PersonLinkReviewCreateForm form, Guid passportId, ApplicationProfileInstance? application, out string? error)
     {
         error = null;
         if (!TryDate(Value(form, "issue"), out var issue) || !TryDate(Value(form, "start"), out var start) || !TryDate(Value(form, "expiration"), out var expiration))
@@ -1805,8 +1794,13 @@ public static partial class PersonLinkReview
         visa.IssueDate = issue;
         visa.StartDate = start;
         visa.ExpirationDate = expiration;
-        var border = Lookup<BorderZoneName>(objectSpace, Value(form, "border"));
-        visa.BorderZoneLocation = border?.NameTm;
+        visa.BorderZoneLocation = Value(form, "border");
+        CaseSavedLocation.RememberStored(
+            objectSpace,
+            application ?? visa.IssuingApplicationProfileInstance,
+            ApplicationProfileSavedLocationField.BorderZone,
+            visa.BorderZoneLocation,
+            CommaSeparatedSelectionHelper.NoneValue);
         return visa;
     }
 }

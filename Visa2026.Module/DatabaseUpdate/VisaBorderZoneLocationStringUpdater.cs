@@ -7,7 +7,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Migrates <see cref="Visa"/> border zones from legacy <see cref="City"/> link rows to comma-separated
-/// <c>BorderZoneLocation</c> nvarchar and <see cref="BorderZoneName"/> catalog.
+/// <c>BorderZoneLocation</c> nvarchar. Location names are not seeded.
 /// </summary>
 public sealed class VisaBorderZoneLocationStringUpdater : ModuleUpdater
 {
@@ -26,7 +26,6 @@ public sealed class VisaBorderZoneLocationStringUpdater : ModuleUpdater
     public override void UpdateDatabaseAfterUpdateSchema()
     {
         base.UpdateDatabaseAfterUpdateSchema();
-        SeedBorderZoneNamesFromVisas();
         DropVisaCityJoinTable();
         DropHasBorderZonePermitColumn();
     }
@@ -98,46 +97,6 @@ EXEC sys.sp_executesql @sql;
 UPDATE dbo.Visas
 SET BorderZoneLocation = N''
 WHERE BorderZoneLocation IS NULL;", false);
-    }
-
-    private void SeedBorderZoneNamesFromVisas()
-    {
-        if (ObjectSpace == null)
-        {
-            return;
-        }
-
-        var names = ObjectSpace.GetObjectsQuery<Visa>()
-            .Select(v => v.BorderZoneLocation)
-            .ToList()
-            .SelectMany(s => (s ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var nameTm in names)
-        {
-            EnsureBorderZoneName(nameTm);
-        }
-    }
-
-    private void EnsureBorderZoneName(string nameTm)
-    {
-        if (string.IsNullOrWhiteSpace(nameTm))
-        {
-            return;
-        }
-
-        var trimmed = nameTm.Trim();
-        var existing = ObjectSpace.FirstOrDefault<BorderZoneName>(z => z.NameTm == trimmed);
-        if (existing != null)
-        {
-            return;
-        }
-
-        var zone = ObjectSpace.CreateObject<BorderZoneName>();
-        zone.NameTm = trimmed;
-        zone.Name = trimmed;
-        ObjectSpace.CommitChanges();
     }
 
     private void DropHasBorderZonePermitColumn()

@@ -71,17 +71,41 @@ public class ApplicationProfilePersonAddressMaxCountTests
     }
 
     [Fact]
-    public void SyncRequireFlagsFromLegacy_MapsMaxTwo()
+    public void SyncRequireFlagsFromLegacy_DoesNotPromotePersonToggleToCaseAddress1()
     {
 #pragma warning disable CS0618
         var profile = new ApplicationProfile
         {
+            RequireAddress1 = false,
+            RequireAddress2 = false,
             RequirePersonAddressOfResidence = true,
             PersonAddressOfResidenceMaxCount = 2,
         };
 #pragma warning restore CS0618
         ApplicationProfilePersonAddressMaxCount.SyncRequireFlagsFromLegacy(profile);
-        Assert.True(profile.RequireAddress1);
-        Assert.True(profile.RequireAddress2);
+        Assert.False(profile.RequireAddress1);
+        Assert.False(profile.RequireAddress2);
+#pragma warning disable CS0618
+        Assert.True(profile.RequirePersonAddressOfResidence);
+        Assert.Equal(2, profile.PersonAddressOfResidenceMaxCount);
+#pragma warning restore CS0618
+    }
+
+    [Fact]
+    public void SyncRequireFlagsFromLegacy_WhenCaseAddressOn_KeepsPersonOn()
+    {
+        var profile = new ApplicationProfile
+        {
+            RequireAddress1 = true,
+            RequireAddress2 = true,
+        };
+#pragma warning disable CS0618
+        profile.RequirePersonAddressOfResidence = false;
+#pragma warning restore CS0618
+        ApplicationProfilePersonAddressMaxCount.SyncRequireFlagsFromLegacy(profile);
+#pragma warning disable CS0618
+        Assert.True(profile.RequirePersonAddressOfResidence);
+        Assert.Equal(2, profile.PersonAddressOfResidenceMaxCount);
+#pragma warning restore CS0618
     }
 }

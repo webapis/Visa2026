@@ -6,17 +6,10 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Migrates <see cref="ApplicationRosterMergeLine"/> border zone from FK (<c>BorderZoneLocationID</c>) to comma-separated
-/// <c>BorderZoneLocation</c> nvarchar, and seeds <see cref="BorderZoneName"/> catalog entries.
+/// <c>BorderZoneLocation</c> nvarchar. Location names are not seeded.
 /// </summary>
 public sealed class ApplicationItemBorderZoneLocationStringUpdater : ModuleUpdater
 {
-    private static readonly string[] DefaultBorderZoneNames =
-    {
-        "Serhetabat etr",
-        "Garabogaz şäheri",
-        "Sarahs etraby",
-    };
-
     public ApplicationItemBorderZoneLocationStringUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
@@ -33,7 +26,6 @@ public sealed class ApplicationItemBorderZoneLocationStringUpdater : ModuleUpdat
     {
         base.UpdateDatabaseAfterUpdateSchema();
         DropApplicationItemBorderZoneLocationForeignKey();
-        SeedBorderZoneNames();
         NormalizeEmptyApplicationItemBorderZones();
     }
 
@@ -125,31 +117,4 @@ SET BorderZoneLocation = N'Ýok'
 WHERE BorderZoneLocation IS NULL OR LTRIM(RTRIM(BorderZoneLocation)) = N'';", false);
     }
 
-    private void SeedBorderZoneNames()
-    {
-        foreach (var nameTm in DefaultBorderZoneNames)
-        {
-            EnsureBorderZoneName(nameTm);
-        }
-    }
-
-    private void EnsureBorderZoneName(string nameTm)
-    {
-        if (string.IsNullOrWhiteSpace(nameTm))
-        {
-            return;
-        }
-
-        var trimmed = nameTm.Trim();
-        var existing = ObjectSpace.FirstOrDefault<BorderZoneName>(z => z.NameTm == trimmed);
-        if (existing != null)
-        {
-            return;
-        }
-
-        var zone = ObjectSpace.CreateObject<BorderZoneName>();
-        zone.NameTm = trimmed;
-        zone.Name = trimmed;
-        ObjectSpace.CommitChanges();
-    }
 }

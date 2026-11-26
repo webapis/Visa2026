@@ -82,6 +82,19 @@ public class PersonIntakeMedicalStepTests
         Assert.Equal(PersonIntakeMedicalState.Expired, PersonIntakeMedicalState.Code(record, null));
     }
 
+    [Fact]
+    public void UnrestrictedAccess_CannotChangeMedicalRecords_OnThePersonWizard()
+    {
+        var access = PersonIntakeWizardAccess.Unrestricted;
+
+        Assert.False(access.CanAddRecord(PersonPendingTargets.MedicalRecord));
+        Assert.False(access.CanEditRecord(PersonPendingTargets.MedicalRecord, null));
+        Assert.False(access.CanEditRecord(PersonPendingTargets.MedicalRecord, Guid.NewGuid()));
+        Assert.False(access.CanRemoveRecord(PersonPendingTargets.MedicalRecord, null));
+        Assert.False(access.CanRemoveRecord(PersonPendingTargets.MedicalRecord, Guid.NewGuid()));
+        Assert.True(access.CanAddRecord(PersonPendingTargets.Passport));
+    }
+
     private static Person Employee()
     {
         var person = new Person();

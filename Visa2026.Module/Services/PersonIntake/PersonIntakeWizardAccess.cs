@@ -101,6 +101,8 @@ public sealed class PersonIntakeWizardAccess
 
     public bool CanAddRecord(string recordKey)
     {
+        if (recordKey == PersonPendingTargets.MedicalRecord)
+            return false;
         var type = RecordType(recordKey);
         return CanEditPerson && (type == null || Cached("sc:" + type.Name, () => _checker.CanCreate(type)));
     }
@@ -108,6 +110,8 @@ public sealed class PersonIntakeWizardAccess
     /// <summary>Edit an existing row (<paramref name="existingId"/>) or fill a new card (null → Create).</summary>
     public bool CanEditRecord(string recordKey, Guid? existingId)
     {
+        if (recordKey == PersonPendingTargets.MedicalRecord)
+            return false;
         if (!CanEditPerson)
             return false;
         var type = RecordType(recordKey);
@@ -121,6 +125,8 @@ public sealed class PersonIntakeWizardAccess
     /// <summary>Unsaved cards can always be discarded; saved rows need Delete.</summary>
     public bool CanRemoveRecord(string recordKey, Guid? existingId)
     {
+        if (recordKey == PersonPendingTargets.MedicalRecord)
+            return false;
         if (!CanEditPerson)
             return false;
         if (!existingId.HasValue)

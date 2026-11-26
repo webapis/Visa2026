@@ -13,7 +13,7 @@ using Visa2026.Module.Services.ApplicationPersonRoster;
 namespace Visa2026.Module.BusinessObjects;
 
 [DefaultClassOptions]
-[NavigationItem("WorkPermit")]
+[NavigationItem(false)]
 [XafDisplayName("Work permit location grant item")]
 public class WorkPermitLocationGrantItem : BaseObject
 {

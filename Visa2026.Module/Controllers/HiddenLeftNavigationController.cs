@@ -27,6 +27,8 @@ public sealed class HiddenLeftNavigationController : WindowController
         "TemporaryVisitors",
         "Visa Tracking",
         "Work Permit Tracking",
+        "VisaExt",
+        "WorkPermit",
     };
 
     private static readonly HashSet<string> HiddenViewIds = new(StringComparer.Ordinal)
@@ -47,6 +49,9 @@ public sealed class HiddenLeftNavigationController : WindowController
         "VisaCancellationStatus_ListView",
         "WorkPermitExtensionStatus_ListView",
         "WorkPermitExtensionTracking_ListView",
+        "ForeignWorkerMaglumat_ListView",
+        "WorkPermitLocationGrant_ListView",
+        "WorkPermitLocationGrantItem_ListView",
     };
 
     public HiddenLeftNavigationController()
@@ -125,13 +130,15 @@ public sealed class HiddenLeftNavigationController : WindowController
 
     private static bool ShouldHide(ChoiceActionItem item, string parentId)
     {
-        if (item.Id == "TemporaryVisitors")
+        if (item.Id is "TemporaryVisitors" or "VisaExt" or "Ministry1" or "Ministry2"
+            or "ForeignWorkerMaglumat" or "WorkPermitLocationGrant" or "WorkPermitLocationGrantItem")
             return true;
 
         if (parentId == null && HiddenTopLevelIds.Contains(item.Id))
             return true;
 
-        if (parentId == "WorkPermit" && item.Id is "WorkPermit" or "WorkPermitItem")
+        if (parentId == "WorkPermit" && item.Id is "WorkPermit" or "WorkPermitItem"
+            or "ForeignWorkerMaglumat" or "WorkPermitLocationGrant" or "WorkPermitLocationGrantItem")
             return true;
 
         return item.Data is IModelNavigationItem model

@@ -2071,14 +2071,8 @@ public static class ApplicationWorkspaceCaseHeaderFieldsHelper
                 AddressesOfResidence = LoadAddressesOfResidence(objectSpace, application),
                 TargetApplicationProfileInstances = LoadTargetApplicationProfileInstances(objectSpace),
                 SubmitToOrganizations = LoadSubmitToOrganizationOptions(objectSpace),
-                BorderZoneNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
-                    objectSpace,
-                    typeof(BorderZoneName),
-                    BorderZoneSelectionHelper.NoneValue),
-                WorkPermittedLocationNames = CommaSeparatedCatalogHelper.LoadCatalogNames(
-                    objectSpace,
-                    typeof(WorkPermittedLocationName),
-                    string.Empty),
+                BorderZoneNames = Array.Empty<string>(),
+                WorkPermittedLocationNames = Array.Empty<string>(),
             };
         }
 

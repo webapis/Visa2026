@@ -1,4 +1,5 @@
 using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.DatabaseUpdate;
@@ -7,6 +8,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 /// Calik tenant Last-N / address-slot seeds. Last 2 means up to two valid rows (person may have 1 or 2).
 /// Passport Last 2 only on <c>pasport_change</c>. Registration passport-info-change stays Last 1.
 /// Address max 2 only on <c>get_invitation</c> (slot 1 required, slot 2 optional).
+/// Case summary Address 1 only for invitation-stay templates; People address uses RequirePersonAddressOfResidence.
 /// </summary>
 public static class ApplicationProfileCalikPersonLastCountSeeds
 {
@@ -52,17 +54,19 @@ public static class ApplicationProfileCalikPersonLastCountSeeds
         row.PersonAddressOfResidenceMaxCount =
             ApplicationProfilePersonAddressMaxCount.Clamp(row.PersonAddressOfResidenceMaxCount);
 
-        // Map legacy person-step address flags onto Results Address 1/2 when unset.
-        if (!row.RequireAddress1 && !row.RequireAddress2 && row.RequirePersonAddressOfResidence)
-        {
+        // Case summary Address 1 is invitation-stay only. Do not promote People toggle → RequireAddress1.
+        var collectsStay = ApplicationProfileInvitationAddressPolicy.CollectsInvitationStay(
+            row.ProfileCatalogKey, row.Code);
+        if (collectsStay)
             row.RequireAddress1 = true;
-            row.RequireAddress2 = row.PersonAddressOfResidenceMaxCount >= 2;
-        }
-        else if (row.RequireAddress1 || row.RequireAddress2)
+        else
+            row.RequireAddress1 = false;
+
+        if (row.RequireAddress1 || row.RequireAddress2)
         {
-            row.RequirePersonAddressOfResidence = row.RequireAddress1;
+            row.RequirePersonAddressOfResidence = true;
             row.PersonAddressOfResidenceMaxCount = ApplicationProfilePersonAddressMaxCount.Clamp(
-                (row.RequireAddress1 ? 1 : 0) + (row.RequireAddress2 ? 1 : 0));
+                row.RequireAddress2 ? 2 : Math.Max(1, row.PersonAddressOfResidenceMaxCount));
         }
     }
 }

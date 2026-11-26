@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
     /// (the SQL Server DDL was removed with ApplicationItem Phase B — see docs/DEPRECATED.md).
     /// </summary>
     [DefaultClassOptions]
-    [NavigationItem("WorkPermit")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
     [ModelDefault("Caption", "Daşary ýurt raýatlary maglumaty")]
     [ModelDefault("AllowEdit", "False")]

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
   <ActionDesign>
     <Actions>
@@ -58,7 +58,6 @@
     <Items>
       <Item Id="Application" Caption="Экземпляры профиля заявки">
         <Items>
-          <Item Id="InvitationItem_Cakylyklar" Caption="Приглашения" />
           <Item Id="Application_DirectMigration" Caption="Заявки без необходимости согласования">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Позиции (напрямую в миграцию)" />
@@ -85,17 +84,7 @@
       <Item Id="Employee" Caption="Сотрудник" />
       <Item Id="Employees" Caption="Сотрудники" />
       <Item Id="FamilyMembers" Caption="Родственники" />
-      <Item Id="Invitations" Caption="Приглашения">
-        <Items>
-          <Item Id="Employee" Caption="Приглашения (Сотрудник)" />
-          <Item Id="FamilyMember" Caption="Приглашения (Член семьи)" />
-        </Items>
-      </Item>
-      <Item Id="WorkPermits" Caption="Разрешения на работу">
-        <Items>
-          <Item Id="Employee" Caption="Разрешения на работу (Сотрудник)" />
-        </Items>
-      </Item>
+      <Item Id="FindEmployees" Caption="Найти сотрудников" />
       <Item Id="Geography" Caption="География" />
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="ImportReimportHistory" Caption="История повторного импорта" />
@@ -2561,10 +2550,6 @@
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
-    <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Приглашения" />
-    <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Приглашения (Сотрудник)" />
-    <ListView Id="WorkPermitItem_Registry_Employees_ListView" Caption="Разрешения на работу (Сотрудник)" />
-    <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Приглашения (Член семьи)" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
@@ -2834,6 +2819,7 @@
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
+    <DetailView Id="EmployeeSearchHost_DetailView" Caption="Найти сотрудников" />
     <DetailView Id="ExpirationAlertRule_DetailView" Caption="Предупреждения об истечении документов" />
     <ListView Id="ExpirationAlertRule_ListView" Caption="Предупреждения об истечении документов" />
     <DetailView Id="ExternalArrival_DetailView" Caption="Внешний въезд" />
@@ -2987,10 +2973,73 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник"></DetailView>
-    <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи"></DetailView>
-    <DetailView Id="Person_DetailView_EmployeeIntake" Caption="Сотрудник"></DetailView>
-    <DetailView Id="Person_DetailView_FamilyMemberIntake" Caption="Член семьи"></DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Сотрудник" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+              <LayoutGroup Id="Educations" Caption="Образование" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+              <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+              <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Члены семьи (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Разрешения на работу (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Член семьи" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+              <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
+              <LayoutGroup Id="Educations" Caption="Образование" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
+              <LayoutGroup Id="IncompleteData" Caption="Неполные данные" />
+              <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+              <LayoutGroup Id="Passports" Caption="Паспорта" />
+              <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+              <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+              <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+              <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Заявки (связанные)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Члены семьи (связанные)" />
+              <LayoutGroup Id="InvitationItems" Caption="Приглашения (выданные)" />
+              <LayoutGroup Id="RejectionItems" Caption="Отказы (выданные)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Разрешения на работу (выданные)" />
+            </TabbedGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Временный посетитель">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

@@ -1,0 +1,450 @@
+.medical-records-workspace-detail {
+    height: calc(100svh - 7.5rem) !important;
+    max-height: calc(100svh - 7.5rem) !important;
+    overflow: hidden !important;
+}
+
+.medical-records-workspace-detail,
+.medical-records-workspace-detail .xaf-detail-view,
+.medical-records-workspace-detail .layout-main,
+.medical-records-workspace-detail .layout-SimpleEditors,
+.medical-records-workspace-detail .layout-MedicalRecordWorkspaceHost,
+.medical-records-workspace-detail .layout-item-WorkspaceUi {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+.medical-records-workspace-detail .layout-item-WorkspaceUi .dxbl-fl-ctrl,
+.medical-records-workspace-detail .layout-item-WorkspaceUi .dxbl-fl-ctrl > * {
+    height: 100%;
+    min-height: 0;
+    background: transparent;
+}
+
+/*
+  Fluent redefines --DS-color-* with the theme stylesheet.
+  --os-* in tokens.css stays light, so this page must not use those.
+*/
+.mrw {
+    --mrw-ink: var(--DS-color-content-neutral-default-rest, var(--bs-body-color, #142033));
+    --mrw-muted: var(--DS-color-content-neutral-subdued-rest, color-mix(in srgb, var(--mrw-ink) 62%, transparent));
+    --mrw-line: var(--DS-color-border-neutral-default-rest, color-mix(in srgb, var(--mrw-ink) 22%, transparent));
+    --mrw-panel: var(--DS-color-surface-neutral-default-rest, transparent);
+    --mrw-field: var(--DS-color-surface-neutral-subdued-rest, color-mix(in srgb, var(--mrw-ink) 6%, var(--mrw-panel)));
+    --mrw-hover: var(--DS-color-surface-neutral-default-hovered, color-mix(in srgb, var(--mrw-ink) 8%, var(--mrw-panel)));
+    --mrw-accent: var(--DS-color-surface-primary-default-rest, var(--bs-primary, #1d6ef2));
+    --mrw-on-accent: var(--DS-color-content-neutral-on-primary-rest, #fff);
+    --mrw-bad: var(--DS-color-content-danger-default-rest, #c62828);
+    --mrw-ok-bg: var(--DS-color-surface-success-subdued-rest, color-mix(in srgb, #0f9d58 18%, var(--mrw-panel)));
+    --mrw-bad-bg: var(--DS-color-surface-danger-subdued-rest, color-mix(in srgb, #c62828 18%, var(--mrw-panel)));
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    padding: 12px 16px 28px;
+    color: var(--mrw-ink);
+    color-scheme: inherit;
+    background: transparent;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.dxbl-theme-fluent-mode-dark .mrw {
+    color-scheme: dark;
+    --mrw-ink: var(--DS-color-content-neutral-default-rest, #e8eaed);
+    --mrw-muted: var(--DS-color-content-neutral-subdued-rest, #a8b0ba);
+    --mrw-line: var(--DS-color-border-neutral-default-rest, rgba(255, 255, 255, 0.14));
+    --mrw-panel: var(--DS-color-surface-neutral-default-rest, #2b2d31);
+    --mrw-field: var(--DS-color-surface-neutral-subdued-rest, #232529);
+    --mrw-hover: var(--DS-color-surface-neutral-default-hovered, rgba(255, 255, 255, 0.06));
+    --mrw-accent: var(--DS-color-surface-primary-default-rest, #1d6ef2);
+    --mrw-on-accent: #fff;
+    --mrw-bad: var(--DS-color-content-danger-default-rest, #f07178);
+    --mrw-ok-bg: var(--DS-color-surface-success-subdued-rest, rgba(15, 157, 88, 0.22));
+    --mrw-bad-bg: var(--DS-color-surface-danger-subdued-rest, rgba(198, 40, 40, 0.22));
+}
+
+.dxbl-theme-fluent-mode-light .mrw {
+    color-scheme: light;
+    --mrw-ink: var(--DS-color-content-neutral-default-rest, #142033);
+    --mrw-muted: var(--DS-color-content-neutral-subdued-rest, #5c6b7a);
+    --mrw-line: var(--DS-color-border-neutral-default-rest, #d8e0ea);
+    --mrw-panel: var(--DS-color-surface-neutral-default-rest, #fff);
+    --mrw-field: var(--DS-color-surface-neutral-subdued-rest, #f4f7fb);
+    --mrw-hover: var(--DS-color-surface-neutral-default-hovered, #e8f1ff);
+    --mrw-accent: var(--DS-color-surface-primary-default-rest, #1d6ef2);
+    --mrw-on-accent: #fff;
+    --mrw-bad: var(--DS-color-content-danger-default-rest, #c62828);
+}
+
+.mrw__head,
+.mrw__search,
+.mrw__actions,
+.mrw__scan-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.mrw__head {
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.mrw__title {
+    margin: 0;
+    font-size: 1.35rem;
+    color: var(--mrw-ink);
+}
+
+.mrw__sub,
+.mrw__hint,
+.mrw__empty,
+.mrw__muted,
+.mrw__selected {
+    margin: 4px 0 0;
+    color: var(--mrw-muted);
+}
+
+.mrw__panel,
+.mrw__table-wrap {
+    background: var(--mrw-panel);
+    border: 1px solid var(--mrw-line);
+    border-radius: 10px;
+    color: var(--mrw-ink);
+}
+
+.mrw__panel {
+    padding: 12px 14px;
+}
+
+.mrw__panel h2 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    color: var(--mrw-ink);
+}
+
+.mrw__form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.mrw__form label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: var(--mrw-muted);
+}
+
+.mrw__input,
+.mrw select,
+.mrw__search .mrw__input {
+    min-height: 2rem;
+    border: 1px solid var(--mrw-line);
+    border-radius: 6px;
+    padding: 4px 8px;
+    background: var(--mrw-field);
+    color: var(--mrw-ink);
+    color-scheme: inherit;
+}
+
+.mrw select {
+    background-color: #232529;
+    color: #e8eaed;
+    color-scheme: dark;
+}
+
+.mrw select option {
+    background-color: #232529;
+    color: #e8eaed;
+}
+
+.mrw select option:checked {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.dxbl-theme-fluent-mode-light .mrw select {
+    background-color: #f4f7fb;
+    color: #142033;
+    color-scheme: light;
+}
+
+.dxbl-theme-fluent-mode-light .mrw select option {
+    background-color: #fff;
+    color: #142033;
+}
+
+.dxbl-theme-fluent-mode-light .mrw select option:checked {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.mrw__input[readonly] {
+    opacity: 0.85;
+}
+
+.mrw__search .mrw__input {
+    flex: 1;
+}
+
+.mrw .officer-date-edit-host,
+.mrw .officer-date-edit,
+.mrw .dxbl-date-edit {
+    width: 100%;
+    color: var(--mrw-ink);
+}
+
+.mrw .officer-date-edit-host .dxbl-text-edit,
+.mrw .dxbl-date-edit .dxbl-text-edit {
+    background: var(--mrw-field);
+    color: var(--mrw-ink);
+    border: 1px solid var(--mrw-line);
+    border-radius: 6px;
+    min-height: 2rem;
+}
+
+.mrw .officer-date-edit-host .dxbl-text-edit input,
+.mrw .dxbl-date-edit .dxbl-text-edit input {
+    color: var(--mrw-ink);
+    -webkit-text-fill-color: var(--mrw-ink);
+    background: transparent;
+}
+
+.mrw .officer-date-edit-host .dxbl-text-edit .dxbl-btn,
+.mrw .dxbl-date-edit .dxbl-text-edit .dxbl-edit-btn {
+    color: var(--mrw-muted);
+    background: transparent;
+}
+
+.mrw__btn {
+    position: relative;
+    border: 1px solid var(--mrw-line);
+    background: var(--mrw-field);
+    color: var(--mrw-ink);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.mrw__btn--primary {
+    background: var(--mrw-accent);
+    border-color: var(--mrw-accent);
+    color: var(--mrw-on-accent);
+}
+
+.mrw__btn--danger {
+    color: var(--mrw-bad);
+    background: transparent;
+}
+
+.mrw__btn--link {
+    background: transparent;
+    border-color: transparent;
+    color: var(--mrw-accent);
+    padding: 2px 6px;
+}
+
+.mrw__btn--link:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+.mrw__btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.mrw__file {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.mrw__table-wrap {
+    overflow: auto;
+}
+
+.mrw__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    color: var(--mrw-ink);
+}
+
+.mrw__table th,
+.mrw__table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--mrw-line);
+    text-align: left;
+    white-space: nowrap;
+    background: transparent;
+    color: var(--mrw-ink);
+}
+
+.mrw__table th {
+    color: var(--mrw-muted);
+    font-weight: 600;
+    background: var(--mrw-field);
+}
+
+.mrw__table tbody tr {
+    cursor: pointer;
+}
+
+.mrw__table tbody tr:hover td {
+    background: var(--mrw-hover);
+}
+
+.mrw__person,
+.mrw__person-field {
+    position: relative;
+}
+
+.mrw__person-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.mrw__person-field .mrw__input {
+    width: 100%;
+}
+
+.mrw__person-selected {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 2rem;
+    padding: 4px 2.2rem 4px 8px;
+    border: 1px solid #2fa36b;
+    border-radius: 6px;
+    background: var(--mrw-field);
+    color: var(--mrw-ink);
+}
+
+.mrw__person-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.mrw__person-clear {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.4rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    padding: 0;
+    border: 1px solid var(--mrw-line);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--mrw-muted);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mrw__person-clear:hover {
+    background: var(--mrw-hover);
+    color: var(--mrw-ink);
+}
+
+.mrw__hits {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 40;
+    max-height: 15.75rem;
+    overflow: auto;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    /* Theme surface tokens are translucent here, so the list must use a solid fill. */
+    background: #2a2e38;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+}
+
+.dxbl-theme-fluent-mode-light .mrw__hits {
+    background: #fff;
+    border-color: rgba(20, 32, 51, 0.18);
+    box-shadow: 0 10px 26px rgba(20, 32, 51, 0.18);
+}
+
+.mrw__scans {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mrw__hit,
+.mrw__scans li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    color: var(--mrw-ink);
+}
+
+.mrw__hit {
+    border: 0;
+    background: #2a2e38;
+    color: inherit;
+    border-radius: 0;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.mrw__hit:hover {
+    background: #3b4558;
+}
+
+.dxbl-theme-fluent-mode-light .mrw__hit {
+    background: #fff;
+}
+
+.dxbl-theme-fluent-mode-light .mrw__hit:hover {
+    background: #e8f1ff;
+}
+
+.mrw__status {
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: var(--mrw-ink);
+}
+
+.mrw__status.is-ok {
+    background: var(--mrw-ok-bg);
+}
+
+.mrw__status.is-error {
+    background: var(--mrw-bad-bg);
+}
+
+.mrw__loading {
+    padding: 24px 0;
+    color: var(--mrw-muted);
+}
+
+@media (max-width: 900px) {
+    .mrw__form {
+        grid-template-columns: 1fr;
+    }
+}

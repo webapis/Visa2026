@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Vize Yönetimi">
   <ActionDesign>
     <Actions>
@@ -58,7 +58,6 @@
     <Items>
       <Item Id="Application" Caption="Başvuru profili örnekleri">
         <Items>
-          <Item Id="InvitationItem_Cakylyklar" Caption="Davetiyeler" />
           <Item Id="Application_DirectMigration" Caption="Anlaşma gerektirmeyen başvurular">
             <Items>
               <Item Id="ApplicationItem_DirectMigration" Caption="Başvuru kalemleri (migrasyon)" />
@@ -85,17 +84,7 @@
       <Item Id="Employee" Caption="Çalışan" />
       <Item Id="Employees" Caption="Çalışanlar" />
       <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
-      <Item Id="Invitations" Caption="Davetiyeler">
-        <Items>
-          <Item Id="Employee" Caption="Davetiyeler (Çalışan)" />
-          <Item Id="FamilyMember" Caption="Davetiyeler (Aile üyesi)" />
-        </Items>
-      </Item>
-      <Item Id="WorkPermits" Caption="İş İzinleri">
-        <Items>
-          <Item Id="Employee" Caption="İş İzinleri (Çalışan)" />
-        </Items>
-      </Item>
+      <Item Id="FindEmployees" Caption="Çalışan ara" />
       <Item Id="Geography" Caption="Coğrafya" />
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="ImportReimportHistory" Caption="Yeniden içe aktarma geçmişi" />
@@ -2561,10 +2550,6 @@
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
-    <ListView Id="InvitationItem_Cakylyklar_ListView" Caption="Davetiyeler" />
-    <ListView Id="InvitationItem_Cakylyklar_Employees_ListView" Caption="Davetiyeler (Çalışan)" />
-    <ListView Id="WorkPermitItem_Registry_Employees_ListView" Caption="İş İzinleri (Çalışan)" />
-    <ListView Id="InvitationItem_Cakylyklar_FamilyMembers_ListView" Caption="Davetiyeler (Aile üyesi)" />
     <ListView Id="Application_ListView_DirectMigration" Caption="Doğrudan migrasyon başvuruları">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
@@ -2834,6 +2819,7 @@
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
       </Columns>
     </ListView>
+    <DetailView Id="EmployeeSearchHost_DetailView" Caption="Çalışan ara" />
     <DetailView Id="ExpirationAlertRule_DetailView" Caption="Belge sona erme uyarıları" />
     <ListView Id="ExpirationAlertRule_ListView" Caption="Belge sona erme uyarıları" />
     <DetailView Id="ExternalArrival_DetailView" Caption="Dış Geliş" />
@@ -2987,10 +2973,73 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Person_DetailView_Employee" Caption="Çalışan"></DetailView>
-    <DetailView Id="Person_DetailView_FamilyMember" Caption="Aile üyesi"></DetailView>
-    <DetailView Id="Person_DetailView_EmployeeIntake" Caption="Çalışan"></DetailView>
-    <DetailView Id="Person_DetailView_FamilyMemberIntake" Caption="Aile üyesi"></DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Çalışan">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Çalışan" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
+              <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
+              <LayoutGroup Id="Educations" Caption="Eğitim" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
+              <LayoutGroup Id="IncompleteData" Caption="Eksik veriler" />
+              <LayoutGroup Id="MedicalRecords" Caption="Sağlık Kayıtları" />
+              <LayoutGroup Id="Passports" Caption="Pasaportlar" />
+              <LayoutGroup Id="PositionHistory" Caption="Pozisyon Geçmişi" />
+              <LayoutGroup Id="Salaries" Caption="Maaşlar" />
+              <LayoutGroup Id="TravelHistories" Caption="Seyahat Geçmişi" />
+              <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň Maksady" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Başvurular (bağlı)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Aile üyeleri (bağlı)" />
+              <LayoutGroup Id="InvitationItems" Caption="Davetler (verilen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (verilen)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="İş izinleri (verilen)" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Aile üyesi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Aile üyesi" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
+              <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
+              <LayoutGroup Id="Educations" Caption="Eğitim" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
+              <LayoutGroup Id="IncompleteData" Caption="Eksik veriler" />
+              <LayoutGroup Id="MedicalRecords" Caption="Sağlık Kayıtları" />
+              <LayoutGroup Id="Passports" Caption="Pasaportlar" />
+              <LayoutGroup Id="PositionHistory" Caption="Pozisyon Geçmişi" />
+              <LayoutGroup Id="Salaries" Caption="Maaşlar" />
+              <LayoutGroup Id="TravelHistories" Caption="Seyahat Geçmişi" />
+              <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň Maksady" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Başvurular (bağlı)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Aile üyeleri (bağlı)" />
+              <LayoutGroup Id="InvitationItems" Caption="Davetler (verilen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (verilen)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="İş izinleri (verilen)" />
+            </TabbedGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Geçici ziyaretçi">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

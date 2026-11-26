@@ -152,8 +152,6 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName — **singleton** |
 | AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName — **singleton** |
 | ProjectContract | `tenant/project-contract.json` | NameTm title (`NameTmTitle`) — variants share Code |
-| BorderZoneName | `tenant/border-zone-name.json` | Name — multi-select catalog for `ApplicationItem` / `Visa` border zones |
-| WorkPermittedLocationName | `tenant/work-permitted-location-name.json` | Name — multi-select catalog for work-permitted locations on `ApplicationItem` / `WorkPermitItem` |
 | Lodging | `tenant/lodging.json` | FullAddress — company lodging sites for `AddressOfResidence` |
 | AddressOfResidence | `tenant/address-of-residence.json` | Type+City+FullAddress shared catalog (Case Address1/2 + People FKs); matchKey `TypeAndCityAndFullAddress` |
 
@@ -166,8 +164,9 @@ For a **new customer**, replace these tenant JSON files (or overlay on the serve
 | Entity | Reason |
 |--------|--------|
 | **ApplicationType** | C# seed + dedicated updaters |
-| **BorderZoneLocation** | Legacy FK / UI catalog BO; **item/visa border zones** use comma-separated strings + **`BorderZoneName`** tenant JSON (`tenant/border-zone-name.json`) |
-| **WorkPermitLocation** | Optional lookup BO (region-scoped); **work-permitted location labels** use **`WorkPermittedLocationName`** tenant JSON (`tenant/work-permitted-location-name.json`) |
+| **BorderZoneName** / **WorkPermittedLocationName** | Not seeded. Visa, invitation, work-permit, border-zone, and case location editors store a comma-separated string and suggest only values officers have saved (`ApplicationProfileSavedLocation`), the same way Address 1/2 works. |
+| **BorderZoneLocation** | Legacy FK. Item and visa border zones are comma-separated strings, not a lookup. |
+| **WorkPermitLocation** | Optional lookup BO (region-scoped). Work-permitted location labels are comma-separated strings, not `WorkPermittedLocationName`. |
 | **MovementPermitLocation** | Intentionally excluded; maintain in app if needed |
 | **ApplicationTypeFilter** | Deprecated; not seeded. Quick-code picker groups by `SelectionCode` hundreds (see `ApplicationTypeCodePickerHelper`). Full row: [`docs/DEPRECATED.md`](DEPRECATED.md). |
 

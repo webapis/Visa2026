@@ -178,6 +178,10 @@ public static class ApplicationProfileInstancePersonService
             objectSpace.Delete(link);
 
         CasePersonRequestedLocation.DeleteForPerson(objectSpace, personId);
+        foreach (var note in objectSpace.GetObjectsQuery<ApplicationProfileInstancePersonAddress2Note>()
+                     .Where(n => n.PersonId == personId)
+                     .ToList())
+            objectSpace.Delete(note);
 
         // Delete person-owned issued lines before Person FK is nulled — otherwise Save validation
         // fires ("Person"/"Adam"/"Häzirki wezipesi" required) on orphaned modified rows.
@@ -246,6 +250,7 @@ public static class ApplicationProfileInstancePersonService
         }
 
         CasePersonRequestedLocation.DeleteForPersonOnCase(objectSpace, applicationId, personId);
+        CasePersonAddress2Note.DeleteForPersonOnCase(objectSpace, applicationId, personId);
     }
 
     public static void RefreshApplication(IObjectSpace objectSpace, ApplicationProfileInstance? application)

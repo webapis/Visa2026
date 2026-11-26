@@ -30,7 +30,18 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 
 ## Local build and test (from repo root)
 
-After a code change, an agent that needs a compile or test check builds into its **own artifacts directory**. Repository `bin/` and `obj/` stay with Visual Studio (F5) and the developer’s build. Two builds writing those folders lock the same DLLs (`MSB3021` / `MSB3027`) and break each other.
+After a code change, an agent that needs a compile or test check builds into its **own artifacts directory**. Repository `bin/` and `obj/` stay with Visual Studio (F5) and the developer’s build. Two builds writing those folders lock the same DLLs (`MSB3021` / `MSB3027`) and break each other — often looking like a **hung** build (long copy retries + wedged `VBCSCompiler`).
+
+**Preferred wrappers** (fail-fast locks, no shared Roslyn server, stop orphans first):
+
+```powershell
+.\scripts\local\Stop-HungBuilds.ps1
+.\scripts\local\Build-Isolated.ps1 -SessionId <session>              # default: Blazor.Server → artifacts
+.\scripts\local\Build-Isolated.ps1 -BlazorOnly -SessionId <session>  # Razor/CSS only; no Module rebuild
+.\scripts\local\Build-Isolated.ps1 -Project Visa2026.slnx -SessionId <session>
+```
+
+`Directory.Build.props` applies isolated settings when `--artifacts-path` is set or `-p:VISA2026_ISOLATED_BUILD=1` (analyzers off, `UseSharedCompilation=false`, short copy retries). Global copy retries are also capped (3×400ms) so F5/agent lock fights fail visibly instead of sitting for minutes.
 
 On the first build in a conversation, create one folder and **reuse that exact path** for every later build and test in the same conversation. Put it outside the repo so agent output does not fill the working copy:
 
@@ -39,8 +50,8 @@ $artifacts = Join-Path $env:LOCALAPPDATA "Visa2026\agent-builds\<session>"
 if (-not $artifacts.EndsWith('\')) { $artifacts += '\' }
 New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
 
-dotnet build Visa2026.slnx -c Debug --artifacts-path $artifacts
-dotnet build Visa2026.slnx -c EasyTest --artifacts-path $artifacts
+dotnet build Visa2026.slnx -c Debug --artifacts-path $artifacts -p:VISA2026_ISOLATED_BUILD=1
+dotnet build Visa2026.slnx -c EasyTest --artifacts-path $artifacts -p:VISA2026_ISOLATED_BUILD=1
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --artifacts-path $artifacts
 ```
 
@@ -50,6 +61,8 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --artifacts
 - Leave project `OutputPath` unchanged. F5, IIS publish, and import scripts keep using repository `bin/` and `obj/`.
 - When the task is to **run** the assembly just built (DataImporter, a unit-test host), start the exe under that artifacts path: `<artifacts>\bin\<Project>\<configuration>\net8.0\`. The configuration folder is lowercase (`debug`, `easytest`).
 - Skip the build when the change cannot affect compilation (docs, comments, prompts only).
+- If a build sits after restore with **no further output** and high CPU: run **`Stop-HungBuilds.ps1`**, then **`Build-Isolated.ps1`**. Do not start a second full Module compile into repo `bin/` while F5 is running.
+- Optional hygiene: **`Clean-BuildArtifacts.ps1`** (trim bloated `eXpressAppFramework.log`; `-Full` clears `bin`/`obj`).
 - The artifacts folder is disposable. A later cleanup of `%LOCALAPPDATA%\Visa2026\agent-builds` is safe. During a session, leave other sessions’ folders alone.
 
 ## Git: “commit” with verification first
@@ -128,6 +141,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`.cursor/skills/visa2026-user-report-templates/SKILL.md`** (+ **`reference*.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: user report template **seeds** under **`Resources/Templates/`** (Word/Excel embed, maps, Extract/Validate, merge families); not dialog UX (see **resminamalar**).
 - **`.cursor/skills/visa2026-word-reports/SKILL.md`** (+ **`reference.md`**, **`review-status.md`**) — **deprecated** for new work (code-backed `IWordReportDefinition` removed); historical **`docs/WORD_REPORT_GENERATION_IDEA.md`** / XtraReports notes only.
 - **`docs/REPORT_DASHBOARD.md`** — officer Report Dashboard home (charts, Excel, ListView); supersedes removed State Dashboard UI.
+- **`docs/EMPLOYEE_SEARCH.md`** — **Find employees** left-nav search: employees only, AND across filters, OR inside one multi-select, 200-row cap, why-matched panel, dossier handoff.
 - **`.cursor/skills/visa2026-report-dashboard/SKILL.md`** (+ **`reference.md`**, **`IMPLEMENTATION_PLAN.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **Report Dashboard** prototyping and evolution: add categories/sub-reports, wire mock → SQL view → real `ReportDashboardQueryService`, **Preview ↔ `vw_rd_*` ↔ XAF ListView parity** (one view + ListView per subreport; Excel same population), status CSS classes. Invitation **Open in Excel** is a company workbook on `ReportDashboardExcelTemplate` (not `UserReportTemplate`); see **`docs/REPORT_DASHBOARD.md`** § Excel templates. Canonical **`docs/REPORT_DASHBOARD.md`**.
 - **`.cursor/skills/visa2026-analytics-ai-chat/SKILL.md`** (+ **`reference.md`**, **`IMPLEMENTATION_PLAN.md`**, **`prompts.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: officer **AI analytics chat** on Report Dashboard (allow-listed aggregate tools, `None` / Azure providers, panel UX, audit turns). Not `vw_rd_*` promotion (**visa2026-report-dashboard**) or Template Convert AI. Canonical **`docs/ANALYTICS_AI_CHAT.md`** (planned with slices).
 - **`docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`** — State notifications inbox (header bell, validity + missing-data alerts, phases after UI prototype); links to state evaluation docs.
@@ -143,6 +157,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **[`docs/APPLICATION_PROGRESS_STATE_VALIDATION.md`](docs/APPLICATION_PROGRESS_STATE_VALIDATION.md)** — `ApplicationProgress` workflow: `ApplicationState` + `ApplicationLocation`, SLA days, transition validation, manual officer advance.
 - **[`docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md)** — approval step flows (ministry legs, direct migration), `ProjectContract` ministry legs, resolver and business rules.
 - **`.cursor/skills/visa2026-application-progress/SKILL.md`** (+ **`reference.md`**, **`prompts.md`**, **`MATURITY.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **`ApplicationProgress`** workflow (transitions, contract/ministry legs, ministry letter file, validation, unit tests) — not ListView row colors (**visa2026-bo-state-colors**).
+- **`.cursor/skills/visa2026-application-process-steps/SKILL.md`** (+ **`reference.md`**, **`prompts.md`**, **`MATURITY.md`**, append-only **`learnings.md`**) — which progress steps each profile shows, when an instance is complete, and keeping [`docs/APPLICATION_PROFILE_PROGRESS_STEPS.md`](docs/APPLICATION_PROFILE_PROGRESS_STEPS.md) in sync with seed and timeline code. Not transition graphs (**visa2026-application-progress**) or color hex (**visa2026-bo-state-colors**).
 - **[`docs/APPLICATION_PROFILE_PLAN.md`](docs/APPLICATION_PROFILE_PLAN.md)** — **Application Profile** live FK model, prototypes, Person M2M (retire ApplicationItem), Person/Dossier start-application; **`ApplicationType` deprecated**.
 - **`.cursor/skills/visa2026-application-profile/SKILL.md`** (+ **`reference.md`**, **`IMPLEMENTATION_PLAN.md`**, **`prompts.md`**, **`MATURITY.md`**, append-only **`learnings.md`**) — **sole** Agent **Skill** for Application Profile implementation: seed/cutover, wizard, picker, config lock, officer configuration suggestions, slice tracking — not progress transitions (**visa2026-application-progress**), Resminamalar (**visa2026-resminamalar**), or **Create from yellow marks** (**visa2026-template-scan**). Responsive case-workspace layout: **visa2026-responsive-ui**.
 - **`.cursor/skills/visa2026-responsive-ui/SKILL.md`** (+ **`reference.md`**, **`prompts.md`**, **`MATURITY.md`**, append-only **`learnings.md`**) — officer shell responsive layout: minimum **1280×800**, Overview reflow, tile stretch, XAF left menu on instance detail. Not profile domain rules (**visa2026-application-profile**) or preview-slot shell (**visa2026-preview-slot**).

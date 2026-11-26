@@ -797,3 +797,67 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Recreate **prod app only**.
 - **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
 - **Skill**: setup-docker-engine
+### 2026-11-17 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1059`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:554bbf525475` Created `2026-11-17T11:07:30Z` (replaces `375ce7014bdf` `2026-11-17T08:22Z`). Module assembly `1.0.0.1059` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-17 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1061`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:a1f7ad2acbf2` Created `2026-11-17T12:11:55Z` (replaces `554bbf525475` `2026-11-17T11:07Z`). Module assembly `1.0.0.1061` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-18 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1062`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:76cd60d3caf3` Created `2026-11-18T05:02:52Z` (replaces `a1f7ad2acbf2` `2026-11-17T12:11Z`). Module assembly `1.0.0.1062` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-18 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1063`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:b48bd0f9f4c2` Created `2026-11-18T07:01:27Z` (replaces `76cd60d3caf3` `2026-11-18T05:02Z`). Module assembly `1.0.0.1063` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-18 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1065`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:f7aae48bd9c7` Created `2026-11-18T07:58:24Z` (replaces `b48bd0f9f4c2` `2026-11-18T07:01Z`). Module assembly `1.0.0.1065` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-23 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1072`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:02da0463f25e` Created `2026-11-23T06:07:40Z` (replaces `f7aae48bd9c7` `2026-11-18T07:58Z`). Module assembly `1.0.0.1072` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; org created=0. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-25 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1077`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:fe31c6790194` Created `2026-11-25T11:08:31Z` (replaces `02da0463f25e` `2026-11-23T06:07Z`). Module assembly `1.0.0.1077` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; approval-leg scanned=171 assigned=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine
+### 2026-11-26 — Hub latest recreate on `10.100.128.26` prod only (`1.0.0.1083`)
+
+- **Symptom**: Deploy newest Docker Hub `webapia/visa2026:latest` to Ubuntu prod.
+- **Try**: SSH `visa2026-onprem-26`. From `/opt/visa2026-prod`: three `-f` files including scan override, `pull app` then `up -d --force-recreate --no-deps app`. Did **not** recreate staging (still Created `2026-10-08T05:34:08Z`). Did **not** run `remote-compose-sql-up.sh`. Did **not** set `FORCE_XAF_DB_UPDATE`.
+- **Test**: Image `sha256:8065827fd350` Created `2026-11-26T09:29:43Z` (replaces `fe31c6790194` `2026-11-25T11:08Z`). Module assembly `1.0.0.1083` (ignore DLL noise `1.0.0.2013`). Prod postgres stayed **healthy** (Created `2026-08-06`, Up 3 months). Seed gates: profile created=0 updated=35; shelf shelvesCreated=0; approval-leg scanned=172 assigned=0; UserReportTemplateSeedGate skipped. Host poll 1 and LAN `http://10.100.128.26:8080/LoginPage` → **200**. No `ValueManagerContext` in logs. Scan override still on (`AzureOpenAI` / `true`). `FORCE_XAF_DB_UPDATE` empty.
+- **Fix**: Recreate **prod app only**.
+- **Prevent**: When the request names prod, do not recreate the staging app. Keep the scan override in the prod `-f` chain. The pull updates the shared `latest` tag; the running staging container stays on Created `2026-10-08T05:34:08Z` until the next staging recreate.
+- **Skill**: setup-docker-engine

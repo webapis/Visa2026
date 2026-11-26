@@ -17,11 +17,13 @@ alwaysApply: true
 
 **Where logic belongs:** business rules, BOs, controllers, DB updaters, PDF mapping → **Module**. Blazor Server stays a **thin** shell unless the task is explicitly host-only.
 
-**Build / test (repo root):** when a code change needs a compile or test check, build into one private artifacts directory for this conversation and reuse it. Repository `bin/` and `obj/` stay with Visual Studio F5 and other agents. Full rule in **`AGENTS.md`** (Local build and test).
+**Build / test (repo root):** when a code change needs a compile or test check, build into one private artifacts directory for this conversation and reuse it. Repository `bin/` and `obj/` stay with Visual Studio F5 and other agents. Full rule in **`AGENTS.md`** (Local build and test). Prefer **`scripts/local/Build-Isolated.ps1`** (sets `VISA2026_ISOLATED_BUILD`, `--artifacts-path`, stops wedged MSBuild). Razor/CSS-only Blazor: **`-BlazorOnly`**. If a build sits after restore with no output and high CPU: **`scripts/local/Stop-HungBuilds.ps1`**, then isolated rebuild — do not leave orphan `VBCSCompiler` / `MSBuild` nodes.
 
 ```powershell
+.\scripts\local\Build-Isolated.ps1 -SessionId <session>            # Blazor host → artifacts
+.\scripts\local\Build-Isolated.ps1 -BlazorOnly -SessionId <session> # Razor/CSS only
 $artifacts = Join-Path $env:LOCALAPPDATA "Visa2026\agent-builds\<session>\"
-dotnet build Visa2026.slnx -c Debug --artifacts-path $artifacts
+dotnet build Visa2026.slnx -c Debug --artifacts-path $artifacts -p:VISA2026_ISOLATED_BUILD=1
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --artifacts-path $artifacts
 ```
 

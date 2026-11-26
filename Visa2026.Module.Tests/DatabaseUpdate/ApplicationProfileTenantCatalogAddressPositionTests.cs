@@ -33,6 +33,8 @@ public class ApplicationProfileTenantCatalogAddressPositionTests
                 row.ProfileCatalogKey, row.Code);
             if (collectsStay)
                 Assert.True(row.RequireAddress1, row.Code);
+            else
+                Assert.False(row.RequireAddress1, row.Code);
         }
     }
 

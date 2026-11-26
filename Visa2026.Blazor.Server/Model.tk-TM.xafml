@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
@@ -163,7 +163,74 @@
           <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsady elementleri" />
         </LayoutGroup>
       </Layout>
-    </DetailView>    <DetailView Id="Person_DetailView_EmployeeIntake" />    <DetailView Id="Person_DetailView_FamilyMemberIntake" />
+    </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Işgär">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Işgär" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
+              <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
+              <LayoutGroup Id="Educations" Caption="Bilim" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
+              <LayoutGroup Id="IncompleteData" Caption="Doly däl maglumat" />
+              <LayoutGroup Id="MedicalRecords" Caption="Saglyk ýazgylary" />
+              <LayoutGroup Id="Passports" Caption="Pasportlar" />
+              <LayoutGroup Id="PositionHistory" Caption="Wezipe taryhy" />
+              <LayoutGroup Id="Salaries" Caption="Aýlyklar" />
+              <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
+              <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
+              <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsatlary (berlen)" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Person" Caption="Maşgala agzy" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PersonCollectionSections">
+            <TabbedGroup Id="PersonRecordTabs">
+              <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
+              <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
+              <LayoutGroup Id="Educations" Caption="Bilim" />
+              <LayoutGroup Id="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
+              <LayoutGroup Id="IncompleteData" Caption="Doly däl maglumat" />
+              <LayoutGroup Id="MedicalRecords" Caption="Saglyk ýazgylary" />
+              <LayoutGroup Id="Passports" Caption="Pasportlar" />
+              <LayoutGroup Id="PositionHistory" Caption="Wezipe taryhy" />
+              <LayoutGroup Id="Salaries" Caption="Aýlyklar" />
+              <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
+              <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
+            </TabbedGroup>
+            <TabbedGroup Id="IssuedDocumentsTabs">
+              <LayoutGroup Id="ApplicationProfileInstances" Caption="Ýüztutmalar (baglanan)" />
+              <LayoutGroup Id="FamilyMembers" Caption="Maşgala agzalary (baglanan)" />
+              <LayoutGroup Id="InvitationItems" Caption="Çakylyklar (berlen)" />
+              <LayoutGroup Id="RejectionItems" Caption="Retler (berlen)" />
+              <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsatlary (berlen)" />
+            </TabbedGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Wagtlaýyn myhman">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Person intake — Work permits (prototype)</title>
+  <style>
+    :root {
+      --bg: #2a2d34;
+      --rail: #24272e;
+      --panel: #32363f;
+      --line: #3e4450;
+      --text: #e6e8ee;
+      --muted: #9aa1b0;
+      --blue: #4c8dff;
+      --green: #3dd68c;
+      --amber: #e0b15a;
+      --red: #f07178;
+      --gray: #8b93a3;
+      --font: "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #1b1e24;
+      color: var(--text);
+      font-family: var(--font);
+    }
+    .page { padding: 18px 18px 8px; }
+    .app {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 12px;
+      align-items: stretch;
+    }
+    .wizard {
+      display: grid;
+      grid-template-columns: 228px 1fr;
+      min-height: 760px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .rail { background: var(--rail); border-right: 1px solid var(--line); padding: 16px 12px; }
+    .who { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .avatar {
+      width: 42px; height: 42px; border-radius: 6px;
+      background: linear-gradient(160deg, #6a8cff, #2d4a8a);
+      display: grid; place-items: center; font-weight: 700; font-size: 14px;
+    }
+    .who h1 { margin: 0; font-size: 14px; font-weight: 650; }
+    .who .role { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .step {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 2px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .step .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; background: #4a5160; }
+    .step.edit { color: #3dd68c; outline: 1px solid rgba(61, 214, 140, 0.45); }
+    .step.edit .dot { background: #3dd68c; }
+    .step.edit .meta { color: #3dd68c; }
+    .step.readonly { color: #6ea8fe; outline: 1px solid rgba(110, 168, 254, 0.5); }
+    .step.readonly .dot { background: #6ea8fe; }
+    .step.readonly .meta { color: #8eb6ff; }
+    .step.readonly.active { background: rgba(110, 168, 254, 0.16); color: #d6e6ff; }
+    .meta { display: block; font-size: 11px; margin-top: 1px; }
+    .main { padding: 18px 18px 14px; display: flex; flex-direction: column; min-width: 0; }
+    .kicker { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+    h2 { margin: 0; font-size: 20px; font-weight: 650; }
+    .hint { color: var(--muted); font-size: 13px; margin: 6px 0 12px; }
+    .grid-wrap {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+      background: #262a32;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th {
+      text-align: left; font-weight: 600; color: var(--muted);
+      padding: 8px 10px; background: #2e333c; border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid #353a44; white-space: nowrap; }
+    tr.picked { background: rgba(76, 141, 255, 0.14); }
+    a.preview { color: #8eb6ff; text-decoration: none; font-weight: 600; }
+    .chip {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 650; letter-spacing: 0.01em;
+    }
+    .chip.valid { background: #1d3d30; color: var(--green); }
+    .chip.soon { background: #3d3420; color: var(--amber); }
+    .chip.ext { background: #3a2e1c; color: #f0c27a; }
+    .chip.expired { background: #4a2428; color: #ffb4b8; }
+    .chip.cancelled { background: #4a2428; color: var(--red); }
+    .chip.previous { background: #343842; color: var(--gray); }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+      margin-top: 12px; color: var(--muted); font-size: 12px;
+    }
+    .footer {
+      margin-top: auto; padding-top: 16px;
+      display: flex; justify-content: space-between;
+    }
+    .btn {
+      background: transparent; color: var(--blue); border: none;
+      font-size: 14px; font-weight: 650; padding: 8px 4px;
+    }
+    .slot {
+      background: #22262e;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .slot h3 { margin: 0; font-size: 13px; font-weight: 650; }
+    .slot .sub { color: var(--muted); font-size: 12px; }
+    .paper {
+      flex: 1;
+      background: #f4f1ea;
+      color: #1c1c1c;
+      border-radius: 4px;
+      padding: 16px 14px;
+      min-height: 520px;
+    }
+    .paper .seal { font-size: 10px; letter-spacing: 0.14em; color: #6a5a3a; }
+    .paper h4 { margin: 8px 0 12px; font-size: 15px; }
+    .paper p { margin: 0 0 6px; font-size: 11px; line-height: 1.35; }
+    .paper .rule { height: 1px; background: #d9d1c3; margin: 10px 0; }
+    .note {
+      margin: 12px 18px 18px;
+      color: #b7becb;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .note strong { color: #e6e8ee; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="app">
+      <section class="wizard" aria-label="Employee wizard, Work permits step">
+        <aside class="rail">
+          <div class="who">
+            <div class="avatar">FD</div>
+            <div>
+              <h1>Fatih DANA</h1>
+              <div class="role">Edit employee</div>
+            </div>
+          </div>
+          <div class="step edit"><span class="dot"></span><div>Identity<span class="meta">Complete</span></div></div>
+          <div class="step edit"><span class="dot"></span><div>Work &amp; address<span class="meta">Complete</span></div></div>
+          <div class="step edit"><span class="dot"></span><div>Passports<span class="meta">Complete</span></div></div>
+          <div class="step edit"><span class="dot"></span><div>Education<span class="meta">Complete</span></div></div>
+          <div class="step edit"><span class="dot"></span><div>CV &amp; files<span class="meta">Complete</span></div></div>
+          <div class="step edit"><span class="dot"></span><div>Salary<span class="meta">Optional</span></div></div>
+          <div class="step edit"><span class="dot"></span><div>Position history<span class="meta">Complete</span></div></div>
+          <div class="step readonly"><span class="dot"></span><div>Family members<span class="meta">Read-only</span></div></div>
+          <div class="step readonly active"><span class="dot"></span><div>Work permits<span class="meta">Read-only</span></div></div>
+          <div class="step"><span class="dot"></span><div>Review<span class="meta">Summary</span></div></div>
+        </aside>
+        <div class="main">
+          <div class="kicker">Step 9 of 10</div>
+          <h2>Work permits</h2>
+          <div class="hint">Read-only. Preview opens the scanned work permit. This step is hidden when the employee has none.</div>
+          <div class="grid-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>State</th>
+                  <th>Number</th>
+                  <th>Start</th>
+                  <th>Expiration</th>
+                  <th>Days</th>
+                  <th>Work permitted locations</th>
+                  <th>AS number</th>
+                  <th>Position</th>
+                  <th>Passport</th>
+                  <th>Work permit</th>
+                  <th>Application profile instance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="picked">
+                  <td><a class="preview" href="#preview">Preview</a></td>
+                  <td><span class="chip valid">Valid</span></td>
+                  <td>WP-2025-0142</td>
+                  <td>01.03.2025</td>
+                  <td>28.02.2026</td>
+                  <td>95</td>
+                  <td>Aşgabat, Balkan</td>
+                  <td>AS-44120</td>
+                  <td>Engineer</td>
+                  <td>P12345678</td>
+                  <td>WP-2025</td>
+                  <td>WP-2025 / Çalık</td>
+                </tr>
+                <tr>
+                  <td><a class="preview" href="#preview">Preview</a></td>
+                  <td><span class="chip cancelled">Cancelled</span></td>
+                  <td>WP-2024-0770</td>
+                  <td>01.02.2024</td>
+                  <td>31.01.2025</td>
+                  <td>—</td>
+                  <td>Mary</td>
+                  <td>AS-33011</td>
+                  <td>Technician</td>
+                  <td>P12345678</td>
+                  <td>WP-2024</td>
+                  <td>WP-2024 / Çalık</td>
+                </tr>
+                <tr>
+                  <td><a class="preview" href="#preview">Preview</a></td>
+                  <td><span class="chip previous">Previous</span></td>
+                  <td>WP-2022-0194</td>
+                  <td>15.06.2022</td>
+                  <td>14.06.2023</td>
+                  <td>—</td>
+                  <td>Aşgabat</td>
+                  <td>AS-22008</td>
+                  <td>Engineer</td>
+                  <td>U998877</td>
+                  <td>WP-2022</td>
+                  <td>WP-2022 / Çalık</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="legend">
+            <span>States</span>
+            <span class="chip valid">Valid</span>
+            <span class="chip soon">Expiring soon</span>
+            <span class="chip ext">Extension required</span>
+            <span class="chip expired">Expired</span>
+            <span class="chip cancelled">Cancelled</span>
+            <span class="chip previous">Previous</span>
+          </div>
+          <div class="footer">
+            <button class="btn" type="button">Back</button>
+            <button class="btn" type="button">Next</button>
+          </div>
+        </div>
+      </section>
+      <aside class="slot" id="preview">
+        <div>
+          <h3>Work permit document copies</h3>
+          <div class="sub">Fatih DANA — work permit WP-2025-0142</div>
+        </div>
+        <div class="paper">
+          <div class="seal">WORK PERMIT</div>
+          <h4>WP-2025-0142</h4>
+          <p><strong>Name</strong> Fatih DANA</p>
+          <p><strong>Passport</strong> P12345678</p>
+          <p><strong>Position</strong> Engineer</p>
+          <p><strong>Locations</strong> Aşgabat, Balkan</p>
+          <div class="rule"></div>
+          <p><strong>Start</strong> 01.03.2025</p>
+          <p><strong>Expiration</strong> 28.02.2026</p>
+          <p><strong>AS number</strong> AS-44120</p>
+          <div class="rule"></div>
+          <p>Scanned copy of the issued work permit. The list stays read-only; this slot is the only opened document.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <p class="note">
+    <strong>Prototype only.</strong>
+    Green steps are editable. Blue steps are read-only and sit after every editable step. Review stays last.
+    Hidden when <strong>WorkPermitItems</strong> is empty, and absent on the family-member wizard.
+    No New, Delete, or edit. Preview uses the same work-permit document copies as the list link.
+    Columns include the parent work-permit number and the application profile instance.
+    <strong>Valid</strong> is the current permit. <strong>Expiring soon</strong> and <strong>Extension required</strong> are that same current permit inside the warning window, so they are not extra rows here.
+    <strong>Expired</strong> is the current permit past its date. <strong>Cancelled</strong> wins over every other label.
+    <strong>Previous</strong> is an older permit that is not the current one — including one whose dates have already passed.
+    Person is omitted because every row is this employee.
+  </p>
+</body>
+</html>

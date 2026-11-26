@@ -4,7 +4,8 @@ namespace Visa2026.Module.Services.ApplicationPersonRoster;
 
 /// <summary>
 /// Address slots: Address 1 required when <see cref="ApplicationProfile.RequireAddress1"/>
-/// (or legacy person-address flag); Address 2 optional when RequireAddress2 / max 2.
+/// (or legacy person-address flag for People tiles); Address 2 optional when RequireAddress2 / max 2.
+/// Case summary Address 1 is catalog <c>RequireAddress1</c> only — not promoted from the People toggle.
 /// </summary>
 public static class ApplicationProfilePersonAddressMaxCount
 {
@@ -16,8 +17,8 @@ public static class ApplicationProfilePersonAddressMaxCount
         value < Min ? Default : (value > Max ? Max : value);
 
     /// <summary>
-    /// Dual-read: when either RequireAddress* is set, use those; otherwise fall back to
-    /// obsolete <see cref="ApplicationProfile.RequirePersonAddressOfResidence"/> + max count.
+    /// Dual-read for People / Linked Records: when either RequireAddress* is set, use those;
+    /// otherwise fall back to obsolete <see cref="ApplicationProfile.RequirePersonAddressOfResidence"/> + max count.
     /// </summary>
     public static bool EffectiveRequireAddress1(ApplicationProfile? profile)
     {
@@ -74,22 +75,26 @@ public static class ApplicationProfilePersonAddressMaxCount
         RequiredSlotCount(application?.ApplicationProfile);
 
     /// <summary>
-    /// Map legacy person-address flags onto RequireAddress* when both Requires are still false,
-    /// then keep obsolete flags aligned with Requires.
+    /// Keep People address aligned when Case Address 1/2 are on. Do not promote
+    /// <see cref="ApplicationProfile.RequirePersonAddressOfResidence"/> onto RequireAddress1
+    /// (Case summary stay is catalog/invitation-stay scoped).
     /// </summary>
     public static void SyncRequireFlagsFromLegacy(ApplicationProfile profile)
     {
         if (profile == null)
             return;
 #pragma warning disable CS0618
-        if (!profile.RequireAddress1 && !profile.RequireAddress2 && profile.RequirePersonAddressOfResidence)
+        if (profile.RequireAddress1 || profile.RequireAddress2)
         {
-            profile.RequireAddress1 = true;
-            profile.RequireAddress2 = Clamp(profile.PersonAddressOfResidenceMaxCount) >= 2;
+            profile.RequirePersonAddressOfResidence = true;
+            profile.PersonAddressOfResidenceMaxCount = profile.RequireAddress2 ? 2 : 1;
         }
-
-        profile.RequirePersonAddressOfResidence = profile.RequireAddress1 || profile.RequireAddress2;
-        profile.PersonAddressOfResidenceMaxCount = profile.RequireAddress2 ? 2 : (profile.RequireAddress1 ? 1 : Default);
+        else
+        {
+            profile.PersonAddressOfResidenceMaxCount = profile.RequirePersonAddressOfResidence
+                ? Clamp(profile.PersonAddressOfResidenceMaxCount)
+                : Default;
+        }
 #pragma warning restore CS0618
     }
 }

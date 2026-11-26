@@ -76,6 +76,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileOverview.ApplicationProfileOverviewHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.MedicalRecordWorkspace.MedicalRecordWorkspaceHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.EmployeeSearch.EmployeeSearchHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.OfficerShell.OfficerShellHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
@@ -190,6 +191,9 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.OrganizationCatalogsDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.OrganizationCatalogsLayoutUpdater());
             updaters.Add(new DatabaseUpdate.OrganizationCatalogsModelUpdater());
+            updaters.Add(new DatabaseUpdate.MedicalRecordWorkspaceDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.MedicalRecordWorkspaceLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.MedicalRecordWorkspaceNavigationUpdater());
             updaters.Add(new DatabaseUpdate.EmployeeSearchDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.EmployeeSearchLayoutUpdater());
             updaters.Add(new DatabaseUpdate.EmployeeSearchNavigationUpdater());

@@ -1,3 +1,4 @@
+using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 
@@ -20,6 +21,12 @@ public sealed class PersonNestedReadOnlyListViewController : ViewController<List
         ApplyReadOnlyChrome();
     }
 
+    protected override void OnViewControlsCreated()
+    {
+        base.OnViewControlsCreated();
+        ApplyReadOnlyChrome();
+    }
+
     private void ApplyReadOnlyChrome()
     {
         View.AllowNew.SetItemValue(nameof(PersonNestedReadOnlyListViewController), false);
@@ -34,5 +41,11 @@ public sealed class PersonNestedReadOnlyListViewController : ViewController<List
             .Active.SetItemValue(nameof(PersonNestedReadOnlyListViewController), false);
         Frame.GetController<LinkUnlinkController>()?.UnlinkAction
             .Active.SetItemValue(nameof(PersonNestedReadOnlyListViewController), false);
+
+        if (string.Equals(View.Id, PersonNestedCollectionLayout.MedicalRecordsListView, StringComparison.Ordinal))
+        {
+            Frame.GetController<ListViewProcessCurrentObjectController>()?
+                .ProcessCurrentObjectAction.Active.SetItemValue(nameof(PersonNestedReadOnlyListViewController), false);
+        }
     }
 }

@@ -8,6 +8,8 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 
 | Script | Purpose |
 |--------|---------|
+| `Stop-HungBuilds.ps1` | Kill wedged **MSBuild** / **VBCSCompiler** / stuck `dotnet build` (not devenv, not a running Blazor host). Run when a compile sits after restore with high CPU. |
+| `Build-Isolated.ps1` | Build into `%LOCALAPPDATA%\Visa2026\agent-builds\` with `VISA2026_ISOLATED_BUILD` (no analyzer/shared-Roslyn wedging; short file-lock retries). `-BlazorOnly` skips Module rebuild for Razor/CSS. |
 | `Build-DockerImages.ps1` | Build `webapia/visa2026` / importer images locally (same build-args as CI). Optional `-DeployLocal` to recreate the **local** compose app container. Sets `DOCKER_BUILDKIT=1` so NuGet **cache mounts** in the Dockerfiles apply (first build still downloads packages; later builds reuse cache on this PC). |
 | `Start-ComposeWatch.ps1` | Optional **hot reload**: `docker-compose.watch.yml` (SDK + `dotnet watch`). Separate compose project from prod-like local stacks. |
 | `Export-DockerAppLogs.ps1` | Dump compose **app** logs into `agent-local/` (e.g. for IDE/AI review). |

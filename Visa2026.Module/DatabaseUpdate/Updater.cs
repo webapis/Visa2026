@@ -14,6 +14,7 @@ using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.BusinessObjects.EmployeeSearch;
 using Visa2026.Module.BusinessObjects.Feedback;
 using Visa2026.Module.BusinessObjects.Operations;
 using Visa2026.Module.BusinessObjects.StateNotifications;
@@ -748,6 +749,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             // Top-level person lists (legacy-style; not under People). Temporary visitors stay off the left menu.
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, EmployeeSearchViewIds.PermissionPath, SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
@@ -1280,6 +1282,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationProfileCatalog", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/OrganizationCatalogs", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, EmployeeSearchViewIds.PermissionPath, SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
