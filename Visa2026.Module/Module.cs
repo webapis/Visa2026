@@ -76,6 +76,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileOverview.ApplicationProfileOverviewHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.OrganizationCatalogs.OrganizationCatalogsHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.EmployeeSearch.EmployeeSearchHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.OfficerShell.OfficerShellHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog));
@@ -94,6 +95,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.WorkPermitQuotaSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaIssueWindowSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardExcelBundleSettingsSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.EmployeeSearchColumnSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardRosterSnapshotSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
@@ -188,6 +190,9 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.OrganizationCatalogsDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.OrganizationCatalogsLayoutUpdater());
             updaters.Add(new DatabaseUpdate.OrganizationCatalogsModelUpdater());
+            updaters.Add(new DatabaseUpdate.EmployeeSearchDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.EmployeeSearchLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.EmployeeSearchNavigationUpdater());
             updaters.Add(new DatabaseUpdate.OfficerShellDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.OfficerShellLayoutUpdater());
             updaters.Add(new DatabaseUpdate.OfficerShellModelUpdater());

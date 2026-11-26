@@ -26,6 +26,7 @@ string applicationProfileJsonPath = Path.Combine(toolsDir, "UiStrings.applicatio
 string applicationProfileMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.application-profile-messages.json");
 string templateScanMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.template-scan.json");
 string personIntakeMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.person-intake.json");
+string employeeSearchMessagesJsonPath = Path.Combine(toolsDir, "UiStrings.employee-search.json");
 string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
@@ -73,6 +74,7 @@ JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.As
 MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(applicationProfileMessagesJsonPath))!.AsObject());
 MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(templateScanMessagesJsonPath))!.AsObject());
 MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(personIntakeMessagesJsonPath))!.AsObject());
+MergeObject(messagesRoot, JsonNode.Parse(File.ReadAllText(employeeSearchMessagesJsonPath))!.AsObject());
 JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
 JsonObject validationTemplatesRoot = JsonNode.Parse(File.ReadAllText(validationTemplatesJsonPath))!.AsObject();
 string[] blazorLayoutDetailViews = blazorLayoutsRoot["detailViewsWithHostLayout"]!.AsArray()

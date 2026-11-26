@@ -48,6 +48,7 @@ Used by:
 - `IssueIssuedVisaSlotPanel.razor` — issued visa issue and expiration dates
 - `OfficerShellCaseProgressTab.razor` — Application Progress advance **Date**
 - Case summary on the case workspace and the profile picker (`OfficerShellCaseWorkspaceComponent.razor`, `ApplicationProfilePickerComponent.razor`) — **Application date**, plus start and end dates on the same form. The field value stays `yyyy-MM-dd` for save; the editor shows `dd.MM.yyyy`.
+- `EmployeeSearchComponent.razor` — Find employees date filters (birth, hire, visa, passport, invitation, medical). The stored value stays a date; the editor shows `dd.MM.yyyy`.
 
 **Family-members birth date** in `Visa2026.Blazor.Server/Editors/VisaFamilyMembersTextComponent.razor` uses the same `DxDateEdit` settings directly. That popup was the original pattern; the controller and `OfficerDateEdit` copy it. Domain notes for that editor: [`VISA_FAMILY_MEMBERS_TEXT_EDITOR.md`](VISA_FAMILY_MEMBERS_TEXT_EDITOR.md).
 

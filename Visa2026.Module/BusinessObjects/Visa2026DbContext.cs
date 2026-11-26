@@ -234,6 +234,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkPermitQuotaSettings> WorkPermitQuotaSettings { get; set; }
         public DbSet<VisaIssueWindowSettings> VisaIssueWindowSettings { get; set; }
         public DbSet<ReportDashboardExcelBundleSettings> ReportDashboardExcelBundleSettings { get; set; }
+        public DbSet<EmployeeSearchColumnSettings> EmployeeSearchColumnSettings { get; set; }
         public DbSet<ReportDashboardRosterSnapshot> ReportDashboardRosterSnapshots { get; set; }
         public DbSet<ExpirationAlertRule> ExpirationAlertRules { get; set; }
         public DbSet<CompanyProfile> CompanyProfiles { get; set; }

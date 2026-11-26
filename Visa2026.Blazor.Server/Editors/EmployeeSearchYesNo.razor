@@ -1,0 +1,15 @@
+@using Visa2026.Module.Localization
+
+<div class="esearch__switch esearch__switch--3" role="group" aria-label="@Label">
+    <button type="button" class="@On(Value == null)" @onclick="() => ValueChanged.InvokeAsync(null)">@EmployeeSearchText.Get("Any")</button>
+    <button type="button" class="@On(Value == true)" @onclick="() => ValueChanged.InvokeAsync(true)">@EmployeeSearchText.Get("Yes")</button>
+    <button type="button" class="@On(Value == false)" @onclick="() => ValueChanged.InvokeAsync(false)">@EmployeeSearchText.Get("No")</button>
+</div>
+
+@code {
+    [Parameter] public bool? Value { get; set; }
+    [Parameter] public EventCallback<bool?> ValueChanged { get; set; }
+    [Parameter] public string Label { get; set; } = "Yes or no";
+
+    private static string On(bool selected) => selected ? "is-selected" : string.Empty;
+}

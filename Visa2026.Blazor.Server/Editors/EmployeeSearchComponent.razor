@@ -1,0 +1,1596 @@
+@using System.Globalization
+@using System.Linq
+@using Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Services
+@using Visa2026.Module.Localization
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.EmployeeSearch
+
+<div class="esearch">
+    @if (IsLoading && !ShowResults)
+    {
+        <div class="esearch__loading" role="status">@L("Loading")</div>
+    }
+    else if (!ShowResults)
+    {
+        <form class="esearch__form" @onsubmit="SearchAsync" @onsubmit:preventDefault>
+            <header class="esearch__head">
+                <div>
+                    <h1 class="esearch__title">@L("Title")</h1>
+                    <p class="esearch__sub">@L("Subtitle")</p>
+                </div>
+                <span class="esearch__bar-actions">
+                    <button type="button" class="esearch__btn" @onclick="Clear" disabled="@IsBusy">@L("Clear")</button>
+                    <button type="submit" class="esearch__btn esearch__btn--primary" disabled="@IsBusy">@L("Search")</button>
+                </span>
+            </header>
+
+            @if (!string.IsNullOrWhiteSpace(StatusMessage))
+            {
+                <p class="@(IsStatusError ? "esearch__error" : "esearch__hint")" role="status">@StatusMessage</p>
+            }
+
+            @{
+                var setCriteria = SetCriteria();
+            }
+            <div class="esearch__picker @(setCriteria.Count > 0 ? "has-set" : null)">
+                @if (setCriteria.Count > 0)
+                {
+                    <div class="esearch__set">
+                        @foreach (var item in setCriteria)
+                        {
+                            <button type="button" class="esearch__set-chip" title="@item.Label" @onclick="() => _openGroup = item.Group">
+                                <span class="esearch__set-group">@L(item.GroupLabel)</span>
+                                <span class="esearch__set-value">@item.Label</span>
+                            </button>
+                        }
+                    </div>
+                }
+                <div class="esearch__tabs" role="tablist" aria-label="@L("Aria.Criteria")">
+                    @foreach (var tab in SearchTabs)
+                    {
+                        var open = _openGroup == tab.Id;
+                        <button type="button" class="esearch__tab @(open ? "is-open" : "")" role="tab" aria-selected="@open" @onclick="() => _openGroup = tab.Id">
+                            <span class="esearch__tab-name">@L(tab.Label)</span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="esearch__cards">
+                @if (_openGroup == 1)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Name")</h2>
+                    <label>@L("FirstName")<input @bind="_firstName" @bind:event="oninput" /></label>
+                    <label>@L("MiddleName")<input @bind="_middleName" @bind:event="oninput" /></label>
+                    <label>@L("LastName")<input @bind="_lastName" @bind:event="oninput" /></label>
+                    <label>@L("FullName")<input @bind="_fullName" @bind:event="oninput" /></label>
+                    <label>@L("PersonalNumber")<input @bind="_personalNumber" /></label>
+                    <label>@L("Email")<input @bind="_email" /></label>
+                    <label>@L("PhotoOnFile")<EmployeeSearchYesNo @bind-Value="_hasPhoto" Label="@L("PhotoOnFile")" /></label>
+                    <div class="esearch__switch esearch__switch--3" role="group" aria-label="@L("Aria.Archive")">
+                        <button type="button" class="@SwitchClass(_archive == "active")" @onclick='() => _archive = "active"'>@L("Active")</button>
+                        <button type="button" class="@SwitchClass(_archive == "archived")" @onclick='() => _archive = "archived"'>@L("Archived")</button>
+                        <button type="button" class="@SwitchClass(_archive == "both")" @onclick='() => _archive = "both"'>@L("Both")</button>
+                    </div>
+                    <label>@L("IncompleteFile")<EmployeeSearchYesNo @bind-Value="_incomplete" Label="@L("IncompleteFile")" /></label>
+                    <label>@L("MissingArea")
+                        <EmployeeSearchMultiSelect Options="GapOptions" @bind-Value="_gaps" FieldName="missing area" ResetKey="@PickerKey("gaps")" />
+                    </label>
+                </section>
+                }
+
+                @if (_openGroup == 2)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Age")</h2>
+                    <label>@L("Gender")
+                        <EmployeeSearchMultiSelect Options="Genders" @bind-Value="_gender" FieldName="gender" ResetKey="@PickerKey("gender")" />
+                    </label>
+                    <div class="esearch__pair">
+                        <label>@L("AgeFrom")<input type="number" min="0" max="120" @bind="_ageFrom" /></label>
+                        <label>@L("AgeTo")<input type="number" min="0" max="120" @bind="_ageTo" /></label>
+                    </div>
+                    <label>@L("AgeAsOfYear")<input type="number" min="1900" max="2100" @bind="_ageAsOf" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("BirthFrom")<OfficerDateEdit @bind-Date="_birthFrom" CssClass="esearch__date" /></label>
+                        <label>@L("BirthTo")<OfficerDateEdit @bind-Date="_birthTo" CssClass="esearch__date" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("BirthYearFrom")<input type="number" min="1900" max="2100" @bind="_birthYearFrom" /></label>
+                        <label>@L("BirthYearTo")<input type="number" min="1900" max="2100" @bind="_birthYearTo" /></label>
+                    </div>
+                    <label>@L("MaritalStatus")
+                        <EmployeeSearchMultiSelect Options="MaritalStatuses" @bind-Value="_marital" FieldName="marital status" ResetKey="@PickerKey("marital")" />
+                    </label>
+                    <label>@L("HasFamily")<EmployeeSearchYesNo @bind-Value="_family" Label="@L("HasFamily")" /></label>
+                    <label>@L("FamilyRelationship")
+                        <EmployeeSearchMultiSelect Options="Relationships" @bind-Value="_relationship" FieldName="relationship" ResetKey="@PickerKey("relationship")" />
+                    </label>
+                    <div class="esearch__pair">
+                        <label>@L("FamilyAtLeast")<input type="number" min="0" max="40" @bind="_familyFrom" /></label>
+                        <label>@L("FamilyAtMost")<input type="number" min="0" max="40" @bind="_familyTo" /></label>
+                    </div>
+                    <label>@L("FamilyVisaYear")<EmployeeSearchYesNo @bind-Value="_familyVisa" Label="@L("FamilyVisaYear")" /></label>
+                    <label>@L("ThatYear")<input type="number" min="1990" max="2100" @bind="_familyVisaYear" /></label>
+                    <label>@L("VisaFamilyText")<input @bind="_familyText" /></label>
+                    <label>@L("FamilyTextEmpty")<EmployeeSearchYesNo @bind-Value="_familyTextEmpty" Label="@L("FamilyTextEmpty")" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 3)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Citizenship")</h2>
+                    <label>@L("Citizenship")
+                        <EmployeeSearchMultiSelect Options="Countries" @bind-Value="_nationality" FieldName="citizenship" ResetKey="@PickerKey("nationality")" />
+                    </label>
+                    <label>@L("CountryOfBirth")
+                        <EmployeeSearchMultiSelect Options="Countries" @bind-Value="_birthCountry" FieldName="country of birth" ResetKey="@PickerKey("birthCountry")" />
+                    </label>
+                    <label>@L("PlaceOfBirth")<input @bind="_birthPlace" /></label>
+                    <label>@L("CitizenshipDiffers")<EmployeeSearchYesNo @bind-Value="_citizenshipDiffers" Label="@L("CitizenshipDiffers")" /></label>
+                    <label>@L("PassportOtherCountry")<EmployeeSearchYesNo @bind-Value="_otherPassport" Label="@L("PassportOtherCountry")" /></label>
+                    <label>@L("ForeignCountry")
+                        <EmployeeSearchMultiSelect Options="Countries" @bind-Value="_foreignCountry" FieldName="foreign country" ResetKey="@PickerKey("foreignCountry")" />
+                    </label>
+                    <label>@L("ForeignAddress")<input @bind="_foreignAddress" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 4)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Position")</h2>
+                    <label>@L("Department")
+                        <EmployeeSearchMultiSelect Options="Departments" @bind-Value="_department" FieldName="department" ResetKey="@PickerKey("department")" />
+                    </label>
+                    <label>@L("Position")
+                        <EmployeeSearchMultiSelect Options="Positions" @bind-Value="_position" FieldName="position" ResetKey="@PickerKey("position")" />
+                    </label>
+                    <label>@L("ActualPosition")
+                        <EmployeeSearchMultiSelect Options="ActualPositions" @bind-Value="_actualPosition" FieldName="actual position" ResetKey="@PickerKey("actual")" />
+                    </label>
+                    <div class="esearch__switch esearch__switch--3" role="group" aria-label="@L("Aria.Position")">
+                        <button type="button" class="@SwitchClass(!_positionAnyTime && !_positionLeft)" @onclick="SetPositionCurrent">@L("Current")</button>
+                        <button type="button" class="@SwitchClass(_positionAnyTime)" @onclick="SetPositionAny">@L("AnyTime")</button>
+                        <button type="button" class="@SwitchClass(_positionLeft)" @onclick="SetPositionLeft">@L("Left")</button>
+                    </div>
+                    <label>@L("LeftInYear")<input type="number" min="1990" max="2100" @bind="_leftYear" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("PositionYearFrom")<input type="number" min="1990" max="2100" @bind="_positionYearFrom" /></label>
+                        <label>@L("PositionYearTo")<input type="number" min="1990" max="2100" @bind="_positionYearTo" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("HiredFrom")<OfficerDateEdit @bind-Date="_hireFrom" CssClass="esearch__date" /></label>
+                        <label>@L("HiredTo")<OfficerDateEdit @bind-Date="_hireTo" CssClass="esearch__date" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("YearsFrom")<input type="number" min="0" max="80" @bind="_yearsFrom" /></label>
+                        <label>@L("YearsTo")<input type="number" min="0" max="80" @bind="_yearsTo" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("ChangedDepartment")<input type="number" min="1990" max="2100" @bind="_changedDepartmentYear" /></label>
+                        <label>@L("ChangedPosition")<input type="number" min="1990" max="2100" @bind="_changedPositionYear" /></label>
+                    </div>
+                    <label>@L("SeveralPositions")<EmployeeSearchYesNo @bind-Value="_severalPositions" Label="@L("SeveralPositions")" /></label>
+                    <label>@L("InYear")<input type="number" min="1990" max="2100" @bind="_severalPositionsYear" /></label>
+                    <label>@L("PreviousWork")<input @bind="_previousWork" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 5)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Project")</h2>
+                    <label>@L("ProjectContract")
+                        <EmployeeSearchMultiSelect Options="Contracts" @bind-Value="_contract" FieldName="project contract" ResetKey="@PickerKey("contract")" />
+                    </label>
+                    <div class="esearch__pair">
+                        <label>@L("ContractYearFrom")<input type="number" min="1990" max="2100" @bind="_contractYearFrom" /></label>
+                        <label>@L("YearTo")<input type="number" min="1990" max="2100" @bind="_contractYearTo" /></label>
+                    </div>
+                    <label>@L("ContractActive")<EmployeeSearchYesNo @bind-Value="_contractActive" Label="@L("ContractActive")" /></label>
+                    <label>@L("ContractDescription")<input @bind="_contractDescription" /></label>
+                    <label>@L("SeveralContracts")<EmployeeSearchYesNo @bind-Value="_severalContracts" Label="@L("SeveralContracts")" /></label>
+                    <label>@L("Subcontractor")
+                        <EmployeeSearchMultiSelect Options="Subcontractors" @bind-Value="_subcontractor" FieldName="subcontractor" ResetKey="@PickerKey("subcontractor")" />
+                    </label>
+                </section>
+                }
+
+                @if (_openGroup == 6)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Pay")</h2>
+                    <div class="esearch__pair">
+                        <label>@L("SalaryFrom")<input type="number" step="0.01" @bind="_salaryFrom" /></label>
+                        <label>@L("SalaryTo")<input type="number" step="0.01" @bind="_salaryTo" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("SalaryYearFrom")<input type="number" min="1990" max="2100" @bind="_salaryYearFrom" /></label>
+                        <label>@L("SalaryYearTo")<input type="number" min="1990" max="2100" @bind="_salaryYearTo" /></label>
+                    </div>
+                    <label>@L("SalaryChanged")<EmployeeSearchYesNo @bind-Value="_salaryChanged" Label="@L("SalaryChanged")" /></label>
+                    <label>@L("ChangedInYear")<input type="number" min="1990" max="2100" @bind="_salaryChangedYear" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 7)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Education")</h2>
+                    <label>@L("Specialty")
+                        <EmployeeSearchMultiSelect Options="Specialties" @bind-Value="_specialty" FieldName="specialty" ResetKey="@PickerKey("specialty")" />
+                    </label>
+                    <label>@L("EducationCountry")
+                        <EmployeeSearchMultiSelect Options="Countries" @bind-Value="_educationCountry" FieldName="education country" ResetKey="@PickerKey("eduCountry")" />
+                    </label>
+                    <label>@L("EducationLevel")
+                        <EmployeeSearchMultiSelect Options="EducationLevels" @bind-Value="_educationLevel" FieldName="education level" ResetKey="@PickerKey("level")" />
+                    </label>
+                    <label>@L("Institution")
+                        <EmployeeSearchMultiSelect Options="Institutions" @bind-Value="_institution" FieldName="institution" ResetKey="@PickerKey("institution")" />
+                    </label>
+                    <div class="esearch__pair">
+                        <label>@L("GraduationFrom")<input type="number" min="1950" max="2100" @bind="_gradFrom" /></label>
+                        <label>@L("GraduationTo")<input type="number" min="1950" max="2100" @bind="_gradTo" /></label>
+                    </div>
+                    <label>@L("HasEducation")<EmployeeSearchYesNo @bind-Value="_hasEducation" Label="@L("HasEducation")" /></label>
+                    <label>@L("EducatedOutside")<EmployeeSearchYesNo @bind-Value="_educatedOutside" Label="@L("EducatedOutside")" /></label>
+                    <label>@L("SpecialtyDiffers")<EmployeeSearchYesNo @bind-Value="_specialtyDiffers" Label="@L("SpecialtyDiffers")" /></label>
+                    <label>@L("Diploma")<EmployeeSearchYesNo @bind-Value="_diploma" Label="@L("Diploma")" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 8)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Visas")</h2>
+                    <div class="esearch__pair">
+                        <label>@L("VisaYearFrom")<input type="number" min="1990" max="2100" @bind="_visaYearFrom" /></label>
+                        <label>@L("YearTo")<input type="number" min="1990" max="2100" @bind="_visaYearTo" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("ValidFrom")<OfficerDateEdit @bind-Date="_visaFrom" CssClass="esearch__date" /></label>
+                        <label>@L("ValidTo")<OfficerDateEdit @bind-Date="_visaTo" CssClass="esearch__date" /></label>
+                    </div>
+                    <label>@L("ValidOn")<OfficerDateEdit @bind-Date="_visaOn" CssClass="esearch__date" /></label>
+                    <label class="esearch__check"><input type="checkbox" @bind="_stillValid" /> @L("ValidToday")</label>
+                    <label>@L("ExpiringDays")<input type="number" min="1" max="3650" @bind="_expiringDays" /></label>
+                    <label>@L("VisaExpired")<EmployeeSearchYesNo @bind-Value="_visaExpired" Label="@L("VisaExpired")" /></label>
+                    <label>@L("ExpiredInYear")<input type="number" min="1990" max="2100" @bind="_visaExpiredYear" /></label>
+                    <label>@L("NeverVisa")<EmployeeSearchYesNo @bind-Value="_neverVisa" Label="@L("NeverVisa")" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("FirstVisaFrom")<input type="number" min="1990" max="2100" @bind="_firstVisaFrom" /></label>
+                        <label>@L("FirstVisaTo")<input type="number" min="1990" max="2100" @bind="_firstVisaTo" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("LastVisaFrom")<input type="number" min="1990" max="2100" @bind="_lastVisaFrom" /></label>
+                        <label>@L("LastVisaTo")<input type="number" min="1990" max="2100" @bind="_lastVisaTo" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("CoveredFrom")<input type="number" min="1990" max="2100" @bind="_coveredFrom" /></label>
+                        <label>@L("CoveredTo")<input type="number" min="1990" max="2100" @bind="_coveredTo" /></label>
+                    </div>
+                    <label>@L("AllowedGap")<input type="number" min="0" max="3650" @bind="_allowedGap" /></label>
+                    <label>@L("HadGap")<EmployeeSearchYesNo @bind-Value="_hadGap" Label="@L("HadGap")" /></label>
+                    <label>@L("GapDays")<input type="number" min="0" max="3650" @bind="_gapDays" /></label>
+                    <label>@L("VisaNumber")<input @bind="_visaNumber" /></label>
+                    <label>@L("VisaType")
+                        <EmployeeSearchMultiSelect Options="VisaTypes" @bind-Value="_visaType" FieldName="visa type" ResetKey="@PickerKey("visaType")" />
+                    </label>
+                    <label>@L("VisaCategory")
+                        <EmployeeSearchMultiSelect Options="VisaCategories" @bind-Value="_visaCategory" FieldName="visa category" ResetKey="@PickerKey("visaCategory")" />
+                    </label>
+                    <label>@L("IssuedPlace")
+                        <EmployeeSearchMultiSelect Options="VisaPlaces" @bind-Value="_visaPlace" FieldName="issued place" ResetKey="@PickerKey("visaPlace")" />
+                    </label>
+                    <label>@L("Extended")<EmployeeSearchYesNo @bind-Value="_visaExtended" Label="@L("Extended")" /></label>
+                    <label>@L("ExtensionRequired")<EmployeeSearchYesNo @bind-Value="_extensionRequired" Label="@L("ExtensionRequired")" /></label>
+                    <label>@L("Registration")<input @bind="_registration" /></label>
+                    <label>@L("VisaBorder")<input @bind="_visaBorder" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("StayFrom")<input type="number" min="0" max="3660" @bind="_stayFrom" /></label>
+                        <label>@L("StayTo")<input type="number" min="0" max="3660" @bind="_stayTo" /></label>
+                    </div>
+                    <label>@L("StayYear")<input type="number" min="1990" max="2100" @bind="_stayYear" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 9)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Passport")</h2>
+                    <label>@L("PassportNumber")<input @bind="_passport" /></label>
+                    <label class="esearch__check"><input type="checkbox" @bind="_passportCurrent" /> @L("CurrentPassport")</label>
+                    <label>@L("PassportType")
+                        <EmployeeSearchMultiSelect Options="PassportTypes" @bind-Value="_passportType" FieldName="passport type" ResetKey="@PickerKey("passportType")" />
+                    </label>
+                    <label>@L("IssuedCountry")
+                        <EmployeeSearchMultiSelect Options="Countries" @bind-Value="_passportCountry" FieldName="issued country" ResetKey="@PickerKey("passportCountry")" />
+                    </label>
+                    <div class="esearch__pair">
+                        <label>@L("IssuedFrom")<OfficerDateEdit @bind-Date="_passportIssuedFrom" CssClass="esearch__date" /></label>
+                        <label>@L("IssuedTo")<OfficerDateEdit @bind-Date="_passportIssuedTo" CssClass="esearch__date" /></label>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("ExpiresFrom")<OfficerDateEdit @bind-Date="_passportExpiresFrom" CssClass="esearch__date" /></label>
+                        <label>@L("ExpiresTo")<OfficerDateEdit @bind-Date="_passportExpiresTo" CssClass="esearch__date" /></label>
+                    </div>
+                    <label>@L("Expired")<EmployeeSearchYesNo @bind-Value="_passportExpired" Label="@L("Expired")" /></label>
+                    <label>@L("ExpiringDays")<input type="number" min="1" max="3650" @bind="_passportExpiringDays" /></label>
+                    <label>@L("Cancelled")<EmployeeSearchYesNo @bind-Value="_passportCancelled" Label="@L("Cancelled")" /></label>
+                    <label>@L("SeveralPassports")<EmployeeSearchYesNo @bind-Value="_severalPassports" Label="@L("SeveralPassports")" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 10)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Invitation")</h2>
+                    <div class="esearch__switch esearch__switch--4" role="group" aria-label="@L("Aria.Invitation")">
+                        <button type="button" class="@SwitchClass(_invitationMode == "")" @onclick='() => _invitationMode = ""'>@L("Any")</button>
+                        <button type="button" class="@SwitchClass(_invitationMode == "ever")" @onclick='() => _invitationMode = "ever"'>@L("Ever")</button>
+                        <button type="button" class="@SwitchClass(_invitationMode == "unused")" @onclick='() => _invitationMode = "unused"'>@L("Unused")</button>
+                        <button type="button" class="@SwitchClass(_invitationMode == "used")" @onclick='() => _invitationMode = "used"'>@L("Used")</button>
+                    </div>
+                    <label>@L("InvitationNumber")<input @bind="_invitation" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("IssuedYearFrom")<input type="number" min="1990" max="2100" @bind="_invitationYearFrom" /></label>
+                        <label>@L("IssuedYearTo")<input type="number" min="1990" max="2100" @bind="_invitationYearTo" /></label>
+                    </div>
+                    <label>@L("VisaCategory")
+                        <EmployeeSearchMultiSelect Options="VisaCategories" @bind-Value="_invitationCategory" FieldName="invitation category" ResetKey="@PickerKey("invitationCategory")" />
+                    </label>
+                    <label>@L("VisaPeriod")
+                        <EmployeeSearchMultiSelect Options="VisaPeriods" @bind-Value="_invitationPeriod" FieldName="visa period" ResetKey="@PickerKey("invitationPeriod")" />
+                    </label>
+                    <label>@L("StillValidOn")<OfficerDateEdit @bind-Date="_invitationValidOn" CssClass="esearch__date" /></label>
+                    <label>@L("InvitationExpired")<EmployeeSearchYesNo @bind-Value="_invitationExpiredNoVisa" Label="@L("InvitationExpired")" /></label>
+                    <label>@L("Cancelled")<EmployeeSearchYesNo @bind-Value="_invitationCancelled" Label="@L("Cancelled")" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 11)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Permit")</h2>
+                    <div class="esearch__switch esearch__switch--3" role="group" aria-label="@L("Aria.Permit")">
+                        <button type="button" class="@SwitchClass(_permitMode == "")" @onclick='() => _permitMode = ""'>@L("Any")</button>
+                        <button type="button" class="@SwitchClass(_permitMode == "ever")" @onclick='() => _permitMode = "ever"'>@L("Ever")</button>
+                        <button type="button" class="@SwitchClass(_permitMode == "current")" @onclick='() => _permitMode = "current"'>@L("Current")</button>
+                    </div>
+                    <label>@L("PermitNumber")<input @bind="_permit" /></label>
+                    <label>@L("AsNumber")<input @bind="_asNumber" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("VisaYearFrom")<input type="number" min="1990" max="2100" @bind="_permitYearFrom" /></label>
+                        <label>@L("YearTo")<input type="number" min="1990" max="2100" @bind="_permitYearTo" /></label>
+                    </div>
+                    <label>@L("PermitLocations")
+                        <EmployeeSearchMultiSelect Options="WorkLocations" @bind-Value="_permitLocations" FieldName="work location" ResetKey="@PickerKey("permitLocation")" />
+                    </label>
+                    <label>@L("PermitPosition")
+                        <EmployeeSearchMultiSelect Options="Positions" @bind-Value="_permitPosition" FieldName="permit position" ResetKey="@PickerKey("permitPosition")" />
+                    </label>
+                    <label>@L("Extended")<EmployeeSearchYesNo @bind-Value="_permitExtended" Label="@L("Extended")" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 12)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Address")</h2>
+                    <label>@L("ResidenceType")
+                        <EmployeeSearchMultiSelect Options="ResidenceOptions" @bind-Value="_residence" FieldName="residence type" ResetKey="@PickerKey("residence")" />
+                    </label>
+                    <label>@L("Region")
+                        <EmployeeSearchMultiSelect Options="Regions" @bind-Value="_region" FieldName="region" ResetKey="@PickerKey("region")" />
+                    </label>
+                    <label>@L("City")
+                        <EmployeeSearchMultiSelect Options="Cities" @bind-Value="_city" FieldName="city" ResetKey="@PickerKey("city")" />
+                    </label>
+                    <label>@L("Lodging")
+                        <EmployeeSearchMultiSelect Options="Lodgings" @bind-Value="_lodging" FieldName="lodging" ResetKey="@PickerKey("lodging")" />
+                    </label>
+                    <label>@L("Hotel")
+                        <EmployeeSearchMultiSelect Options="Hotels" @bind-Value="_hotel" FieldName="hotel" ResetKey="@PickerKey("hotel")" />
+                    </label>
+                    <label>@L("Hospital")
+                        <EmployeeSearchMultiSelect Options="Hospitals" @bind-Value="_hospital" FieldName="hospital" ResetKey="@PickerKey("hospital")" />
+                    </label>
+                    <label>@L("OtherSite")
+                        <EmployeeSearchMultiSelect Options="OtherSites" @bind-Value="_otherSite" FieldName="other site" ResetKey="@PickerKey("otherSite")" />
+                    </label>
+                    <label>@L("AddressText")<input @bind="_addressText" /></label>
+                    <label>@L("AddressExpired")<EmployeeSearchYesNo @bind-Value="_addressExpiredDuringVisa" Label="@L("AddressExpired")" /></label>
+                </section>
+                }
+
+                @if (_openGroup == 13)
+                {
+                <section class="esearch__card">
+                    <h2>@L("Group.Border")</h2>
+                    <div class="esearch__switch esearch__switch--3" role="group" aria-label="@L("Aria.Border")">
+                        <button type="button" class="@SwitchClass(_borderMode == "")" @onclick='() => _borderMode = ""'>@L("Any")</button>
+                        <button type="button" class="@SwitchClass(_borderMode == "ever")" @onclick='() => _borderMode = "ever"'>@L("Ever")</button>
+                        <button type="button" class="@SwitchClass(_borderMode == "current")" @onclick='() => _borderMode = "current"'>@L("Current")</button>
+                    </div>
+                    <div class="esearch__pair">
+                        <label>@L("BorderYearFrom")<input type="number" min="1990" max="2100" @bind="_borderYearFrom" /></label>
+                        <label>@L("YearTo")<input type="number" min="1990" max="2100" @bind="_borderYearTo" /></label>
+                    </div>
+                    <label>@L("BorderNumber")<input @bind="_borderNumber" /></label>
+                    <label>@L("BorderPlace")<input @bind="_borderPlace" /></label>
+                    <label>@L("Rejected")<EmployeeSearchYesNo @bind-Value="_rejected" Label="@L("Rejected")" /></label>
+                    <label>@L("RejectedYear")<input type="number" min="1990" max="2100" @bind="_rejectedYear" /></label>
+                    <label>@L("MedicalOnFile")<EmployeeSearchYesNo @bind-Value="_medical" Label="@L("MedicalOnFile")" /></label>
+                    <label>@L("MedicalNumber")<input @bind="_medicalNumber" /></label>
+                    <div class="esearch__pair">
+                        <label>@L("MedicalYearFrom")<input type="number" min="1990" max="2100" @bind="_medicalYearFrom" /></label>
+                        <label>@L("MedicalYearTo")<input type="number" min="1990" max="2100" @bind="_medicalYearTo" /></label>
+                    </div>
+                    <label>@L("MedicalOn")<OfficerDateEdit @bind-Date="_medicalOn" CssClass="esearch__date" /></label>
+                    <label>@L("MedicalExpired")<EmployeeSearchYesNo @bind-Value="_medicalExpiredDuringVisa" Label="@L("MedicalExpired")" /></label>
+                </section>
+                }
+            </div>
+        </form>
+    }
+    else
+    {
+        <header class="esearch__head">
+            <div>
+                <h1 class="esearch__title">@L("Title")</h1>
+                <p class="esearch__sub">@CountLabel</p>
+            </div>
+            <div class="esearch__actions">
+                <button type="button" class="esearch__btn" @onclick="OpenColumns">@L("Columns")</button>
+                <button type="button" class="esearch__btn" disabled="@(IsBusy || Rows.Count == 0)" @onclick="ExportExcelAsync">@L("OpenInExcel")</button>
+                <button type="button" class="esearch__btn" @onclick="() => EditCriteriaRequested.InvokeAsync()">@L("EditCriteria")</button>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <p class="@(IsStatusError ? "esearch__error" : "esearch__hint")" role="status">@StatusMessage</p>
+        }
+
+        @if (_chips.Count > 0)
+        {
+            <div class="esearch__chips esearch__chips--bar">
+                @foreach (var chip in _chips)
+                {
+                    <button type="button" class="esearch__chip" @onclick="() => RemoveChip(chip.Key)">@chip.Label</button>
+                }
+            </div>
+        }
+
+        @if (Truncated)
+        {
+            <p class="esearch__hint">@F("Truncated", EmployeeSearchService.ResultLimit, Total)</p>
+        }
+
+        <div class="esearch__split @(Selected == null ? "" : "esearch__split--open")">
+            <div class="esearch__table-wrap">
+                @if (Rows.Count == 0)
+                {
+                    <p class="esearch__empty">@L("Empty")</p>
+                }
+                else
+                {
+                    <table class="esearch__table">
+                        <thead>
+                            <tr>
+                                @foreach (var column in VisibleColumns)
+                                {
+                                    <th>@column.Caption</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Rows)
+                            {
+                                <tr class="@(row.PersonId == _selectedId ? "is-selected" : "")" @onclick="() => Select(row.PersonId)">
+                                    @foreach (var column in VisibleColumns)
+                                    {
+                                        <td class="@(column.Key == "WhyMatched" ? "esearch__why-cell" : null)">
+                                            @if (column.Key == "WhyMatched")
+                                            {
+                                                @foreach (var pill in row.Pills)
+                                                {
+                                                    <span class="esearch__pill">@pill</span>
+                                                }
+                                            }
+                                            else if (column.Key == "Visa")
+                                            {
+                                                <span class="esearch__visa esearch__visa--@row.VisaStatus.ToLowerInvariant()">@VisaLabel(row.VisaStatus)</span>
+                                            }
+                                            else
+                                            {
+                                                @Cell(row, column.Key)
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            @if (Selected != null)
+            {
+                <aside class="esearch__why">
+                    <header>
+                        <h2>@F("WhyMatched", FirstNameOf(Selected))</h2>
+                        <button type="button" class="esearch__btn" @onclick="() => _selectedId = null">@L("Close")</button>
+                    </header>
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.VisaLine))
+                    {
+                        <section class="esearch__fact"><h3>@L("Stay")</h3><p>@Selected.Detail.VisaLine</p></section>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.PositionLine))
+                    {
+                        <section class="esearch__fact"><h3>@L("Work")</h3><p>@Selected.Detail.PositionLine</p></section>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.EarlierPositionLine))
+                    {
+                        <p class="esearch__earlier">@Selected.Detail.EarlierPositionLine</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.ContractLine))
+                    {
+                        <section class="esearch__fact"><h3>@L("Column.Contract")</h3><p>@Selected.Detail.ContractLine</p></section>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.EducationLine))
+                    {
+                        <section class="esearch__fact"><h3>@L("Education")</h3><p>@Selected.Detail.EducationLine</p></section>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.EducationNote))
+                    {
+                        <p class="esearch__note">@Selected.Detail.EducationNote</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Selected.Detail.MoreLine))
+                    {
+                        <section class="esearch__fact"><h3>@L("Also")</h3><p>@Selected.Detail.MoreLine</p></section>
+                    }
+                    <div class="esearch__why-actions">
+                        <button type="button" class="esearch__btn esearch__btn--primary" @onclick="() => OpenDossierRequested.InvokeAsync(Selected.PersonId)">@L("OpenDossier")</button>
+                        <button type="button" class="esearch__btn" @onclick="() => _selectedId = null">@L("BackToResults")</button>
+                    </div>
+                </aside>
+            }
+        </div>
+        @if (_columnsOpen)
+        {
+            <div class="esearch-cols-backdrop" @onclick="CloseColumns"></div>
+            <div class="esearch-cols-dialog" role="dialog" aria-modal="true" aria-label="@L("ColumnsTitle")">
+                <div class="esearch-cols-title">@L("ColumnsTitle")</div>
+                <p class="esearch-cols-hint">@L("ColumnsHint")</p>
+                @if (!string.IsNullOrWhiteSpace(_columnsError))
+                {
+                    <p class="esearch__error" role="status">@_columnsError</p>
+                }
+                <div class="esearch-cols-list">
+                    @for (var columnIndex = 0; columnIndex < _columns.Count; columnIndex++)
+                    {
+                        var item = _columns[columnIndex];
+                        var index = columnIndex;
+                        <div @key="item.Key"
+                             class="esearch-cols-row @(_columnDragFrom == index ? "is-dragging" : null) @(_columnDragOver == index ? "is-over" : null)"
+                             @ondragenter="() => OnColumnDragEnter(index)"
+                             @ondragover="OnColumnDragOver"
+                             @ondragover:preventDefault
+                             @ondrop="() => OnColumnDrop(index)"
+                             @ondrop:preventDefault>
+                            <span class="esearch-cols-handle"
+                                  draggable="true"
+                                  aria-hidden="true"
+                                  @ondragstart="() => OnColumnDragStart(index)"
+                                  @ondragend="OnColumnDragEnd">::</span>
+                            <label class="esearch-cols-check">
+                                <input type="checkbox" @bind="item.Included" @bind:after="SaveColumns" />
+                                <span>@item.Caption</span>
+                            </label>
+                        </div>
+                    }
+                </div>
+                <div class="esearch-cols-actions">
+                    <button type="button" class="esearch__btn" @onclick="CloseColumns">@L("Close")</button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private string _firstName = string.Empty;
+    private string _middleName = string.Empty;
+    private string _lastName = string.Empty;
+    private string _fullName = string.Empty;
+    private string _personalNumber = string.Empty;
+    private string _email = string.Empty;
+    private bool? _hasPhoto;
+    private string _archive = "active";
+    private bool? _incomplete;
+    private string _gaps = string.Empty;
+    private string _gender = string.Empty;
+    private int? _ageFrom;
+    private int? _ageTo;
+    private int? _ageAsOf;
+    private DateTime? _birthFrom;
+    private DateTime? _birthTo;
+    private int? _birthYearFrom;
+    private int? _birthYearTo;
+    private string _marital = string.Empty;
+    private bool? _family;
+    private string _relationship = string.Empty;
+    private int? _familyFrom;
+    private int? _familyTo;
+    private bool? _familyVisa;
+    private int? _familyVisaYear;
+    private string _familyText = string.Empty;
+    private bool? _familyTextEmpty;
+    private string _nationality = string.Empty;
+    private string _birthCountry = string.Empty;
+    private string _birthPlace = string.Empty;
+    private bool? _citizenshipDiffers;
+    private bool? _otherPassport;
+    private string _foreignCountry = string.Empty;
+    private string _foreignAddress = string.Empty;
+    private string _department = string.Empty;
+    private string _position = string.Empty;
+    private string _actualPosition = string.Empty;
+    private bool _positionAnyTime = true;
+    private bool _positionLeft;
+    private int? _leftYear;
+    private int? _positionYearFrom;
+    private int? _positionYearTo;
+    private DateTime? _hireFrom;
+    private DateTime? _hireTo;
+    private int? _yearsFrom;
+    private int? _yearsTo;
+    private int? _changedDepartmentYear;
+    private int? _changedPositionYear;
+    private bool? _severalPositions;
+    private int? _severalPositionsYear;
+    private string _previousWork = string.Empty;
+    private string _contract = string.Empty;
+    private int? _contractYearFrom;
+    private int? _contractYearTo;
+    private bool? _contractActive;
+    private string _contractDescription = string.Empty;
+    private bool? _severalContracts;
+    private string _subcontractor = string.Empty;
+    private decimal? _salaryFrom;
+    private decimal? _salaryTo;
+    private int? _salaryYearFrom;
+    private int? _salaryYearTo;
+    private bool? _salaryChanged;
+    private int? _salaryChangedYear;
+    private string _specialty = string.Empty;
+    private string _educationCountry = string.Empty;
+    private string _educationLevel = string.Empty;
+    private string _institution = string.Empty;
+    private int? _gradFrom;
+    private int? _gradTo;
+    private bool? _hasEducation;
+    private bool? _educatedOutside;
+    private bool? _specialtyDiffers;
+    private bool? _diploma;
+    private int? _visaYearFrom;
+    private int? _visaYearTo;
+    private DateTime? _visaFrom;
+    private DateTime? _visaTo;
+    private DateTime? _visaOn;
+    private bool _stillValid;
+    private int? _expiringDays;
+    private bool? _visaExpired;
+    private int? _visaExpiredYear;
+    private bool? _neverVisa;
+    private int? _firstVisaFrom;
+    private int? _firstVisaTo;
+    private int? _lastVisaFrom;
+    private int? _lastVisaTo;
+    private int? _coveredFrom;
+    private int? _coveredTo;
+    private int? _allowedGap;
+    private bool? _hadGap;
+    private int? _gapDays;
+    private string _visaNumber = string.Empty;
+    private string _visaType = string.Empty;
+    private string _visaCategory = string.Empty;
+    private string _visaPlace = string.Empty;
+    private bool? _visaExtended;
+    private bool? _extensionRequired;
+    private string _registration = string.Empty;
+    private string _visaBorder = string.Empty;
+    private int? _stayFrom;
+    private int? _stayTo;
+    private int? _stayYear;
+    private string _passport = string.Empty;
+    private bool _passportCurrent;
+    private string _passportType = string.Empty;
+    private string _passportCountry = string.Empty;
+    private DateTime? _passportIssuedFrom;
+    private DateTime? _passportIssuedTo;
+    private DateTime? _passportExpiresFrom;
+    private DateTime? _passportExpiresTo;
+    private bool? _passportExpired;
+    private int? _passportExpiringDays;
+    private bool? _passportCancelled;
+    private bool? _severalPassports;
+    private string _invitationMode = string.Empty;
+    private string _invitation = string.Empty;
+    private int? _invitationYearFrom;
+    private int? _invitationYearTo;
+    private string _invitationCategory = string.Empty;
+    private string _invitationPeriod = string.Empty;
+    private DateTime? _invitationValidOn;
+    private bool? _invitationExpiredNoVisa;
+    private bool? _invitationCancelled;
+    private string _permitMode = string.Empty;
+    private string _permit = string.Empty;
+    private string _asNumber = string.Empty;
+    private int? _permitYearFrom;
+    private int? _permitYearTo;
+    private string _permitLocations = string.Empty;
+    private string _permitPosition = string.Empty;
+    private bool? _permitExtended;
+    private string _residence = string.Empty;
+    private string _region = string.Empty;
+    private string _city = string.Empty;
+    private string _lodging = string.Empty;
+    private string _hotel = string.Empty;
+    private string _hospital = string.Empty;
+    private string _otherSite = string.Empty;
+    private string _addressText = string.Empty;
+    private bool? _addressExpiredDuringVisa;
+    private string _borderMode = string.Empty;
+    private int? _borderYearFrom;
+    private int? _borderYearTo;
+    private string _borderNumber = string.Empty;
+    private string _borderPlace = string.Empty;
+    private bool? _rejected;
+    private int? _rejectedYear;
+    private bool? _medical;
+    private string _medicalNumber = string.Empty;
+    private int? _medicalYearFrom;
+    private int? _medicalYearTo;
+    private DateTime? _medicalOn;
+    private bool? _medicalExpiredDuringVisa;
+    private int _pickerEpoch;
+    private Guid? _selectedId;
+    private List<Chip> _chips = new();
+
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool ShowResults { get; set; }
+    [Parameter] public int Total { get; set; }
+    [Parameter] public bool Truncated { get; set; }
+    [Parameter] public IReadOnlyList<EmployeeSearchRow> Rows { get; set; } = Array.Empty<EmployeeSearchRow>();
+    [Parameter] public EmployeeSearchOptions? Options { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback<EmployeeSearchCriteria> SearchRequested { get; set; }
+    [Parameter] public EventCallback EditCriteriaRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenDossierRequested { get; set; }
+
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+
+    private async Task ExportExcelAsync()
+    {
+        if (IsBusy || Rows.Count == 0 || FileDownloader == null)
+            return;
+
+        var notes = new List<string>();
+        if (_chips.Count > 0)
+            notes.Add(string.Join(" · ", _chips.Select(chip => chip.Label)));
+        if (Truncated)
+            notes.Add(F("Truncated", EmployeeSearchService.ResultLimit, Total));
+
+        var bytes = EmployeeSearchExcel.Build(Rows, VisibleColumns, notes);
+        var fileName = SafeFileName(L("Title")) + " " + DateTime.Today.ToString("yyyy-MM-dd") + ".xlsx";
+        await using var stream = new MemoryStream(bytes);
+        await FileDownloader.DownloadAsync(fileName, stream, EmployeeSearchExcel.ContentType);
+    }
+
+    private static string SafeFileName(string name)
+    {
+        var cleaned = new string((name ?? string.Empty).Select(ch => Path.GetInvalidFileNameChars().Contains(ch) ? ' ' : ch).ToArray()).Trim();
+        return string.IsNullOrEmpty(cleaned) ? "Find employees" : cleaned;
+    }
+
+    private bool _columnsOpen;
+    private bool _wasShowingResults;
+    private string _columnsError;
+    private int _columnDragFrom = -1;
+    private int _columnDragOver = -1;
+    private readonly List<EmployeeSearchColumnState> _columns = new();
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; }
+
+    private IReadOnlyList<EmployeeSearchColumnState> VisibleColumns =>
+        (_columns.Count == 0 ? EmployeeSearchColumns.Defaults() : _columns).Where(column => column.Included).ToList();
+
+    protected override void OnParametersSet()
+    {
+        if (ShowResults && !_wasShowingResults)
+            ReloadColumns();
+        _wasShowingResults = ShowResults;
+    }
+
+    private void OpenColumns()
+    {
+        ReloadColumns();
+        _columnDragFrom = -1;
+        _columnDragOver = -1;
+        _columnsOpen = true;
+    }
+
+    private void CloseColumns()
+    {
+        _columnsOpen = false;
+        _columnDragFrom = -1;
+        _columnDragOver = -1;
+    }
+
+    private void ReloadColumns()
+    {
+        _columnsError = null;
+        try
+        {
+            if (ObjectSpaceFactory == null)
+            {
+                ReplaceColumns(EmployeeSearchColumns.Defaults());
+                return;
+            }
+
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<EmployeeSearchColumnSettings>();
+            ReplaceColumns(EmployeeSearchColumns.Resolve(objectSpace));
+        }
+        catch (Exception ex)
+        {
+            _columnsError = ex.Message;
+            if (_columns.Count == 0)
+                ReplaceColumns(EmployeeSearchColumns.Defaults());
+        }
+    }
+
+    private void ReplaceColumns(IReadOnlyList<EmployeeSearchColumnState> columns)
+    {
+        _columns.Clear();
+        _columns.AddRange(columns);
+    }
+
+    private void OnColumnDragStart(int index)
+    {
+        _columnDragFrom = index;
+        _columnDragOver = -1;
+    }
+
+    private void OnColumnDragEnter(int index)
+    {
+        if (_columnDragFrom >= 0 && _columnDragFrom != index)
+            _columnDragOver = index;
+    }
+
+    private void OnColumnDragOver(DragEventArgs _)
+    {
+    }
+
+    private void OnColumnDragEnd()
+    {
+        _columnDragOver = -1;
+        var from = _columnDragFrom;
+        _ = InvokeAsync(async () =>
+        {
+            await Task.Delay(100);
+            if (_columnDragFrom == from)
+                _columnDragFrom = -1;
+            StateHasChanged();
+        });
+    }
+
+    private void OnColumnDrop(int toIndex)
+    {
+        var fromIndex = _columnDragFrom;
+        _columnDragFrom = -1;
+        _columnDragOver = -1;
+        if (fromIndex < 0 || fromIndex == toIndex || fromIndex >= _columns.Count || toIndex < 0 || toIndex >= _columns.Count)
+            return;
+
+        var item = _columns[fromIndex];
+        _columns.RemoveAt(fromIndex);
+        if (fromIndex < toIndex)
+            toIndex--;
+        _columns.Insert(toIndex, item);
+        SaveColumns();
+    }
+
+    private void SaveColumns()
+    {
+        _columnsError = null;
+        if (_columns.Count > 0 && !_columns.Any(column => column.Included))
+            _columns[0].Included = true;
+
+        try
+        {
+            if (ObjectSpaceFactory == null)
+            {
+                _columnsError = "Column settings could not be saved.";
+                return;
+            }
+
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<EmployeeSearchColumnSettings>();
+            EmployeeSearchColumns.Save(objectSpace, _columns);
+        }
+        catch (Exception ex)
+        {
+            _columnsError = ex.Message;
+        }
+    }
+
+    private static string Cell(EmployeeSearchRow row, string key) =>
+        row.Values != null && row.Values.TryGetValue(key, out var value) ? value : string.Empty;
+
+    private IReadOnlyList<EmployeeSearchLookupOption> Genders => Options?.Genders ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Countries => Options?.Countries ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Departments => Options?.Departments ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Positions => Options?.Positions ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Contracts => Options?.Contracts ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Specialties => Options?.Specialties ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> EducationLevels => Options?.EducationLevels ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Cities => Options?.Cities ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> MaritalStatuses => Options?.MaritalStatuses ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Relationships => Options?.Relationships ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> ActualPositions => Options?.ActualPositions ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Institutions => Options?.Institutions ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> PassportTypes => Options?.PassportTypes ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> VisaTypes => Options?.VisaTypes ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> VisaCategories => Options?.VisaCategories ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> VisaPlaces => Options?.VisaIssuedPlaces ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> VisaPeriods => Options?.VisaPeriods ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Subcontractors => Options?.Subcontractors ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Regions => Options?.Regions ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Lodgings => Options?.Lodgings ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Hotels => Options?.Hotels ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> Hospitals => Options?.Hospitals ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> OtherSites => Options?.OtherSites ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> WorkLocations => Options?.WorkLocations ?? Array.Empty<EmployeeSearchLookupOption>();
+    private IReadOnlyList<EmployeeSearchLookupOption> GapOptions => new EmployeeSearchLookupOption[]
+    {
+        Gap("Personal data", "Gap.Personal"), Gap("Passport", "Gap.Passport"), Gap("CV", "Gap.Cv"),
+        Gap("Photo", "Gap.Photo"), Gap("Education", "Gap.Education"), Gap("Medical", "Gap.Medical"),
+        Gap("Address", "Gap.Address"), Gap("Family docs", "Gap.Family"), Gap("Other", "Gap.Other"),
+    };
+    private IReadOnlyList<EmployeeSearchLookupOption> ResidenceOptions => new EmployeeSearchLookupOption[]
+    {
+        Stay("Lodging", "PersonDossier.ResidenceType.Lodging"),
+        Stay("Hotel", "PersonDossier.ResidenceType.Hotel"),
+        Stay("Private house", "PersonDossier.ResidenceType.PrivateHouse"),
+        Stay("Hospital", "PersonDossier.ResidenceType.Hospital"),
+        Stay("Other", "PersonDossier.ResidenceType.Other"),
+    };
+
+    private static EmployeeSearchLookupOption Gap(string key, string textKey) =>
+        new() { Key = key, Caption = L(textKey) };
+
+    private static EmployeeSearchLookupOption Stay(string key, string messageKey) =>
+        new() { Key = key, Caption = VisaUiMessages.Get(messageKey) };
+
+    private EmployeeSearchRow? Selected => Rows.FirstOrDefault(row => row.PersonId == _selectedId);
+
+    private string CountLabel => Total == 1 ? L("Count.One") : F("Count.Many", Total);
+
+    protected override void OnInitialized()
+    {
+        _ = InitialLoadRequested.InvokeAsync();
+    }
+
+    private string PickerKey(string name) => name + "-" + _pickerEpoch;
+
+    private void SetPositionCurrent() { _positionAnyTime = false; _positionLeft = false; }
+    private void SetPositionAny() { _positionAnyTime = true; _positionLeft = false; }
+    private void SetPositionLeft() { _positionAnyTime = false; _positionLeft = true; }
+
+    private void Clear()
+    {
+        _firstName = _middleName = _lastName = _fullName = _personalNumber = _email = _gaps = string.Empty;
+        _gender = _marital = _relationship = _familyText = _nationality = _birthCountry = _birthPlace = string.Empty;
+        _foreignCountry = _foreignAddress = _department = _position = _actualPosition = _previousWork = string.Empty;
+        _contract = _contractDescription = _subcontractor = _specialty = _educationCountry = _educationLevel = _institution = string.Empty;
+        _visaNumber = _visaType = _visaCategory = _visaPlace = _registration = _visaBorder = _passport = _passportType = _passportCountry = string.Empty;
+        _invitationMode = _invitation = _invitationCategory = _invitationPeriod = _permitMode = _permit = _asNumber = string.Empty;
+        _permitLocations = _permitPosition = _residence = _region = _city = _lodging = _hotel = _hospital = _otherSite = _addressText = string.Empty;
+        _borderMode = _borderNumber = _borderPlace = _medicalNumber = string.Empty;
+        _ageFrom = _ageTo = _ageAsOf = _birthYearFrom = _birthYearTo = _familyFrom = _familyTo = _familyVisaYear = null;
+        _leftYear = _positionYearFrom = _positionYearTo = _yearsFrom = _yearsTo = _changedDepartmentYear = _changedPositionYear = _severalPositionsYear = null;
+        _contractYearFrom = _contractYearTo = _salaryYearFrom = _salaryYearTo = _salaryChangedYear = _gradFrom = _gradTo = null;
+        _visaYearFrom = _visaYearTo = _expiringDays = _visaExpiredYear = _firstVisaFrom = _firstVisaTo = _lastVisaFrom = _lastVisaTo = null;
+        _coveredFrom = _coveredTo = _allowedGap = _gapDays = _stayFrom = _stayTo = _stayYear = _passportExpiringDays = null;
+        _invitationYearFrom = _invitationYearTo = _permitYearFrom = _permitYearTo = _borderYearFrom = _borderYearTo = _rejectedYear = null;
+        _medicalYearFrom = _medicalYearTo = null;
+        _birthFrom = _birthTo = _hireFrom = _hireTo = _visaFrom = _visaTo = _visaOn = null;
+        _passportIssuedFrom = _passportIssuedTo = _passportExpiresFrom = _passportExpiresTo = _invitationValidOn = _medicalOn = null;
+        _salaryFrom = _salaryTo = null;
+        _hasPhoto = _incomplete = _family = _familyVisa = _familyTextEmpty = _citizenshipDiffers = _otherPassport = null;
+        _severalPositions = _contractActive = _severalContracts = _salaryChanged = _hasEducation = _educatedOutside = null;
+        _specialtyDiffers = _diploma = _visaExpired = _neverVisa = _hadGap = _visaExtended = _extensionRequired = null;
+        _passportExpired = _passportCancelled = _severalPassports = _invitationExpiredNoVisa = _invitationCancelled = null;
+        _permitExtended = _addressExpiredDuringVisa = _rejected = _medical = _medicalExpiredDuringVisa = null;
+        _archive = "active";
+        _positionAnyTime = true;
+        _positionLeft = _stillValid = _passportCurrent = false;
+        _pickerEpoch++;
+    }
+
+    private async Task SearchAsync()
+    {
+        _chips = BuildChips();
+        _selectedId = null;
+        await SearchRequested.InvokeAsync(BuildCriteria());
+    }
+
+    private async Task RemoveChip(string key)
+    {
+        switch (key)
+        {
+            case "first": _firstName = string.Empty; break;
+            case "middle": _middleName = string.Empty; break;
+            case "last": _lastName = string.Empty; break;
+            case "full": _fullName = string.Empty; break;
+            case "personal": _personalNumber = string.Empty; break;
+            case "email": _email = string.Empty; break;
+            case "photo": _hasPhoto = null; break;
+            case "archive": _archive = "active"; break;
+            case "incomplete": _incomplete = null; break;
+            case "gaps": _gaps = string.Empty; break;
+            case "gender": _gender = string.Empty; break;
+            case "age": _ageFrom = _ageTo = _ageAsOf = null; break;
+            case "birth": _birthFrom = _birthTo = null; break;
+            case "birthYear": _birthYearFrom = _birthYearTo = null; break;
+            case "marital": _marital = string.Empty; break;
+            case "family": _family = null; break;
+            case "relationship": _relationship = string.Empty; break;
+            case "familyCount": _familyFrom = _familyTo = null; break;
+            case "familyVisa": _familyVisa = null; _familyVisaYear = null; break;
+            case "familyText": _familyText = string.Empty; break;
+            case "familyEmpty": _familyTextEmpty = null; break;
+            case "nationality": _nationality = string.Empty; break;
+            case "birthCountry": _birthCountry = string.Empty; break;
+            case "birthPlace": _birthPlace = string.Empty; break;
+            case "differs": _citizenshipDiffers = null; break;
+            case "otherPassport": _otherPassport = null; break;
+            case "foreignCountry": _foreignCountry = string.Empty; break;
+            case "foreignAddress": _foreignAddress = string.Empty; break;
+            case "department": _department = string.Empty; break;
+            case "position": _position = string.Empty; break;
+            case "actual": _actualPosition = string.Empty; break;
+            case "period": SetPositionAny(); _leftYear = null; break;
+            case "positionYear": _positionYearFrom = _positionYearTo = null; break;
+            case "hire": _hireFrom = _hireTo = null; break;
+            case "years": _yearsFrom = _yearsTo = null; break;
+            case "changedDepartment": _changedDepartmentYear = null; break;
+            case "changedPosition": _changedPositionYear = null; break;
+            case "severalPositions": _severalPositions = null; _severalPositionsYear = null; break;
+            case "previous": _previousWork = string.Empty; break;
+            case "contract": _contract = string.Empty; break;
+            case "contractYear": _contractYearFrom = _contractYearTo = null; break;
+            case "contractActive": _contractActive = null; break;
+            case "contractText": _contractDescription = string.Empty; break;
+            case "severalContracts": _severalContracts = null; break;
+            case "subcontractor": _subcontractor = string.Empty; break;
+            case "salary": _salaryFrom = _salaryTo = null; break;
+            case "salaryYear": _salaryYearFrom = _salaryYearTo = null; break;
+            case "salaryChanged": _salaryChanged = null; _salaryChangedYear = null; break;
+            case "specialty": _specialty = string.Empty; break;
+            case "eduCountry": _educationCountry = string.Empty; break;
+            case "level": _educationLevel = string.Empty; break;
+            case "institution": _institution = string.Empty; break;
+            case "grad": _gradFrom = _gradTo = null; break;
+            case "hasEducation": _hasEducation = null; break;
+            case "outside": _educatedOutside = null; break;
+            case "differsSpecialty": _specialtyDiffers = null; break;
+            case "diploma": _diploma = null; break;
+            case "visa": _visaYearFrom = _visaYearTo = null; break;
+            case "visaDates": _visaFrom = _visaTo = _visaOn = null; break;
+            case "valid": _stillValid = false; break;
+            case "expiring": _expiringDays = null; break;
+            case "visaExpired": _visaExpired = null; _visaExpiredYear = null; break;
+            case "neverVisa": _neverVisa = null; break;
+            case "firstVisa": _firstVisaFrom = _firstVisaTo = null; break;
+            case "lastVisa": _lastVisaFrom = _lastVisaTo = null; break;
+            case "covered": _coveredFrom = _coveredTo = _allowedGap = null; break;
+            case "gap": _hadGap = null; _gapDays = null; break;
+            case "visaNumber": _visaNumber = string.Empty; break;
+            case "visaType": _visaType = string.Empty; break;
+            case "visaCategory": _visaCategory = string.Empty; break;
+            case "visaPlace": _visaPlace = string.Empty; break;
+            case "extended": _visaExtended = null; break;
+            case "extensionRequired": _extensionRequired = null; break;
+            case "registration": _registration = string.Empty; break;
+            case "visaBorder": _visaBorder = string.Empty; break;
+            case "stay": _stayFrom = _stayTo = _stayYear = null; break;
+            case "passport": _passport = string.Empty; _passportCurrent = false; break;
+            case "passportType": _passportType = string.Empty; break;
+            case "passportCountry": _passportCountry = string.Empty; break;
+            case "passportIssued": _passportIssuedFrom = _passportIssuedTo = null; break;
+            case "passportExpires": _passportExpiresFrom = _passportExpiresTo = null; break;
+            case "passportExpired": _passportExpired = null; _passportExpiringDays = null; break;
+            case "passportCancelled": _passportCancelled = null; break;
+            case "severalPassports": _severalPassports = null; break;
+            case "invitationMode": _invitationMode = string.Empty; break;
+            case "invitation": _invitation = string.Empty; break;
+            case "invitationYear": _invitationYearFrom = _invitationYearTo = null; break;
+            case "invitationCategory": _invitationCategory = string.Empty; break;
+            case "invitationPeriod": _invitationPeriod = string.Empty; break;
+            case "invitationOn": _invitationValidOn = null; break;
+            case "invitationExpired": _invitationExpiredNoVisa = null; break;
+            case "invitationCancelled": _invitationCancelled = null; break;
+            case "permitMode": _permitMode = string.Empty; break;
+            case "permit": _permit = string.Empty; break;
+            case "asNumber": _asNumber = string.Empty; break;
+            case "permitYear": _permitYearFrom = _permitYearTo = null; break;
+            case "permitLocation": _permitLocations = string.Empty; break;
+            case "permitPosition": _permitPosition = string.Empty; break;
+            case "permitExtended": _permitExtended = null; break;
+            case "residence": _residence = string.Empty; break;
+            case "region": _region = string.Empty; break;
+            case "city": _city = string.Empty; break;
+            case "lodging": _lodging = string.Empty; break;
+            case "hotel": _hotel = string.Empty; break;
+            case "hospital": _hospital = string.Empty; break;
+            case "otherSite": _otherSite = string.Empty; break;
+            case "address": _addressText = string.Empty; break;
+            case "addressExpired": _addressExpiredDuringVisa = null; break;
+            case "borderMode": _borderMode = string.Empty; break;
+            case "borderYear": _borderYearFrom = _borderYearTo = null; break;
+            case "borderNumber": _borderNumber = string.Empty; break;
+            case "borderPlace": _borderPlace = string.Empty; break;
+            case "rejected": _rejected = null; _rejectedYear = null; break;
+            case "medical": _medical = null; break;
+            case "medicalNumber": _medicalNumber = string.Empty; break;
+            case "medicalYear": _medicalYearFrom = _medicalYearTo = null; break;
+            case "medicalOn": _medicalOn = null; break;
+            case "medicalExpired": _medicalExpiredDuringVisa = null; break;
+        }
+
+        _pickerEpoch++;
+        await SearchAsync();
+    }
+
+    private EmployeeSearchCriteria BuildCriteria() => new()
+    {
+        FirstName = _firstName,
+        MiddleName = _middleName,
+        LastName = _lastName,
+        FullName = _fullName,
+        PersonalNumber = _personalNumber,
+        Email = _email,
+        HasPhoto = _hasPhoto,
+        IncludeArchived = _archive == "both",
+        ArchivedOnly = _archive == "archived",
+        Incomplete = _incomplete,
+        IncompleteGaps = Labels(_gaps),
+        GenderIds = Resolve(_gender, Genders),
+        AgeFrom = _ageFrom,
+        AgeTo = _ageTo,
+        AgeAsOfYear = _ageAsOf,
+        BirthFrom = _birthFrom,
+        BirthTo = _birthTo,
+        BirthYearFrom = _birthYearFrom,
+        BirthYearTo = _birthYearTo,
+        MaritalStatusIds = Resolve(_marital, MaritalStatuses),
+        RequireFamily = _family,
+        RelationshipIds = Resolve(_relationship, Relationships),
+        FamilyCountFrom = _familyFrom,
+        FamilyCountTo = _familyTo,
+        FamilyVisa = _familyVisa,
+        FamilyVisaYear = _familyVisaYear,
+        FamilyText = _familyText,
+        FamilyTextEmpty = _familyTextEmpty,
+        NationalityIds = Resolve(_nationality, Countries),
+        BirthCountryIds = Resolve(_birthCountry, Countries),
+        BirthPlace = _birthPlace,
+        CitizenshipDiffersFromBirth = _citizenshipDiffers,
+        PassportFromOtherCountry = _otherPassport,
+        ForeignCountryIds = Resolve(_foreignCountry, Countries),
+        ForeignAddress = _foreignAddress,
+        DepartmentIds = Resolve(_department, Departments),
+        PositionIds = Resolve(_position, Positions),
+        ActualPositionIds = Resolve(_actualPosition, ActualPositions),
+        PositionAnyTime = _positionAnyTime,
+        PositionLeft = _positionLeft,
+        PositionLeftYear = _leftYear,
+        PositionYearFrom = _positionYearFrom,
+        PositionYearTo = _positionYearTo,
+        HireFrom = _hireFrom,
+        HireTo = _hireTo,
+        YearsFrom = _yearsFrom,
+        YearsTo = _yearsTo,
+        ChangedDepartmentYear = _changedDepartmentYear,
+        ChangedPositionYear = _changedPositionYear,
+        SeveralPositions = _severalPositions,
+        SeveralPositionsYear = _severalPositionsYear,
+        PreviousWorkplaces = _previousWork,
+        ProjectContractIds = Resolve(_contract, Contracts),
+        ContractYearFrom = _contractYearFrom,
+        ContractYearTo = _contractYearTo,
+        ContractActive = _contractActive,
+        ContractDescription = _contractDescription,
+        SeveralContracts = _severalContracts,
+        SubcontractorIds = Resolve(_subcontractor, Subcontractors),
+        SalaryFrom = _salaryFrom,
+        SalaryTo = _salaryTo,
+        SalaryYearFrom = _salaryYearFrom,
+        SalaryYearTo = _salaryYearTo,
+        SalaryChanged = _salaryChanged,
+        SalaryChangedYear = _salaryChangedYear,
+        SpecialtyIds = Resolve(_specialty, Specialties),
+        EducationCountryIds = Resolve(_educationCountry, Countries),
+        EducationLevelIds = Resolve(_educationLevel, EducationLevels),
+        InstitutionIds = Resolve(_institution, Institutions),
+        GraduationYearFrom = _gradFrom,
+        GraduationYearTo = _gradTo,
+        HasEducation = _hasEducation,
+        EducatedOutsideCitizenship = _educatedOutside,
+        SpecialtyDiffers = _specialtyDiffers,
+        DiplomaOnFile = _diploma,
+        VisaYearFrom = _visaYearFrom,
+        VisaYearTo = _visaYearTo,
+        VisaFrom = _visaFrom,
+        VisaTo = _visaTo,
+        VisaOn = _visaOn,
+        StillValidToday = _stillValid,
+        ExpiringWithinDays = _expiringDays,
+        VisaExpired = _visaExpired,
+        VisaExpiredYear = _visaExpiredYear,
+        NeverHadVisa = _neverVisa,
+        FirstVisaYearFrom = _firstVisaFrom,
+        FirstVisaYearTo = _firstVisaTo,
+        LastVisaYearFrom = _lastVisaFrom,
+        LastVisaYearTo = _lastVisaTo,
+        CoveredYearFrom = _coveredFrom,
+        CoveredYearTo = _coveredTo,
+        AllowedGapDays = _allowedGap,
+        HadGap = _hadGap,
+        GapLongerThanDays = _gapDays,
+        VisaNumber = _visaNumber,
+        VisaTypeIds = Resolve(_visaType, VisaTypes),
+        VisaCategoryIds = Resolve(_visaCategory, VisaCategories),
+        VisaIssuedPlaceIds = Resolve(_visaPlace, VisaPlaces),
+        VisaExtended = _visaExtended,
+        ExtensionRequired = _extensionRequired,
+        RegistrationState = _registration,
+        VisaBorderZone = _visaBorder,
+        StayDaysFrom = _stayFrom,
+        StayDaysTo = _stayTo,
+        StayYear = _stayYear,
+        PassportNumber = _passport,
+        PassportCurrentOnly = _passportCurrent,
+        PassportTypeIds = Resolve(_passportType, PassportTypes),
+        PassportCountryIds = Resolve(_passportCountry, Countries),
+        PassportIssuedFrom = _passportIssuedFrom,
+        PassportIssuedTo = _passportIssuedTo,
+        PassportExpiresFrom = _passportExpiresFrom,
+        PassportExpiresTo = _passportExpiresTo,
+        PassportExpired = _passportExpired,
+        PassportExpiringDays = _passportExpiringDays,
+        PassportCancelled = _passportCancelled,
+        SeveralPassports = _severalPassports,
+        InvitationMode = _invitationMode,
+        InvitationNumber = _invitation,
+        InvitationYearFrom = _invitationYearFrom,
+        InvitationYearTo = _invitationYearTo,
+        InvitationCategoryIds = Resolve(_invitationCategory, VisaCategories),
+        InvitationPeriodIds = Resolve(_invitationPeriod, VisaPeriods),
+        InvitationValidOn = _invitationValidOn,
+        InvitationExpiredNoVisa = _invitationExpiredNoVisa,
+        InvitationCancelled = _invitationCancelled,
+        PermitMode = _permitMode,
+        WorkPermitNumber = _permit,
+        AsNumber = _asNumber,
+        PermitYearFrom = _permitYearFrom,
+        PermitYearTo = _permitYearTo,
+        PermitLocations = Labels(_permitLocations),
+        PermitPositionIds = Resolve(_permitPosition, Positions),
+        PermitExtended = _permitExtended,
+        ResidenceTypes = Labels(_residence),
+        RegionIds = Resolve(_region, Regions),
+        CityIds = Resolve(_city, Cities),
+        LodgingIds = Resolve(_lodging, Lodgings),
+        HotelIds = Resolve(_hotel, Hotels),
+        HospitalIds = Resolve(_hospital, Hospitals),
+        OtherSiteIds = Resolve(_otherSite, OtherSites),
+        AddressText = _addressText,
+        AddressExpiredDuringVisa = _addressExpiredDuringVisa,
+        BorderZoneMode = _borderMode,
+        BorderZoneYearFrom = _borderYearFrom,
+        BorderZoneYearTo = _borderYearTo,
+        BorderZoneNumber = _borderNumber,
+        BorderZonePlace = _borderPlace,
+        WasRejected = _rejected,
+        RejectedYear = _rejectedYear,
+        RequireMedical = _medical,
+        MedicalNumber = _medicalNumber,
+        MedicalYearFrom = _medicalYearFrom,
+        MedicalYearTo = _medicalYearTo,
+        MedicalValidOn = _medicalOn,
+        MedicalExpiredDuringVisa = _medicalExpiredDuringVisa,
+    };
+
+    private int _openGroup = 1;
+
+    private readonly record struct SetChip(int Group, string GroupLabel, string Label);
+
+    private static readonly (int Id, string Label)[] SearchTabs =
+    {
+        (1, "Tab.Name"),
+        (2, "Tab.Age"),
+        (3, "Tab.Citizenship"),
+        (4, "Tab.Position"),
+        (5, "Tab.Project"),
+        (6, "Tab.Pay"),
+        (7, "Tab.Education"),
+        (8, "Tab.Visas"),
+        (9, "Tab.Passport"),
+        (10, "Tab.Invitation"),
+        (11, "Tab.Permit"),
+        (12, "Tab.Address"),
+        (13, "Tab.Border"),
+    };
+
+    private static readonly Dictionary<string, int> ChipGroups = new(StringComparer.Ordinal)
+    {
+        ["first"] = 1, ["middle"] = 1, ["last"] = 1, ["full"] = 1, ["personal"] = 1, ["email"] = 1,
+        ["photo"] = 1, ["archive"] = 1, ["incomplete"] = 1, ["gaps"] = 1,
+        ["gender"] = 2, ["age"] = 2, ["birth"] = 2, ["birthYear"] = 2, ["marital"] = 2, ["family"] = 2,
+        ["relationship"] = 2, ["familyCount"] = 2, ["familyVisa"] = 2, ["familyText"] = 2, ["familyEmpty"] = 2,
+        ["nationality"] = 3, ["birthCountry"] = 3, ["birthPlace"] = 3, ["differs"] = 3, ["otherPassport"] = 3,
+        ["foreignCountry"] = 3, ["foreignAddress"] = 3,
+        ["department"] = 4, ["position"] = 4, ["actual"] = 4, ["period"] = 4, ["positionYear"] = 4, ["hire"] = 4,
+        ["years"] = 4, ["changedDepartment"] = 4, ["changedPosition"] = 4, ["severalPositions"] = 4, ["previous"] = 4,
+        ["contract"] = 5, ["contractYear"] = 5, ["contractActive"] = 5, ["contractText"] = 5, ["severalContracts"] = 5, ["subcontractor"] = 5,
+        ["salary"] = 6, ["salaryYear"] = 6, ["salaryChanged"] = 6,
+        ["specialty"] = 7, ["eduCountry"] = 7, ["level"] = 7, ["institution"] = 7, ["grad"] = 7, ["hasEducation"] = 7,
+        ["outside"] = 7, ["differsSpecialty"] = 7, ["diploma"] = 7,
+        ["visa"] = 8, ["visaDates"] = 8, ["valid"] = 8, ["expiring"] = 8, ["visaExpired"] = 8, ["neverVisa"] = 8,
+        ["firstVisa"] = 8, ["lastVisa"] = 8, ["covered"] = 8, ["gap"] = 8, ["visaNumber"] = 8, ["visaType"] = 8,
+        ["visaCategory"] = 8, ["visaPlace"] = 8, ["extended"] = 8, ["extensionRequired"] = 8, ["registration"] = 8,
+        ["visaBorder"] = 8, ["stay"] = 8,
+        ["passport"] = 9, ["passportType"] = 9, ["passportCountry"] = 9, ["passportIssued"] = 9, ["passportExpires"] = 9,
+        ["passportExpired"] = 9, ["passportCancelled"] = 9, ["severalPassports"] = 9,
+        ["invitationMode"] = 10, ["invitation"] = 10, ["invitationYear"] = 10, ["invitationCategory"] = 10,
+        ["invitationPeriod"] = 10, ["invitationOn"] = 10, ["invitationExpired"] = 10, ["invitationCancelled"] = 10,
+        ["permitMode"] = 11, ["permit"] = 11, ["asNumber"] = 11, ["permitYear"] = 11, ["permitLocation"] = 11,
+        ["permitPosition"] = 11, ["permitExtended"] = 11,
+        ["residence"] = 12, ["region"] = 12, ["city"] = 12, ["lodging"] = 12, ["hotel"] = 12, ["hospital"] = 12,
+        ["otherSite"] = 12, ["address"] = 12, ["addressExpired"] = 12,
+        ["borderMode"] = 13, ["borderYear"] = 13, ["borderNumber"] = 13, ["borderPlace"] = 13, ["rejected"] = 13,
+        ["medical"] = 13, ["medicalNumber"] = 13, ["medicalYear"] = 13, ["medicalOn"] = 13, ["medicalExpired"] = 13,
+    };
+
+    private List<SetChip> SetCriteria()
+    {
+        var set = new List<SetChip>();
+        foreach (var chip in BuildChips())
+        {
+            if (!ChipGroups.TryGetValue(chip.Key, out var group) || string.IsNullOrWhiteSpace(chip.Label))
+                continue;
+
+            var tab = SearchTabs.FirstOrDefault(item => item.Id == group);
+            set.Add(new SetChip(group, string.IsNullOrEmpty(tab.Label) ? "Tab.Name" : tab.Label, chip.Label));
+        }
+
+        return set;
+    }
+
+    private List<Chip> BuildChips()
+    {
+        var chips = new List<Chip>();
+        Text(chips, "first", _firstName, "FirstName");
+        Text(chips, "middle", _middleName, "MiddleName");
+        Text(chips, "last", _lastName, "LastName");
+        Text(chips, "full", _fullName, "Column.Name");
+        Text(chips, "personal", _personalNumber, "PersonalNumber");
+        Text(chips, "email", _email, "Email");
+        Tri(chips, "photo", _hasPhoto, "PhotoOnFile");
+        if (_archive == "archived") chips.Add(new Chip("archive", L("Line.ArchivedOnly")));
+        if (_archive == "both") chips.Add(new Chip("archive", L("Both")));
+        Tri(chips, "incomplete", _incomplete, "IncompleteFile");
+        AddLookupChip(chips, "gaps", _gaps, GapOptions);
+        AddLookupChip(chips, "gender", _gender);
+        if (_ageFrom != null || _ageTo != null || _ageAsOf != null)
+            chips.Add(new Chip("age", F("Chip.Age", _ageFrom?.ToString() ?? "", _ageTo?.ToString() ?? "", _ageAsOf is int year ? F("Chip.InYear", year) : "")));
+        if (_birthFrom != null || _birthTo != null) chips.Add(new Chip("birth", L("Chip.BirthDates")));
+        if (_birthYearFrom != null || _birthYearTo != null) chips.Add(new Chip("birthYear", L("Chip.BirthYear")));
+        AddLookupChip(chips, "marital", _marital);
+        Tri(chips, "family", _family, "HasFamily");
+        AddLookupChip(chips, "relationship", _relationship);
+        if (_familyFrom != null || _familyTo != null) chips.Add(new Chip("familyCount", L("Chip.FamilyCount")));
+        if (_familyVisa != null) chips.Add(new Chip("familyVisa", L("FamilyVisaYear") + ": " + L(_familyVisa == true ? "Yes" : "No")));
+        Text(chips, "familyText", _familyText, "VisaFamilyText");
+        Tri(chips, "familyEmpty", _familyTextEmpty, "FamilyTextEmpty");
+        AddLookupChip(chips, "nationality", _nationality);
+        AddLookupChip(chips, "birthCountry", _birthCountry);
+        Text(chips, "birthPlace", _birthPlace, "PlaceOfBirth");
+        Tri(chips, "differs", _citizenshipDiffers, "CitizenshipDiffers");
+        Tri(chips, "otherPassport", _otherPassport, "PassportOtherCountry");
+        AddLookupChip(chips, "foreignCountry", _foreignCountry);
+        Text(chips, "foreignAddress", _foreignAddress, "ForeignAddress");
+        AddLookupChip(chips, "department", _department);
+        AddLookupChip(chips, "position", _position);
+        AddLookupChip(chips, "actual", _actualPosition);
+        if (!_positionAnyTime || _positionLeft) chips.Add(new Chip("period", L(_positionLeft ? "Chip.LeftPosition" : "Chip.CurrentPosition")));
+        if (_positionYearFrom != null || _positionYearTo != null) chips.Add(new Chip("positionYear", L("Chip.PositionYears")));
+        if (_hireFrom != null || _hireTo != null) chips.Add(new Chip("hire", L("Chip.Hired")));
+        if (_yearsFrom != null || _yearsTo != null) chips.Add(new Chip("years", L("Chip.Years")));
+        if (_changedDepartmentYear != null) chips.Add(new Chip("changedDepartment", F("Chip.ChangedDepartment", _changedDepartmentYear)));
+        if (_changedPositionYear != null) chips.Add(new Chip("changedPosition", F("Chip.ChangedPosition", _changedPositionYear)));
+        Tri(chips, "severalPositions", _severalPositions, "SeveralPositions");
+        Text(chips, "previous", _previousWork, "PreviousWork");
+        AddLookupChip(chips, "contract", _contract);
+        if (_contractYearFrom != null || _contractYearTo != null) chips.Add(new Chip("contractYear", L("Chip.ContractYears")));
+        Tri(chips, "contractActive", _contractActive, "ContractActive");
+        Text(chips, "contractText", _contractDescription, "Column.Contract");
+        Tri(chips, "severalContracts", _severalContracts, "SeveralContracts");
+        AddLookupChip(chips, "subcontractor", _subcontractor);
+        if (_salaryFrom != null || _salaryTo != null) chips.Add(new Chip("salary", L("Chip.Salary")));
+        if (_salaryYearFrom != null || _salaryYearTo != null) chips.Add(new Chip("salaryYear", L("Chip.SalaryYear")));
+        Tri(chips, "salaryChanged", _salaryChanged, "SalaryChanged");
+        AddLookupChip(chips, "specialty", _specialty);
+        AddLookupChip(chips, "eduCountry", _educationCountry);
+        AddLookupChip(chips, "level", _educationLevel);
+        AddLookupChip(chips, "institution", _institution);
+        if (_gradFrom != null || _gradTo != null) chips.Add(new Chip("grad", L("Chip.Graduation")));
+        Tri(chips, "hasEducation", _hasEducation, "HasEducation");
+        Tri(chips, "outside", _educatedOutside, "EducatedOutside");
+        Tri(chips, "differsSpecialty", _specialtyDiffers, "SpecialtyDiffers");
+        Tri(chips, "diploma", _diploma, "Diploma");
+        if (_visaYearFrom != null || _visaYearTo != null) chips.Add(new Chip("visa", L("Chip.VisaYears")));
+        if (_visaFrom != null || _visaTo != null || _visaOn != null) chips.Add(new Chip("visaDates", L("Chip.VisaDates")));
+        if (_stillValid) chips.Add(new Chip("valid", L("ValidToday")));
+        if (_expiringDays != null) chips.Add(new Chip("expiring", F("Chip.Expiring", _expiringDays)));
+        Tri(chips, "visaExpired", _visaExpired, "VisaExpired");
+        Tri(chips, "neverVisa", _neverVisa, "NeverVisa");
+        if (_firstVisaFrom != null || _firstVisaTo != null) chips.Add(new Chip("firstVisa", L("Chip.FirstVisa")));
+        if (_lastVisaFrom != null || _lastVisaTo != null) chips.Add(new Chip("lastVisa", L("Chip.LastVisa")));
+        if (_coveredFrom != null || _coveredTo != null) chips.Add(new Chip("covered", L("Chip.Covered")));
+        Tri(chips, "gap", _hadGap, "HadGap");
+        Text(chips, "visaNumber", _visaNumber, "Column.Visa");
+        AddLookupChip(chips, "visaType", _visaType);
+        AddLookupChip(chips, "visaCategory", _visaCategory);
+        AddLookupChip(chips, "visaPlace", _visaPlace);
+        Tri(chips, "extended", _visaExtended, "Extended");
+        Tri(chips, "extensionRequired", _extensionRequired, "ExtensionRequired");
+        Text(chips, "registration", _registration, "Registration");
+        Text(chips, "visaBorder", _visaBorder, "VisaBorder");
+        if (_stayFrom != null || _stayTo != null || _stayYear != null) chips.Add(new Chip("stay", L("Chip.Stay")));
+        Text(chips, "passport", _passport, "Pill.Passport");
+        if (_passportCurrent) chips.Add(new Chip("passport", L("Chip.CurrentPassport")));
+        AddLookupChip(chips, "passportType", _passportType);
+        AddLookupChip(chips, "passportCountry", _passportCountry);
+        if (_passportIssuedFrom != null || _passportIssuedTo != null) chips.Add(new Chip("passportIssued", L("Chip.PassportIssued")));
+        if (_passportExpiresFrom != null || _passportExpiresTo != null) chips.Add(new Chip("passportExpires", L("Chip.PassportExpires")));
+        Tri(chips, "passportExpired", _passportExpired, "Expired");
+        Tri(chips, "passportCancelled", _passportCancelled, "Cancelled");
+        Tri(chips, "severalPassports", _severalPassports, "SeveralPassports");
+        if (!string.IsNullOrEmpty(_invitationMode)) chips.Add(new Chip("invitationMode", F("Chip.Mode", L("Pill.Invitation"), ModeLabel(_invitationMode))));
+        Text(chips, "invitation", _invitation, "Pill.Invitation");
+        if (_invitationYearFrom != null || _invitationYearTo != null) chips.Add(new Chip("invitationYear", L("Chip.InvitationYear")));
+        AddLookupChip(chips, "invitationCategory", _invitationCategory);
+        AddLookupChip(chips, "invitationPeriod", _invitationPeriod);
+        if (_invitationValidOn != null) chips.Add(new Chip("invitationOn", L("Chip.InvitationOn")));
+        Tri(chips, "invitationExpired", _invitationExpiredNoVisa, "InvitationExpired");
+        Tri(chips, "invitationCancelled", _invitationCancelled, "Cancelled");
+        if (!string.IsNullOrEmpty(_permitMode)) chips.Add(new Chip("permitMode", F("Chip.Mode", L("Pill.Permit"), ModeLabel(_permitMode))));
+        Text(chips, "permit", _permit, "Pill.Permit");
+        Text(chips, "asNumber", _asNumber, "AsNumber");
+        if (_permitYearFrom != null || _permitYearTo != null) chips.Add(new Chip("permitYear", L("Chip.PermitYears")));
+        AddLookupChip(chips, "permitLocation", _permitLocations);
+        AddLookupChip(chips, "permitPosition", _permitPosition);
+        Tri(chips, "permitExtended", _permitExtended, "Extended");
+        AddLookupChip(chips, "residence", _residence, ResidenceOptions);
+        AddLookupChip(chips, "region", _region);
+        AddLookupChip(chips, "city", _city);
+        AddLookupChip(chips, "lodging", _lodging);
+        AddLookupChip(chips, "hotel", _hotel);
+        AddLookupChip(chips, "hospital", _hospital);
+        AddLookupChip(chips, "otherSite", _otherSite);
+        Text(chips, "address", _addressText, "Pill.Address");
+        Tri(chips, "addressExpired", _addressExpiredDuringVisa, "AddressExpired");
+        if (!string.IsNullOrEmpty(_borderMode)) chips.Add(new Chip("borderMode", F("Chip.Mode", L("Aria.Border"), ModeLabel(_borderMode))));
+        if (_borderYearFrom != null || _borderYearTo != null) chips.Add(new Chip("borderYear", L("Chip.BorderYears")));
+        Text(chips, "borderNumber", _borderNumber, "Aria.Border");
+        Text(chips, "borderPlace", _borderPlace, "BorderPlace");
+        Tri(chips, "rejected", _rejected, "Rejected");
+        Tri(chips, "medical", _medical, "MedicalOnFile");
+        Text(chips, "medicalNumber", _medicalNumber, "Pill.Medical");
+        if (_medicalYearFrom != null || _medicalYearTo != null) chips.Add(new Chip("medicalYear", L("Chip.MedicalYear")));
+        if (_medicalOn != null) chips.Add(new Chip("medicalOn", L("Chip.MedicalOn")));
+        Tri(chips, "medicalExpired", _medicalExpiredDuringVisa, "MedicalExpired");
+        return chips;
+    }
+
+    private static void Text(List<Chip> chips, string key, string value, string labelKey)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+            chips.Add(new Chip(key, L(labelKey) + " " + value.Trim()));
+    }
+
+    private static void Tri(List<Chip> chips, string key, bool? value, string labelKey)
+    {
+        if (value == true) chips.Add(new Chip(key, L(labelKey) + ": " + L("Yes")));
+        else if (value == false) chips.Add(new Chip(key, L(labelKey) + ": " + L("No")));
+    }
+
+    private static List<string> Labels(string stored) =>
+        CaseLocationAutocomplete.ParseChips(stored, string.Empty).ToList();
+
+    private static void AddLookupChip(List<Chip> chips, string key, string stored, IReadOnlyList<EmployeeSearchLookupOption> keyed = null)
+    {
+        var parts = CaseLocationAutocomplete.ParseChips(stored, string.Empty).Select(part =>
+        {
+            var match = keyed?.FirstOrDefault(option => string.Equals(option.Key, part, StringComparison.Ordinal));
+            return string.IsNullOrEmpty(match?.Caption) ? part : match.Caption;
+        });
+        var label = string.Join(" " + L("Or") + " ", parts);
+        if (!string.IsNullOrWhiteSpace(label))
+            chips.Add(new Chip(key, label));
+    }
+
+    private static List<Guid> Resolve(string stored, IReadOnlyList<EmployeeSearchLookupOption> options)
+    {
+        var ids = new List<Guid>();
+        foreach (var label in CaseLocationAutocomplete.ParseChips(stored, string.Empty))
+        {
+            var key = CaseLocationAutocomplete.FoldKey(label);
+            foreach (var option in options)
+            {
+                if (string.Equals(CaseLocationAutocomplete.FoldKey(option.Caption), key, StringComparison.Ordinal))
+                    ids.Add(option.Id);
+            }
+        }
+
+        return ids.Distinct().ToList();
+    }
+
+    private static string L(string key) => EmployeeSearchText.Get(key);
+    private static string F(string key, params object[] args) => EmployeeSearchText.Format(key, args);
+
+    private static string ModeLabel(string mode) => mode switch
+    {
+        "ever" => L("Ever"),
+        "unused" => L("Unused"),
+        "used" => L("Used"),
+        "current" => L("Current"),
+        _ => mode,
+    };
+
+    private static string SwitchClass(bool selected) => selected ? "is-selected" : string.Empty;
+
+    private static string VisaLabel(string status) => status switch
+    {
+        "Valid" => L("Visa.Valid"),
+        "Expiring" => L("Visa.Expiring"),
+        "Expired" => L("Visa.Expired"),
+        _ => L("Visa.None"),
+    };
+
+    private static string FirstNameOf(EmployeeSearchRow row)
+    {
+        var name = row.FullName?.Trim();
+        if (string.IsNullOrEmpty(name))
+            return L("ThisEmployee");
+        var space = name.IndexOf(' ');
+        return space < 0 ? name : name[..space];
+    }
+
+    private void Select(Guid personId) => _selectedId = _selectedId == personId ? null : personId;
+
+    private sealed record Chip(string Key, string Label);
+}

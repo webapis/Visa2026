@@ -1,0 +1,59 @@
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.EmployeeSearch
+
+<LocationMultiSelectField @key="ResetKey"
+                          Value="@Shown"
+                          ValueChanged="OnShownChanged"
+                          Suggestions="Entries"
+                          AllowCatalogEdit="false"
+                          NoneValue=""
+                          Placeholder="@EmployeeSearchText.Get("Any")"
+                          EmptyHint="@EmployeeSearchText.Get("Hint.Several")"
+                          FieldName="@FieldName" />
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyList<EmployeeSearchLookupOption> Options { get; set; } = Array.Empty<EmployeeSearchLookupOption>();
+    [Parameter] public string FieldName { get; set; } = "value";
+    [Parameter] public string ResetKey { get; set; } = "picker";
+
+    private bool Keyed => Options.Any(option => !string.IsNullOrEmpty(option.Key));
+
+    private string Shown => Keyed
+        ? CaseLocationAutocomplete.FormatChips(Parse(Value).Select(ToCaption), string.Empty)
+        : Value ?? string.Empty;
+
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> Entries =>
+        Options.Select(option => new CaseAddressAutocomplete.SavedEntry(option.Caption, 1, DateTime.MinValue)).ToList();
+
+    private string ToCaption(string stored)
+    {
+        var match = Options.FirstOrDefault(option => string.Equals(option.Key, stored, StringComparison.Ordinal));
+        return string.IsNullOrEmpty(match?.Caption) ? stored : match.Caption;
+    }
+
+    private string ToKey(string caption)
+    {
+        var folded = CaseLocationAutocomplete.FoldKey(caption);
+        var match = Options.FirstOrDefault(option =>
+            string.Equals(option.Caption, caption, StringComparison.Ordinal)
+            || string.Equals(CaseLocationAutocomplete.FoldKey(option.Caption), folded, StringComparison.Ordinal));
+        return string.IsNullOrEmpty(match?.Key) ? caption : match.Key;
+    }
+
+    private static IEnumerable<string> Parse(string? stored) =>
+        CaseLocationAutocomplete.ParseChips(stored, string.Empty);
+
+    private async Task OnShownChanged(string? shown)
+    {
+        if (!Keyed)
+        {
+            await ValueChanged.InvokeAsync(shown);
+            return;
+        }
+
+        await ValueChanged.InvokeAsync(CaseLocationAutocomplete.FormatChips(Parse(shown).Select(ToKey), string.Empty));
+    }
+}

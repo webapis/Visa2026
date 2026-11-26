@@ -1,4 +1,5 @@
 @using Microsoft.JSInterop
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 
 <div class="cw-loc-ms" data-loc-value="@FormatCurrent()">
@@ -9,18 +10,25 @@
                 {
                     var chipItem = chip;
                     <span class="cw-loc-ms__chip" title="@chipItem.Label">
-                        <button type="button"
-                                class="cw-loc-ms__chip-edit-btn"
-                                disabled="@(!Enabled || ReadOnly)"
-                                aria-label="@($"Edit {chipItem.Label}")"
-                                @onmousedown:preventDefault="true"
-                                @onclick="() => OpenEditDialogAsync(chipItem)"
-                                @onclick:stopPropagation="true">
+                        @if (AllowCatalogEdit)
+                        {
+                            <button type="button"
+                                    class="cw-loc-ms__chip-edit-btn"
+                                    disabled="@(!Enabled || ReadOnly)"
+                                    aria-label="@($"Edit {chipItem.Label}")"
+                                    @onmousedown:preventDefault="true"
+                                    @onclick="() => OpenEditDialogAsync(chipItem)"
+                                    @onclick:stopPropagation="true">
+                                <span class="cw-loc-ms__chip-lbl">@chipItem.Label</span>
+                                <svg class="cw-loc-ms__pen" width="11" height="11" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                </svg>
+                            </button>
+                        }
+                        else
+                        {
                             <span class="cw-loc-ms__chip-lbl">@chipItem.Label</span>
-                            <svg class="cw-loc-ms__pen" width="11" height="11" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                            </svg>
-                        </button>
+                        }
                         @if (Enabled && !ReadOnly)
                         {
                             <button type="button"
@@ -85,13 +93,16 @@
                             @onmousedown:preventDefault="true"
                             @onmousedown="() => PickAsync(item.Text)">
                             <span class="cw-addr-ac__option-main">@Highlight(item.Text)</span>
-                            <span class="cw-addr-ac__option-meta">@(item.UseCount <= 0 ? "New" : $"Used {item.UseCount}×")</span>
+                            @if (AllowCatalogEdit)
+                            {
+                                <span class="cw-addr-ac__option-meta">@(item.UseCount <= 0 ? "New" : $"Used {item.UseCount}×")</span>
+                            }
                         </li>
                     }
                 </ul>
             }
         </div>
-        @if (Enabled && !ReadOnly && !_suggestionsFailed)
+        @if (AllowCatalogEdit && Enabled && !ReadOnly && !_suggestionsFailed)
         {
             <button type="button"
                     class="cw-loc-ms__add"
@@ -108,6 +119,8 @@
     <div class="cw-loc-ms__sr" aria-live="polite">@_liveText</div>
 </div>
 
+@if (AllowCatalogEdit)
+{
 <SavedValueDialog IsOpen="@_dialogOpen"
                   Kind="location"
                   Mode="@_dialogMode"
@@ -119,6 +132,7 @@
                   ExternalError="@_dialogSaveError"
                   OnCancel="CloseDialogAsync"
                   OnSave="OnDialogSaveAsync" />
+}
 
 @code {
     private sealed class Chip
@@ -138,6 +152,8 @@
     [Parameter] public string Placeholder { get; set; } = "Start typing a location";
     [Parameter] public string EmptyHint { get; set; } = "Search saved locations. Use the + button to add a new one.";
     [Parameter] public string? NoneValue { get; set; } = CommaSeparatedSelectionHelper.NoneValue;
+    /// <summary>When false, the field only picks existing suggestions. The add button and chip pen stay hidden.</summary>
+    [Parameter] public bool AllowCatalogEdit { get; set; } = true;
 
     [Inject] private IJSRuntime Js { get; set; } = default!;
 
@@ -526,7 +542,7 @@
         if (_suggestionsFailed)
         {
             _statusState = "new";
-            _statusText = "Locations unavailable";
+            _statusText = VisaUiMessages.Get("LocationMultiSelect.Unavailable");
             _listOpen = false;
             return;
         }
@@ -543,7 +559,7 @@
             if (_chips.Count > 0)
             {
                 _statusState = "ok";
-                _statusText = _chips.Count + " selected.";
+                _statusText = VisaUiMessages.Format("LocationMultiSelect.Selected", _chips.Count);
             }
             else
             {
@@ -559,7 +575,7 @@
             _hitTotal = 0;
             _listOpen = false;
             _statusState = string.Empty;
-            _statusText = "Already selected.";
+            _statusText = VisaUiMessages.Get("LocationMultiSelect.Already");
             return;
         }
 
@@ -573,7 +589,9 @@
         if (CaseLocationAutocomplete.IsExactSaved(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
         {
             _statusState = "ok";
-            _statusText = "Saved location. Press Enter to add it.";
+            _statusText = AllowCatalogEdit
+                ? VisaUiMessages.Get("LocationMultiSelect.SavedEnter")
+                : VisaUiMessages.Get("LocationMultiSelect.PressEnter");
             _listOpen = false;
             _activeIndex = -1;
             return;
@@ -582,8 +600,9 @@
         if (_hits.Count > 0)
         {
             _statusState = string.Empty;
-            _statusText = _hitTotal + " saved location" + (_hitTotal == 1 ? " matches" : "s match")
-                + ". Pick one from the list.";
+            _statusText = VisaUiMessages.Format(
+                _hitTotal == 1 ? "LocationMultiSelect.Match" : "LocationMultiSelect.Matches",
+                _hitTotal);
             _listOpen = keepList && _focused;
             if (!_listOpen)
                 _activeIndex = -1;
@@ -591,7 +610,9 @@
         }
 
         _statusState = "new";
-        _statusText = $"No saved location matches \u201c{q}\u201d. Use the + button to add it as a new location.";
+        _statusText = AllowCatalogEdit
+            ? VisaUiMessages.Format("LocationMultiSelect.NoMatchAdd", q)
+            : VisaUiMessages.Format("LocationMultiSelect.NoMatch", q);
         _listOpen = false;
         _activeIndex = -1;
     }

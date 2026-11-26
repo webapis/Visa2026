@@ -36,6 +36,7 @@
       }
     },
     "Employees": { "en-US": "Employees", "tr-TR": "Çalışanlar", "tk-TM": "Işgärler", "ru-RU": "Сотрудники" },
+    "FindEmployees": { "en-US": "Find employees", "tr-TR": "Çalışan ara", "tk-TM": "Işgär gözle", "ru-RU": "Найти сотрудников" },
     "FamilyMembers": { "en-US": "Family Members", "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
     "TemporaryVisitors": { "en-US": "Temporary visitors", "tr-TR": "Geçici ziyaretçiler", "tk-TM": "Wagtlaýyn myhmanlar", "ru-RU": "Временные посетители" },
     "Application": {
@@ -754,6 +755,9 @@
     },
     "Person_DetailView": {
       "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+    },
+    "EmployeeSearchHost_DetailView": {
+      "caption": { "en-US": "Find employees", "tr-TR": "Çalışan ara", "tk-TM": "Işgär gözle", "ru-RU": "Найти сотрудников" }
     },
     "ApplicationUser_ListView": {
       "caption": { "tr-TR": "Kullanıcılar", "tk-TM": "Ulanyjylar", "ru-RU": "Пользователи" }

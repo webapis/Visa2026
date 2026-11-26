@@ -187,6 +187,7 @@ namespace Visa2026.Blazor.Server
                         WorkPermitQuotaSettingsSchemaSql.ApplyIfMissing(connectionString);
                         VisaIssueWindowSettingsSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardExcelBundleSettingsSchemaSql.ApplyIfMissing(connectionString);
+                EmployeeSearchColumnSettingsSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardRosterSnapshotSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
@@ -402,6 +403,7 @@ namespace Visa2026.Blazor.Server
                 WorkPermitQuotaSettingsSchemaSql.ApplyIfMissing(connectionString);
                 VisaIssueWindowSettingsSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardExcelBundleSettingsSchemaSql.ApplyIfMissing(connectionString);
+                EmployeeSearchColumnSettingsSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardRosterSnapshotSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
