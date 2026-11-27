@@ -24,13 +24,29 @@
             <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
                     type="button"
                     title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")"
-                    @onclick="ClosePanelAsync">
+                    @onclick="RequestCloseFromChrome">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                 </svg>
             </button>
         </div>
     </div>
+
+    @if (_draft != null)
+    {
+        <DetailRecordRibbon @ref="_ribbon"
+                            RecordTitle="@PanelTitle"
+                            IsDirty="@RibbonDirty"
+                            CanSave="@RibbonCanSave"
+                            CanCreate="true"
+                            CanDelete="true"
+                            HoldFocus="false"
+                            IsBusy="@_busy"
+                            TrySave="TrySaveAsync"
+                            CloseRequested="ClosePanelAsync"
+                            NewRequested="StartNewAsync"
+                            DeleteRequested="DeleteFromRibbonAsync" />
+    }
 
     <div class="resminamalar-slot-panel__body">
         <div class="resminamalar-slot-panel__catalog issue-issued-header-slot issue-issued-visa-slot">
@@ -130,27 +146,6 @@
                     </p>
                 }
 
-                <div class="issue-issued-visa-slot__actions">
-                    <button type="button" class="issue-issued-header-slot__btn" disabled="@_busy" @onclick="ClosePanelAsync">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")</button>
-                    @if (_draft.IsEditMode)
-                    {
-                        <button type="button"
-                                class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
-                                disabled="@(!CanSaveVisa)"
-                                @onclick="SaveAsync">
-                            @(_busy ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Saving") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Save"))
-                        </button>
-                    }
-                    else
-                    {
-                        <button type="button"
-                                class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary"
-                                disabled="@(!CanCreate)"
-                                @onclick="CreateAsync">
-                            @(_busy ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Creating") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.CreateVisas"))
-                        </button>
-                    }
-                </div>
             }
         </div>
     </div>
@@ -524,6 +519,14 @@
         && !_busy
         && IsDirty;
 
+    private bool RibbonCanSave => _draft?.IsEditMode == true ? CanSaveVisa : CanCreate;
+
+    private bool _savedClean;
+    private DetailRecordRibbon? _ribbon;
+
+    private bool RibbonDirty =>
+        _draft != null && (IsDirty || (!_draft.IsEditMode && !_savedClean));
+
     private bool IsDirty =>
         _draft != null
         && !string.IsNullOrEmpty(_pristineFingerprint)
@@ -546,6 +549,7 @@
             return;
 
         _boundOccupantKey = occupantKey;
+        _savedClean = false;
         _actionError = null;
         _saveMessage = null;
         CancelVisaDialog();
@@ -769,8 +773,21 @@
             if (result.Succeeded)
             {
                 WorkspaceActions?.NotifyWorkspaceChanged();
-                _busy = false;
-                await ClosePanelAsync();
+                var createdId = result.Rows.Count == 1 ? result.Rows[0].VisaId : Guid.Empty;
+                if (createdId != Guid.Empty && Request != null)
+                {
+                    _busy = false;
+                    await SlotService.OpenIssueIssuedVisaAsync(new IssueIssuedVisaSlotRequest
+                    {
+                        ApplicationProfileInstanceId = Request.ApplicationProfileInstanceId,
+                        ExistingVisaId = createdId,
+                    });
+                    return;
+                }
+
+                LoadDraft();
+                _savedClean = true;
+                _saveMessage = "Saved.";
                 return;
             }
 
@@ -1137,6 +1154,91 @@
             PendingCopyFileName = source.PendingCopyFileName,
             PendingCopyBytes = source.PendingCopyBytes,
         };
+
+    private async Task<bool> TrySaveAsync()
+    {
+        if (_draft?.IsEditMode == true)
+        {
+            if (!CanSaveVisa)
+                return false;
+            await SaveAsync();
+            return string.IsNullOrWhiteSpace(_actionError) && !IsDirty;
+        }
+
+        if (!CanCreate)
+            return false;
+        await CreateAsync();
+        return string.IsNullOrWhiteSpace(_actionError);
+    }
+
+    private async Task RequestCloseFromChrome()
+    {
+        if (_ribbon != null)
+            await _ribbon.RequestClose();
+        else
+            await ClosePanelAsync();
+    }
+
+    private async Task StartNewAsync()
+    {
+        if (Request == null)
+            return;
+
+        if (Request.ExistingVisaId is not Guid existing || existing == Guid.Empty)
+        {
+            _savedClean = false;
+            LoadDraft();
+            return;
+        }
+
+        await SlotService.OpenIssueIssuedVisaAsync(new IssueIssuedVisaSlotRequest
+        {
+            ApplicationProfileInstanceId = Request.ApplicationProfileInstanceId,
+        });
+    }
+
+    private async Task DeleteFromRibbonAsync()
+    {
+        if (_draft == null || Request == null || _busy)
+            return;
+
+        if (!_draft.IsEditMode)
+        {
+            await ClosePanelAsync();
+            return;
+        }
+
+        if (Request.ExistingVisaId is not Guid visaId || visaId == Guid.Empty)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        _saveMessage = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedVisaComposeService.Delete(
+                objectSpace,
+                Request.ApplicationProfileInstanceId,
+                visaId);
+            if (!result.Succeeded)
+            {
+                _actionError = result.ErrorMessage;
+                return;
+            }
+
+            WorkspaceActions?.NotifyWorkspaceChanged();
+            await ClosePanelAsync();
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
 
     private Task ClosePanelAsync() => CloseRequested.InvokeAsync();
 

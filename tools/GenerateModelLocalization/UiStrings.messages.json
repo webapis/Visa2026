@@ -9128,6 +9128,7 @@
   "RecordRibbon.Close": { "en": "Close", "tr-TR": "Kapat", "tk-TM": "Ýap", "ru-RU": "Закрыть" },
   "RecordRibbon.Cancel": { "en": "Cancel", "tr-TR": "İptal", "tk-TM": "Ýatyr", "ru-RU": "Отмена" },
   "RecordRibbon.Group": { "en": "Record", "tr-TR": "Kayıt", "tk-TM": "Ýazgy", "ru-RU": "Запись" },
+  "RecordRibbon.GroupEdit": { "en": "Edit", "tr-TR": "Düzenle", "tk-TM": "Üýtget", "ru-RU": "Правка" },
   "RecordRibbon.Saved": { "en": "Saved", "tr-TR": "Kaydedildi", "tk-TM": "Ýazdyryldy", "ru-RU": "Сохранено" },
   "RecordRibbon.Unsaved": { "en": "Unsaved changes", "tr-TR": "Kaydedilmemiş değişiklikler", "tk-TM": "Ýazdyrylmadyk üýtgeşmeler", "ru-RU": "Несохраненные изменения" },
   "RecordRibbon.Discard": { "en": "Don't save", "tr-TR": "Kaydetme", "tk-TM": "Ýazma", "ru-RU": "Не сохранять" },

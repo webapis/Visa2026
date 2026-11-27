@@ -1,3 +1,19 @@
+## 2026-11-27 — Application result editors use the record ribbon
+
+- **Need**: Invitation, work permit, visa, border zone, and rejection, opened from a case, still used Save and Close at the bottom of the side editor.
+- **Fix**: Those side editors use `DetailRecordRibbon`: New, Save, Save and Close, Delete, and Close. The bottom buttons are gone. Save stays on the form. Save and Close writes, then closes the side editor. Close asks when the form is unsaved. New starts another record of the same kind. The ribbon does not hold focus, so the field being edited commits before Save.
+- **Officer**: Stop F5, rebuild, hard-refresh. From a case, open an invitation or a work permit. The ribbon is under the title. Cancel and Close are not at the bottom.
+- **Prevent**: Do not put Save back at the bottom of the issued side editor. Do not turn on HoldFocus there; the case ribbon is the one that must keep focus.
+- **Verify**: Isolated Blazor build 0 errors (session ribbonui). Not clicked in the running app.
+
+## 2026-11-27 — Record ribbon uses the XAF ribbon
+
+- **Need**: The record bar was plain text. Officers wanted the XAF ribbon: a large icon, a caption under it, and a group name under the set.
+- **Fix**: `DetailRecordRibbon` is a `DxRibbon` with the standard action images (`Action_New`, `Action_Save`, `Action_Save_Close`, `Action_Delete`, `Action_Close`). Groups are Record, Save, Edit, and Close. The tab strip is hidden. Save stays disabled until something changes. The mouse-down on the bar still does not steal focus, so a case field is read before Save.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a case or an employee. The ribbon shows the usual XAF icons, with the group name under each set.
+- **Prevent**: Do not go back to text-only buttons. Do not let Save take focus away from the field being edited.
+- **Verify**: Isolated Blazor build 0 errors (session ribbonui). Not clicked in the running app.
+
 ## 2026-11-27 — Delete on the record ribbon
 
 - **Need**: The record ribbon on a case, employee, and family member needed Delete next to New, Save, Save and Close, and Close.

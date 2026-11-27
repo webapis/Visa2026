@@ -6470,69 +6470,20 @@ button.lv-progress-step__files {
     color: #fff;
 }
 
-.record-ribbon {
+.record-ribbon-host {
     display: flex;
-    align-items: stretch;
-    gap: 0.5rem;
-    margin: 0 0 0.75rem;
-    padding: 0.45rem 0.55rem 0.3rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 0.4rem;
-    background: rgba(0, 0, 0, 0.18);
-}
-
-.record-ribbon__group {
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    padding-right: 0.55rem;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    gap: 0.75rem;
+    margin: 0 0 0.65rem;
 }
 
-.record-ribbon__cmds {
-    display: flex;
-    gap: 0.25rem;
+.record-ribbon-host .record-ribbon {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-.record-ribbon__cmd {
-    min-width: 5.6rem;
-    min-height: 2.4rem;
-    padding: 0.35rem 0.55rem;
-    border: 1px solid transparent;
-    border-radius: 0.35rem;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-}
-
-.record-ribbon__cmd--wide {
-    min-width: 7.2rem;
-}
-
-.record-ribbon__cmd:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.record-ribbon__cmd:disabled {
-    opacity: 0.38;
-    cursor: default;
-}
-
-.record-ribbon__cmd.is-accent:not(:disabled) {
-    background: rgba(13, 110, 253, 0.9);
-    border-color: rgba(13, 110, 253, 0.95);
-    color: #fff;
-}
-
-.record-ribbon__cmd.is-danger:not(:disabled) {
-    color: #ffb4b4;
-}
-
-.record-ribbon__name {
-    margin-top: 0.15rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    opacity: 0.65;
+.record-ribbon-host .dxbl-tabs-tablist {
+    display: none;
 }
 
 .record-ribbon__status {
@@ -6621,15 +6572,6 @@ button.lv-progress-step__files {
     color: #fff;
 }
 
-.dxbl-theme-fluent-mode-light .record-ribbon {
-    background: #f4f6f8;
-    border-color: rgba(20, 32, 51, 0.12);
-}
-
-.dxbl-theme-fluent-mode-light .record-ribbon__group {
-    border-right-color: rgba(20, 32, 51, 0.12);
-}
-
 .dxbl-theme-fluent-mode-light .record-ribbon__pill.is-clean {
     color: #0f7a45;
 }
@@ -6642,10 +6584,6 @@ button.lv-progress-step__files {
     background: #fff;
     color: #142033;
     border-color: rgba(20, 32, 51, 0.16);
-}
-
-.dxbl-theme-fluent-mode-light .record-ribbon__cmd.is-danger:not(:disabled) {
-    color: #a32020;
 }
 
 .dxbl-theme-fluent-mode-light .record-ribbon__dialog-actions button {

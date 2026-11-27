@@ -1,48 +1,51 @@
 @namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp.Blazor.Services
 @using Visa2026.Module.Localization
+@inject IImageUrlService ImageUrls
 
-<div class="record-ribbon" role="toolbar" aria-label="@T("Group")">
-    <div class="record-ribbon__group">
-        <div class="record-ribbon__cmds">
+<div class="record-ribbon-host" @onmousedown:preventDefault="HoldFocus">
+    <DxRibbon CssClass="record-ribbon dxbl-ribbon-hidden-tabs" SizeMode="SizeMode.Large">
+        <DxRibbonTab Text="@T("Group")">
             @if (CanCreate)
             {
-                <button type="button" class="record-ribbon__cmd" disabled="@IsBusy" @onclick="RequestNew">
-                    <span>@T("New")</span>
-                </button>
+                <DxRibbonGroup Text="@T("Group")">
+                    <DxRibbonItem Text="@T("New")"
+                                  IconUrl="@_newIcon"
+                                  Enabled="@(!IsBusy)"
+                                  Click="OnNewClick" />
+                </DxRibbonGroup>
             }
             @if (CanWrite)
             {
-                <button type="button"
-                        class="record-ribbon__cmd @(CanSave ? "is-accent" : null)"
-                        disabled="@(!CanSave || IsBusy)"
-                        @onmousedown:preventDefault="true"
-                        @onclick="RequestSave">
-                    <span>@T("Save")</span>
-                </button>
-                <button type="button"
-                        class="record-ribbon__cmd record-ribbon__cmd--wide @(IsDirty ? "is-accent" : null)"
-                        disabled="@IsBusy"
-                        @onmousedown:preventDefault="true"
-                        @onclick="RequestSaveAndClose">
-                    <span>@T("SaveAndClose")</span>
-                </button>
+                <DxRibbonGroup Text="@T("Save")">
+                    <DxRibbonItem Text="@T("Save")"
+                                  IconUrl="@_saveIcon"
+                                  Enabled="@(CanSave && !IsBusy)"
+                                  Click="OnSaveClick" />
+                    <DxRibbonItem Text="@T("SaveAndClose")"
+                                  IconUrl="@_saveCloseIcon"
+                                  Enabled="@(!IsBusy)"
+                                  Click="OnSaveAndCloseClick" />
+                </DxRibbonGroup>
             }
             @if (ShowDelete)
             {
-                <button type="button"
-                        class="record-ribbon__cmd is-danger"
-                        disabled="@(!CanDelete || IsBusy || _acting)"
-                        title="@DeleteTitle"
-                        @onclick="RequestDelete">
-                    <span>@T("Delete")</span>
-                </button>
+                <DxRibbonGroup Text="@T("GroupEdit")">
+                    <DxRibbonItem Text="@T("Delete")"
+                                  IconUrl="@_deleteIcon"
+                                  Enabled="@(CanDelete && !IsBusy && !_acting)"
+                                  Tooltip="@DeleteTitle"
+                                  Click="OnDeleteClick" />
+                </DxRibbonGroup>
             }
-            <button type="button" class="record-ribbon__cmd" disabled="@IsBusy" @onclick="RequestClose">
-                <span>@T("Close")</span>
-            </button>
-        </div>
-        <div class="record-ribbon__name">@T("Group")</div>
-    </div>
+            <DxRibbonGroup Text="@T("Close")">
+                <DxRibbonItem Text="@T("Close")"
+                              IconUrl="@_closeIcon"
+                              Enabled="@(!IsBusy)"
+                              Click="OnCloseClick" />
+            </DxRibbonGroup>
+        </DxRibbonTab>
+    </DxRibbon>
     <div class="record-ribbon__status">
         <b>@RecordTitle</b>
         <span class="record-ribbon__pill @(IsDirty ? "is-dirty" : "is-clean")">@(IsDirty ? T("Unsaved") : T("Saved"))</span>
@@ -84,6 +87,11 @@
     [Parameter] public bool CanCreate { get; set; } = true;
     [Parameter] public bool CanDelete { get; set; }
     [Parameter] public string? DeleteTitle { get; set; }
+    /// <summary>
+    /// When true, clicking the ribbon does not move focus, so a case field can be read before Save.
+    /// Issued editors leave this off so the field commits on blur before Save.
+    /// </summary>
+    [Parameter] public bool HoldFocus { get; set; } = true;
     [Parameter] public bool IsBusy { get; set; }
     [Parameter] public Func<Task<bool>>? TrySave { get; set; }
     [Parameter] public EventCallback CloseRequested { get; set; }
@@ -93,6 +101,46 @@
 
     private string? _pending;
     private bool _acting;
+    private string? _newIcon;
+    private string? _saveIcon;
+    private string? _saveCloseIcon;
+    private string? _deleteIcon;
+    private string? _closeIcon;
+
+    protected override void OnInitialized()
+    {
+        _newIcon = Icon("Action_New_32x32");
+        _saveIcon = Icon("Action_Save_32x32");
+        _saveCloseIcon = Icon("Action_Save_Close_32x32");
+        _deleteIcon = Icon("Action_Delete_32x32");
+        _closeIcon = Icon("Action_Close_32x32");
+    }
+
+    private string? Icon(string name)
+    {
+        try
+        {
+            return ImageUrls.GetImageUrl(name);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private Task OnNewClick(RibbonItemClickEventArgs _) => RequestNew();
+
+    private Task OnSaveClick(RibbonItemClickEventArgs _) => RequestSave();
+
+    private Task OnSaveAndCloseClick(RibbonItemClickEventArgs _) => RequestSaveAndClose();
+
+    private Task OnCloseClick(RibbonItemClickEventArgs _) => RequestClose();
+
+    private Task OnDeleteClick(RibbonItemClickEventArgs _)
+    {
+        RequestDelete();
+        return Task.CompletedTask;
+    }
 
     private bool ShowDelete =>
         DeleteRequested.HasDelegate && (CanDelete || !string.IsNullOrWhiteSpace(DeleteTitle));

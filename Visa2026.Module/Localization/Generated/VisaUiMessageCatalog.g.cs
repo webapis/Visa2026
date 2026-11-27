@@ -5556,6 +5556,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýazgy",
             ["ru-RU"] = "Запись",
         },
+        ["RecordRibbon.GroupEdit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit",
+            ["tr-TR"] = "Düzenle",
+            ["tk-TM"] = "Üýtget",
+            ["ru-RU"] = "Правка",
+        },
         ["RecordRibbon.Saved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Saved",
