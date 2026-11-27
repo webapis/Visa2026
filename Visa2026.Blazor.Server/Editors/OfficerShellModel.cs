@@ -442,6 +442,12 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback NewCaseRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback DeleteCaseRequested
     {
         get => GetPropertyValue<EventCallback>();

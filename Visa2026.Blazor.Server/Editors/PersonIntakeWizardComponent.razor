@@ -30,8 +30,19 @@ else
     var findings = PersonIntakeCompleteness.Evaluate(Person, State.PendingKeys, State.DraftSatisfiedKeys());
     var unresolved = findings.Where(f => f.State == PersonIntakeItemState.Unresolved).ToList();
     var pending = findings.Where(f => f.State == PersonIntakeItemState.Pending).ToList();
+    var blocksSave = unresolved.Any(f => !f.CanDefer);
 
-    <div class="person-intake-wizard">
+    <div class="person-intake-wizard" @oninput="MarkUnsaved" @onchange="MarkUnsaved">
+        <DetailRecordRibbon RecordTitle="@PersonHeading"
+                            IsDirty="@State.Unsaved"
+                            CanSave="@(State.Unsaved && !blocksSave)"
+                            CanWrite="@(!Access.IsViewOnly)"
+                            CanCreate="@(!Access.IsViewOnly && NewRequested.HasDelegate)"
+                            CanDelete="@Access.CanDeletePerson"
+                            TrySave="TrySaveAsync"
+                            CloseRequested="CloseRequested"
+                            NewRequested="NewRequested"
+                            DeleteRequested="DeleteRequested" />
         <header class="person-intake-wizard__header">
             <div class="person-intake-wizard__who">
                 <div class="person-intake-wizard__avatar" title="@PersonHeading">
@@ -529,30 +540,6 @@ else
                 }
             </div>
         </div>
-
-        <footer class="person-intake-wizard__footer">
-            <button type="button" class="person-intake-wizard__btn" disabled="@(currentIndex == 0)" @onclick="PreviousStep">@T("Back")</button>
-            <div class="person-intake-wizard__footer-right">
-                @if (!Access.IsViewOnly)
-                {
-                    <button type="button" class="person-intake-wizard__btn"
-                            disabled="@(unresolved.Count > 0)"
-                            @onclick="SaveAsync">
-                        @NativeActionCaption("Save", "Save")
-                    </button>
-                    <button type="button" class="person-intake-wizard__btn person-intake-wizard__btn--primary"
-                            @onclick="SaveAndCloseAsync">
-                        @NativeActionCaption("SaveAndClose", "Save and Close")
-                    </button>
-                }
-                <button type="button"
-                        class="person-intake-wizard__btn person-intake-wizard__btn--primary @(currentIndex >= steps.Count - 1 ? "is-reserved" : null)"
-                        disabled="@(currentIndex >= steps.Count - 1)"
-                        aria-hidden="@(currentIndex >= steps.Count - 1)"
-                        tabindex="@(currentIndex >= steps.Count - 1 ? -1 : 0)"
-                        @onclick="NextStep">@T("Next")</button>
-            </div>
-        </footer>
     </div>
 }
 
@@ -568,6 +555,9 @@ else
     [Parameter] public PersonIntakeWizardAccess Access { get; set; } = PersonIntakeWizardAccess.Unrestricted;
     [Parameter] public EventCallback SaveRequested { get; set; }
     [Parameter] public EventCallback SaveAndCloseRequested { get; set; }
+    [Parameter] public EventCallback NewRequested { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+    [Parameter] public EventCallback DeleteRequested { get; set; }
 
     private int _stepIndex;
     private bool _showLookupTools;
@@ -1133,23 +1123,43 @@ else
         public string Preview => string.Empty;
     }
 
-    private Task SaveAsync() => SaveRequested.HasDelegate ? SaveRequested.InvokeAsync() : Task.CompletedTask;
-
-    private Task SaveAndCloseAsync() =>
-        SaveAndCloseRequested.HasDelegate ? SaveAndCloseRequested.InvokeAsync() : Task.CompletedTask;
-
-    private string NativeActionCaption(string actionId, string fallback)
+    private async Task<bool> TrySaveAsync()
     {
-        var caption = Application?.Model?.ActionDesign?.Actions[actionId]?.Caption;
-        if (!string.IsNullOrWhiteSpace(caption))
-            return caption;
+        if (!State.Unsaved)
+            return true;
+        if (!SaveRequested.HasDelegate)
+            return false;
 
-        return fallback;
+        await SaveRequested.InvokeAsync();
+        if (State.OpenOverview)
+        {
+            State.OpenOverview = false;
+            _stepIndex = 0;
+            if (Person != null)
+                _overviewPersonId = Person.ID;
+        }
+
+        return !State.Unsaved;
+    }
+
+    private void MarkUnsaved()
+    {
+        if (Access.IsViewOnly || State.Unsaved)
+            return;
+        State.Unsaved = true;
     }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        if (State?.OpenOverview == true)
+        {
+            State.OpenOverview = false;
+            _stepIndex = 0;
+            if (Person != null)
+                _overviewPersonId = Person.ID;
+        }
+
         if (!ShowIncompleteOverview || Person == null)
             return;
 
@@ -1249,22 +1259,6 @@ else
         var text = value.Trim();
         return char.ToUpperInvariant(text[0]).ToString();
     }
-    private Task NextStep()
-    {
-        if (Person != null)
-        {
-            var steps = VisibleSteps();
-            _stepIndex = Math.Min(_stepIndex + 1, steps.Count - 1);
-        }
-        return Task.CompletedTask;
-    }
-
-    private Task PreviousStep()
-    {
-        _stepIndex = Math.Max(0, _stepIndex - 1);
-        return Task.CompletedTask;
-    }
-
     private Task GoToStep(int index)
     {
         if (Person == null)
@@ -1281,6 +1275,7 @@ else
             State.PendingKeys.Add(key);
         else
             State.PendingKeys.Remove(key);
+        MarkUnsaved();
         InvokeAsync(StateHasChanged);
     }
 
@@ -1296,7 +1291,11 @@ else
 
     private static string T(string key) => PersonIntakeText.Get(key);
 
-    private Task OnRecordStateChanged() => InvokeAsync(StateHasChanged);
+    private Task OnRecordStateChanged()
+    {
+        MarkUnsaved();
+        return InvokeAsync(StateHasChanged);
+    }
 
     private string GetRecordNote(string key) =>
         State.RecordNotes.TryGetValue(key, out var note) ? note : string.Empty;
@@ -1307,6 +1306,7 @@ else
             State.RecordNotes.Remove(key);
         else
             State.RecordNotes[key] = value;
+        MarkUnsaved();
     }
 
     private bool RecordHasRows(string recordKey) => recordKey switch
@@ -1777,6 +1777,8 @@ else
         if (args.FileCount == 0)
             return;
 
+        MarkUnsaved();
+
         var maxMb = ObjectSpace != null
             ? (SystemSettings.TryGetInstance(ObjectSpace)?.MaxDocumentSizeInMB ?? SystemSettings.DefaultMaxDocumentSizeInMB)
             : SystemSettings.DefaultMaxDocumentSizeInMB;
@@ -1919,6 +1921,7 @@ else
         if (Person == null || args.File == null)
             return;
 
+        MarkUnsaved();
         await using var stream = args.File.OpenReadStream(2 * 1024 * 1024);
         using var buffer = new MemoryStream();
         await stream.CopyToAsync(buffer);
@@ -1929,7 +1932,10 @@ else
     private Task ClearPhoto()
     {
         if (Person != null)
+        {
             Person.Photo = null;
+            MarkUnsaved();
+        }
         return Task.CompletedTask;
     }
 
@@ -2119,6 +2125,7 @@ else
             ? (Person.IsEmployee ? VisaFamilyMemberLinesHelper.NoneValue : string.Empty)
             : formatted;
         Person.VisaApplicationFamilyMembersText = stored;
+        MarkUnsaved();
         _familySourceText = stored;
         _familyPopupVisible = false;
         _familyStatus = string.Empty;

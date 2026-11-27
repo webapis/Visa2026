@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Detail record ribbon — prototype</title>
+<style>
+  :root {
+    --bg: #2a2d31;
+    --panel: #34383e;
+    --card: #3a3e45;
+    --input: #2c3036;
+    --line: rgba(255,255,255,.12);
+    --line-strong: rgba(255,255,255,.22);
+    --text: #f2f3f5;
+    --muted: rgba(242,243,245,.62);
+    --blue: #2f6fed;
+    --blue-2: #4c86f5;
+    --green: #3fb27f;
+    --amber: #e0b15a;
+    --danger: #e06a6a;
+    --ribbon: #2e3238;
+    --nav: #26292e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #1e2126;
+    color: var(--text);
+    font: 13px/1.4 "Segoe UI", system-ui, sans-serif;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .page { width: 1440px; margin: 0 auto; padding: 16px 18px 28px; }
+  h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  .lead { margin: 4px 0 12px; color: var(--muted); max-width: 920px; }
+  .switch { display: flex; gap: 8px; margin-bottom: 12px; }
+  .switch button {
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .switch button[aria-pressed="true"] {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+  .window {
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg);
+    min-height: 760px;
+    display: flex;
+    flex-direction: column;
+  }
+  .titlebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 12px;
+    background: #1a1d22;
+    border-bottom: 1px solid var(--line);
+  }
+  .mark {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: #c45c26;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .titlebar strong { font-weight: 650; }
+  .titlebar span { color: var(--muted); }
+  .ribbon {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 10px 6px;
+    background: var(--ribbon);
+    border-bottom: 1px solid var(--line);
+  }
+  .group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px 0 0;
+    border-right: 1px solid var(--line);
+  }
+  .cmds { display: flex; gap: 4px; }
+  .cmd {
+    width: 92px;
+    min-height: 68px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 4px;
+  }
+  .cmd.wide { width: 108px; }
+  .cmd svg { width: 22px; height: 22px; }
+  .cmd small { color: var(--muted); font-size: 11px; }
+  .cmd:hover:not(:disabled) { background: rgba(255,255,255,.06); }
+  .cmd:disabled { opacity: .38; cursor: default; }
+  .cmd.accent:not(:disabled) {
+    background: var(--blue);
+    border-color: #1f5fe0;
+  }
+  .cmd.accent:not(:disabled) small { color: rgba(255,255,255,.85); }
+  .group-name {
+    margin-top: 2px;
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+  .status {
+    margin-left: auto;
+    align-self: center;
+    text-align: right;
+    padding-right: 8px;
+  }
+  .status b { display: block; font-weight: 650; }
+  .pill {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 650;
+  }
+  .pill.clean { background: rgba(63,178,127,.18); color: #8ee0b8; }
+  .pill.dirty { background: rgba(224,177,90,.18); color: #f0cb86; }
+  .log {
+    padding: 6px 14px;
+    background: #262a30;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    min-height: 28px;
+  }
+  .body { display: flex; min-height: 0; flex: 1; }
+  .nav {
+    width: 210px;
+    background: var(--nav);
+    border-right: 1px solid var(--line);
+    padding: 10px 8px;
+    color: var(--muted);
+  }
+  .nav .item { padding: 6px 8px; border-radius: 4px; }
+  .nav .item.on { background: rgba(47,111,237,.28); color: var(--text); }
+  .main { flex: 1; padding: 14px 16px 18px; min-width: 0; }
+  .tabs { display: flex; gap: 16px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .tabs span { padding: 6px 0 8px; color: var(--muted); }
+  .tabs .on { color: var(--text); border-bottom: 2px solid var(--blue-2); }
+  .case-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 220px;
+    gap: 14px;
+  }
+  label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+  .field { margin-bottom: 10px; }
+  input, select {
+    width: 100%;
+    background: var(--input);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 6px 8px;
+  }
+  input:focus, select:focus { outline: 2px solid rgba(47,111,237,.7); border-color: var(--blue); }
+  .side {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    background: var(--card);
+  }
+  .side h2 { margin: 0 0 8px; font-size: 13px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .ghost {
+    border: 1px solid var(--line-strong);
+    background: #2f333a;
+    border-radius: 4px;
+    padding: 5px 8px;
+    color: var(--muted);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  tr.hit { cursor: pointer; }
+  tr.hit:hover td { background: rgba(255,255,255,.04); }
+  .who { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 6px;
+    background: #3d5a40;
+    display: grid; place-items: center; font-weight: 700;
+  }
+  .steps .step { padding: 7px 8px; border-radius: 6px; margin-bottom: 2px; }
+  .steps .step.on { outline: 1px solid rgba(63,178,127,.7); color: #b7ebc9; }
+  .wizard {
+    display: grid;
+    grid-template-columns: 220px 1fr 180px;
+    gap: 16px;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .photo {
+    width: 120px; height: 150px; margin: 28px auto 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    display: grid; place-items: center;
+    color: var(--muted);
+    background: #2a2e34;
+  }
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .footer button, .dlg button, .list-open {
+    border: 1px solid var(--line-strong);
+    background: #2c3138;
+    border-radius: 4px;
+    padding: 6px 12px;
+  }
+  .footer .next, .dlg .primary, .list-open.primary {
+    background: var(--blue);
+    border-color: #1f5fe0;
+  }
+  .list-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .list-head h2 { margin: 0; font-size: 16px; }
+  .note { color: var(--muted); margin: 0 0 10px; }
+  .mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: grid; place-items: center;
+  }
+  .dlg {
+    width: 420px;
+    background: #2c3138;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .dlg h2 { margin: 0 0 6px; font-size: 16px; }
+  .dlg p { margin: 0 0 14px; color: var(--muted); }
+  .dlg .row { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #121418;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 8px 14px;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Record ribbon on an open detail</h1>
+  <p class="lead">New creates another record of the same kind. Save updates the open record and stays. Save and Close writes, then returns to the list. Close returns to the list and asks when there are unsaved changes. Try it on each screen.</p>
+  <div class="switch" role="tablist">
+    <button type="button" id="tab-case" aria-pressed="true">Application Profile Instance</button>
+    <button type="button" id="tab-employee" aria-pressed="false">Employee</button>
+    <button type="button" id="tab-family" aria-pressed="false">Family member</button>
+  </div>
+  <div class="window" id="window"></div>
+</div>
+<div class="mask hidden" id="mask">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <h2 id="dlg-title"></h2>
+    <p id="dlg-text"></p>
+    <div class="row">
+      <button type="button" id="dlg-cancel">Cancel</button>
+      <button type="button" id="dlg-discard">Don't save</button>
+      <button type="button" class="primary" id="dlg-save">Save</button>
+    </div>
+  </div>
+</div>
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script>
+const seed = {
+  case: {
+    listTitle: "Application Profile Instances",
+    listNoun: "case",
+    nav: "Application Profile Instances",
+    record: "Çalyk Almak",
+    fields: {
+      visaType: "SSI — Çarşy wagtlaýyn",
+      company: "",
+      period: "32 days",
+      project: "",
+      address1: "",
+      appNumber: "00-10/42",
+      appDate: "23.06.2026",
+      urgency: "Urgent"
+    }
+  },
+  employee: {
+    listTitle: "Employees",
+    listNoun: "employee",
+    nav: "Employees",
+    role: "Exit employee",
+    record: "Fatih DANA",
+    fields: {
+      first: "Fatih",
+      last: "DANA",
+      dob: "01.01.1977",
+      birthPlace: "Türkiye",
+      gender: "Male",
+      marital: "Married",
+      nationality: "TUR — Türkiye",
+      personalNumber: "12319081072"
+    }
+  },
+  family: {
+    listTitle: "Family members",
+    listNoun: "family member",
+    nav: "Family Members",
+    role: "Spouse",
+    record: "Merjen Atayeva",
+    fields: {
+      first: "Merjen",
+      last: "Atayeva",
+      dob: "14.04.1984",
+      birthPlace: "Aşgabat",
+      gender: "Female",
+      marital: "Married",
+      nationality: "TKM — Turkmenistan",
+      personalNumber: "84501234567"
+    }
+  }
+};
+
+const lists = {
+  case: ["Çalyk Almak", "Serhet ýaka"],
+  employee: ["Fatih DANA", "Mehmet Akın"],
+  family: ["Merjen Atayeva", "Aýlar Begmyradova"]
+};
+
+let screen = "case";
+let mode = "detail";
+let dirty = false;
+let blank = false;
+let values = {};
+let pending = null;
+let log = "Open a field and change it. Save becomes available.";
+
+const windowEl = document.getElementById("window");
+const mask = document.getElementById("mask");
+const toast = document.getElementById("toast");
+
+function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function load(name) {
+  screen = name;
+  mode = "detail";
+  dirty = false;
+  blank = false;
+  values = clone(seed[name].fields);
+  log = "Open a field and change it. Save becomes available.";
+  document.getElementById("tab-case").setAttribute("aria-pressed", name === "case");
+  document.getElementById("tab-employee").setAttribute("aria-pressed", name === "employee");
+  document.getElementById("tab-family").setAttribute("aria-pressed", name === "family");
+  paint();
+}
+
+function recordTitle() {
+  if (screen === "case") {
+    if (blank && !values.appNumber) return "New application";
+    return seed.case.record;
+  }
+  const name = (values.first + " " + values.last).trim();
+  if (!name) return screen === "employee" ? "New employee" : "New family member";
+  return name;
+}
+
+function paint() {
+  const meta = seed[screen];
+  const ribbon = mode === "detail" ? ribbonHtml() : "";
+  const body = mode === "detail"
+    ? (screen === "case" ? caseHtml() : personHtml())
+    : listHtml();
+  windowEl.innerHTML =
+    '<div class="titlebar"><div class="mark">Ç</div><strong>' + esc(mode === "detail" ? header() : meta.listTitle) + '</strong></div>' +
+    ribbon +
+    '<div class="log">' + esc(log) + '</div>' +
+    '<div class="body"><nav class="nav">' + navHtml() + '</nav><div class="main">' + body + '</div></div>';
+  bind();
+}
+
+function header() {
+  if (screen === "case") return "Case: " + recordTitle();
+  return "Person intake";
+}
+
+function ribbonHtml() {
+  const saveClass = dirty ? "cmd accent" : "cmd";
+  return '<div class="ribbon" role="toolbar" aria-label="Record">' +
+    '<div class="group"><div class="cmds">' +
+    btn("new", "New", "Create", iconNew(), "cmd") +
+    btn("save", "Save", "Update", iconSave(), saveClass, !dirty) +
+    btn("save-close", "Save and Close", "Write, then leave", iconSaveClose(), saveClass + " wide") +
+    btn("close", "Close", "Leave", iconClose(), "cmd") +
+    '</div><div class="group-name">Record</div></div>' +
+    '<div class="status"><b>' + esc(recordTitle()) + '</b><span class="pill ' + (dirty ? "dirty" : "clean") + '">' +
+    (dirty ? "Unsaved changes" : "Saved") + '</span></div></div>';
+}
+
+function btn(id, label, hint, icon, cls, disabled) {
+  return '<button type="button" class="' + cls + '" data-act="' + id + '"' + (disabled ? " disabled" : "") +
+    ' aria-label="' + label + '">' + icon + '<span>' + label + '</span><small>' + hint + '</small></button>';
+}
+
+function navHtml() {
+  const items = ["Report Dashboard", "Employees", "Family Members", "Application Profile Instances"];
+  return items.map(function (item) {
+    const on = item === seed[screen].nav;
+    return '<div class="item' + (on ? " on" : "") + '">' + item + '</div>';
+  }).join("");
+}
+
+function caseHtml() {
+  return '<div class="tabs"><span class="on">Application</span><span>Progress</span></div>' +
+    '<div class="case-grid">' +
+    '<div>' +
+    field("visaType", "Visa type", true) +
+    field("company", "Company") +
+    field("period", "Period") +
+    field("project", "Project") +
+    '</div><div>' +
+    field("address1", "Address 1", false, "Street, district, or city") +
+    '</div><div class="side"><h2>Application</h2>' +
+    field("appNumber", "Application number") +
+    field("appDate", "Application date") +
+    '<div class="field"><label for="urgency">Urgency</label><select id="urgency" data-field="urgency">' +
+    ["Urgent", "Normal", "Low"].map(function (opt) {
+      return '<option' + (values.urgency === opt ? " selected" : "") + '>' + opt + '</option>';
+    }).join("") + '</select></div></div></div>' +
+    '<div class="actions">' +
+    ["People & docs", "Invitation", "Rejection", "Issued docs", "Link existing", "Preview document copies"].map(function (name) {
+      return '<button type="button" class="ghost" data-stay="' + name + '">' + name + '</button>';
+    }).join("") + '</div>' +
+    '<table><thead><tr><th>Person</th><th>Role</th><th>Position</th></tr></thead><tbody>' +
+    '<tr><td>Şan Oraz Gülnur</td><td>Primary applicant</td><td>Iş geçiriji işgär</td></tr></tbody></table>';
+}
+
+function personHtml() {
+  const meta = seed[screen];
+  const steps = ["Identity", "Work & address", "Passports", "Education", "CV & files", "Review"];
+  return '<div class="wizard"><div><div class="who"><div class="avatar">' + esc(initials()) + '</div><div><strong>' +
+    esc(recordTitle()) + '</strong><div style="color:var(--muted)">' + esc(meta.role) + '<br>Step 1 of 12 · Identity</div></div></div>' +
+    '<div class="steps">' + steps.map(function (step, i) {
+      return '<div class="step' + (i === 0 ? " on" : "") + '">' + step + '</div>';
+    }).join("") + '</div></div><div><div class="kicker" style="color:var(--muted)">Identity</div>' +
+    '<h2 style="margin:0 0 10px;font-size:18px">Identity</h2><div class="form-grid">' +
+    field("first", "First name") + field("last", "Last name") +
+    field("dob", "Date of birth") + field("birthPlace", "Birth place") +
+    field("gender", "Gender") + field("marital", "Marital status") +
+    field("nationality", "Nationality") + field("personalNumber", "Personal number") +
+    '</div><div class="footer"><button type="button" disabled>Back</button>' +
+    '<button type="button" class="next" data-act="next">Next</button></div></div>' +
+    '<div><div class="photo">Photo</div><div style="text-align:center;color:var(--muted)">Not marked</div></div></div>';
+}
+
+function listHtml() {
+  const meta = seed[screen];
+  const rows = lists[screen].map(function (name) {
+    return '<tr class="hit" data-open="' + esc(name) + '"><td>' + esc(name) + '</td><td>' + esc(meta.listNoun) + '</td></tr>';
+  }).join("");
+  return '<div class="list-head"><h2>' + esc(meta.listTitle) + '</h2>' +
+    '<button type="button" class="list-open" data-act="new">New</button></div>' +
+    '<p class="note">The list keeps its own New. The record ribbon appears after you open a row.</p>' +
+    '<table><thead><tr><th>Name</th><th>Kind</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function field(key, label, unused, placeholder) {
+  return '<div class="field"><label for="' + key + '">' + label + '</label><input id="' + key + '" data-field="' + key + '" value="' +
+    esc(values[key] || "") + '"' + (placeholder ? ' placeholder="' + esc(placeholder) + '"' : "") + '></div>';
+}
+
+function initials() {
+  const a = (values.first || "?").charAt(0);
+  const b = (values.last || "").charAt(0);
+  return (a + b).toUpperCase();
+}
+
+function bind() {
+  windowEl.querySelectorAll("[data-act]").forEach(function (el) {
+    el.addEventListener("click", function () { act(el.getAttribute("data-act")); });
+  });
+  windowEl.querySelectorAll("[data-field]").forEach(function (el) {
+    el.addEventListener("input", onEdit);
+    el.addEventListener("change", onEdit);
+  });
+  windowEl.querySelectorAll("[data-stay]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      log = el.getAttribute("data-stay") + " stays on the case. It is not part of the record ribbon.";
+      const line = windowEl.querySelector(".log");
+      if (line) line.textContent = log;
+    });
+  });
+  windowEl.querySelectorAll("[data-open]").forEach(function (el) {
+    el.addEventListener("click", function () { reopen(el.getAttribute("data-open")); });
+  });
+}
+
+function onEdit(ev) {
+  const key = ev.target.getAttribute("data-field");
+  values[key] = ev.target.value;
+  if (!dirty) {
+    dirty = true;
+    log = "Unsaved changes on " + recordTitle() + ".";
+    refreshRibbon();
+  } else if (screen !== "case") {
+    const title = windowEl.querySelector(".status b");
+    if (title) title.textContent = recordTitle();
+    const who = windowEl.querySelector(".who strong");
+    if (who) who.textContent = recordTitle();
+  }
+}
+
+function refreshRibbon() {
+  const host = windowEl.querySelector(".ribbon");
+  if (!host) return;
+  host.outerHTML = ribbonHtml();
+  windowEl.querySelectorAll(".ribbon [data-act]").forEach(function (el) {
+    el.addEventListener("click", function () { act(el.getAttribute("data-act")); });
+  });
+  const line = windowEl.querySelector(".log");
+  if (line) line.textContent = log;
+}
+
+function act(name) {
+  if (name === "save") return save(false);
+  if (name === "save-close") return save(true);
+  if (name === "close") return dirty ? ask("close") : leave();
+  if (name === "new") return dirty ? ask("new") : startNew();
+  if (name === "next") {
+    log = "Next still moves to the next step. Save stays in the ribbon.";
+    const line = windowEl.querySelector(".log");
+    if (line) line.textContent = log;
+    showToast("Step navigation stays in the footer.");
+  }
+}
+
+function save(thenClose) {
+  dirty = false;
+  if (blank && screen !== "case") {
+    const name = (values.first + " " + values.last).trim();
+    if (name && lists[screen].indexOf(name) < 0) lists[screen].unshift(name);
+  }
+  if (blank && screen === "case" && values.appNumber && lists.case.indexOf(seed.case.record) === 0) {
+    /* keep the sample list; a brand-new number is represented by the open form */
+  }
+  blank = false;
+  log = "Saved " + recordTitle() + ".";
+  showToast(log);
+  if (thenClose) leave();
+  else refreshRibbon();
+}
+
+function leave() {
+  dirty = false;
+  mode = "list";
+  log = "Closed. Back on " + seed[screen].listTitle + ". Open a row to see the ribbon again.";
+  paint();
+}
+
+function startNew() {
+  mode = "detail";
+  dirty = false;
+  blank = true;
+  Object.keys(values).forEach(function (key) { values[key] = ""; });
+  log = "New " + seed[screen].listNoun + ". Fill the form, then Save.";
+  paint();
+}
+
+function reopen(name) {
+  load(screen);
+  log = "Opened " + name + ".";
+  paint();
+}
+
+function ask(kind) {
+  pending = kind;
+  document.getElementById("dlg-title").textContent = "Save changes to " + recordTitle() + "?";
+  document.getElementById("dlg-text").textContent = kind === "new"
+    ? "New starts another " + seed[screen].listNoun + ". The open record still has unsaved changes."
+    : "Close returns to " + seed[screen].listTitle + ".";
+  document.getElementById("dlg-save").textContent = kind === "new" ? "Save and create" : "Save and close";
+  document.getElementById("dlg-discard").textContent = kind === "new" ? "Create without saving" : "Don't save";
+  mask.classList.remove("hidden");
+}
+
+function finishAsk(choice) {
+  mask.classList.add("hidden");
+  const kind = pending;
+  pending = null;
+  if (choice === "cancel") return;
+  if (choice === "save") save(false);
+  else dirty = false;
+  if (kind === "new") startNew();
+  else leave();
+}
+
+function showToast(text) {
+  toast.textContent = text;
+  toast.classList.remove("hidden");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function () { toast.classList.add("hidden"); }, 2200);
+}
+
+function esc(value) {
+  return String(value).replace(/[&<>"']/g, function (ch) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  });
+}
+
+function iconNew() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></svg>';
+}
+function iconSave() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-6h8v6"/></svg>';
+}
+function iconSaveClose() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l3 3v13H4z"/><path d="M16 4v4h4M7 20v-5h7v5M19 13l2 2-2 2"/></svg>';
+}
+function iconClose() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+}
+
+document.getElementById("tab-case").onclick = function () { load("case"); };
+document.getElementById("tab-employee").onclick = function () { load("employee"); };
+document.getElementById("tab-family").onclick = function () { load("family"); };
+document.getElementById("dlg-cancel").onclick = function () { finishAsk("cancel"); };
+document.getElementById("dlg-discard").onclick = function () { finishAsk("discard"); };
+document.getElementById("dlg-save").onclick = function () { finishAsk("save"); };
+
+load("case");
+</script>
+</body>
+</html>

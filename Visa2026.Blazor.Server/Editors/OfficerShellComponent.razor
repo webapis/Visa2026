@@ -89,6 +89,7 @@
                                                                 IssuedHeaderNewRequested="@IssuedHeaderNewRequested"
                                                                 IssuedHeaderOpenRequested="@IssuedHeaderOpenRequested"
                                                                 BackToListRequested="@BackToInProcessRequested"
+                                                                NewCaseRequested="@NewCaseRequested"
                                                                 DeleteCaseRequested="@DeleteCaseRequested"
                                                                 DeleteCaseErrorMessage="@DeleteCaseErrorMessage"
                                                                 SpecialFollowUpChanged="@SpecialFollowUpChanged"
@@ -226,6 +227,7 @@
     [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToInProcessRequested { get; set; }
+    [Parameter] public EventCallback NewCaseRequested { get; set; }
     [Parameter] public EventCallback DeleteCaseRequested { get; set; }
     [Parameter] public EventCallback<bool> SpecialFollowUpChanged { get; set; }
     [Parameter] public string? DeleteCaseErrorMessage { get; set; }

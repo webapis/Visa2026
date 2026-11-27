@@ -44,6 +44,31 @@ public static class PersonIntakeWizardReturn
         wizardView.Close();
     }
 
+    public static void ShowList(XafApplication application, View wizardView, PersonRecordRole role)
+    {
+        var listViewId = role == PersonRecordRole.FamilyMember
+            ? PersonRosterListViewIds.FamilyMembers
+            : PersonRosterListViewIds.Employees;
+
+        var openList = FindOpenList(application, listViewId);
+        if (openList != null)
+        {
+            Activate(application, openList);
+            wizardView.Close();
+            return;
+        }
+
+        var objectSpace = application.CreateObjectSpace(typeof(Person));
+        var listView = application.CreateListView(
+            listViewId,
+            application.CreateCollectionSource(objectSpace, typeof(Person), listViewId),
+            isRoot: true);
+        application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(listView) { TargetWindow = TargetWindow.NewWindow },
+            new ShowViewSource(application.MainWindow, null));
+        wizardView.Close();
+    }
+
     private static Window? FindOpenList(XafApplication application, string listViewId)
     {
         var strategy = application.ShowViewStrategy;

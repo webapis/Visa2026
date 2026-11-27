@@ -13,6 +13,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.PersonIntake;
 using Visa2026.Module.Editors;
 using Visa2026.Blazor.Server.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.PersonIntake;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -42,7 +43,10 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
         {
             State = new PersonIntakeWizardState(),
             SaveRequested = EventCallback.Factory.Create(this, () => SaveCoreAsync(closeAfterSave: false)),
-            SaveAndCloseRequested = EventCallback.Factory.Create(this, () => SaveCoreAsync(closeAfterSave: true))
+            SaveAndCloseRequested = EventCallback.Factory.Create(this, () => SaveCoreAsync(closeAfterSave: true)),
+            NewRequested = EventCallback.Factory.Create(this, OpenAnotherPerson),
+            CloseRequested = EventCallback.Factory.Create(this, ClosePerson),
+            DeleteRequested = EventCallback.Factory.Create(this, DeletePerson)
         };
         model.Application = _application;
         return model;
@@ -97,12 +101,18 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
         model.OwnerViewId = View?.Id;
         model.ObjectSpace = personSpace;
         model.Application = _application;
-        model.ShowIncompleteOverview = openedFromIncompleteList && person?.IsDataIncomplete == true;
+        var fromIncompleteList = openedFromIncompleteList && person?.IsDataIncomplete == true;
+        if (_boundPersonId != person?.ID)
+            model.ShowIncompleteOverview = fromIncompleteList;
+        else if (fromIncompleteList)
+            model.ShowIncompleteOverview = true;
         if (person == null)
             return;
 
         var personId = person.ID;
         var reloadChildren = forceReloadChildren || _boundPersonId != personId;
+        if (reloadChildren)
+            model.State.Unsaved = false;
         if (reloadChildren || model.Access == PersonIntakeWizardAccess.Unrestricted)
             model.Access = PersonIntakeWizardAccess.ForCurrentUser(personSpace, person);
         model.State.LoadFromPerson(person, reloadChildren: reloadChildren);
@@ -127,7 +137,7 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
 
         // Save already stored this person. A later refresh can make an empty field look unresolved
         // and block another commit. Save and Close still leaves, with the last successful save kept.
-        if (closeAfterSave && _cleanSave && HasUnresolved(model))
+        if (closeAfterSave && _cleanSave && !model.State.Unsaved && HasUnresolved(model))
         {
             if (_application != null && View != null)
                 PersonIntakeWizardReturn.ShowListWithPerson(_application, View, person);
@@ -168,10 +178,19 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
                 }
             }
 
+            model.State.Unsaved = false;
             _cleanSave = true;
             ReadValueCore();
+            if (person.IsDataIncomplete)
+            {
+                model.State.OpenOverview = true;
+                model.ShowIncompleteOverview = true;
+            }
+
             return Task.CompletedTask;
         }
+
+        model.State.Unsaved = false;
 
         if (_application != null && View != null)
             PersonIntakeWizardReturn.ShowListWithPerson(_application, View, person);
@@ -183,4 +202,87 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
         PersonIntakeCompleteness
             .Evaluate(model.Person, model.State.PendingKeys, model.State.DraftSatisfiedKeys())
             .Any(finding => finding.State == PersonIntakeItemState.Unresolved);
+
+    private void OpenAnotherPerson()
+    {
+        if (_application == null)
+            return;
+
+        var role = CurrentRole();
+        var space = (CurrentObject as PersonIntakeWizardHost)?.PersonObjectSpace ?? _objectSpace;
+        var wizard = space != null && PersonIntakeWizardAccess.IsWizardEnabled(space)
+            ? PersonIntakeWizardOpenHelper.OpenNew(_application, role)
+            : PersonIntakeWizardOpenHelper.OpenNativeNew(_application, role);
+        if (wizard == null)
+            return;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(wizard) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(_application.MainWindow, null));
+    }
+
+    private void DeletePerson()
+    {
+        if (_application == null || View == null)
+            return;
+
+        var host = CurrentObject as PersonIntakeWizardHost;
+        var person = host?.Person ?? CurrentObject as Person;
+        var space = host?.PersonObjectSpace ?? _objectSpace;
+        if (person == null || space == null)
+            return;
+
+        if (space.IsNewObject(person))
+        {
+            PersonIntakeWizardReturn.ShowList(_application, View, CurrentRole());
+            return;
+        }
+
+        try
+        {
+            ApplicationProfileInstancePersonService.DetachForPersonDelete(space, person);
+            space.Delete(person);
+            space.CommitChanges();
+        }
+        catch (Exception ex)
+        {
+            var model = ComponentModel;
+            if (model != null)
+            {
+                model.StatusMessage = EntitySaveExceptionFormatter.ToOfficerMessage(ex);
+                model.IsStatusError = true;
+            }
+            return;
+        }
+
+        PersonIntakeWizardReturn.ShowList(_application, View, CurrentRole());
+    }
+
+    private void ClosePerson()
+    {
+        if (_application == null || View == null)
+            return;
+
+        var host = CurrentObject as PersonIntakeWizardHost;
+        var person = host?.Person ?? CurrentObject as Person;
+        var space = host?.PersonObjectSpace ?? _objectSpace;
+        if (person != null && space != null && !space.IsNewObject(person))
+        {
+            PersonIntakeWizardReturn.ShowListWithPerson(_application, View, person);
+            return;
+        }
+
+        PersonIntakeWizardReturn.ShowList(_application, View, CurrentRole());
+    }
+
+    private PersonRecordRole CurrentRole()
+    {
+        if (CurrentObject is PersonIntakeWizardHost host)
+            return host.Person?.PersonRole ?? host.Role;
+
+        if (CurrentObject is Person person)
+            return person.PersonRole;
+
+        return PersonRecordRole.Employee;
+    }
 }

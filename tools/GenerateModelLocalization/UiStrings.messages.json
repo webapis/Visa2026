@@ -9121,5 +9121,19 @@
     "tr-TR": "Eşleşen kişi yok. Başka bir ad, kişisel numara veya pasaport numarası deneyin.",
     "tk-TM": "Gabat gelýän adam tapylmady. Başga at, şahsy belgi ýa-da pasport belgisini synap görüň.",
     "ru-RU": "Никого не найдено. Попробуйте другое имя, личный номер или номер паспорта."
-  }
+  },
+  "RecordRibbon.New": { "en": "New", "tr-TR": "Yeni", "tk-TM": "Täze", "ru-RU": "Создать" },
+  "RecordRibbon.Save": { "en": "Save", "tr-TR": "Kaydet", "tk-TM": "Sakla", "ru-RU": "Сохранить" },
+  "RecordRibbon.SaveAndClose": { "en": "Save and Close", "tr-TR": "Kaydet ve Kapat", "tk-TM": "Sakla we ýap", "ru-RU": "Сохранить и закрыть" },
+  "RecordRibbon.Close": { "en": "Close", "tr-TR": "Kapat", "tk-TM": "Ýap", "ru-RU": "Закрыть" },
+  "RecordRibbon.Cancel": { "en": "Cancel", "tr-TR": "İptal", "tk-TM": "Ýatyr", "ru-RU": "Отмена" },
+  "RecordRibbon.Group": { "en": "Record", "tr-TR": "Kayıt", "tk-TM": "Ýazgy", "ru-RU": "Запись" },
+  "RecordRibbon.Saved": { "en": "Saved", "tr-TR": "Kaydedildi", "tk-TM": "Ýazdyryldy", "ru-RU": "Сохранено" },
+  "RecordRibbon.Unsaved": { "en": "Unsaved changes", "tr-TR": "Kaydedilmemiş değişiklikler", "tk-TM": "Ýazdyrylmadyk üýtgeşmeler", "ru-RU": "Несохраненные изменения" },
+  "RecordRibbon.Discard": { "en": "Don't save", "tr-TR": "Kaydetme", "tk-TM": "Ýazma", "ru-RU": "Не сохранять" },
+  "RecordRibbon.SaveAndCreate": { "en": "Save and create", "tr-TR": "Kaydet ve oluştur", "tk-TM": "Ýazdyr we döret", "ru-RU": "Сохранить и создать" },
+  "RecordRibbon.UnsavedNew": { "en": "New starts another record. This one still has unsaved changes.", "tr-TR": "Yeni, başka bir kayıt başlatır. Bu kayıtta kaydedilmemiş değişiklikler var.", "tk-TM": "Täze başga bir ýazgy başladýar. Bunda heniz ýazdyrylmadyk üýtgeşmeler bar.", "ru-RU": "Создать начинает другую запись. В этой есть несохраненные изменения." },
+  "RecordRibbon.UnsavedClose": { "en": "Close returns to the list.", "tr-TR": "Kapat listeye döner.", "tk-TM": "Ýap sanawa gaýtarylýar.", "ru-RU": "Закрыть возвращает к списку." },
+  "RecordRibbon.Delete": { "en": "Delete", "tr-TR": "Sil", "tk-TM": "Poz", "ru-RU": "Удалить" },
+  "RecordRibbon.ConfirmDelete": { "en": "Delete {0}? This cannot be undone.", "tr-TR": "{0} silinsin mi? Bu geri alınamaz.", "tk-TM": "{0} pozulsynmy? Yza alyp bolmaýar.", "ru-RU": "Удалить {0}? Это нельзя отменить." }
 }

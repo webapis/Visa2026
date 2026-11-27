@@ -1,3 +1,19 @@
+## 2026-11-27 — Delete on the record ribbon
+
+- **Need**: The record ribbon on a case, employee, and family member needed Delete next to New, Save, Save and Close, and Close.
+- **Fix**: `DetailRecordRibbon` shows Delete and asks before it runs. A case uses the existing case delete and hides the old header button. A locked case leaves Delete disabled. An employee or family member uses the same detach-then-delete path as the list. A person who was never saved is closed without writing a row.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open an employee: Delete sits before Close. Confirm deletes a saved person and returns to the list. Open a case: Delete is on the ribbon, not in the case header.
+- **Prevent**: Do not confirm twice. The ribbon asks once; the case delete and the person delete do not ask again. Do not unhide the XAF Delete action on the person wizard.
+- **Verify**: Isolated Blazor build 0 errors (session ribbonui). Not clicked in the running app.
+
+## 2026-11-27 — Record ribbon on case, employee, and family member
+
+- **Need**: An open Application Profile Instance, Employee, or Family member needed New, Save, Save and Close, and Close together, as in the detail-record ribbon prototype.
+- **Fix**: `DetailRecordRibbon` sits on the case workspace and the person intake wizard. Save stays disabled until something changes. Save and Close writes, then returns to the list. Close and New ask when there are unsaved changes. Person intake keeps Back and Next in the footer. Case summary stays editable; Save writes the pending case fields and the case stays open. New on a case starts another application from the same profile. New on a person opens another employee or family member.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a case, change a field, and use Save. Open an employee or family member and use the same ribbon. Back and Next stay at the bottom of the person form.
+- **Prevent**: Do not put Save back in the person-intake footer. Do not discard case-summary edits when the officer changes tabs; Close is what asks.
+- **Verify**: Isolated Blazor build 0 errors (session ribbonui). Not clicked in the running app.
+
 ## 2026-11-27 — People +N must not reload the list
 
 - **Need**: Clicking +N on the People column left the Applications via ministry grid on the purple Loading panel.

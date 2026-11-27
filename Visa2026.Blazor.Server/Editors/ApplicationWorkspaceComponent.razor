@@ -23,6 +23,7 @@
                                         IssuedHeaderNewRequested="@IssuedHeaderNewRequested"
                                         IssuedHeaderOpenRequested="@IssuedHeaderOpenRequested"
                                         BackToListRequested="@BackToListRequested"
+                                        NewCaseRequested="@RequestNewCase"
                                         DeleteCaseRequested="@DeleteCaseRequested"
                                         DeleteCaseErrorMessage="@DeleteCaseErrorMessage"
                                         SpecialFollowUpChanged="@SpecialFollowUpChanged"
@@ -171,4 +172,7 @@
         _initialLoadStarted = true;
         await InitialLoadRequested.InvokeAsync();
     }
+
+    private Task RequestNewCase() =>
+        NewApplicationFromProfileRequested.InvokeAsync(Snapshot?.Profile.ProfileId ?? Guid.Empty);
 }

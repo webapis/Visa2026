@@ -1,0 +1,185 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Localization
+
+<div class="record-ribbon" role="toolbar" aria-label="@T("Group")">
+    <div class="record-ribbon__group">
+        <div class="record-ribbon__cmds">
+            @if (CanCreate)
+            {
+                <button type="button" class="record-ribbon__cmd" disabled="@IsBusy" @onclick="RequestNew">
+                    <span>@T("New")</span>
+                </button>
+            }
+            @if (CanWrite)
+            {
+                <button type="button"
+                        class="record-ribbon__cmd @(CanSave ? "is-accent" : null)"
+                        disabled="@(!CanSave || IsBusy)"
+                        @onmousedown:preventDefault="true"
+                        @onclick="RequestSave">
+                    <span>@T("Save")</span>
+                </button>
+                <button type="button"
+                        class="record-ribbon__cmd record-ribbon__cmd--wide @(IsDirty ? "is-accent" : null)"
+                        disabled="@IsBusy"
+                        @onmousedown:preventDefault="true"
+                        @onclick="RequestSaveAndClose">
+                    <span>@T("SaveAndClose")</span>
+                </button>
+            }
+            @if (ShowDelete)
+            {
+                <button type="button"
+                        class="record-ribbon__cmd is-danger"
+                        disabled="@(!CanDelete || IsBusy || _acting)"
+                        title="@DeleteTitle"
+                        @onclick="RequestDelete">
+                    <span>@T("Delete")</span>
+                </button>
+            }
+            <button type="button" class="record-ribbon__cmd" disabled="@IsBusy" @onclick="RequestClose">
+                <span>@T("Close")</span>
+            </button>
+        </div>
+        <div class="record-ribbon__name">@T("Group")</div>
+    </div>
+    <div class="record-ribbon__status">
+        <b>@RecordTitle</b>
+        <span class="record-ribbon__pill @(IsDirty ? "is-dirty" : "is-clean")">@(IsDirty ? T("Unsaved") : T("Saved"))</span>
+    </div>
+</div>
+
+@if (_pending != null)
+{
+    <div class="record-ribbon__mask">
+        <div class="record-ribbon__dialog" role="dialog" aria-modal="true" aria-labelledby="record-ribbon-title">
+            @if (_pending == "delete")
+            {
+                <h2 id="record-ribbon-title">@T("Delete")</h2>
+                <p>@VisaUiMessages.Format("RecordRibbon.ConfirmDelete", RecordTitle)</p>
+                <div class="record-ribbon__dialog-actions">
+                    <button type="button" @onclick="CancelPending">@T("Cancel")</button>
+                    <button type="button" class="is-danger" @onclick="ConfirmDelete">@T("Delete")</button>
+                </div>
+            }
+            else
+            {
+                <h2 id="record-ribbon-title">@VisaUiMessages.Get("PersonIntake.Save.SaveChanges")</h2>
+                <p>@(_pending == "new" ? T("UnsavedNew") : T("UnsavedClose"))</p>
+                <div class="record-ribbon__dialog-actions">
+                    <button type="button" @onclick="CancelPending">@T("Cancel")</button>
+                    <button type="button" @onclick="DiscardPending">@T("Discard")</button>
+                    <button type="button" class="is-primary" @onclick="SavePending">@(_pending == "new" ? T("SaveAndCreate") : T("SaveAndClose"))</button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? RecordTitle { get; set; }
+    [Parameter] public bool IsDirty { get; set; }
+    [Parameter] public bool CanSave { get; set; }
+    [Parameter] public bool CanWrite { get; set; } = true;
+    [Parameter] public bool CanCreate { get; set; } = true;
+    [Parameter] public bool CanDelete { get; set; }
+    [Parameter] public string? DeleteTitle { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public Func<Task<bool>>? TrySave { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+    [Parameter] public EventCallback NewRequested { get; set; }
+    [Parameter] public EventCallback DiscardRequested { get; set; }
+    [Parameter] public EventCallback DeleteRequested { get; set; }
+
+    private string? _pending;
+    private bool _acting;
+
+    private bool ShowDelete =>
+        DeleteRequested.HasDelegate && (CanDelete || !string.IsNullOrWhiteSpace(DeleteTitle));
+
+    public Task RequestClose() => BeginLeave("close");
+
+    public Task RequestNew() => BeginLeave("new");
+
+    private Task RequestSave() => TrySave == null ? Task.CompletedTask : TrySave();
+
+    private void RequestDelete()
+    {
+        if (!CanDelete || IsBusy || _acting)
+            return;
+        _pending = "delete";
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (!CanDelete || _acting)
+            return;
+        _acting = true;
+        _pending = null;
+        try
+        {
+            await DeleteRequested.InvokeAsync();
+        }
+        finally
+        {
+            _acting = false;
+        }
+    }
+
+    private async Task RequestSaveAndClose()
+    {
+        if (IsDirty)
+        {
+            if (!await SaveAsync())
+                return;
+        }
+
+        await CloseRequested.InvokeAsync();
+    }
+
+    private Task BeginLeave(string kind)
+    {
+        if (IsBusy)
+            return Task.CompletedTask;
+        if (!IsDirty)
+            return kind == "new" ? NewRequested.InvokeAsync() : CloseRequested.InvokeAsync();
+        _pending = kind;
+        return Task.CompletedTask;
+    }
+
+    private void CancelPending() => _pending = null;
+
+    private async Task DiscardPending()
+    {
+        var kind = _pending;
+        _pending = null;
+        if (DiscardRequested.HasDelegate)
+            await DiscardRequested.InvokeAsync();
+        if (kind == "new")
+            await NewRequested.InvokeAsync();
+        else
+            await CloseRequested.InvokeAsync();
+    }
+
+    private async Task SavePending()
+    {
+        var kind = _pending;
+        if (!await SaveAsync())
+            return;
+
+        _pending = null;
+        if (kind == "new")
+            await NewRequested.InvokeAsync();
+        else
+            await CloseRequested.InvokeAsync();
+    }
+
+    private async Task<bool> SaveAsync()
+    {
+        if (TrySave == null)
+            return !IsDirty;
+        return await TrySave();
+    }
+
+    private static string T(string key) => VisaUiMessages.Get("RecordRibbon." + key);
+}

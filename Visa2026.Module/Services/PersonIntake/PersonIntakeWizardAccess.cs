@@ -67,6 +67,9 @@ public sealed class PersonIntakeWizardAccess
     public bool CanEditPerson => Cached("person:edit", () =>
         _isNew ? _checker.CanCreate(typeof(Person)) : _checker.CanWrite(typeof(Person), _person, null));
 
+    public bool CanDeletePerson => Cached("person:delete", () =>
+        _isNew ? _checker.CanCreate(typeof(Person)) : _checker.CanDelete(typeof(Person), _person));
+
     public bool IsViewOnly => !CanEditPerson;
 
     /// <summary>Create, Write, and Delete on <see cref="PersonPendingItem"/>.</summary>

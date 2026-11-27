@@ -77,6 +77,24 @@ public sealed class PersonIntakeWizardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public EventCallback NewRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback CloseRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback DeleteRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback RefreshRequested
     {
         get => GetPropertyValue<EventCallback>();

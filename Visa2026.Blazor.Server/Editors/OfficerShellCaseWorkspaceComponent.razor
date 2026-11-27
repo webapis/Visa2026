@@ -146,22 +146,11 @@
                                @onchange="ToggleSpecialFollowUpAsync" />
                         <span>@Msg("ApplicationProfileInstance.SpecialFollowUp")</span>
                     </label>
-                    @if (DeleteCaseRequested.HasDelegate)
-                    {
-                        var caseLocked = view.Chrome.ResolvedLinksLocked;
-                        <button type="button"
-                                class="cw-head__delete"
-                                disabled="@caseLocked"
-                                title="@(caseLocked
-                                    ? Msg("ApplicationProfileInstance.Workspace.DeleteCaseWhenLocked")
-                                    : Msg("ApplicationProfileInstance.Workspace.DeleteCase"))"
-                                @onclick="DeleteCaseAsync">@Msg("ApplicationProfileInstance.Workspace.DeleteCase")</button>
-                    }
                     <button type="button"
                             class="cw-head__close"
                             aria-label="@Msg("ApplicationProfileInstance.Workspace.CloseAria")"
                             title="@Msg("ApplicationProfileInstance.Workspace.Close")"
-                            @onclick="BackToListAsync">×</button>
+                            @onclick="RequestCloseAsync">×</button>
                 </div>
             </div>
             @if (!string.IsNullOrWhiteSpace(DeleteCaseErrorMessage))
@@ -170,6 +159,20 @@
             }
 
         </header>
+
+        <DetailRecordRibbon @ref="_recordRibbon"
+                            RecordTitle="@CaseRecordTitle(view)"
+                            IsDirty="@(_pendingHeaders.Count > 0)"
+                            CanSave="@(_pendingHeaders.Count > 0 && !_summarySaving)"
+                            CanCreate="@NewCaseRequested.HasDelegate"
+                            CanDelete="@(!view.Chrome.ResolvedLinksLocked && DeleteCaseRequested.HasDelegate)"
+                            DeleteTitle="@(view.Chrome.ResolvedLinksLocked ? Msg("ApplicationProfileInstance.Workspace.DeleteCaseWhenLocked") : null)"
+                            IsBusy="@_summarySaving"
+                            TrySave="TrySaveSummaryAsync"
+                            CloseRequested="BackToListAsync"
+                            NewRequested="NewCaseRequested"
+                            DiscardRequested="DiscardSummaryFromRibbon"
+                            DeleteRequested="DeleteFromRibbonAsync" />
 
         <div class="cw-layout cw-layout--no-nav @(HasRightCasePanel ? "cw-layout--right-case" : null)">
             @RenderCaseLevel1Tabs(view)
@@ -321,6 +324,7 @@
     [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
     [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToListRequested { get; set; }
+    [Parameter] public EventCallback NewCaseRequested { get; set; }
     [Parameter] public EventCallback DeleteCaseRequested { get; set; }
     [Parameter] public string? DeleteCaseErrorMessage { get; set; }
     [Parameter] public EventCallback<bool> SpecialFollowUpChanged { get; set; }
@@ -388,6 +392,7 @@
     private string? _appliedPeopleFocusKey;
     private bool _caseSummaryEditing;
     private bool _summarySaving;
+    private DetailRecordRibbon? _recordRibbon;
     private Guid _caseSummaryInstanceId;
     private int _seenStageToken;
     private IReadOnlyList<ApplicationWorkspaceCaseHeaderField>? _boundHeaderFields;
@@ -587,6 +592,9 @@
             _documentCopiesLoadAttempted = false;
         }
 
+        if ((Snapshot?.CaseView.HeaderFields.Count ?? 0) > 0)
+            _caseSummaryEditing = true;
+
         SyncDocumentPeopleFilter(Snapshot?.CaseView);
         SyncPeopleRecordFocus();
 
@@ -602,10 +610,6 @@
             _boundHeaderFields = Snapshot?.CaseView.HeaderFields;
         }
 
-        if (_caseSummaryEditing
-            && !_summarySaving
-            && !string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase))
-            DiscardCaseSummaryDraft();
         if (_organizationEditing)
             EnsureOrganizationCatalogOptions();
 
@@ -801,13 +805,12 @@
             loadLookupCatalogs: true);
     }
 
-    private async Task FinishCaseSummaryEdit()
+    private async Task<bool> FinishCaseSummaryEdit()
     {
         if (_summarySaving)
-            return;
+            return false;
 
-        // Mouse-down must not move focus. Read the focused value before the click ends,
-        // then save every edited field once. Leaving the case without Done discards them.
+        // Mouse-down on Save keeps focus in the field. Read that value, then save once.
         var focused = await ReadFocusedSummaryFieldAsync();
         ApplyFocusedSummaryField(focused);
         var updates = _pendingHeaders
@@ -818,12 +821,7 @@
             })
             .ToList();
         if (updates.Count == 0 || !HeaderFieldsSaved.HasDelegate)
-        {
-            _caseSummaryEditing = false;
-            _pendingHeaders.Clear();
-            _headerOriginals = null;
-            return;
-        }
+            return true;
 
         _summarySaving = true;
         await InvokeAsync(StateHasChanged);
@@ -832,11 +830,11 @@
         {
             await HeaderFieldsSaved.InvokeAsync(updates);
             if (HeaderFieldStatusIsError)
-                return;
+                return false;
 
             _pendingHeaders.Clear();
             _headerOriginals = null;
-            _caseSummaryEditing = false;
+            return true;
         }
         finally
         {
@@ -1286,7 +1284,8 @@
 
         _pendingHeaders.Clear();
         _headerOriginals = null;
-        _caseSummaryEditing = false;
+        if ((Snapshot?.CaseView.HeaderFields.Count ?? 0) > 0)
+            _caseSummaryEditing = true;
     }
 
     private static string OptionValue(ApplicationWorkspaceLookupOption option) =>
@@ -2123,30 +2122,6 @@
     {
         <div class="cw-overview">
             <section class="cw-card">
-                @if (view.HeaderFields.Count > 0)
-                {
-                    <div class="cw-card__title-row cw-card__title-row--actions-only">
-                        @if (IsCaseSummaryEditing)
-                        {
-                            <button type="button"
-                                    class="cw-summary-mode-btn @(_summarySaving ? "is-busy" : null)"
-                                    disabled="@_summarySaving"
-                                    aria-busy="@_summarySaving"
-                                    @onmousedown:preventDefault="true"
-                                    @onclick="FinishCaseSummaryEdit">
-                                @if (_summarySaving)
-                                {
-                                    <span class="cw-summary-spin" aria-hidden="true"></span>
-                                }
-                                @Msg("ApplicationProfileInstance.Workspace.Done")
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" class="cw-summary-mode-btn" @onclick="StartCaseSummaryEdit">@Msg("ApplicationProfileInstance.Workspace.Edit")</button>
-                        }
-                    </div>
-                }
                 @if (IsSummaryProcessGateActive)
                 {
                     <div class="os-banner os-banner--error cw-summary-gate" role="alert">
@@ -2204,7 +2179,7 @@
                             </aside>
                         }
                     </div>
-                    @if (IsCaseSummaryEditing)
+                    @if (_pendingHeaders.Count > 0)
                     {
                         <p class="cw-summary-foot">@Msg("ApplicationProfileInstance.Workspace.SummaryFoot")</p>
                     }
@@ -3583,11 +3558,6 @@
             await InvokeAsync(StateHasChanged);
             return;
         }
-        if (_caseSummaryEditing
-            && !string.Equals(key, "overview", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(key, "people", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(key, "result", StringComparison.OrdinalIgnoreCase))
-            DiscardCaseSummaryDraft();
         if (!_keepBlockedSectionLabel)
             _blockedSectionLabel = null;
         if (string.Equals(key, "result", StringComparison.OrdinalIgnoreCase))
@@ -3642,12 +3612,6 @@
             await InvokeAsync(StateHasChanged);
             return;
         }
-
-        if (_caseSummaryEditing
-            && !string.Equals(ActiveTab, "overview", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(ActiveTab, "people", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(ActiveTab, "result", StringComparison.OrdinalIgnoreCase))
-            DiscardCaseSummaryDraft();
 
         if (!_keepBlockedSectionLabel)
             _blockedSectionLabel = null;
@@ -4916,6 +4880,23 @@
 
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();
 
+    private Task RequestCloseAsync() =>
+        _recordRibbon == null ? BackToListAsync() : _recordRibbon.RequestClose();
+
+    private Task<bool> TrySaveSummaryAsync() => FinishCaseSummaryEdit();
+
+    private Task DiscardSummaryFromRibbon()
+    {
+        DiscardCaseSummaryDraft();
+        return Task.CompletedTask;
+    }
+
+    private static string CaseRecordTitle(ApplicationWorkspaceCaseView view)
+    {
+        var name = view.Chrome.ProfileTemplateName;
+        return string.IsNullOrWhiteSpace(name) ? $"№ {view.Chrome.DisplayNumber}" : name;
+    }
+
     private async Task ToggleSpecialFollowUpAsync(ChangeEventArgs e)
     {
         if (_specialFollowUpSaving || !SpecialFollowUpChanged.HasDelegate)
@@ -4941,35 +4922,11 @@
         }
     }
 
-    private async Task DeleteCaseAsync()
+    private Task DeleteFromRibbonAsync()
     {
-        if (Snapshot == null || !DeleteCaseRequested.HasDelegate)
-            return;
-        if (Snapshot.CaseView?.Chrome.ResolvedLinksLocked == true)
-            return;
-
-        var number = Snapshot.CaseView?.Chrome.DisplayNumber;
-        var label = string.IsNullOrWhiteSpace(number)
-            ? Msg("ApplicationProfileInstance.Workspace.CaseWorkspace")
-            : $"№ {number}";
-        bool confirmed;
-        try
-        {
-            confirmed = await JS.InvokeAsync<bool>(
-                "confirm",
-                VisaUiMessages.Format("ApplicationProfileInstance.Workspace.ConfirmDelete", label));
-        }
-        catch (JSException)
-        {
-            return;
-        }
-        catch (InvalidOperationException)
-        {
-            return;
-        }
-
-        if (confirmed)
-            await DeleteCaseRequested.InvokeAsync();
+        if (Snapshot?.CaseView?.Chrome.ResolvedLinksLocked == true || !DeleteCaseRequested.HasDelegate)
+            return Task.CompletedTask;
+        return DeleteCaseRequested.InvokeAsync();
     }
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
 

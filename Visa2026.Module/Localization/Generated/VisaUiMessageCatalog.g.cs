@@ -5514,6 +5514,104 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüztutma iş meýdanyny ýap",
             ["ru-RU"] = "Закрыть рабочее место дела",
         },
+        ["RecordRibbon.New"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New",
+            ["tr-TR"] = "Yeni",
+            ["tk-TM"] = "Täze",
+            ["ru-RU"] = "Создать",
+        },
+        ["RecordRibbon.Save"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save",
+            ["tr-TR"] = "Kaydet",
+            ["tk-TM"] = "Sakla",
+            ["ru-RU"] = "Сохранить",
+        },
+        ["RecordRibbon.SaveAndClose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save and Close",
+            ["tr-TR"] = "Kaydet ve Kapat",
+            ["tk-TM"] = "Sakla we ýap",
+            ["ru-RU"] = "Сохранить и закрыть",
+        },
+        ["RecordRibbon.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["RecordRibbon.Cancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["RecordRibbon.Group"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Record",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Ýazgy",
+            ["ru-RU"] = "Запись",
+        },
+        ["RecordRibbon.Saved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Saved",
+            ["tr-TR"] = "Kaydedildi",
+            ["tk-TM"] = "Ýazdyryldy",
+            ["ru-RU"] = "Сохранено",
+        },
+        ["RecordRibbon.Unsaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unsaved changes",
+            ["tr-TR"] = "Kaydedilmemiş değişiklikler",
+            ["tk-TM"] = "Ýazdyrylmadyk üýtgeşmeler",
+            ["ru-RU"] = "Несохраненные изменения",
+        },
+        ["RecordRibbon.Discard"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Don't save",
+            ["tr-TR"] = "Kaydetme",
+            ["tk-TM"] = "Ýazma",
+            ["ru-RU"] = "Не сохранять",
+        },
+        ["RecordRibbon.SaveAndCreate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save and create",
+            ["tr-TR"] = "Kaydet ve oluştur",
+            ["tk-TM"] = "Ýazdyr we döret",
+            ["ru-RU"] = "Сохранить и создать",
+        },
+        ["RecordRibbon.UnsavedNew"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New starts another record. This one still has unsaved changes.",
+            ["tr-TR"] = "Yeni, başka bir kayıt başlatır. Bu kayıtta kaydedilmemiş değişiklikler var.",
+            ["tk-TM"] = "Täze başga bir ýazgy başladýar. Bunda heniz ýazdyrylmadyk üýtgeşmeler bar.",
+            ["ru-RU"] = "Создать начинает другую запись. В этой есть несохраненные изменения.",
+        },
+        ["RecordRibbon.UnsavedClose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close returns to the list.",
+            ["tr-TR"] = "Kapat listeye döner.",
+            ["tk-TM"] = "Ýap sanawa gaýtarylýar.",
+            ["ru-RU"] = "Закрыть возвращает к списку.",
+        },
+        ["RecordRibbon.Delete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete",
+            ["tr-TR"] = "Sil",
+            ["tk-TM"] = "Poz",
+            ["ru-RU"] = "Удалить",
+        },
+        ["RecordRibbon.ConfirmDelete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete {0}? This cannot be undone.",
+            ["tr-TR"] = "{0} silinsin mi? Bu geri alınamaz.",
+            ["tk-TM"] = "{0} pozulsynmy? Yza alyp bolmaýar.",
+            ["ru-RU"] = "Удалить {0}? Это нельзя отменить.",
+        },
         ["ApplicationProfileInstance.Workspace.Complete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "complete",

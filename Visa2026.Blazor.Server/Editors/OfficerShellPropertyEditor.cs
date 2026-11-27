@@ -104,6 +104,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         IssuedHeaderNewRequested = EventCallback.Factory.Create<string>(this, OnIssuedHeaderNewRequested),
         IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
         BackToInProcessRequested = EventCallback.Factory.Create(this, BackToInProcessAsync),
+        NewCaseRequested = EventCallback.Factory.Create(this, NewCaseAsync),
         DeleteCaseRequested = EventCallback.Factory.Create(this, DeleteCaseAsync),
         SpecialFollowUpChanged = EventCallback.Factory.Create<bool>(this, SetSpecialFollowUpAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
@@ -414,6 +415,22 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             _application.MainWindow,
             request.Key,
             request.Id);
+    }
+
+    private Task NewCaseAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return Task.CompletedTask;
+
+        var profileId = model.WorkspaceSnapshot?.Profile.ProfileId ?? Guid.Empty;
+        ApplicationWorkspaceProfileRailHelper.TryCreateNewApplicationFromProfile(
+            _application,
+            profileId,
+            model.CaseApplicationProfileInstanceId,
+            _application.MainWindow,
+            out _);
+        return Task.CompletedTask;
     }
 
     private async Task BackToInProcessAsync()
