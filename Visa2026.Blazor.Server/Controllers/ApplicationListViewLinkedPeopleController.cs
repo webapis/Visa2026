@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
-using Microsoft.AspNetCore.Components.Rendering;
+using Visa2026.Blazor.Server.Components;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Model;
 using Visa2026.Module.Services.ApplicationWorkspace;
@@ -119,29 +118,11 @@ public sealed class ApplicationListViewLinkedPeopleController : ViewController<L
                     return;
                 }
 
-                RenderPeople(builder, people);
+                builder.OpenComponent<ApplicationListPeopleCell>(0);
+                builder.AddAttribute(1, "ApplicationId", application.ID);
+                builder.AddAttribute(2, "People", people);
+                builder.CloseComponent();
             };
         }
-    }
-
-    private static void RenderPeople(
-        RenderTreeBuilder builder,
-        IReadOnlyList<ApplicationListLinkedPeople.Row> people)
-    {
-        builder.OpenElement(0, "div");
-        builder.AddAttribute(1, "class", "lv-people");
-        var seq = 2;
-        foreach (var person in people)
-        {
-            builder.OpenElement(seq++, "div");
-            builder.AddAttribute(seq++, "class", "lv-people__row");
-            builder.OpenElement(seq++, "span");
-            builder.AddAttribute(seq++, "class", "lv-people__name");
-            builder.AddContent(seq++, person.Name);
-            builder.CloseElement();
-            builder.CloseElement();
-        }
-
-        builder.CloseElement();
     }
 }

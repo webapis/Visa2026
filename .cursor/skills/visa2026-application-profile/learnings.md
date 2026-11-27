@@ -1,3 +1,17 @@
+## 2026-11-27 — People +N must not reload the list
+
+- **Need**: Clicking +N on the People column left the Applications via ministry grid on the purple Loading panel.
+- **Fix**: The extra names are already in the cell, hidden. The +N control is a checkbox label. `list-people-expand.js` toggles it in the browser and stops the click before the grid treats it as a row load. Click again collapses that row. Other rows stay as they are.
+- **Officer**: Stop F5, rebuild, hard-refresh. Click +N: the other names appear and the button becomes −. The Loading pill does not stay. Click − to collapse. Clicking the name still opens the case.
+- **Prevent**: Do not handle +N with a Blazor click inside the cell. A server round-trip on that virtual-scrolled list sticks the DxGrid loading panel.
+- **Verify**: Isolated Blazor build 0 errors (session peoplecol). localhost:5001 was not running, so the click was not tried in the browser.
+## 2026-11-27 — People column shows one name and a count
+
+- **Need**: The People column listed every name, so list rows grew very tall.
+- **Fix**: Each Application Profile Instance list shows the first person’s full name. When more people are on the case, a +N button shows how many are hidden. Click opens the rest on that row. Click again collapses it. Other rows stay as they are.
+- **Officer**: Stop F5, rebuild, hard-refresh. Applications via ministry: a case with many people shows one name and +N. Click +N, then click −.
+- **Prevent**: Do not render every person in the cell before the button is clicked.
+- **Verify**: Isolated Blazor build 0 errors (session peoplecol). Not opened in the browser.
 ## 2026-11-27 — Visa issued place searches the shared list
 
 - **Need**: Visa issued place was a plain dropdown. Officers want the address search, with add and rename only after the gear is on.

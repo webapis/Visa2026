@@ -1,0 +1,53 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="lv-people">
+    @if (Remaining > 0)
+    {
+        <input id="@ToggleId"
+               class="lv-people__toggle"
+               type="checkbox"
+               onclick="event.stopPropagation();"
+               onmousedown="event.stopPropagation();"
+               onpointerdown="event.stopPropagation();" />
+    }
+    <div class="lv-people__row lv-people__main--inline">
+        <span class="lv-people__name">@First.Name</span>
+        @if (Remaining > 0)
+        {
+            <label for="@ToggleId"
+                   class="lv-people__more"
+                   aria-expanded="false"
+                   onclick="event.stopPropagation();"
+                   onmousedown="event.stopPropagation();"
+                   onpointerdown="event.stopPropagation();">
+                <span class="lv-people__more-count">+@Remaining</span>
+                <span class="lv-people__more-hide" aria-hidden="true">−</span>
+            </label>
+        }
+    </div>
+    @if (Remaining > 0)
+    {
+        <div class="lv-people__rest">
+            @foreach (var person in People.Skip(1))
+            {
+                <div class="lv-people__row">
+                    <span class="lv-people__name">@person.Name</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+
+    [Parameter] public IReadOnlyList<ApplicationListLinkedPeople.Row> People { get; set; } =
+        Array.Empty<ApplicationListLinkedPeople.Row>();
+
+    private string ToggleId => "lv-people-" + ApplicationId.ToString("N");
+
+    private ApplicationListLinkedPeople.Row First => People[0];
+
+    private int Remaining => Math.Max(0, People.Count - 1);
+}
