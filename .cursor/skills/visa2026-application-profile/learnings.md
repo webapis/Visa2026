@@ -1,3 +1,73 @@
+## 2026-11-27 — Saved visa opens only the dialog
+
+- **Need**: Clicking a visa that is already on the case opened the side preview and the dialog together.
+- **Fix**: That click still uses the custom visa form, and the preview column stays shut. Cancel closes the dialog. Keep writes the visa and closes it. + Add issued visa still opens the preview.
+- **Officer**: Stop F5, rebuild, hard-refresh. Click a listed visa: only the form appears. The right column does not open.
+- **Prevent**: Do not call `setSlotOpen(true)` when `ExistingVisaId` is set.
+- **Verify**: Isolated Blazor build 0 errors (session visadet). Not opened in the browser.
+## 2026-11-27 — Saved issued visa opens the custom editor, not XAF
+
+- **Need**: Clicking an issued visa opened the XAF Visa detail view. Officers want the custom visa form, and they should not have to click the name row after the preview opens.
+- **Fix**: The issued-visa row opens the preview-slot editor again. When that visa is already saved, the person form opens immediately. + Add issued visa is unchanged. The XAF detail view stays only when the custom editor cannot open.
+- **Officer**: Stop F5, rebuild, hard-refresh. Application result → click a listed visa. The custom form opens. It is not the XAF Visa screen.
+- **Prevent**: Do not call `CreateDetailView` for an issued visa that `CanOpenInSlot`.
+- **Verify**: Isolated Blazor build 0 errors (session visadet). Not opened in the browser.
+## 2026-11-27 — Saved issued visa opens its detail form
+
+- **Need**: Clicking a visa that is already on the case opened the side preview and then that visa's row. Officers want the visa detail form.
+- **Fix**: A saved issued-visa row closes the visa preview if it is open and opens the Visa detail form. + Add issued visa still composes in the side preview.
+- **Officer**: Stop F5, rebuild, hard-refresh. Application result → click a visa that is already listed. The detail form opens. + Add issued visa still opens on the right.
+- **Prevent**: Do not send an existing visa id back through `TryOpenIssuedVisaInSlotAsync` or `TryOpenComposeAsync`.
+- **Verify**: Isolated Blazor build 0 errors (session visadet). Not opened in the browser.
+## 2026-11-27 — Work permit preview and person dialog sit tighter
+
+- **Need**: The person dialog crushed the location chips, and the preview column left a blank well between the people table and Linked files.
+- **Fix**: CSS only. Dialog is a bit wider, labels stay above the values, location chips can wrap, Cancel is an outline, Keep is the purple button. People, Linked files, and Close stay in that order and none of them stretch to fill the slot.
+- **Officer**: Hard-refresh. Open a work permit, click a person. Linked files should sit under the table. Ýatyr, Ýatda sakla, and the case Save still do what they did.
+- **Prevent**: Do not give the people section `flex: 1` inside `.issue-issued-header-slot`.
+- **Verify**: Not opened in the browser.
+## 2026-11-27 — Case page visual polish
+
+- **Need**: The approved prototype (flatter header, quiet summary, people table as the work surface) should ship without new behavior.
+- **Fix**: CSS on `.officer-case-workspace`. Header has no card or color bar. Summary labels sit above the values. Identity is a narrow side card. People rows are shorter, names are the bright text, role is muted, passport is monospace, long cells ellipsize, and an excluded row keeps a red edge. Link existing stays the only solid toolbar button.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open the same case. Sort, Link existing, and Edit still do what they did.
+- **Prevent**: Do not put a second border back around the summary card or the people table.
+- **Verify**: Not opened in the browser.
+## 2026-11-27 — People list sorts by column; Address and Position hide a missing file
+
+- **Need**: People & links headers did not sort. Address and Position showed the amber missing-file mark even when the cell already had text.
+- **Fix**: Column headers sort A–Z, click again for Z–A. № sorts by the person's place on the case. Empty cells stay at the bottom. The missing-file mark is hidden for Address, Address 1, and Position. A file that is already stored still has the preview icon. Passport, Education, and Medical still warn when the scan is missing.
+- **Officer**: Stop F5, rebuild, hard-refresh. Click Person, then Address. The warning triangles on Address and Position are gone.
+- **Prevent**: Do not put the missing-file icon back on `address`, `address:1`, or `position`.
+- **Verify**: Isolated Blazor build 0 errors (session pplsort). Not opened in the browser.
+## 2026-11-26 — New visa list hides visas already saved
+
+- **Need**: The right-hand New visa preview still listed people under Eýýäm berildi after their visa was created. Those visas already appear on the case (Berlen wiza).
+- **Fix**: Create mode only lists people still waiting: not selected, selected, and not ready (name only, checkbox off when there is no passport). Already-issued people are omitted from that list. Editing a saved visa still opens that visa on the right.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open New issued visa on a case that already has a visa — that person is not on the right.
+- **Prevent**: Do not put AlreadyIssued people back on the create list.
+- **Verify**: Isolated Blazor build 0 errors (session visarow). Not opened in the browser.
+## 2026-11-26 — Created visa rows show number, type, dates, passport
+
+- **Need**: New-visa list showed only the name, including visas already saved on the case.
+- **Fix**: Not completed stays name-only and comes first (not selected, selected, not ready). Already saved visas are the last group and add number, type, start–end, and passport under the name. Filling the dialog does not count as created until Wizalary döret.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open New issued visa on a case that already has visas.
+- **Prevent**: Do not put visa details on a row that is only checked or filled in the dialog.
+- **Verify**: Isolated Blazor build 0 errors (session visarow). Not opened in the browser.
+## 2026-11-26 — Visa person editor opens as a dialog
+
+- **Need**: Checking a person on a new or existing visa expanded the visa form under the name and pushed the list down.
+- **Fix**: The row stays a name line. Aç, a click, or checking the box opens the same fields in a dialog, including the visa copy. Ýatyr drops that copy. Ýatda sakla writes it back. Wiza döret / Sakla still stores the visas. People who already have a visa stay a short row.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open New issued visa and check a person: the list stays put and the form is a window.
+- **Prevent**: Do not bind the dialog inputs to the live row. A visa copy picked in the window is kept only on Ýatda sakla.
+- **Verify**: Isolated Blazor build, 0 errors. Not opened in the browser.
+## 2026-11-26 — Work permit person editor opens as a dialog
+
+- **Need**: Opening a person on a work permit in the preview slot inserted the editor under the people table and pushed the copies section down.
+- **Fix**: The row and Open copy that person's fields into a dialog. Ýatyr drops the copy. Ýatda sakla writes it back onto the row and marks the letter dirty. The case Save still stores the work permit. Location grants stay stacked cards.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a work permit, click a person: the table stays put and the editor is a window.
+- **Prevent**: Do not bind the dialog inputs to the live row. Edits belong on the copy until Ýatda sakla.
+- **Verify**: Isolated Blazor and Module builds, 0 errors. Not opened in the browser; F5 was still the previous build.
 ## 2026-11-24 — Duplicate work-permit row hid Mustafa's cancellation
 
 - **Symptom**: Ýagdaý syny still showed Mustafa Yetkin Aydınlı In force on permit 1445 after counting in-progress cancellations.

@@ -690,6 +690,42 @@ button.cw-person:focus-visible {
 .dxbl-theme-fluent-mode-light .cw-people-action-menu__loading {
   color: #666;
 }
+.os-people-order-col {
+  width: 2.5rem;
+  padding-right: 8px;
+  text-align: right;
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+  color: var(--os-muted);
+}
+.cw-people-links-scroll .os-people-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cw-people-links-scroll .os-people-sort:hover {
+  color: var(--os-ink);
+}
+.cw-people-links-scroll .os-people-order-col .os-people-sort {
+  width: 100%;
+  justify-content: flex-end;
+}
+.cw-people-links-scroll .os-people-sort__mark {
+  font-size: 0.65rem;
+  line-height: 1;
+}
 .os-people-check-col {
   width: 2rem;
   text-align: center;
@@ -3372,14 +3408,16 @@ select.cw-summary-field__input option {
 
 /* People toolbar / row actions — quieter secondary chrome. */
 .cw-people-links-panel {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   min-width: 0;
   padding: 0;
   overflow: hidden;
 }
+/* Height is the space left under the case summary, set by visaCaseWorkspaceNav.fitPeopleLinks. */
 .cw-people-links-scroll {
   overflow: auto;
-  max-height: min(52vh, 560px);
+  max-height: none;
+  min-height: 10rem;
   min-width: 0;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -3961,4 +3999,182 @@ select.cw-summary-field__input option {
 }
 .cw-svd__btn--primary:hover {
   background: var(--ap-fill-hover, var(--ap-accent, #6a1fb0));
+}
+
+/* Case page polish: one header, a quiet summary, the people table as the work surface. */
+.officer-case-workspace .cw-head {
+  padding: 4px 2px 8px;
+  margin-bottom: 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.officer-case-workspace .cw-head__accent {
+  display: none;
+}
+.officer-case-workspace .cw-head__top {
+  align-items: center;
+}
+.officer-case-workspace .cw-head h1 {
+  font-size: 1.35rem;
+  font-weight: 650;
+}
+.officer-case-workspace .cw-head__badges {
+  gap: 6px;
+}
+.officer-case-workspace .cw-head-badge {
+  padding: 3px 9px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.officer-case-workspace .cw-head__follow {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.officer-case-workspace .cw-head__delete {
+  margin-inline-end: 0;
+  padding: 3px 8px;
+  border-color: transparent;
+  font-weight: 600;
+}
+.officer-case-workspace .cw-layout {
+  gap: 8px;
+}
+.officer-case-workspace .cw-main {
+  padding: 10px 12px 8px;
+}
+.officer-case-workspace .cw-hybrid {
+  gap: 8px;
+}
+.officer-case-workspace .cw-overview > .cw-card {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.officer-case-workspace .cw-summary-mode-btn {
+  border: 0;
+  background: transparent;
+  color: var(--os-muted);
+  padding: 2px 8px;
+  font-weight: 600;
+}
+.officer-case-workspace .cw-summary-mode-btn:hover {
+  background: var(--os-surface);
+  color: var(--os-ink);
+}
+.officer-case-workspace .cw-summary-main .cw-summary-field--plain {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 0 0 8px;
+}
+.officer-case-workspace .cw-summary-main .cw-summary-field--plain .cw-summary-field__label {
+  flex: none;
+  width: auto;
+  max-width: none;
+  padding-top: 0;
+}
+.officer-case-workspace .cw-summary-identity {
+  width: 16.5rem;
+  max-width: 100%;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--os-ink) 4%, var(--os-panel));
+}
+.officer-case-workspace .cw-summary-identity .cw-summary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.officer-case-workspace .cw-summary-identity .cw-summary-form > .cw-summary-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.officer-case-workspace .cw-summary-identity .cw-summary-field__label {
+  width: auto;
+  max-width: none;
+}
+.officer-case-workspace .cw-hybrid__level2 {
+  padding-top: 4px;
+  margin-top: 0;
+}
+.officer-case-workspace .cw-hybrid__tab--sub.is-active {
+  background: color-mix(in srgb, #7c3aed 14%, var(--os-panel));
+}
+.officer-case-workspace .cw-hybrid__tab-count {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--os-ink) 10%, transparent);
+  opacity: 1;
+}
+.officer-case-workspace .cw-people-toolbar__hint {
+  margin-left: auto;
+}
+.officer-case-workspace .cw-people-toolbar__report {
+  background: transparent;
+  font-weight: 550;
+}
+.officer-case-workspace .cw-people-links-panel.os-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.officer-case-workspace .cw-people-links-scroll .os-table--people-links th,
+.officer-case-workspace .cw-people-links-scroll .os-table--people-links td {
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  vertical-align: middle;
+}
+.officer-case-workspace .cw-people-links-scroll .os-table--people-links thead th {
+  background: color-mix(in srgb, var(--os-ink) 7%, var(--os-panel));
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+.officer-case-workspace .cw-people-links-scroll .os-people-order-col {
+  color: var(--os-muted);
+}
+.officer-case-workspace .cw-people-links-scroll .ct-link {
+  font-weight: 650;
+  color: var(--os-ink);
+}
+.officer-case-workspace .cw-people-links-scroll .os-people-role {
+  color: var(--os-muted);
+}
+.officer-case-workspace .cw-people-links-scroll .os-people-mono {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+.officer-case-workspace .cw-people-links-scroll .os-people-doc-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  max-width: 22rem;
+}
+.officer-case-workspace .cw-people-links-scroll .os-people-doc {
+  display: inline-block;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+}
+.officer-case-workspace .os-person-row.is-excluded td:first-child {
+  box-shadow: inset 3px 0 0 #f87171;
+}
+.dxbl-theme-fluent-mode-dark .officer-case-workspace .cw-excluded-badge {
+  background: color-mix(in srgb, #fecaca 24%, var(--os-panel));
+  color: #fecaca;
+  border: 1px solid color-mix(in srgb, #fecaca 45%, transparent);
 }

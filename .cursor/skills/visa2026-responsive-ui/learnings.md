@@ -20,6 +20,16 @@
 
 ## Entries
 
+### 2026-11-27 — People & links list stopped short of the window
+
+- **Symptom**: On an Application Profile instance, the People & links table (linked records) sat in a short box. Empty space remained under the rows, and the horizontal scrollbar was not at the bottom of the window.
+- **Try**: `.cw-people-links-scroll` used `max-height: min(52vh, 560px)`, so the list could not grow into the space under the case summary.
+- **Test**: Not rechecked in the browser. The PC was on the lock screen after the change.
+- **Root cause**: The 560px cap. With only a few people, the table stayed content height and left the rest of the case empty.
+- **Fix**: Drop the cap. `visaCaseWorkspaceNav.fitPeopleLinks` sets the scroll height to the space from the table top to the bottom of the window (card padding kept).
+- **Prevent**: Do not put a vh/px max-height back on `.cw-people-links-scroll`. The list should keep filling the leftover case height.
+- **Cross-skill**: responsive-ui | application-profile
+
 ### 2026-09-24 — Issued visa form left empty space in the slot
 
 - **Symptom**: New Issued visa did not use the free space on the right of the preview. Action labels on the result page ran into the next button.

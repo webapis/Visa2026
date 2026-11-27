@@ -4026,6 +4026,12 @@
     "tk-TM": "Sakla",
     "ru-RU": "Сохранить"
   },
+  "ApplicationProfileInstance.Issued.KeepItem": {
+    "en-US": "Keep",
+    "tr-TR": "Satırda tut",
+    "tk-TM": "Ýatda sakla",
+    "ru-RU": "Оставить в строке"
+  },
   "ApplicationProfileInstance.Issued.Create": {
     "en-US": "Create",
     "tr-TR": "Oluştur",

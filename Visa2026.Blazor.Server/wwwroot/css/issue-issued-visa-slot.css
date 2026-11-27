@@ -91,6 +91,26 @@
   color: var(--dxds-color-content-neutral-default-rest, var(--dxbl-text-color, var(--bs-body-color, #212529)));
 }
 
+.issue-issued-visa-slot__card--row {
+  gap: 0;
+  padding: 0.55rem 0.85rem;
+}
+
+.issue-issued-visa-slot__card--row:not(.issue-issued-visa-slot__card--static) {
+  cursor: pointer;
+}
+
+.issue-issued-visa-slot__card--open {
+  border-color: color-mix(in srgb, var(--issue-accent, var(--bs-primary, #0d6efd)) 55%, var(--issue-line));
+  background: color-mix(in srgb, var(--issue-accent, var(--bs-primary, #0d6efd)) 12%, var(--issue-sunken, transparent));
+}
+
+.issue-issued-visa-dialog {
+  width: min(46rem, calc(100vw - 2.5rem));
+  max-height: calc(100vh - 2.5rem);
+  overflow: auto;
+}
+
 .issue-issued-visa-slot__card-head {
   display: flex;
   align-items: center;
@@ -118,9 +138,23 @@
 .issue-issued-visa-slot__person {
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
   font-size: 0.92rem;
   font-weight: 650;
   color: inherit;
+}
+
+.issue-issued-visa-slot__person-name {
+  min-width: 0;
+}
+
+.issue-issued-visa-slot__person-meta {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--issue-muted, var(--dxds-color-content-neutral-secondary-rest, var(--bs-secondary-color, #6c757d)));
 }
 
 .issue-issued-visa-slot__card-head input[type="checkbox"] {

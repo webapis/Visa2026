@@ -392,6 +392,14 @@
   background: color-mix(in srgb, #f0ad4e 10%, transparent);
 }
 
+.issue-issued-header-slot__table tbody tr {
+  cursor: pointer;
+}
+
+.issue-issued-header-slot__row--open td {
+  background: color-mix(in srgb, var(--issue-accent) 16%, transparent);
+}
+
 .issue-issued-header-slot__row--disabled td {
   opacity: 0.58;
 }
@@ -552,6 +560,67 @@
   font-weight: 650;
 }
 
+.issue-issued-wp-dialog-back {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: color-mix(in srgb, #000 45%, transparent);
+}
+
+.issue-issued-wp-dialog {
+  width: min(40rem, calc(100vw - 2.5rem));
+  max-height: calc(100vh - 2.5rem);
+  overflow: visible;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--issue-line);
+  border-radius: 0.6rem;
+  background: var(--issue-panel);
+  color: var(--issue-ink);
+  box-shadow: 0 20px 60px color-mix(in srgb, #000 35%, transparent);
+}
+
+.issue-issued-wp-dialog__head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.9rem;
+}
+
+.issue-issued-wp-dialog__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.issue-issued-wp-dialog__close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--issue-ink);
+  cursor: pointer;
+}
+
+.issue-issued-wp-dialog__close:hover {
+  background: var(--issue-hover);
+}
+
+.issue-issued-wp-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 @media (max-width: 640px) {
   .issue-issued-header-slot-panel.resminamalar-slot-panel {
     --issue-issued-pad-x: 0.85rem;
@@ -565,4 +634,68 @@
   .issue-issued-header-slot__section {
     padding: 0.85rem 0.9rem;
   }
+}
+
+/* Preview column + person dialog polish. Sections stay in document order:
+   people, then linked files, then Close. Nothing between them grows. */
+.issue-issued-header-slot-panel .resminamalar-slot-panel__catalog.issue-issued-header-slot {
+  gap: 0.75rem;
+  justify-content: flex-start;
+  overflow: auto;
+}
+
+.issue-issued-header-slot-panel .issue-issued-header-slot__section,
+.issue-issued-header-slot-panel .issue-issued-header-slot__actions,
+.issue-issued-header-slot-panel .issue-issued-header-slot__error {
+  flex: 0 0 auto;
+}
+
+.issue-issued-header-slot-panel .issue-issued-header-slot__actions {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.issue-issued-wp-dialog {
+  width: min(46rem, calc(100vw - 2rem));
+  padding: 1.15rem 1.25rem 1rem;
+  border-radius: 0.7rem;
+  box-shadow: 0 18px 48px color-mix(in srgb, #000 45%, transparent);
+}
+
+.issue-issued-wp-dialog .issue-issued-header-slot__grid {
+  gap: 0.85rem 1rem;
+}
+
+.issue-issued-wp-dialog .issue-issued-header-slot__field > span {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--issue-muted);
+}
+
+.issue-issued-wp-dialog .cw-loc-ms__box {
+  max-height: 8.5rem;
+  align-items: flex-start;
+  align-content: flex-start;
+  background: var(--issue-sunken);
+  border-color: var(--issue-line);
+  color: var(--issue-ink);
+}
+
+.issue-issued-wp-dialog__actions .issue-issued-header-slot__btn:not(.issue-issued-header-slot__btn--primary) {
+  background: transparent;
+}
+
+.issue-issued-wp-dialog__actions .issue-issued-header-slot__btn--primary {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+}
+
+.issue-issued-wp-dialog__actions .issue-issued-header-slot__btn--primary:hover:not(:disabled) {
+  background: #6d28d9;
+  border-color: #6d28d9;
+  color: #fff;
+  filter: none;
 }

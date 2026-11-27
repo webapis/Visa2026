@@ -3147,6 +3147,29 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     overflow: hidden;
 }
 
+/* Saved visa: the form is a dialog. The preview column stays shut. */
+#visa-app-shell.visa-app-shell--visa-dialog-only {
+    overflow: visible;
+}
+
+#visa-preview-slot.visa-preview-slot--dialog-only {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+#visa-preview-slot.visa-preview-slot--dialog-only .resminamalar-slot-panel__header,
+#visa-preview-slot.visa-preview-slot--dialog-only .resminamalar-slot-panel__body,
+#visa-preview-slot.visa-preview-slot--dialog-only .visa-preview-slot__tabs {
+    display: none;
+}
+
+#visa-preview-slot.visa-preview-slot--dialog-only .issue-issued-wp-dialog-back {
+    pointer-events: auto;
+}
+
 /* Preview slot: collapsed by default */
 #visa-preview-slot {
     flex: 0 0 0;

@@ -24,6 +24,35 @@ window.visaCaseWorkspaceNav = window.visaCaseWorkspaceNav || (function () {
             return;
         // Keep the XAF left navigation open while a case is on screen.
         el.classList.remove("visa-app-shell--nav-collapsed-for-case");
+        fitPeopleLinks();
+    }
+
+    // People & links table fills the viewport under the case summary.
+    function fitPeopleLinks() {
+        var scrollers = document.querySelectorAll(".officer-case-workspace .cw-people-links-scroll");
+        for (var i = 0; i < scrollers.length; i++) {
+            var scroller = scrollers[i];
+            if (!scroller.getClientRects().length)
+                continue;
+            var top = scroller.getBoundingClientRect().top;
+            if (top < 0)
+                top = 0;
+            var bottom = 12;
+            var main = scroller.closest(".cw-main");
+            if (main) {
+                var mainStyle = window.getComputedStyle(main);
+                bottom += parseFloat(mainStyle.paddingBottom) || 0;
+                bottom += parseFloat(mainStyle.borderBottomWidth) || 0;
+            }
+            var height = Math.floor(window.innerHeight - top - bottom);
+            if (height < 160)
+                height = 160;
+            var px = height + "px";
+            if (scroller.style.height !== px) {
+                scroller.style.height = px;
+                scroller.style.maxHeight = px;
+            }
+        }
     }
 
     function rightLayout() {

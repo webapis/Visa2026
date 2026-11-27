@@ -102,7 +102,7 @@ public static class ApplicationWorkspaceIssuedHeaderOpenHelper
             return false;
         }
 
-        // Issued visa: Blazor opens the compose slot (invitation or roster source).
+        // Saved issued visa uses the custom slot editor, not the XAF Visa detail view.
         if (header is Visa visa
             && string.Equals(key, ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa, StringComparison.OrdinalIgnoreCase)
             && IssueIssuedVisaComposeService.CanOpenInSlot(visa.IssuingApplicationProfileInstance))

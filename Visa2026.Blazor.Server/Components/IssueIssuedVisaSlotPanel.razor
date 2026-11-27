@@ -76,249 +76,45 @@
                         <h3 class="issue-issued-visa-slot__group-title">@(section.Title)</h3>
                         @foreach (var person in section.People)
                         {
-                            var issued = person.AlreadyIssued && !_draft.IsEditMode;
-                            var cardClass = issued
-                                ? "issue-issued-visa-slot__card issue-issued-visa-slot__card--issued"
-                                : "issue-issued-visa-slot__card";
-                            <article class="@cardClass">
+                            var canOpen = CanOpenVisaPerson(person);
+                            <article class="@VisaRowClass(person)" @onclick="() => OpenVisaPerson(person)">
                                 <div class="issue-issued-visa-slot__card-head">
                                     @if (!_draft.IsEditMode)
                                     {
-                                        <input type="checkbox"
-                                               disabled="@(person.AlreadyIssued || !person.IsReady)"
-                                               checked="@person.Include"
-                                               @onchange="e => OnIncludeChanged(person, e)" />
+                                        <span @onclick:stopPropagation="true">
+                                            <input type="checkbox"
+                                                   disabled="@(person.AlreadyIssued || !person.IsReady)"
+                                                   checked="@person.Include"
+                                                   @onchange="e => OnIncludeChanged(person, e)" />
+                                        </span>
                                     }
                                     <span class="issue-issued-visa-slot__avatar">@Initials(person.PersonName)</span>
-                                    <span class="issue-issued-visa-slot__person">@person.PersonName</span>
-                                    @if (issued)
-                                    {
-                                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--ready">@ApplicationProfileLocalization.IssuedStatus("Visa issued")</span>
-                                    }
-                                    else if (!_draft.IsEditMode && !person.IsReady)
+                                    <span class="issue-issued-visa-slot__person">
+                                        <span class="issue-issued-visa-slot__person-name">@person.PersonName</span>
+                                    </span>
+                                    @if (!_draft.IsEditMode && !person.IsReady)
                                     {
                                         <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@ApplicationProfileLocalization.IssuedStatus("No passport")</span>
                                     }
                                     else if (!_draft.IsEditMode && person.Include)
                                     {
-                                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="() => RemovePerson(person)">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")</button>
+                                        <button type="button"
+                                                class="issue-issued-header-slot__link-btn"
+                                                @onclick="() => RemovePerson(person)"
+                                                @onclick:stopPropagation="true">
+                                            @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
+                                        </button>
+                                    }
+                                    @if (canOpen)
+                                    {
+                                        <button type="button"
+                                                class="issue-issued-header-slot__link-btn"
+                                                @onclick="() => OpenVisaPerson(person)"
+                                                @onclick:stopPropagation="true">
+                                            @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.OpenItem")
+                                        </button>
                                     }
                                 </div>
-
-                                @if (issued)
-                                {
-                                    <dl class="issue-issued-visa-slot__readonly-grid">
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</dt>
-                                            <dd>@(person.ExistingVisaNumber ?? person.VisaNumber)</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Field("VisaType")</dt>
-                                            <dd>@LookupCaption(_draft.VisaTypes, person.VisaTypeId)</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Field("Category")</dt>
-                                            <dd>@LookupCaption(_draft.VisaCategories, person.VisaCategoryId)</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Field("Period")</dt>
-                                            <dd>@LookupCaption(_draft.VisaPeriods, person.VisaPeriodId)</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</dt>
-                                            <dd>@LookupCaption(_draft.VisaIssuedPlaces, person.VisaIssuedPlaceId)</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Issued")</dt>
-                                            <dd>@person.IssueDate.ToString("dd MMM yyyy")</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</dt>
-                                            <dd>@person.StartDate.ToString("dd MMM yyyy")</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Field("EndDate")</dt>
-                                            <dd>@(person.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</dt>
-                                            <dd>@person.PassportNumber</dd>
-                                        </div>
-                                        <div>
-                                            <dt>@ApplicationProfileLocalization.Field("BorderZone")</dt>
-                                            <dd>@(string.IsNullOrWhiteSpace(person.BorderZoneLocation) ? "Ýok" : person.BorderZoneLocation)</dd>
-                                        </div>
-                                    </dl>
-                                    <p class="issue-issued-visa-slot__note">
-                                        @(_draft.UsesInvitationSource
-                                            ? "This issued invitation line already has a visa."
-                                            : "This person already has a visa on this case.")
-                                    </p>
-                                }
-                                else if (person.Include || _draft.IsEditMode)
-                                {
-                                    var card = person;
-                                    var numberKey = CueKey(card, "visaNumber");
-                                    var typeKey = CueKey(card, "visaType");
-                                    var categoryKey = CueKey(card, "visaCategory");
-                                    var periodKey = CueKey(card, "visaPeriod");
-                                    var placeKey = CueKey(card, "visaPlace");
-                                    var issueKey = CueKey(card, "issueDate");
-                                    var startKey = CueKey(card, "startDate");
-                                    var expKey = CueKey(card, "expiration");
-                                    var zoneKey = CueKey(card, "borderZone");
-                                    var passportKey = CueKey(card, "passport");
-                                    <div class="issue-issued-header-slot__grid">
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(numberKey, true, IssueComposeFieldCue.HasText(card.VisaNumber))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</span>
-                                            <input class="issue-issued-header-slot__input"
-                                                   @bind="card.VisaNumber"
-                                                   @onfocusout="() => ReviewField(numberKey)" />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(typeKey, true, IssueComposeFieldCue.HasId(card.VisaTypeId))">
-                                            <span>@ApplicationProfileLocalization.Field("VisaType") *</span>
-                                            <select class="issue-issued-header-slot__input"
-                                                    value="@GuidText(card.VisaTypeId)"
-                                                    @onchange="e => SetGuidAndReview(v => card.VisaTypeId = v, e.Value, typeKey)"
-                                                    @onfocusout="() => ReviewField(typeKey)">
-                                                <option value="">—</option>
-                                                @foreach (var opt in _draft.VisaTypes)
-                                                {
-                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                                                }
-                                            </select>
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(categoryKey, true, IssueComposeFieldCue.HasId(card.VisaCategoryId))">
-                                            <span>@ApplicationProfileLocalization.Field("VisaCategory") *</span>
-                                            <select class="issue-issued-header-slot__input"
-                                                    value="@GuidText(card.VisaCategoryId)"
-                                                    @onchange="e => SetGuidAndReview(v => card.VisaCategoryId = v, e.Value, categoryKey)"
-                                                    @onfocusout="() => ReviewField(categoryKey)">
-                                                <option value="">—</option>
-                                                @foreach (var opt in _draft.VisaCategories)
-                                                {
-                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                                                }
-                                            </select>
-                                        </label>
-                                        @if (_draft.UsesInvitationSource)
-                                        {
-                                            <label class="issue-issued-header-slot__field @FieldCueClass(periodKey, true, IssueComposeFieldCue.HasId(card.VisaPeriodId))">
-                                                <span>@ApplicationProfileLocalization.Field("VisaPeriod") *</span>
-                                                <select class="issue-issued-header-slot__input"
-                                                        value="@GuidText(card.VisaPeriodId)"
-                                                        @onchange="e => SetGuidAndReview(v => card.VisaPeriodId = v, e.Value, periodKey)"
-                                                        @onfocusout="() => ReviewField(periodKey)">
-                                                    <option value="">—</option>
-                                                    @foreach (var opt in _draft.VisaPeriods)
-                                                    {
-                                                        <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                                                    }
-                                                </select>
-                                            </label>
-                                        }
-                                        else
-                                        {
-                                            <label class="issue-issued-header-slot__field issue-issued-header-slot__field--readonly">
-                                                <span>@ApplicationProfileLocalization.Field("VisaPeriod")</span>
-                                                <input class="issue-issued-header-slot__input" readonly
-                                                       value="@(LookupCaption(_draft.VisaPeriods, card.VisaPeriodId))" />
-                                            </label>
-                                        }
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(card.VisaIssuedPlaceId))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</span>
-                                            <select class="issue-issued-header-slot__input"
-                                                    value="@GuidText(card.VisaIssuedPlaceId)"
-                                                    @onchange="e => SetGuidAndReview(v => card.VisaIssuedPlaceId = v, e.Value, placeKey)"
-                                                    @onfocusout="() => ReviewField(placeKey)">
-                                                <option value="">—</option>
-                                                @foreach (var opt in _draft.VisaIssuedPlaces)
-                                                {
-                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                                                }
-                                            </select>
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(issueKey, true, IssueComposeFieldCue.HasDate(card.IssueDate))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.IssuedDate") *</span>
-                                            <OfficerDateEdit Date="card.IssueDate"
-                                                             DateChanged="value => OnVisaIssueDateChangedAsync(card, value, issueKey)" />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(startKey, true, IssueComposeFieldCue.HasDate(card.StartDate))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</span>
-                                            <OfficerDateEdit Date="card.StartDate"
-                                                             DateChanged="value => OnVisaStartDateChangedAsync(card, value, startKey)" />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @FieldCueClass(expKey, true, IssueComposeFieldCue.HasDate(card.ExpirationDate))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Expiration")</span>
-                                            <OfficerDateEdit @bind-Date="card.ExpirationDate"
-                                                             @bind-Date:after="() => ReviewField(expKey)" />
-                                        </label>
-                                        <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(zoneKey, false, IssueComposeFieldCue.HasText(card.BorderZoneLocation))">
-                                            <span>@ApplicationProfileLocalization.Field("BorderZone")</span>
-                                            <LocationMultiSelectField Value="@card.BorderZoneLocation"
-                                                                      Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.BorderZone)"
-                                                                      NoneValue="@CommaSeparatedSelectionHelper.NoneValue"
-                                                                      FieldName="border zone location"
-                                                                      Placeholder="Start typing a location"
-                                                                      EmptyHint="Search saved locations. Use the + button to add a new one."
-                                                                      ValueChanged="@(value => OnPersonBorderZoneChanged(card, value, zoneKey))"
-                                                                      AddSaved="text => OnIssuedVisaLocationAddAsync(ApplicationProfileSavedLocationField.BorderZone, text)"
-                                                                      RenameSaved="pair => OnIssuedVisaLocationRenameAsync(ApplicationProfileSavedLocationField.BorderZone, pair)" />
-                                        </div>
-                                        <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(passportKey, false, IssueComposeFieldCue.HasText(card.PassportNumber), true)">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
-                                            <input class="issue-issued-header-slot__input" value="@card.PassportNumber" disabled />
-                                        </label>
-                                        <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCopy")</span>
-                                            <p class="issue-issued-header-slot__muted">
-                                                @ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.CopyHint", ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Visa"), MaxCopyUploadMb)
-                                            </p>
-                                            @if (card.Documents.Count == 0 && string.IsNullOrWhiteSpace(card.PendingCopyFileName))
-                                            {
-                                                <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.NoCopy")</p>
-                                            }
-                                            else
-                                            {
-                                                <ul class="issue-issued-visa-slot__copy-list">
-                                                    @foreach (var doc in card.Documents)
-                                                    {
-                                                        <li @key="@doc.DocumentId">
-                                                            <span>@doc.FileName</span>
-                                                            @if (_draft.IsEditMode)
-                                                            {
-                                                                <button type="button"
-                                                                        class="issue-issued-header-slot__link-btn"
-                                                                        disabled="@_busy"
-                                                                        @onclick="() => RemoveCopyAsync(card, doc.DocumentId)">
-                                                                    @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
-                                                                </button>
-                                                            }
-                                                        </li>
-                                                    }
-                                                    @if (!string.IsNullOrWhiteSpace(card.PendingCopyFileName))
-                                                    {
-                                                        <li>
-                                                            <span>@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.AttachesOnCreate", card.PendingCopyFileName)</span>
-                                                            <button type="button"
-                                                                    class="issue-issued-header-slot__link-btn"
-                                                                    disabled="@_busy"
-                                                                    @onclick="() => ClearPendingCopy(card)">
-                                                                @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
-                                                            </button>
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                            <label class="issue-issued-header-slot__upload">
-                                                <InputFile OnChange="e => OnCopyFileSelectedAsync(card, e)"
-                                                           accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp"
-                                                           disabled="@_busy" />
-                                                <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.UploadCopy")</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                }
                             </article>
                         }
                     </section>
@@ -358,6 +154,198 @@
             }
         </div>
     </div>
+    @if (_visaDialog is IssueIssuedVisaPersonCardDraft editPerson && _draft != null)
+    {
+        var numberKey = CueKey(editPerson, "visaNumber");
+        var typeKey = CueKey(editPerson, "visaType");
+        var categoryKey = CueKey(editPerson, "visaCategory");
+        var periodKey = CueKey(editPerson, "visaPeriod");
+        var placeKey = CueKey(editPerson, "visaPlace");
+        var issueKey = CueKey(editPerson, "issueDate");
+        var startKey = CueKey(editPerson, "startDate");
+        var expKey = CueKey(editPerson, "expiration");
+        var zoneKey = CueKey(editPerson, "borderZone");
+        var passportKey = CueKey(editPerson, "passport");
+        var visibleDocs = editPerson.Documents.Where(doc => !_visaDialogRemovedDocs.Contains(doc.DocumentId)).ToList();
+        <div class="issue-issued-wp-dialog-back" @onclick="DismissVisaDialogAsync">
+            <div class="issue-issued-wp-dialog issue-issued-visa-dialog"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="issue-issued-visa-dialog-title"
+                 tabindex="-1"
+                 @ref="_visaDialogEl"
+                 @onclick:stopPropagation="true"
+                 @onkeydown="OnVisaDialogKeyDown">
+                <header class="issue-issued-wp-dialog__head">
+                    <h2 id="issue-issued-visa-dialog-title" class="issue-issued-wp-dialog__title">@editPerson.PersonName</h2>
+                    <button type="button"
+                            class="issue-issued-wp-dialog__close"
+                            title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")"
+                            @onclick="DismissVisaDialogAsync">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </header>
+                <div class="issue-issued-header-slot__grid">
+                    <label class="issue-issued-header-slot__field @FieldCueClass(numberKey, true, IssueComposeFieldCue.HasText(editPerson.VisaNumber))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaNumber")</span>
+                        <input class="issue-issued-header-slot__input" @bind="editPerson.VisaNumber" @bind:event="oninput" />
+                    </label>
+                    <label class="issue-issued-header-slot__field @FieldCueClass(typeKey, true, IssueComposeFieldCue.HasId(editPerson.VisaTypeId))">
+                        <span>@ApplicationProfileLocalization.Field("VisaType") *</span>
+                        <select class="issue-issued-header-slot__input"
+                                value="@GuidText(editPerson.VisaTypeId)"
+                                @onchange="e => editPerson.VisaTypeId = ParseGuid(e.Value)">
+                            <option value="">—</option>
+                            @foreach (var opt in _draft.VisaTypes)
+                            {
+                                <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                            }
+                        </select>
+                    </label>
+                    <label class="issue-issued-header-slot__field @FieldCueClass(categoryKey, true, IssueComposeFieldCue.HasId(editPerson.VisaCategoryId))">
+                        <span>@ApplicationProfileLocalization.Field("VisaCategory") *</span>
+                        <select class="issue-issued-header-slot__input"
+                                value="@GuidText(editPerson.VisaCategoryId)"
+                                @onchange="e => editPerson.VisaCategoryId = ParseGuid(e.Value)">
+                            <option value="">—</option>
+                            @foreach (var opt in _draft.VisaCategories)
+                            {
+                                <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                            }
+                        </select>
+                    </label>
+                    @if (_draft.UsesInvitationSource)
+                    {
+                        <label class="issue-issued-header-slot__field @FieldCueClass(periodKey, true, IssueComposeFieldCue.HasId(editPerson.VisaPeriodId))">
+                            <span>@ApplicationProfileLocalization.Field("VisaPeriod") *</span>
+                            <select class="issue-issued-header-slot__input"
+                                    value="@GuidText(editPerson.VisaPeriodId)"
+                                    @onchange="e => editPerson.VisaPeriodId = ParseGuid(e.Value)">
+                                <option value="">—</option>
+                                @foreach (var opt in _draft.VisaPeriods)
+                                {
+                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                                }
+                            </select>
+                        </label>
+                    }
+                    else
+                    {
+                        <label class="issue-issued-header-slot__field issue-issued-header-slot__field--readonly">
+                            <span>@ApplicationProfileLocalization.Field("VisaPeriod")</span>
+                            <input class="issue-issued-header-slot__input" readonly
+                                   value="@(LookupCaption(_draft.VisaPeriods, editPerson.VisaPeriodId))" />
+                        </label>
+                    }
+                    <label class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(editPerson.VisaIssuedPlaceId))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</span>
+                        <select class="issue-issued-header-slot__input"
+                                value="@GuidText(editPerson.VisaIssuedPlaceId)"
+                                @onchange="e => editPerson.VisaIssuedPlaceId = ParseGuid(e.Value)">
+                            <option value="">—</option>
+                            @foreach (var opt in _draft.VisaIssuedPlaces)
+                            {
+                                <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                            }
+                        </select>
+                    </label>
+                    <label class="issue-issued-header-slot__field @FieldCueClass(issueKey, true, IssueComposeFieldCue.HasDate(editPerson.IssueDate))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.IssuedDate") *</span>
+                        <OfficerDateEdit Date="editPerson.IssueDate"
+                                         DateChanged="value => OnVisaDialogIssueDateChanged(editPerson, value)" />
+                    </label>
+                    <label class="issue-issued-header-slot__field @FieldCueClass(startKey, true, IssueComposeFieldCue.HasDate(editPerson.StartDate))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</span>
+                        <OfficerDateEdit Date="editPerson.StartDate"
+                                         DateChanged="value => OnVisaDialogStartDateChanged(editPerson, value)" />
+                    </label>
+                    <label class="issue-issued-header-slot__field @FieldCueClass(expKey, true, IssueComposeFieldCue.HasDate(editPerson.ExpirationDate))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Expiration")</span>
+                        <OfficerDateEdit Date="editPerson.ExpirationDate"
+                                         DateChanged="value => editPerson.ExpirationDate = value?.Date" />
+                    </label>
+                    <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(zoneKey, false, IssueComposeFieldCue.HasText(editPerson.BorderZoneLocation))">
+                        <span>@ApplicationProfileLocalization.Field("BorderZone")</span>
+                        <LocationMultiSelectField Value="@editPerson.BorderZoneLocation"
+                                                  Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.BorderZone)"
+                                                  NoneValue="@CommaSeparatedSelectionHelper.NoneValue"
+                                                  FieldName="border zone location"
+                                                  Placeholder="Start typing a location"
+                                                  EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                  ValueChanged="@(value => editPerson.BorderZoneLocation = value ?? string.Empty)"
+                                                  AddSaved="text => OnIssuedVisaLocationAddAsync(ApplicationProfileSavedLocationField.BorderZone, text)"
+                                                  RenameSaved="pair => OnIssuedVisaLocationRenameAsync(ApplicationProfileSavedLocationField.BorderZone, pair)" />
+                    </div>
+                    <label class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @FieldCueClass(passportKey, false, IssueComposeFieldCue.HasText(editPerson.PassportNumber), true)">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
+                        <input class="issue-issued-header-slot__input" value="@editPerson.PassportNumber" disabled />
+                    </label>
+                    <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCopy")</span>
+                        <p class="issue-issued-header-slot__muted">
+                            @ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.CopyHint", ApplicationProfileLocalization.Msg("ApplicationProfile.Doc.Visa"), MaxCopyUploadMb)
+                        </p>
+                        @if (visibleDocs.Count == 0 && string.IsNullOrWhiteSpace(editPerson.PendingCopyFileName))
+                        {
+                            <p class="issue-issued-header-slot__muted">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.NoCopy")</p>
+                        }
+                        else
+                        {
+                            <ul class="issue-issued-visa-slot__copy-list">
+                                @foreach (var doc in visibleDocs)
+                                {
+                                    <li @key="@doc.DocumentId">
+                                        <span>@doc.FileName</span>
+                                        @if (_draft.IsEditMode)
+                                        {
+                                            <button type="button"
+                                                    class="issue-issued-header-slot__link-btn"
+                                                    disabled="@_busy"
+                                                    @onclick="() => StageVisaDialogRemove(doc.DocumentId)">
+                                                @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
+                                            </button>
+                                        }
+                                    </li>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(editPerson.PendingCopyFileName))
+                                {
+                                    <li>
+                                        <span>@ApplicationProfileLocalization.Format("ApplicationProfileInstance.Issued.AttachesOnCreate", editPerson.PendingCopyFileName)</span>
+                                        <button type="button"
+                                                class="issue-issued-header-slot__link-btn"
+                                                disabled="@_busy"
+                                                @onclick="() => ClearPendingCopy(editPerson)">
+                                            @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Remove")
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <label class="issue-issued-header-slot__upload">
+                            <InputFile OnChange="OnVisaDialogCopySelected"
+                                       accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp"
+                                       disabled="@_busy" />
+                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.UploadCopy")</span>
+                        </label>
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(_actionError))
+                {
+                    <p class="issue-issued-header-slot__error">@_actionError</p>
+                }
+                <footer class="issue-issued-wp-dialog__actions">
+                    <button type="button" class="issue-issued-header-slot__btn" @onclick="DismissVisaDialogAsync">
+                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")
+                    </button>
+                    <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" disabled="@_busy" @onclick="KeepVisaDialogAsync">
+                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.KeepItem")
+                    </button>
+                </footer>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -433,6 +421,10 @@
     private const int MaxCopyUploadMb = 5;
     private readonly HashSet<string> _reviewedFields = new(StringComparer.Ordinal);
     private readonly HashSet<string> _defaultFields = new(StringComparer.Ordinal);
+    private IssueIssuedVisaPersonCardDraft? _visaDialog;
+    private readonly HashSet<Guid> _visaDialogRemovedDocs = new();
+    private ElementReference _visaDialogEl;
+    private bool _visaDialogFocus;
 
     private string PanelTitle =>
         _draft?.IsEditMode == true
@@ -464,8 +456,8 @@
         && _draft.SelectedUnusedCount > 0;
 
     /// <summary>
-    /// Create: flat blocks (not selected → selected → already issued → not ready).
-    /// Unchecked people stay at the top so the next person is easy to find.
+    /// Create: people still waiting for a visa (not selected, selected, not ready — name only).
+    /// Visas already saved on this case stay on the case list and are not shown here.
     /// Edit: keep invitation / case grouping as loaded.
     /// </summary>
     private IEnumerable<(string Title, IReadOnlyList<IssueIssuedVisaPersonCardDraft> People)> PeopleSections
@@ -500,11 +492,6 @@
                         .Where(p => !p.AlreadyIssued && p.IsReady && p.Include)
                         .ToList()),
                 (
-                    ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateAlreadyIssued"),
-                    (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
-                        .Where(p => p.AlreadyIssued)
-                        .ToList()),
-                (
                     ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaCreateNotReady"),
                     (IReadOnlyList<IssueIssuedVisaPersonCardDraft>)people
                         .Where(p => !p.AlreadyIssued && !p.IsReady)
@@ -534,6 +521,7 @@
             _loadError = "Compose request is missing.";
             _boundOccupantKey = null;
             _pristineFingerprint = null;
+            CancelVisaDialog();
             return;
         }
 
@@ -544,6 +532,7 @@
         _boundOccupantKey = occupantKey;
         _actionError = null;
         _saveMessage = null;
+        CancelVisaDialog();
         LoadDraft();
     }
 
@@ -574,6 +563,9 @@
             {
                 CaptureFieldCues();
                 CapturePristine();
+                var person = _draft.AllPeople.FirstOrDefault();
+                if (person != null)
+                    OpenVisaPerson(person);
             }
             return;
         }
@@ -599,6 +591,10 @@
         person.Include = e.Value is bool flag
             ? flag
             : bool.TryParse(e.Value?.ToString(), out var parsed) && parsed;
+        if (person.Include)
+            OpenVisaPerson(person);
+        else if (_visaDialog != null && SameVisaPerson(_visaDialog, person))
+            CancelVisaDialog();
     }
 
     private void RemovePerson(IssueIssuedVisaPersonCardDraft person)
@@ -606,12 +602,8 @@
         if (person.AlreadyIssued)
             return;
         person.Include = false;
-    }
-
-    private void OnPersonBorderZoneChanged(IssueIssuedVisaPersonCardDraft person, string? value, string cueKey)
-    {
-        person.BorderZoneLocation = value ?? string.Empty;
-        ReviewField(cueKey);
+        if (_visaDialog != null && SameVisaPerson(_visaDialog, person))
+            CancelVisaDialog();
     }
 
     private static string CueKey(IssueIssuedVisaPersonCardDraft person, string field)
@@ -633,39 +625,6 @@
         if (string.IsNullOrEmpty(key))
             return;
         _reviewedFields.Add(key);
-    }
-
-    private Task OnVisaIssueDateChangedAsync(
-        IssueIssuedVisaPersonCardDraft card,
-        DateTime? value,
-        string cueKey)
-    {
-        var previousIssueDate = card.IssueDate;
-        card.IssueDate = value ?? DateTime.Today;
-        // Match Visa.IssueDate setter: keep StartDate aligned until the officer sets a later start.
-        if (card.StartDate == default || card.StartDate.Date == previousIssueDate.Date)
-            card.StartDate = card.IssueDate.Date;
-        else if (card.StartDate.Date < card.IssueDate.Date)
-            card.StartDate = card.IssueDate.Date;
-        ReviewField(cueKey);
-        return Task.CompletedTask;
-    }
-
-    private Task OnVisaStartDateChangedAsync(
-        IssueIssuedVisaPersonCardDraft card,
-        DateTime? value,
-        string cueKey)
-    {
-        var start = value ?? card.IssueDate;
-        card.StartDate = start.Date < card.IssueDate.Date ? card.IssueDate.Date : start.Date;
-        ReviewField(cueKey);
-        return Task.CompletedTask;
-    }
-
-    private void SetGuidAndReview(Action<Guid?> setter, object? raw, string cueKey)
-    {
-        setter(ParseGuid(raw));
-        ReviewField(cueKey);
     }
 
     private void CaptureFieldCues()
@@ -710,70 +669,6 @@
         person.PendingCopyFileName = null;
         person.PendingCopyBytes = null;
         _actionError = null;
-    }
-
-    private async Task OnCopyFileSelectedAsync(IssueIssuedVisaPersonCardDraft person, InputFileChangeEventArgs args)
-    {
-        if (_draft == null || _busy || args.FileCount == 0)
-            return;
-
-        var file = args.File;
-        if (file == null)
-            return;
-
-        _busy = true;
-        _actionError = null;
-        _saveMessage = null;
-        try
-        {
-            await using var stream = file.OpenReadStream(MaxCopyUploadMb * 1024L * 1024L);
-            using var memory = new System.IO.MemoryStream();
-            await stream.CopyToAsync(memory);
-            var content = memory.ToArray();
-            var fileName = file.Name;
-
-            if (_draft.IsEditMode && person.ExistingVisaId is Guid visaId && visaId != Guid.Empty)
-            {
-                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-                var result = IssueIssuedVisaComposeService.AddDocument(
-                    objectSpace,
-                    Request!.ApplicationProfileInstanceId,
-                    visaId,
-                    fileName,
-                    content);
-                if (!result.Succeeded)
-                {
-                    _actionError = result.ErrorMessage;
-                    return;
-                }
-
-                ReloadDocuments(person);
-                _saveMessage = "Copy saved.";
-                WorkspaceActions?.NotifyWorkspaceChanged();
-            }
-            else
-            {
-                using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-                var validationError = IssueIssuedHeaderComposeService.ValidateDocumentBytes(
-                    objectSpace, fileName, content);
-                if (!string.IsNullOrEmpty(validationError))
-                {
-                    _actionError = validationError;
-                    return;
-                }
-
-                person.PendingCopyFileName = fileName;
-                person.PendingCopyBytes = content;
-            }
-        }
-        catch (Exception ex)
-        {
-            _actionError = ex.Message;
-        }
-        finally
-        {
-            _busy = false;
-        }
     }
 
     private async Task RemoveCopyAsync(IssueIssuedVisaPersonCardDraft person, Guid documentId)
@@ -899,6 +794,283 @@
 
         await Task.CompletedTask;
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_visaDialogFocus || _visaDialog == null)
+            return;
+        _visaDialogFocus = false;
+        try
+        {
+            await _visaDialogEl.FocusAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            // Dialog was closed before focus.
+        }
+    }
+
+    private bool CanOpenVisaPerson(IssueIssuedVisaPersonCardDraft person) =>
+        _draft != null && (_draft.IsEditMode || (!person.AlreadyIssued && person.IsReady));
+
+    private string VisaRowClass(IssueIssuedVisaPersonCardDraft person)
+    {
+        var open = _visaDialog != null && SameVisaPerson(_visaDialog, person);
+        if (open)
+            return "issue-issued-visa-slot__card issue-issued-visa-slot__card--row issue-issued-visa-slot__card--open";
+        if (CanOpenVisaPerson(person))
+            return "issue-issued-visa-slot__card issue-issued-visa-slot__card--row";
+        return "issue-issued-visa-slot__card issue-issued-visa-slot__card--row issue-issued-visa-slot__card--static";
+    }
+
+    private void OpenVisaPerson(IssueIssuedVisaPersonCardDraft person)
+    {
+        if (!CanOpenVisaPerson(person))
+            return;
+        if (_visaDialog != null && SameVisaPerson(_visaDialog, person))
+            return;
+        _visaDialog = CloneVisaPerson(person);
+        _visaDialogRemovedDocs.Clear();
+        _visaDialogFocus = true;
+        _actionError = null;
+    }
+
+    private void CancelVisaDialog()
+    {
+        _visaDialog = null;
+        _visaDialogRemovedDocs.Clear();
+    }
+
+    private async Task OnVisaDialogKeyDown(KeyboardEventArgs e)
+    {
+        if (string.Equals(e.Key, "Escape", StringComparison.Ordinal))
+            await DismissVisaDialogAsync();
+    }
+
+    private async Task DismissVisaDialogAsync()
+    {
+        if (_draft?.IsEditMode == true)
+        {
+            await ClosePanelAsync();
+            return;
+        }
+
+        CancelVisaDialog();
+    }
+
+    private async Task KeepVisaDialogAsync()
+    {
+        var edit = _visaDialog;
+        if (edit == null || _draft == null)
+        {
+            CancelVisaDialog();
+            return;
+        }
+
+        var target = _draft.AllPeople.FirstOrDefault(p => SameVisaPerson(p, edit));
+        if (target == null)
+        {
+            CancelVisaDialog();
+            return;
+        }
+
+        target.VisaNumber = edit.VisaNumber?.Trim() ?? string.Empty;
+        target.VisaTypeId = edit.VisaTypeId;
+        target.VisaCategoryId = edit.VisaCategoryId;
+        target.VisaPeriodId = edit.VisaPeriodId;
+        target.VisaIssuedPlaceId = edit.VisaIssuedPlaceId;
+        target.IssueDate = edit.IssueDate;
+        target.StartDate = edit.StartDate;
+        target.ExpirationDate = edit.ExpirationDate;
+        target.BorderZoneLocation = edit.BorderZoneLocation ?? string.Empty;
+        target.PendingCopyFileName = edit.PendingCopyFileName;
+        target.PendingCopyBytes = edit.PendingCopyBytes;
+
+        ReviewField(CueKey(target, "visaNumber"));
+        ReviewField(CueKey(target, "visaType"));
+        ReviewField(CueKey(target, "visaCategory"));
+        ReviewField(CueKey(target, "visaPeriod"));
+        ReviewField(CueKey(target, "visaPlace"));
+        ReviewField(CueKey(target, "issueDate"));
+        ReviewField(CueKey(target, "startDate"));
+        ReviewField(CueKey(target, "expiration"));
+        ReviewField(CueKey(target, "borderZone"));
+
+        var removed = _visaDialogRemovedDocs.ToList();
+        var pendingName = edit.PendingCopyFileName;
+        var pendingBytes = edit.PendingCopyBytes;
+        var editMode = _draft.IsEditMode;
+        if (!editMode)
+        {
+            CancelVisaDialog();
+            return;
+        }
+
+        foreach (var documentId in removed)
+            await RemoveCopyAsync(target, documentId);
+
+        if (pendingBytes is { Length: > 0 })
+        {
+            target.PendingCopyFileName = null;
+            target.PendingCopyBytes = null;
+            await SaveStagedVisaCopyAsync(target, pendingName, pendingBytes);
+        }
+
+        _busy = true;
+        _actionError = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedVisaComposeService.Update(objectSpace, _draft);
+            if (!result.Succeeded)
+            {
+                _actionError = result.ErrorMessage ?? "Cannot save visa.";
+                return;
+            }
+
+            WorkspaceActions?.NotifyWorkspaceChanged();
+            await ClosePanelAsync();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private static Task OnVisaDialogIssueDateChanged(IssueIssuedVisaPersonCardDraft card, DateTime? value)
+    {
+        var previousIssueDate = card.IssueDate;
+        card.IssueDate = value ?? DateTime.Today;
+        if (card.StartDate == default || card.StartDate.Date == previousIssueDate.Date)
+            card.StartDate = card.IssueDate.Date;
+        else if (card.StartDate.Date < card.IssueDate.Date)
+            card.StartDate = card.IssueDate.Date;
+        return Task.CompletedTask;
+    }
+
+    private static Task OnVisaDialogStartDateChanged(IssueIssuedVisaPersonCardDraft card, DateTime? value)
+    {
+        var start = value ?? card.IssueDate;
+        card.StartDate = start.Date < card.IssueDate.Date ? card.IssueDate.Date : start.Date;
+        return Task.CompletedTask;
+    }
+
+    private void StageVisaDialogRemove(Guid documentId)
+    {
+        if (documentId != Guid.Empty)
+            _visaDialogRemovedDocs.Add(documentId);
+    }
+
+    private async Task OnVisaDialogCopySelected(InputFileChangeEventArgs args)
+    {
+        var person = _visaDialog;
+        if (person == null || _draft == null || _busy || args.FileCount == 0)
+            return;
+
+        var file = args.File;
+        if (file == null)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxCopyUploadMb * 1024L * 1024L);
+            using var memory = new System.IO.MemoryStream();
+            await stream.CopyToAsync(memory);
+            var content = memory.ToArray();
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var validationError = IssueIssuedHeaderComposeService.ValidateDocumentBytes(
+                objectSpace, file.Name, content);
+            if (!string.IsNullOrEmpty(validationError))
+            {
+                _actionError = validationError;
+                return;
+            }
+
+            person.PendingCopyFileName = file.Name;
+            person.PendingCopyBytes = content;
+        }
+        catch (Exception ex)
+        {
+            _actionError = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task SaveStagedVisaCopyAsync(IssueIssuedVisaPersonCardDraft person, string? fileName, byte[] content)
+    {
+        if (_draft == null || person.ExistingVisaId is not Guid visaId || visaId == Guid.Empty)
+            return;
+
+        _busy = true;
+        _actionError = null;
+        try
+        {
+            using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
+            var result = IssueIssuedVisaComposeService.AddDocument(
+                objectSpace,
+                Request!.ApplicationProfileInstanceId,
+                visaId,
+                fileName ?? "visa-copy.pdf",
+                content);
+            if (!result.Succeeded)
+            {
+                _actionError = result.ErrorMessage;
+                return;
+            }
+
+            ReloadDocuments(person);
+            _saveMessage = "Copy saved.";
+            WorkspaceActions?.NotifyWorkspaceChanged();
+        }
+        finally
+        {
+            _busy = false;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private static bool SameVisaPerson(IssueIssuedVisaPersonCardDraft left, IssueIssuedVisaPersonCardDraft right)
+    {
+        if (left.InvitationItemId != Guid.Empty || right.InvitationItemId != Guid.Empty)
+            return left.InvitationItemId == right.InvitationItemId;
+        return left.PersonId == right.PersonId && left.ExistingVisaId == right.ExistingVisaId;
+    }
+
+    private static IssueIssuedVisaPersonCardDraft CloneVisaPerson(IssueIssuedVisaPersonCardDraft source) =>
+        new()
+        {
+            InvitationId = source.InvitationId,
+            InvitationNumber = source.InvitationNumber,
+            InvitationIssuedDate = source.InvitationIssuedDate,
+            InvitationItemId = source.InvitationItemId,
+            PersonId = source.PersonId,
+            PersonName = source.PersonName,
+            PassportId = source.PassportId,
+            PassportNumber = source.PassportNumber,
+            Include = source.Include,
+            AlreadyIssued = source.AlreadyIssued,
+            IsReady = source.IsReady,
+            ExistingVisaId = source.ExistingVisaId,
+            ExistingVisaNumber = source.ExistingVisaNumber,
+            VisaNumber = source.VisaNumber,
+            VisaTypeId = source.VisaTypeId,
+            VisaCategoryId = source.VisaCategoryId,
+            VisaPeriodId = source.VisaPeriodId,
+            VisaIssuedPlaceId = source.VisaIssuedPlaceId,
+            IssueDate = source.IssueDate,
+            StartDate = source.StartDate,
+            ExpirationDate = source.ExpirationDate,
+            BorderZoneLocation = source.BorderZoneLocation,
+            Documents = source.Documents.ToList(),
+            PendingCopyFileName = source.PendingCopyFileName,
+            PendingCopyBytes = source.PendingCopyBytes,
+        };
 
     private Task ClosePanelAsync() => CloseRequested.InvokeAsync();
 

@@ -42,7 +42,7 @@ public sealed class LocationMultiSelectEditorModel : ComponentModelBase
 
     public bool Enabled
     {
-        get => GetPropertyValue<bool?>() ?? true;
+        get => GetPropertyValue(true);
         set => SetPropertyValue(value);
     }
 

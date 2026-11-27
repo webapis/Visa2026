@@ -2754,7 +2754,10 @@
 
     private RenderFragment RenderPeople(ApplicationWorkspaceCaseView view) => __builder =>
     {
-        var filteredPeople = OrderLastLinkedFirst(FilterLinkedPeople(view.People)).ToList();
+        var filteredPeople = FilterLinkedPeople(view.People).ToList();
+        filteredPeople = string.IsNullOrEmpty(_peopleSortKey)
+            ? OrderLastLinkedFirst(filteredPeople).ToList()
+            : SortLinkedPeople(filteredPeople);
         var selectablePeople = filteredPeople.Where(p => !p.IsExcluded && p.PersonId != Guid.Empty).ToList();
         var allPeopleSelected = AreAllDocumentPeopleSelected(selectablePeople);
         var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
@@ -3202,6 +3205,15 @@
                     <table class="os-table os-table--people-links">
                         <thead>
                             <tr>
+                                <th class="os-people-order-col" scope="col" aria-sort="@PeopleSortAria("order")">
+                                    <button type="button" class="os-people-sort" @onclick='() => TogglePeopleSort("order")'>
+                                        №
+                                        @if (IsPeopleSortColumn("order"))
+                                        {
+                                            <span class="os-people-sort__mark" aria-hidden="true">@PeopleSortMark("order")</span>
+                                        }
+                                    </button>
+                                </th>
                                 <th class="os-people-check-col">
                                     <input type="checkbox"
                                            checked="@allPeopleSelected"
@@ -3210,11 +3222,36 @@
                                            aria-label="Select all people"
                                            @onchange="e => OnSelectAllFilteredPeopleChanged(selectablePeople, e)" />
                                 </th>
-                                <th>Person</th>
-                                <th>Role</th>
+                                <th scope="col" aria-sort="@PeopleSortAria("person")">
+                                    <button type="button" class="os-people-sort" @onclick='() => TogglePeopleSort("person")'>
+                                        Person
+                                        @if (IsPeopleSortColumn("person"))
+                                        {
+                                            <span class="os-people-sort__mark" aria-hidden="true">@PeopleSortMark("person")</span>
+                                        }
+                                    </button>
+                                </th>
+                                <th scope="col" aria-sort="@PeopleSortAria("role")">
+                                    <button type="button" class="os-people-sort" @onclick='() => TogglePeopleSort("role")'>
+                                        Role
+                                        @if (IsPeopleSortColumn("role"))
+                                        {
+                                            <span class="os-people-sort__mark" aria-hidden="true">@PeopleSortMark("role")</span>
+                                        }
+                                    </button>
+                                </th>
                                 @foreach (var col in peopleLinkColumns)
                                 {
-                                    <th>@ApplicationProfileLocalization.LinkedRecordLabel(col.Label)</th>
+                                    var sortKey = col.Key;
+                                    <th scope="col" aria-sort="@PeopleSortAria(sortKey)">
+                                        <button type="button" class="os-people-sort" @onclick="() => TogglePeopleSort(sortKey)">
+                                            @ApplicationProfileLocalization.LinkedRecordLabel(col.Label)
+                                            @if (IsPeopleSortColumn(sortKey))
+                                            {
+                                                <span class="os-people-sort__mark" aria-hidden="true">@PeopleSortMark(sortKey)</span>
+                                            }
+                                        </button>
+                                    </th>
                                 }
                                 <th></th>
                                 <th></th>
@@ -3224,9 +3261,11 @@
                         <tbody>
                             @foreach (var person in filteredPeople)
                             {
+                                var orderLabel = (person.Index + 1).ToString(CultureInfo.InvariantCulture);
                                 var personSelected = IsDocumentPersonSelected(person.PersonId);
                                 <tr class="os-person-row @(person.Index == SelectedPersonRowIndex ? "is-selected" : null) @(person.PersonId == LastLinkedPersonId ? "is-just-linked" : null) @(person.IsExcluded ? "is-excluded" : null)"
                                     @onclick="() => OpenPersonReviewFromRowAsync(person)">
+                                    <td class="os-people-order-col">@orderLabel</td>
                                     <td class="os-people-check-col" @onclick:stopPropagation="true">
                                         @if (!person.IsExcluded && person.PersonId != Guid.Empty)
                                         {
@@ -3248,14 +3287,15 @@
                                             <span class="cw-excluded-badge @(person.ExcludedLetterCount > 1 ? "is-multi" : null)" title="@ExcludedTitle(person)">@ApplicationListLinkedPeople.FormatExcludedBadge(person.ExcludedLetterNumber, person.ExcludedLetterDate, person.ExcludedMoreLetters)</span>
                                         }
                                     </td>
-                                    <td>@person.RoleLabel</td>
+                                    <td class="os-people-role">@person.RoleLabel</td>
                                     @foreach (var col in peopleLinkColumns)
                                     {
                                         var record = person.Records.FirstOrDefault(r =>
                                             string.Equals(r.Key, col.Key, StringComparison.OrdinalIgnoreCase));
                                         var missing = record != null
                                             && ApplicationWorkspacePeopleLinksCompleteness.IsRecordShort(record, view.Chrome.ResolvedLinksLocked);
-                                        <td>
+                                        var mono = string.Equals(col.Key, "passport", StringComparison.OrdinalIgnoreCase);
+                                        <td class="@(mono ? "os-people-mono" : null)">
                                             <div class="os-people-doc-cell">
                                                 <span class="os-people-doc @(missing ? "cw-cell-missing" : null)">@FormatPeopleLinkCell(person, record)</span>
                                                 @if (TryGetPeopleDocUploadTarget(person, record, out var uploadKind, out var uploadSourceId))
@@ -3263,6 +3303,9 @@
                                                     var kind = uploadKind;
                                                     var sourceId = uploadSourceId;
                                                     var missingScans = !PeopleDocHasScans(kind, sourceId);
+                                                    var showFileIcon = !missingScans || !SuppressPeopleMissingFileWarning(record?.Key);
+                                                    if (showFileIcon)
+                                                    {
                                                     <button type="button"
                                                             class="os-people-doc-icon @(missingScans ? "os-people-doc-icon--missing" : "os-people-doc-icon--ready")"
                                                             title="@(missingScans
@@ -3275,6 +3318,7 @@
                                                             @onclick="() => OpenPeopleDocNusgaAsync(person, kind, sourceId, record)">
                                                         <span aria-hidden="true">@(missingScans ? "⚠" : "📄")</span>
                                                     </button>
+                                                    }
                                                 }
                                             </div>
                                         </td>
@@ -3711,6 +3755,46 @@
     }
 
     private string _peopleSearchText = string.Empty;
+    private string? _peopleSortKey;
+    private bool _peopleSortDescending;
+
+    private void TogglePeopleSort(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return;
+        if (string.Equals(_peopleSortKey, key, StringComparison.OrdinalIgnoreCase))
+            _peopleSortDescending = !_peopleSortDescending;
+        else
+        {
+            _peopleSortKey = key;
+            _peopleSortDescending = false;
+        }
+    }
+
+    private bool IsPeopleSortColumn(string key) =>
+        string.Equals(_peopleSortKey, key, StringComparison.OrdinalIgnoreCase);
+
+    private string PeopleSortAria(string key) =>
+        IsPeopleSortColumn(key)
+            ? (_peopleSortDescending ? "descending" : "ascending")
+            : "none";
+
+    private string PeopleSortMark(string key) =>
+        IsPeopleSortColumn(key) ? (_peopleSortDescending ? "▼" : "▲") : string.Empty;
+
+    /// <summary>
+    /// Address 1 and Position are not scan slots on this list. A missing file must not show the warning icon.
+    /// A file that is already there still opens from the preview icon.
+    /// </summary>
+    private static bool SuppressPeopleMissingFileWarning(string? recordKey)
+    {
+        if (string.IsNullOrWhiteSpace(recordKey))
+            return false;
+        if (recordKey.Equals("position", StringComparison.OrdinalIgnoreCase))
+            return true;
+        return recordKey.Equals("address", StringComparison.OrdinalIgnoreCase)
+            || recordKey.Equals("address:1", StringComparison.OrdinalIgnoreCase);
+    }
 
     private IEnumerable<ApplicationWorkspaceCasePerson> FilterLinkedPeople(
         IReadOnlyList<ApplicationWorkspaceCasePerson> people)
@@ -3729,6 +3813,58 @@
             return people;
 
         return people.OrderBy(person => person.PersonId == LastLinkedPersonId ? 0 : 1);
+    }
+
+    private List<ApplicationWorkspaceCasePerson> SortLinkedPeople(List<ApplicationWorkspaceCasePerson> people)
+    {
+        var key = _peopleSortKey;
+        if (string.IsNullOrEmpty(key) || people.Count < 2)
+            return people;
+
+        var desc = _peopleSortDescending;
+        people.Sort((a, b) =>
+        {
+            int cmp;
+            if (key.Equals("order", StringComparison.OrdinalIgnoreCase))
+            {
+                cmp = a.Index.CompareTo(b.Index);
+            }
+            else
+            {
+                var left = key.Equals("person", StringComparison.OrdinalIgnoreCase)
+                    ? a.Name
+                    : key.Equals("role", StringComparison.OrdinalIgnoreCase)
+                        ? a.RoleLabel
+                        : PeopleSortText(a, key);
+                var right = key.Equals("person", StringComparison.OrdinalIgnoreCase)
+                    ? b.Name
+                    : key.Equals("role", StringComparison.OrdinalIgnoreCase)
+                        ? b.RoleLabel
+                        : PeopleSortText(b, key);
+                var leftEmpty = string.IsNullOrWhiteSpace(left) || left == "—";
+                var rightEmpty = string.IsNullOrWhiteSpace(right) || right == "—";
+                if (leftEmpty || rightEmpty)
+                {
+                    if (leftEmpty && rightEmpty)
+                        return a.Index.CompareTo(b.Index);
+                    return leftEmpty ? 1 : -1;
+                }
+
+                cmp = string.Compare(left, right, StringComparison.CurrentCultureIgnoreCase);
+            }
+
+            if (cmp == 0)
+                cmp = a.Index.CompareTo(b.Index);
+            return desc ? -cmp : cmp;
+        });
+        return people;
+    }
+
+    private string PeopleSortText(ApplicationWorkspaceCasePerson person, string recordKey)
+    {
+        var record = person.Records.FirstOrDefault(r =>
+            string.Equals(r.Key, recordKey, StringComparison.OrdinalIgnoreCase));
+        return FormatPeopleLinkCell(person, record);
     }
 
     private static bool PersonMatchesSearch(ApplicationWorkspaceCasePerson person, string query)

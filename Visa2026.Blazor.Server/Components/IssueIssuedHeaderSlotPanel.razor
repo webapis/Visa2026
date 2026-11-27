@@ -292,8 +292,9 @@
                                     @foreach (var person in WorkPermitPeopleInOrder)
                                     {
                                         <tr @key="@($"{_boundOccupantKey}:wp:{person.PersonId:N}")"
-                                            class="@(person.IsReady ? null : "issue-issued-header-slot__row--warn")">
-                                            <td>
+                                            class="@WorkPermitRowClass(person)"
+                                            @onclick="() => OpenWorkPermitPerson(person)">
+                                            <td @onclick:stopPropagation="true">
                                                 <input type="checkbox"
                                                        disabled="@person.IncludeLocked"
                                                        checked="@person.Include"
@@ -303,85 +304,17 @@
                                             <td>@(string.IsNullOrWhiteSpace(person.ItemNumber) ? "—" : person.ItemNumber)</td>
                                             <td>@WorkPermitPeriod(person)</td>
                                             <td>@ShortLocations(person.WorkPermittedLocations)</td>
-                                            <td>
+                                            <td @onclick:stopPropagation="true">
                                                 <button type="button"
                                                         class="issue-issued-header-slot__link-btn"
                                                         @onclick="() => OpenWorkPermitPerson(person)">
-                                                    @(person.PersonId == _openWorkPermitPersonId
-                                                        ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")
-                                                        : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.OpenItem"))
+                                                    @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.OpenItem")
                                                 </button>
                                             </td>
                                         </tr>
                                     }
                                 </tbody>
                             </table>
-                            @if (OpenWorkPermitPersonLine is IssueIssuedHeaderPersonLineDraft openPerson)
-                            {
-                                <article class="issue-issued-visa-slot__card" @key="@($"{_boundOccupantKey}:wp-open:{openPerson.PersonId:N}")">
-                                    <div class="issue-issued-visa-slot__card-head">
-                                        <span class="issue-issued-visa-slot__avatar">@Initials(openPerson.PersonName)</span>
-                                        <span class="issue-issued-visa-slot__person">@openPerson.PersonName</span>
-                                        @if (!openPerson.IsReady)
-                                        {
-                                            <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@ApplicationProfileLocalization.IssuedStatus(openPerson.StatusCaption)</span>
-                                        }
-                                        <button type="button" class="issue-issued-header-slot__link-btn" @onclick="CloseWorkPermitPerson">@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Workspace.Close")</button>
-                                    </div>
-                                    <div class="issue-issued-header-slot__grid">
-                                        <label class="issue-issued-header-slot__field @(WpCueClass(openPerson, "itemNumber", true, IssueComposeFieldCue.HasText(openPerson.ItemNumber)))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ItemWorkPermitNumber")</span>
-                                            <input class="issue-issued-header-slot__input"
-                                                   @bind="openPerson.ItemNumber"
-                                                   @bind:event="oninput"
-                                                   @bind:after='() => ReviewWpField(openPerson, "itemNumber")' />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @(WpCueClass(openPerson, "asNumber", true, IssueComposeFieldCue.HasText(openPerson.ASNumber)))">
-                                            <span>@(openPerson.AsNumberReadOnly ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ProcessNumberRequired") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ASNumber"))</span>
-                                            <input class="issue-issued-header-slot__input"
-                                                   @bind="openPerson.ASNumber"
-                                                   @bind:event="oninput"
-                                                   disabled="@openPerson.AsNumberReadOnly"
-                                                   @bind:after='() => ReviewWpField(openPerson, "asNumber")' />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @(WpCueClass(openPerson, "position", true, IssueComposeFieldCue.HasId(openPerson.PositionId)))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Position") *</span>
-                                            <select class="issue-issued-header-slot__input"
-                                                    value="@GuidText(openPerson.PositionId)"
-                                                    @onchange='e => SetWpGuidAndReview(openPerson, v => openPerson.PositionId = v, e.Value, "position")'
-                                                    @onfocusout='() => ReviewWpField(openPerson, "position")'>
-                                                <option value="">—</option>
-                                                @foreach (var opt in openPerson.Positions)
-                                                {
-                                                    <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                                                }
-                                            </select>
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @(WpCueClass(openPerson, "passport", false, IssueComposeFieldCue.HasText(openPerson.PassportNumber), true))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
-                                            <input class="issue-issued-header-slot__input" value="@openPerson.PassportNumber" disabled />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @(WpCueClass(openPerson, "start", true, IssueComposeFieldCue.HasDate(openPerson.ItemStartDate)))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</span>
-                                            <OfficerDateEdit Date="openPerson.ItemStartDate"
-                                                             DateChanged="v => OnWorkPermitDateChanged(openPerson, v, start: true)" />
-                                        </label>
-                                        <label class="issue-issued-header-slot__field @(WpCueClass(openPerson, "end", true, IssueComposeFieldCue.HasDate(openPerson.ItemExpirationDate)))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.End")</span>
-                                            <OfficerDateEdit Date="openPerson.ItemExpirationDate"
-                                                             DateChanged="v => OnWorkPermitDateChanged(openPerson, v, start: false)" />
-                                        </label>
-                                        <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(openPerson, "locations", true, IssueComposeFieldCue.HasText(openPerson.WorkPermittedLocations)))">
-                                            <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermittedLocations")</span>
-                                            <LocationMultiSelectField Value="@openPerson.WorkPermittedLocations" Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.WorkPermitLocation)" NoneValue="@string.Empty" FieldName="work permit location" Placeholder="Start typing a location" EmptyHint="Search saved locations. Use the + button to add a new one." AddSaved="text => OnIssuedLocationAddAsync(ApplicationProfileSavedLocationField.WorkPermitLocation, text)" RenameSaved="pair => OnIssuedLocationRenameAsync(ApplicationProfileSavedLocationField.WorkPermitLocation, pair)" ValueChanged="@(value => OnWorkPermitLocationsChanged(openPerson, value))" />
-                                        </div>
-                                    </div>
-                                    @if (!string.IsNullOrWhiteSpace(openPerson.DatePrefillNote))
-                                    {
-                                        <p class="issue-issued-visa-slot__note">@openPerson.DatePrefillNote</p>
-                                    }
-                                </article>
-                            }
                         }
                     </section>
                 }
@@ -743,6 +676,100 @@
             }
         </div>
     </div>
+    @if (_workPermitPersonDialog is IssueIssuedHeaderPersonLineDraft editPerson)
+    {
+        <div class="issue-issued-wp-dialog-back" @onclick="CancelWorkPermitPersonDialog">
+            <div class="issue-issued-wp-dialog"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="issue-issued-wp-dialog-title"
+                 tabindex="-1"
+                 @ref="_wpDialog"
+                 @onclick:stopPropagation="true"
+                 @onkeydown="OnWorkPermitDialogKeyDown">
+                <header class="issue-issued-wp-dialog__head">
+                    <h2 id="issue-issued-wp-dialog-title" class="issue-issued-wp-dialog__title">@editPerson.PersonName</h2>
+                    @if (!editPerson.IsReady)
+                    {
+                        <span class="issue-issued-header-slot__status issue-issued-header-slot__status--warn">@ApplicationProfileLocalization.IssuedStatus(editPerson.StatusCaption)</span>
+                    }
+                    <button type="button"
+                            class="issue-issued-wp-dialog__close"
+                            title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")"
+                            @onclick="CancelWorkPermitPersonDialog">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </header>
+                <div class="issue-issued-header-slot__grid">
+                    <label class="issue-issued-header-slot__field @(WpCueClass(editPerson, "itemNumber", true, IssueComposeFieldCue.HasText(editPerson.ItemNumber)))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ItemWorkPermitNumber")</span>
+                        <input class="issue-issued-header-slot__input"
+                               @bind="editPerson.ItemNumber"
+                               @bind:event="oninput" />
+                    </label>
+                    <label class="issue-issued-header-slot__field @(WpCueClass(editPerson, "asNumber", true, IssueComposeFieldCue.HasText(editPerson.ASNumber)))">
+                        <span>@(editPerson.AsNumberReadOnly ? ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ProcessNumberRequired") : ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.ASNumber"))</span>
+                        <input class="issue-issued-header-slot__input"
+                               @bind="editPerson.ASNumber"
+                               @bind:event="oninput"
+                               disabled="@editPerson.AsNumberReadOnly" />
+                    </label>
+                    <label class="issue-issued-header-slot__field @(WpCueClass(editPerson, "position", true, IssueComposeFieldCue.HasId(editPerson.PositionId)))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfile.Person.Position") *</span>
+                        <select class="issue-issued-header-slot__input"
+                                value="@GuidText(editPerson.PositionId)"
+                                @onchange="e => editPerson.PositionId = ParseGuid(e.Value)">
+                            <option value="">—</option>
+                            @foreach (var opt in editPerson.Positions)
+                            {
+                                <option value="@opt.Id.ToString("N")">@opt.Caption</option>
+                            }
+                        </select>
+                    </label>
+                    <label class="issue-issued-header-slot__field @(WpCueClass(editPerson, "passport", false, IssueComposeFieldCue.HasText(editPerson.PassportNumber), true))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Org.PassportNumber")</span>
+                        <input class="issue-issued-header-slot__input" value="@editPerson.PassportNumber" disabled />
+                    </label>
+                    <label class="issue-issued-header-slot__field @(WpCueClass(editPerson, "start", true, IssueComposeFieldCue.HasDate(editPerson.ItemStartDate)))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Start")</span>
+                        <OfficerDateEdit Date="editPerson.ItemStartDate"
+                                         DateChanged="v => OnWorkPermitDialogDateChanged(editPerson, v, start: true)" />
+                    </label>
+                    <label class="issue-issued-header-slot__field @(WpCueClass(editPerson, "end", true, IssueComposeFieldCue.HasDate(editPerson.ItemExpirationDate)))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.End")</span>
+                        <OfficerDateEdit Date="editPerson.ItemExpirationDate"
+                                         DateChanged="v => OnWorkPermitDialogDateChanged(editPerson, v, start: false)" />
+                    </label>
+                    <div class="issue-issued-header-slot__field issue-issued-header-slot__field--wide @(WpCueClass(editPerson, "locations", true, IssueComposeFieldCue.HasText(editPerson.WorkPermittedLocations)))">
+                        <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.WorkPermittedLocations")</span>
+                        <LocationMultiSelectField Value="@editPerson.WorkPermittedLocations"
+                                                   Suggestions="@LoadIssuedSavedLocations(ApplicationProfileSavedLocationField.WorkPermitLocation)"
+                                                   NoneValue="@string.Empty"
+                                                   FieldName="work permit location"
+                                                   Placeholder="Start typing a location"
+                                                   EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                   AddSaved="text => OnIssuedLocationAddAsync(ApplicationProfileSavedLocationField.WorkPermitLocation, text)"
+                                                   RenameSaved="pair => OnIssuedLocationRenameAsync(ApplicationProfileSavedLocationField.WorkPermitLocation, pair)"
+                                                   ValueChanged="@(value => editPerson.WorkPermittedLocations = value?.Trim() ?? string.Empty)" />
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(editPerson.DatePrefillNote))
+                {
+                    <p class="issue-issued-visa-slot__note">@editPerson.DatePrefillNote</p>
+                }
+                <footer class="issue-issued-wp-dialog__actions">
+                    <button type="button" class="issue-issued-header-slot__btn" @onclick="CancelWorkPermitPersonDialog">
+                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")
+                    </button>
+                    <button type="button" class="issue-issued-header-slot__btn issue-issued-header-slot__btn--primary" @onclick="KeepWorkPermitPersonDialog">
+                        @ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.KeepItem")
+                    </button>
+                </footer>
+            </div>
+        </div>
+    }
 </div>
 
 <OfficerDeleteConfirmDialog @bind-Visible="_deleteConfirmVisible"
@@ -842,6 +869,9 @@
     private string? _pendingCopyName;
     private byte[]? _pendingCopyBytes;
     private Guid? _openWorkPermitPersonId;
+    private IssueIssuedHeaderPersonLineDraft? _workPermitPersonDialog;
+    private ElementReference _wpDialog;
+    private bool _wpDialogFocus;
     private readonly HashSet<string> _reviewedFields = new(StringComparer.Ordinal);
     private readonly HashSet<string> _defaultFields = new(StringComparer.Ordinal);
 
@@ -992,6 +1022,7 @@
             _pendingCopyName = null;
             _pendingCopyBytes = null;
             _openWorkPermitPersonId = null;
+            _workPermitPersonDialog = null;
             return;
         }
 
@@ -1013,19 +1044,132 @@
         _pendingCopyName = null;
         _pendingCopyBytes = null;
         _openWorkPermitPersonId = null;
+        _workPermitPersonDialog = null;
         LoadDraft();
     }
 
-    private IssueIssuedHeaderPersonLineDraft? OpenWorkPermitPersonLine =>
-        _draft?.People.FirstOrDefault(p => p.PersonId == _openWorkPermitPersonId);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_wpDialogFocus || _workPermitPersonDialog == null)
+            return;
+        _wpDialogFocus = false;
+        try
+        {
+            await _wpDialog.FocusAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            // Dialog was closed before focus.
+        }
+    }
 
     private void OpenWorkPermitPerson(IssueIssuedHeaderPersonLineDraft person)
     {
         _actionError = null;
-        _openWorkPermitPersonId = _openWorkPermitPersonId == person.PersonId ? null : person.PersonId;
+        if (_workPermitPersonDialog?.PersonId == person.PersonId)
+            return;
+        _workPermitPersonDialog = CloneWorkPermitPerson(person);
+        _openWorkPermitPersonId = person.PersonId;
+        _wpDialogFocus = true;
     }
 
-    private void CloseWorkPermitPerson() => _openWorkPermitPersonId = null;
+    private void CancelWorkPermitPersonDialog()
+    {
+        _workPermitPersonDialog = null;
+        _openWorkPermitPersonId = null;
+    }
+
+    private void KeepWorkPermitPersonDialog()
+    {
+        var edit = _workPermitPersonDialog;
+        if (edit == null || _draft == null)
+        {
+            CancelWorkPermitPersonDialog();
+            return;
+        }
+
+        var target = _draft.People.FirstOrDefault(p => p.PersonId == edit.PersonId);
+        if (target == null)
+        {
+            CancelWorkPermitPersonDialog();
+            return;
+        }
+
+        var changed = !string.Equals(target.ItemNumber?.Trim(), edit.ItemNumber?.Trim(), StringComparison.Ordinal)
+            || !string.Equals(target.ASNumber?.Trim(), edit.ASNumber?.Trim(), StringComparison.Ordinal)
+            || target.PositionId != edit.PositionId
+            || target.ItemStartDate != edit.ItemStartDate
+            || target.ItemExpirationDate != edit.ItemExpirationDate
+            || !string.Equals(target.WorkPermittedLocations?.Trim(), edit.WorkPermittedLocations?.Trim(), StringComparison.Ordinal);
+
+        target.ItemNumber = edit.ItemNumber?.Trim() ?? string.Empty;
+        if (!target.AsNumberReadOnly)
+            target.ASNumber = edit.ASNumber?.Trim() ?? string.Empty;
+        target.PositionId = edit.PositionId;
+        target.ItemStartDate = edit.ItemStartDate;
+        target.ItemExpirationDate = edit.ItemExpirationDate;
+        target.WorkPermittedLocations = edit.WorkPermittedLocations?.Trim() ?? string.Empty;
+
+        if (changed)
+            MarkWorkPermitPersonEdited(target);
+
+        ReviewField(WpCueKey(target, "itemNumber"));
+        ReviewField(WpCueKey(target, "asNumber"));
+        ReviewField(WpCueKey(target, "position"));
+        ReviewField(WpCueKey(target, "start"));
+        ReviewField(WpCueKey(target, "end"));
+        ReviewField(WpCueKey(target, "locations"));
+        CancelWorkPermitPersonDialog();
+    }
+
+    private void OnWorkPermitDialogKeyDown(KeyboardEventArgs e)
+    {
+        if (string.Equals(e.Key, "Escape", StringComparison.Ordinal))
+            CancelWorkPermitPersonDialog();
+    }
+
+    private static Task OnWorkPermitDialogDateChanged(IssueIssuedHeaderPersonLineDraft person, DateTime? value, bool start)
+    {
+        if (start)
+            person.ItemStartDate = value?.Date;
+        else
+            person.ItemExpirationDate = value?.Date;
+        return Task.CompletedTask;
+    }
+
+    private static IssueIssuedHeaderPersonLineDraft CloneWorkPermitPerson(IssueIssuedHeaderPersonLineDraft source) =>
+        new()
+        {
+            PersonId = source.PersonId,
+            PersonName = source.PersonName,
+            PassportNumber = source.PassportNumber,
+            IsReady = source.IsReady,
+            StatusCaption = source.StatusCaption,
+            Include = source.Include,
+            IncludeLocked = source.IncludeLocked,
+            ItemNumber = source.ItemNumber,
+            ASNumber = source.ASNumber,
+            AsNumberReadOnly = source.AsNumberReadOnly,
+            PositionId = source.PositionId,
+            Positions = source.Positions,
+            ItemStartDate = source.ItemStartDate,
+            ItemExpirationDate = source.ItemExpirationDate,
+            WorkPermittedLocations = source.WorkPermittedLocations,
+            DatePrefillNote = source.DatePrefillNote,
+            IsEmployee = source.IsEmployee,
+        };
+
+    private string WorkPermitRowClass(IssueIssuedHeaderPersonLineDraft person)
+    {
+        var open = person.PersonId == _openWorkPermitPersonId;
+        if (!person.IsReady && open)
+            return "issue-issued-header-slot__row--warn issue-issued-header-slot__row--open";
+        if (!person.IsReady)
+            return "issue-issued-header-slot__row--warn";
+        if (open)
+            return "issue-issued-header-slot__row--open";
+        return string.Empty;
+    }
 
     private static string WorkPermitPeriod(IssueIssuedHeaderPersonLineDraft person)
     {

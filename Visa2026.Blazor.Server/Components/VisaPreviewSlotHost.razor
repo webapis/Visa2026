@@ -247,11 +247,16 @@ else if (_state.Mode == VisaPreviewSlotMode.ApprovalLegCatalog)
     private async Task ApplyStateAsync()
     {
         var open = _state.Mode != VisaPreviewSlotMode.Closed;
+        var dialogOnly = _state.Mode == VisaPreviewSlotMode.IssueIssuedVisa
+            && _state.IssueIssuedVisa?.ExistingVisaId is Guid existingVisaId
+            && existingVisaId != Guid.Empty;
         try
         {
-            await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", open);
+            await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", open && !dialogOnly);
+            await JS.InvokeVoidAsync("visaPreviewDrawer.setVisaDialogOnly", dialogOnly);
         }
         catch (JSDisconnectedException) { }
+        catch (JSException) { }
 
         if (_state.Mode != VisaPreviewSlotMode.File
             || string.IsNullOrWhiteSpace(_state.FileSourceType)

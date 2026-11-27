@@ -3344,6 +3344,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Sakla",
             ["ru-RU"] = "Сохранить",
         },
+        ["ApplicationProfileInstance.Issued.KeepItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Keep",
+            ["tr-TR"] = "Satırda tut",
+            ["tk-TM"] = "Ýatda sakla",
+            ["ru-RU"] = "Оставить в строке",
+        },
         ["ApplicationProfileInstance.Issued.SaveThenOpenItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Save the work permit, then open a person to edit that item.",

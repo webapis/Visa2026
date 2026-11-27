@@ -1215,6 +1215,13 @@
                 return URL.createObjectURL(blob);
             };
 
+            window.visaPreviewDrawer.setVisaDialogOnly = function (on) {
+                var slot = document.getElementById('visa-preview-slot');
+                var shell = document.getElementById('visa-app-shell');
+                if (slot) slot.classList.toggle('visa-preview-slot--dialog-only', !!on);
+                if (shell) shell.classList.toggle('visa-app-shell--visa-dialog-only', !!on);
+            };
+
             window.visaPreviewDrawer.setSlotOpen = function (open) {
                 var slot = document.getElementById('visa-preview-slot');
                 var shell = document.getElementById('visa-app-shell');
