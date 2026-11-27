@@ -614,6 +614,80 @@
   background: var(--issue-hover);
 }
 
+.issue-issued-wp-dialog__tools {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.issue-issued-wp-dialog__tools .issue-issued-wp-dialog__close {
+  margin-left: 0;
+}
+
+.issue-issued-wp-dialog__gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--issue-ink);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.issue-issued-wp-dialog__gear:hover,
+.issue-issued-wp-dialog__gear.is-on {
+  background: color-mix(in srgb, #7c3aed 28%, transparent);
+  color: #ddd6fe;
+}
+
+.issue-issued-wp-dialog-back {
+  overflow: auto;
+}
+
+.issue-issued-wp-dialog.issue-issued-visa-dialog {
+  overflow: visible;
+}
+
+.issue-issued-wp-dialog .cw-addr-ac--line {
+  --ap-ink: var(--issue-ink);
+  --ap-panel: var(--issue-sunken);
+  --ap-line: var(--issue-line);
+  --os-ink: var(--issue-ink);
+  --os-panel: var(--issue-sunken);
+  --os-line: var(--issue-line);
+}
+
+.issue-issued-wp-dialog .cw-addr-ac--line .cw-addr-ac__ta,
+.issue-issued-wp-dialog .cw-addr-ac--line .cw-addr-ac__selected {
+  min-height: 2.35rem;
+  height: auto;
+  max-height: none;
+  background: var(--issue-sunken) !important;
+  color: var(--issue-ink);
+  -webkit-text-fill-color: var(--issue-ink);
+  border-color: var(--issue-line);
+}
+
+.issue-issued-wp-dialog .cw-addr-ac--line .cw-addr-ac__add {
+  background: var(--issue-sunken);
+  color: var(--issue-ink);
+  border-color: var(--issue-line);
+}
+
+.issue-issued-wp-dialog .cw-addr-ac--line .cw-addr-ac__list {
+  z-index: 30;
+  background: var(--issue-panel);
+  color: var(--issue-ink);
+  border-color: var(--issue-line);
+}
+
 .issue-issued-wp-dialog__actions {
   display: flex;
   justify-content: flex-end;

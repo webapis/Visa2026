@@ -3554,6 +3554,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wiza berlen ýeri *",
             ["ru-RU"] = "Место выдачи визы *",
         },
+        ["ApplicationProfileInstance.Issued.VisaPlaceGear"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add or rename issued places",
+            ["tr-TR"] = "Verildiği yeri ekle veya yeniden adlandır",
+            ["tk-TM"] = "Wiza berlen ýerini goş ýa-da adyny üýtget",
+            ["ru-RU"] = "Добавить или переименовать место выдачи",
+        },
         ["ApplicationProfileInstance.Issued.VisaNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Visa number *",

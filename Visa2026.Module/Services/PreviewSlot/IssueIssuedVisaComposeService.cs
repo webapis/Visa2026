@@ -1104,6 +1104,53 @@ public static class IssueIssuedVisaComposeService
             .ToList();
     }
 
+    public static List<IssueIssuedVisaLookupOption> ListVisaIssuedPlaces(IObjectSpace objectSpace) =>
+        LoadLookups<VisaIssuedPlace>(objectSpace);
+
+    public static Guid AddVisaIssuedPlace(IObjectSpace objectSpace, string text)
+    {
+        if (objectSpace == null)
+            throw new InvalidOperationException("Place list is not available.");
+
+        var name = CaseAddressAutocomplete.NormalizeDisplay(text);
+        if (string.IsNullOrEmpty(name))
+            throw new InvalidOperationException("Enter a place.");
+
+        var key = CaseAddressAutocomplete.FoldKey(name);
+        var existing = objectSpace.GetObjectsQuery<VisaIssuedPlace>().ToList();
+        if (existing.Any(place => string.Equals(CaseAddressAutocomplete.FoldKey(place.NameTm), key, StringComparison.Ordinal)))
+            throw new InvalidOperationException("That place is already saved.");
+
+        var created = objectSpace.CreateObject<VisaIssuedPlace>();
+        created.NameTm = name;
+        objectSpace.CommitChanges();
+        return created.ID;
+    }
+
+    public static void RenameVisaIssuedPlace(IObjectSpace objectSpace, string previous, string next)
+    {
+        if (objectSpace == null)
+            throw new InvalidOperationException("Place list is not available.");
+
+        var name = CaseAddressAutocomplete.NormalizeDisplay(next);
+        if (string.IsNullOrEmpty(name))
+            throw new InvalidOperationException("Enter a place.");
+
+        var previousKey = CaseAddressAutocomplete.FoldKey(previous);
+        var nextKey = CaseAddressAutocomplete.FoldKey(name);
+        var existing = objectSpace.GetObjectsQuery<VisaIssuedPlace>().ToList();
+        var target = existing.FirstOrDefault(place =>
+            string.Equals(CaseAddressAutocomplete.FoldKey(place.NameTm), previousKey, StringComparison.Ordinal));
+        if (target == null)
+            throw new InvalidOperationException("That place is no longer in the list.");
+        if (existing.Any(place => place.ID != target.ID
+            && string.Equals(CaseAddressAutocomplete.FoldKey(place.NameTm), nextKey, StringComparison.Ordinal)))
+            throw new InvalidOperationException("That place is already saved.");
+
+        target.NameTm = name;
+        objectSpace.CommitChanges();
+    }
+
     public static IReadOnlyList<IssueIssuedHeaderDocumentRow> ListDocuments(IObjectSpace objectSpace, Guid visaId)
     {
         if (objectSpace == null || visaId == Guid.Empty)

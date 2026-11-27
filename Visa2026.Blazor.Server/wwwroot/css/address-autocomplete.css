@@ -158,6 +158,34 @@
   opacity: 0.75;
 }
 
+.cw-addr-ac--line .cw-addr-ac__ta,
+.cw-addr-ac--line .cw-addr-ac__selected {
+  min-height: 2.35rem;
+  height: 2.35rem;
+  max-height: 2.35rem;
+  padding: 0.35rem 2rem 0.35rem 0.65rem;
+  line-height: 1.35;
+  field-sizing: fixed;
+}
+
+.cw-addr-ac--line .cw-addr-ac__selected {
+  display: flex;
+  align-items: center;
+}
+
+.cw-addr-ac--line .cw-addr-ac__edit,
+.cw-addr-ac--line .cw-addr-ac__edit-text {
+  min-height: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cw-addr-ac--line .cw-addr-ac__clear {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .cw-addr-ac__status {
   display: flex;
   align-items: center;

@@ -178,14 +178,22 @@
                  @onkeydown="OnVisaDialogKeyDown">
                 <header class="issue-issued-wp-dialog__head">
                     <h2 id="issue-issued-visa-dialog-title" class="issue-issued-wp-dialog__title">@editPerson.PersonName</h2>
-                    <button type="button"
-                            class="issue-issued-wp-dialog__close"
+                    <span class="issue-issued-wp-dialog__tools">
+                        <button type="button"
+                                class="issue-issued-wp-dialog__gear @(_visaPlaceGear ? "is-on" : null)"
+                                aria-pressed="@_visaPlaceGear"
+                                title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaPlaceGear")"
+                                @onclick="ToggleVisaPlaceGear"
+                                @onclick:stopPropagation="true">⚙</button>
+                        <button type="button"
+                                class="issue-issued-wp-dialog__close"
                             title="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.Cancel")"
                             @onclick="DismissVisaDialogAsync">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                             <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                         </svg>
-                    </button>
+                        </button>
+                    </span>
                 </header>
                 <div class="issue-issued-header-slot__grid">
                     <label class="issue-issued-header-slot__field @FieldCueClass(numberKey, true, IssueComposeFieldCue.HasText(editPerson.VisaNumber))">
@@ -239,18 +247,24 @@
                                    value="@(LookupCaption(_draft.VisaPeriods, editPerson.VisaPeriodId))" />
                         </label>
                     }
-                    <label class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(editPerson.VisaIssuedPlaceId))">
+                    <div class="issue-issued-header-slot__field @FieldCueClass(placeKey, true, IssueComposeFieldCue.HasId(editPerson.VisaIssuedPlaceId))">
                         <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")</span>
-                        <select class="issue-issued-header-slot__input"
-                                value="@GuidText(editPerson.VisaIssuedPlaceId)"
-                                @onchange="e => editPerson.VisaIssuedPlaceId = ParseGuid(e.Value)">
-                            <option value="">—</option>
-                            @foreach (var opt in _draft.VisaIssuedPlaces)
-                            {
-                                <option value="@opt.Id.ToString("N")">@opt.Caption</option>
-                            }
-                        </select>
-                    </label>
+                        <div @onkeydown:stopPropagation="true">
+                        <AddressAutocompleteField SingleLine="true"
+                                                  ShowCatalogActions="_visaPlaceGear"
+                                                  Required="true"
+                                                  FieldName="@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.VisaIssuedPlace")"
+                                                  ItemNoun="place"
+                                                  ItemNounPlural="places"
+                                                  Placeholder="Start typing a place"
+                                                  EmptyHint="@(_visaPlaceGear ? "Search saved places. Use the + button to add a new one." : "Start typing to search saved places.")"
+                                                  Suggestions="@VisaPlaceSuggestions"
+                                                  Value="@VisaPlaceCaption(editPerson.VisaIssuedPlaceId)"
+                                                  ValueChanged="text => OnVisaPlaceValueChanged(editPerson, text)"
+                                                  AddSaved="OnVisaIssuedPlaceAddAsync"
+                                                  RenameSaved="OnVisaIssuedPlaceRenameAsync" />
+                        </div>
+                    </div>
                     <label class="issue-issued-header-slot__field @FieldCueClass(issueKey, true, IssueComposeFieldCue.HasDate(editPerson.IssueDate))">
                         <span>@ApplicationProfileLocalization.Msg("ApplicationProfileInstance.Issued.IssuedDate") *</span>
                         <OfficerDateEdit Date="editPerson.IssueDate"
@@ -422,6 +436,8 @@
     private readonly HashSet<string> _reviewedFields = new(StringComparer.Ordinal);
     private readonly HashSet<string> _defaultFields = new(StringComparer.Ordinal);
     private IssueIssuedVisaPersonCardDraft? _visaDialog;
+    private bool _visaPlaceGear;
+    private List<IssueIssuedVisaLookupOption> _visaPlaceOptions = new();
     private readonly HashSet<Guid> _visaDialogRemovedDocs = new();
     private ElementReference _visaDialogEl;
     private bool _visaDialogFocus;
@@ -563,6 +579,7 @@
             {
                 CaptureFieldCues();
                 CapturePristine();
+                _visaPlaceOptions = _draft.VisaIssuedPlaces.ToList();
                 var person = _draft.AllPeople.FirstOrDefault();
                 if (person != null)
                     OpenVisaPerson(person);
@@ -580,6 +597,7 @@
         {
             CaptureFieldCues();
             CapturePristine();
+            _visaPlaceOptions = _draft.VisaIssuedPlaces.ToList();
         }
     }
 
@@ -831,6 +849,7 @@
             return;
         _visaDialog = CloneVisaPerson(person);
         _visaDialogRemovedDocs.Clear();
+        _visaPlaceGear = false;
         _visaDialogFocus = true;
         _actionError = null;
     }
@@ -839,6 +858,53 @@
     {
         _visaDialog = null;
         _visaDialogRemovedDocs.Clear();
+        _visaPlaceGear = false;
+    }
+
+    private void ToggleVisaPlaceGear() => _visaPlaceGear = !_visaPlaceGear;
+
+    private IReadOnlyList<CaseAddressAutocomplete.SavedEntry> VisaPlaceSuggestions =>
+        _visaPlaceOptions
+            .Select(place => new CaseAddressAutocomplete.SavedEntry(place.Caption, 0, DateTime.MinValue))
+            .ToList();
+
+    private string VisaPlaceCaption(Guid? id) =>
+        id is Guid placeId && placeId != Guid.Empty
+            ? _visaPlaceOptions.FirstOrDefault(place => place.Id == placeId)?.Caption ?? string.Empty
+            : string.Empty;
+
+    private Task OnVisaPlaceValueChanged(IssueIssuedVisaPersonCardDraft person, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            person.VisaIssuedPlaceId = null;
+            ReviewField(CueKey(person, "visaPlace"));
+            return Task.CompletedTask;
+        }
+
+        var key = CaseAddressAutocomplete.FoldKey(text);
+        var match = _visaPlaceOptions.FirstOrDefault(place =>
+            string.Equals(CaseAddressAutocomplete.FoldKey(place.Caption), key, StringComparison.Ordinal));
+        if (match != null)
+            person.VisaIssuedPlaceId = match.Id;
+        ReviewField(CueKey(person, "visaPlace"));
+        return Task.CompletedTask;
+    }
+
+    private Task OnVisaIssuedPlaceAddAsync(string text)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<VisaIssuedPlace>();
+        IssueIssuedVisaComposeService.AddVisaIssuedPlace(objectSpace, text);
+        _visaPlaceOptions = IssueIssuedVisaComposeService.ListVisaIssuedPlaces(objectSpace);
+        return Task.CompletedTask;
+    }
+
+    private Task OnVisaIssuedPlaceRenameAsync((string Previous, string Next) pair)
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<VisaIssuedPlace>();
+        IssueIssuedVisaComposeService.RenameVisaIssuedPlace(objectSpace, pair.Previous, pair.Next);
+        _visaPlaceOptions = IssueIssuedVisaComposeService.ListVisaIssuedPlaces(objectSpace);
+        return Task.CompletedTask;
     }
 
     private async Task OnVisaDialogKeyDown(KeyboardEventArgs e)

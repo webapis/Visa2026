@@ -1,3 +1,10 @@
+## 2026-11-27 — Visa issued place searches the shared list
+
+- **Need**: Visa issued place was a plain dropdown. Officers want the address search, with add and rename only after the gear is on.
+- **Fix**: The custom visa form uses a single-line search. The gear at the top right of that form shows the pen and the plus. Those change the shared Visa issued place list. The Visa detail screen is unchanged.
+- **Officer**: Stop F5, rebuild, hard-refresh. Open a visa form. Search a place. Click the gear: pen and plus appear. Click the gear again: they hide.
+- **Prevent**: Do not show the pen or plus while the gear is off. Do not put this control on the XAF Visa detail view.
+- **Verify**: Isolated Blazor build 0 errors (session visaplace). Not opened in the browser.
 ## 2026-11-27 — Saved visa opens only the dialog
 
 - **Need**: Clicking a visa that is already on the case opened the side preview and the dialog together.

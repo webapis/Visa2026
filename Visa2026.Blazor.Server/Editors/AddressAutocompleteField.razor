@@ -2,23 +2,30 @@
 @using Visa2026.Module.Services
 @inject IJSRuntime Js
 
-<div class="cw-addr-ac">
+<div class="cw-addr-ac @(SingleLine ? "cw-addr-ac--line" : null)">
     <div class="cw-addr-ac__row">
         <div class="cw-addr-ac__field" @onfocusin="OnFocusIn" @onfocusout="OnFocusOut">
             @if (HasSelection)
             {
                 <div class="@SelectedBoxCss">
-                    <button type="button"
-                            id="@_editBtnId"
-                            class="cw-addr-ac__edit"
-                            disabled="@(!Enabled || ReadOnly)"
-                            aria-label="@($"Edit {FieldName}: {SelectedText}")"
-                            @onclick="OpenEditDialogAsync">
+                    @if (ShowCatalogActions)
+                    {
+                        <button type="button"
+                                id="@_editBtnId"
+                                class="cw-addr-ac__edit"
+                                disabled="@(!Enabled || ReadOnly)"
+                                aria-label="@($"Edit {FieldName}: {SelectedText}")"
+                                @onclick="OpenEditDialogAsync">
+                            <span class="cw-addr-ac__edit-text">@SelectedText</span>
+                            <svg class="cw-addr-ac__pen" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                    }
+                    else
+                    {
                         <span class="cw-addr-ac__edit-text">@SelectedText</span>
-                        <svg class="cw-addr-ac__pen" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                        </svg>
-                    </button>
+                    }
                     @if (Enabled && !ReadOnly)
                     {
                         <button type="button"
@@ -29,6 +36,46 @@
                                 @onclick:preventDefault="true">×</button>
                     }
                 </div>
+            }
+            else if (SingleLine)
+            {
+                <input id="@_inputId"
+                       type="text"
+                       class="@SearchCss"
+                       maxlength="@CaseAddressAutocomplete.MaxLength"
+                       disabled="@(!Enabled || ReadOnly)"
+                       readonly="@ReadOnly"
+                       placeholder="@Placeholder"
+                       role="combobox"
+                       aria-expanded="@(_listOpen ? "true" : "false")"
+                       aria-controls="@_listId"
+                       aria-autocomplete="list"
+                       aria-required="@(Required ? "true" : "false")"
+                       aria-activedescendant="@(_activeIndex >= 0 && _activeIndex < _hits.Count ? OptionId(_activeIndex) : null)"
+                       aria-describedby="@_statusId"
+                       value="@_search"
+                       @oninput="OnSearchInput"
+                       @onkeydown="OnSearchKeyDown"
+                       @onkeydown:preventDefault="@_preventEnter" />
+                @if (_listOpen && _hits.Count > 0)
+                {
+                    <ul id="@_listId" class="cw-addr-ac__list" role="listbox">
+                        @for (var i = 0; i < _hits.Count; i++)
+                        {
+                            var index = i;
+                            var item = _hits[index];
+                            <li id="@OptionId(index)"
+                                class="@(_activeIndex == index ? "cw-addr-ac__option is-active" : "cw-addr-ac__option")"
+                                role="option"
+                                aria-selected="@(_activeIndex == index)"
+                                @onmousedown:preventDefault="true"
+                                @onmousedown="() => SelectAsync(item.Text)">
+                                <span class="cw-addr-ac__option-main">@Highlight(item.Text)</span>
+                                <span class="cw-addr-ac__option-meta">@(item.UseCount <= 0 ? "New" : $"Used {item.UseCount}×")</span>
+                            </li>
+                        }
+                    </ul>
+                }
             }
             else
             {
@@ -71,7 +118,7 @@
                 }
             }
         </div>
-        @if (Enabled && !ReadOnly && !_suggestionsFailed)
+        @if (ShowCatalogActions && Enabled && !ReadOnly && !_suggestionsFailed)
         {
             <button type="button"
                     class="cw-addr-ac__add"
@@ -113,6 +160,10 @@
     [Parameter] public string Placeholder { get; set; } = "Start typing a street, district or city";
     [Parameter] public string EmptyHint { get; set; } =
         "Start typing to search saved addresses. Use the + button to add a new one.";
+    [Parameter] public bool ShowCatalogActions { get; set; } = true;
+    [Parameter] public bool SingleLine { get; set; }
+    [Parameter] public string ItemNoun { get; set; } = "address";
+    [Parameter] public string ItemNounPlural { get; set; } = "addresses";
 
     private readonly string _inputId = "cw-addr-ac-" + Guid.NewGuid().ToString("N")[..8];
     private readonly string _listId = "cw-addr-ac-list-" + Guid.NewGuid().ToString("N")[..8];
@@ -268,7 +319,7 @@
             _activeIndex = -1;
             _lastExternal = normalized;
             _announce = "Selected " + normalized + ".";
-            _focusEditAfterSelect = true;
+            _focusEditAfterSelect = ShowCatalogActions;
             RefreshStatus(keepList: false);
             if (ValueChanged.HasDelegate)
                 await ValueChanged.InvokeAsync(string.IsNullOrEmpty(normalized) ? null : normalized);
@@ -393,7 +444,9 @@
             _listOpen = false;
             _activeIndex = -1;
             _statusState = "ok";
-            _statusText = "Saved address. Click it to edit, or × to choose another.";
+            _statusText = ShowCatalogActions
+                ? $"Saved {ItemNoun}. Click it to edit, or × to choose another."
+                : $"Saved {ItemNoun}. × to choose another.";
             return;
         }
 
@@ -419,7 +472,7 @@
         if (CaseAddressAutocomplete.IsExactSaved(q, Suggestions ?? Array.Empty<CaseAddressAutocomplete.SavedEntry>()))
         {
             _statusState = "ok";
-            _statusText = "Saved address. Press Enter to select it.";
+            _statusText = $"Saved {ItemNoun}. Press Enter to select it.";
             _listOpen = false;
             _activeIndex = -1;
             return;
@@ -428,7 +481,7 @@
         if (_hits.Count > 0)
         {
             _statusState = string.Empty;
-            _statusText = $"{_hitTotal} saved address{(_hitTotal == 1 ? "" : "es")} match. Pick one from the list.";
+            _statusText = $"{_hitTotal} saved {(_hitTotal == 1 ? ItemNoun : ItemNounPlural)} match. Pick one from the list.";
             _listOpen = keepList && _focused;
             if (!_listOpen)
                 _activeIndex = -1;
@@ -436,7 +489,9 @@
         }
 
         _statusState = "new";
-        _statusText = $"No saved address matches “{q}”. Use the + button to add it as a new address.";
+        _statusText = ShowCatalogActions
+            ? $"No saved {ItemNoun} matches “{q}”. Use the + button to add it as a new {ItemNoun}."
+            : $"No saved {ItemNoun} matches “{q}”.";
         _listOpen = false;
         _activeIndex = -1;
     }
