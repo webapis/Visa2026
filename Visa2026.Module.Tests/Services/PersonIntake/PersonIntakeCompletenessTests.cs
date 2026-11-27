@@ -75,6 +75,83 @@ public class PersonIntakeCompletenessTests
     }
 
     [Fact]
+    public void AcceptMissing_MarksEmptyRequiredFields_AndLeavesOptionalEmpty()
+    {
+        var person = Employee();
+        person.FirstName = "Demo";
+        person.LastName = "Name";
+        var state = new PersonIntakeWizardState();
+
+        PersonIntakeCompleteness.AcceptMissingAsNotReceived(person, state);
+
+        Assert.Contains(PersonPendingTargets.Gender, state.PendingKeys);
+        Assert.Contains(PersonPendingTargets.BirthPlace, state.PendingKeys);
+        Assert.Contains(PersonPendingTargets.Passport, state.PendingKeys);
+        Assert.Contains(PersonPendingTargets.Education, state.PendingKeys);
+        Assert.Contains(PersonPendingTargets.ForeignAddress, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.Photo, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.PersonDocument, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.EmployeeSalary, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.FirstName, state.PendingKeys);
+    }
+
+    [Fact]
+    public void AcceptMissing_DropsUnfinishedPassport_AndMarksTheStepNotReceived()
+    {
+        var person = Employee();
+        person.FirstName = "Demo";
+        person.LastName = "Name";
+        var state = new PersonIntakeWizardState();
+        state.PassportDrafts.Add(new PersonIntakePassportDraft { PassportNumber = "AB123" });
+
+        PersonIntakeCompleteness.AcceptMissingAsNotReceived(person, state);
+
+        Assert.Empty(state.PassportDrafts);
+        Assert.Contains(PersonPendingTargets.Passport, state.PendingKeys);
+    }
+
+    [Fact]
+    public void AcceptMissing_KeepsACompletePassport()
+    {
+        var person = Employee();
+        person.FirstName = "Demo";
+        person.LastName = "Name";
+        var state = new PersonIntakeWizardState();
+        state.PassportDrafts.Add(new PersonIntakePassportDraft
+        {
+            PassportNumber = "AB123",
+            PassportTypeId = Guid.NewGuid(),
+            IssuedCountryId = Guid.NewGuid(),
+            Authority = "Ashgabat",
+            IssueDate = new DateTime(2020, 1, 1),
+            ExpirationDate = new DateTime(2030, 1, 1)
+        });
+
+        PersonIntakeCompleteness.AcceptMissingAsNotReceived(person, state);
+
+        Assert.Single(state.PassportDrafts);
+        Assert.DoesNotContain(PersonPendingTargets.Passport, state.PendingKeys);
+    }
+
+    [Fact]
+    public void AcceptMissing_DoesNotDeferFamilySponsorOrRelationship()
+    {
+        var person = Family();
+        person.FirstName = "Demo";
+        person.LastName = "Name";
+        var state = new PersonIntakeWizardState();
+
+        PersonIntakeCompleteness.AcceptMissingAsNotReceived(person, state);
+
+        Assert.DoesNotContain(PersonPendingTargets.SponsoringEmployee, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.Relationship, state.PendingKeys);
+        Assert.Equal(
+            PersonIntakeItemState.Unresolved,
+            PersonIntakeCompleteness.Evaluate(person, state.PendingKeys, state.DraftSatisfiedKeys())
+                .Single(finding => finding.TargetKey == PersonPendingTargets.SponsoringEmployee).State);
+    }
+
+    [Fact]
     public void OptionalCv_DoesNotBlock_UntilTheOfficerSwitchesItOn()
     {
         var person = Employee();

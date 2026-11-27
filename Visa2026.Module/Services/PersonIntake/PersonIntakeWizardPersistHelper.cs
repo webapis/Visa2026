@@ -35,6 +35,7 @@ public static class PersonIntakeWizardPersistHelper
             return new PersonIntakeSaveResult { Succeeded = false, Message = PersonIntakeText.Get("Save.NameRequired") };
 
         PersonIntakeDeferredRecords.EnsureCreateTimePending(person, state);
+        PersonIntakeCompleteness.AcceptMissingAsNotReceived(person, state);
         var violation = access.FindSaveViolation(person, state);
         if (violation != null)
             return new PersonIntakeSaveResult { Succeeded = false, Message = violation };

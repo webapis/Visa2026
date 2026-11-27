@@ -65,6 +65,29 @@ public static class PersonIntakeCompleteness
         new(PersonPendingTargets.PersonFamilyRelationDocument, PersonIncompleteDataLabels.FamilyDocs, Who.Family, false, true),
     ];
 
+    /// <summary>
+    /// A partial save marks every empty required item Not received.
+    /// Optional empty items stay empty. An unfinished passport or education card is dropped,
+    /// and that step is Not received when no complete card remains.
+    /// First name, last name, and a family member's sponsoring employee and relationship stay required.
+    /// </summary>
+    public static void AcceptMissingAsNotReceived(Person person, PersonIntakeWizardState state)
+    {
+        if (person == null || state == null)
+            return;
+
+        state.PassportDrafts.RemoveAll(draft => draft == null || !draft.IsComplete);
+        state.EducationDrafts.RemoveAll(draft => draft == null || !draft.IsComplete);
+
+        foreach (var finding in Evaluate(person, state.PendingKeys, state.DraftSatisfiedKeys()))
+        {
+            if (finding.State != PersonIntakeItemState.Unresolved || !finding.CanDefer)
+                continue;
+
+            state.PendingKeys.Add(finding.TargetKey);
+        }
+    }
+
     public static bool HasPending(Person person, string targetKey) =>
         person?.PendingItems != null
         && person.PendingItems.Any(item =>
