@@ -302,6 +302,21 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         }
     }
 
+
+    /// <summary>
+    /// Re-run State / State-preview / % column order (e.g. after Ähli shows ProgressColorTabDisplay).
+    /// </summary>
+    public void ReapplyColumnPlacement()
+    {
+        if (View?.Editor is not DxGridListEditor { GridModel: not null } gridListEditor)
+            return;
+
+        var progressColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(IsProgressStepperColumn);
+        if (progressColumn == null)
+            return;
+
+        PlaceProgressThenPercent(gridListEditor, progressColumn);
+    }
     private void OpenStatePreview(Guid instanceId)
     {
         ApplicationListRowActivationGate.SuppressBriefly();
@@ -316,16 +331,35 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             !ReferenceEquals(c, progressColumn)
             && string.Equals(c.FieldName, nameof(ApplicationProfileInstance.CompletionPercentage), StringComparison.Ordinal));
 
+        var stateColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
+            string.Equals(
+                c.FieldName,
+                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
+                StringComparison.Ordinal));
+
         var lastOther = gridListEditor.GridDataColumnModels
             .Where(c => !ReferenceEquals(c, progressColumn)
                 && !ReferenceEquals(c, percentColumn)
+                && !ReferenceEquals(c, stateColumn)
                 && c.Visible
                 && c.VisibleIndex >= 0)
             .Select(c => c.VisibleIndex)
             .DefaultIfEmpty(-1)
             .Max();
 
-        progressColumn.VisibleIndex = lastOther + 1;
+        // State (color-tab label) immediately before State preview when Ähli shows it.
+        if (stateColumn != null && stateColumn.Visible)
+        {
+            stateColumn.AllowSort = true;
+            stateColumn.SortMode = GridColumnSortMode.Value;
+            stateColumn.VisibleIndex = lastOther + 1;
+            progressColumn.VisibleIndex = stateColumn.VisibleIndex + 1;
+        }
+        else
+        {
+            progressColumn.VisibleIndex = lastOther + 1;
+        }
+
         if (percentColumn != null)
             percentColumn.VisibleIndex = progressColumn.VisibleIndex + 1;
     }

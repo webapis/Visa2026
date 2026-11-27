@@ -433,6 +433,19 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationProfileInstanceProgressColorTab.ResolveBucketKey(this);
 
         /// <summary>
+        /// Localized progress color-tab label (Ofisde, Resmileşdirildi, …) for Ähli ListView sort.
+        /// Visibility is toggled on the progress color-tab strip — only when Ähli is selected.
+        /// </summary>
+        [XafDisplayName("State")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [VisibleInListView(false)]
+        [NotMapped]
+        public string ProgressColorTabDisplay =>
+            ApplicationProfileInstanceProgressColorTab.GetLabel(ProgressColorTabKey);
+
+        /// <summary>
         /// ListView sort key for the Application progress column — same 0-100 scale as CompletionPercentage.
         /// Bound by the progress stepper column (display stays the stepper template).
         /// </summary>

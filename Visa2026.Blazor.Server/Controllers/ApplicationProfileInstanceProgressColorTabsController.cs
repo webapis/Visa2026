@@ -83,6 +83,7 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
     {
         base.OnViewControlsCreated();
         ApplyToolbar();
+        SyncAllTabStateColumn();
     }
 
     protected override void OnDeactivated()
@@ -215,6 +216,7 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
         try
         {
             ApplySelectionFilter();
+            SyncAllTabStateColumn();
             PublishStrip();
             await Task.WhenAny(tcs.Task, Task.Delay(2000));
             await Task.Delay(50);
@@ -276,6 +278,7 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
 
             RebuildTabsFromCache();
             ApplySelectionFilter();
+            SyncAllTabStateColumn();
         }
         finally
         {
@@ -396,6 +399,43 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
         {
             suppressCollectionHandler = false;
         }
+    }
+
+
+    /// <summary>
+    /// Show ProgressColorTabDisplay only on Ähli so officers can sort by color-tab state.
+    /// </summary>
+    private void SyncAllTabStateColumn()
+    {
+        if (View?.Editor is not DxGridListEditor { GridModel: not null } gridListEditor)
+            return;
+
+        var show = string.Equals(
+            selectedKey,
+            ApplicationProfileInstanceProgressColorTab.AllKey,
+            StringComparison.Ordinal);
+
+        var stateColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
+            string.Equals(
+                c.FieldName,
+                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
+                StringComparison.Ordinal)
+            || string.Equals(
+                c.Name,
+                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
+                StringComparison.Ordinal));
+
+        if (stateColumn == null)
+            return;
+
+        stateColumn.Visible = show;
+        stateColumn.AllowSort = show;
+        if (show)
+            stateColumn.SortMode = GridColumnSortMode.Value;
+
+        // Re-place State preview after State when Ähli shows the column.
+        Frame.GetController<ApplicationListViewProgressStepsController>()
+            ?.ReapplyColumnPlacement();
     }
 
     private void ClearColorCriteria()

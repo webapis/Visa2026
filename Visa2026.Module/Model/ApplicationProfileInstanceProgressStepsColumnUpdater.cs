@@ -51,12 +51,20 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         }
     }
 
+    public const string ColorTabStateColumnId = nameof(ApplicationProfileInstance.ProgressColorTabDisplay);
+
     internal static void EnsureColumn(IModelListView listView)
     {
         HideColumn(listView, ReplacedColumnId);
         HideColumn(listView, nameof(ApplicationProfileInstance.ProgressSlaStatement));
         HideColumn(listView, nameof(ApplicationProfileInstance.MigrationSlaStatement));
         HideColumn(listView, nameof(ApplicationProfileInstance.ResultCoverageDisplay));
+
+        // State (color-tab label) immediately before State preview; Blazor hides unless Ähli.
+        var stateColumn = listView.Columns[ColorTabStateColumnId]
+            ?? listView.Columns.AddNode<IModelColumn>(ColorTabStateColumnId);
+        stateColumn.PropertyName = ColorTabStateColumnId;
+        stateColumn.Caption = "State";
 
         var column = listView.Columns[ColumnId]
             ?? listView.Columns.AddNode<IModelColumn>(ColumnId);
@@ -66,12 +74,15 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         var completionId = nameof(ApplicationProfileInstance.CompletionPercentage);
         var lastVisible = listView.Columns
             .Where(c => !ReferenceEquals(c, column)
+                && !ReferenceEquals(c, stateColumn)
                 && c.Index >= 0
-                && !string.Equals(c.Id, completionId, StringComparison.Ordinal))
+                && !string.Equals(c.Id, completionId, StringComparison.Ordinal)
+                && !string.Equals(c.Id, ColorTabStateColumnId, StringComparison.Ordinal))
             .Select(c => c.Index)
             .DefaultIfEmpty(-1)
             .Max();
-        column.Index = lastVisible + 1;
+        stateColumn.Index = lastVisible + 1;
+        column.Index = stateColumn.Index + 1;
     }
 
     private static void HideColumn(IModelListView listView, string columnId)
