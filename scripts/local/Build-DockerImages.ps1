@@ -1,8 +1,9 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  [LOCAL WORKSTATION] Build Visa2026 Docker images locally with the same build-args as CI
-  (.github/workflows/publish-to-docker-hub.yml).
+  [LOCAL WORKSTATION] Build Visa2026 Docker images locally.
+  CI publishes the app on the runner and uses docker/Dockerfile.app-runtime.
+  This script still compiles the app inside the root Dockerfile.
 
 .DESCRIPTION
   - App image: root Dockerfile, tags webapia/visa2026:local and webapia/visa2026:<AssemblyVersion>

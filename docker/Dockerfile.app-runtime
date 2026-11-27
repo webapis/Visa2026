@@ -1,0 +1,16 @@
+# Thin runtime image for CI (.github/workflows/publish-to-docker-hub.yml).
+# The workflow publishes Visa2026.Blazor.Server on the runner (NuGet cache),
+# stages that output under publish/, and builds this file.
+# Local workstation builds still compile inside the root Dockerfile.
+
+ARG RUNTIME_BASE_IMAGE=webapia/visa2026-runtime-base:v1
+FROM ${RUNTIME_BASE_IMAGE}
+
+WORKDIR /app
+
+COPY publish/ .
+
+RUN sed -i 's/\r$//' /app/visa2026-entrypoint.sh && chmod +x /app/visa2026-entrypoint.sh
+
+USER root
+ENTRYPOINT ["/app/visa2026-entrypoint.sh"]

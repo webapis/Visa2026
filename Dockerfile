@@ -3,7 +3,8 @@
 #
 # NuGet: RUN lines use BuildKit cache mounts (id=visa2026-nuget) so packages persist across docker builds on this machine.
 # Runtime apt/fonts/LibreOffice live in webapia/visa2026-runtime-base (docker/Dockerfile.runtime-base) so routine
-# app publishes only restore + publish + copy. Requires BuildKit (on by default in Docker Desktop).
+# local builds only restore + publish + copy. Requires BuildKit (on by default in Docker Desktop).
+# GitHub publish does not use this file: it publishes on the runner and copies with docker/Dockerfile.app-runtime.
 
 ARG RUNTIME_BASE_IMAGE=webapia/visa2026-runtime-base:v1
 FROM ${RUNTIME_BASE_IMAGE} AS base

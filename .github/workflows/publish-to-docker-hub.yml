@@ -2,17 +2,41 @@
 #
 # When this runs:
 #   Push to master, or workflow_dispatch (current HEAD).
+#   Skips pushes that only touch docs, .cursor, tests, scripts, or the user manual.
 #   Does not wait for EasyTest E2E or unit tests.
-#   App publishes every time. Importer only when DataImporter (or this workflow) changes.
+#   A newer master push cancels an in-progress publish (only latest needs to land on Hub).
+#   App image: dotnet publish on the runner (NuGet cache), then a thin copy onto the
+#   runtime base (docker/Dockerfile.app-runtime). No mode=max build-cache upload.
+#   App image rebuilds when the Blazor host, Module, Dockerfile, or docker/ changes.
+#   Importer only when DataImporter (or this workflow) changes.
 #   Runtime base (apt/fonts/LibreOffice) rebuilds only when its Dockerfile/fonts change
 #   (or workflow_dispatch rebuild_runtime_base=true). App FROMs webapia/visa2026-runtime-base:v1.
-#   Buildx GHA + registry cache reuses layers on later runs.
+#   Local workstation builds still compile inside the root Dockerfile
+#   (scripts/local/Build-DockerImages.ps1).
 
 name: Build and Publish to Docker Hub
 
 on:
   push:
     branches: [master]
+    paths-ignore:
+      # These never change the published images. A commit that also touches
+      # app/importer/docker files still runs (GitHub ignores the filter then).
+      # Do not ignore **/*.md — Module embeds SCAN_AUTHORING_PLAYBOOK.md.
+      - '.cursor/**'
+      - 'docs/**'
+      - 'user-manual/**'
+      - 'scripts/**'
+      - 'graphify-out/**'
+      - 'artifacts/**'
+      - 'Visa2026.E2E.Tests/**'
+      - 'Visa2026.Module.Tests/**'
+      - '.github/actions/**'
+      - '.github/workflows/build-and-test.yml'
+      - '.github/workflows/e2e-tests.yml'
+      - '.github/workflows/user-manual.yml'
+      - '.github/workflows/cursor-on-issue-opened.yml'
+      - '*.md'
   workflow_dispatch:
     inputs:
       rebuild_runtime_base:
@@ -29,6 +53,10 @@ env:
   RUNTIME_BASE_IMAGE: webapia/visa2026-runtime-base
   RUNTIME_BASE_TAG: v1
 
+concurrency:
+  group: publish-docker-hub-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   changes:
     name: Path filters
@@ -39,6 +67,7 @@ jobs:
     outputs:
       importer: ${{ steps.filter.outputs.importer }}
       runtime_base: ${{ steps.filter.outputs.runtime_base }}
+      app: ${{ steps.filter.outputs.app }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,6 +83,20 @@ jobs:
             runtime_base:
               - 'docker/Dockerfile.runtime-base'
               - 'docker/fonts/**'
+              - '.github/workflows/publish-to-docker-hub.yml'
+            app:
+              - 'Visa2026.Blazor.Server/**'
+              - 'Visa2026.Module/**'
+              - 'Dockerfile'
+              - 'docker/**'
+              - 'Directory.Build.props'
+              - 'Directory.Build.targets'
+              - 'Directory.Packages.props'
+              - 'global.json'
+              - 'nuget.config'
+              - 'NuGet.Config'
+              - '*.sln'
+              - '*.slnx'
               - '.github/workflows/publish-to-docker-hub.yml'
 
   publish-runtime-base:
@@ -99,15 +142,25 @@ jobs:
     name: App image
     needs: [changes, publish-runtime-base]
     # Run when base succeeded or was skipped (existing Hub :v1 is used).
+    # Skip when this push did not change the app image (importer-only, for example).
+    # workflow_dispatch always publishes the app, including after a forced base rebuild.
     if: >-
       always()
       && needs.changes.result == 'success'
       && (needs.publish-runtime-base.result == 'success'
           || needs.publish-runtime-base.result == 'skipped')
+      && (needs.changes.outputs.app == 'true'
+          || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     permissions:
       contents: read
       actions: write
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      NUGET_XMLDOC_MODE: skip
     steps:
       - name: Resolve commit to publish
         id: ref
@@ -123,47 +176,77 @@ jobs:
         with:
           ref: ${{ steps.ref.outputs.sha }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          dotnet-version: 8.0.x
 
-      - name: Write DevExpress license key
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Write DevExpress license
+        shell: bash
+        env:
+          DEVEXPRESS_LICENSE: ${{ secrets.DEVEXPRESS_LICENSE }}
+          DEVEXPRESS_KEY: ${{ secrets.DEVEXPRESS_KEY }}
         run: |
+          license="${DEVEXPRESS_LICENSE:-$DEVEXPRESS_KEY}"
+          if [ -z "$license" ]; then
+            echo "::error::DEVEXPRESS_LICENSE or DEVEXPRESS_KEY is required to publish."
+            exit 1
+          fi
           mkdir -p DevExpress.Key
-          echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key/DevExpress_License.txt
-
-      - name: Write DevExpress license file
-        run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress.Key/DevExpress_License.txt
+          printf '%s' "$license" > DevExpress.Key/DevExpress_License.txt
 
       - name: Get Version from Project
         id: get_version
         run: |
           echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
 
+      - name: Publish Blazor Server
+        run: |
+          out="${RUNNER_TEMP}/visa2026-image/publish"
+          mkdir -p "$out"
+          dotnet publish Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj \
+            -c Release \
+            -o "$out" \
+            -m \
+            -p:UseAppHost=false \
+            -p:RunAnalyzersDuringBuild=false \
+            -p:EnforceCodeStyleInBuild=false \
+            -p:InformationalVersion="${{ env.APP_VERSION }}+${{ steps.ref.outputs.sha_short }}" \
+            "/p:NoWarn=DX1000%3BDX1001"
+          cp docker/visa2026-entrypoint.sh "$out/visa2026-entrypoint.sh"
+          cp docker/Dockerfile.app-runtime "${RUNNER_TEMP}/visa2026-image/Dockerfile"
+          test -s "$out/Visa2026.Blazor.Server.dll"
+          test -s "$out/visa2026-entrypoint.sh"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Context is only the publish output. Base layers already on Hub are mounted,
+      # not re-uploaded. No mode=max cache export (that upload dominated the old ~35 min step).
       - name: Build and push app image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ runner.temp }}/visa2026-image
           push: true
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.ref.outputs.sha }}
             ${{ env.DOCKER_IMAGE_NAME }}:latest
             ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
           build-args: |
-            APP_VERSION=${{ env.APP_VERSION }}
-            GIT_SHA=${{ steps.ref.outputs.sha_short }}
             RUNTIME_BASE_IMAGE=${{ env.RUNTIME_BASE_IMAGE }}:${{ env.RUNTIME_BASE_TAG }}
-          cache-from: |
-            type=gha,scope=visa2026-app
-            type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache
-          cache-to: |
-            type=gha,mode=max,scope=visa2026-app
-            type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
   publish-importer:
     name: Importer image
