@@ -206,11 +206,13 @@ public class PdfMappingHelperTests
         {
             ApplicationType = new ApplicationType { ShowCurrentAddressOfResidence = true },
             ApplicationProfile = new ApplicationProfile { RequireAddress1 = true },
+            Address1DefaultText = "Ahal welaýatynyň Gökdepe etraby, YYLDYZ MYHMANHANASY",
+            Address2DefaultText = "Jaý 4",
             Address1 = new AddressOfResidence
             {
-                Region = new Region { PdfForm_Code = "AH" },
-                City = new City { PdfForm_Code = "AKB" },
-                FullAddress = "YYLDYZ MYHMANHANASY, YA-DA BALKAN WELAYATYNYNG",
+                Region = new Region { PdfForm_Code = "LB" },
+                City = new City { PdfForm_Code = "LB" },
+                FullAddress = "Catalog street that must not be used",
             },
         };
         var item = new ApplicationRosterMergeLine
@@ -219,8 +221,8 @@ public class PdfMappingHelperTests
             ApplicationProfileInstance = application,
             CurrentAddressOfResidence = new AddressOfResidence
             {
-                Region = new Region { PdfForm_Code = "LB" },
-                City = new City { PdfForm_Code = "LB" },
+                Region = new Region { PdfForm_Code = "DZ" },
+                City = new City { PdfForm_Code = "DZ" },
                 FullAddress = "Residence street",
             },
         };
@@ -250,9 +252,39 @@ public class PdfMappingHelperTests
         PdfMappingHelper.MapApplicationData(data, application, item, objectSpace: null, logger: null, mappings);
 
         Assert.Equal("AH", data[PdfMappingHelper.InvitationStayRegionKey]);
-        Assert.Equal("AKB", data[PdfMappingHelper.InvitationStayCityKey]);
-        Assert.Equal("YYLDYZ MYHMANHANASY, YA-DA BALKAN WELAYATYNYNG", data[PdfMappingHelper.InvitationStayAddressKey]);
+        Assert.Equal("AH47", data[PdfMappingHelper.InvitationStayCityKey]);
+        Assert.Equal(
+            "JAY 4, AHAL WELAYATYNYNG GOKDEPE ETRABY, YYLDYZ MYHMANHANASY",
+            data[PdfMappingHelper.InvitationStayAddressKey]);
     }
+
+    [Fact]
+    public void MapApplicationData_Address2Optional_Field35IsAddress1Only()
+    {
+        var application = new ApplicationProfileInstance
+        {
+            ApplicationProfile = new ApplicationProfile { RequireAddress1 = true },
+            Address1DefaultText = "Aşgabat şäheri, 10 ýyl köçesi",
+        };
+        var item = new ApplicationRosterMergeLine
+        {
+            SuppressPersonCurrentFieldSync = true,
+            ApplicationProfileInstance = application,
+        };
+        var data = new Dictionary<string, object>
+        {
+            [PdfMappingHelper.InvitationStayRegionKey] = "LB",
+            [PdfMappingHelper.InvitationStayCityKey] = "LB26",
+        };
+
+        PdfMappingHelper.MapApplicationData(data, application, item, objectSpace: null, logger: null, mappings: Array.Empty<PdfFormMappingDefinition>());
+
+        Assert.Equal("AS", data[PdfMappingHelper.InvitationStayRegionKey]);
+        Assert.Equal("AS69", data[PdfMappingHelper.InvitationStayCityKey]);
+        Assert.Equal("ASHGABAT SHAHERI, 10 YYL KOCHESI", data[PdfMappingHelper.InvitationStayAddressKey]);
+    }
+
+    [Fact]
     public void MapApplicationData_KeepsAddressOfResidenceWhenInvitationAddressIsOff()
     {
         var application = new ApplicationProfileInstance

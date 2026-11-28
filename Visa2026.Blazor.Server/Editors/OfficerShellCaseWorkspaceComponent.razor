@@ -391,6 +391,8 @@
     private int? _peopleRecordPersonIndex;
     private string? _appliedPeopleFocusKey;
     private bool _caseSummaryEditing;
+    /// <summary>Case summary Address 1/2 and requested locations: + stays behind this gear.</summary>
+    private bool _summaryCatalogGearOn;
     private bool _summarySaving;
     private DetailRecordRibbon? _recordRibbon;
     private Guid _caseSummaryInstanceId;
@@ -582,6 +584,7 @@
         {
             _caseSummaryInstanceId = instanceId;
             _caseSummaryEditing = false;
+            _summaryCatalogGearOn = false;
             _summarySaving = false;
             _pendingHeaders.Clear();
             _headerOriginals = null;
@@ -768,6 +771,13 @@
         StartCaseSummaryEdit();
         return true;
     }
+
+    private static bool IsSavedCatalogHeaderField(ApplicationWorkspaceCaseHeaderField field) =>
+        ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(field.Key)
+        || field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect;
+
+    private void ToggleSummaryCatalogGear() =>
+        _summaryCatalogGearOn = !_summaryCatalogGearOn;
 
     private void StartCaseSummaryEdit()
     {
@@ -1866,7 +1876,8 @@
                                           Suggestions="@locSuggestions"
                                           NoneValue="@(isWp ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
                                           Placeholder="Start typing a location"
-                                          EmptyHint="Search saved locations. Use the + button to add a new one."
+                                          EmptyHint="@(_summaryCatalogGearOn ? "Search saved locations. Use the + button to add a new one." : "Search saved locations.")"
+                                          ShowAdd="_summaryCatalogGearOn"
                                           ValueChanged="value => OnHeaderFieldChanged(field.Key, value)"
                                           AddSaved="text => OnCaseLocationAddAsync(locField, text)"
                                           RenameSaved="pair => OnCaseLocationRenameAsync(locField, pair)" />
@@ -1971,8 +1982,13 @@
                                               ? "Start typing a street, district or city"
                                               : "Apartment, building, floor or landmark")"
                                           EmptyHint="@(isAddress1
-                                              ? "Start typing to search saved addresses. Use the + button to add a new one."
-                                              : "Optional. Start typing to search saved entries. Use the + button to add a new one.")"
+                                              ? (_summaryCatalogGearOn
+                                                  ? "Start typing to search saved addresses. Use the + button to add a new one."
+                                                  : "Start typing to search saved addresses.")
+                                              : (_summaryCatalogGearOn
+                                                  ? "Optional. Start typing to search saved entries. Use the + button to add a new one."
+                                                  : "Optional. Start typing to search saved entries."))"
+                                          ShowAdd="_summaryCatalogGearOn"
                                           ValueChanged="text => OnHeaderFieldChanged(field.Key, text)"
                                           AddSaved="text => OnCaseAddressAddAsync(savedField, text)"
                                           RenameSaved="pair => OnCaseAddressRenameAsync(savedField, pair)" />
@@ -2155,6 +2171,21 @@
                     var identityFields = IdentityHeaderFields(view.HeaderFields);
                     var mainFields = MainHeaderFields(view.HeaderFields);
                     var summaryReadOnly = !IsCaseSummaryEditing;
+                    var showCatalogGear = !summaryReadOnly && view.HeaderFields.Any(IsSavedCatalogHeaderField);
+                    var catalogGearTitle = _summaryCatalogGearOn
+                        ? Msg("ApplicationProfileInstance.Picker.HideCatalogManage")
+                        : Msg("ApplicationProfileInstance.Picker.ShowCatalogManage");
+                    @if (showCatalogGear)
+                    {
+                        <div class="cw-summary-tools">
+                            <button type="button"
+                                    class="os-link-review__gear @(_summaryCatalogGearOn ? "is-on" : null)"
+                                    title="@catalogGearTitle"
+                                    aria-label="@catalogGearTitle"
+                                    aria-pressed="@_summaryCatalogGearOn"
+                                    @onclick="ToggleSummaryCatalogGear">⚙</button>
+                        </div>
+                    }
                     <div class="cw-summary-body @(mainFields.Count == 0 ? "cw-summary-body--identity-only" : null)">
                         @if (mainFields.Count > 0)
                         {
@@ -2829,7 +2860,7 @@
                                                 class="cw-people-action-menu__item"
                                                 role="menuitem"
                                                 @onclick="() => PreviewResminamalarEntryAsync(menuItem)">
-                                            <span class="cw-people-action-menu__glyph" aria-hidden="true">📗</span>
+                                            <span class="cw-people-action-menu__glyph" aria-hidden="true">@(IsApplicationFormMenuItem(menuItem) ? "📄" : "📗")</span>
                                             <span class="cw-people-action-menu__label">@menuItem.Label</span>
                                         </button>
                                     }
@@ -2987,8 +3018,13 @@
                                                                           ? "Start typing a street, district or city"
                                                                           : "Apartment, building, floor or landmark")"
                                                                       EmptyHint="@(isAddress1Line
-                                                                          ? "Start typing to search saved addresses. Use the + button to add a new one."
-                                                                          : "Optional. Start typing to search saved entries. Use the + button to add a new one.")"
+                                                                          ? (_reviewGearOn
+                                                                              ? "Start typing to search saved addresses. Use the + button to add a new one."
+                                                                              : "Start typing to search saved addresses.")
+                                                                          : (_reviewGearOn
+                                                                              ? "Optional. Start typing to search saved entries. Use the + button to add a new one."
+                                                                              : "Optional. Start typing to search saved entries."))"
+                                                                      ShowAdd="_reviewGearOn"
                                                                       ValueChanged="text => SetAddressText(line, text)"
                                                                       AddSaved="text => OnCaseAddressAddAsync(addressField, text)"
                                                                       RenameSaved="pair => OnCaseAddressRenameAsync(addressField, pair)" />
@@ -3011,7 +3047,8 @@
                                                                       Suggestions="@LoadCaseSummarySavedLocations(lrField)"
                                                                       NoneValue="@(isWpLoc ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
                                                                       Placeholder="Start typing a location"
-                                                                      EmptyHint="Search saved locations. Use the + button to add a new one."
+                                                                      EmptyHint="@(_reviewGearOn ? "Search saved locations. Use the + button to add a new one." : "Search saved locations.")"
+                                                                      ShowAdd="_reviewGearOn"
                                                                       ValueChanged="value => SetRequestedLocations(line, value)"
                                                                       AddSaved="text => OnCaseLocationAddAsync(lrField, text)"
                                                                       RenameSaved="pair => OnCaseLocationRenameAsync(lrField, pair)" />
@@ -4078,16 +4115,31 @@
             application,
             WordReportGenerationContext.ForRosterPersons(personIds));
 
-        return catalog.Entries
+        var items = new List<PeoplePreviewMenuItem>
+        {
+            new(
+                ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
+                Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm"),
+                Guid.Empty,
+                FocusEntryKey: ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey),
+        };
+
+        items.AddRange(catalog.Entries
             .OrderBy(entry => entry.SortOrder)
             .ThenBy(entry => entry.DisplayName, StringComparer.OrdinalIgnoreCase)
             .Select(entry => new PeoplePreviewMenuItem(
                 entry.EntryKey,
                 ToTitleCaseLabel(string.IsNullOrWhiteSpace(entry.DisplayName) ? entry.EntryKey : entry.DisplayName),
                 Guid.Empty,
-                FocusEntryKey: entry.EntryKey))
-            .ToList();
+                FocusEntryKey: entry.EntryKey)));
+        return items;
     }
+
+    private static bool IsApplicationFormMenuItem(PeoplePreviewMenuItem item) =>
+        string.Equals(
+            item.FocusEntryKey,
+            ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
+            StringComparison.Ordinal);
 
     private async Task PreviewDocumentSectionAsync(PeoplePreviewMenuItem item)
     {
@@ -4117,6 +4169,21 @@
             return;
 
         ClosePeoplePreviewMenus();
+        if (IsApplicationFormMenuItem(item))
+        {
+            await PreviewSlotService.OpenDocumentCopiesAsync(
+                new DocumentCopiesSlotRequest
+                {
+                    ApplicationProfileInstancePersonIds = ids,
+                    ApplicationProfileInstanceId = Snapshot.ApplicationProfileInstanceId,
+                    FocusSlotKey = ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
+                    FocusDisplayName = item.Label,
+                    OpenPreviewOnly = true,
+                },
+                PreviewSlotOwnerViewId);
+            return;
+        }
+
         await PreviewSlotService.OpenResminamalarAsync(
             new ResminamalarSlotRequest
             {

@@ -1,4 +1,13 @@
 
+### 2026-11-28 — Application form card on the Templates list
+
+- **Need**: The filled visa application PDF was missing from the case Templates panel. That list showed only Word and Excel letters.
+- **Cause**: Profile rows of kind PdfForm are excluded from the Resminamalar catalog. The filled form was only reachable from Review document copies.
+- **Fix**: This profile leads with an Application form card. Preview opens the filled XFA in the preview slot for the header-selected people. The card is not a catalog row and is not part of Download package.
+- **Officer**: Stop F5, rebuild, hard-refresh. People tab → check rows → **Preview Resminamalar**. Application form is the first item and opens the filled PDF. The same card is first on Templates → This profile.
+- **Prevent**: Do not add the Application form card to ZIP selection or treat it as a Word/Excel template.
+- **Cross-skill**: document-copies, pdf-form-mapping
+
 ### 2026-09-30 — Add existing template follows Fluent Dark
 
 - **Need**: Resminamalar **Add existing template** was a white card (drop zone, name, Save to, Project contract, Data, Cancel) on the dark catalog.

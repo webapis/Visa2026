@@ -12,6 +12,8 @@
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
+@using Visa2026.Module.BusinessObjects.OfficerShell
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
 @using Visa2026.Module.Services.UserReports
@@ -35,7 +37,7 @@
                             aria-selected="@(IsThisProfilePane ? "true" : "false")"
                             class="@ThisProfilePaneTabCss"
                             @onclick="ShowThisProfilePaneAsync">
-                        @FormatMsg("ApplicationReportPackage.ThisProfileTab", VisibleCatalogEntries.Count)
+                        @FormatMsg("ApplicationReportPackage.ThisProfileTab", ThisProfileCardCount)
                     </button>
                     <button type="button"
                             role="tab"
@@ -277,7 +279,7 @@
                 </div>
             }
         }
-        else if (VisibleCatalogEntries.Count == 0)
+        else if (VisibleCatalogEntries.Count == 0 && !ShowApplicationFormCard)
         {
             <div class="app-item-doc-copies__empty" role="status">
                 <p>@Msg("ApplicationReportPackage.Empty")</p>
@@ -477,6 +479,7 @@
     private bool _packageConfirmPending;
     private bool _packageBusy;
     private bool _previewBusy;
+    private bool _applicationFormPreviewBusy;
     private bool _scanReviewBusy;
     private string? _previewEntryKey;
     private string? _handledFocusEntryKey;
@@ -505,6 +508,52 @@
 
     private RenderFragment RenderCatalogCards() =>
         @<div class="resminamalar-catalog__cards">
+            @if (ShowApplicationFormCard)
+            {
+                <section class="resminamalar-catalog__card app-report-package__entry app-report-package__entry--ready @(_applicationFormPreviewBusy ? "app-report-package__entry--previewing" : null)"
+                         aria-label="@ApplicationFormTitle">
+                    <div class="resminamalar-catalog__card-head">
+                        <span class="resminamalar-catalog__nav-icon resminamalar-catalog__nav-icon--pdf" aria-hidden="true">
+                            @((MarkupString)ApplicationFormIconSvg)
+                        </span>
+                        <div class="resminamalar-catalog__main">
+                            <span class="resminamalar-catalog__title">@ApplicationFormTitle</span>
+                            <span class="resminamalar-catalog__summary">@ApplicationFormSummary</span>
+                        </div>
+                        <div class="resminamalar-catalog__actions">
+                            <span class="app-report-package__readiness app-report-package__readiness--ready">
+                                @Msg("ApplicationReportPackage.Readiness.Ready")
+                            </span>
+                            @if (_applicationFormPreviewBusy)
+                            {
+                                <span class="app-report-package__preview-busy-label" role="status">
+                                    @FormatMsg("ApplicationReportPackage.Preview.Downloading", ApplicationFormTitle)
+                                </span>
+                            }
+                            else
+                            {
+                                <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                          RenderStyle="ButtonRenderStyle.Link"
+                                          SizeMode="SizeMode.Small"
+                                          CssClass="app-item-doc-copies__action-btn"
+                                          Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
+                                          Click="@PreviewApplicationFormAsync" />
+                            }
+                        </div>
+                    </div>
+                    @if (_applicationFormPreviewBusy)
+                    {
+                        <div class="resminamalar-catalog__card-body">
+                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", ApplicationFormTitle)">
+                                <div class="app-report-package__preview-progress-track">
+                                    <div class="app-report-package__preview-progress-indeterminate"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </section>
+            }
             @foreach (var entry in VisibleCatalogEntries)
             {
                 <section @key="entry.EntryKey"
@@ -714,6 +763,25 @@
     private bool IsCatalogPane => !_showRecycleBinPane;
 
     private bool IsThisProfilePane => !_showRecycleBinPane && !_showSharedPane;
+
+    private bool CanShowApplicationForm =>
+        ApplicationProfileInstanceId != Guid.Empty
+        && ApplicationItemIds.Count > 0;
+
+    private bool ShowApplicationFormCard =>
+        IsThisProfilePane && CanShowApplicationForm;
+
+    private int ThisProfileCardCount =>
+        VisibleCatalogEntries.Count + (CanShowApplicationForm ? 1 : 0);
+
+    private string ApplicationFormTitle =>
+        Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm");
+
+    private string ApplicationFormSummary =>
+        Msg("ApplicationItemDocumentCopies.Summary.ApplicationForm");
+
+    private const string ApplicationFormIconSvg =
+        """<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>""";
 
     private bool IsSharedPane => !_showRecycleBinPane && _showSharedPane;
 
@@ -1988,6 +2056,40 @@
             RecycleConfirmKind.Move => FormatMsg("ApplicationReportPackage.RecycleBin.Moving", name),
             _ => FormatMsg("ApplicationReportPackage.RecycleBin.Restoring", name),
         };
+    }
+
+    private async Task PreviewApplicationFormAsync()
+    {
+        if (!ShowApplicationFormCard || _previewBusy || _packageBusy || _applicationFormPreviewBusy)
+            return;
+
+        var personIds = ApplicationItemIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (personIds.Count == 0)
+            return;
+
+        _applicationFormPreviewBusy = true;
+        _previewBusy = true;
+        ClearStatusMessages();
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            await PreviewSlotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
+            {
+                ApplicationProfileInstancePersonIds = personIds,
+                ApplicationProfileInstanceId = ApplicationProfileInstanceId,
+                FocusSlotKey = ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
+                FocusDisplayName = ApplicationFormTitle,
+                OpenPreviewOnly = true,
+            }, OfficerShellViewIds.DetailView);
+        }
+        finally
+        {
+            _applicationFormPreviewBusy = false;
+            _previewBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)

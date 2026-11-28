@@ -112,6 +112,10 @@
   background: #16a34a;
 }
 
+.resminamalar-catalog__nav-icon--pdf {
+  background: #0e7490;
+}
+
 .resminamalar-catalog__main {
   flex: 1 1 auto;
   min-width: 0;

@@ -347,7 +347,7 @@ namespace Visa2026.Module.Services
                 }
             }
 
-            ApplyInvitationStayFields(data, application);
+            ApplyInvitationStayFields(data, application, item, objectSpace);
             RememberVisaDegreeLocalizationKey(data, application);
 
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);
@@ -358,10 +358,15 @@ namespace Visa2026.Module.Services
         internal const string InvitationStayAddressKey = "topmostSubform[0].Page2[0]._35[0]";
 
         /// <summary>
-        /// Fields 33–35: case Address 1 when required; legacy InvitationAddress only as dual-read fallback.
-        /// Otherwise the seeded address-of-residence mappings are left as they were.
+        /// Fields 33–34: region and city codes inferred from Address 1 free text.
+        /// Field 35: Address 2 when present, then Address 1. Address 2 is optional.
+        /// Legacy InvitationAddress remains only when the profile does not use Address 1.
         /// </summary>
-        private static void ApplyInvitationStayFields(Dictionary<string, object> data, ApplicationProfileInstance application)
+        private static void ApplyInvitationStayFields(
+            Dictionary<string, object> data,
+            ApplicationProfileInstance application,
+            ApplicationRosterMergeLine? item,
+            IObjectSpace? objectSpace)
         {
             var profile = application?.ApplicationProfile;
             if (profile == null)
@@ -369,23 +374,15 @@ namespace Visa2026.Module.Services
 
             if (profile.RequireAddress1)
             {
-                var freeText = CaseAddressAutocomplete.NormalizeDisplay(application.Address1DefaultText);
-                if (!string.IsNullOrEmpty(freeText))
-                {
-                    SetInvitationStayField(data, InvitationStayAddressKey, freeText);
-                    return;
-                }
+                var address1 = FirstStayText(item?.Address1Text, application.Address1DefaultText);
+                var address2 = FirstStayText(item?.Address2Text, application.Address2DefaultText);
+                SetInvitationStayField(data, InvitationStayAddressKey, PdfStayAddressFromFreeText.Combine(address2, address1));
 
-#pragma warning disable CS0618
-                var address1 = application.Address1;
-#pragma warning restore CS0618
-                if (address1 != null)
-                {
-                    SetInvitationStayField(data, InvitationStayRegionKey, address1.Region?.PdfForm_Code);
-                    SetInvitationStayField(data, InvitationStayCityKey, address1.City?.PdfForm_Code);
-                    SetInvitationStayField(data, InvitationStayAddressKey, address1.FullAddress);
-                    return;
-                }
+                var catalog = PdfStayAddressFromFreeText.ResolveCatalog(objectSpace);
+                var codes = PdfStayAddressFromFreeText.Extract(address1, catalog.Regions, catalog.Cities);
+                SetInvitationStayField(data, InvitationStayRegionKey, codes.RegionCode);
+                SetInvitationStayField(data, InvitationStayCityKey, codes.CityCode);
+                return;
             }
 
 #pragma warning disable CS0618
@@ -409,6 +406,12 @@ namespace Visa2026.Module.Services
             }
 
             data[PdfVisaDegreeChoiceList.LocalizationKeyDataKey] = key.Trim();
+        }
+
+        private static string FirstStayText(string? preferred, string? fallback)
+        {
+            var first = CaseAddressAutocomplete.NormalizeDisplay(preferred);
+            return first.Length > 0 ? first : CaseAddressAutocomplete.NormalizeDisplay(fallback);
         }
 
         private static void SetInvitationStayField(Dictionary<string, object> data, string key, string? value)

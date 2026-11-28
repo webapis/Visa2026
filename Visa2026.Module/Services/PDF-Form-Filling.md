@@ -193,9 +193,9 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page2[0]._30[0]` | 30. Soňky berlen wiza | textEdit | `Pdf_LastIssuedVisaSummary` | Latest linked visa, including an expired one on Çakylyk Almak: degree, entry type, number, start-end. |
 | `topmostSubform[0].Page2[0]._27[0]` | Duration of stay | textEdit | `Application.VisaPeriod.PdfForm_Count` | |
 | `topmostSubform[0].Page2[0]._271[0]`| Duration unit | choiceList | `Application.VisaPeriod.PdfForm__Code` | Raw: 'GUN', 'AY', 'YYL' |
-| `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | When the profile Invitation address switch is on: `InvitationAddress.Region.PdfForm_Code` |
-| `topmostSubform[0].Page2[0]._34[0]` | District of stay | choiceList | `CurrentAddressOfResidence.City.PdfForm_Code` | When the profile Invitation address switch is on: `InvitationAddress.City.PdfForm_Code` |
-| `topmostSubform[0].Page2[0]._35[0]` | Stay address | textEdit | `CurrentAddressOfResidence.FullAddress` | When the profile Invitation address switch is on: chosen place + other invitation places (no region or city) |
+| `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | Address 1 free text | Region code (`AS`, `AH`, …) inferred from the Address 1 text. Not the Region business object. |
+| `topmostSubform[0].Page2[0]._34[0]` | District of stay | choiceList | Address 1 free text | City code (`AH47`, `AS69`, …) inferred from the Address 1 text. Not the City business object. |
+| `topmostSubform[0].Page2[0]._35[0]` | Stay address | textEdit | Address 2 + Address 1 | Address 2 is optional. When it is empty, field 35 is Address 1 only. |
 
 ---
 

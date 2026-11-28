@@ -25,6 +25,16 @@ Purpose: **XFA fill, PdfFormMapping rules, template, gates, converters** — not
 
 ## Entries
 
+### 2026-11-28 — Fields 33–35 from Address 1 free text (mapping)
+
+- **Symptom**: PDF 33 Welaýaty and 34 Şäheri stayed empty. They were filled from Region and City business objects. Address 1 is now one free-text line that already contains the region and city.
+- **Try**: Preview the application form for a case whose Address 1 names a welaýat and etrap.
+- **Test**: `PdfMappingHelperTests.MapApplicationData_UsesAddress1WhenRequireAddress1` and `MapApplicationData_Address2Optional_Field35IsAddress1Only`.
+- **Root cause**: Stay fields copied `AddressOfResidence.Region` / `City` codes, or wrote only Address 1 into field 35.
+- **Fix**: Infer 33 and 34 choice codes from Address 1 text (catalog names, including `welaýatynyň`). Field 35 is Address 2, then Address 1. Address 2 is optional, so an empty Address 2 leaves field 35 as Address 1 only.
+- **Prevent**: Do not read the case Region or City business object to fill 33 or 34.
+- **Cross-skill**: —
+
 ### 2026-10-07 — Family citizenship on every Maşgala line (mapping)
 
 - **Symptom**: Application form item 18 showed citizenship only after the last family member.
