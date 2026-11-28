@@ -149,9 +149,23 @@ else
                 else if (active.Kind == PersonIntakeStepKind.Form)
                 {
                     var showPhoto = active.FieldKeys.Contains(PersonPendingTargets.Photo);
-                    <div class="person-intake-wizard__form-fields @(showPhoto ? "has-photo" : null)">
-                    <div class="person-intake-wizard__form-fields-main">
-                    @foreach (var key in active.FieldKeys)
+                    var sideKeys = active.CompanionFieldKeys;
+                    var showSide = sideKeys.Count > 0;
+                    var columns = new List<(string Css, string Title, IReadOnlyList<string> Keys)>
+                    {
+                        ("person-intake-wizard__form-fields-main", null, active.FieldKeys)
+                    };
+                    if (showSide)
+                        columns.Add(("person-intake-wizard__form-fields-side", active.CompanionTitle, sideKeys));
+                    <div class="person-intake-wizard__form-fields @(showPhoto ? "has-photo" : null) @(showSide ? "has-companion" : null)">
+                    @foreach (var column in columns)
+                    {
+                    <div class="@column.Css">
+                    @if (!string.IsNullOrWhiteSpace(column.Title))
+                    {
+                        <h3 class="person-intake-wizard__form-column-title">@column.Title</h3>
+                    }
+                    @foreach (var key in column.Keys)
                     {
                         if (key == PersonPendingTargets.Age || key == PersonPendingTargets.Photo)
                             continue;
@@ -202,6 +216,7 @@ else
                         </div>
                     }
                     </div>
+                    }
                     @if (showPhoto)
                     {
                         var photoKey = PersonPendingTargets.Photo;
@@ -588,7 +603,7 @@ else
     private bool StepHasLookupTools(PersonIntakeStep step) =>
         !Access.IsViewOnly && step.Kind switch
         {
-            PersonIntakeStepKind.Form => step.FieldKeys.Any(k => LookupFieldKeys.Contains(k) && Access.CanWriteField(k)),
+            PersonIntakeStepKind.Form => step.FieldKeys.Concat(step.CompanionFieldKeys).Any(k => LookupFieldKeys.Contains(k) && Access.CanWriteField(k)),
             PersonIntakeStepKind.Record => LookupRecordKeys.Contains(step.RecordTargetKey),
             _ => false
         };
@@ -1131,14 +1146,6 @@ else
             return false;
 
         await SaveRequested.InvokeAsync();
-        if (State.OpenOverview)
-        {
-            State.OpenOverview = false;
-            _stepIndex = 0;
-            if (Person != null)
-                _overviewPersonId = Person.ID;
-        }
-
         return !State.Unsaved;
     }
 
@@ -1152,13 +1159,6 @@ else
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        if (State?.OpenOverview == true)
-        {
-            State.OpenOverview = false;
-            _stepIndex = 0;
-            if (Person != null)
-                _overviewPersonId = Person.ID;
-        }
 
         if (!ShowIncompleteOverview || Person == null)
             return;
@@ -1179,7 +1179,7 @@ else
         if (!ShowIncompleteOverview)
             return steps;
 
-        steps.Insert(0, new PersonIntakeStep
+        steps.Add(new PersonIntakeStep
         {
             Id = "overview",
             Title = T("Step.Overview"),
@@ -1196,13 +1196,16 @@ else
         {
             case PersonIntakeStepKind.Form:
                 var fields = step.FieldKeys.Where(Access.CanReadField).ToList();
-                return fields.Count == 0 ? null : new PersonIntakeStep
+                var companion = step.CompanionFieldKeys.Where(Access.CanReadField).ToList();
+                return fields.Count == 0 && companion.Count == 0 ? null : new PersonIntakeStep
                 {
                     Id = step.Id,
                     Title = step.Title,
                     Hint = step.Hint,
                     Kind = step.Kind,
-                    FieldKeys = fields
+                    FieldKeys = fields,
+                    CompanionFieldKeys = companion,
+                    CompanionTitle = step.CompanionTitle
                 };
             case PersonIntakeStepKind.Record:
                 return Access.CanReadStep(step.RecordTargetKey) ? step : null;
@@ -1350,6 +1353,8 @@ else
                 builder.AddAttribute(seq++, nameof(OfficerDateEdit.DateChanged), EventCallback.Factory.Create<DateTime?>(this, value =>
                 {
                     Person.DateOfBirth = value ?? default;
+                    if (Person.DateOfBirth != default)
+                        State.PendingKeys.Remove(PersonPendingTargets.DateOfBirth);
                 }));
                 builder.AddAttribute(seq++, nameof(OfficerDateEdit.CssClass), "person-intake-wizard__input");
                 builder.AddAttribute(seq++, nameof(OfficerDateEdit.Enabled), !locked);
@@ -1471,13 +1476,7 @@ else
         builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Options), options);
         builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Value), current?.ID);
         builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.ValueChanged),
-            EventCallback.Factory.Create<Guid?>(this, id =>
-            {
-                if (id is Guid guid && guid != Guid.Empty)
-                    assign(ObjectSpace.GetObjectByKey<T>(guid));
-                else
-                    assign(null);
-            }));
+            EventCallback.Factory.Create<Guid?>(this, id => AssignLookup(key, assign, id)));
         builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.CssClass),
             css + " person-intake-wizard__lookup");
         builder.AddAttribute(seq++, nameof(PersonIntakeSearchableLookup.Enabled), !deferred);
@@ -1926,6 +1925,7 @@ else
         using var buffer = new MemoryStream();
         await stream.CopyToAsync(buffer);
         Person.Photo = buffer.ToArray();
+        State.PendingKeys.Remove(PersonPendingTargets.Photo);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -1977,7 +1977,7 @@ else
     private static List<PersonIntakeFinding> findingsForStep(PersonIntakeStep step, IReadOnlyList<PersonIntakeFinding> all)
     {
         if (step.Kind == PersonIntakeStepKind.Form)
-            return all.Where(f => step.FieldKeys.Contains(f.TargetKey)).ToList();
+            return all.Where(f => step.FieldKeys.Contains(f.TargetKey) || step.CompanionFieldKeys.Contains(f.TargetKey)).ToList();
         if (step.Kind == PersonIntakeStepKind.Record)
             return all.Where(f => f.TargetKey == step.RecordTargetKey).ToList();
         if (step.Kind == PersonIntakeStepKind.Others)
@@ -2038,6 +2038,25 @@ else
                 Person.ForeignAddress = value;
                 break;
         }
+
+        if (!string.IsNullOrWhiteSpace(value))
+            State.PendingKeys.Remove(key);
+    }
+
+    private void AssignLookup<T>(string key, Action<T?> assign, Guid? id) where T : BaseObject
+    {
+        if (ObjectSpace == null || Person == null)
+            return;
+
+        if (id is Guid guid && guid != Guid.Empty)
+        {
+            assign(ObjectSpace.GetObjectByKey<T>(guid));
+            State.PendingKeys.Remove(key);
+        }
+        else
+            assign(null);
+
+        MarkUnsaved();
     }
 
     private void EnsureVisaFamilyEditor()
@@ -2125,6 +2144,8 @@ else
             ? (Person.IsEmployee ? VisaFamilyMemberLinesHelper.NoneValue : string.Empty)
             : formatted;
         Person.VisaApplicationFamilyMembersText = stored;
+        if (!string.IsNullOrWhiteSpace(stored))
+            State.PendingKeys.Remove(PersonPendingTargets.VisaApplicationFamilyMembersText);
         MarkUnsaved();
         _familySourceText = stored;
         _familyPopupVisible = false;
@@ -2215,7 +2236,7 @@ else
 
         var pendingCount = stepFindings.Count(f => f.State == PersonIntakeItemState.Pending);
         if (pendingCount > 0 && stepFindings.All(f => f.State != PersonIntakeItemState.Unresolved))
-            return ("is-pending", "!", PersonIntakeText.Format("Status.PendingCount", pendingCount));
+            return ("is-done", "✓", PersonIntakeText.Format("Status.PendingCount", pendingCount));
 
         if (stepFindings.All(f => f.State == PersonIntakeItemState.Filled))
             return ("is-done", "✓", T("Status.Complete"));

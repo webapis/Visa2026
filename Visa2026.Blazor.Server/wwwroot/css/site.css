@@ -7191,17 +7191,29 @@ button.state-preview-doc {
 .person-intake-wizard__form-fields {
     max-width: 40rem;
 }
-.person-intake-wizard__form-fields.has-photo {
+.person-intake-wizard__form-fields.has-photo,
+.person-intake-wizard__form-fields.has-companion {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
-    gap: 3rem;
+    justify-content: flex-start;
+    gap: 2.5rem;
     width: 100%;
     max-width: none;
 }
-.person-intake-wizard__form-fields-main {
-    flex: 0 1 40rem;
+.person-intake-wizard__form-fields-main,
+.person-intake-wizard__form-fields-side {
+    flex: 1 1 0;
     min-width: 0;
+    max-width: 40rem;
+}
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__form-fields-main,
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__form-fields-side {
+    max-width: none;
+}
+.person-intake-wizard__form-column-title {
+    margin: 0 0 0.85rem;
+    font-size: 1rem;
+    font-weight: 600;
 }
 .person-intake-wizard__photo-aside {
     flex: 0 0 auto;
@@ -7210,7 +7222,7 @@ button.state-preview-doc {
     align-items: flex-start;
     gap: 0.55rem;
     margin-top: 0.15rem;
-    margin-left: auto;
+    margin-left: 0.5rem;
     margin-right: 1.5rem;
     min-width: 10rem;
 }
@@ -7220,8 +7232,9 @@ button.state-preview-doc {
 .person-intake-wizard__photo-aside .person-intake-wizard__photo {
     max-width: 9rem;
 }
-@media (max-width: 900px) {
-    .person-intake-wizard__form-fields.has-photo {
+@media (max-width: 1100px) {
+    .person-intake-wizard__form-fields.has-photo,
+    .person-intake-wizard__form-fields.has-companion {
         flex-direction: column;
     }
 
@@ -7232,6 +7245,20 @@ button.state-preview-doc {
 }
 .person-intake-wizard__form-fields .person-intake-wizard__field-row {
     grid-template-columns: minmax(8rem, 11rem) minmax(0, 22rem) auto;
+}
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__field-row {
+    grid-template-columns: minmax(7.5rem, 9.5rem) minmax(0, 1fr) auto;
+}
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__input,
+.person-intake-wizard__form-fields.has-companion select,
+.person-intake-wizard__form-fields.has-companion .officer-date-edit-host,
+.person-intake-wizard__form-fields.has-companion .officer-date-edit,
+.person-intake-wizard__form-fields.has-companion .dxbl-date-edit,
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__lookup-host,
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__lookup,
+.person-intake-wizard__form-fields.has-companion .person-intake-wizard__dob-age,
+.person-intake-wizard__form-fields.has-companion .visa-family-lines-inline {
+    max-width: none;
 }
 .person-intake-wizard__form-fields .person-intake-wizard__input,
 .person-intake-wizard__form-fields select,

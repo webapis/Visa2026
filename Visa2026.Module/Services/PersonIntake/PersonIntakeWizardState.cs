@@ -20,9 +20,6 @@ public sealed class PersonIntakeWizardState
     /// <summary>True after the officer changes this person and before the next successful save.</summary>
     public bool Unsaved { get; set; }
 
-    /// <summary>After an incomplete save, the wizard opens Overview so the missing items are visible.</summary>
-    public bool OpenOverview { get; set; }
-
     public List<PersonIntakePassportDraft> PassportDrafts { get; } = new();
     public List<PersonIntakeEducationDraft> EducationDrafts { get; } = new();
     public List<PersonIntakeMedicalDraft> MedicalDrafts { get; } = new();

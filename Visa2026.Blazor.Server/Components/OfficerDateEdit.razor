@@ -6,10 +6,14 @@
   DateTimeMaskAdvancingController / VisaFamilyMembersTextComponent).
   Mouse wheel must not change day/month/year (keyboard only).
 *@
-<div class="officer-date-edit-host" @onwheel:preventDefault @onwheel:stopPropagation>
+<div class="officer-date-edit-host"
+     @onfocusin="OnFocusIn"
+     @onfocusout="OnFocusOut"
+     @onwheel:preventDefault
+     @onwheel:stopPropagation>
     <DxDateEdit @ref="_editor"
-                @bind-Date="Date"
-                @bind-Date:after="NotifyDateChangedAsync"
+                @bind-Date="_date"
+                @bind-Date:after="OnDateChangedAsync"
                 InputId="@InputId"
                 CssClass="@ResolvedCssClass"
                 Mask="dd.MM.yyyy"
@@ -32,16 +36,49 @@
     [Parameter] public bool ReadOnly { get; set; }
 
     private DxDateEdit<DateTime?>? _editor;
+    private DateTime? _date;
+    private bool _editing;
+    private bool _holdParameter;
 
     public Task FocusAsync() =>
         _editor is null ? Task.CompletedTask : _editor.FocusAsync().AsTask();
+
+    protected override void OnParametersSet()
+    {
+        // A parent refresh while the caret is in the field pushes the last saved value
+        // and would wipe the date the officer is typing.
+        if (_editing)
+            return;
+
+        if (Nullable.Equals(_date, Date))
+            return;
+
+        _holdParameter = Date is not null;
+        _date = Date;
+    }
+
+    protected override void OnAfterRender(bool firstRender) => _holdParameter = false;
+
+    private void OnFocusIn() => _editing = true;
+
+    private void OnFocusOut() => _editing = false;
 
     private string ResolvedCssClass =>
         (string.IsNullOrWhiteSpace(CssClass)
             ? "issue-issued-header-slot__input officer-date-edit"
             : $"{CssClass} officer-date-edit")
-        + (Date.HasValue ? " is-filled" : string.Empty);
+        + (_date.HasValue ? " is-filled" : string.Empty);
 
-    private Task NotifyDateChangedAsync() =>
-        DateChanged.HasDelegate ? DateChanged.InvokeAsync(Date) : Task.CompletedTask;
+    private Task OnDateChangedAsync()
+    {
+        // Opening the editor with a date can report empty once. That is not the officer clearing it.
+        if (_holdParameter && _date is null && Date is not null)
+        {
+            _date = Date;
+            return Task.CompletedTask;
+        }
+
+        _holdParameter = false;
+        return DateChanged.HasDelegate ? DateChanged.InvokeAsync(_date) : Task.CompletedTask;
+    }
 }

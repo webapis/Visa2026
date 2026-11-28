@@ -181,12 +181,6 @@ public sealed class PersonIntakeWizardPropertyEditor : BlazorPropertyEditorBase,
             model.State.Unsaved = false;
             _cleanSave = true;
             ReadValueCore();
-            if (person.IsDataIncomplete)
-            {
-                model.State.OpenOverview = true;
-                model.ShowIncompleteOverview = true;
-            }
-
             return Task.CompletedTask;
         }
 

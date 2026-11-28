@@ -33,6 +33,9 @@ public sealed class PersonIntakeStep
     public string Hint { get; init; }
     public PersonIntakeStepKind Kind { get; init; }
     public IReadOnlyList<string> FieldKeys { get; init; } = Array.Empty<string>();
+    /// <summary>Fields shown in a column to the right of <see cref="FieldKeys"/> on the same step.</summary>
+    public IReadOnlyList<string> CompanionFieldKeys { get; init; } = Array.Empty<string>();
+    public string CompanionTitle { get; init; }
     public string RecordTargetKey { get; init; }
     public IReadOnlyList<PersonIntakeOtherRecordOption> OtherOptions { get; init; } = Array.Empty<PersonIntakeOtherRecordOption>();
 }
@@ -85,10 +88,13 @@ public static class PersonIntakeStepCatalog
 
         var steps = new List<PersonIntakeStep>
         {
-            FormStep("identity", PersonIntakeText.Get("Step.Identity"), PersonIntakeText.Get("Step.Identity.Hint"), identityFields.ToArray()),
-            FormStep("work", PersonIntakeText.Get("Step.Work"), employee
-                ? PersonIntakeText.Get("Step.Work.HintEmployee")
-                : PersonIntakeText.Get("Step.Work.HintFamilyMember"), workFields.ToArray())
+            FormStep(
+                "identity",
+                PersonIntakeText.Get("Step.Identity"),
+                PersonIntakeText.Get("Step.Identity.Hint"),
+                identityFields.ToArray(),
+                workFields.ToArray(),
+                PersonIntakeText.Get("Step.Work"))
         };
 
         steps.Add(RecordStep("passports", PersonIntakeText.Get("Step.Passports"), PersonPendingTargets.Passport));
@@ -216,14 +222,22 @@ public static class PersonIntakeStepCatalog
             Kind = PersonIntakeStepKind.FamilyMembers
         };
 
-    private static PersonIntakeStep FormStep(string id, string title, string hint, string[] keys) =>
+    private static PersonIntakeStep FormStep(
+        string id,
+        string title,
+        string hint,
+        string[] keys,
+        string[] companionKeys = null,
+        string companionTitle = null) =>
         new()
         {
             Id = id,
             Title = title,
             Hint = hint,
             Kind = PersonIntakeStepKind.Form,
-            FieldKeys = keys
+            FieldKeys = keys,
+            CompanionFieldKeys = companionKeys ?? Array.Empty<string>(),
+            CompanionTitle = companionTitle
         };
 
     private static PersonIntakeStep RecordStep(string id, string title, string recordKey, string hint = null) =>

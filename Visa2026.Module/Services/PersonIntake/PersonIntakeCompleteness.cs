@@ -169,9 +169,14 @@ public static class PersonIntakeCompleteness
         return findings;
     }
 
+    /// <summary>
+    /// Wizard saves pass the officer's current marks. A row left from the last save
+    /// must not keep a field pending after the officer has turned that mark off and entered a value.
+    /// </summary>
     private static bool IsPending(Person person, string targetKey, HashSet<string> draftPendingKeys) =>
-        draftPendingKeys != null && draftPendingKeys.Contains(targetKey)
-        || HasPending(person, targetKey);
+        draftPendingKeys != null
+            ? draftPendingKeys.Contains(targetKey)
+            : HasPending(person, targetKey);
 
     public static bool IsLegacyOnly(Person person)
     {
@@ -226,37 +231,55 @@ public static class PersonIntakeCompleteness
     /// <summary>
     /// A pending scalar is stored empty. Personal number stays null rather than the sentinel "0".
     /// Child records are not created or deleted here.
+    /// Uses the rows currently on the person.
     /// </summary>
     public static void ClearPendingScalars(Person person)
     {
-        if (person == null)
+        if (person?.PendingItems == null)
             return;
 
-        if (HasPending(person, PersonPendingTargets.DateOfBirth))
+        ClearPendingScalars(
+            person,
+            person.PendingItems
+                .Where(item => item != null && !string.IsNullOrWhiteSpace(item.TargetKey))
+                .Select(item => item.TargetKey));
+    }
+
+    /// <summary>
+    /// Clears only the marks the officer is saving. A value entered after the previous
+    /// Not received row is left as the officer typed it.
+    /// </summary>
+    public static void ClearPendingScalars(Person person, IEnumerable<string> pendingKeys)
+    {
+        if (person == null || pendingKeys == null)
+            return;
+
+        var keys = pendingKeys as HashSet<string> ?? new HashSet<string>(pendingKeys, StringComparer.Ordinal);
+        if (keys.Contains(PersonPendingTargets.DateOfBirth))
             person.DateOfBirth = default;
-        if (HasPending(person, PersonPendingTargets.Gender))
+        if (keys.Contains(PersonPendingTargets.Gender))
             person.Gender = null;
-        if (HasPending(person, PersonPendingTargets.PersonalNumber))
+        if (keys.Contains(PersonPendingTargets.PersonalNumber))
             person.PersonalNumber = null;
-        if (HasPending(person, PersonPendingTargets.BirthPlace))
+        if (keys.Contains(PersonPendingTargets.BirthPlace))
             person.BirthPlace = null;
-        if (HasPending(person, PersonPendingTargets.CountryOfBirth))
+        if (keys.Contains(PersonPendingTargets.CountryOfBirth))
             person.CountryOfBirth = null;
-        if (HasPending(person, PersonPendingTargets.Nationality))
+        if (keys.Contains(PersonPendingTargets.Nationality))
             person.Nationality = null;
-        if (HasPending(person, PersonPendingTargets.MaritalStatus))
+        if (keys.Contains(PersonPendingTargets.MaritalStatus))
             person.MaritalStatus = null;
-        if (HasPending(person, PersonPendingTargets.VisaApplicationFamilyMembersText))
+        if (keys.Contains(PersonPendingTargets.VisaApplicationFamilyMembersText))
             person.VisaApplicationFamilyMembersText = null;
-        if (HasPending(person, PersonPendingTargets.ForeignAddress))
+        if (keys.Contains(PersonPendingTargets.ForeignAddress))
             person.ForeignAddress = null;
-        if (HasPending(person, PersonPendingTargets.ForeignAddressCountry))
+        if (keys.Contains(PersonPendingTargets.ForeignAddressCountry))
             person.ForeignAddressCountry = null;
-        if (HasPending(person, PersonPendingTargets.ProjectContract) && person.PersonRole != PersonRecordRole.FamilyMember)
+        if (keys.Contains(PersonPendingTargets.ProjectContract) && person.PersonRole != PersonRecordRole.FamilyMember)
             person.ProjectContract = null;
-        if (HasPending(person, PersonPendingTargets.Subcontractor))
+        if (keys.Contains(PersonPendingTargets.Subcontractor))
             person.Subcontractor = null;
-        if (HasPending(person, PersonPendingTargets.Photo))
+        if (keys.Contains(PersonPendingTargets.Photo))
             person.Photo = null;
     }
 

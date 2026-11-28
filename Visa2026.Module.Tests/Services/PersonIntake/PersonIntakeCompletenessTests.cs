@@ -178,6 +178,62 @@ public class PersonIntakeCompletenessTests
     }
 
     [Fact]
+    public void EnteredDate_IsKept_WhenTheOldNotReceivedRowIsStillOnThePerson()
+    {
+        var person = Employee();
+        person.FirstName = "Demo";
+        person.LastName = "Name";
+        var birth = new DateTime(1971, 10, 19);
+        person.DateOfBirth = birth;
+        person.BirthPlace = "Ashgabat";
+        person.PersonalNumber = "AB123";
+        person.ForeignAddress = "1 Main Street";
+        person.Photo = new byte[] { 1, 2, 3 };
+        person.PendingItems.Add(Pending(PersonPendingTargets.DateOfBirth, PersonIncompleteDataLabels.PersonalData));
+        person.PendingItems.Add(Pending(PersonPendingTargets.BirthPlace, PersonIncompleteDataLabels.PersonalData));
+        person.PendingItems.Add(Pending(PersonPendingTargets.PersonalNumber, PersonIncompleteDataLabels.PersonalData));
+        person.PendingItems.Add(Pending(PersonPendingTargets.ForeignAddress, PersonIncompleteDataLabels.Address));
+        person.PendingItems.Add(Pending(PersonPendingTargets.Photo, PersonIncompleteDataLabels.Photo));
+        var state = new PersonIntakeWizardState();
+
+        var birthState = PersonIntakeCompleteness
+            .Evaluate(person, state.PendingKeys)
+            .Single(finding => finding.TargetKey == PersonPendingTargets.DateOfBirth)
+            .State;
+        Assert.Equal(PersonIntakeItemState.Filled, birthState);
+
+        PersonIntakeCompleteness.AcceptMissingAsNotReceived(person, state);
+        PersonIntakeCompleteness.ClearPendingScalars(person, state.PendingKeys);
+
+        Assert.DoesNotContain(PersonPendingTargets.DateOfBirth, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.BirthPlace, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.PersonalNumber, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.ForeignAddress, state.PendingKeys);
+        Assert.DoesNotContain(PersonPendingTargets.Photo, state.PendingKeys);
+        Assert.Equal(birth, person.DateOfBirth);
+        Assert.Equal("Ashgabat", person.BirthPlace);
+        Assert.Equal("AB123", person.PersonalNumber);
+        Assert.Equal("1 Main Street", person.ForeignAddress);
+        Assert.Equal(new byte[] { 1, 2, 3 }, person.Photo);
+    }
+
+    [Fact]
+    public void NotReceivedDate_IsStillCleared_WhenTheOfficerLeftTheMarkOn()
+    {
+        var person = Employee();
+        person.DateOfBirth = new DateTime(1971, 10, 19);
+        person.BirthPlace = "Ashgabat";
+        var state = new PersonIntakeWizardState();
+        state.PendingKeys.Add(PersonPendingTargets.DateOfBirth);
+        state.PendingKeys.Add(PersonPendingTargets.BirthPlace);
+
+        PersonIntakeCompleteness.ClearPendingScalars(person, state.PendingKeys);
+
+        Assert.Equal(default, person.DateOfBirth);
+        Assert.Null(person.BirthPlace);
+    }
+
+    [Fact]
     public void PersonalNumberPending_IsClearedToNull_NotTheSentinelZero()
     {
         var person = Employee();

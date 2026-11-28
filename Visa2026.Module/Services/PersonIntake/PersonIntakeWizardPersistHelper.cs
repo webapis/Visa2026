@@ -69,7 +69,9 @@ public static class PersonIntakeWizardPersistHelper
 
         ApplyOtherDrafts(objectSpace, person, state);
 
-        PersonIntakeCompleteness.ClearPendingScalars(person);
+        // Clear from the marks being saved. Rows left over from the previous save are
+        // deleted above and must not wipe a date, lookup, or address the officer just entered.
+        PersonIntakeCompleteness.ClearPendingScalars(person, state.PendingKeys);
 
         var unresolved = PersonIntakeCompleteness
             .Evaluate(person, state.PendingKeys, state.DraftSatisfiedKeys())
@@ -607,6 +609,7 @@ public static class PersonIntakeWizardPersistHelper
             }
 
             objectSpace.Delete(existing);
+            person.PendingItems.Remove(existing);
         }
 
         foreach (var key in state.PendingKeys)
