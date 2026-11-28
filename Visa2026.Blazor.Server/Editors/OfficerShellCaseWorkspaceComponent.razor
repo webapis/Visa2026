@@ -264,15 +264,21 @@
         ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization"), "🏢"),
     ];
 
-    private static (string Key, string Label)[] RightCaseTabs =>
+    private static (string Key, string Label)[] LeftCaseTabs =>
     [
         ("resminamalar", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Resminamalar")),
+        ("documents", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Documents")),
+    ];
+
+    private static (string Key, string Label)[] FarRightCaseTabs =>
+    [
         ("sla", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Sla")),
         ("organization", VisaUiMessages.Get("ApplicationProfileInstance.Workspace.Organization")),
     ];
 
     private OfficerShellCaseProgressTab? _progressTab;
     private string? _rightCaseTab;
+    private bool _rightCaseDefaultChosen;
     private bool _progressUpdating;
     private bool _ignoreAdvanceClick;
     private string? _pendingTab;
@@ -417,7 +423,7 @@
         tab is "overview" or "people" or "result" or "progress";
 
     private static bool IsRightCaseTab(string? tab) =>
-        tab is "resminamalar" or "sla" or "organization";
+        tab is "resminamalar" or "documents" or "sla" or "organization";
 
     private bool HasRightCasePanel => IsRightCaseTab(_rightCaseTab);
 
@@ -460,14 +466,6 @@
     {
         PreviewSlotService.StateChanged -= OnPreviewSlotStateChanged;
         ReleaseCaseNav();
-        try
-        {
-            _ = JS.InvokeVoidAsync("visaPeopleActionMenu.unbindDismiss");
-        }
-        catch (InvalidOperationException) { }
-        catch (JSDisconnectedException) { }
-        _peopleMenuDotNetRef?.Dispose();
-        _peopleMenuDotNetRef = null;
     }
 
     private void ReleaseCaseNav()
@@ -590,6 +588,9 @@
             _headerOriginals = null;
             _boundHeaderFields = null;
             _organizationEditing = false;
+            _rightCaseTab = null;
+            _rightCaseDefaultChosen = false;
+            _resminamalarCatalogPending = false;
             _documentCopiesCompletenessKey = null;
             _documentCopiesNavReady = false;
             _documentCopiesLoadAttempted = false;
@@ -640,6 +641,17 @@
             _rightCaseTab = null;
             _resminamalarCatalogPending = false;
         }
+
+        if (!_rightCaseDefaultChosen && Snapshot != null)
+        {
+            _rightCaseDefaultChosen = true;
+            if (!IsRightCaseTab(_rightCaseTab)
+                && !ApplicationWorkspaceCaseSummaryCompletenessGate.BlocksTab(Snapshot.CaseView, "resminamalar"))
+            {
+                _rightCaseTab = "resminamalar";
+                _resminamalarCatalogPending = true;
+            }
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -686,12 +698,6 @@
             catch (InvalidOperationException)
             {
             }
-        }
-
-        if (_peopleActionMenuNeedsPlace && (_peopleDocMenuOpen || _peopleResmiMenuOpen))
-        {
-            _peopleActionMenuNeedsPlace = false;
-            await PlaceOpenPeopleActionMenuAsync();
         }
 
         if (HasRightCasePanel)
@@ -2033,9 +2039,23 @@
                         @onclick="SelectHybridProgressAsync">
                     @Msg("ApplicationProfileInstance.Workspace.Progress")
                 </button>
+                @foreach (var tab in LeftCaseTabs)
+                {
+                    var leftKey = tab.Key;
+                    var leftActive = string.Equals(_rightCaseTab, leftKey, StringComparison.OrdinalIgnoreCase);
+                    <button type="button"
+                            class="cw-hybrid__tab @(leftActive ? "is-active" : null)"
+                            role="tab"
+                            aria-selected="@leftActive"
+                            disabled="@_tabSwitching"
+                            title="@TabBlockedTitle(leftKey)"
+                            @onclick="() => SelectRightCaseTabAsync(leftKey)">
+                        @tab.Label
+                    </button>
+                }
             </div>
             <div class="cw-case-level1__right">
-                @foreach (var tab in RightCaseTabs)
+                @foreach (var tab in FarRightCaseTabs)
                 {
                     var rightKey = tab.Key;
                     var rightActive = string.Equals(_rightCaseTab, rightKey, StringComparison.OrdinalIgnoreCase);
@@ -2062,6 +2082,13 @@
                                                 Snapshot="Snapshot"
                                                 SelectedPersonIds="SelectedDocumentPersonIds"
                                                 InitialCatalogSettled="OnResminamalarCatalogSettled" />
+                break;
+            case "documents":
+                <OfficerShellCaseDocumentsTab ApplicationProfileInstanceId="Snapshot!.ApplicationProfileInstanceId"
+                                             Snapshot="Snapshot"
+                                             SelectedPersonIds="SelectedDocumentPersonIds"
+                                             PreviewSlotOwnerViewId="@PreviewSlotOwnerViewId"
+                                             CatalogReloaded="OnDocumentCopiesCatalogReloaded" />
                 break;
             case "sla":
                 @RenderSla(view)
@@ -2766,7 +2793,6 @@
             : SortLinkedPeople(filteredPeople);
         var selectablePeople = filteredPeople.Where(p => !p.IsExcluded && p.PersonId != Guid.Empty).ToList();
         var allPeopleSelected = AreAllDocumentPeopleSelected(selectablePeople);
-        var anyPeopleSelected = _selectedDocumentPersonIds.Count > 0;
         <div class="ct-page">
             <div class="os-toolbar cw-people-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                 <DxTextBox @bind-Text="_peopleSearchText"
@@ -2775,101 +2801,6 @@
                            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
                            CssClass="cw-people-search" />
                 <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker || ShowPersonLinkReview || IsRelinking)" @onclick="LinkPersonAsync">Link existing…</button>
-                <span class="cw-people-toolbar__reports" role="group" aria-label="Preview reports">
-                    <div class="cw-people-action-menu">
-                        <button type="button"
-                                id="cw-people-doc-menu-btn"
-                                class="os-btn cw-people-toolbar__report @(_peopleDocMenuOpen ? "is-open" : null) @(_peopleDocMenuLoading ? "is-busy" : null)"
-                                disabled="@(!anyPeopleSelected)"
-                                aria-haspopup="menu"
-                                aria-expanded="@_peopleDocMenuOpen"
-                                title="Preview document copies for checked rows"
-                                @onclick="TogglePeopleDocumentCopiesMenuAsync">
-                            @if (_peopleDocMenuLoading)
-                            {
-                                <span class="cw-summary-spin" aria-hidden="true"></span>
-                            }
-                            Preview document copies ▾
-                        </button>
-                        @if (_peopleDocMenuOpen)
-                        {
-                            <div id="cw-people-doc-menu-panel" class="cw-people-action-menu__panel" role="menu">
-                                @if (_peopleDocMenuLoading)
-                                {
-                                    <div class="cw-people-action-menu__loading" role="status" aria-live="polite">
-                                        <span class="cw-summary-spin" aria-hidden="true"></span>
-                                        <span>Loading document sections…</span>
-                                    </div>
-                                }
-                                else if (_peopleDocMenuItems.Count == 0)
-                                {
-                                    <div class="cw-people-action-menu__empty">No required document sections for this profile</div>
-                                }
-                                else
-                                {
-                                    @foreach (var item in _peopleDocMenuItems)
-                                    {
-                                        var menuItem = item;
-                                        <button type="button"
-                                                class="cw-people-action-menu__item"
-                                                role="menuitem"
-                                                @onclick="() => PreviewDocumentSectionAsync(menuItem)">
-                                            <span class="cw-people-action-menu__glyph" aria-hidden="true">📄</span>
-                                            <span class="cw-people-action-menu__label">@menuItem.Label</span>
-                                        </button>
-                                    }
-                                }
-                            </div>
-                        }
-                    </div>
-                    <div class="cw-people-action-menu">
-                        <button type="button"
-                                id="cw-people-resmi-menu-btn"
-                                class="os-btn cw-people-toolbar__report @(_peopleResmiMenuOpen ? "is-open" : null) @(_peopleResmiMenuLoading ? "is-busy" : null)"
-                                disabled="@(!anyPeopleSelected)"
-                                aria-haspopup="menu"
-                                aria-expanded="@_peopleResmiMenuOpen"
-                                title="Preview Resminamalar for checked rows"
-                                @onclick="TogglePeopleResminamalarMenuAsync">
-                            @if (_peopleResmiMenuLoading)
-                            {
-                                <span class="cw-summary-spin" aria-hidden="true"></span>
-                            }
-                            Preview Resminamalar ▾
-                        </button>
-                        @if (_peopleResmiMenuOpen)
-                        {
-                            <div id="cw-people-resmi-menu-panel" class="cw-people-action-menu__panel" role="menu">
-                                @if (_peopleResmiMenuLoading)
-                                {
-                                    <div class="cw-people-action-menu__loading" role="status" aria-live="polite">
-                                        <span class="cw-summary-spin" aria-hidden="true"></span>
-                                        <span>Loading Resminamalar…</span>
-                                    </div>
-                                }
-                                else if (_peopleResmiMenuItems.Count == 0)
-                                {
-                                    <div class="cw-people-action-menu__empty">No Resminamalar templates</div>
-                                }
-                                else
-                                {
-                                    @foreach (var item in _peopleResmiMenuItems)
-                                    {
-                                        var menuItem = item;
-                                        <button type="button"
-                                                class="cw-people-action-menu__item"
-                                                role="menuitem"
-                                                @onclick="() => PreviewResminamalarEntryAsync(menuItem)">
-                                            <span class="cw-people-action-menu__glyph" aria-hidden="true">@(IsApplicationFormMenuItem(menuItem) ? "📄" : "📗")</span>
-                                            <span class="cw-people-action-menu__label">@menuItem.Label</span>
-                                        </button>
-                                    }
-                                }
-                            </div>
-                        }
-                    </div>
-                </span>
-                <span class="cw-people-toolbar__hint">Checked rows only</span>
             </div>
             @if (ShowPersonLinkPicker)
             {
@@ -3891,311 +3822,6 @@
         !string.IsNullOrWhiteSpace(value)
         && value.Contains(query, StringComparison.OrdinalIgnoreCase);
 
-    private bool _peopleDocMenuOpen;
-    private bool _peopleResmiMenuOpen;
-    private bool _peopleDocMenuLoading;
-    private bool _peopleResmiMenuLoading;
-    private bool _peopleActionMenuNeedsPlace;
-    private List<PeoplePreviewMenuItem> _peopleDocMenuItems = [];
-    private List<PeoplePreviewMenuItem> _peopleResmiMenuItems = [];
-
-    private sealed record PeoplePreviewMenuItem(
-        string Key,
-        string Label,
-        Guid PersonId,
-        string? FocusRecordKey = null,
-        string? FocusEntryKey = null,
-        bool HasFiles = true);
-
-    private DotNetObjectReference<OfficerShellCaseWorkspaceComponent>? _peopleMenuDotNetRef;
-
-    private void EnsurePeopleMenuDotNetRef()
-    {
-        _peopleMenuDotNetRef ??= DotNetObjectReference.Create(this);
-    }
-
-    private void ClosePeoplePreviewMenus()
-    {
-        _peopleDocMenuOpen = false;
-        _peopleResmiMenuOpen = false;
-        _peopleDocMenuLoading = false;
-        _peopleResmiMenuLoading = false;
-        _peopleActionMenuNeedsPlace = false;
-        try
-        {
-            _ = JS.InvokeVoidAsync("visaPeopleActionMenu.unbindDismiss");
-        }
-        catch (InvalidOperationException) { }
-        catch (JSDisconnectedException) { }
-    }
-
-    [JSInvokable]
-    public Task ClosePeoplePreviewMenusFromJs()
-    {
-        if (!_peopleDocMenuOpen && !_peopleResmiMenuOpen)
-            return Task.CompletedTask;
-
-        ClosePeoplePreviewMenus();
-        return InvokeAsync(StateHasChanged);
-    }
-
-    private static string ToTitleCaseLabel(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return value ?? string.Empty;
-
-        var culture = CultureInfo.CurrentUICulture;
-        var normalized = value.Trim().Replace('_', ' ');
-        while (normalized.Contains("  ", StringComparison.Ordinal))
-            normalized = normalized.Replace("  ", " ", StringComparison.Ordinal);
-        return culture.TextInfo.ToTitleCase(normalized.ToLower(culture));
-    }
-
-    private async Task PlaceOpenPeopleActionMenuAsync()
-    {
-        try
-        {
-            EnsurePeopleMenuDotNetRef();
-            if (_peopleDocMenuOpen)
-            {
-                await JS.InvokeVoidAsync(
-                    "visaPeopleActionMenu.place",
-                    "cw-people-doc-menu-btn",
-                    "cw-people-doc-menu-panel");
-                await JS.InvokeVoidAsync(
-                    "visaPeopleActionMenu.bindDismiss",
-                    _peopleMenuDotNetRef,
-                    new[] { "cw-people-doc-menu-btn", "cw-people-doc-menu-panel" });
-            }
-            else if (_peopleResmiMenuOpen)
-            {
-                await JS.InvokeVoidAsync(
-                    "visaPeopleActionMenu.place",
-                    "cw-people-resmi-menu-btn",
-                    "cw-people-resmi-menu-panel");
-                await JS.InvokeVoidAsync(
-                    "visaPeopleActionMenu.bindDismiss",
-                    _peopleMenuDotNetRef,
-                    new[] { "cw-people-resmi-menu-btn", "cw-people-resmi-menu-panel" });
-            }
-        }
-        catch (JSDisconnectedException)
-        {
-        }
-        catch (JSException)
-        {
-        }
-    }
-
-    private async Task TogglePeopleDocumentCopiesMenuAsync()
-    {
-        if (_peopleDocMenuOpen)
-        {
-            ClosePeoplePreviewMenus();
-            return;
-        }
-
-        _peopleResmiMenuOpen = false;
-        _peopleResmiMenuLoading = false;
-        _peopleDocMenuItems = [];
-        _peopleDocMenuOpen = true;
-        _peopleDocMenuLoading = true;
-        _peopleActionMenuNeedsPlace = true;
-        await InvokeAsync(StateHasChanged);
-
-        var personIds = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
-        try
-        {
-            _peopleDocMenuItems = await Task.Run(() => BuildDocumentSectionMenuItems(personIds));
-        }
-        finally
-        {
-            _peopleDocMenuLoading = false;
-            _peopleActionMenuNeedsPlace = true;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task TogglePeopleResminamalarMenuAsync()
-    {
-        if (_peopleResmiMenuOpen)
-        {
-            ClosePeoplePreviewMenus();
-            return;
-        }
-
-        _peopleDocMenuOpen = false;
-        _peopleDocMenuLoading = false;
-        _peopleResmiMenuItems = [];
-        _peopleResmiMenuOpen = true;
-        _peopleResmiMenuLoading = true;
-        _peopleActionMenuNeedsPlace = true;
-        await InvokeAsync(StateHasChanged);
-
-        var applicationId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
-        var personIds = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
-        try
-        {
-            _peopleResmiMenuItems = await Task.Run(() => BuildResminamalarMenuItems(applicationId, personIds));
-        }
-        finally
-        {
-            _peopleResmiMenuLoading = false;
-            _peopleActionMenuNeedsPlace = true;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private List<PeoplePreviewMenuItem> BuildDocumentSectionMenuItems(IReadOnlyList<Guid> personIds)
-    {
-        if (personIds.Count == 0)
-            return [];
-
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        var applicationId = Snapshot?.ApplicationProfileInstanceId ?? Guid.Empty;
-        var application = applicationId == Guid.Empty
-            ? null
-            : objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
-                .Include(item => item.ApplicationProfile)
-                .FirstOrDefault(item => item.ID == applicationId);
-        var profile = application?.ApplicationProfile;
-        var allowed = PersonDocumentCopiesProfileSectionFilter.GetAllowedPersonSectionIds(profile);
-        if (allowed.Count == 0)
-            return [];
-
-        var menuIds = PersonDocumentCopiesProfileSectionFilter.ExpandPeopleMenuSectionIds(allowed);
-        var hasFilesByCatalog = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var personId in personIds)
-        {
-            var person = objectSpace.GetObjectByKey<Person>(personId);
-            if (person == null)
-                continue;
-
-            var snapshot = PersonLinkedDocumentsResolver.Resolve(objectSpace, person);
-            foreach (var section in snapshot.Sections.OrderBy(s => s.SortOrder))
-            {
-                if (!PersonDocumentCopiesProfileSectionFilter.IsPersonSectionAllowed(profile, section.SectionId))
-                    continue;
-
-                if (section.Records.Any(r => r.Files.Any(f => f.HasContent)))
-                    hasFilesByCatalog.Add(section.SectionId);
-            }
-        }
-
-        var items = new List<PeoplePreviewMenuItem>();
-        foreach (var menuId in menuIds)
-        {
-            var catalogId = PersonDocumentCopiesProfileSectionFilter.NormalizeCatalogSectionId(menuId);
-            items.Add(new PeoplePreviewMenuItem(
-                menuId,
-                ToTitleCaseLabel(PersonDocumentCopiesProfileSectionFilter.PersonSectionLabel(menuId)),
-                personIds[0],
-                HasFiles: hasFilesByCatalog.Contains(catalogId)));
-        }
-
-        return items;
-    }
-
-    private List<PeoplePreviewMenuItem> BuildResminamalarMenuItems(Guid applicationId, IReadOnlyList<Guid> personIds)
-    {
-        if (applicationId == Guid.Empty || personIds.Count == 0)
-            return [];
-
-        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProfileInstance>();
-        var application = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
-            .Include(item => item.ProjectContract)
-            .Include(item => item.MigrationService)
-            .Include(item => item.ApplicationProfile)
-            .FirstOrDefault(item => item.ID == applicationId);
-        if (application == null)
-            return [];
-
-        var catalog = WordReportCatalogService.Build(
-            objectSpace,
-            application,
-            WordReportGenerationContext.ForRosterPersons(personIds));
-
-        var items = new List<PeoplePreviewMenuItem>
-        {
-            new(
-                ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
-                Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm"),
-                Guid.Empty,
-                FocusEntryKey: ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey),
-        };
-
-        items.AddRange(catalog.Entries
-            .OrderBy(entry => entry.SortOrder)
-            .ThenBy(entry => entry.DisplayName, StringComparer.OrdinalIgnoreCase)
-            .Select(entry => new PeoplePreviewMenuItem(
-                entry.EntryKey,
-                ToTitleCaseLabel(string.IsNullOrWhiteSpace(entry.DisplayName) ? entry.EntryKey : entry.DisplayName),
-                Guid.Empty,
-                FocusEntryKey: entry.EntryKey)));
-        return items;
-    }
-
-    private static bool IsApplicationFormMenuItem(PeoplePreviewMenuItem item) =>
-        string.Equals(
-            item.FocusEntryKey,
-            ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
-            StringComparison.Ordinal);
-
-    private async Task PreviewDocumentSectionAsync(PeoplePreviewMenuItem item)
-    {
-        var ids = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
-        if (ids.Count == 0 || string.IsNullOrWhiteSpace(item.Key))
-            return;
-
-        ClosePeoplePreviewMenus();
-        await PreviewSlotService.OpenPersonDocumentCopiesAsync(
-            new PersonDocumentCopiesSlotRequest
-            {
-                PersonIds = ids,
-                FocusSectionId = item.Key,
-                FocusDisplayName = item.Label,
-                OpenPreviewOnly = true,
-            },
-            PreviewSlotOwnerViewId);
-    }
-
-    private async Task PreviewResminamalarEntryAsync(PeoplePreviewMenuItem item)
-    {
-        if (Snapshot == null || string.IsNullOrWhiteSpace(item.FocusEntryKey))
-            return;
-
-        var ids = _selectedDocumentPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
-        if (ids.Count == 0)
-            return;
-
-        ClosePeoplePreviewMenus();
-        if (IsApplicationFormMenuItem(item))
-        {
-            await PreviewSlotService.OpenDocumentCopiesAsync(
-                new DocumentCopiesSlotRequest
-                {
-                    ApplicationProfileInstancePersonIds = ids,
-                    ApplicationProfileInstanceId = Snapshot.ApplicationProfileInstanceId,
-                    FocusSlotKey = ApplicationItemDocumentCopiesTypeCatalog.ApplicationFormSlotKey,
-                    FocusDisplayName = item.Label,
-                    OpenPreviewOnly = true,
-                },
-                PreviewSlotOwnerViewId);
-            return;
-        }
-
-        await PreviewSlotService.OpenResminamalarAsync(
-            new ResminamalarSlotRequest
-            {
-                ApplicationProfileInstanceId = Snapshot.ApplicationProfileInstanceId,
-                Scope = WordReportPackageScope.RosterPerson,
-                ApplicationItemIds = ids,
-                FocusEntryKey = item.FocusEntryKey,
-                FocusDisplayName = item.Label,
-                OpenPreviewOnly = true,
-            },
-            PreviewSlotOwnerViewId);
-    }
 
     private async Task PaintTabSwitchAsync(string key)
     {
@@ -5485,7 +5111,6 @@
         if (person.PersonId == Guid.Empty || sourceObjectId == Guid.Empty)
             return;
 
-        ClosePeoplePreviewMenus();
         await InvokeAsync(StateHasChanged);
 
         var label = record == null
