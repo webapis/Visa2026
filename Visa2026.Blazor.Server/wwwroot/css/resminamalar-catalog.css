@@ -335,7 +335,69 @@
   justify-content: flex-end;
   gap: 8px;
   margin-left: auto;
-  max-width: 22rem;
+  max-width: 46rem;
+}
+
+.resminamalar-catalog__manual-edit {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.resminamalar-catalog__file-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.resminamalar-catalog__file-btn input[type="file"] {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.resminamalar-catalog__folder-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.15rem;
+  padding: 0.08rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0f766e;
+  background: color-mix(in srgb, #0f766e 16%, transparent);
+}
+
+.resminamalar-catalog__edit-template-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.resminamalar-catalog__edit-template-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.resminamalar-catalog__edit-template-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .resminamalar-catalog__recycle-btn {

@@ -1560,10 +1560,52 @@
     "ru-RU": "Не удалось скачать файл шаблона."
   },
   "ApplicationReportPackage.DownloadTemplate.Downloaded": {
-    "en": "Downloaded template \"{0}\" ({1}).",
-    "tr-TR": "Şablon \"{0}\" indirildi ({1}).",
-    "tk-TM": "Şablon \"{0}\" göçürildi ({1}).",
-    "ru-RU": "Шаблон «{0}» скачан ({1})."
+    "en": "Downloaded \"{0}\" ({1}). Edit it in Word or Excel, then click Upload template.",
+    "tr-TR": "\"{0}\" indirildi ({1}). Word veya Excel'de düzenleyin, ardından Şablon yükle'ye tıklayın.",
+    "tk-TM": "\"{0}\" göçürildi ({1}). Word ýa-da Excel-de redaktirläň, soň Şablon ýükle basyň.",
+    "ru-RU": "Скачан «{0}» ({1}). Отредактируйте в Word или Excel, затем нажмите «Загрузить шаблон»."
+  },
+  "ApplicationReportPackage.UploadTemplate": {
+    "en": "Upload template",
+    "tr-TR": "Şablon yükle",
+    "tk-TM": "Şablon ýükle",
+    "ru-RU": "Загрузить шаблон"
+  },
+  "ApplicationReportPackage.UploadTemplate.Tooltip": {
+    "en": "Upload a Word or Excel file you edited after Download Template.",
+    "tr-TR": "Şablonu indirdikten sonra düzenlediğiniz Word veya Excel dosyasını yükler.",
+    "tk-TM": "Şablony göçürenden soň redaktirlän Word ýa-da Excel faýlyňyzy ýükleýär.",
+    "ru-RU": "Загрузить файл Word или Excel, который вы отредактировали после скачивания шаблона."
+  },
+  "ApplicationReportPackage.UploadTemplate.Uploading": {
+    "en": "Uploading…",
+    "tr-TR": "Yükleniyor…",
+    "tk-TM": "Ýüklenýär…",
+    "ru-RU": "Загрузка…"
+  },
+  "ApplicationReportPackage.UploadTemplate.Imported": {
+    "en": "Uploaded \"{0}\". The catalog will refresh.",
+    "tr-TR": "\"{0}\" yüklendi. Katalog yenilenecek.",
+    "tk-TM": "\"{0}\" ýüklendi. Katalog täzelener.",
+    "ru-RU": "«{0}» загружен. Каталог обновится."
+  },
+  "ApplicationReportPackage.UploadTemplate.Unchanged": {
+    "en": "That file matches the saved template. Nothing was changed.",
+    "tr-TR": "Bu dosya kayıtlı şablonla aynı. Değişiklik yapılmadı.",
+    "tk-TM": "Bu faýl ýazdyrylan şablon bilen deň. Üýtgeşme bolmady.",
+    "ru-RU": "Этот файл совпадает с сохранённым шаблоном. Изменений нет."
+  },
+  "ApplicationReportPackage.UploadTemplate.Failed": {
+    "en": "Could not upload the template file.",
+    "tr-TR": "Şablon dosyası yüklenemedi.",
+    "tk-TM": "Şablon faýly ýüklenmedi.",
+    "ru-RU": "Не удалось загрузить файл шаблона."
+  },
+  "ApplicationReportPackage.UploadTemplate.WrongType": {
+    "en": "Choose a {0} file for this template.",
+    "tr-TR": "Bu şablon için bir {0} dosyası seçin.",
+    "tk-TM": "Bu şablon üçin {0} faýly saýlaň.",
+    "ru-RU": "Для этого шаблона выберите файл {0}."
   },
   "ApplicationReportPackage.CatalogTab": {
     "en": "Catalog",
@@ -1770,10 +1812,10 @@
     "ru-RU": "Редактировать шаблон"
   },
   "ApplicationReportPackage.EditTemplate.Tooltip": {
-    "en": "Downloads the template file. Open it in Word or Excel, save your changes, then click Sync to database and choose the edited file.",
-    "tr-TR": "Şablon dosyasını indirir. Word veya Excel'de açın, kaydedin, ardından Veritabanına senkronize et'e tıklayıp düzenlenen dosyayı seçin.",
-    "tk-TM": "Şablon faýlyny göçürýär. Word ýa-da Excel-de açyň, ýazdyryň, soň Maglumat bazasyna sinhronla basyp redaktirlenen faýly saýlaň.",
-    "ru-RU": "Скачивает файл шаблона. Откройте в Word или Excel, сохраните изменения, затем нажмите «Синхронизировать с базой» и выберите отредактированный файл."
+    "en": "Saves the template into the template folder on this PC and opens it in Word or Excel. Save, close, then click Sync to database.",
+    "tr-TR": "Şablonu bu bilgisayardaki şablon klasörüne kaydeder ve Word veya Excel'de açar. Kaydedip kapatın, ardından Veritabanına senkronize et'e tıklayın.",
+    "tk-TM": "Şablony şu kompýuterdäki şablon papkasyna ýazdyryp Word ýa-da Excel-de açýar. Ýazdyryň, ýapyň, soň Maglumat bazasyna sinhronla basyň.",
+    "ru-RU": "Сохраняет шаблон в папку шаблонов на этом компьютере и открывает его в Word или Excel. Сохраните, закройте, затем нажмите «Синхронизировать с базой»."
   },
   "ApplicationReportPackage.EditTemplate.Exporting": {
     "en": "Exporting template…",
@@ -1787,11 +1829,17 @@
     "tk-TM": "\"{0}\" eksport edildi. Word/Excel-de açyň: {1}",
     "ru-RU": "Экспортирован «{0}». Откройте в Word/Excel: {1}"
   },
+  "ApplicationReportPackage.EditTemplate.HelperMissing": {
+    "en": "Word or Excel did not open. On this PC, run the Visa2026 template opener setup once, then click Edit template again.",
+    "tr-TR": "Word veya Excel açılmadı. Bu bilgisayarda Visa2026 şablon açıcı kurulumunu bir kez çalıştırın, ardından Şablonu düzenle'ye tekrar tıklayın.",
+    "tk-TM": "Word ýa-da Excel açylmady. Bu kompýuterde Visa2026 şablon açyjy gurnamasyny bir gezek işlediň, soň Şablony redaktirle täzeden basyň.",
+    "ru-RU": "Word или Excel не открылись. На этом компьютере один раз выполните установку средства открытия шаблонов Visa2026, затем снова нажмите «Редактировать шаблон»."
+  },
   "ApplicationReportPackage.EditTemplate.ExportFailed": {
-    "en": "Could not download the template file.",
-    "tr-TR": "Şablon dosyası indirilemedi.",
-    "tk-TM": "Şablon faýly göçürilmedi.",
-    "ru-RU": "Не удалось скачать файл шаблона."
+    "en": "Could not save the template into the local folder.",
+    "tr-TR": "Şablon yerel klasöre kaydedilemedi.",
+    "tk-TM": "Şablon ýerli papka ýazdyrylmady.",
+    "ru-RU": "Не удалось сохранить шаблон в локальную папку."
   },
   "ApplicationReportPackage.EditTemplate.Downloaded": {
     "en": "Downloaded \"{0}\" ({1}). Open it in Word or Excel, save, then click Sync to database and choose this file.",
@@ -2051,6 +2099,18 @@
     "tk-TM": "Maglumat bazasyna sinhronla",
     "ru-RU": "Синхронизировать с базой"
   },
+  "ApplicationReportPackage.InstallPcSetup": {
+    "en": "Install on this PC",
+    "tr-TR": "Bu bilgisayara kur",
+    "tk-TM": "Şu kompýutere gur",
+    "ru-RU": "Установить на этот ПК"
+  },
+  "ApplicationReportPackage.InstallPcSetup.Tooltip": {
+    "en": "Download the setup for this PC. Unzip it and run Install.cmd once. Home → Sync then works for every template.",
+    "tr-TR": "Bu bilgisayar için kurulumu indirin. Zip'i açıp Install.cmd dosyasını bir kez çalıştırın. Giriş → Sync bundan sonra her şablonda çalışır.",
+    "tk-TM": "Şu kompýuter üçin gurnamany göçürip alyň. Zip-i açyp Install.cmd bir gezek işlediň. Baş sahypa → Sync soň her şablonda işleýär.",
+    "ru-RU": "Скачайте установку для этого компьютера. Распакуйте и один раз запустите Install.cmd. После этого Главная → Sync работает для каждого шаблона."
+  },
   "ApplicationReportPackage.SyncTemplates.ImportSummary": {
     "en": "Sync: {0} imported, {1} unchanged, {2} failed.",
     "tr-TR": "Senkron: {0} içe aktarıldı, {1} değişmedi, {2} başarısız.",
@@ -2058,10 +2118,10 @@
     "ru-RU": "Синхронизация: {0} импортировано, {1} без изменений, {2} ошибок."
   },
   "ApplicationReportPackage.SyncTemplates.NoLocalChanges": {
-    "en": "No changes were imported. Choose the edited template file you saved after Edit template.",
-    "tr-TR": "İçe aktarılan değişiklik yok. Şablonu düzenle'den sonra kaydettiğiniz dosyayı seçin.",
-    "tk-TM": "Import edilen üýtgeşme ýok. Şablony redaktirle-den soň ýazdyran faýly saýlaň.",
-    "ru-RU": "Изменения не импортированы. Выберите отредактированный файл, сохранённый после «Редактировать шаблон»."
+    "en": "No changes were imported. Save the template in Word or Excel, then click Sync to database.",
+    "tr-TR": "İçe aktarılan değişiklik yok. Şablonu Word veya Excel'de kaydedin, ardından Veritabanına senkronize et'e tıklayın.",
+    "tk-TM": "Import edilen üýtgeşme ýok. Şablony Word ýa-da Excel-de ýazdyryň, soň Maglumat bazasyna sinhronla basyň.",
+    "ru-RU": "Изменения не импортированы. Сохраните шаблон в Word или Excel, затем нажмите «Синхронизировать с базой»."
   },
   "ApplicationReportPackage.SyncTemplates.ImportFailed": {
     "en": "Could not import the selected template file.",

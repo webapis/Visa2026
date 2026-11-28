@@ -3,7 +3,7 @@ name: visa2026-resminamalar
 description: >-
   Resminamalar report package dialog (Application + ApplicationItem): catalog, readiness chips,
   checkboxes, in-app PDF preview, ZIP batch enqueue, WordReportGenerationBatch worker, empty template
-  list / UserReportTemplateSeedGate, desktop template staging (UNC share Edit template / Sync to database),
+  list / UserReportTemplateSeedGate, desktop template staging (Edit template / Sync to database),
   permissions, gear toggle, gap confirm, UX improvements.
   User templates only (UserReportTemplate from Resources/Templates). Use for Resminamalar bugs,
   batch ZIP failures, preview errors, template missing from catalog, template staging sync/import,
@@ -30,7 +30,7 @@ disable-model-invocation: false
 
 **[`docs/APPLICATION_REPORT_PACKAGE.md`](../../../docs/APPLICATION_REPORT_PACKAGE.md)** — officer workflow, architecture, file map summary.
 
-**Desktop template edit (UNC staging):** [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) — canonical plan for **Edit template** / **Sync to database**; implementation and manual QA checklist.
+**Desktop template edit:** [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) — canonical plan for **Edit template** / **Sync to database**; production uses the officer-PC opener.
 
 **Related skills (do not duplicate):**
 
@@ -80,7 +80,7 @@ disable-model-invocation: false
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 | **Delete / Move to Recycle Bin** persists but the catalog card stays | Recycle Bin count vs Catalog row; restart then retry | **This skill** — learnings *catalog row stays* / *locked profile no-op* |
 | Shared catalog row has no trash (this-profile does) | Gear (details) on; Shared Word/Excel uses the same Recycle Bin as this-profile. Restart, hard-refresh | **This skill** |
-| **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), folder chosen | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
+| **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, HTTPS (prod), officer-PC opener (`visa2026edit`) | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) |
 | **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
 | Preview stale after sync | Run **Sync to database** (imports share); catalog reloads after import | **This skill** |
 | Şahsy / per-person form Preview shows only one roster person | Case workspace header chips; Preview must pass `ApplicationItemIds`. Nested `SAHSY KAGYZ_*` names need `LooksLikeSahsyKagyzName` | **This skill** |
@@ -116,9 +116,9 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 ## Officer workflow (v2)
 
 1. Open dialog → see **user templates** (checkboxes, Ready / Check chips).
-2. Optional **gear** (footer): show **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default). **Edit template** is not on catalog rows — download the file instead.
+2. **Edit template** (when staging is enabled): write the file on the officer PC and open Word or Excel. Beside it: **Download Template** and **Upload template**. Footer: **Sync to database**. Optional **gear**: **Review placeholders**, Recycle, and readiness hint lines (hidden by default).
 3. Case workspace: one flat catalog (no By person / By type switch). Header chips filter who is generated. Preview of Şahsy kagyz includes every selected person.
-4. **Download Template** (gear on): browser download of the saved Word/Excel (placeholders, not filled case data).
+4. **Download Template** / **Upload template** (beside Edit when staging is on; Download stays on the gear when editing is off): browser download of the saved Word/Excel, then upload the edited file.
 5. **Preview** → generate same bytes as ZIP → Office → PDF in popup.
 6. **Download package** → gap confirm if checked rows have warnings → `WordReportGenerationBatch` → toast **Download ZIP**.
 
@@ -139,7 +139,7 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 | Old batch includes wrong files | Legacy batches with null keys = all applicable; new batches store explicit `user:{id}` array. |
 | `Invalid column name` on batch | `BatchWorkerSchemaGate`, `WordReportGenerationBatchSelected*Updater`, or `FORCE_XAF_DB_UPDATE`. |
 | Staging export/import / Sync button | [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md); `TemplateEditStaging` config; `UserReportTemplateStagingUiService` |
-| Word/Excel won't open from Edit template | Run `Set-Visa2026TemplateEditOfficeTrust.ps1`; use **Copy path**; open from `Documents\Visa2026Templates` |
+| Word/Excel won't open from Edit template | Run `Set-Visa2026TemplateEditOfficeTrust.ps1`; use **Copy path**; open from `%LOCALAPPDATA%\Visa2026\TemplateEdit` |
 | Excel Preview blank; pane title `report_….docx` | Filename fallback used Word converter on `.xlsx` bytes — match catalog by `UserReportTemplateId`; ZIP sniff `xl/` vs `word/` |
 
 *(Extend this table when a learnings entry is promoted — see [MATURITY.md](./MATURITY.md).)*

@@ -25,7 +25,7 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         _maintenanceService = maintenanceService;
     }
 
-    public async Task<UserReportTemplateStagingExportResult> ExportForEditAsync(
+    public Task<UserReportTemplateStagingExportResult> ExportForEditAsync(
         Guid templateId,
         string exportedByUserName,
         CancellationToken cancellationToken = default)
@@ -33,6 +33,24 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         cancellationToken.ThrowIfCancellationRequested();
         EnsureEnabled();
         EnsureEditAccess();
+        return ReadExportAsync(templateId, cancellationToken);
+    }
+
+    public Task<UserReportTemplateStagingExportResult> ExportForAuthorizedHttpAsync(
+        Guid templateId,
+        string exportedByUserName,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        EnsureEnabled();
+        return ReadExportAsync(templateId, cancellationToken);
+    }
+
+    private async Task<UserReportTemplateStagingExportResult> ReadExportAsync(
+        Guid templateId,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (templateId == Guid.Empty)
             throw new ArgumentException("Template id is required.", nameof(templateId));
@@ -146,6 +164,18 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             if (!string.IsNullOrEmpty(currentHash)
                 && string.Equals(currentHash, stagedHash, StringComparison.OrdinalIgnoreCase))
             {
+                // Preview reads the profile row's own file, not this master blob. A previous
+                // sync can leave that copy behind even when the master hash already matches.
+                if (PublishProfileCopies(objectSpace, template, stagedContent) > 0)
+                {
+                    return new UserReportTemplateStagingImportResult
+                    {
+                        TemplateId = templateId,
+                        DisplayName = displayName,
+                        Status = UserReportTemplateStagingImportStatus.Imported,
+                    };
+                }
+
                 return SkippedImport(
                     templateId,
                     displayName,
@@ -208,24 +238,26 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             if (template.TemplateFile != null && template.TemplateFile.ID != Guid.Empty)
             {
                 var rows = efObjectSpace.DbContext.Database.ExecuteSqlRaw(
-                    "UPDATE [FileData] SET [Content] = {0}, [Size] = {1}, [FileName] = {2} WHERE [ID] = {3}",
+                    """UPDATE "FileData" SET "Content" = {0}, "Size" = {1}, "FileName" = {2} WHERE "ID" = {3}""",
                     stagedContent,
                     stagedContent.Length,
                     fileName,
                     template.TemplateFile.ID);
                 if (rows != 1)
                     return FailedImport(templateId, displayName, "Template file content was not saved (0 rows affected).");
+                PublishProfileCopies(objectSpace, template, stagedContent);
             }
             else
             {
                 // No existing FileData row — insert one and wire the FK, all via raw SQL.
                 var newFileId = Guid.NewGuid();
                 efObjectSpace.DbContext.Database.ExecuteSqlRaw(
-                    "INSERT INTO [FileData] ([ID], [GCRecord], [FileName], [Size], [Content]) VALUES ({0}, NULL, {1}, {2}, {3})",
+                    """INSERT INTO "FileData" ("ID", "GCRecord", "FileName", "Size", "Content") VALUES ({0}, NULL, {1}, {2}, {3})""",
                     newFileId, fileName, stagedContent.Length, stagedContent);
                 efObjectSpace.DbContext.Database.ExecuteSqlRaw(
-                    "UPDATE [UserReportTemplates] SET [TemplateFileID] = {0} WHERE [ID] = {1}",
+                    """UPDATE "UserReportTemplates" SET "TemplateFileID" = {0} WHERE "ID" = {1}""",
                     newFileId, templateId);
+                PublishProfileCopies(objectSpace, template, stagedContent);
             }
         }
         catch (Exception ex)
@@ -272,6 +304,57 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
     {
         if (!UserReportTemplateEditAccess.CanEditTemplates())
             throw new UnauthorizedAccessException("Template edit access denied.");
+    }
+
+    /// <summary>
+    /// Preview and ZIP read <see cref="ApplicationProfileTemplate.TemplateFile"/>, not the master
+    /// <see cref="UserReportTemplate"/> blob. Keep every same-name profile copy on the bytes just saved.
+    /// </summary>
+    private static int PublishProfileCopies(
+        IObjectSpace objectSpace,
+        UserReportTemplate template,
+        byte[] stagedContent)
+    {
+        if (objectSpace is not EFCoreObjectSpace efObjectSpace)
+            return 0;
+
+        var name = template.TemplateName?.Trim();
+        if (string.IsNullOrEmpty(name) || stagedContent.Length == 0)
+            return 0;
+
+        var kind = template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel
+            ? ApplicationProfileTemplateKind.Excel
+            : ApplicationProfileTemplateKind.Word;
+        var lowered = name.ToLower();
+        var masterFileId = template.TemplateFile?.ID ?? Guid.Empty;
+        var fileIds = objectSpace.GetObjectsQuery<ApplicationProfileTemplate>()
+            .Where(row => row.TemplateName != null
+                && row.TemplateName.ToLower() == lowered
+                && row.TemplateKind == kind
+                && row.TemplateFile != null
+                && row.TemplateFile.ID != masterFileId)
+            .Select(row => row.TemplateFile!.ID)
+            .ToList();
+
+        var updated = 0;
+        foreach (var fileId in fileIds.Distinct())
+        {
+            if (fileId == Guid.Empty)
+                continue;
+
+            updated += efObjectSpace.DbContext.Database.ExecuteSqlRaw(
+                """
+                UPDATE "FileData"
+                SET "Content" = {0}, "Size" = {1}
+                WHERE "ID" = {2}
+                  AND ("Size" IS DISTINCT FROM {1} OR "Content" IS DISTINCT FROM {0})
+                """,
+                stagedContent,
+                stagedContent.Length,
+                fileId);
+        }
+
+        return updated;
     }
 
     private static UserReportTemplate? LoadTemplate(IObjectSpace objectSpace, Guid templateId) =>

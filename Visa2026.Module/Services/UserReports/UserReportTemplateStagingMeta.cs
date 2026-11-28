@@ -34,6 +34,12 @@ public sealed class UserReportTemplateStagingMeta
     /// <summary>SHA-256 (hex) of staged file content after the last successful import.</summary>
     public string? LastImportedContentHashSha256 { get; set; }
 
+    /// <summary>Visa2026 site origin the ribbon Sync button posts to.</summary>
+    public string? ServerBase { get; set; }
+
+    /// <summary>Ribbon Sync token for this officer. Valid for every template, not only this file.</summary>
+    public string? RibbonToken { get; set; }
+
     public static UserReportTemplateStagingMeta ReadFromFile(string metaFilePath)
     {
         var json = File.ReadAllText(metaFilePath);

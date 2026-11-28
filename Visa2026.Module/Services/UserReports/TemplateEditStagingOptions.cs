@@ -24,6 +24,12 @@ public sealed class TemplateEditStagingOptions
     public long MaxFileSizeBytes { get; set; } = 52_428_800;
 
     /// <summary>
+    /// Secret for the Word/Excel ribbon Sync button. Empty uses a key file under the server
+    /// user's LocalAppData. Not sent to the officer PC.
+    /// </summary>
+    public string? RibbonSyncKey { get; set; }
+
+    /// <summary>
     /// Optional Windows profile folder name on officer PCs (<c>C:\Users\{this}\...</c>) when XAF login
     /// does not match the local profile (e.g. login <c>officer1</c>, profile <c>serdar</c>).
     /// </summary>

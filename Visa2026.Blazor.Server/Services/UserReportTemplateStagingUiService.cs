@@ -27,6 +27,12 @@ public sealed class UserReportTemplateStagingUiService
     public bool CanEditTemplates() =>
         IsEnabled && UserReportTemplateEditAccess.CanEditTemplates();
 
+    public string FolderPickerHint =>
+        TemplateEditStagingPathHints.FolderDisplay(_options, _httpContextAccessor.HttpContext);
+
+    public string FolderLeaf =>
+        TemplateEditStagingPathHints.FolderLeaf(_options);
+
     public async Task<UserReportTemplateStagingUiExportOutcome> ExportForEditAsync(Guid templateId)
     {
         if (!CanEditTemplates())
@@ -67,6 +73,41 @@ public sealed class UserReportTemplateStagingUiService
         catch (Exception ex)
         {
             return UserReportTemplateStagingUiExportOutcome.Fail(ex.Message);
+        }
+    }
+
+    /// <summary>Replace the stored template with a file the officer downloaded and edited.</summary>
+    public async Task<UserReportTemplateStagingImportResult> UploadTemplateAsync(
+        Guid templateId,
+        byte[] content,
+        CancellationToken cancellationToken = default)
+    {
+        if (!CanEditTemplates())
+        {
+            return new UserReportTemplateStagingImportResult
+            {
+                TemplateId = templateId,
+                DisplayName = string.Empty,
+                Status = UserReportTemplateStagingImportStatus.Failed,
+                ErrorMessage = "Template edit access denied or staging is disabled.",
+            };
+        }
+
+        try
+        {
+            return await _stagingService
+                .ImportFromUploadAsync(templateId, content, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            return new UserReportTemplateStagingImportResult
+            {
+                TemplateId = templateId,
+                DisplayName = string.Empty,
+                Status = UserReportTemplateStagingImportStatus.Failed,
+                ErrorMessage = ex.Message,
+            };
         }
     }
 

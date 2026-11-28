@@ -61,7 +61,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+$slotsScript = Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1"
+if (Test-Path -LiteralPath $slotsScript) {
+    . $slotsScript
+}
 
 if ($AllUsers) {
     $identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
@@ -74,8 +77,6 @@ $ServerHost = $ServerHost.Trim().TrimEnd('\', '/')
 if ([string]::IsNullOrWhiteSpace($ServerHost)) {
     throw "ServerHost is required."
 }
-
-$slot = Get-Visa2026IisSlotDefinition -Profile $Profile
 
 $hive = if ($AllUsers) { "HKLM" } else { "HKCU" }
 $baseKey = "$hive`:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
@@ -202,6 +203,7 @@ Write-Host ""
 Write-Host "Visa2026 template edit - Office trust ($hive)" -ForegroundColor Cyan
 Write-Host "  Server host : $ServerHost"
 Write-Host "  Web origin  : https://$ServerHost"
+Write-Host "  Profile     : $Profile"
 Write-Host ""
 
 if ($PSCmdlet.ShouldProcess($baseKey, "Configure UNCAsIntranet and intranet zone map")) {
@@ -241,10 +243,84 @@ if ($IncludeLocalhost) {
     }
 }
 
-Write-Host ""
+$helperSource = Join-Path $PSScriptRoot "Invoke-Visa2026TemplateEdit.ps1"
+if (Test-Path -LiteralPath $helperSource) {
+    $helperDir = if ($AllUsers) {
+        "C:\ProgramData\Visa2026\TemplateEditHost"
+    } else {
+        Join-Path $env:LOCALAPPDATA "Visa2026\TemplateEditHost"
+    }
+    $helperDest = Join-Path $helperDir "Invoke-Visa2026TemplateEdit.ps1"
+    $classesRoot = if ($AllUsers) { "HKLM:\Software\Classes" } else { "HKCU:\Software\Classes" }
+    $protocolKey = Join-Path $classesRoot "visa2026edit"
+    $commandKey = Join-Path $protocolKey "shell\open\command"
+    if ($PSCmdlet.ShouldProcess($helperDest, "Install template opener and visa2026edit protocol")) {
+        New-Item -ItemType Directory -Force -Path $helperDir | Out-Null
+        Copy-Item -LiteralPath $helperSource -Destination $helperDest -Force
+        New-Item -Path $protocolKey -Force | Out-Null
+        Set-Item -LiteralPath $protocolKey -Value "URL:Visa2026 template edit"
+        New-ItemProperty -LiteralPath $protocolKey -Name "URL Protocol" -Value "" -PropertyType String -Force | Out-Null
+        New-Item -Path $commandKey -Force | Out-Null
+        $command = "powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$helperDest`" `"%1`""
+        Set-Item -LiteralPath $commandKey -Value $command
+        Write-Host "Template opener installed ($classesRoot):" -ForegroundColor Green
+        Write-Host "  $helperDest"
+        Write-Host "  visa2026edit: -> $helperDest"
+        Write-Host ""
+    }
+}
+else {
+    Write-Warning "Invoke-Visa2026TemplateEdit.ps1 was not next to this script. Edit template on a remote server needs that opener."
+}
+
+$syncInstaller = Join-Path $PSScriptRoot "Install-Visa2026OfficeSyncAddin.ps1"
+if (Test-Path -LiteralPath $syncInstaller) {
+    if ($PSCmdlet.ShouldProcess($syncInstaller, "Install Word and Excel Sync button")) {
+        & $syncInstaller
+    }
+}
+
+$sandbox = Join-Path $env:LOCALAPPDATA "Visa2026\TemplateEdit"
+if ($PSCmdlet.ShouldProcess($sandbox, "Create the template folder and trust it in Word and Excel")) {
+    New-Item -ItemType Directory -Force -Path $sandbox | Out-Null
+    $trustedPath = $sandbox.TrimEnd("\") + "\"
+    foreach ($app in @("Word", "Excel")) {
+        $root = "HKCU:\Software\Microsoft\Office\16.0\$app\Security\Trusted Locations"
+        if (-not (Test-Path -LiteralPath $root)) {
+            New-Item -Path $root -Force | Out-Null
+        }
+
+        $already = $false
+        Get-ChildItem -LiteralPath $root -ErrorAction SilentlyContinue | ForEach-Object {
+            $existing = (Get-ItemProperty -LiteralPath $_.PSPath -Name "Path" -ErrorAction SilentlyContinue).Path
+            if ($existing -and ($existing.TrimEnd("\") -eq $sandbox)) {
+                $already = $true
+            }
+        }
+
+        if ($already) {
+            continue
+        }
+
+        $index = 0
+        while (Test-Path -LiteralPath (Join-Path $root "Location$index")) {
+            $index++
+        }
+
+        $key = Join-Path $root "Location$index"
+        New-Item -Path $key -Force | Out-Null
+        New-ItemProperty -LiteralPath $key -Name "Path" -Value $trustedPath -PropertyType String -Force | Out-Null
+        New-ItemProperty -LiteralPath $key -Name "AllowSubfolders" -Value 1 -PropertyType DWord -Force | Out-Null
+        New-ItemProperty -LiteralPath $key -Name "Description" -Value "Visa2026 template edit" -PropertyType String -Force | Out-Null
+    }
+
+    Write-Host "Template folder (temporary copies while editing):" -ForegroundColor Green
+    Write-Host "  $sandbox"
+    Write-Host ""
+}
+
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Close Word and Edge completely (or sign out / reboot)."
-Write-Host "  2. Hard-refresh Visa2026 (Ctrl+F5), click Edit template again."
-Write-Host "  3. If Office still blocks, open the file from Explorer (your chosen sandbox folder),"
-Write-Host "     or use Copy path from Resminamalar after Edit template."
+Write-Host "  1. Close Word and Excel completely."
+Write-Host "  2. In Visa2026, click Edit template. The file is written to the folder above."
+Write-Host "  3. Save in Word or Excel, then click Sync on the Home tab."
 Write-Host ""

@@ -26,6 +26,26 @@ public sealed class UserReportTemplateStagingLocalCollectJsResult
     public List<UserReportTemplateStagingLocalUploadJsItem> Uploads { get; init; } = new();
 }
 
+/// <summary>JS interop payload from a local-folder Edit template attempt.</summary>
+public sealed class UserReportTemplateStagingEditJsResult
+{
+    public string Code { get; init; } = string.Empty;
+
+    public string? Error { get; init; }
+
+    public string? DisplayName { get; init; }
+
+    public string? FileName { get; init; }
+
+    public string? FolderName { get; init; }
+
+    public string? CopyPath { get; init; }
+
+    public bool Opened { get; init; }
+
+    public Guid TemplateId { get; init; }
+}
+
 public sealed class UserReportTemplateStagingLocalUploadJsItem
 {
     public Guid TemplateId { get; init; }

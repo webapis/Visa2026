@@ -347,6 +347,8 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<IWordReportBatchTrackNotifier, WordReportBatchTrackNotifier>();
             services.AddScoped<ApplicationWordReportPackageFileAccess>();
             services.AddScoped<UserReportTemplateStagingUiService>();
+            services.AddSingleton<TemplateEditRibbonTokenService>();
+            services.AddScoped<TemplateEditDesktopBroker>();
             services.AddScoped<UserReportTemplateEditLinkService>();
             services.AddScoped<ApplicationWordReportPackageEnqueueService>();
             services.AddVisaOfficerMail(Configuration);

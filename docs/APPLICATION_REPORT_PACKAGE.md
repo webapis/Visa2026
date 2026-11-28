@@ -134,9 +134,9 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 | — | Review template list (checkboxes, Ready / Check) |
 
-| — | Optional **gear**: **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default) |
+| — | Optional **gear**: **Review placeholders**, Recycle, and readiness hint lines (hidden by default). **Download Template** and **Upload template** sit beside **Edit template** |
 
-| — | **Choose template folder** (once), **Sync to database** after editing |
+| — | **Edit template** writes the file on this PC and opens Word or Excel. **Sync to database** imports the saved file |
 
 | — | **Preview** → in-slot **PDF viewer** (catalog **or** preview — exclusive toggle; **Close** returns to catalog) |
 
@@ -299,7 +299,9 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
    - Each row: **include checkbox**, **Ready** / **Check** chip, optional warning text, **Preview**.
 
-   - Footer **gear** on: **Download Template**, **Review placeholders**, Recycle, and readiness hint lines (hidden by default). **Edit template** is not on catalog rows.
+   - **Edit template** (when template editing is enabled): saves the Word/Excel file on this PC and opens it. Footer: **Sync to database**.
+
+   - Beside **Edit template**: **Download Template** and **Upload template** (download the file, edit it, upload it back). Footer **gear** on: **Review placeholders**, Recycle, and readiness hint lines (hidden by default). Download stays on the gear when template editing is off.
 
 2. **Footer**
 
@@ -323,7 +325,9 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
 
 
-When **`TemplateEditStaging:Enabled`** is true, catalog rows no longer show **Edit template**. Officers use **Download Template** (gear on) to save the Word/Excel file, then edit locally. Staging **Sync to database** remains available from the host when enabled.
+When **`TemplateEditStaging:Enabled`** is true, catalog rows show **Edit template**. The file is saved on the officer PC at `%LOCALAPPDATA%\Visa2026\TemplateEdit` and opened in Word or Excel. **Download Template** and **Upload template** stay beside it: download the file, edit it in Word or Excel, then upload that file.
+
+Development (the site and the browser are the same PC) creates that folder from the site. Production runs on another server, so each officer PC installs the opener once with `Set-Visa2026TemplateEditOfficeTrust.ps1`. That opener creates the folder, saves the file, and starts Word or Excel.
 
 
 
@@ -331,15 +335,13 @@ When **`TemplateEditStaging:Enabled`** is true, catalog rows no longer show **Ed
 
 |------|----------------|-----------------|
 
-| 1 | **Once:** **Choose template folder** (footer) | Browser grants write access; creates `Documents\Visa2026Templates` |
+| 1 | **Edit template** | File is written to `%LOCALAPPDATA%\Visa2026\TemplateEdit` on this PC and opened in Word or Excel |
 
-| 2 | **Edit template** (gear on) | Export from DB → write to local sandbox → try Word/Excel open; **Copy path** fallback |
+| 2 | Edit, **Save**, **Close** | The file stays in that folder. The row shows **In folder** |
 
-| 3 | Edit, **Save**, **Close** in desktop Word/Excel | File remains in sandbox; **In folder** badge on the row |
+| 3 | **Sync to database** | Changed files in that folder replace the database templates. **Extract + Validate** runs when the file changed |
 
-| 4 | **Sync to database** | Upload changed files → replace DB blobs → **Extract + Validate** when hash changed |
-
-| 5 | **Refresh** | Reload catalog readiness **only** — does **not** import |
+| 4 | **Refresh** | Reload catalog readiness **only** — does **not** import |
 
 
 

@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.1108</AssemblyVersion>
-    <FileVersion>1.0.0.1108</FileVersion>
+    <AssemblyVersion>1.0.0.1109</AssemblyVersion>
+    <FileVersion>1.0.0.1109</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -98,7 +98,7 @@
       <DependentUpon>Model.xafml</DependentUpon>
     </None>
   </ItemGroup>
-  <!-- Model Editor stubs (Model_tr-TR.xafml, â€¦) are not part of the build; see ReadMe.txt -->
+  <!-- Model Editor stubs (Model_tr-TR.xafml, Ã¢â‚¬Â¦) are not part of the build; see ReadMe.txt -->
   <Target Name="RemoveDevExpressModelEditorCultureStubs" BeforeTargets="BeforeBuild">
     <ItemGroup>
       <_DevExpressModelEditorStub Include="$(MSBuildProjectDirectory)\Model_*.xafml" />
@@ -132,6 +132,36 @@
     <Content Include="Model_ru-RU.xafml">
       <DependentUpon>Model.xafml</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\scripts\windows-iis\template-edit-setup\Install.cmd">
+      <Link>template-edit-setup\Install.cmd</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\scripts\windows-iis\template-edit-setup\Install-Visa2026TemplateEdit.ps1">
+      <Link>template-edit-setup\Install-Visa2026TemplateEdit.ps1</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1">
+      <Link>template-edit-setup\Set-Visa2026TemplateEditOfficeTrust.ps1</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\scripts\windows-iis\Install-Visa2026OfficeSyncAddin.ps1">
+      <Link>template-edit-setup\Install-Visa2026OfficeSyncAddin.ps1</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\scripts\windows-iis\Invoke-Visa2026TemplateEdit.ps1">
+      <Link>template-edit-setup\Invoke-Visa2026TemplateEdit.ps1</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\scripts\windows-iis\office-sync\Visa2026.OfficeSync.dll">
+      <Link>template-edit-setup\office-sync\Visa2026.OfficeSync.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
 </Project>

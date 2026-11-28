@@ -1,4 +1,22 @@
 
+### 2026-11-28 — Preview ignored bold saved by Sync
+
+- **Need**: After Sync, Preview of yüztutma-energetika still showed the opening line in regular weight. The Word file had **Türkmenistanyň** bold.
+- **Cause**: Sync wrote `UserReportTemplate` FileData. Preview and ZIP read the same-named `ApplicationProfileTemplate.TemplateFile`. That profile copy stayed on the older bytes.
+- **Fix**: Sync also writes those bytes onto every same-name Word/Excel profile copy. The local profile row for yüztutma-energetika was updated to the synced file (21782 bytes).
+- **Officer**: Click Preview again. **Türkmenistanyň** at the start of the body is bold. **Energetika** is regular in the saved Word file. To bold that word too, select it in Word, save, rebuild, then Sync.
+- **Prevent**: Do not treat a matching master hash as “nothing to publish” while a profile copy still has different bytes.
+- **Cross-skill**: —
+
+### 2026-11-28 — Edit template writes to a local folder (Application)
+
+- **Need**: Officers downloaded a template, edited it, then uploaded it. Edit should write the file on this PC and open Word or Excel from that folder.
+- **Cause**: Catalog Edit had been removed. The remaining script saved into the browser Downloads folder and Sync asked the officer to pick the file.
+- **Fix**: Edit template uses the browser folder grant (File System Access). The file is written under the chosen folder, Word or Excel is opened from that path when the host is this PC, and Sync to database reads the saved file back. Download Template stays behind the gear.
+- **Officer**: Stop F5, rebuild, hard-refresh in Edge or Chrome. Templates → Edit template. In the folder picker paste `%LOCALAPPDATA%\Visa2026\TemplateEdit`, Select Folder. Save in Word, close it, then Sync to database. The row shows In folder.
+- **Prevent**: Do not start the folder picker after a Blazor round-trip. The click handler in `template-staging-local.js` must call `showDirectoryPicker` while the browser still has the click.
+- **Cross-skill**: —
+
 ### 2026-11-28 — Application form card on the Templates list
 
 - **Need**: The filled visa application PDF was missing from the case Templates panel. That list showed only Word and Excel letters.

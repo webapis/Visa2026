@@ -1,4 +1,9 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using DocxTemplater;
+using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.WordReports;
 using Xunit;
 
@@ -111,6 +116,67 @@ public class ApplicationWordReportOfficePreviewPdfConverterTests
         Assert.Equal("Ferdi", only.Cell("A1").GetString());
         Assert.Equal(XLPageOrientation.Landscape, only.PageSetup.PageOrientation);
         Assert.Equal(1, only.PageSetup.PagesWide);
+    }
+
+    [Fact]
+    public void Preview_keeps_bold_on_the_opening_words()
+    {
+        var docx = CreateBoldOpeningDocx();
+        using var input = new MemoryStream(docx, writable: false);
+        var template = DocxTemplateFactory.Open(input);
+        template.BindModel("ds", new Dictionary<string, object> { ["Urgency_NameTm"] = "Gyssagly tertipde!" });
+        using var merged = new MemoryStream();
+        template.Save(merged);
+        merged.Position = 0;
+
+        using var check = WordprocessingDocument.Open(merged, false);
+        var boldText = string.Concat(check.MainDocumentPart!.Document.Body!
+            .Descendants<Run>()
+            .Where(run => run.RunProperties?.GetFirstChild<Bold>() != null)
+            .Select(run => run.InnerText));
+        Assert.Contains("Türkmenistanyň", boldText);
+        Assert.Contains("Energetika", boldText);
+
+        var pdf = new ApplicationWordReportOfficePreviewPdfConverter().TryConvertToPdf(merged.ToArray(), "yuztutma.docx");
+        Assert.NotNull(pdf);
+        var pdfText = System.Text.Encoding.Latin1.GetString(pdf!);
+        Assert.Contains("Bold", pdfText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static byte[] CreateBoldOpeningDocx()
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+        {
+            var main = document.AddMainDocumentPart();
+            var body = new Body();
+            main.Document = new Document(body);
+            var paragraph = new Paragraph();
+            paragraph.AppendChild(RunOf("{{ds.Urgency_NameTm}}", bold: false));
+            paragraph.AppendChild(RunOf("Türkmenistanyň", bold: true));
+            paragraph.AppendChild(RunOf(" ", bold: false));
+            paragraph.AppendChild(RunOf("Energetika ", bold: true));
+            paragraph.AppendChild(RunOf("ministrligi", bold: false));
+            body.AppendChild(paragraph);
+            main.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    private static Run RunOf(string text, bool bold)
+    {
+        var props = new RunProperties(
+            new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+            new FontSize { Val = "32" },
+            new FontSizeComplexScript { Val = "32" });
+        if (bold)
+        {
+            props.AppendChild(new Bold());
+            props.AppendChild(new BoldComplexScript());
+        }
+
+        return new Run(props, new Text(text) { Space = SpaceProcessingModeValues.Preserve });
     }
 
     private static byte[] CreateMinimalXlsx()

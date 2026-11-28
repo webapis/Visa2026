@@ -2,6 +2,7 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp
@@ -340,6 +341,31 @@
                     }
                 </div>
                 <div class="app-item-doc-copies__package-bar-actions">
+                    @if (ShowTemplateStagingActions)
+                    {
+                        <button type="button"
+                                class="dxbl-btn dxbl-btn-link app-item-doc-copies__action-btn"
+                                data-visa-download-pc-setup="true"
+                                title="@Msg("ApplicationReportPackage.InstallPcSetup.Tooltip")">
+                            @Msg("ApplicationReportPackage.InstallPcSetup")
+                        </button>
+                        <button type="button"
+                                class="dxbl-btn dxbl-btn-link app-item-doc-copies__action-btn app-report-package__sync-templates-btn"
+                                data-visa-sync-templates="true"
+                                disabled="@(_syncBusy || _editTemplateId != null || _packageBusy || _previewBusy)"
+                                title="@Msg("ApplicationReportPackage.SyncTemplates")">
+                            @Msg("ApplicationReportPackage.SyncTemplates")
+                        </button>
+                        @if (!string.IsNullOrWhiteSpace(_copyPath))
+                        {
+                            <button type="button"
+                                    class="dxbl-btn dxbl-btn-link app-item-doc-copies__action-btn app-report-package__sync-templates-btn"
+                                    data-visa-copy-path="@_copyPath"
+                                    title="@Msg("ApplicationReportPackage.EditTemplate.CopyPath")">
+                                @Msg("ApplicationReportPackage.EditTemplate.CopyPath")
+                            </button>
+                        }
+                    }
                     @if (!_recycleBusy && _recycleConfirmKind != RecycleConfirmKind.None)
                     {
                         <DxButton Text="@GetRecycleConfirmActionLabel()"
@@ -491,7 +517,60 @@
     private bool _syncBusy;
     private Guid? _editTemplateId;
     private Guid? _downloadTemplateId;
-    private readonly HashSet<Guid> _downloadedTemplateIds = new();
+    private Guid? _uploadTemplateId;
+    private readonly HashSet<Guid> _inFolderTemplateIds = new();
+    private string? _copyPath;
+
+    private bool ShowTemplateStagingActions =>
+        _canEditUserTemplates
+        && IsCatalogPane
+        && !_packageSelectMode
+        && !_packageConfirmPending
+        && _recycleConfirmKind == RecycleConfirmKind.None
+        && !_recycleBusy;
+
+    private RenderFragment EditTemplateButton(ApplicationWordReportPackageCatalogEntry entry) =>
+    @<button type="button"
+             class="resminamalar-catalog__edit-template-btn"
+             title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")"
+             data-visa-edit-template="@entry.UserReportTemplateId"
+             disabled="@(_packageBusy || _previewBusy || _refreshBusy || _syncBusy || _recycleBusy || _editTemplateId != null || _downloadTemplateId != null || _uploadTemplateId != null)">
+        @(IsEditingTemplate(entry)
+            ? Msg("ApplicationReportPackage.EditTemplate.Exporting")
+            : Msg("ApplicationReportPackage.EditTemplate"))
+    </button>;
+
+    private RenderFragment DownloadUploadButtons(ApplicationWordReportPackageCatalogEntry entry) =>
+    @<span class="resminamalar-catalog__manual-edit">
+        <button type="button"
+                class="resminamalar-catalog__edit-template-btn"
+                title="@Msg("ApplicationReportPackage.DownloadTemplate.Tooltip")"
+                disabled="@TemplateFileActionBusy"
+                @onclick="() => DownloadTemplateAsync(entry)">
+            @(IsDownloadingTemplate(entry)
+                ? Msg("ApplicationReportPackage.EditTemplate.Exporting")
+                : Msg("ApplicationReportPackage.DownloadTemplate"))
+        </button>
+        @if (CanPickUpload)
+        {
+            <label class="resminamalar-catalog__edit-template-btn resminamalar-catalog__file-btn"
+                   title="@Msg("ApplicationReportPackage.UploadTemplate.Tooltip")">
+                @Msg("ApplicationReportPackage.UploadTemplate")
+                <InputFile OnChange="e => UploadTemplateAsync(entry, e)" accept="@AcceptFor(entry)" />
+            </label>
+        }
+        else
+        {
+            <button type="button"
+                    class="resminamalar-catalog__edit-template-btn"
+                    title="@Msg("ApplicationReportPackage.UploadTemplate.Tooltip")"
+                    disabled>
+                @(IsUploadingTemplate(entry)
+                    ? Msg("ApplicationReportPackage.UploadTemplate.Uploading")
+                    : Msg("ApplicationReportPackage.UploadTemplate"))
+            </button>
+        }
+    </span>;
     private bool ShowDetails;
     private bool _recycleBusy;
     private RecycleConfirmKind _recycleBusyKind = RecycleConfirmKind.None;
@@ -591,6 +670,10 @@
                             <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
                                 @ReadinessLabel(entry)
                             </span>
+                            @if (IsInLocalFolder(entry))
+                            {
+                                <span class="resminamalar-catalog__folder-chip">@Msg("ApplicationReportPackage.EditTemplate.OnLocalFolder")</span>
+                            }
                             @if (IsRecyclingEntry(entry))
                             {
                                 <span class="app-report-package__preview-busy-label" role="status">
@@ -611,15 +694,13 @@
                                           CssClass="app-item-doc-copies__action-btn"
                                           Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy)"
                                           Click="@(() => PreviewEntryAsync(entry))" />
+                                @if (CanEditTemplate(entry))
+                                {
+                                    @EditTemplateButton(entry)
+                                }
                                 @if (ShowDetails && CanDownloadTemplate(entry))
                                 {
-                                    <DxButton Text="@Msg("ApplicationReportPackage.DownloadTemplate")"
-                                              RenderStyle="ButtonRenderStyle.Link"
-                                              SizeMode="SizeMode.Small"
-                                              CssClass="app-item-doc-copies__action-btn"
-                                              title="@Msg("ApplicationReportPackage.DownloadTemplate.Tooltip")"
-                                              Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null && _downloadTemplateId == null)"
-                                              Click="@(() => DownloadTemplateAsync(entry))" />
+                                    @DownloadUploadButtons(entry)
                                 }
                                 @if (ShowDetails && CanReviewPlaceholders(entry))
                                 {
@@ -712,12 +793,21 @@
                             <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
                         </div>
                         <div class="resminamalar-catalog__actions">
+                            @if (IsInLocalFolder(entry))
+                            {
+                                <span class="resminamalar-catalog__folder-chip">@Msg("ApplicationReportPackage.EditTemplate.OnLocalFolder")</span>
+                            }
                             <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
                                       RenderStyle="ButtonRenderStyle.Link"
                                       SizeMode="SizeMode.Small"
                                       CssClass="app-item-doc-copies__action-btn"
                                       Enabled="@(!_packageBusy && !_previewBusy && !_recycleBusy && !_sharedToggleBusy)"
                                       Click="@(() => PreviewEntryAsync(entry))" />
+                            @if (CanEditTemplate(entry))
+                            {
+                                @EditTemplateButton(entry)
+                                @DownloadUploadButtons(entry)
+                            }
                             <button type="button"
                                     class="resminamalar-catalog__toggle @(entry.IsSharedIncluded ? "resminamalar-catalog__toggle--on" : "resminamalar-catalog__toggle--off")"
                                     role="switch"
@@ -943,6 +1033,7 @@
             try
             {
                 await JS.InvokeVoidAsync("visaTemplateStagingLocal.initDotNetRef", _dotNetRef);
+                await RefreshInFolderIdsAsync();
             }
             catch (JSDisconnectedException)
             {
@@ -953,7 +1044,164 @@
         }
     }
 
-    /// <summary>Called by <c>visaTemplateStagingLocal.syncFromFilePickerDirect()</c> before the file picker opens.</summary>
+    private async Task RefreshInFolderIdsAsync()
+    {
+        string[]? ids;
+        try
+        {
+            ids = await JS.InvokeAsync<string[]>("visaTemplateStagingLocal.listGrantedTemplateIds");
+        }
+        catch (JSDisconnectedException)
+        {
+            return;
+        }
+        catch (JSException)
+        {
+            return;
+        }
+
+        if (ids == null)
+            return;
+
+        var added = false;
+        foreach (var id in ids)
+        {
+            if (Guid.TryParse(id, out var templateId)
+                && templateId != Guid.Empty
+                && _inFolderTemplateIds.Add(templateId))
+            {
+                added = true;
+            }
+        }
+
+        if (added)
+            await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Called by <c>visaTemplateStagingLocal.editTemplateDirect</c> after the folder grant, before the file is written.</summary>
+    [JSInvokable]
+    public async Task OnEditTemplateStarted(string templateId)
+    {
+        if (!_canEditUserTemplates || !Guid.TryParse(templateId, out var id) || id == Guid.Empty)
+            return;
+
+        _copyPath = null;
+        ClearStatusMessages();
+        _editTemplateId = id;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Called by <c>visaTemplateStagingLocal.editTemplateDirect</c> when the local folder write finishes.</summary>
+    [JSInvokable]
+    public async Task OnEditTemplateResult(string json)
+    {
+        try
+        {
+            if (!_canEditUserTemplates || string.IsNullOrWhiteSpace(json))
+                return;
+
+            var result = JsonSerializer.Deserialize<UserReportTemplateStagingEditJsResult>(json, SyncResultJsonOptions);
+            if (result == null)
+            {
+                _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            ApplyEditResult(result);
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar template staging export failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _editTemplateId = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnTemplateFolderChosen(string folderName)
+    {
+        if (!_canEditUserTemplates)
+            return;
+
+        _copyPath = null;
+        if (!string.IsNullOrWhiteSpace(folderName)
+            && !string.Equals(folderName, TemplateStagingUiService.FolderLeaf, StringComparison.OrdinalIgnoreCase))
+        {
+            _packageStatusMessage = FormatMsg(
+                "ApplicationReportPackage.EditTemplate.ChooseFolderHint",
+                TemplateStagingUiService.FolderPickerHint);
+            _packageStatusIsError = true;
+        }
+        else
+        {
+            _packageStatusMessage = FormatMsg(
+                "ApplicationReportPackage.EditTemplate.FolderReady",
+                string.IsNullOrWhiteSpace(folderName)
+                    ? TemplateStagingUiService.FolderPickerHint
+                    : folderName);
+            _packageStatusIsError = false;
+        }
+
+        await RefreshInFolderIdsAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnTemplateFolderChoiceFailed(string code)
+    {
+        if (!_canEditUserTemplates || string.Equals(code, "cancelled", StringComparison.OrdinalIgnoreCase))
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        ApplyFolderFailure(code);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnSyncFolderFailed(string code)
+    {
+        try
+        {
+            if (!_canEditUserTemplates)
+                return;
+
+            if (string.Equals(code, "cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                ClearStatusMessages();
+                return;
+            }
+
+            ApplyFolderFailure(code);
+        }
+        finally
+        {
+            _syncBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnTemplatePathCopied(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        _packageStatusMessage = FormatMsg("ApplicationReportPackage.EditTemplate.PathCopied", path);
+        _packageStatusIsError = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
     [JSInvokable]
     public async Task OnSyncFromFilePickerStarted()
     {
@@ -1735,19 +1983,203 @@
         entry.UserReportTemplateId is Guid templateId
         && templateId != Guid.Empty;
 
+    private bool IsEditingTemplate(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.UserReportTemplateId is Guid templateId
+        && _editTemplateId == templateId;
+
+    private bool IsInLocalFolder(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.UserReportTemplateId is Guid templateId
+        && _inFolderTemplateIds.Contains(templateId);
+
+    private void ApplyEditResult(UserReportTemplateStagingEditJsResult result)
+    {
+        switch (result.Code)
+        {
+            case "cancelled":
+                ClearStatusMessages();
+                _copyPath = null;
+                return;
+            case "needsSync":
+                _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.NeedsSyncFirst");
+                _packageStatusIsError = true;
+                if (result.TemplateId != Guid.Empty)
+                    _inFolderTemplateIds.Add(result.TemplateId);
+                return;
+            case "fileLocked":
+                _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.FileLocked");
+                _packageStatusIsError = true;
+                return;
+            case "protectedRoot":
+            case "unsupported":
+            case "helperMissing":
+                ApplyFolderFailure(result.Code);
+                return;
+            case "exported":
+                RememberExported(result);
+                return;
+            default:
+                _packageStatusMessage = string.IsNullOrWhiteSpace(result.Error)
+                    ? Msg("ApplicationReportPackage.EditTemplate.ExportFailed")
+                    : result.Error;
+                _packageStatusIsError = true;
+                return;
+        }
+    }
+
+    private void RememberExported(UserReportTemplateStagingEditJsResult result)
+    {
+        if (result.TemplateId != Guid.Empty)
+            _inFolderTemplateIds.Add(result.TemplateId);
+
+        var folder = !string.IsNullOrWhiteSpace(result.CopyPath)
+            ? Path.GetDirectoryName(result.CopyPath) ?? result.FolderName ?? string.Empty
+            : result.FolderName ?? string.Empty;
+        var fileName = result.FileName ?? string.Empty;
+        var displayName = string.IsNullOrWhiteSpace(result.DisplayName) ? fileName : result.DisplayName;
+        _copyPath = string.IsNullOrWhiteSpace(result.CopyPath) ? null : result.CopyPath;
+        _packageStatusMessage = result.Opened
+            ? FormatMsg("ApplicationReportPackage.EditTemplate.LocalExportedOpen", displayName, folder, fileName)
+            : FormatMsg("ApplicationReportPackage.EditTemplate.LocalExported", displayName, folder, fileName);
+        _packageStatusIsError = false;
+    }
+
+    private void ApplyFolderFailure(string? code)
+    {
+        _copyPath = null;
+        _packageStatusIsError = true;
+        if (string.Equals(code, "protectedRoot", StringComparison.OrdinalIgnoreCase))
+            _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot");
+        else if (string.Equals(code, "helperMissing", StringComparison.OrdinalIgnoreCase))
+            _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.HelperMissing");
+        else if (!string.IsNullOrWhiteSpace(code) && code.Contains(' '))
+            _packageStatusMessage = code.Trim();
+        else
+            _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
+    }
+
     private bool IsDownloadedForEdit(ApplicationWordReportPackageCatalogEntry entry) =>
         entry.UserReportTemplateId is Guid templateId
-        && _downloadedTemplateIds.Contains(templateId);
+        && _inFolderTemplateIds.Contains(templateId);
+
+    private bool TemplateFileActionBusy =>
+        _packageBusy
+        || _previewBusy
+        || _refreshBusy
+        || _syncBusy
+        || _recycleBusy
+        || _editTemplateId != null
+        || _downloadTemplateId != null
+        || _uploadTemplateId != null;
+
+    private bool CanPickUpload => !TemplateFileActionBusy;
+
+    private bool IsDownloadingTemplate(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.UserReportTemplateId is Guid templateId
+        && _downloadTemplateId == templateId;
+
+    private bool IsUploadingTemplate(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.UserReportTemplateId is Guid templateId
+        && _uploadTemplateId == templateId;
+
+    private static string AcceptFor(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.Kind == ApplicationWordReportPackageEntryKind.UserExcel ? ".xlsx" : ".docx";
+
+    private async Task UploadTemplateAsync(
+        ApplicationWordReportPackageCatalogEntry entry,
+        InputFileChangeEventArgs args)
+    {
+        if (entry.UserReportTemplateId is not Guid templateId
+            || templateId == Guid.Empty
+            || TemplateFileActionBusy)
+        {
+            return;
+        }
+
+        var file = args.File;
+        if (file == null)
+            return;
+
+        var expectedExtension = AcceptFor(entry);
+        if (!file.Name.EndsWith(expectedExtension, StringComparison.OrdinalIgnoreCase))
+        {
+            _packageStatusMessage = FormatMsg(
+                "ApplicationReportPackage.UploadTemplate.WrongType",
+                expectedExtension);
+            _packageStatusIsError = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        byte[] content;
+        try
+        {
+            await using var stream = file.OpenReadStream(52_428_800);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            content = memory.ToArray();
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.UploadTemplate.Failed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar template upload failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        ClearStatusMessages();
+        _uploadTemplateId = templateId;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var result = await TemplateStagingUiService.UploadTemplateAsync(templateId, content);
+            switch (result.Status)
+            {
+                case UserReportTemplateStagingImportStatus.Imported:
+                    _packageStatusMessage = FormatMsg(
+                        "ApplicationReportPackage.UploadTemplate.Imported",
+                        string.IsNullOrWhiteSpace(result.DisplayName) ? entry.DisplayName : result.DisplayName);
+                    _packageStatusIsError = false;
+                    if (RefreshRequested.HasDelegate)
+                        await RefreshRequested.InvokeAsync();
+                    break;
+                case UserReportTemplateStagingImportStatus.SkippedUnchanged:
+                    _packageStatusMessage = Msg("ApplicationReportPackage.UploadTemplate.Unchanged");
+                    _packageStatusIsError = false;
+                    break;
+                default:
+                    _packageStatusMessage = string.IsNullOrWhiteSpace(result.ErrorMessage)
+                        ? Msg("ApplicationReportPackage.UploadTemplate.Failed")
+                        : result.ErrorMessage;
+                    _packageStatusIsError = true;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.UploadTemplate.Failed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar template upload failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _uploadTemplateId = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
 
     private async Task DownloadTemplateAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
         if (entry.UserReportTemplateId is not Guid templateId
             || templateId == Guid.Empty
-            || _downloadTemplateId.HasValue
-            || _editTemplateId.HasValue
-            || _packageBusy
-            || _previewBusy
-            || _refreshBusy)
+            || TemplateFileActionBusy)
         {
             return;
         }
@@ -1801,91 +2233,20 @@
         }
     }
 
-    private async Task EditTemplateAsync(ApplicationWordReportPackageCatalogEntry entry)
+    private async Task ApplySyncCollectResultAsync(UserReportTemplateStagingLocalCollectJsResult result)
     {
-        if (!_canEditUserTemplates
-            || entry.UserReportTemplateId is not Guid templateId
-            || templateId == Guid.Empty
-            || _editTemplateId.HasValue
-            || _downloadTemplateId.HasValue
-            || _packageBusy
-            || _previewBusy
-            || _refreshBusy)
+        if (result.ImportedCount == 0 && result.FailedCount == 0)
         {
+            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.NoLocalChanges");
+            _packageStatusIsError = false;
             return;
         }
 
-        ClearStatusMessages();
-        _editTemplateId = templateId;
-        await InvokeAsync(StateHasChanged);
-
-        try
+        var locked = result.Uploads.FirstOrDefault(item =>
+            string.Equals(item.Status, "fileLocked", StringComparison.OrdinalIgnoreCase));
+        if (locked != null && result.ImportedCount == 0)
         {
-            var outcome = await TemplateStagingUiService.ExportForEditAsync(templateId);
-            if (!outcome.Success || outcome.Result == null)
-            {
-                _packageStatusMessage = outcome.ErrorMessage ?? Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
-                _packageStatusIsError = true;
-                return;
-            }
-
-            if (outcome.Result.FileContent == null || outcome.Result.FileContent.Length == 0)
-            {
-                _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
-                _packageStatusIsError = true;
-                return;
-            }
-
-            var downloadResult = await JS.InvokeAsync<UserReportTemplateStagingDownloadJsResult>(
-                "visaTemplateStagingLocal.downloadTemplate",
-                new
-                {
-                    fileName = outcome.Result.DocumentFileName,
-                    templateId = templateId.ToString(),
-                    displayName = outcome.Result.DisplayName,
-                    fileBase64 = Convert.ToBase64String(outcome.Result.FileContent),
-                    exportedAtUtc = DateTime.UtcNow.ToString("o"),
-                });
-
-            if (downloadResult == null || !downloadResult.Success)
-            {
-                _packageStatusMessage = downloadResult?.Error
-                    ?? Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
-                _packageStatusIsError = true;
-                return;
-            }
-
-            _downloadedTemplateIds.Add(templateId);
-            _packageStatusMessage = FormatMsg(
-                "ApplicationReportPackage.EditTemplate.Downloaded",
-                outcome.Result.DisplayName,
-                outcome.Result.DocumentFileName);
-            _packageStatusIsError = false;
-        }
-        catch (Exception ex)
-        {
-            _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
-            _packageStatusIsError = true;
-            ErrorReporter.ReportReportPackageError(
-                "Resminamalar template staging export failed.",
-                ApplicationRuntimeLogCategories.ReportPackageComponent,
-                ex);
-        }
-        finally
-        {
-            _editTemplateId = null;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task ApplySyncCollectResultAsync(UserReportTemplateStagingLocalCollectJsResult collect)
-    {
-        var result = UserReportTemplateStagingUiService.MapCollectResult(collect);
-        if (result.ImportedCount == 0
-            && result.FailedCount == 0
-            && result.SkippedUnchangedCount > 0)
-        {
-            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.NoLocalChanges");
+            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.FileLocked");
             _packageStatusIsError = true;
             return;
         }
@@ -1897,32 +2258,13 @@
             result.FailedCount);
         _packageStatusIsError = result.FailedCount > 0;
 
-        var firstFailure = result.Results.FirstOrDefault(r =>
-            r.Status == UserReportTemplateStagingImportStatus.Failed
-            && !string.IsNullOrWhiteSpace(r.ErrorMessage));
+        var firstFailure = result.Uploads.FirstOrDefault(item =>
+            string.Equals(item.Status, nameof(UserReportTemplateStagingImportStatus.Failed), StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(item.ErrorMessage));
         if (firstFailure?.ErrorMessage != null)
-        {
             _packageStatusMessage += " " + firstFailure.ErrorMessage;
-        }
 
-        foreach (var imported in result.Results.Where(r =>
-                     r.Status == UserReportTemplateStagingImportStatus.Imported))
-        {
-            _downloadedTemplateIds.Remove(imported.TemplateId);
-        }
-
-        var locked = result.Results.FirstOrDefault(r =>
-            r.Status == UserReportTemplateStagingImportStatus.Failed
-            && !string.IsNullOrWhiteSpace(r.ErrorMessage)
-            && r.ErrorMessage.Contains("locked", StringComparison.OrdinalIgnoreCase));
-        if (locked != null)
-        {
-            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.FileLocked");
-            _packageStatusIsError = true;
-            return;
-        }
-
-        if (RefreshRequested.HasDelegate)
+        if (RefreshRequested.HasDelegate && result.ImportedCount > 0)
             await RefreshRequested.InvokeAsync();
     }
 
