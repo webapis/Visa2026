@@ -5975,6 +5975,28 @@ button.lv-progress-step__files {
     background: rgba(61, 214, 140, 0.14);
 }
 
+.person-intake-wizard__nav-item.is-missing {
+    border-color: rgba(255, 107, 107, 0.75);
+}
+
+.person-intake-wizard__nav-item.is-editable.is-missing .person-intake-wizard__nav-label {
+    color: inherit;
+}
+
+.person-intake-wizard__nav-item.is-missing .person-intake-wizard__nav-badge,
+.person-intake-wizard__nav-item.is-missing .person-intake-wizard__nav-status,
+.person-intake-wizard__nav-item.is-editable.is-missing .person-intake-wizard__nav-badge,
+.person-intake-wizard__nav-item.is-editable.is-missing .person-intake-wizard__nav-status {
+    color: #ff6b6b;
+    opacity: 1;
+}
+
+.person-intake-wizard__nav-item.is-missing.is-active,
+.person-intake-wizard__nav-item.is-editable.is-missing.is-active {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.14);
+}
+
 .person-intake-wizard__nav-item.is-readonly {
     border-color: rgba(110, 168, 254, 0.55);
 }
@@ -6660,6 +6682,28 @@ button.lv-progress-step__files {
 .dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-editable.is-active {
     border-color: #157347;
     background: rgba(21, 115, 71, 0.1);
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-missing {
+    border-color: rgba(220, 53, 69, 0.7);
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-editable.is-missing .person-intake-wizard__nav-label {
+    color: inherit;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-missing .person-intake-wizard__nav-badge,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-missing .person-intake-wizard__nav-status,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-editable.is-missing .person-intake-wizard__nav-badge,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-editable.is-missing .person-intake-wizard__nav-status {
+    color: #dc3545;
+    opacity: 1;
+}
+
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-missing.is-active,
+.dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-editable.is-missing.is-active {
+    border-color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
 }
 
 .dxbl-theme-fluent-mode-light .person-intake-wizard__nav-item.is-readonly {

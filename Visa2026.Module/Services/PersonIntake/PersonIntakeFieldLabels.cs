@@ -25,6 +25,7 @@ public static class PersonIntakeFieldLabels
     {
         PersonPendingTargets.FirstName => false,
         PersonPendingTargets.LastName => false,
+        PersonPendingTargets.MiddleName => false,
         PersonPendingTargets.Age => false,
         PersonPendingTargets.SponsoringEmployee => false,
         PersonPendingTargets.Relationship => false,
@@ -71,6 +72,7 @@ public static class PersonIntakeFieldLabels
     {
         PersonPendingTargets.FirstName => "First name",
         PersonPendingTargets.LastName => "Last name",
+        PersonPendingTargets.MiddleName => "Father's name",
         PersonPendingTargets.DateOfBirth => "Date of birth",
         PersonPendingTargets.Age => "Age",
         PersonPendingTargets.Gender => "Gender",

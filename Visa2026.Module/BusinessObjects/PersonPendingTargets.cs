@@ -21,6 +21,7 @@ public static class PersonPendingTargets
 
     public const string FirstName = "Person.FirstName";
     public const string LastName = "Person.LastName";
+    public const string MiddleName = "Person.MiddleName";
     public const string Age = "Person.Age";
     public const string VisaApplicationFamilyMembersText = "Person.VisaApplicationFamilyMembersText";
     public const string SponsoringEmployee = "Person.SponsoringEmployee";

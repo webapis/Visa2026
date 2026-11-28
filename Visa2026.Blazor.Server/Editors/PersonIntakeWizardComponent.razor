@@ -1347,6 +1347,14 @@ else
                 builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => Person.LastName = e.Value?.ToString()));
                 builder.CloseElement();
                 break;
+            case PersonPendingTargets.MiddleName:
+                builder.OpenElement(seq++, "input");
+                builder.AddAttribute(seq++, "class", FilledCss(css, Person.MiddleName));
+                builder.AddAttribute(seq++, "disabled", locked);
+                builder.AddAttribute(seq++, "value", Person.MiddleName ?? string.Empty);
+                builder.AddAttribute(seq++, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, e => Person.MiddleName = e.Value?.ToString()));
+                builder.CloseElement();
+                break;
             case PersonPendingTargets.DateOfBirth:
                 builder.OpenComponent<OfficerDateEdit>(seq++);
                 builder.AddAttribute(seq++, nameof(OfficerDateEdit.Date), Person.DateOfBirth == default ? null : Person.DateOfBirth);
@@ -2209,6 +2217,9 @@ else
 
         if (step.RecordTargetKey is PersonPendingTargets.EmployeeSalary or PersonPendingTargets.WorkDuty)
         {
+            if (stepFindings.Any(f => f.State is PersonIntakeItemState.Pending or PersonIntakeItemState.Unresolved))
+                return MissingStatus(stepFindings);
+
             var hasRows = step.RecordTargetKey == PersonPendingTargets.EmployeeSalary
                 ? State.SalaryDrafts.Count > 0 || Person?.Salaries?.Any(salary => salary != null) == true
                 : State.WorkDutyDrafts.Count > 0 || Person?.WorkDuties?.Any(duty => duty != null) == true;
@@ -2223,7 +2234,7 @@ else
     private static (string Css, string Badge, string Text) StepStatus(PersonIntakeStep step, List<PersonIntakeFinding> stepFindings)
     {
         if (step.Kind == PersonIntakeStepKind.Overview)
-            return ("is-pending", "!", T("Status.StartHere"));
+            return ("is-missing", "!", T("Status.StartHere"));
 
         if (step.Kind == PersonIntakeStepKind.Review)
             return ("is-review", "✓", T("Status.Summary"));
@@ -2231,16 +2242,23 @@ else
         if (stepFindings.Count == 0)
             return ("is-todo", "·", T("Status.NotStarted"));
 
-        if (stepFindings.Any(f => f.State == PersonIntakeItemState.Unresolved))
-            return ("is-progress", "…", T("Status.InProgress"));
-
-        var pendingCount = stepFindings.Count(f => f.State == PersonIntakeItemState.Pending);
-        if (pendingCount > 0 && stepFindings.All(f => f.State != PersonIntakeItemState.Unresolved))
-            return ("is-done", "✓", PersonIntakeText.Format("Status.PendingCount", pendingCount));
+        // Not received is missing data: a tick means every item on the tab has a real value.
+        if (stepFindings.Any(f => f.State is PersonIntakeItemState.Pending or PersonIntakeItemState.Unresolved))
+            return MissingStatus(stepFindings);
 
         if (stepFindings.All(f => f.State == PersonIntakeItemState.Filled))
             return ("is-done", "✓", T("Status.Complete"));
 
         return ("is-todo", "·", T("Status.NotStarted"));
+    }
+
+    private static (string Css, string Badge, string Text) MissingStatus(List<PersonIntakeFinding> stepFindings)
+    {
+        var missingCount = stepFindings.Count(f =>
+            f.State is PersonIntakeItemState.Pending or PersonIntakeItemState.Unresolved);
+        var text = missingCount > 0
+            ? PersonIntakeText.Format("Status.PendingCount", missingCount)
+            : T("Status.InProgress");
+        return ("is-missing", "!", text);
     }
 }

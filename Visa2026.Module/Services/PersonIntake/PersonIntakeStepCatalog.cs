@@ -52,24 +52,29 @@ public static class PersonIntakeStepCatalog
     public static IReadOnlyList<PersonIntakeStep> Steps(Person person)
     {
         var employee = person?.PersonRole == PersonRecordRole.Employee;
-        // Identity: who the person is.
+        // Identity column follows the legacy employee form: name, father's name, gender, birth, marital status.
         var identityFields = new List<string>
         {
             PersonPendingTargets.FirstName,
             PersonPendingTargets.LastName,
-            PersonPendingTargets.DateOfBirth,
-            PersonPendingTargets.Age,
-            PersonPendingTargets.BirthPlace,
+            PersonPendingTargets.MiddleName,
+            PersonPendingTargets.Gender,
             PersonPendingTargets.CountryOfBirth,
-            PersonPendingTargets.Gender
+            PersonPendingTargets.BirthPlace,
+            PersonPendingTargets.DateOfBirth,
+            PersonPendingTargets.Age
         };
         if (employee)
+        {
             identityFields.Add(PersonPendingTargets.MaritalStatus);
+            identityFields.Add(PersonPendingTargets.VisaApplicationFamilyMembersText);
+        }
         identityFields.Add(PersonPendingTargets.Nationality);
-        identityFields.Add(PersonPendingTargets.PersonalNumber);
+        if (!employee)
+            identityFields.Add(PersonPendingTargets.PersonalNumber);
         identityFields.Add(PersonPendingTargets.Photo);
 
-        // Work & address: assignment / contact context (shorter companion step).
+        // Right column follows the legacy form: country, address, contract, company, then ID.
         var workFields = new List<string>();
         if (!employee)
         {
@@ -78,13 +83,14 @@ public static class PersonIntakeStepCatalog
         }
         else
         {
-            workFields.Add(PersonPendingTargets.VisaApplicationFamilyMembersText);
-            workFields.Add(PersonPendingTargets.ForeignAddress);
             workFields.Add(PersonPendingTargets.ForeignAddressCountry);
+            workFields.Add(PersonPendingTargets.ForeignAddress);
         }
 
         workFields.Add(PersonPendingTargets.ProjectContract);
         workFields.Add(PersonPendingTargets.Subcontractor);
+        if (employee)
+            workFields.Add(PersonPendingTargets.PersonalNumber);
 
         var steps = new List<PersonIntakeStep>
         {
