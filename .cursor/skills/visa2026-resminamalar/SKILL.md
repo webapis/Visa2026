@@ -3,11 +3,11 @@ name: visa2026-resminamalar
 description: >-
   Resminamalar report package dialog (Application + ApplicationItem): catalog, readiness chips,
   checkboxes, in-app PDF preview, ZIP batch enqueue, WordReportGenerationBatch worker, empty template
-  list / UserReportTemplateSeedGate, desktop template staging (Edit template / Sync to database),
-  permissions, gear toggle, gap confirm, UX improvements.
+  list / UserReportTemplateSeedGate, permissions, gear toggle, gap confirm, UX improvements.
   User templates only (UserReportTemplate from Resources/Templates). Use for Resminamalar bugs,
-  batch ZIP failures, preview errors, template missing from catalog, template staging sync/import,
-  officer workflow UX — not for authoring new .docx/.xlsx seeds (visa2026-user-report-templates).
+  batch ZIP failures, preview errors, template missing from catalog, officer workflow UX.
+  Edit template, the local sandbox, Word/Excel Sync, and Install on this PC are visa2026-template-edit.
+  Not for authoring new .docx/.xlsx seeds (visa2026-user-report-templates).
   Always read learnings.md first; append after verified fixes; skill accumulates experience per MATURITY.md.
   User prompts: prompts.md.
 disable-model-invocation: false
@@ -20,7 +20,7 @@ disable-model-invocation: false
 ## Agent workflow (every task — mandatory)
 
 1. **Read** [learnings.md](./learnings.md) (**## Entries**, newest first) and **Scenarios** below.
-2. **Classify** — dialog/catalog/batch/preview/seed/permissions (**this skill**) vs DocxTemplater merge/token errors (**[user-report-templates](../visa2026-user-report-templates/SKILL.md)**).
+2. **Classify** — dialog/catalog/batch/preview/seed/permissions (**this skill**) vs Edit template / Office Sync / PC installer (**[template-edit](../visa2026-template-edit/SKILL.md)**) vs DocxTemplater merge/token errors (**[user-report-templates](../visa2026-user-report-templates/SKILL.md)**).
 3. **Fix** with minimal diff; **preview and ZIP must share** `ApplicationWordReportEntryGenerator`.
 4. **Verify** — `dotnet build Visa2026.slnx -c Debug`; officer path (preview + subset ZIP) when UI/worker touched.
 5. **Record** — append [learnings.md](./learnings.md) after **verified** fix ([MATURITY.md](./MATURITY.md)).
@@ -30,12 +30,13 @@ disable-model-invocation: false
 
 **[`docs/APPLICATION_REPORT_PACKAGE.md`](../../../docs/APPLICATION_REPORT_PACKAGE.md)** — officer workflow, architecture, file map summary.
 
-**Desktop template edit:** [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) — canonical plan for **Edit template** / **Sync to database**; production uses the officer-PC opener.
+**Edit template / Office Sync:** [visa2026-template-edit](../visa2026-template-edit/SKILL.md) — sole skill. Canonical plan [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md).
 
 **Related skills (do not duplicate):**
 
 | Topic | Skill |
 |-------|--------|
+| Edit template, local sandbox, Word/Excel Sync, Install on this PC | [visa2026-template-edit](../visa2026-template-edit/SKILL.md) |
 | Template seeds, maps, placeholders, merge (`RowNo`, Sanaw, Extract/Validate) | [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../visa2026-user-report-templates/SKILL.md) |
 | Roles / navigation to User Report Template | [`.cursor/skills/visa2026-security-access/SKILL.md`](../visa2026-security-access/SKILL.md) |
 | Docker / `FORCE_XAF_DB_UPDATE` / schema columns | [`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../visa2026-lifecycle-docker/SKILL.md) |
