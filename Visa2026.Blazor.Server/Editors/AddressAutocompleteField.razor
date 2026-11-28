@@ -118,7 +118,7 @@
                 }
             }
         </div>
-        @if (ShowCatalogActions && Enabled && !ReadOnly && !_suggestionsFailed)
+        @if (ShowCatalogActions && ShowAdd && Enabled && !ReadOnly && !_suggestionsFailed)
         {
             <button type="button"
                     class="cw-addr-ac__add"
@@ -161,6 +161,8 @@
     [Parameter] public string EmptyHint { get; set; } =
         "Start typing to search saved addresses. Use the + button to add a new one.";
     [Parameter] public bool ShowCatalogActions { get; set; } = true;
+    /// <summary>When false, the add button stays hidden. Search, select, clear, and rename still work.</summary>
+    [Parameter] public bool ShowAdd { get; set; } = true;
     [Parameter] public bool SingleLine { get; set; }
     [Parameter] public string ItemNoun { get; set; } = "address";
     [Parameter] public string ItemNounPlural { get; set; } = "addresses";
@@ -489,7 +491,7 @@
         }
 
         _statusState = "new";
-        _statusText = ShowCatalogActions
+        _statusText = ShowCatalogActions && ShowAdd
             ? $"No saved {ItemNoun} matches “{q}”. Use the + button to add it as a new {ItemNoun}."
             : $"No saved {ItemNoun} matches “{q}”.";
         _listOpen = false;

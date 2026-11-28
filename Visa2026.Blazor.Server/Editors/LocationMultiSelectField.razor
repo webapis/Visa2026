@@ -102,7 +102,7 @@
                 </ul>
             }
         </div>
-        @if (AllowCatalogEdit && Enabled && !ReadOnly && !_suggestionsFailed)
+        @if (AllowCatalogEdit && ShowAdd && Enabled && !ReadOnly && !_suggestionsFailed)
         {
             <button type="button"
                     class="cw-loc-ms__add"
@@ -154,6 +154,8 @@
     [Parameter] public string? NoneValue { get; set; } = CommaSeparatedSelectionHelper.NoneValue;
     /// <summary>When false, the field only picks existing suggestions. The add button and chip pen stay hidden.</summary>
     [Parameter] public bool AllowCatalogEdit { get; set; } = true;
+    /// <summary>When false, the add button stays hidden. Search, select, remove, and rename still work.</summary>
+    [Parameter] public bool ShowAdd { get; set; } = true;
 
     [Inject] private IJSRuntime Js { get; set; } = default!;
 
@@ -610,7 +612,7 @@
         }
 
         _statusState = "new";
-        _statusText = AllowCatalogEdit
+        _statusText = AllowCatalogEdit && ShowAdd
             ? VisaUiMessages.Format("LocationMultiSelect.NoMatchAdd", q)
             : VisaUiMessages.Format("LocationMultiSelect.NoMatch", q);
         _listOpen = false;

@@ -1,3 +1,11 @@
+## 2026-11-28 — Saved address and location plus stays behind the gear
+
+- **Need**: Address 1, Address 2, Requested border zone location, and Requested work permit location showed a plus all the time. Officers added a new shared value instead of picking one that was already saved, so the lists filled with duplicates.
+- **Fix**: The plus is hidden until the gear is on. Search, select, clear, and the rename pen stay available. Linked records uses the gear beside the person. The create Application step and the case summary each have their own gear. The hint no longer mentions the plus while the gear is off.
+- **Officer**: Stop F5, rebuild, hard-refresh. On Application, the plus is gone until the gear at the top right is on. In Linked records, click the gear: the plus appears on those four fields. Click it again: the plus hides. Typing a value that is not in the list still does not create one.
+- **Prevent**: Do not show the add button while the gear is off. Do not hide search or the clear control with that gear.
+- **Verify**: Isolated Blazor build 0 errors (session gearplus). Not clicked in the running app.
+
 ## 2026-11-27 — Application result editors use the record ribbon
 
 - **Need**: Invitation, work permit, visa, border zone, and rejection, opened from a case, still used Save and Close at the bottom of the side editor.

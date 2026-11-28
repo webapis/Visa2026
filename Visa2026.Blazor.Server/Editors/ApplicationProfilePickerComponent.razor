@@ -195,7 +195,19 @@
                     <strong>@Msg("ApplicationProfileInstance.Picker.CaseSummary")</strong>
                 </p>
             </div>
-
+            @if (CaseSummaryShowsCatalogGear)
+            {
+                <button type="button"
+                        class="cs-multi-select-popup__gear-btn @(_savedCatalogGearOn ? "cs-multi-select-popup__gear-btn--active" : null)"
+                        title="@CatalogGearTitle"
+                        aria-label="@CatalogGearTitle"
+                        aria-pressed="@_savedCatalogGearOn"
+                        @onclick="ToggleSavedCatalogGear">
+                    <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0 .12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                    </svg>
+                </button>
+            }
         </header>
 
         @RenderStatus()
@@ -536,8 +548,8 @@
     private string _dialogName = string.Empty;
     private Guid _busyVersionId;
     private string? _busyLabel;
-    /// <summary>Create-wizard Address 1 only: + / pen / × behind gear; resets when leaving Case summary.</summary>
-    private bool _address1ToolsGearOn;
+    /// <summary>Create-wizard saved address and location catalog: + stays behind the gear. Resets when leaving Case summary.</summary>
+    private bool _savedCatalogGearOn;
     private int _address1ToolsGearStep = -1;
 
     private string VersionBusyText =>
@@ -580,15 +592,15 @@
     protected override void OnParametersSet()
     {
         EnsureDefaultTab();
-        // Reset Address 1 tool gear when leaving Case summary (step 4) or first entering it.
+        // Reset the saved-value gear when leaving Case summary (step 4) or first entering it.
         if (Step != 4)
         {
-            _address1ToolsGearOn = false;
+            _savedCatalogGearOn = false;
             _address1ToolsGearStep = Step;
         }
         else if (_address1ToolsGearStep != 4)
         {
-            _address1ToolsGearOn = false;
+            _savedCatalogGearOn = false;
             _address1ToolsGearStep = 4;
         }
     }
@@ -783,20 +795,30 @@
 
     private async Task UseProfileAsync()
     {
-        _address1ToolsGearOn = false;
+        _savedCatalogGearOn = false;
         if (UseProfileRequested.HasDelegate)
             await UseProfileRequested.InvokeAsync();
     }
 
     private async Task BackStepAsync()
     {
-        _address1ToolsGearOn = false;
+        _savedCatalogGearOn = false;
         if (BackStepRequested.HasDelegate)
             await BackStepRequested.InvokeAsync();
     }
 
-    private void ToggleAddress1ToolsGear() =>
-        _address1ToolsGearOn = !_address1ToolsGearOn;
+    private bool CaseSummaryShowsCatalogGear =>
+        CaseSummaryFields.Any(field =>
+            ApplicationWorkspaceCaseHeaderFieldsHelper.IsAddressDefaultTextField(field.Key)
+            || field.Kind == ApplicationWorkspaceCaseHeaderFieldKind.CommaSeparatedMultiSelect);
+
+    private string CatalogGearTitle =>
+        _savedCatalogGearOn
+            ? Msg("ApplicationProfileInstance.Picker.HideCatalogManage")
+            : Msg("ApplicationProfileInstance.Picker.ShowCatalogManage");
+
+    private void ToggleSavedCatalogGear() =>
+        _savedCatalogGearOn = !_savedCatalogGearOn;
 
     private async Task NewApprovalLegAsync()
     {
@@ -878,7 +900,8 @@
                                           Suggestions="@locSuggestions"
                                           NoneValue="@(isWp ? string.Empty : CommaSeparatedSelectionHelper.NoneValue)"
                                           Placeholder="Start typing a location"
-                                          EmptyHint="Search saved locations. Use the + button to add a new one."
+                                          EmptyHint="@(_savedCatalogGearOn ? "Search saved locations. Use the + button to add a new one." : "Search saved locations.")"
+                                          ShowAdd="_savedCatalogGearOn"
                                           ValueChanged="value => OnCaseSummaryFieldChanged(field.Key, value)"
                                           AddSaved="text => OnPickerLocationAddAsync(locField, text)"
                                           RenameSaved="pair => OnPickerLocationRenameAsync(locField, field.Key, pair)" />
@@ -1042,8 +1065,13 @@
                                           ? "Start typing a street, district or city"
                                           : "Apartment, building, floor or landmark")"
                                       EmptyHint="@(isAddress1
-                                          ? "Start typing to search saved addresses. Use the + button to add a new one."
-                                          : "Optional. Start typing to search saved entries. Use the + button to add a new one.")"
+                                          ? (_savedCatalogGearOn
+                                              ? "Start typing to search saved addresses. Use the + button to add a new one."
+                                              : "Start typing to search saved addresses.")
+                                          : (_savedCatalogGearOn
+                                              ? "Optional. Start typing to search saved entries. Use the + button to add a new one."
+                                              : "Optional. Start typing to search saved entries."))"
+                                      ShowAdd="_savedCatalogGearOn"
                                       ValueChanged="text => OnCaseSummaryFieldChanged(field.Key, text)"
                                       AddSaved="text => OnPickerAddressAddAsync(savedField, text)"
                                       RenameSaved="pair => OnPickerAddressRenameAsync(savedField, pair)" />

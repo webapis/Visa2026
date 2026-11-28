@@ -788,6 +788,11 @@ button.cw-person:focus-visible {
 .cw-summary-gate__copy { flex: 1 1 16rem; display: flex; flex-direction: column; gap: 6px; }
 .cw-summary-gate__body p { margin: 0; font-weight: 650; }
 .cw-summary-gate__notice { font-weight: 700; }
+.cw-summary-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px;
+}
 .cw-summary-body {
   display: flex;
   gap: 14px;
