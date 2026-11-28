@@ -440,10 +440,23 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
         [VisibleInLookupListView(false)]
-        [VisibleInListView(false)]
+        [Browsable(false)]
         [NotMapped]
         public string ProgressColorTabDisplay =>
             ApplicationProfileInstanceProgressColorTab.GetLabel(ProgressColorTabKey);
+        /// <summary>
+        /// ListView sort key for State — color-tab strip order (not label alphabet).
+        /// Bound as the State column FieldName; cell template shows <see cref="ProgressColorTabDisplay"/>.
+        /// </summary>
+        [XafDisplayName("State")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public int ProgressColorTabSortOrder =>
+            ApplicationProfileInstanceProgressColorTab.GetSortOrder(ProgressColorTabKey);
+
 
         /// <summary>
         /// ListView sort key for the Application progress column — same 0-100 scale as CompletionPercentage.

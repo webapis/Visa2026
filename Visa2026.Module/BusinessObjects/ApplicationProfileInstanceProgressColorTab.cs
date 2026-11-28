@@ -43,6 +43,52 @@ public static class ApplicationProfileInstanceProgressColorTab
     public readonly record struct TabInfo(string Key, string Label, string BackgroundHex, int Count);
 
     public static IReadOnlyList<string> OrderedBucketKeys => BucketOrder;
+    /// <summary>
+    /// Ascending ListView sort: color-tab strip left→right, then cancelled (no tab).
+    /// </summary>
+    public static int GetSortOrder(string? bucketKey)
+    {
+        var key = bucketKey?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(key) || IsSearchTab(key))
+            return -1;
+
+        for (var i = 0; i < BucketOrder.Length; i++)
+        {
+            if (string.Equals(key, BucketOrder[i], StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+
+        // After Garşylyk berildi / last color tab (cancelled has no strip tab).
+        if (string.Equals(key, Cancelled, StringComparison.OrdinalIgnoreCase))
+            return BucketOrder.Length;
+
+        if (IsSpecialFollowUpTab(key))
+            return BucketOrder.Length + 1;
+
+        return BucketOrder.Length + 2;
+    }
+    /// <summary>Maps a displayed State label back to <see cref="GetSortOrder"/> (CustomSort fallback).</summary>
+    public static int GetSortOrderFromLabel(string? label)
+    {
+        var text = label?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(text))
+            return -1;
+
+        foreach (var key in BucketOrder)
+        {
+            if (string.Equals(GetLabel(key), text, StringComparison.Ordinal))
+                return GetSortOrder(key);
+        }
+
+        if (string.Equals(GetLabel(Cancelled), text, StringComparison.Ordinal))
+            return GetSortOrder(Cancelled);
+        if (string.Equals(GetLabel(SpecialFollowUp), text, StringComparison.Ordinal))
+            return GetSortOrder(SpecialFollowUp);
+
+        return int.MaxValue;
+    }
+
+
 
     public static bool IsSearchTab(string? key) =>
         string.Equals(key?.Trim(), SearchKey, StringComparison.OrdinalIgnoreCase);

@@ -82,7 +82,7 @@ Above every Application Profile Instance ListView grid:
 - Remembers last tab **per ListView id** in browser `localStorage`; unknown key → fall back to **Ähli**
 - Left nav (Via ministry / Direct migration) unchanged
 - **Gözleg/Search** tab: appears when searching (auto-selected); count = matches across all colors; clearing the box keeps Search at 0 until a color tab is chosen; color tabs stay visible
-- **State** column (`ProgressColorTabDisplay`): same labels as the color tabs (Ofisde, Resmileşdirildi, …); sortable; shown **only on Ähli**, immediately before **State preview**
+- **State** column (`ProgressColorTabDisplay`): same labels as the color tabs (Ofisde, Resmileşdirildi, …); sortable by **tab / process-step order** (not alphabet; cancelled after last color tab); shown **only on Ähli**, immediately before **State preview**
 
 | Layer | Location |
 |-------|----------|
@@ -98,3 +98,4 @@ Prototype: [`docs/prototypes/application-profile-instance-listview-process-color
 | 2026-11-16 | Drop Cancelled tab; Garşylyk berildi = ≥1 Application Result Rejection |
 | 2026-11-17 | Last tab Ýörite gözegçilik / Özel takip: case-header switch, any progress step |
 | 2026-11-27 | Ähli-only sortable **State** column (ProgressColorTabDisplay) before State preview |
+| 2026-11-28 | State sort uses tab strip order via `ProgressColorTabSortOrder` (cancelled after last color tab) |

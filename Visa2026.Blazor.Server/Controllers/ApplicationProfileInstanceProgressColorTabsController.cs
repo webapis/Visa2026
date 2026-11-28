@@ -415,23 +415,15 @@ public sealed class ApplicationProfileInstanceProgressColorTabsController : View
             ApplicationProfileInstanceProgressColorTab.AllKey,
             StringComparison.Ordinal);
 
-        var stateColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
-            string.Equals(
-                c.FieldName,
-                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
-                StringComparison.Ordinal)
-            || string.Equals(
-                c.Name,
-                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
-                StringComparison.Ordinal));
-
+        var stateColumn = ApplicationListViewProgressStepsController.FindColorTabStateColumn(gridListEditor);
         if (stateColumn == null)
             return;
 
         stateColumn.Visible = show;
-        stateColumn.AllowSort = show;
         if (show)
-            stateColumn.SortMode = GridColumnSortMode.Value;
+            ApplicationListViewProgressStepsController.ConfigureColorTabStateColumn(stateColumn);
+        else
+            stateColumn.AllowSort = false;
 
         // Re-place State preview after State when Ähli shows the column.
         Frame.GetController<ApplicationListViewProgressStepsController>()

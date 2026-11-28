@@ -51,7 +51,7 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         }
     }
 
-    public const string ColorTabStateColumnId = nameof(ApplicationProfileInstance.ProgressColorTabDisplay);
+    public const string ColorTabStateColumnId = nameof(ApplicationProfileInstance.ProgressColorTabSortOrder);
 
     internal static void EnsureColumn(IModelListView listView)
     {
@@ -60,7 +60,10 @@ public sealed class ApplicationProfileInstanceProgressStepsColumnUpdater
         HideColumn(listView, nameof(ApplicationProfileInstance.MigrationSlaStatement));
         HideColumn(listView, nameof(ApplicationProfileInstance.ResultCoverageDisplay));
 
-        // State (color-tab label) immediately before State preview; Blazor hides unless Ähli.
+        // Drop legacy label-bound State column if present (sort must use ProgressColorTabSortOrder).
+        HideColumn(listView, nameof(ApplicationProfileInstance.ProgressColorTabDisplay));
+
+        // State: bind int sort key; Blazor cell template shows the color-tab label; hide unless Ähli.
         var stateColumn = listView.Columns[ColorTabStateColumnId]
             ?? listView.Columns.AddNode<IModelColumn>(ColorTabStateColumnId);
         stateColumn.PropertyName = ColorTabStateColumnId;

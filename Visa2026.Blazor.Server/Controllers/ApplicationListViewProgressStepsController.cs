@@ -25,6 +25,8 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
 {
     private CancellationTokenSource? deferredApplyCts;
     private int ignoreWidthSave;
+    private Action<GridCustomSortEventArgs>? customSortHandler;
+    private Action<GridCustomSortEventArgs>? previousCustomSort;
 
     public ApplicationListViewProgressStepsController()
     {
@@ -34,6 +36,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
+        WireColorTabStateCustomSort();
         ApplyStepperTemplate();
         ScheduleDeferredApply();
     }
@@ -215,6 +218,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
 
     protected override void OnDeactivated()
     {
+        UnwireColorTabStateCustomSort();
         deferredApplyCts?.Cancel();
         deferredApplyCts?.Dispose();
         deferredApplyCts = null;
@@ -331,11 +335,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
             !ReferenceEquals(c, progressColumn)
             && string.Equals(c.FieldName, nameof(ApplicationProfileInstance.CompletionPercentage), StringComparison.Ordinal));
 
-        var stateColumn = gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
-            string.Equals(
-                c.FieldName,
-                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
-                StringComparison.Ordinal));
+        var stateColumn = FindColorTabStateColumn(gridListEditor);
 
         var lastOther = gridListEditor.GridDataColumnModels
             .Where(c => !ReferenceEquals(c, progressColumn)
@@ -350,8 +350,7 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
         // State (color-tab label) immediately before State preview when Ähli shows it.
         if (stateColumn != null && stateColumn.Visible)
         {
-            stateColumn.AllowSort = true;
-            stateColumn.SortMode = GridColumnSortMode.Value;
+            ConfigureColorTabStateColumn(stateColumn);
             stateColumn.VisibleIndex = lastOther + 1;
             progressColumn.VisibleIndex = stateColumn.VisibleIndex + 1;
         }
@@ -362,6 +361,121 @@ public sealed class ApplicationListViewProgressStepsController : ViewController<
 
         if (percentColumn != null)
             percentColumn.VisibleIndex = progressColumn.VisibleIndex + 1;
+    }
+
+    internal static DxGridDataColumnModel? FindColorTabStateColumn(DxGridListEditor gridListEditor) =>
+        gridListEditor.GridDataColumnModels.FirstOrDefault(c =>
+            string.Equals(
+                c.Name,
+                ApplicationProfileInstanceProgressStepsColumnUpdater.ColorTabStateColumnId,
+                StringComparison.Ordinal)
+            || string.Equals(
+                c.FieldName,
+                nameof(ApplicationProfileInstance.ProgressColorTabSortOrder),
+                StringComparison.Ordinal)
+            || string.Equals(
+                c.FieldName,
+                nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
+                StringComparison.Ordinal));
+
+    /// <summary>
+    /// Bind State to ProgressColorTabSortOrder (tab strip order); cell shows the Turkmen label.
+    /// </summary>
+    internal static void ConfigureColorTabStateColumn(DxGridDataColumnModel stateColumn)
+    {
+        stateColumn.Name = ApplicationProfileInstanceProgressStepsColumnUpdater.ColorTabStateColumnId;
+        stateColumn.FieldName = nameof(ApplicationProfileInstance.ProgressColorTabSortOrder);
+        stateColumn.Caption = "State";
+        stateColumn.AllowSort = true;
+        // Custom + GridModel.CustomSort — Value alone failed when the column was label-bound.
+        stateColumn.SortMode = GridColumnSortMode.Custom;
+        stateColumn.CellDisplayTemplate = context => builder =>
+        {
+            if (context.DataItem is ApplicationProfileInstance application)
+            {
+                builder.AddContent(0, application.ProgressColorTabDisplay);
+                return;
+            }
+
+            builder.AddContent(0, "\u2014");
+        };
+    }
+
+    private void WireColorTabStateCustomSort()
+    {
+        if (View?.Editor is not DxGridListEditor { GridModel: { } gridModel })
+            return;
+
+        UnwireColorTabStateCustomSort();
+        previousCustomSort = gridModel.CustomSort;
+        customSortHandler = e =>
+        {
+            previousCustomSort?.Invoke(e);
+            if (e.Handled)
+                return;
+
+            if (!string.Equals(
+                    e.FieldName,
+                    nameof(ApplicationProfileInstance.ProgressColorTabSortOrder),
+                    StringComparison.Ordinal)
+                && !string.Equals(
+                    e.FieldName,
+                    nameof(ApplicationProfileInstance.ProgressColorTabDisplay),
+                    StringComparison.Ordinal)
+                && !string.Equals(
+                    e.FieldName,
+                    ApplicationProfileInstanceProgressStepsColumnUpdater.ColorTabStateColumnId,
+                    StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var order1 = ResolveColorTabSortOrder(e.Value1, () => e.GetRow1Value(nameof(ApplicationProfileInstance.ProgressColorTabSortOrder)));
+            var order2 = ResolveColorTabSortOrder(e.Value2, () => e.GetRow2Value(nameof(ApplicationProfileInstance.ProgressColorTabSortOrder)));
+            e.Result = order1.CompareTo(order2);
+            e.Handled = true;
+        };
+        gridModel.CustomSort = customSortHandler;
+    }
+
+    private void UnwireColorTabStateCustomSort()
+    {
+        if (customSortHandler == null)
+            return;
+
+        if (View?.Editor is DxGridListEditor { GridModel: { } gridModel }
+            && ReferenceEquals(gridModel.CustomSort, customSortHandler))
+        {
+            gridModel.CustomSort = previousCustomSort;
+        }
+
+        customSortHandler = null;
+        previousCustomSort = null;
+    }
+
+    private static int ResolveColorTabSortOrder(object? value, Func<object?> fallback)
+    {
+        if (value is int i)
+            return i;
+        if (value is string s && int.TryParse(s, out var parsed))
+            return parsed;
+        if (value is string label)
+            return ApplicationProfileInstanceProgressColorTab.GetSortOrderFromLabel(label);
+
+        try
+        {
+            var alt = fallback();
+            if (alt is int ai)
+                return ai;
+            if (alt != null && int.TryParse(alt.ToString(), out var ap))
+                return ap;
+        }
+        catch
+        {
+            // GetRowValue may throw when the member is unavailable.
+        }
+
+        return int.MaxValue;
     }
 
     private static string? ModelColumnId(DxGridDataColumnModel column)
