@@ -1,0 +1,556 @@
+@using Visa2026.Module.Services.ApplicationResultsDesk
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="ard">
+    @if (IsLoading && Page == null)
+    {
+        <div class="ard__loading" role="status">Loading application results…</div>
+    }
+    else if (Page?.Header != null)
+    {
+        var header = Page.Header;
+        <button type="button" class="ard__link" @onclick="BackToDesk">Back to results</button>
+        <header class="ard__head">
+            <div>
+                <h1 class="ard__title">@header.Title</h1>
+                <p class="ard__sub">@header.ProcessNumber · @header.ProfileName · Application <button type="button" class="ard__link" disabled="@IsBusy" @onclick="() => OpenCaseRequested.InvokeAsync(header.InstanceId)">@header.ApplicationNumber</button></p>
+            </div>
+        </header>
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <p class="@(IsStatusError ? "ard__error" : "ard__ok")" role="status">@StatusMessage</p>
+        }
+        <form class="ard__sheet" @onsubmit="SaveHeader" @onsubmit:preventDefault>
+            <div class="ard__form">
+                <label>
+                    <span>Number</span>
+                    <input @bind="_headerNumber" />
+                </label>
+                <label>
+                    <span>Date</span>
+                    <input @bind="_headerDate" placeholder="dd.MM.yyyy" />
+                </label>
+                @if (header.ShowExpiration)
+                {
+                    <label>
+                        <span>End date</span>
+                        <input @bind="_headerEnd" placeholder="dd.MM.yyyy" />
+                    </label>
+                }
+                @if (header.ShowReason)
+                {
+                    <label class="ard__span">
+                        <span>Reason</span>
+                        <input @bind="_headerReason" />
+                    </label>
+                }
+                @if (header.ShowBorder)
+                {
+                    <label class="ard__span">
+                        <span>Border zone</span>
+                        <input @bind="_headerBorder" />
+                    </label>
+                }
+                @if (header.ShowVisaLookups)
+                {
+                    <label>
+                        <span>Visa category</span>
+                        <select @bind="_headerCategory">
+                            <option value="">Choose</option>
+                            @foreach (var option in header.VisaCategories)
+                            {
+                                <option value="@option.Id">@option.Caption</option>
+                            }
+                        </select>
+                    </label>
+                    <label>
+                        <span>Visa period</span>
+                        <select @bind="_headerPeriod">
+                            <option value="">Choose</option>
+                            @foreach (var option in header.VisaPeriods)
+                            {
+                                <option value="@option.Id">@option.Caption</option>
+                            }
+                        </select>
+                    </label>
+                }
+            </div>
+            <table class="ard__table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Person</th>
+                        <th>Passport</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var person in _headerPeople)
+                    {
+                        <tr>
+                            <td><input type="checkbox" @bind="person.Include" disabled="@(IsBusy || person.Locked || !person.Ready)" /></td>
+                            <td>@person.Name</td>
+                            <td>@Dash(person.Passport)</td>
+                            <td>@person.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="ard__actions">
+                <button type="button" class="ard__btn" disabled="@IsBusy" @onclick="BackToDesk">Cancel</button>
+                <button type="submit" class="ard__btn ard__btn--primary" disabled="@IsBusy">Save</button>
+            </div>
+        </form>
+    }
+    else if (Page?.Detail != null)
+    {
+        var detail = Page.Detail;
+        <button type="button" class="ard__link" @onclick="BackToList">@(detail.IsVisa ? "Back to visas" : "Back to work permits")</button>
+        <header class="ard__head">
+            <div>
+                <h1 class="ard__title">@detail.Title</h1>
+                <p class="ard__sub">@detail.PersonName · @detail.ProcessNumber · Application <button type="button" class="ard__link" disabled="@IsBusy" @onclick="() => OpenCaseRequested.InvokeAsync(detail.InstanceId)">@detail.ApplicationNumber</button></p>
+            </div>
+        </header>
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <p class="@(IsStatusError ? "ard__error" : "ard__ok")" role="status">@StatusMessage</p>
+        }
+        <form class="ard__sheet" @onsubmit="SaveDetail" @onsubmit:preventDefault>
+            @if (detail.IsVisa)
+            {
+                <div class="ard__form">
+                    <label><span>Person</span><input value="@detail.PersonName" readonly /></label>
+                    <label><span>Issued place</span><select @bind="_visaPlace"><option value="">Choose</option>@foreach (var option in detail.IssuedPlaces) { <option value="@option.Id">@option.Caption</option> }</select></label>
+                    <label><span>Passport</span><input value="@detail.Passport" readonly /></label>
+                    <label><span>Process number</span><input value="@detail.ProcessNumber" readonly /></label>
+                    <label><span>Visa number</span><input @bind="_visaNumber" /></label>
+                    <label><span>Issued date</span><input @bind="_detailIssued" placeholder="dd.MM.yyyy" /></label>
+                    <label><span>Visa type</span><select @bind="_visaType"><option value="">Choose</option>@foreach (var option in detail.VisaTypes) { <option value="@option.Id">@option.Caption</option> }</select></label>
+                    <label><span>Start date</span><input @bind="_detailStart" placeholder="dd.MM.yyyy" /></label>
+                    <label><span>Visa category</span><select @bind="_visaCategory"><option value="">Choose</option>@foreach (var option in detail.VisaCategories) { <option value="@option.Id">@option.Caption</option> }</select></label>
+                    <label><span>Expiration</span><input @bind="_detailEnd" placeholder="dd.MM.yyyy" /></label>
+                    <label class="ard__span"><span>Border zone</span><input @bind="_detailLocations" /></label>
+                    <label><span>Issuing invitation</span><input value="@Dash(detail.InvitationNumber)" readonly /></label>
+                </div>
+                <p class="ard__hint">Passport, process number, and the issuing invitation come from the case. The visa number is entered here.</p>
+            }
+            else
+            {
+                <div class="ard__form">
+                    <label><span>Person</span><input value="@detail.PersonName" readonly /></label>
+                    <label><span>Item work-permit number</span><input @bind="_itemNumber" /></label>
+                    <label><span>Passport</span><input value="@detail.Passport" readonly /></label>
+                    <label><span>Work permit letter</span><input value="@detail.LetterNumber" readonly /></label>
+                    <label><span>Position</span><input value="@detail.Position" readonly /></label>
+                    <label><span>Start</span><input @bind="_detailStart" placeholder="dd.MM.yyyy" /></label>
+                    <label><span>AS number</span><input value="@detail.AsNumber" readonly /></label>
+                    <label><span>End</span><input @bind="_detailEnd" placeholder="dd.MM.yyyy" /></label>
+                    <label class="ard__span"><span>Work permitted locations</span><input @bind="_detailLocations" /></label>
+                </div>
+                <p class="ard__hint">AS number and passport come from the case and the person.</p>
+            }
+            <div class="ard__actions">
+                <button type="button" class="ard__btn" disabled="@IsBusy" @onclick="BackToList">Cancel</button>
+                <button type="submit" class="ard__btn ard__btn--primary" disabled="@IsBusy">Save</button>
+            </div>
+        </form>
+    }
+    else if (Page?.People != null)
+    {
+        var people = Page.People;
+        var visa = people.Kind == ApplicationWorkspaceIssuedRecordsCatalog.IssuedVisa;
+        <button type="button" class="ard__link" @onclick="BackToDesk">Back to results</button>
+        <header class="ard__head">
+            <div>
+                <h1 class="ard__title">@people.Title</h1>
+                <p class="ard__sub">@people.ProcessNumber · @people.ProfileName · Application <button type="button" class="ard__link" disabled="@IsBusy" @onclick="() => OpenCaseRequested.InvokeAsync(people.InstanceId)">@people.ApplicationNumber</button></p>
+            </div>
+            @if (people.LetterReady || visa)
+            {
+                <button type="button" class="ard__btn ard__btn--primary" disabled="@IsBusy" @onclick="() => OpenNew(people)">New</button>
+            }
+        </header>
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <p class="@(IsStatusError ? "ard__error" : "ard__ok")" role="status">@StatusMessage</p>
+        }
+        <p class="ard__hint">@people.Note</p>
+        @if (!visa)
+        {
+            <form class="ard__letter" @onsubmit="() => SaveLetter(people.InstanceId)" @onsubmit:preventDefault>
+                <label>
+                    <span>Work permit number</span>
+                    <input @bind="_letterNumber" />
+                </label>
+                <label>
+                    <span>Issued date</span>
+                    <input @bind="_letterIssued" placeholder="dd.MM.yyyy" />
+                </label>
+                <button type="submit" class="ard__btn ard__btn--primary" disabled="@IsBusy">Save letter</button>
+            </form>
+        }
+        <table class="ard__table">
+            <thead>
+                <tr>
+                    <th>Person</th>
+                    @if (visa)
+                    {
+                        <th>Visa number</th>
+                        <th>Invitation</th>
+                        <th>Passport</th>
+                        <th>Issued</th>
+                        <th>Expiration</th>
+                    }
+                    else
+                    {
+                        <th>Item number</th>
+                        <th>Position</th>
+                        <th>Passport</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Locations</th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (people.Rows.Count == 0)
+                {
+                    <tr><td colspan="8">No people on this list.</td></tr>
+                }
+                else
+                {
+                    @foreach (var row in people.Rows)
+                    {
+                        <tr class="@(row.CanOpen ? "is-click" : null)" @onclick="() => OpenRowIfReady(people, row)">
+                            <td>@row.PersonName</td>
+                            <td>@Dash(row.Number)</td>
+                            <td>@Dash(row.Detail)</td>
+                            <td>@Dash(row.Passport)</td>
+                            <td>@Dash(row.Start)</td>
+                            <td>@Dash(row.End)</td>
+                            @if (!visa)
+                            {
+                                <td>@Dash(row.Locations)</td>
+                            }
+                            <td>
+                                @if (!row.CanOpen)
+                                {
+                                    <span class="ard__hint">@row.BlockReason</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <header class="ard__head">
+            <div>
+                <h1 class="ard__title">Application results</h1>
+                <p class="ard__sub">Search by CO / AS number and add the missing result.</p>
+            </div>
+            @if (Page != null && Page.Hit == null)
+            {
+                <span class="ard__badge">@Page.MissingCaseCount still missing</span>
+            }
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <p class="@(IsStatusError ? "ard__error" : "ard__ok")" role="status">@StatusMessage</p>
+        }
+
+        <form class="ard__search" @onsubmit="SearchAsync" @onsubmit:preventDefault>
+            <label>
+                <span>CO / AS number</span>
+                <input value="@_search" @oninput="OnSearchInput" placeholder="C00138718 or 2026-0155" />
+            </label>
+            <button type="submit" class="ard__btn ard__btn--primary" disabled="@IsBusy">Search</button>
+            <p class="ard__hint">Also finds the application number.</p>
+        </form>
+
+        @if (Page?.SearchMiss == true)
+        {
+            <div class="ard__empty">
+                <strong>No case found.</strong>
+                <span>No application has CO / AS number or application number @Page.SearchedText.</span>
+            </div>
+        }
+
+        @if (Page?.Hit != null)
+        {
+            var hit = Page.Hit;
+            <section class="ard__card">
+                <div class="ard__card-head">
+                    <div>
+                        <strong>@(string.IsNullOrWhiteSpace(hit.ProcessNumber) ? hit.ApplicationNumber : hit.ProcessNumber)</strong>
+                        <span>@hit.ProfileName · Application <button type="button" class="ard__link" disabled="@IsBusy" @onclick="() => OpenCaseRequested.InvokeAsync(hit.InstanceId)">@hit.ApplicationNumber</button> · @hit.PeopleCount people@(hit.HasProcessNumber ? " · AS number received" : "")</span>
+                    </div>
+                    <button type="button" class="ard__link" @onclick="() => OpenCaseRequested.InvokeAsync(hit.InstanceId)">Open case</button>
+                </div>
+                <div class="ard__types">
+                    @foreach (var type in hit.Types)
+                    {
+                        <article class="ard__type @(type.Optional ? "is-optional" : type.Complete ? "is-complete" : "is-missing")">
+                            <header>
+                                <span>@type.Label</span>
+                                <em>@(type.Optional ? "Optional" : type.Complete ? "Complete" : "Missing")</em>
+                            </header>
+                            <strong>@type.Ratio</strong>
+                            @if (type.OpensOnDesk)
+                            {
+                                <button type="button" class="@((type.Complete || type.Optional) ? "ard__btn" : "ard__btn ard__btn--primary")" disabled="@IsBusy" @onclick="() => OpenPeople(hit.InstanceId, type.Key)">@((type.Complete || type.Optional) ? "Open" : "Add " + type.Label)</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="@((type.Complete || type.Optional) ? "ard__btn" : "ard__btn ard__btn--primary")" disabled="@IsBusy" @onclick="() => OpenHeader(hit.InstanceId, type.Key)">@((type.Complete || type.Optional) ? "Open" : "Add " + type.Label)</button>
+                            }
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public ApplicationResultsDeskPage? Page { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationResultsDeskRequest> LoadRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenCaseRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationResultsDeskHeaderOpen> OpenHeaderRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationResultsDeskLetterSave> SaveLetterRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationResultsDeskPersonOpen> OpenPersonRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationResultsDeskDetailSave> SaveDetailRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationResultsDeskHeaderSave> SaveHeaderRequested { get; set; }
+
+    private string _search = string.Empty;
+    private string _letterNumber = string.Empty;
+    private string _letterIssued = string.Empty;
+    private Guid _letterInstance;
+    private string _detailKey = string.Empty;
+    private string _itemNumber = string.Empty;
+    private string _detailStart = string.Empty;
+    private string _detailEnd = string.Empty;
+    private string _detailIssued = string.Empty;
+    private string _detailLocations = string.Empty;
+    private string _visaNumber = string.Empty;
+    private string _visaType = string.Empty;
+    private string _visaCategory = string.Empty;
+    private string _visaPlace = string.Empty;
+    private string _headerKey = string.Empty;
+    private string _headerNumber = string.Empty;
+    private string _headerDate = string.Empty;
+    private string _headerEnd = string.Empty;
+    private string _headerReason = string.Empty;
+    private string _headerBorder = string.Empty;
+    private string _headerCategory = string.Empty;
+    private string _headerPeriod = string.Empty;
+    private List<ApplicationResultsDeskHeaderPerson> _headerPeople = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Page == null)
+            await InitialLoadRequested.InvokeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Page?.People != null && Page.People.InstanceId != _letterInstance)
+        {
+            _letterInstance = Page.People.InstanceId;
+            _letterNumber = Page.People.LetterNumber;
+            _letterIssued = Page.People.LetterIssued;
+        }
+
+        var detail = Page?.Detail;
+        var detailKey = detail == null ? string.Empty : detail.Kind + detail.PersonId;
+        if (detailKey != _detailKey)
+        {
+            _detailKey = detailKey;
+            if (detail != null)
+            {
+                _itemNumber = detail.ItemNumber;
+                _detailStart = detail.Start;
+                _detailEnd = detail.End;
+                _detailIssued = detail.Issued;
+                _detailLocations = detail.IsVisa ? detail.BorderZone : detail.Locations;
+                _visaNumber = detail.VisaNumber;
+                _visaType = IdText(detail.VisaTypeId);
+                _visaCategory = IdText(detail.VisaCategoryId);
+                _visaPlace = IdText(detail.VisaIssuedPlaceId);
+            }
+        }
+
+        var header = Page?.Header;
+        var headerKey = header == null ? string.Empty : header.Kind + header.InstanceId;
+        if (headerKey != _headerKey)
+        {
+            _headerKey = headerKey;
+            _headerPeople = new List<ApplicationResultsDeskHeaderPerson>();
+            if (header != null)
+            {
+                _headerNumber = header.Number;
+                _headerDate = header.PrimaryDate;
+                _headerEnd = header.Expiration;
+                _headerReason = header.Reason;
+                _headerBorder = header.BorderZone;
+                _headerCategory = IdText(header.VisaCategoryId);
+                _headerPeriod = IdText(header.VisaPeriodId);
+                foreach (var person in header.People)
+                {
+                    _headerPeople.Add(new ApplicationResultsDeskHeaderPerson
+                    {
+                        PersonId = person.PersonId,
+                        Name = person.Name,
+                        Passport = person.Passport,
+                        Status = person.Status,
+                        Include = person.Include || person.Locked,
+                        Ready = person.Ready,
+                        Locked = person.Locked,
+                    });
+                }
+            }
+        }
+    }
+
+    private static string Dash(string value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+
+    private void OnSearchInput(ChangeEventArgs args) => _search = args.Value?.ToString() ?? string.Empty;
+
+    private Task SearchAsync() => LoadRequested.InvokeAsync(Copy(search: _search));
+
+    private Task OpenHeader(Guid instanceId, string kind) =>
+        OpenHeaderRequested.InvokeAsync(new ApplicationResultsDeskHeaderOpen
+        {
+            InstanceId = instanceId,
+            Kind = kind,
+        });
+
+    private Task OpenPeople(Guid instanceId, string kind)
+    {
+        var request = Copy();
+        request.PeopleInstanceId = instanceId;
+        request.PeopleKind = kind;
+        request.HeaderKind = string.Empty;
+        request.DetailOpen = false;
+        request.DetailPersonId = Guid.Empty;
+        return LoadRequested.InvokeAsync(request);
+    }
+
+    private Task BackToDesk()
+    {
+        var request = Copy();
+        request.PeopleInstanceId = Guid.Empty;
+        request.PeopleKind = string.Empty;
+        request.HeaderKind = string.Empty;
+        request.DetailOpen = false;
+        request.DetailPersonId = Guid.Empty;
+        return LoadRequested.InvokeAsync(request);
+    }
+
+    private Task BackToList()
+    {
+        var request = Copy();
+        request.HeaderKind = string.Empty;
+        request.DetailOpen = false;
+        request.DetailPersonId = Guid.Empty;
+        return LoadRequested.InvokeAsync(request);
+    }
+
+    private Task OpenRowIfReady(ApplicationResultsDeskPeoplePage people, ApplicationResultsDeskPersonRow row)
+    {
+        if (IsBusy || row == null || !row.CanOpen)
+            return Task.CompletedTask;
+        return OpenRow(people, row.PersonId);
+    }
+
+    private Task SaveDetail()
+    {
+        var detail = Page?.Detail;
+        if (detail == null)
+            return Task.CompletedTask;
+        return SaveDetailRequested.InvokeAsync(new ApplicationResultsDeskDetailSave
+        {
+            Kind = detail.Kind,
+            InstanceId = detail.InstanceId,
+            PersonId = detail.PersonId,
+            ItemNumber = _itemNumber,
+            Start = _detailStart,
+            End = _detailEnd,
+            Locations = _detailLocations,
+            VisaNumber = _visaNumber,
+            VisaTypeId = ParseId(_visaType),
+            VisaCategoryId = ParseId(_visaCategory),
+            VisaIssuedPlaceId = ParseId(_visaPlace),
+            Issued = _detailIssued,
+            BorderZone = _detailLocations,
+        });
+    }
+
+    private Task SaveHeader()
+    {
+        var header = Page?.Header;
+        if (header == null)
+            return Task.CompletedTask;
+        return SaveHeaderRequested.InvokeAsync(new ApplicationResultsDeskHeaderSave
+        {
+            InstanceId = header.InstanceId,
+            Kind = header.Kind,
+            Number = _headerNumber,
+            PrimaryDate = _headerDate,
+            Expiration = _headerEnd,
+            Reason = _headerReason,
+            BorderZone = _headerBorder,
+            VisaCategoryId = ParseId(_headerCategory),
+            VisaPeriodId = ParseId(_headerPeriod),
+            IncludedPersonIds = _headerPeople.Where(person => person.Include).Select(person => person.PersonId).ToList(),
+        });
+    }
+
+    private static string IdText(Guid id) => id == Guid.Empty ? string.Empty : id.ToString();
+
+    private static Guid ParseId(string text) => Guid.TryParse(text, out var id) ? id : Guid.Empty;
+
+    private Task SaveLetter(Guid instanceId) =>
+        SaveLetterRequested.InvokeAsync(new ApplicationResultsDeskLetterSave
+        {
+            InstanceId = instanceId,
+            Number = _letterNumber,
+            IssuedDate = _letterIssued,
+        });
+
+    private Task OpenNew(ApplicationResultsDeskPeoplePage people) =>
+        OpenPersonRequested.InvokeAsync(new ApplicationResultsDeskPersonOpen
+        {
+            InstanceId = people.InstanceId,
+            Kind = people.Kind,
+        });
+
+    private Task OpenRow(ApplicationResultsDeskPeoplePage people, Guid personId) =>
+        OpenPersonRequested.InvokeAsync(new ApplicationResultsDeskPersonOpen
+        {
+            InstanceId = people.InstanceId,
+            PersonId = personId,
+            Kind = people.Kind,
+        });
+
+    private ApplicationResultsDeskRequest Copy(string? search = null, string? typeKey = null, string? stateKey = null) =>
+        new()
+        {
+            SearchText = search ?? Page?.SearchedText ?? _search,
+            TypeKey = typeKey ?? Page?.TypeKey ?? string.Empty,
+            StateKey = stateKey ?? Page?.StateKey ?? ApplicationResultsDeskStates.Missing,
+            PeopleInstanceId = Page?.People?.InstanceId ?? Guid.Empty,
+            PeopleKind = Page?.People?.Kind ?? string.Empty,
+        };
+}

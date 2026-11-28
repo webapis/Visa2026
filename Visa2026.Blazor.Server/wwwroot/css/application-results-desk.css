@@ -1,0 +1,346 @@
+.application-results-desk-detail,
+.application-results-desk-detail .xaf-detail-view,
+.application-results-desk-detail .layout-main,
+.application-results-desk-detail .layout-SimpleEditors,
+.application-results-desk-detail .layout-ApplicationResultsDeskHost,
+.application-results-desk-detail .layout-item-DeskUi {
+    height: 100%;
+    min-height: 0;
+    background: transparent;
+}
+
+.application-results-desk-detail .layout-item-DeskUi .dxbl-fl-ctrl,
+.application-results-desk-detail .layout-item-DeskUi .dxbl-fl-ctrl > * {
+    height: 100%;
+    min-height: 0;
+    background: transparent;
+}
+
+/*
+  Same Fluent tokens as Find employees.
+  Fallbacks stay neutral until the light or dark mode class sets real colors.
+*/
+.ard {
+    --ard-ink: var(--bs-body-color, #142033);
+    --ard-muted: color-mix(in srgb, var(--ard-ink) 68%, transparent);
+    --ard-line: color-mix(in srgb, var(--ard-ink) 22%, transparent);
+    --ard-panel: transparent;
+    --ard-field: color-mix(in srgb, var(--ard-ink) 6%, transparent);
+    --ard-accent: var(--bs-primary, #1d6ef2);
+    --ard-on: #fff;
+    --ard-ok: #166534;
+    --ard-ok-bg: #dcfce7;
+    --ard-miss: #991b1b;
+    --ard-miss-bg: #fee2e2;
+    --ard-warn: #9a3412;
+    --ard-warn-bg: #ffedd5;
+    --ard-change: #5b21b6;
+    --ard-change-bg: #ede9fe;
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    padding: 8px 16px 24px;
+    color: var(--ard-ink);
+    color-scheme: inherit;
+    background: transparent;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.dxbl-theme-fluent-mode-dark .ard,
+.dxbl-mode-dark .ard,
+[data-bs-theme="dark"] .ard {
+    color-scheme: dark;
+    --ard-ink: var(--DS-color-content-neutral-default-rest, #e8eaed);
+    --ard-muted: var(--DS-color-content-neutral-subdued-rest, #a8b0ba);
+    --ard-line: var(--DS-color-border-neutral-default-rest, rgba(255, 255, 255, 0.16));
+    --ard-panel: #2b2d31;
+    --ard-field: #232529;
+    --ard-accent: var(--DS-color-surface-primary-default-rest, var(--bs-primary, #1d6ef2));
+    --ard-on: var(--DS-color-content-neutral-on-primary-rest, #fff);
+    --ard-ok: #86efac;
+    --ard-ok-bg: rgba(22, 101, 52, 0.45);
+    --ard-miss: #fca5a5;
+    --ard-miss-bg: rgba(153, 27, 27, 0.45);
+    --ard-warn: #fdba74;
+    --ard-warn-bg: rgba(154, 52, 18, 0.45);
+    --ard-change: #d8b4fe;
+    --ard-change-bg: rgba(91, 33, 182, 0.45);
+}
+
+.dxbl-theme-fluent-mode-light .ard,
+.dxbl-mode-light .ard,
+[data-bs-theme="light"] .ard {
+    color-scheme: light;
+    --ard-ink: var(--DS-color-content-neutral-default-rest, #142033);
+    --ard-muted: var(--DS-color-content-neutral-subdued-rest, #5c6b7a);
+    --ard-line: var(--DS-color-border-neutral-default-rest, #d8e0ea);
+    --ard-panel: var(--DS-color-surface-neutral-default-rest, #fff);
+    --ard-field: var(--DS-color-surface-neutral-subdued-rest, #f4f7fb);
+    --ard-accent: var(--DS-color-surface-primary-default-rest, var(--bs-primary, #1d6ef2));
+    --ard-on: var(--DS-color-content-neutral-on-primary-rest, #fff);
+    --ard-ok: #166534;
+    --ard-ok-bg: #dcfce7;
+    --ard-miss: #991b1b;
+    --ard-miss-bg: #fee2e2;
+    --ard-warn: #9a3412;
+    --ard-warn-bg: #ffedd5;
+    --ard-change: #5b21b6;
+    --ard-change-bg: #ede9fe;
+}
+
+.ard__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.ard__title {
+    margin: 0;
+    font-size: 28px;
+    color: var(--ard-ink);
+}
+
+.ard__sub,
+.ard__hint {
+    margin: 4px 0 0;
+    color: var(--ard-muted);
+    font-size: 14px;
+}
+
+.ard__badge {
+    border-radius: 999px;
+    background: var(--ard-warn-bg);
+    color: var(--ard-warn);
+    font-weight: 700;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.ard__search,
+.ard__letter,
+.ard__card,
+.ard__queue {
+    background: var(--ard-panel);
+    border: 1px solid var(--ard-line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    color: var(--ard-ink);
+}
+
+.ard__search,
+.ard__letter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
+.ard__search label,
+.ard__letter label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 220px;
+    font-size: 13px;
+    color: var(--ard-muted);
+}
+
+.ard input {
+    border: 1px solid var(--ard-line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+    background: var(--ard-field);
+    color: var(--ard-ink);
+    color-scheme: inherit;
+}
+
+.ard__btn,
+.ard__chip {
+    border: 1px solid var(--ard-line);
+    background: var(--ard-field);
+    color: var(--ard-ink);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.ard__btn--primary,
+.ard__chip.is-on {
+    background: var(--ard-accent);
+    border-color: var(--ard-accent);
+    color: var(--ard-on);
+}
+
+.ard__link {
+    border: 0;
+    background: transparent;
+    color: var(--ard-accent);
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.ard__link:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.ard__card-head,
+.ard__types {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.ard__types {
+    margin-top: 12px;
+    align-items: stretch;
+}
+
+.ard__type {
+    flex: 1;
+    border: 1px solid var(--ard-line);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--ard-field);
+    color: var(--ard-ink);
+}
+
+.ard__type header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ard__type em {
+    font-style: normal;
+    font-size: 12px;
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+.ard__type.is-complete em { background: var(--ard-ok-bg); color: var(--ard-ok); }
+.ard__type.is-missing em { background: var(--ard-miss-bg); color: var(--ard-miss); }
+.ard__type.is-optional { border-style: dashed; }
+.ard__type.is-optional em { background: var(--ard-warn-bg); color: var(--ard-warn); }
+.ard__type strong { font-size: 28px; color: var(--ard-ink); }
+
+.ard__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.ard__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    color: var(--ard-ink);
+}
+
+.ard__table th,
+.ard__table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ard-line);
+    vertical-align: top;
+}
+
+.ard__table th {
+    color: var(--ard-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ard__state {
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 12px;
+    background: var(--ard-miss-bg);
+    color: var(--ard-miss);
+}
+
+.ard__state.issued,
+.ard__state.valid,
+.ard__state.complete { background: var(--ard-ok-bg); color: var(--ard-ok); }
+.ard__state.cancelled,
+.ard__state.changed { background: var(--ard-change-bg); color: var(--ard-change); }
+.ard__state.seretmezlik { background: var(--ard-warn-bg); color: var(--ard-warn); }
+
+.ard__empty {
+    border: 1px dashed var(--ard-line);
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 16px;
+    background: var(--ard-panel);
+    color: var(--ard-ink);
+}
+
+.ard__empty span,
+.ard__error,
+.ard__ok { display: block; }
+
+.ard__error { color: var(--ard-miss); }
+.ard__ok { color: var(--ard-ok); }
+.ard__loading { padding: 24px; color: var(--ard-muted); }
+
+.ard__sheet {
+    background: var(--ard-panel);
+    border: 1px solid var(--ard-line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+}
+
+.ard__form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+}
+
+.ard__form label,
+.ard__sheet label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--ard-muted);
+}
+
+.ard__span { grid-column: 1 / -1; }
+
+.ard select,
+.ard input[readonly] {
+    border: 1px solid var(--ard-line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+    background: var(--ard-field);
+    color: var(--ard-ink);
+}
+
+.ard input[readonly] { opacity: 0.85; }
+
+.ard__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.ard__table tr.is-click { cursor: pointer; }
+.ard__table tr.is-click:hover { background: var(--ard-field); }
